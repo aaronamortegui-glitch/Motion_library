@@ -1,4 +1,4 @@
-// 05_Text_Behind_70s: título gigante entre el fondo y la persona (matte de Flora/VEED) + tracking de fondo.
+// 05_Text_Behind_70s: giant title between the background and the person (Flora/VEED matte) + background tracking.
 #include "ss_presets.jsx"
 (function () {
     var ROOT = SS_ROOT + "/";
@@ -20,13 +20,13 @@
     var folder = findItem("SS Motion Lab"); if (folder instanceof FolderItem) c.parentFolder = folder;
 
     c.layers.add(plate).name = "Plate · Aaron 70s";
-    // null del papel tapiz para que el título viva en el fondo (parallax)
+    // wallpaper null so the title lives in the background (parallax)
     var tk = TRK.tracks.wallpaper, N = c.layers.addNull(), fd = 1 / TRK.fps, ts = [], ps = [];
     N.name = "TRK wallpaper"; N.enabled = false; tr(N, "ADBE Anchor Point").setValue([50, 50]);
     for (var f = 0; f < tk.pos.length; f++) { ts.push(f * fd); ps.push(tk.pos[f]); }
     tr(N, "ADBE Position").setValuesAtTimes(ts, ps);
 
-    // Título gigante detrás de la persona
+    // Giant title behind the person
     var T = c.layers.addText("1974");
     T.name = "Title behind";
     var tp = T.property("ADBE Text Properties").property("ADBE Text Document"), td = tp.value;
@@ -36,13 +36,13 @@
     tr(T, "ADBE Position").setValue([50 + 800, 50 + 300]);
     SSP.applyText(T, "Chars Rise", "in", 0.3);
 
-    // Persona recortada encima: el título queda "detrás"
+    // Cut-out person on top: the title ends up "behind"
     var M = c.layers.add(matte);
     M.name = "Aaron matte (Flora · VEED)";
-    // el matte viene en 1920x1080 y el plate es 1928x1076: escala por eje para calzar píxel a píxel
+    // the matte is 1920x1080 and the plate is 1928x1076: scale per axis to match pixel for pixel
     tr(M, "ADBE Scale").setValue([c.width / matte.width * 100, c.height / matte.height * 100, 100]);
 
-    // Kicker y lower third encima de todo
+    // Kicker and lower third on top of everything
     var K = c.layers.addText("SUPERSIDE MOTION LAB");
     var kd = K.property("ADBE Text Properties").property("ADBE Text Document"), kv = kd.value;
     kv.resetCharStyle(); kv.font = SSM.font("ui"); kv.fontSize = 30; kv.tracking = 200; kv.fillColor = hex(PAL.cloud); kv.applyFill = true; kv.justification = ParagraphJustification.LEFT_JUSTIFY; kd.setValue(kv);

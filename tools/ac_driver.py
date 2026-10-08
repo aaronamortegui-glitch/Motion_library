@@ -1,18 +1,18 @@
-"""Controlador de la interfaz de Animation Composer (sin tocar el plugin).
+"""Animation Composer UI driver (without touching the plugin).
 
-Hace doble clic en cada miniatura del panel de Animation Composer, como lo haría una persona, y espera a que
-la estación de cosecha (tools/ss_harvest_station.jsx, corriendo en AE) registre el preset en
-research/harvest/station/_log.csv antes de pasar al siguiente. Recorre la carpeta completa haciendo scroll.
+Double-clicks each thumbnail in the Animation Composer panel, as a person would, and waits for
+the harvest station (tools/ss_harvest_station.jsx, running in AE) to log the preset in
+research/harvest/station/_log.csv before moving on to the next one. Walks the whole folder by scrolling.
 
-Requisitos: Windows, Python 3, Pillow, opencv-python, numpy (sin dependencias de automatización).
+Requirements: Windows, Python 3, Pillow, opencv-python, numpy (no automation dependencies).
 
-Uso:
-  python tools/ac_driver.py calibrate          # una vez por equipo / tamaño de panel
-  python tools/ac_driver.py preview            # recorre las celdas con el mouse SIN hacer clic (verificar calibración)
-  python tools/ac_driver.py run [--max N]      # con la carpeta abierta en el panel y la estación iniciada
-  ESC en cualquier momento detiene el recorrido.
+Usage:
+  python tools/ac_driver.py calibrate          # once per machine / panel size
+  python tools/ac_driver.py preview            # walks the cells with the mouse WITHOUT clicking (verify calibration)
+  python tools/ac_driver.py run [--max N]      # with the folder open in the panel and the station started
+  ESC at any time stops the walk.
 
-Uso interno como referencia de comportamiento: no descifra ni modifica Animation Composer.
+Internal use as a behavior reference: it does not decrypt or modify Animation Composer.
 """
 import argparse
 import ctypes
@@ -26,13 +26,13 @@ import numpy as np
 from PIL import ImageGrab
 
 ROOT = Path(__file__).resolve().parent.parent
-CAL = ROOT / "tools" / "ac_driver.local.json"          # calibración por equipo (ignorada por git)
+CAL = ROOT / "tools" / "ac_driver.local.json"          # per-machine calibration (ignored by git)
 LOG = ROOT / "research" / "harvest" / "station" / "_log.csv"
 LABELS = ROOT / "research" / "harvest" / "station" / "labels"
 
 user32 = ctypes.windll.user32
 try:
-    ctypes.windll.shcore.SetProcessDpiAwareness(2)     # coordenadas reales de pantalla con escalado de Windows
+    ctypes.windll.shcore.SetProcessDpiAwareness(2)     # real screen coordinates with Windows scaling
 except Exception:
     user32.SetProcessDPIAware()
 
@@ -78,7 +78,7 @@ def grab(box):
 
 def check_abort():
     if pressed(VK_ESC):
-        print("\nESC: detenido por el usuario.")
+        print("\nESC: stopped by the user.")
         sys.exit(0)
 
 
@@ -95,33 +95,33 @@ def wait_f8(msg):
 
 
 def calibrate():
-    print("Calibración. Abre una carpeta con varias filas de miniaturas en Animation Composer.")
-    a = wait_f8("1/4 Mouse en el CENTRO de la 1.ª miniatura (arriba-izquierda) y F8 ")
-    b = wait_f8("2/4 CENTRO de la miniatura a su DERECHA y F8 ")
-    c = wait_f8("3/4 CENTRO de la miniatura DEBAJO de la 1.ª y F8 ")
-    d = wait_f8("4/4 CENTRO de la última miniatura VISIBLE abajo-derecha del panel y F8 ")
+    print("Calibration. Open a folder with several rows of thumbnails in Animation Composer.")
+    a = wait_f8("1/4 Mouse on the CENTER of the 1st thumbnail (top-left) and F8 ")
+    b = wait_f8("2/4 CENTER of the thumbnail to its RIGHT and F8 ")
+    c = wait_f8("3/4 CENTER of the thumbnail BELOW the 1st and F8 ")
+    d = wait_f8("4/4 CENTER of the last VISIBLE thumbnail at the bottom-right of the panel and F8 ")
     dx, dy = b[0] - a[0], c[1] - a[1]
     if dx <= 0 or dy <= 0:
-        sys.exit("Calibración inválida: la 2.ª debe estar a la derecha y la 3.ª debajo de la 1.ª.")
+        sys.exit("Invalid calibration: the 2nd must be to the right of and the 3rd below the 1st.")
     cols = round((d[0] - a[0]) / dx) + 1
     rows = round((d[1] - a[1]) / dy) + 1
     cal = {"x0": a[0], "y0": a[1], "dx": dx, "dy": dy, "cols": cols, "rows": rows}
     CAL.write_text(json.dumps(cal, indent=1), encoding="utf-8")
-    print(f"OK: {cols} columnas × {rows} filas visibles. Guardado en {CAL.name}")
+    print(f"OK: {cols} columns × {rows} visible rows. Saved to {CAL.name}")
 
 
 def preview():
     if not CAL.exists():
-        sys.exit("Falta calibración: python tools/ac_driver.py calibrate")
+        sys.exit("Missing calibration: python tools/ac_driver.py calibrate")
     cal = json.loads(CAL.read_text(encoding="utf-8"))
-    print(f"Recorriendo {cal['cols']}×{cal['rows']} celdas sin hacer clic (ESC para parar)…")
+    print(f"Walking {cal['cols']}×{cal['rows']} cells without clicking (ESC to stop)…")
     time.sleep(1.5)
     for r in range(cal["rows"]):
         for c in range(cal["cols"]):
             check_abort()
             move(cal["x0"] + c * cal["dx"], cal["y0"] + r * cal["dy"])
             time.sleep(0.35)
-    print("OK: si el mouse pasó por el centro de cada miniatura, la calibración es correcta.")
+    print("OK: if the mouse passed over the center of each thumbnail, the calibration is correct.")
 
 
 def log_lines():
@@ -141,15 +141,15 @@ def wait_harvest(before, timeout):
 
 def run(max_items, timeout):
     if not CAL.exists():
-        sys.exit("Falta calibración: python tools/ac_driver.py calibrate")
+        sys.exit("Missing calibration: python tools/ac_driver.py calibrate")
     cal = json.loads(CAL.read_text(encoding="utf-8"))
     x0, y0, dx, dy, cols, rows = (cal[k] for k in ("x0", "y0", "dx", "dy", "cols", "rows"))
     LABELS.mkdir(parents=True, exist_ok=True)
-    # zona de la cuadrícula y un punto neutro (margen derecho) para sacar el mouse de las miniaturas
+    # grid area and a neutral point (right margin) to move the mouse off the thumbnails
     grid_box = (int(x0 - dx / 2), int(y0 - dy / 2), int(x0 + dx * (cols - 0.5)), int(y0 + dy * (rows - 0.5)))
     rest = (grid_box[2] - 4, grid_box[1] + 4)
 
-    print("Empieza en 3 s. Deja la estación «Iniciada» en AE y no muevas el mouse. ESC para detener.")
+    print("Starting in 3 s. Leave the station «Started» in AE and do not move the mouse. ESC to stop.")
     time.sleep(3)
     done, misses, first_row = 0, 0, 0
     while True:
@@ -158,7 +158,7 @@ def run(max_items, timeout):
                 check_abort()
                 x, y = x0 + c * dx, y0 + r * dy
                 before = len(log_lines())
-                # recorte de la etiqueta (nombre del preset) antes del clic
+                # crop of the label (preset name) before the click
                 label = ImageGrab.grab(bbox=(int(x - dx / 2), int(y + dy * 0.25), int(x + dx / 2), int(y + dy / 2)), all_screens=True)
                 double_click(x, y)
                 line = wait_harvest(before, timeout)
@@ -169,17 +169,17 @@ def run(max_items, timeout):
                     parts = line.split(",")
                     code = parts[2] if len(parts) > 2 else "unknown"
                     label.save(LABELS / f"{parts[1].replace(' ', '').replace('·', '_')}__{code}.png")
-                    print(f"  ✓ {done:4d}  fila {r + 1} col {c + 1}  {code}{'  (dup)' if line.endswith(',1') else ''}")
+                    print(f"  ✓ {done:4d}  row {r + 1} col {c + 1}  {code}{'  (dup)' if line.endswith(',1') else ''}")
                 else:
                     misses += 1
-                    print(f"  · fila {r + 1} col {c + 1} sin preset (vacía o no aplicó)")
+                    print(f"  · row {r + 1} col {c + 1} no preset (empty or not applied)")
                     if misses >= cols:
-                        print(f"Fin: una fila completa sin presets. Total {done}.")
+                        print(f"End: a full row with no presets. Total {done}.")
                         return
                 if max_items and done >= max_items:
-                    print(f"Límite --max alcanzado: {done}.")
+                    print(f"--max limit reached: {done}.")
                     return
-        # scroll: seguir la última fila procesada hasta que suba a la 1.ª fila
+        # scroll: follow the last processed row until it moves up to the 1st row
         strip_y = int(y0 + (rows - 1) * dy - grid_box[1])
         before_img = grab(grid_box)
         tpl = before_img[max(0, strip_y - int(dy / 2)): strip_y + int(dy / 2), :]
@@ -197,25 +197,25 @@ def run(max_items, timeout):
             if score < 0.8 or cy <= int(dy / 2) + 2:
                 new_y = cy if score >= 0.8 else -dy
                 break
-            if score >= 0.8 and abs(cy - new_y) <= 1 and moved:   # ya no se mueve: final de la lista
+            if score >= 0.8 and abs(cy - new_y) <= 1 and moved:   # no longer moving: end of the list
                 new_y = cy
                 break
             new_y = cy
         if not moved:
-            print(f"Fin de la carpeta (no hay más scroll). Total {done}.")
+            print(f"End of the folder (no more scrolling). Total {done}.")
             return
-        # filas nuevas = las que quedan por debajo de la última procesada
+        # new rows = those below the last processed one
         y0 = grid_box[1] + new_y + dy
         first_row = 0
         rows = max(1, int((grid_box[3] - y0) // dy) + 1)
-        print(f"  ↓ scroll: {rows} fila(s) nuevas")
+        print(f"  ↓ scroll: {rows} new row(s)")
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("cmd", choices=["calibrate", "preview", "run"])
-    ap.add_argument("--max", type=int, default=0, help="máximo de presets a cosechar")
-    ap.add_argument("--timeout", type=float, default=8.0, help="segundos de espera por preset")
+    ap.add_argument("--max", type=int, default=0, help="maximum number of presets to harvest")
+    ap.add_argument("--timeout", type=float, default=8.0, help="seconds to wait per preset")
     a = ap.parse_args()
     {"calibrate": calibrate, "preview": preview}.get(a.cmd, lambda: run(a.max, a.timeout))()
 

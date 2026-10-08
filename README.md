@@ -1,94 +1,104 @@
 # SS Motion Library
 
-Librería de motion de Superside para After Effects, pensada para que **un LLM (Claude u otro) la use localmente para manejar AE**: aplicar animaciones, probarlas, renderizar y ampliar el catálogo. Todo lo que crea son keyframes y expresiones nativas, sin plugins.
+Superside's own motion library for After Effects, built so that **an LLM (Claude or any other) can use it locally to drive AE**: apply animations, test them, render, and grow the catalog. Everything it creates is native keyframes and expressions, with no plugins required.
 
-## Cómo se ve
+## What it looks like
 
-Miniaturas de 240 px (el catálogo completo está en `library/index.html`).
+240 px thumbnails (the full catalog lives in `library/index.html`).
 
-| Categoría | Ejemplo | Ejemplo | Para qué |
+| Category | Example | Example | Good for |
 |---|---|---|---|
-| **Motion** — entradas y salidas | ![Scale Pop](library/gifs/motion/scale-pop.gif) `Scale Pop` | ![Line Draw](library/gifs/motion/line-draw.gif) `Line Draw` | Íconos, chips, cards, líneas |
-| **Effects** — loops continuos | ![Float](library/gifs/fx/float.gif) `Float` | ![Jitter](library/gifs/fx/jitter.gif) `Jitter` | Elementos en reposo, piezas de alta energía |
-| **Texto** — por carácter o palabra | ![Chars Rise](library/gifs/text/chars-rise.gif) `Chars Rise` | ![Tracking Settle](library/gifs/text/tracking-settle.gif) `Tracking Settle` | Titulares, kickers, subtítulos |
-| **Recetas** — comportamiento cosechado de Animation Composer y reproducido con nuestro código | ![2JV](library/gifs/recipe/calibration-2jv.gif) `2JV` pop con rebote | ![4VW](library/gifs/recipe/calibration-4vw.gif) `4VW` caída con rebote | Ampliar el catálogo con referencias reales |
+| **Motion** — entrances and exits | ![Scale Pop](library/gifs/motion/scale-pop.gif) `Scale Pop` | ![Line Draw](library/gifs/motion/line-draw.gif) `Line Draw` | Icons, chips, cards, lines |
+| **Effects** — continuous loops | ![Float](library/gifs/fx/float.gif) `Float` | ![Jitter](library/gifs/fx/jitter.gif) `Jitter` | Idle elements, high-energy pieces |
+| **Text** — per character or word | ![Chars Rise](library/gifs/text/chars-rise.gif) `Chars Rise` | ![Tracking Settle](library/gifs/text/tracking-settle.gif) `Tracking Settle` | Headlines, kickers, captions |
+| **Recipes** — behavior harvested from Animation Composer and reproduced with our own code | ![2JV](library/gifs/recipe/calibration-2jv.gif) `2JV` bouncy pop | ![4VW](library/gifs/recipe/calibration-4vw.gif) `4VW` bouncy drop | Growing the catalog from real references |
 
-Cada preset tiene **energía** (`suave`, `medio`, `dinámico`) para elegir según la pieza: social/hype → dinámico, corporativo/UI → suave.
+Every preset has an **energy** level (`soft`, `medium`, `dynamic`) to match the piece: social/hype → dynamic, corporate/UI → soft.
 
-## Cómo funciona
+## How it works
 
 ```
-tokens (tiempos y curvas) ──► ss_motion_lib.jsx (SSM.animate) ──► ss_presets.jsx (SSP.apply / applyFx / applyText / applyRecipe)
+tokens (timing + curves) ──► ss_motion_lib.jsx (SSM.animate) ──► ss_presets.jsx (SSP.apply / applyFx / applyText / applyRecipe)
                                                                         │
-            LLM ──► bridge/inbox/*.jsx ──► AE (ss_bridge.jsx) ──► bridge/outbox/*.txt   (aplicar, probar, renderizar)
+            LLM ──► bridge/inbox/*.jsx ──► AE (ss_bridge.jsx) ──► bridge/outbox/*.txt   (apply, test, render)
                                                                         │
-                                       library/INDEX.txt  ◄── lo único que el LLM lee (~1 línea por preset)
+                                       library/INDEX.txt  ◄── the only file the LLM reads (~1 line per preset)
 ```
 
-- **`tokens/superside_motion_tokens.json`**: 6 duraciones (Tick 4f … Stage 33f) y 7 curvas (Flat, Land, Launch, Settle, Cruise, Pop, Recoil), calibradas con transiciones reales.
-- **`library/INDEX.txt`**: índice ultracompacto `tipo|nombre|canales|energía|uso`. Un LLM lo lee completo con muy pocos tokens; el HTML y los GIF son solo para humanos.
+- **`tokens/superside_motion_tokens.json`**: 6 durations (Tick 4f … Stage 33f), 7 easing curves (Flat, Land, Launch, Settle, Cruise, Pop, Recoil) calibrated against real transitions, and font roles.
+- **`library/INDEX.txt`**: ultra-compact index `kind|name|channels|energy|use`. An LLM reads it whole for very few tokens; the HTML and GIFs are for humans only.
 
-## Para el LLM (Claude Code)
+## For the LLM (Claude Code)
 
-La skill `.claude/skills/ss-motion-library` explica todo. Lo esencial:
+The skill in `.claude/skills/ss-motion-library` explains everything. The essentials:
 
 ```bash
-bash tools/bridge.sh tools/<job>.jsx      # ejecuta un .jsx en AE y devuelve OK/ERROR con línea (arranca el puente si hace falta)
+bash tools/bridge.sh tools/<job>.jsx      # runs a .jsx in AE and returns OK/ERROR with the line number (starts the bridge if needed)
 ```
 ```js
-#include "ss_presets.jsx"   // el job vive en tools/ (o usa la ruta a tools/ss_presets.jsx)
+#include "ss_presets.jsx"   // keep the job inside tools/ (or use the path to tools/ss_presets.jsx)
 (function () {
-    var L = app.project.activeItem.layer("Titulo");
+    var L = app.project.activeItem.layer("Title");
     SSP.applyText(L, "Chars Rise", "both");
     return "ok";
 })();
 ```
 
-## Ampliar la librería con Animation Composer (sin tocar el plugin)
+## Growing the library with Animation Composer (without touching the plugin)
 
-Animation Composer no tiene API de script y sus presets están cifrados: **no se descifra ni se modifica**. Se automatiza su interfaz, como lo haría una persona, y se observa el resultado.
+Animation Composer has no scripting API and its presets are encrypted: **we never decrypt or modify it**. Instead we automate its UI, the way a person would, and observe the result.
 
-1. **AE:** *File › Scripts › Run Script File…* → `tools/ss_harvest_station.jsx`. Elige la sección y pulsa **Iniciar**.
-2. **Panel de Animation Composer:** abre esa misma carpeta.
-3. **Controlador** (solo la primera vez: `python tools/ac_driver.py calibrate`, con F8 sobre tres miniaturas):
+1. **AE:** *File › Scripts › Run Script File…* → `tools/ss_harvest_station.jsx`. Pick the section and press **Start**.
+2. **Animation Composer panel:** open the same folder.
+3. **Driver** (first time only: `python tools/ac_driver.py calibrate`, pressing F8 over three thumbnails; then `preview` to check):
    ```bash
    python tools/ac_driver.py run
    ```
-   Hace doble clic miniatura por miniatura, espera a que la estación registre cada preset (receta, curvas y nombre), hace scroll y termina solo. ESC detiene.
-4. **Integrar a la librería** (OCR de nombres → recetas → miniaturas → índice):
+   It double-clicks thumbnail after thumbnail, waits for the station to log each preset (recipe, curves and name), scrolls, and stops on its own. ESC aborts.
+4. **Merge into the library** (name OCR → recipes → thumbnails → index):
    ```bash
    bash tools/expand_library.sh
    ```
 
-Las recetas guardan *qué se mueve y cómo* (canales relativos, frames, curva o frecuencia/amplitud) y `SSP.applyRecipe` lo reproduce con keyframes propios. Si una curva coincide con un token, se usa el token.
+Recipes store *what moves and how* (relative channels, frames, curve or frequency/amplitude), and `SSP.applyRecipe` reproduces them with our own keyframes. When a measured curve matches a token, the token is used.
 
-> Animation Composer es software licenciado de Mister Horse. Las cosechas (`research/harvest/`) son referencia de uso interno; no se redistribuyen presets ni renders del plugin.
+> Animation Composer is licensed software by Mister Horse. Harvests (`research/harvest/`) are internal behavioral references; no presets or plugin renders are redistributed.
 
-## Para diseñadores
+## For designers
 
-- **Panel:** `tools/ss_panel.jsx` → selecciona capas → preset → Aplicar (pestañas Motion / Effects, filtro por energía, escalonado).
-- **Visualizador:** `library/index.html`.
+- **Panel:** `tools/ss_panel.jsx` → select layers → pick a preset → Apply (tabs: Motion, Text, Effects, Recipes; energy filter; stagger).
+- **Visualizer:** `library/index.html`.
 
-## Estructura
+## Test comps (`ae/motion_lab_v01.aep`, all on an AI-generated video)
 
-| Carpeta | Contenido |
+| Comp | What it tests |
 |---|---|
-| `tokens/` | Tiempos y curvas |
-| `tools/` | Librería JSX, panel, puente, estación de cosecha, controlador, pipelines (`expand_library.sh`, `render_gifs.sh`, `render_queue.jsx`) |
+| `01_SS_Icon_Intro` | Superside S-mark: line draw-on, Pop fill, Launch exit |
+| `02_Track_70s` | 6 OpenCV-tracked points, constellation lines, tracked callout, Animation Composer grain/light leak |
+| `03_Figma_Chips` | The *Essentials* Figma slide animated with tokens (staggered chips) |
+| `04_Text_Tracking_70s` | Text presets, fixed and tracked to the scene (title on the wallpaper, label on the face, ON AIR on the mic) |
+| `05_Text_Behind_70s` | Giant title between the background and the person, using a person matte from Flora (VEED) |
+
+## Structure
+
+| Folder | Contents |
+|---|---|
+| `tokens/` | Timing, curves and font roles |
+| `tools/` | JSX library, panel, bridge, harvest station, AC driver, pipelines (`expand_library.sh`, `render_gifs.sh`, `render_queue.jsx`, `render_comps.jsx`) |
 | `library/` | `INDEX.txt` (LLM), `library.json`, `recipes.json`, `index.html`, `gifs/` |
-| `assets/` | Logos Superside, S-mark para AE, paleta y componentes del Figma *Essentials* |
-| `ae/` | Proyecto de pruebas: 01 ícono · 02 tracking · 03 Figma · 04 texto + tracking · 05 texto detrás del sujeto (todo sobre video AI) |
-| `media/` | Video base (Flora, 70s 16mm) y datos de tracking |
-| `research/` | Calibración, cosechas, catálogo de previews |
+| `assets/` | Superside logos, S-mark shape for AE, palette and components from the *Essentials* Figma, brand fonts |
+| `ae/` | Test project (see above) |
+| `media/` | Base video (Flora, 70s 16mm look), person matte and tracking data |
+| `research/` | Calibration, Animation Composer harvests, preview catalog |
 
-## Requisitos
+## Requirements
 
-Windows · After Effects 2026 · Python 3 con `numpy`, `opencv-python`, `scipy`, `Pillow` · `ffmpeg` en el PATH · Git LFS.
-El repo se puede clonar en cualquier carpeta: los scripts calculan la raíz (`SS_ROOT`) desde su propia ubicación. Ejecuta los `.jsx` desde `tools/` (no los copies a la carpeta *ScriptUI Panels* de AE).
+Windows · After Effects 2026 · Python 3 with `numpy`, `opencv-python`, `scipy`, `Pillow` · `ffmpeg` on the PATH · Git LFS.
+The repo can be cloned anywhere: scripts compute the repo root (`SS_ROOT`) from their own location. Run the `.jsx` files from `tools/` (don't copy them into AE's *ScriptUI Panels* folder).
 
-## Notas
+## Notes
 
-- `render_gifs.sh` usa `aerender` solo sin `SKIP_RENDER`. Si el proyecto tiene capas con presets de Animation Composer, renderiza con `tools/render_queue.jsx` (cola del AE abierto), porque `aerender` se queda colgado.
-- `aaron.png` y el video de `media/` son material personal de prueba; revísalos antes de publicar el repo fuera del equipo.
-- Fuentes de marca en `assets/fonts/` (Inter Tight e Instrument Serif, licencia OFL). Instálalas en Windows (clic derecho › Instalar) antes de abrir AE; los scripts las eligen con `SSM.font("display" | "ui")` y si faltan usan Georgia/Arial.
-- Matte de la persona para texto detrás del sujeto: `media/aaron_70s_matte.webm` (Flora · VEED). AE necesita el `.mov`: `ffmpeg -c:v libvpx-vp9 -i media/aaron_70s_matte.webm -c:v prores_ks -profile:v 4444 -pix_fmt yuva444p10le media/aaron_70s_matte.mov`.
+- `render_gifs.sh` only uses `aerender` without `SKIP_RENDER`. If the project contains layers with Animation Composer presets, render through `tools/render_queue.jsx` / `tools/render_comps.jsx` (the open AE's render queue), because `aerender` hangs.
+- Brand fonts live in `assets/fonts/` (Inter Tight and Instrument Serif, OFL). Install them in Windows (right-click › Install) before opening AE; scripts pick them with `SSM.font("display" | "ui")` and fall back to Georgia/Arial.
+- Person matte for text-behind-subject: `media/aaron_70s_matte.webm` (Flora · VEED). AE needs the `.mov`: `ffmpeg -c:v libvpx-vp9 -i media/aaron_70s_matte.webm -c:v prores_ks -profile:v 4444 -pix_fmt yuva444p10le media/aaron_70s_matte.mov`.
+- `aaron.png` and the videos in `media/` are personal test material from a project collaborator.

@@ -1,5 +1,5 @@
-// Superside Motion Lib — aplica los tokens propios (tokens/superside_motion_tokens.json) en AE.
-// Uso: #include este archivo y llama SSM.load(rutaTokens), luego SSM.animate(prop, t0, v0, v1, "Arrive", "Land").
+// Superside Motion Lib — applies our own tokens (tokens/superside_motion_tokens.json) in AE.
+// Usage: #include this file, call SSM.load(tokensPath), then SSM.animate(prop, t0, v0, v1, "Arrive", "Land").
 var SSM = (function () {
     var T = null;
 
@@ -9,13 +9,13 @@ var SSM = (function () {
         f.open("r");
         var s = f.read();
         f.close();
-        return eval("(" + s + ")"); // archivo propio y confiable
+        return eval("(" + s + ")"); // our own, trusted file
     }
     function find(list, name) {
         for (var i = 0; i < list.length; i++) if (list[i].name === name) return list[i];
-        throw new Error("Token no encontrado: " + name);
+        throw new Error("Token not found: " + name);
     }
-    // respeta min/max de la propiedad (ej. selectores de texto ±100)
+    // respects the property's min/max (e.g. text selectors ±100)
     function clampTo(prop, v) {
         var lo = prop.hasMin ? prop.minValue : null, hi = prop.hasMax ? prop.maxValue : null;
         function c1(x) { if (lo !== null && x < lo) x = lo; if (hi !== null && x > hi) x = hi; return x; }
@@ -29,7 +29,7 @@ var SSM = (function () {
     }
     function avgSpeed(v0, v1, dur, spatial) {
         if (!(v0 instanceof Array)) return [Math.abs(v1 - v0) / dur];
-        if (spatial) { // velocidad espacial: un solo valor, sobre la distancia total
+        if (spatial) { // spatial speed: a single value over the total distance
             var d = 0;
             for (var i = 0; i < v0.length; i++) d += Math.pow(v1[i] - v0[i], 2);
             return [Math.sqrt(d) / dur];
@@ -50,7 +50,7 @@ var SSM = (function () {
         frames: function (durName) { return find(T.durations, durName).frames; },
         seconds: function (durName, fps) { return find(T.durations, durName).frames / (fps || T.fps); },
 
-        // Anima prop de v0 a v1 empezando en t0 (s), duración y easing por token. Devuelve el tiempo final.
+        // Animates prop from v0 to v1 starting at t0 (s); duration and easing come from tokens. Returns the end time.
         animate: function (prop, t0, v0, v1, durName, easeName, fps) {
             var dur = this.seconds(durName, fps);
             var t1 = t0 + dur;
@@ -75,7 +75,7 @@ var SSM = (function () {
             return t1;
         },
 
-        // Overshoot: v0 → v1 + 8% de la distancia → v1 (Land hasta el pico, Settle de vuelta)
+        // Overshoot: v0 → v1 + overshoot% of the distance → v1 (Land up to the peak, Settle back)
         pop: function (prop, t0, v0, v1, durName, fps, durSec) {
             var dur = durSec || this.seconds(durName, fps);
             var peak;
@@ -87,7 +87,7 @@ var SSM = (function () {
             this.animateRaw(prop, tm, t0 + dur, peak, v1, find(T.easings, "Settle").ae);
             return t0 + dur;
         },
-        // Anticipación: v0 → retrocede 4% del recorrido (Settle) → v1 (Launch)
+        // Anticipation: v0 → pulls back 4% of the travel (Settle) → v1 (Launch)
         recoil: function (prop, t0, v0, v1, durName, fps, durSec) {
             var dur = durSec || this.seconds(durName, fps), back;
             if (v0 instanceof Array) { back = []; for (var i = 0; i < v0.length; i++) back.push(v0[i] - (v1[i] - v0[i]) * 0.04); }
@@ -97,7 +97,7 @@ var SSM = (function () {
             this.animateRaw(prop, tm, t0 + dur, back, v1, find(T.easings, "Launch").ae);
             return t0 + dur;
         },
-        // Anima con un cubic-bezier CSS arbitrario (x1,y1,x2,y2) en n frames; y fuera de [0,1] → 3 keys (overshoot/undershoot)
+        // Animates with an arbitrary CSS cubic-bezier (x1,y1,x2,y2) over n frames; y outside [0,1] → 3 keys (overshoot/undershoot)
         animateBezier: function (prop, t0, v0, v1, frames, bz, fps) {
             var dur = frames / (fps || T.fps), x1 = bz[0], y1 = bz[1], x2 = bz[2], y2 = bz[3];
             if (y1 > 1.02 || y2 > 1.02) return this.pop(prop, t0, v0, v1, null, fps, dur);
@@ -116,7 +116,7 @@ var SSM = (function () {
             prop.setTemporalEaseAtKey(k0, prop.keyInTemporalEase(k0), eases(ae.out, avg));
             prop.setTemporalEaseAtKey(k1, eases(ae["in"], avg), prop.keyOutTemporalEase(k1));
         },
-        // Fuente por rol tipográfico (display | ui | ui_regular): primera instalada de la lista de tokens
+        // Font for a typographic role (display | ui | ui_regular): first installed one from the token list
         font: function (role) {
             var list = (T.fonts && T.fonts[role]) || ["ArialMT"];
             for (var i = 0; i < list.length; i++) {

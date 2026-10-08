@@ -1,8 +1,8 @@
-// Cosecha la "receta" y el comportamiento de cada capa con preset de Animation Composer
-// en todas las comps cuyo nombre empiece con "AC_" (o CALIBRATION).
-// Por capa: controles (código del preset + parámetros), marcadores In/Out, efectos nativos usados
-// y el valor evaluado frame a frame de cada propiedad con expresión o keys.
-// Salida: research/harvest/<comp>.json (sobrescribe) — solo lectura del proyecto.
+// Harvests the "recipe" and behavior of every layer with an Animation Composer preset
+// in all comps whose name starts with "AC_" (or CALIBRATION).
+// Per layer: controls (preset code + parameters), In/Out markers, native effects used
+// and the frame-by-frame evaluated value of every property with an expression or keys.
+// Output: research/harvest/<comp>.json (overwrites) — read-only on the project.
 var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).parent.parent.fsName.split("\\").join("/");
 (function () {
     var OUT = SS_ROOT + "/research/harvest/";
@@ -51,7 +51,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
                     natives.push('"' + esc(E.matchName) + '"');
                 }
             }
-            if (!controls.length) continue; // capa sin preset aplicado
+            if (!controls.length) continue; // layer without an applied preset
             var mk = L.property("ADBE Marker"), markers = [];
             for (var k = 1; k <= mk.numKeys; k++) markers.push('{"f":' + Math.round(mk.keyTime(k) / fd) + ',"c":"' + esc(mk.keyValue(k).comment) + '"}');
             var props = [];
@@ -82,5 +82,5 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         var n = harvestComp(it);
         if (n) { report.push(it.name + ": " + n); total += n; }
     }
-    return "harvest: " + total + " capas con preset\n" + report.join("\n");
+    return "harvest: " + total + " layers with preset\n" + report.join("\n");
 })();

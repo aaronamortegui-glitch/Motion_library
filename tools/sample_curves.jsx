@@ -1,10 +1,10 @@
-// Muestrea frame a frame el valor evaluado (post-expresión) de toda propiedad con expresión o keys
-// en las capas de la comp CALIBRATION. Salida: research/inspections/samples_<ts>.json
+// Samples frame by frame the evaluated (post-expression) value of every property with an expression or keys
+// on the layers of the CALIBRATION comp. Output: research/inspections/samples_<ts>.json
 var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).parent.parent.fsName.split("\\").join("/");
 (function () {
     var proj = app.project, comp = null;
     for (var i = 1; i <= proj.numItems; i++) if (proj.item(i) instanceof CompItem && proj.item(i).name === "CALIBRATION") comp = proj.item(i);
-    if (!comp) return "No existe la comp CALIBRATION";
+    if (!comp) return "The CALIBRATION comp does not exist";
     var fd = comp.frameDuration, nF = Math.round(comp.duration / fd);
 
     function esc(s) { return String(s).split("\\").join("\\\\").split('"').join('\\"'); }

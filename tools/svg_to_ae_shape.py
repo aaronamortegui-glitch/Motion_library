@@ -1,8 +1,8 @@
-"""Convierte un path SVG (M/L/H/V/C/Z absolutos) a vértices de Shape de After Effects (JSON).
+"""Converts an SVG path (absolute M/L/H/V/C/Z) to After Effects Shape vertices (JSON).
 
-Uso: python svg_to_ae_shape.py <archivo.svg> <salida.json>
-Salida: {"viewBox":[w,h], "fill":"#hex", "paths":[{"v":[[x,y]..], "i":[[dx,dy]..], "o":[[dx,dy]..], "closed":true}]}
-Coordenadas centradas en el viewBox (0,0 = centro) para que el anchor quede en el medio.
+Usage: python svg_to_ae_shape.py <file.svg> <output.json>
+Output: {"viewBox":[w,h], "fill":"#hex", "paths":[{"v":[[x,y]..], "i":[[dx,dy]..], "o":[[dx,dy]..], "closed":true}]}
+Coordinates centered on the viewBox (0,0 = center) so the anchor ends up in the middle.
 """
 import json
 import re
@@ -48,14 +48,14 @@ def parse(d):
             pos = p
         elif cmd in "Zz":
             cur["closed"] = True
-            # si el último punto repite el primero, fusionarlos
+            # if the last point repeats the first, merge them
             if len(cur["pts"]) > 1 and abs(cur["pts"][-1][0] - cur["pts"][0][0]) < 0.05 and abs(cur["pts"][-1][1] - cur["pts"][0][1]) < 0.05:
                 cur["in"][0] = cur["in"][-1]
                 for k in ("pts", "in", "out"):
                     cur[k].pop()
             cmd = None
         else:
-            raise ValueError(f"Comando SVG no soportado: {cmd}")
+            raise ValueError(f"Unsupported SVG command: {cmd}")
     return paths
 
 
@@ -74,7 +74,7 @@ def main():
             "closed": p["closed"],
         })
     Path(sys.argv[2]).write_text(json.dumps(out), encoding="utf-8")
-    print(f'{len(out["paths"])} path(s), {sum(len(p["v"]) for p in out["paths"])} vértices')
+    print(f'{len(out["paths"])} path(s), {sum(len(p["v"]) for p in out["paths"])} vertices')
 
 
 if __name__ == "__main__":

@@ -1,6 +1,5 @@
-// SS Motion — panel para aplicar los presets propios de Superside a las capas seleccionadas.
-// Abrir: File > Scripts > Run Script File… (ventana flotante)
-// o copiar a ".../Support Files/Scripts/ScriptUI Panels" para tenerlo en Window.
+// SS Motion — panel to apply Superside's own presets to the selected layers.
+// Open: File > Scripts > Run Script File… (floating window). Run it from tools/ so relative includes resolve.
 #include "ss_presets.jsx"
 
 var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).parent.parent.fsName.split("\\").join("/");
@@ -10,80 +9,77 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
 
     var tabs = win.add("tabbedpanel");
     var tM = tabs.add("tab", undefined, "Motion");
+    var tT = tabs.add("tab", undefined, "Text");
     var tF = tabs.add("tab", undefined, "Effects");
+    var tR = tabs.add("tab", undefined, "Recipes");
     tabs.selection = tM;
 
-    // ---- Motion ----
-    tM.alignChildren = ["fill", "top"];
-    var gE = tM.add("group"); gE.add("statictext", undefined, "Energía:");
-    var energy = gE.add("dropdownlist", undefined, ["todas", "suave", "medio", "dinámico"]); energy.selection = 0;
-    var list = tM.add("listbox", [0, 0, 300, 200]);
-    var info = tM.add("statictext", undefined, " ", { multiline: true }); info.preferredSize.height = 34;
-    var gP = tM.add("group");
-    var rIn = gP.add("radiobutton", undefined, "In"), rOut = gP.add("radiobutton", undefined, "Out"), rBoth = gP.add("radiobutton", undefined, "In + Out");
-    rBoth.value = true;
-    var gS = tM.add("group"); gS.add("statictext", undefined, "Escalonar (frames):");
-    var stag = gS.add("edittext", undefined, String(SSM.frames("Tick"))); stag.characters = 4;
-    var bApply = tM.add("button", undefined, "Aplicar a seleccionadas");
-
-    function refill() {
-        list.removeAll();
-        var names = SSP.names(), want = energy.selection.text;
-        for (var i = 0; i < names.length; i++) {
-            var p = SSP.presets[names[i]];
-            if (want === "todas" || p.energy === want) list.add("item", names[i]);
+    // Builds a tab: energy filter, list, info, optional phase/stagger controls and an Apply button.
+    function buildTab(tab, names, getMeta, withPhase, applyFn, buttonLabel) {
+        tab.alignChildren = ["fill", "top"];
+        var gE = tab.add("group"); gE.add("statictext", undefined, "Energy:");
+        var energy = gE.add("dropdownlist", undefined, ["all", "soft", "medium", "dynamic"]); energy.selection = 0;
+        var list = tab.add("listbox", [0, 0, 320, 200]);
+        var info = tab.add("statictext", undefined, " ", { multiline: true }); info.preferredSize.height = 34;
+        var rIn, rOut, rBoth, stag;
+        if (withPhase) {
+            var gP = tab.add("group");
+            rIn = gP.add("radiobutton", undefined, "In"); rOut = gP.add("radiobutton", undefined, "Out"); rBoth = gP.add("radiobutton", undefined, "In + Out");
+            rBoth.value = true;
+            var gS = tab.add("group"); gS.add("statictext", undefined, "Stagger (frames):");
+            stag = gS.add("edittext", undefined, String(SSM.frames("Tick"))); stag.characters = 4;
         }
-        if (list.items.length) list.selection = 0;
+        var btn = tab.add("button", undefined, buttonLabel);
+        function refill() {
+            list.removeAll();
+            var want = energy.selection.text;
+            for (var i = 0; i < names.length; i++) {
+                var m = getMeta(names[i]);
+                if (want === "all" || m.energy === want) list.add("item", names[i]);
+            }
+            if (list.items.length) list.selection = 0;
+        }
+        energy.onChange = refill;
+        list.onChange = function () {
+            if (!list.selection) return;
+            var m = getMeta(list.selection.text);
+            info.text = m.channels + " · " + m.energy + "\n" + m.use;
+        };
+        refill();
+        btn.onClick = function () {
+            var ls = selected(); if (!ls || !list.selection) return;
+            var phase = !withPhase ? "both" : rIn.value ? "in" : rOut.value ? "out" : "both";
+            var st = withPhase ? (parseFloat(stag.text) || 0) * ls[0].containingComp.frameDuration : 0;
+            app.beginUndoGroup("SS Motion: " + list.selection.text);
+            try {
+                for (var i = 0; i < ls.length; i++) {
+                    var L = ls[i];
+                    // with "both" the stagger applies to the entrance; the exit stays anchored to the outPoint
+                    var t0 = (phase === "out" ? L.outPoint - SSM.seconds("Arrive") : L.inPoint) + i * st;
+                    applyFn(L, list.selection.text, phase, t0);
+                }
+            } catch (e) { alert("Error: " + e.toString() + " (line " + e.line + ")"); }
+            app.endUndoGroup();
+        };
     }
-    energy.onChange = refill;
-    list.onChange = function () {
-        if (!list.selection) return;
-        var p = SSP.presets[list.selection.text];
-        info.text = p.channels + " · " + p.energy + "\n" + p.use;
-    };
-    refill();
-
-    // ---- Effects ----
-    tF.alignChildren = ["fill", "top"];
-    var flist = tF.add("listbox", [0, 0, 300, 200]);
-    var finfo = tF.add("statictext", undefined, " ", { multiline: true }); finfo.preferredSize.height = 34;
-    var fn = SSP.effectNames();
-    for (var j = 0; j < fn.length; j++) flist.add("item", fn[j]);
-    flist.selection = 0;
-    flist.onChange = function () {
-        if (!flist.selection) return;
-        var f = SSP.effects[flist.selection.text];
-        finfo.text = f.channels + " · " + f.energy + "\n" + f.use;
-    };
-    var bFx = tF.add("button", undefined, "Aplicar efecto a seleccionadas");
-
     function selected() {
         var c = app.project.activeItem;
-        if (!(c instanceof CompItem) || !c.selectedLayers.length) { alert("Selecciona capas en una composición."); return null; }
+        if (!(c instanceof CompItem) || !c.selectedLayers.length) { alert("Select layers in a composition."); return null; }
         return c.selectedLayers;
     }
-    bApply.onClick = function () {
-        var ls = selected(); if (!ls || !list.selection) return;
-        var phase = rIn.value ? "in" : rOut.value ? "out" : "both";
-        var st = (parseFloat(stag.text) || 0) * ls[0].containingComp.frameDuration;
-        app.beginUndoGroup("SS Motion: " + list.selection.text);
-        try {
-            for (var i = 0; i < ls.length; i++) {
-                var L = ls[i];
-                // en "both" el escalonado se aplica a la entrada; la salida queda anclada al outPoint
-                var t0 = (phase === "out" ? L.outPoint - SSM.seconds("Arrive") : L.inPoint) + i * st;
-                SSP.apply(L, list.selection.text, phase, t0);
-            }
-        } catch (e) { alert("Error: " + e.toString() + " (línea " + e.line + ")"); }
-        app.endUndoGroup();
-    };
-    bFx.onClick = function () {
-        var ls = selected(); if (!ls || !flist.selection) return;
-        app.beginUndoGroup("SS FX: " + flist.selection.text);
-        try { for (var i = 0; i < ls.length; i++) SSP.applyFx(ls[i], flist.selection.text); }
-        catch (e) { alert("Error: " + e.toString() + " (línea " + e.line + ")"); }
-        app.endUndoGroup();
-    };
+    var ENERGY = { s: "soft", m: "medium", d: "dynamic" };
+
+    buildTab(tM, SSP.names(), function (n) { return SSP.presets[n]; }, true,
+        function (L, n, ph, t0) { SSP.apply(L, n, ph, t0); }, "Apply to selected layers");
+    buildTab(tT, SSP.textNames(), function (n) { return SSP.text[n]; }, true,
+        function (L, n, ph, t0) { SSP.applyText(L, n, ph, t0); }, "Apply to selected text layers");
+    buildTab(tF, SSP.effectNames(), function (n) { return SSP.effects[n]; }, false,
+        function (L, n) { SSP.applyFx(L, n); }, "Apply effect to selected layers");
+    buildTab(tR, SSP.recipeIds(), function (id) {
+        var r = SSP.recipes[id];
+        return { channels: r.channels.join(" & ") + (r.kind === "fx" ? " (loop)" : ""), energy: ENERGY[r.energy] || r.energy,
+                 use: (r.name ? r.name + " · " : "") + "AC ref · " + (r.section || "?") };
+    }, false, function (L, id) { SSP.applyRecipe(L, id, "both"); }, "Apply recipe to selected layers");
 
     if (win instanceof Window) { win.center(); win.show(); } else win.layout.layout(true);
 })(this);

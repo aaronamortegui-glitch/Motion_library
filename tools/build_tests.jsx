@@ -1,5 +1,5 @@
-// Construye el proyecto de pruebas: ícono Superside, tracking 70s y componentes del Figma.
-// Ejecutar con: AfterFX.exe -s "$.evalFile(SS_ROOT + '/tools/build_tests.jsx')"
+// Builds the test project: Superside icon, 70s tracking and Figma components.
+// Run with: AfterFX.exe -s "$.evalFile(SS_ROOT + '/tools/build_tests.jsx')"
 #include "ss_motion_lib.jsx"
 
 var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).parent.parent.fsName.split("\\").join("/");
@@ -14,14 +14,14 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var PAL = SSM.readJSON(ROOT + "assets/figma_essentials/palette.json").colors;
     var ICON = SSM.readJSON(ROOT + "assets/superside/ss_icon_shape.json");
     var TRK = SSM.readJSON(ROOT + "media/tracks.json");
-    var SERIF = SSM.font("display"), SANS = SSM.font("ui"); // fallback: Instrument Serif / Inter Tight no instaladas
+    var SERIF = SSM.font("display"), SANS = SSM.font("ui"); // fallback: Instrument Serif / Inter Tight not installed
 
     function hex(h) { h = h.replace("#", ""); return [parseInt(h.substr(0, 2), 16) / 255, parseInt(h.substr(2, 2), 16) / 255, parseInt(h.substr(4, 2), 16) / 255]; }
     function sec(name) { return SSM.seconds(name); }
 
     app.beginUndoGroup("SS motion tests");
-    // Reconstruye solo sus comps dentro del proyecto abierto (no crea proyecto nuevo:
-    // así no se pierden CALIBRATION, AC Sections, 04_Text_Tracking, GIF Previews, etc.)
+    // Rebuilds only its own comps inside the open project (does not create a new project:
+    // so CALIBRATION, AC Sections, 04_Text_Tracking, GIF Previews, etc. are not lost)
     if (!app.project.file) app.project.expressionEngine = "javascript-1.0";
     function findItem(name) { for (var i = 1; i <= app.project.numItems; i++) if (app.project.item(i).name === name) return app.project.item(i); return null; }
     var OWN = ["01_SS_Icon_Intro", "02_Track_70s", "03_Figma_Chips"];
@@ -100,7 +100,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     function tr(L, p) { return L.property("ADBE Transform Group").property(p); }
 
     // =========================================================
-    // 01 · Ícono Superside — draw-on de línea + Pop + salida
+    // 01 · Superside icon — line draw-on + Pop + exit
     // =========================================================
     var c1 = app.project.items.addComp("01_SS_Icon_Intro", 1920, 1080, 1, 3.5, 30);
     c1.parentFolder = folder;
@@ -111,25 +111,25 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     tr(eyebrow, "ADBE Position").setValue([960, 900]);
     var trim = line.property("ADBE Root Vectors Group").addProperty("ADBE Vector Filter - Trim");
     var t = 0.2;
-    // Línea: se dibuja en Sweep con Cruise
+    // Line: draws on over Sweep with Cruise
     var tEnd = SSM.animate(trim.property("ADBE Vector Trim End"), t, 0, 100, "Sweep", "Cruise");
     SSM.animate(trim.property("ADBE Vector Trim Offset"), t, -40, 0, "Sweep", "Cruise");
-    // Relleno: entra con Pop al terminar la línea; opacidad Blink/Flat
+    // Fill: enters with Pop when the line finishes; opacity Blink/Flat
     SSM.animate(tr(fill, "ADBE Scale"), tEnd - sec("Glide"), [0, 0, 100], [100, 100, 100], "Arrive", "Pop");
     SSM.animate(tr(fill, "ADBE Opacity"), tEnd - sec("Glide"), 0, 100, "Blink", "Flat");
     SSM.animate(tr(line, "ADBE Opacity"), tEnd, 100, 0, "Blink", "Flat");
-    // Eyebrow: sube con Land, escalonado un Tick
+    // Eyebrow: rises with Land, staggered by one Tick
     var tE = tEnd + sec("Tick");
     SSM.animate(tr(eyebrow, "ADBE Position"), tE, [960, 940], [960, 900], "Arrive", "Land");
     SSM.animate(tr(eyebrow, "ADBE Opacity"), tE, 0, 100, "Blink", "Flat");
-    // Salida encadenada: Launch
+    // Chained exit: Launch
     var tOut = 2.7;
     SSM.animate(tr(fill, "ADBE Scale"), tOut, [100, 100, 100], [0, 0, 100], "Glide", "Launch");
     SSM.animate(tr(eyebrow, "ADBE Opacity"), tOut, 100, 0, "Blink", "Flat");
-    log("01 ok — draw-on termina en " + tEnd.toFixed(2) + "s");
+    log("01 ok — draw-on ends at " + tEnd.toFixed(2) + "s");
 
     // =========================================================
-    // 02 · Tracking sobre video 70s
+    // 02 · Tracking over 70s video
     // =========================================================
     var vid = importOnce(new File(ROOT + "media/aaron_70s_handheld.mp4"));
     vid.parentFolder = folder;
@@ -144,7 +144,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         var N = c2.layers.addNull();
         N.name = "TRK " + name;
         N.label = 9;
-        tr(N, "ADBE Anchor Point").setValue([50, 50]); // null de 100x100: anchor al centro
+        tr(N, "ADBE Anchor Point").setValue([50, 50]); // 100x100 null: anchor at center
         var times = [], vals = [], sc = [], rt = [];
         for (var f = 0; f < tk.pos.length; f++) {
             times.push(f * fd); vals.push(tk.pos[f]);
@@ -158,13 +158,13 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         N.comment = "confidence_min=" + minC;
         nulls[name] = { layer: N, conf: minC };
     }
-    // Anillos en cada punto (Coral si el track es poco confiable)
+    // Rings at each point (Coral if the track is unreliable)
     var ringOrder = ["face", "mic_head", "mic_joint", "lapel", "wallpaper", "lamp"];
     for (var i = 0; i < ringOrder.length; i++) {
         var nm = ringOrder[i];
         var ok = nulls[nm].conf >= 0.3;
         var R = c2.layers.addShape();
-        R.name = "Ring " + nm + (ok ? "" : " (track débil)");
+        R.name = "Ring " + nm + (ok ? "" : " (weak track)");
         var g = R.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
         g.addProperty("ADBE Vector Shape - Ellipse").property("ADBE Vector Ellipse Size").setValue([44, 44]);
         var st = g.addProperty("ADBE Vector Graphic - Stroke");
@@ -173,7 +173,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         tr(R, "ADBE Position").expression = 'thisComp.layer("TRK ' + nm + '").transform.position';
         SSM.animate(tr(R, "ADBE Scale"), 0.3 + i * sec("Tick"), [0, 0, 100], [100, 100, 100], "Arrive", "Pop");
     }
-    // Líneas tipo constelación entre puntos trackeados (path por expresión)
+    // Constellation-style lines between tracked points (path via expression)
     var lines = c2.layers.addShape();
     lines.name = "Constellation lines";
     tr(lines, "ADBE Position").setValue([0, 0]);
@@ -190,7 +190,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     ls.property("ADBE Vector Stroke Width").setValue(3);
     var ltrim = lines.property("ADBE Root Vectors Group").addProperty("ADBE Vector Filter - Trim");
     SSM.animate(ltrim.property("ADBE Vector Trim End"), 0.5, 0, 100, "Sweep", "Cruise");
-    // Callout chip pegado a la cara
+    // Callout chip stuck to the face
     var chip = pill(c2, "Callout chip", 300, 60, PAL.cloud, null);
     var chipTxt = text(c2, "Callout text", "Aaron · 1974", SANS, 30, PAL.pine, ParagraphJustification.CENTER_JUSTIFY);
     chipTxt.parent = chip;
@@ -208,18 +208,18 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     lds.property("ADBE Vector Stroke Width").setValue(3);
     var ldt = leader.property("ADBE Root Vectors Group").addProperty("ADBE Vector Filter - Trim");
     SSM.animate(ldt.property("ADBE Vector Trim End"), 0.9, 0, 100, "Glide", "Settle");
-    // S-mark pegado al papel tapiz (prueba de fondo con parallax)
+    // S-mark stuck to the wallpaper (background parallax test)
     var mini = iconShape(c2, "S-mark on wallpaper", PAL.spark, null);
     mini.parent = nulls.wallpaper.layer;
     tr(mini, "ADBE Position").setValue([50, 230]);
     SSM.animate(tr(mini, "ADBE Scale"), 0.6, [0, 0, 100], [12, 12, 100], "Arrive", "Pop");
-    // Recursos del plugin: grano y light leak de los asset packs de Animation Composer
+    // Plugin resources: grain and light leak from the Animation Composer asset packs
     function addPack(rel, mode, opac, nameL) {
-        // "#" en el nombre rompe new File(): buscar por máscara dentro de la carpeta del pack
+        // "#" in the name breaks new File(): search by mask inside the pack folder
         var parts = rel.split("/");
         var hits = Folder(AC_PACKS + parts[0]).getFiles(parts[1].split(" #")[0] + "*");
         var f = hits.length ? hits[0] : null;
-        if (!f || !f.exists) { log("asset no encontrado: " + rel); return; }
+        if (!f || !f.exists) { log("asset not found: " + rel); return; }
         var it = importOnce(f);
         it.parentFolder = folder;
         it.mainSource.loop = 10;
@@ -237,7 +237,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     log("02 ok — " + ringOrder.length + " tracks");
 
     // =========================================================
-    // 03 · Componentes del Figma animados con tokens
+    // 03 · Figma components animated with tokens
     // =========================================================
     var c3 = app.project.items.addComp("03_Figma_Chips", 1920, 1080, 1, 4, 30);
     c3.parentFolder = folder;

@@ -1,9 +1,9 @@
-// Renderiza con la cola del AE abierto las comps listadas en research/_render_list.txt (una por línea) → renders/<comp>.mp4
-// Útil cuando aerender no sirve (proyecto con capas de Animation Composer). Luego: bash tools/wait_files.sh research/_render_expected.txt
+// Renders with the open AE's queue the comps listed in research/_render_list.txt (one per line) → renders/<comp>.mp4
+// Useful when aerender doesn't work (project with Animation Composer layers). Then: bash tools/wait_files.sh research/_render_expected.txt
 var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).parent.parent.fsName.split("\\").join("/");
 (function () {
     var lf = new File(SS_ROOT + "/research/_render_list.txt"); lf.encoding = "UTF-8";
-    if (!lf.exists) return "Falta research/_render_list.txt";
+    if (!lf.exists) return "Missing research/_render_list.txt";
     lf.open("r"); var names = lf.read().split("\n"); lf.close();
     var proj = app.project, rq = proj.renderQueue, comps = {}, n = 0, miss = [];
     for (var i = rq.numItems; i >= 1; i--) rq.item(i).remove();
@@ -23,5 +23,5 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     }
     ex.close();
     if (n) app.scheduleTask("app.project.renderQueue.render()", 200, false);
-    return "render: " + n + " comps" + (miss.length ? " · no existen: " + miss.join(", ") : "");
+    return "render: " + n + " comps" + (miss.length ? " · not found: " + miss.join(", ") : "");
 })();

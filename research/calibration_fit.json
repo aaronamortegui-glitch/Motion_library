@@ -1,6 +1,6 @@
 [
  {
-  "layer": "12 · Effects / Long Shadow & Extrude / (primero de la carpeta)",
+  "layer": "12 · Effects / Long Shadow & Extrude / (first in folder)",
   "markers": [],
   "phases": [
    {
@@ -342,17 +342,17 @@
   ]
  },
  {
-  "layer": "11 · 3D Transitions / Fade & Rotate / (primero de la carpeta)",
+  "layer": "11 · 3D Transitions / Fade & Rotate / (first in folder)",
   "markers": [],
   "phases": []
  },
  {
-  "layer": "10 · 2D Transitions / Scale / (primero de la carpeta)",
+  "layer": "10 · 2D Transitions / Scale / (first in folder)",
   "markers": [],
   "phases": []
  },
  {
-  "layer": "09 · 2D Transitions / Rotate & Scale / (primero de la carpeta)",
+  "layer": "09 · 2D Transitions / Rotate & Scale / (first in folder)",
   "markers": [
    17,
    71
@@ -503,7 +503,7 @@
   ]
  },
  {
-  "layer": "08 · 2D Transitions / Position & Scale / (primero de la carpeta)",
+  "layer": "08 · 2D Transitions / Position & Scale / (first in folder)",
   "markers": [
    17,
    69

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Ejecuta un .jsx en After Effects a través del puente (tools/ss_bridge.jsx debe estar activo) y espera el resultado.
-# Uso: bash tools/bridge.sh tools/archivo.jsx [timeout_seg]
-# Sale con código 1 si AE devuelve ERROR o si no responde a tiempo. Arranca el puente si no está activo.
+# Runs a .jsx in After Effects through the bridge (tools/ss_bridge.jsx must be active) and waits for the result.
+# Usage: bash tools/bridge.sh tools/file.jsx [timeout_sec]
+# Exits with code 1 if AE returns ERROR or does not respond in time. Starts the bridge if it is not active.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="$1"; TIMEOUT="${2:-180}"
@@ -19,6 +19,6 @@ for ((i = 0; i < TIMEOUT * 2; i++)); do
   [ -f "$out" ] && break
   sleep 0.5
 done
-[ -f "$out" ] || { echo "Sin respuesta de AE en ${TIMEOUT}s (¿AE abierto y puente activo?)"; exit 1; }
+[ -f "$out" ] || { echo "No response from AE in ${TIMEOUT}s (is AE open and the bridge active?)"; exit 1; }
 cat "$out"; echo
 head -1 "$out" | grep -q '^OK' || exit 1

@@ -1,7 +1,7 @@
-"""Sube un archivo a un descriptor de subida firmada (p. ej. flora_create_asset source="signed-url").
+"""Uploads a file to a signed-upload descriptor (e.g. flora_create_asset source="signed-url").
 
-Uso: python tools/signed_upload.py <archivo> '<json del campo "upload">'
-Envía un POST multipart con todos los form_fields tal cual y el archivo al final (campo file_field).
+Usage: python tools/signed_upload.py <file> '<json of the "upload" field>'
+Sends a multipart POST with all form_fields as-is and the file at the end (file_field field).
 """
 import json
 import subprocess

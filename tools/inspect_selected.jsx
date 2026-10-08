@@ -1,6 +1,6 @@
-// Inspector de comportamiento: vuelca capas seleccionadas (o todas) de la comp activa a JSON.
-// Uso: aplica un preset de Animation Composer a una capa, selecciónala y corre este script.
-// Salida: <repo>/research/inspections/<comp>_<timestamp>.json
+// Behavior inspector: dumps the selected layers (or all) of the active comp to JSON.
+// Usage: apply an Animation Composer preset to a layer, select it and run this script.
+// Output: <repo>/research/inspections/<comp>_<timestamp>.json
 var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).parent.parent.fsName.split("\\").join("/");
 (function () {
     var OUT_DIR = SS_ROOT + "/research/inspections";
@@ -54,7 +54,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
                     d.keys.push(key);
                 }
             } else if (!d.expression) {
-                // Sin keys ni expresión: solo reportar si cambió del default
+                // No keys or expression: only report if it changed from the default
                 if (!p.isModified) return null;
                 try { d.value = safeVal(p.value); } catch (e2) {}
             } else {
@@ -86,7 +86,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     }
 
     var comp = app.project.activeItem;
-    if (!(comp instanceof CompItem)) { writeLn("Abre una composición primero."); return; }
+    if (!(comp instanceof CompItem)) { writeLn("Open a composition first."); return; }
     var layers = comp.selectedLayers.length ? comp.selectedLayers : [];
     if (!layers.length) for (var i = 1; i <= comp.numLayers; i++) layers.push(comp.layer(i));
 
@@ -97,8 +97,8 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     if (!folder.exists) folder.create();
     var f = new File(OUT_DIR + "/" + comp.name.replace(/[^\w\-]+/g, "_") + "_" + new Date().getTime() + ".json");
     f.encoding = "UTF-8";
-    if (!f.open("w")) { writeLn("No se pudo escribir. Activa Preferencias > Scripting & Expressions > Allow Scripts to Write Files."); return; }
+    if (!f.open("w")) { writeLn("Could not write. Enable Preferences > Scripting & Expressions > Allow Scripts to Write Files."); return; }
     f.write(toJSON(out));
     f.close();
-    writeLn("Inspección guardada: " + f.fsName);
+    writeLn("Inspection saved: " + f.fsName);
 })();

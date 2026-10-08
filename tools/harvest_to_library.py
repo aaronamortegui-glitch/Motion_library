@@ -1,10 +1,10 @@
-"""Convierte comportamientos cosechados (research/harvest/**.json) en recetas propias → library/recipes.json.
+"""Converts harvested behaviors (research/harvest/**.json) into our own recipes → library/recipes.json.
 
-Una receta describe QUÉ se mueve y CÓMO (canales relativos al reposo, frames, curva), no copia el preset:
-SSP.applyRecipe() la reproduce con keyframes nativos y nuestros tokens. Si la curva medida se parece a un token
-(distancia < 0.06) se usa el token; si no, se guarda la bezier ajustada.
+A recipe describes WHAT moves and HOW (channels relative to rest, frames, curve); it does not copy the preset:
+SSP.applyRecipe() reproduces it with native keyframes and our tokens. If the measured curve resembles a token
+(distance < 0.06) the token is used; otherwise the fitted bezier is stored.
 
-Uso: python tools/harvest_to_library.py
+Usage: python tools/harvest_to_library.py
 """
 import csv
 import glob
@@ -37,11 +37,11 @@ def load_labels():
 
 def layers_in(path):
     d = json.loads(Path(path).read_text(encoding="utf-8"))
-    if "layers" in d:  # formato de harvest.jsx (comp completa)
+    if "layers" in d:  # harvest.jsx format (full comp)
         for L in d["layers"]:
             L.setdefault("fps", d.get("fps", 30)); L.setdefault("section", d.get("comp", ""))
             yield L
-    else:              # formato de la estación (una capa)
+    else:              # station format (one layer)
         yield d
 
 
@@ -61,7 +61,7 @@ def phase_spec(values, ph, fps, chan):
 
 
 def oscillation(values, fps):
-    """Loop continuo: amplitud (mitad del rango) y frecuencia dominante (FFT) por componente."""
+    """Continuous loop: amplitude (half the range) and dominant frequency (FFT) per component."""
     v = np.asarray(values, dtype=float)
     if v.ndim == 1:
         v = v[:, None]
@@ -108,7 +108,7 @@ def recipe(L, labels):
     n_in = max([c["frames"] for c in ins.values()] or [0])
     energy = "d" if over > 0.03 or (0 < n_in < 10) else ("s" if n_in > 20 or set(ins) <= {"opacity"} else "m")
     kind = "fx" if is_fx else "transition"
-    if is_fx:  # energía de un loop: frecuencia alta o estilo wiggle → dinámico
+    if is_fx:  # energy of a loop: high frequency or wiggle style → dynamic
         fmax = max([max(c["freq"]) for c in chans.get("loop", {}).values()] or [0])
         wig = any(c["style"] == "wiggle" for c in chans.get("loop", {}).values())
         energy = "d" if wig or fmax > 2 else ("m" if fmax > 0.8 else "s")
@@ -129,7 +129,7 @@ def main():
             if r and r["id"] not in out:
                 out[r["id"]] = r
     (ROOT / "library/recipes.json").write_text(json.dumps({"version": 1, "recipes": list(out.values())}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    print(f"{len(out)} recetas → library/recipes.json")
+    print(f"{len(out)} recipes → library/recipes.json")
     for r in out.values():
         ph = r["phases"].get("in") or r["phases"].get("loop", {})
         desc = [(k, v["frames"], v["token"] or v["bezier"]) if "frames" in v else (k, v["style"], v["freq"], v["amp"]) for k, v in ph.items()]

@@ -1,4 +1,4 @@
-// Exporta library/library.json desde ss_presets.jsx (fuente única de verdad de los metadatos).
+// Exports library/library.json from ss_presets.jsx (single source of truth for the metadata).
 #include "ss_presets.jsx"
 var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).parent.parent.fsName.split("\\").join("/");
 (function () {
@@ -19,5 +19,5 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     f.encoding = "UTF-8"; f.open("w");
     f.write('{"version":"0.1","tokens":"../tokens/superside_motion_tokens.json","presets":[' + out.join(",") + "]}");
     f.close();
-    return out.length + " presets exportados";
+    return out.length + " presets exported";
 })();

@@ -1,8 +1,8 @@
-"""Ajusta curvas bezier a las propiedades muestreadas de CALIBRATION (samples_*.json).
+"""Fits bezier curves to the sampled CALIBRATION properties (samples_*.json).
 
-Por propiedad animada: separa fases (entrada/salida) donde el valor cambia, normaliza a progreso 0→1,
-ajusta un cubic-bezier CSS (x1,y1,x2,y2) y reporta duración, overshoot y el token más cercano.
-Uso: python fit_samples.py <samples.json> [--plot carpeta] [--out resumen.json]
+Per animated property: splits phases (in/out) where the value changes, normalizes to 0→1 progress,
+fits a CSS cubic-bezier (x1,y1,x2,y2) and reports duration, overshoot and the nearest token.
+Usage: python fit_samples.py <samples.json> [--plot folder] [--out summary.json]
 """
 import argparse
 import json
@@ -37,7 +37,7 @@ def fit(prog):
 
 def magnitude(v):
     v = np.asarray(v, dtype=float)
-    return v if v.ndim == 1 else v  # se maneja por componente abajo
+    return v if v.ndim == 1 else v  # handled per component below
 
 
 def phases(values, thr=1e-3):
@@ -47,7 +47,7 @@ def phases(values, thr=1e-3):
     span = np.ptp(v, axis=0)
     if span.max() < 1e-6:
         return []
-    comp = int(np.argmax(span))  # componente que más cambia
+    comp = int(np.argmax(span))  # component that changes the most
     s = v[:, comp]
     d = np.abs(np.diff(s)) > thr * (span[comp] or 1)
     segs, start = [], None
@@ -58,7 +58,7 @@ def phases(values, thr=1e-3):
             segs.append((start, i)); start = None
     if start is not None:
         segs.append((start, len(d)))
-    # unir segmentos separados por 1 frame quieto (ej. overshoot que pasa por 0 velocidad)
+    # merge segments separated by 1 still frame (e.g. overshoot passing through 0 velocity)
     merged = []
     for sg in segs:
         if merged and sg[0] - merged[-1][1] <= 2:
@@ -72,7 +72,7 @@ def phases(values, thr=1e-3):
             continue
         v0, v1 = seg[0], seg[-1]
         rng = v1 - v0
-        if abs(rng) < 1e-6:  # va y vuelve (pulso): normalizar por el pico
+        if abs(rng) < 1e-6:  # goes and comes back (pulse): normalize by the peak
             pk = seg[np.argmax(np.abs(seg - v0))]
             prog = (seg - v0) / ((pk - v0) or 1)
             out.append({"start": a, "end": b, "comp": comp, "from": round(float(v0), 3), "to": round(float(v1), 3), "pulse": True, "prog": prog})
@@ -116,7 +116,7 @@ def main():
                        "progress": [round(float(x), 4) for x in ph["prog"]]}
                 rows.append(row)
                 print(f'  {P["path"][-45:]:45s} f{ph["start"]:>3}-{ph["end"]:<3} {n:>2}f {row["ms"]:>4}ms  '
-                      f'{ph["from"]}→{ph["to"]}  bez={p}  over={over:.2f}  ~{tok[0]}({tok[1]})' + ("  PULSO" if ph["pulse"] else ""))
+                      f'{ph["from"]}→{ph["to"]}  bez={p}  over={over:.2f}  ~{tok[0]}({tok[1]})' + ("  PULSE" if ph["pulse"] else ""))
         summary.append({"layer": L["layer"], "markers": L["markers"], "phases": rows})
         if a.plot and rows:
             import matplotlib

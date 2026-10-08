@@ -1,6 +1,6 @@
-// Superside Motion Presets v0.1 — librería propia construida sobre ss_motion_lib.jsx + tokens v0.2.
-// Cada preset: canales (taxonomía tipo carpeta), energía, uso, y funciones in/out que crean keyframes reales
-// (editables, sin plugin). Uso: SSP.apply(layer, "Scale Pop", "in", tiempoInicio)
+// Superside Motion Presets v0.1 — our own library built on ss_motion_lib.jsx + tokens v0.2.
+// Each preset: channels (folder-style taxonomy), energy, use, and in/out functions that create real keyframes
+// (editable, no plugin). Usage: SSP.apply(layer, "Scale Pop", "in", startTime)
 #include "ss_motion_lib.jsx"
 
 var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).parent.parent.fsName.split("\\").join("/");
@@ -8,7 +8,7 @@ var SSP = (function () {
     var TOKENS = SS_ROOT + "/tokens/superside_motion_tokens.json";
     SSM.load(TOKENS);
 
-    // Valores "de reposo": se leen a mitad de la capa, donde in/out ya no afectan
+    // "Rest" values: read at the middle of the layer, where in/out no longer apply
     function REF(L) { return (L.inPoint + L.outPoint) / 2; }
     function T(L, p) { return L.property("ADBE Transform Group").property(p); }
     function pos(L) { var v = T(L, "ADBE Position").valueAtTime(REF(L), true); return [v[0], v[1]]; }
@@ -25,13 +25,13 @@ var SSP = (function () {
     }
     function blur(L) {
         var e = effect(L, "ADBE Gaussian Blur 2", "SS Blur");
-        e.property("ADBE Gaussian Blur 2-0003").setValue(1); // repetir píxeles de borde
+        e.property("ADBE Gaussian Blur 2-0003").setValue(1); // repeat edge pixels
         return e.property("ADBE Gaussian Blur 2-0001");
     }
     function wipe(L) {
         var e = effect(L, "ADBE Linear Wipe", "SS Wipe");
-        e.property("ADBE Linear Wipe-0002").setValue(90); // de izquierda a derecha
-        e.property("ADBE Linear Wipe-0003").setValue(0);  // borde duro
+        e.property("ADBE Linear Wipe-0002").setValue(90); // left to right
+        e.property("ADBE Linear Wipe-0003").setValue(0);  // hard edge
         return e.property("ADBE Linear Wipe-0001");
     }
     function trimEnd(L) {
@@ -42,15 +42,15 @@ var SSP = (function () {
         return tr.property("ADBE Vector Trim End");
     }
 
-    // Cada fase devuelve el tiempo en que termina.
+    // Each phase returns its end time.
     var P = {
         "Fade": {
-            channels: "Fade", energy: "suave", use: "Corporativo, UI, textos de apoyo",
+            channels: "Fade", energy: "soft", use: "Corporate, UI, supporting text",
             "in": function (L, t) { return SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Blink", "Flat"); },
             "out": function (L, t) { return SSM.animate(T(L, "ADBE Opacity"), t, opa(L), 0, "Blink", "Flat"); }
         },
         "Fade Up": {
-            channels: "Fade & Position", energy: "suave", use: "Titulares, párrafos, listas",
+            channels: "Fade & Position", energy: "soft", use: "Headlines, paragraphs, lists",
             "in": function (L, t) {
                 var p = pos(L);
                 SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Blink", "Flat");
@@ -63,7 +63,7 @@ var SSP = (function () {
             }
         },
         "Scale Pop": {
-            channels: "Fade & Scale", energy: "dinámico", use: "Íconos, chips, stickers, social",
+            channels: "Fade & Scale", energy: "dynamic", use: "Icons, chips, stickers, social",
             "in": function (L, t) {
                 SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Tick", "Flat");
                 return SSM.animate(T(L, "ADBE Scale"), t, [0, 0, 100], scl(L), "Arrive", "Pop");
@@ -74,7 +74,7 @@ var SSP = (function () {
             }
         },
         "Blur In": {
-            channels: "Blur & Fade", energy: "suave", use: "Fotos, fondos, momentos premium",
+            channels: "Blur & Fade", energy: "soft", use: "Photos, backgrounds, premium moments",
             "in": function (L, t) {
                 SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Glide", "Flat");
                 return SSM.animate(blur(L), t, 40, 0, "Sweep", "Settle");
@@ -85,7 +85,7 @@ var SSP = (function () {
             }
         },
         "Slide Land": {
-            channels: "Position", energy: "medio", use: "Imágenes y cards que entran desde fuera de cuadro",
+            channels: "Position", energy: "medium", use: "Images and cards entering from off-screen",
             "in": function (L, t) {
                 var p = pos(L), w = L.containingComp.width;
                 return SSM.animate(T(L, "ADBE Position"), t, [w + L.sourceRectAtTime(t, false).width, p[1]], p, "Sweep", "Land");
@@ -96,7 +96,7 @@ var SSP = (function () {
             }
         },
         "Rotate Settle": {
-            channels: "Fade & Rotate & Scale", energy: "medio", use: "Logos, badges, piezas con personalidad",
+            channels: "Fade & Rotate & Scale", energy: "medium", use: "Logos, badges, pieces with personality",
             "in": function (L, t) {
                 SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Blink", "Flat");
                 SSM.animate(T(L, "ADBE Rotate Z"), t, rot(L) - 12, rot(L), "Arrive", "Settle");
@@ -109,7 +109,7 @@ var SSP = (function () {
             }
         },
         "Squash Warp": {
-            channels: "Scale & Warp", energy: "dinámico", use: "Social, hype, transiciones con ritmo",
+            channels: "Scale & Warp", energy: "dynamic", use: "Social, hype, rhythmic transitions",
             "in": function (L, t) {
                 var s = scl(L);
                 SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Tick", "Flat");
@@ -122,19 +122,19 @@ var SSP = (function () {
             }
         },
         "Wipe Reveal": {
-            channels: "Mask", energy: "medio", use: "Barras, lower thirds, subrayados",
+            channels: "Mask", energy: "medium", use: "Bars, lower thirds, underlines",
             "in": function (L, t) { return SSM.animate(wipe(L), t, 100, 0, "Sweep", "Cruise"); },
             "out": function (L, t) { return SSM.animate(wipe(L), t, 0, 100, "Arrive", "Launch"); }
         },
         "Line Draw": {
-            channels: "Trim Path", energy: "medio", use: "Líneas, íconos de trazo, tracking HUD (solo shape layers)",
+            channels: "Trim Path", energy: "medium", use: "Lines, stroke icons, tracking HUD (shape layers only)",
             "in": function (L, t) { var p = trimEnd(L); return p ? SSM.animate(p, t, 0, 100, "Sweep", "Cruise") : t; },
             "out": function (L, t) { var p = trimEnd(L); return p ? SSM.animate(p, t, 100, 0, "Arrive", "Launch") : t; }
         }
     };
 
 
-    // ---------- Effects: loops continuos con controles editables (misma idea que los AC FX: controles + expresión) ----------
+    // ---------- Effects: continuous loops with editable controls (same idea as AC FX: controls + expression) ----------
     function slider(L, label, v) {
         var fx = L.property("ADBE Effect Parade");
         var e = fx.property(label) || fx.addProperty("ADBE Slider Control");
@@ -144,47 +144,47 @@ var SSP = (function () {
     }
     var FX = {
         "Float": {
-            channels: "Position", energy: "suave", use: "Íconos y cards en reposo, fondos vivos",
+            channels: "Position", energy: "soft", use: "Idle icons and cards, living backgrounds",
             build: function (L) {
-                var a = slider(L, "SS Float · Amplitud px", 12), f = slider(L, "SS Float · Frecuencia Hz", 0.5);
+                var a = slider(L, "SS Float · Amplitude px", 12), f = slider(L, "SS Float · Frequency Hz", 0.5);
                 T(L, "ADBE Position").expression = "var a=" + a + ", f=" + f + "; value + [0, Math.sin(time*f*Math.PI*2)*a];";
             }
         },
         "Wiggle Rotate": {
-            channels: "Rotate", energy: "medio", use: "Stickers, ilustraciones con personalidad",
+            channels: "Rotate", energy: "medium", use: "Stickers, illustrations with personality",
             build: function (L) {
-                var a = slider(L, "SS Wiggle · Ángulo", 6), f = slider(L, "SS Wiggle · Frecuencia", 2);
+                var a = slider(L, "SS Wiggle · Angle", 6), f = slider(L, "SS Wiggle · Frequency", 2);
                 T(L, "ADBE Rotate Z").expression = "wiggle(" + f + ", " + a + ");";
             }
         },
         "Pulse": {
-            channels: "Scale", energy: "medio", use: "CTAs, botones, llamadas de atención",
+            channels: "Scale", energy: "medium", use: "CTAs, buttons, attention grabbers",
             build: function (L) {
-                var a = slider(L, "SS Pulse · Intensidad %", 6), f = slider(L, "SS Pulse · Frecuencia Hz", 1);
+                var a = slider(L, "SS Pulse · Intensity %", 6), f = slider(L, "SS Pulse · Frequency Hz", 1);
                 T(L, "ADBE Scale").expression = "var k = 1 + Math.pow(Math.max(0, Math.sin(time*" + f + "*Math.PI*2)), 4)*" + a + "/100; [value[0]*k, value[1]*k];";
             }
         },
         "Jitter": {
-            channels: "Position & Rotate", energy: "dinámico", use: "Social, glitch, piezas de alta energía",
+            channels: "Position & Rotate", energy: "dynamic", use: "Social, glitch, high-energy pieces",
             build: function (L) {
-                var a = slider(L, "SS Jitter · Amplitud px", 8), f = slider(L, "SS Jitter · Fotogramas por salto", 2);
+                var a = slider(L, "SS Jitter · Amplitude px", 8), f = slider(L, "SS Jitter · Frames per jump", 2);
                 T(L, "ADBE Position").expression = "var n=" + f + "; var t=Math.floor(timeToFrames(time)/n)*n; seedRandom(t,true); value + random([-1,-1],[1,1])*" + a + ";";
                 T(L, "ADBE Rotate Z").expression = "var n=" + f + "; var t=Math.floor(timeToFrames(time)/n)*n; seedRandom(t+7,true); value + random(-2,2);";
             }
         }
     };
 
-    // ---------- Text: animadores de texto nativos (por carácter / palabra / línea) ----------
+    // ---------- Text: native text animators (per character / word / line) ----------
     function textAnimator(L, name, basedOn, shape) {
         var anims = L.property("ADBE Text Properties").property("ADBE Text Animators");
         var A = anims.addProperty("ADBE Text Animator");
         A.name = name;
         var sel = A.property("ADBE Text Selectors").addProperty("ADBE Text Selector");
         var adv = sel.property("ADBE Text Range Advanced");
-        adv.property("ADBE Text Range Type2").setValue(basedOn); // 1 caracteres · 3 palabras · 4 líneas
-        adv.property("ADBE Text Range Shape").setValue(shape || 2); // 2 = Ramp Up (revelado suave)
-        // Revelado: rampa de ancho W; con Ramp Up lo que queda después del End está 100 % afectado (oculto)
-        // y lo anterior al Start 0 %. Animando Offset de -W a 100 se revela todo de izquierda a derecha.
+        adv.property("ADBE Text Range Type2").setValue(basedOn); // 1 characters · 3 words · 4 lines
+        adv.property("ADBE Text Range Shape").setValue(shape || 2); // 2 = Ramp Up (soft reveal)
+        // Reveal: ramp of width W; with Ramp Up everything after End is 100% affected (hidden)
+        // and everything before Start 0%. Animating Offset from -W to 100 reveals left to right.
         var W = 35;
         sel.property("ADBE Text Percent Start").setValue(0);
         sel.property("ADBE Text Percent End").setValue(W);
@@ -194,7 +194,7 @@ var SSP = (function () {
     function isText(L) { return L.property("ADBE Text Properties") !== null; }
     var TX = {
         "Chars Rise": {
-            channels: "Text · Position & Fade (carácter)", energy: "medio", use: "Titulares cortos, nombres, kickers",
+            channels: "Text · Position & Fade (char)", energy: "medium", use: "Short headlines, names, kickers",
             "in": function (L, t) {
                 var a = textAnimator(L, "SS Chars Rise", 1, 2);
                 a.props.addProperty("ADBE Text Position 3D").setValue([0, 50, 0]);
@@ -203,7 +203,7 @@ var SSP = (function () {
             }
         },
         "Words Fade Up": {
-            channels: "Text · Position & Fade (palabra)", energy: "suave", use: "Frases, subtítulos, citas",
+            channels: "Text · Position & Fade (word)", energy: "soft", use: "Phrases, captions, quotes",
             "in": function (L, t) {
                 var a = textAnimator(L, "SS Words Fade Up", 3, 2);
                 a.props.addProperty("ADBE Text Position 3D").setValue([0, 24, 0]);
@@ -212,7 +212,7 @@ var SSP = (function () {
             }
         },
         "Blur Words": {
-            channels: "Text · Blur & Fade (palabra)", energy: "suave", use: "Momentos premium, intros calmadas",
+            channels: "Text · Blur & Fade (word)", energy: "soft", use: "Premium moments, calm intros",
             "in": function (L, t) {
                 var a = textAnimator(L, "SS Blur Words", 3, 2);
                 a.props.addProperty("ADBE Text Blur").setValue([18, 18]);
@@ -221,7 +221,7 @@ var SSP = (function () {
             }
         },
         "Tracking Settle": {
-            channels: "Text · Tracking & Fade", energy: "medio", use: "Títulos en mayúsculas, logotipos tipográficos",
+            channels: "Text · Tracking & Fade", energy: "medium", use: "All-caps titles, typographic logos",
             "in": function (L, t) {
                 var a = textAnimator(L, "SS Tracking Settle", 1, 1);
                 var tr = a.props.addProperty("ADBE Text Tracking Amount");
@@ -229,13 +229,13 @@ var SSP = (function () {
                 a.sel.property("ADBE Text Percent End").setValue(100);
                 a.start.setValue(0);
                 SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Glide", "Flat");
-                // el selector cubre todo; anima el tracking de 60 → 0 y la opacidad del animador 0 → 100
+                // the selector covers everything; animate tracking 60 → 0 and animator opacity 0 → 100
                 SSM.animate(tr, t, 60, 0, "Stage", "Settle");
                 return SSM.animate(a.props.property("ADBE Text Opacity"), t, 0, 100, "Arrive", "Flat");
             }
         },
         "Chars Pop": {
-            channels: "Text · Scale (carácter)", energy: "dinámico", use: "Social, hype, números grandes",
+            channels: "Text · Scale (char)", energy: "dynamic", use: "Social, hype, big numbers",
             "in": function (L, t) {
                 var a = textAnimator(L, "SS Chars Pop", 1, 2);
                 a.props.addProperty("ADBE Text Scale 3D").setValue([0, 0, 100]);
@@ -244,10 +244,10 @@ var SSP = (function () {
             }
         }
     };
-    // Salida común para texto: fade + leve subida (Glide/Launch)
+    // Shared text exit: fade + slight rise (Glide/Launch)
     for (var tk in TX) if (TX.hasOwnProperty(tk)) TX[tk]["out"] = P["Fade Up"]["out"];
 
-    // ---------- Recetas: comportamientos cosechados → reproducidos con keyframes/expresiones propias ----------
+    // ---------- Recipes: harvested behaviors → reproduced with our own keyframes/expressions ----------
     var RECIPES = (function () {
         var f = new File(SS_ROOT + "/library/recipes.json");
         if (!f.exists) return {};
@@ -261,7 +261,7 @@ var SSP = (function () {
         if (spec.token) { for (var i = 0; i < SSM.tokens().easings.length; i++) { var e = SSM.tokens().easings[i]; if (e.name === spec.token && e.bezier) return e.bezier; } }
         return spec.bezier;
     }
-    // valor de arranque relativo al reposo de la capa (no copia posiciones absolutas del preset)
+    // start value relative to the layer's rest value (does not copy the preset's absolute positions)
     function relFrom(ch, spec, rest) {
         var f = spec.from, t = spec.to, out = [], i;
         if (!(rest instanceof Array)) {
@@ -289,7 +289,7 @@ var SSP = (function () {
         }
     }
     function playLoop(L, loop) {
-        var k = slider(L, "SS Receta · Intensidad %", 100);
+        var k = slider(L, "SS Recipe · Intensity %", 100);
         for (var ch in loop) {
             if (!loop.hasOwnProperty(ch) || !CH[ch]) continue;
             var o = loop[ch], parts = [];
@@ -311,21 +311,21 @@ var SSP = (function () {
         recipeIds: function () { var a = []; for (var k in RECIPES) if (RECIPES.hasOwnProperty(k)) a.push(k); return a; },
         applyRecipe: function (L, id, phase) {
             var r = RECIPES[id];
-            if (!r) throw new Error("Receta no existe: " + id);
+            if (!r) throw new Error("Recipe not found: " + id);
             phase = phase || "both";
             if (r.kind === "fx" || r.phases.loop) { playLoop(L, r.phases.loop || {}); }
             else {
                 if ((phase === "in" || phase === "both") && r.phases["in"]) playPhase(L, r.phases["in"], L.inPoint, false);
                 if ((phase === "out" || phase === "both") && r.phases.out) playPhase(L, r.phases.out, L.outPoint, true);
             }
-            L.comment = "SS receta: " + id + (r.name ? " (" + r.name + ")" : "");
+            L.comment = "SS recipe: " + id + (r.name ? " (" + r.name + ")" : "");
         },
         text: TX,
         textNames: function () { var a = []; for (var k in TX) if (TX.hasOwnProperty(k)) a.push(k); return a; },
         applyText: function (L, name, phase, t0) {
             var pr = TX[name];
-            if (!pr) throw new Error("Preset de texto no existe: " + name);
-            if (!isText(L)) throw new Error("La capa no es de texto: " + L.name);
+            if (!pr) throw new Error("Text preset not found: " + name);
+            if (!isText(L)) throw new Error("Layer is not a text layer: " + L.name);
             if (phase === "in" || phase === "both") pr["in"](L, t0 === undefined ? L.inPoint : t0);
             if (phase === "out" || phase === "both") pr["out"](L, L.outPoint - SSM.seconds("Arrive"));
             L.comment = "SS text: " + name + " (" + pr.channels + ", " + pr.energy + ")";
@@ -334,15 +334,15 @@ var SSP = (function () {
         effectNames: function () { var a = []; for (var k in FX) if (FX.hasOwnProperty(k)) a.push(k); return a; },
         applyFx: function (L, name) {
             var f = FX[name];
-            if (!f) throw new Error("Efecto no existe: " + name);
+            if (!f) throw new Error("Effect not found: " + name);
             f.build(L);
             L.comment = (L.comment ? L.comment + " | " : "") + "SS FX: " + name;
         },
         names: function () { var a = []; for (var k in P) if (P.hasOwnProperty(k)) a.push(k); return a; },
-        // Aplica un preset a una capa. Si phase es "both", la salida termina en el outPoint de la capa.
+        // Applies a preset to a layer. With phase "both", the exit ends at the layer outPoint.
         apply: function (L, name, phase, t0) {
             var pr = P[name];
-            if (!pr) throw new Error("Preset no existe: " + name);
+            if (!pr) throw new Error("Preset not found: " + name);
             if (phase === "in" || phase === "both") pr["in"](L, t0 === undefined ? L.inPoint : t0);
             if (phase === "out" || phase === "both") {
                 var dur = SSM.seconds("Arrive");

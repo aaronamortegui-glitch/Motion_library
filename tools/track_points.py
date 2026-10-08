@@ -1,7 +1,7 @@
-"""Tracking de regiones con OpenCV (KLT) → JSON con posición/escala/rotación por frame para AE.
+"""Region tracking with OpenCV (KLT) → JSON with per-frame position/scale/rotation for AE.
 
-Uso: python track_points.py <video> <salida.json> [--debug video_debug.mp4]
-Las regiones se definen abajo en píxeles del video (centro x, y, radio).
+Usage: python track_points.py <video> <output.json> [--debug video_debug.mp4]
+Regions are defined below in video pixels (center x, y, radius).
 """
 import argparse
 import json
@@ -54,7 +54,7 @@ def main():
         s_acc, r_acc = 1.0, 0.0
         n0 = len(pts)
         for i in range(1, len(grays)):
-            if pts is None or len(pts) < 4:  # re-sembrar si se perdieron puntos
+            if pts is None or len(pts) < 4:  # re-seed if points were lost
                 pts = seed(grays[i - 1], int(anchor[0]), int(anchor[1]), r)
                 if pts is None:
                     pos.append(anchor.tolist()); scale.append(s_acc); rot.append(r_acc); conf.append(0.0)

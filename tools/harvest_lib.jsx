@@ -1,5 +1,5 @@
-// SSH — utilidades de cosecha de comportamiento (solo lectura) de capas con presets de Animation Composer.
-// SSH.harvestLayer(L) → objeto JSON-string con receta (controles MHAC), marcadores, efectos y curvas muestreadas.
+// SSH — behavior harvesting utilities (read-only) for layers with Animation Composer presets.
+// SSH.harvestLayer(L) → JSON-string object with recipe (MHAC controls), markers, effects and sampled curves.
 var SSH = (function () {
     function esc(s) { return String(s).split("\\").join("\\\\").split('"').join('\\"').split("\n").join(" ").split("\r").join(" "); }
     function num(v) {
@@ -21,7 +21,7 @@ var SSH = (function () {
             } else animatedProps(pr, nm, out);
         }
     }
-    // Devuelve {codes:[...], json:"..."} o null si la capa no tiene preset AC
+    // Returns {codes:[...], json:"..."} or null if the layer has no AC preset
     function harvestLayer(L, extra) {
         var comp = L.containingComp, fd = comp.frameDuration, nF = Math.round(comp.duration / fd);
         var fx = L.property("ADBE Effect Parade");

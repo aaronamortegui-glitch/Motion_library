@@ -1,10 +1,10 @@
-"""Analiza previews .webm de Animation Composer y reconstruye las curvas de movimiento.
+"""Analyzes Animation Composer .webm previews and reconstructs the motion curves.
 
-Por frame mide sobre el elemento (fondo negro): visibilidad (opacidad/área), centroide X/Y,
-escala (sqrt del área del bbox) y rotación (momentos). Luego detecta las fases animadas,
-normaliza el progreso del canal dominante y lo compara con las curvas de Superside.
+Per frame it measures the element (black background): visibility (opacity/area), X/Y centroid,
+scale (sqrt of the bbox area) and rotation (moments). Then it detects the animated phases,
+normalizes the progress of the dominant channel and compares it with the Superside curves.
 
-Uso: python -I analyze_previews.py <webm|carpeta> [--limit N] [--out archivo.json] [--plot carpeta]
+Usage: python -I analyze_previews.py <webm|folder> [--limit N] [--out file.json] [--plot folder]
 """
 import argparse
 import json
@@ -16,7 +16,7 @@ import cv2
 import numpy as np
 
 TOKENS = json.loads((Path(__file__).resolve().parent.parent / "tokens" / "superside_motion_tokens.json").read_text(encoding="utf-8"))
-# Familias genéricas para describir la curva de la referencia, independientes de nuestros tokens
+# Generic families to describe the reference curve, independent of our tokens
 FAMILIES = {
     "linear": (0, 0, 1, 1),
     "ease-in": (0.5, 0, 1, 1),
@@ -25,7 +25,7 @@ FAMILIES = {
     "expo-out": (0.05, 0.9, 0.2, 1),
     "expo-in": (0.7, 0, 0.95, 0.2),
 }
-# Nuestros tokens (sin Pop: el overshoot se detecta aparte)
+# Our tokens (without Pop: overshoot is detected separately)
 CURVES = {e["name"]: tuple(e["bezier"]) for e in TOKENS["easings"] if e["name"] != "Pop"}
 DURATIONS = [(d["name"], d["frames"]) for d in TOKENS["durations"]]
 
@@ -62,7 +62,7 @@ def measure(frame, thr=0.08):
     if mask.sum() < 4:
         return dict(vis=vis, x=np.nan, y=np.nan, scale=np.nan, rot=np.nan, sharp=np.nan, aspect=np.nan)
     lap = cv2.Laplacian(frame, cv2.CV_32F)
-    sharp = float(np.abs(lap[mask]).mean() / (frame[mask].mean() or 1))  # nitidez independiente de opacidad
+    sharp = float(np.abs(lap[mask]).mean() / (frame[mask].mean() or 1))  # sharpness independent of opacity
     ys, xs = np.nonzero(mask)
     w = xs.max() - xs.min() + 1
     h = ys.max() - ys.min() + 1
@@ -76,7 +76,7 @@ _ORB = cv2.ORB_create(nfeatures=800, fastThreshold=5)
 
 
 def register(frames, vis):
-    """Afín de cada frame respecto al frame más visible (estado asentado): tx, ty, escala, rotación, aspecto."""
+    """Affine of each frame relative to the most visible frame (settled state): tx, ty, scale, rotation, aspect."""
     ref_i = int(np.argmax(vis))
     up = lambda f: cv2.resize((f * 255).astype(np.uint8), None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
     kr, dr = _ORB.detectAndCompute(up(frames[ref_i]), None)
@@ -98,7 +98,7 @@ def register(frames, vis):
             continue
         a, b, c, dd = A[0, 0], A[0, 1], A[1, 0], A[1, 1]
         sx, sy = math.hypot(a, c), math.hypot(b, dd)
-        # frame→ref; invertimos signos para tener ref→frame en unidades de frame
+        # frame→ref; invert signs to get ref→frame in frame units
         out[i] = [-A[0, 2] / 2, -A[1, 2] / 2, 1 / max((sx + sy) / 2, 1e-6), -math.degrees(math.atan2(c, a)), sx / max(sy, 1e-6)]
     return out
 
@@ -118,7 +118,7 @@ def segments(active, min_len=2):
 
 
 def fit_curve(prog, samples=None):
-    """Compara un progreso 0→1 con un set de curvas; devuelve la más cercana y el overshoot."""
+    """Compares a 0→1 progress with a set of curves; returns the closest one and the overshoot."""
     samples = samples or CURVE_SAMPLES
     xs = np.linspace(0, 1, len(prog))
     resampled = np.interp(np.linspace(0, 1, 200), xs, prog)
@@ -128,7 +128,7 @@ def fit_curve(prog, samples=None):
     return best, scores, overshoot
 
 
-# Cambio total mínimo en una fase para considerar que el canal se anima
+# Minimum total change in a phase to consider the channel animated
 CHANNEL_MIN = {"opacity": 0.3, "position": 0.03, "scale": 0.08, "rotation": 0.1, "blur": 0.3, "warp": 0.12}
 
 
@@ -142,7 +142,7 @@ def analyze(path):
         return {"file": path.name, "error": "too few frames"}
     ms = [measure(f) for f in frames]
     ch = {k: np.array([m[k] for m in ms], dtype=float) for k in ("vis", "x", "y", "scale", "rot", "sharp", "aspect")}
-    for k in ch:  # rellenar NaN (elemento invisible) con vecinos
+    for k in ch:  # fill NaN (invisible element) with neighbors
         a = ch[k]
         if np.isnan(a).all():
             a[:] = 0
@@ -152,9 +152,9 @@ def analyze(path):
             a[~good] = np.interp(idx[~good], idx[good], a[good])
     reg = register(frames, ch["vis"])
     ok = ~np.isnan(reg[:, 0])
-    if ok.sum() >= 3:  # el registro afín manda; los momentos quedan como respaldo
+    if ok.sum() >= 3:  # affine registration wins; moments remain as fallback
         idx = np.arange(len(frames))
-        # posición = centroide (invariante a escala centrada); el afín aporta escala/rotación/aspecto
+        # position = centroid (invariant to centered scale); the affine provides scale/rotation/aspect
         for j, k in ((2, "scale"), (3, "rot"), (4, "aspect")):
             v = np.interp(idx, idx[ok], reg[ok, j])
             ch[k] = v * ch["scale"].max() if k == "scale" else v
@@ -164,7 +164,7 @@ def analyze(path):
         drot[np.abs(drot) > 40] = 0
         ch["rot"] = np.concatenate([[rot[0]], rot[0] + np.cumsum(drot)])
     h, w = frames[0].shape
-    norm = {  # cambios por frame normalizados a tamaño de frame
+    norm = {  # per-frame changes normalized to frame size
         "opacity": np.abs(np.diff(ch["vis"])) / (ch["vis"].max() or 1),
         "position": np.hypot(np.diff(ch["x"]), np.diff(ch["y"])) / w,
         "scale": np.abs(np.diff(ch["scale"])) / (ch["scale"].max() or 1),
@@ -172,9 +172,9 @@ def analyze(path):
         "blur": np.abs(np.diff(ch["sharp"])) / (ch["sharp"].max() or 1),
         "warp": np.abs(np.diff(np.log(np.clip(ch["aspect"], 1e-3, None)))),
     }
-    # warp solo cuenta si la relación de aspecto cambia sin rotación que lo explique
+    # warp only counts if the aspect ratio changes without rotation to explain it
     norm["warp"] = np.where(norm["rotation"] > 0.01, 0, norm["warp"])
-    # con poca visibilidad la máscara es ruido: ignorar geometría/blur/warp ahí
+    # with low visibility the mask is noise: ignore geometry/blur/warp there
     valid = ch["vis"] > 0.35 * (ch["vis"].max() or 1)
     pair = valid[1:] & valid[:-1]
     for k in ("position", "scale", "rotation", "blur", "warp"):
@@ -183,12 +183,12 @@ def analyze(path):
     active = total > 0.004
     phases = []
     for s, e in segments(active):
-        # canal dominante en esta fase
+        # dominant channel in this phase
         dom = max(norm, key=lambda k: norm[k][s:e].sum())
         src = {"opacity": ch["vis"], "position": np.hypot(ch["x"] - ch["x"][e], ch["y"] - ch["y"][e]),
                "scale": ch["scale"], "rotation": ch["rot"], "blur": ch["sharp"], "warp": ch["aspect"]}[dom][s:e + 1]
         a, b = src[0], src[-1]
-        if dom == "position":  # distancia al punto final → progreso
+        if dom == "position":  # distance to end point → progress
             prog = 1 - src / (src[0] or 1)
         else:
             prog = (src - a) / ((b - a) or 1)
@@ -211,7 +211,7 @@ def analyze(path):
     return {
         "file": path.name, "fps": round(fps, 2), "frames": len(frames), "size": [w, h],
         "category": category, "phases": phases, "energy": round(energy, 4),
-        "energy_class": "dinámico" if energy > 0.08 else "medio" if energy > 0.03 else "suave",
+        "energy_class": "dynamic" if energy > 0.08 else "medium" if energy > 0.03 else "soft",
         "has_bounce": any(p["overshoot"] >= 0.05 for p in phases),
     }
 
@@ -248,7 +248,7 @@ def main():
     for i, f in enumerate(files):
         try:
             r = analyze(f)
-        except Exception as e:  # un preview roto no debe parar el lote
+        except Exception as e:  # a broken preview must not stop the batch
             r = {"file": f.name, "error": str(e)}
         results.append(r)
         if args.plot and "error" not in r:

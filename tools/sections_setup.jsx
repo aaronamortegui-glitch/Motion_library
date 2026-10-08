@@ -1,7 +1,7 @@
-// Crea una comp por sección del panel de Animation Composer (Motion Presets + Effects),
-// cada una con 8 capas-slot. El usuario aplica un preset distinto de esa carpeta a cada slot
-// (seleccionar slot → doble clic en la miniatura) y renombra el slot con el nombre del preset si quiere.
-// Luego harvest.jsx cosecha receta + curvas de todas las comps "AC_".
+// Creates one comp per Animation Composer panel section (Motion Presets + Effects),
+// each with 8 slot layers. The user applies a different preset from that folder to each slot
+// (select slot → double-click the thumbnail) and optionally renames the slot after the preset.
+// Then harvest.jsx harvests recipe + curves from all "AC_" comps.
 (function () {
     var SECTIONS = {
         "2D": ["Blur & Fade", "Blur & Fade & Warp", "Fade", "Fade & Position", "Fade & Position & Scale", "Fade & Rotate",
@@ -43,5 +43,5 @@
         }
     }
     proj.save();
-    return made + " comps de sección creadas en la carpeta 'AC Sections'";
+    return made + " section comps created in the 'AC Sections' folder";
 })();

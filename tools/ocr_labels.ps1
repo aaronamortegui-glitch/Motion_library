@@ -1,7 +1,7 @@
-# OCR de los recortes de etiqueta que guarda ac_driver.py → nombre real de cada preset de Animation Composer.
-# Usa el OCR integrado de Windows (Windows.Media.Ocr), sin dependencias.
-# Uso (Windows PowerShell 5.1):  powershell -ExecutionPolicy Bypass -File tools/ocr_labels.ps1
-# Salida: research/harvest/station/labels.csv  (archivo, sección, código, nombre)
+# OCR of the label crops saved by ac_driver.py → real name of each Animation Composer preset.
+# Uses the built-in Windows OCR (Windows.Media.Ocr), no dependencies.
+# Usage (Windows PowerShell 5.1):  powershell -ExecutionPolicy Bypass -File tools/ocr_labels.ps1
+# Output: research/harvest/station/labels.csv  (file, section, code, name)
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $dir = Join-Path $root "research\harvest\station\labels"
@@ -16,7 +16,7 @@ $asTask = ([System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object {
 function Await($op, [Type]$t) { $task = $asTask.MakeGenericMethod($t).Invoke($null, @($op)); $task.Wait() | Out-Null; $task.Result }
 
 $engine = [Windows.Media.Ocr.OcrEngine]::TryCreateFromUserProfileLanguages()
-if (-not $engine) { throw "No hay motor OCR para el idioma del perfil de Windows." }
+if (-not $engine) { throw "No OCR engine for the Windows profile language." }
 
 $rows = foreach ($f in Get-ChildItem $dir -Filter *.png) {
     $file = Await ([Windows.Storage.StorageFile]::GetFileFromPathAsync($f.FullName)) ([Windows.Storage.StorageFile])
@@ -29,4 +29,4 @@ $rows = foreach ($f in Get-ChildItem $dir -Filter *.png) {
     [pscustomobject]@{ file = $f.Name; section = $parts[0]; code = $parts[-1]; name = ($res.Text -replace '\s+', ' ').Trim() }
 }
 $rows | Export-Csv -Path $out -NoTypeInformation -Encoding UTF8
-"OCR: $(@($rows).Count) etiquetas → $out"
+"OCR: $(@($rows).Count) labels → $out"

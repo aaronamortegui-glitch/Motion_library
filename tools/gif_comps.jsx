@@ -1,5 +1,5 @@
-// Crea una comp chica por preset (carpeta "GIF Previews") para renderizar los GIF del visualizador.
-// Nombre: GIF__<tipo>__<preset>  (tipo: motion | fx | text)
+// Creates a small comp per preset ("GIF Previews" folder) to render the viewer GIFs.
+// Name: GIF__<kind>__<preset>  (kind: motion | fx | text)
 #include "ss_presets.jsx"
 var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).parent.parent.fsName.split("\\").join("/");
 (function () {
@@ -75,7 +75,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         SSP.applyText(text(c3, sm[0], sm[1], sm[2]), tx[d], "both", 0.2);
         made.push(c3.name);
     }
-    // Recetas cosechadas (reproducidas con nuestra librería, no con el plugin)
+    // Harvested recipes (reproduced with our library, not with the plugin)
     var rids = SSP.recipeIds();
     for (var r = 0; r < rids.length; r++) {
         var c4 = comp("recipe", rids[r], 3);
@@ -89,5 +89,5 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     }
     var lf = new File(ROOT + "research/gif_comps.txt"); lf.encoding = "UTF-8"; lf.open("w"); lf.write(made.join("\n") + "\n"); lf.close();
     proj.save();
-    return made.length + " comps GIF (lista en research/gif_comps.txt)";
+    return made.length + " GIF comps (list in research/gif_comps.txt)";
 })();

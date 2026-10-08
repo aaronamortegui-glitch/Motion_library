@@ -1,4 +1,4 @@
-// Comp SS_Presets_Showcase: un ejemplo por preset (in + out), con etiqueta de canales y energía.
+// SS_Presets_Showcase comp: one example per preset (in + out), labeled with channels and energy.
 #include "ss_presets.jsx"
 var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).parent.parent.fsName.split("\\").join("/");
 (function () {
@@ -49,7 +49,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         SSP.apply(L, names[n], "both");
         var pr = SSP.presets[names[n]];
         label(names[n], x, y + 150, 30, PAL.cloud);
-        label(pr.channels + " · " + pr.energy, x, y + 190, 20, pr.energy === "dinámico" ? PAL.coral : pr.energy === "medio" ? PAL.spark : PAL.grey);
+        label(pr.channels + " · " + pr.energy, x, y + 190, 20, pr.energy === "dynamic" ? PAL.coral : pr.energy === "medium" ? PAL.spark : PAL.grey);
     }
     proj.save();
     return "showcase ok: " + names.length + " presets";

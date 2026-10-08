@@ -1,6 +1,6 @@
-// Crea la comp CALIBRATION con una capa S-mark por preset a probar.
-// El usuario aplica a cada capa el preset de Animation Composer que indica su nombre;
-// después calibration_dump.jsx vuelca keyframes/eases de todas para calibrar el analizador.
+// Creates the CALIBRATION comp with one S-mark layer per preset to test.
+// The user applies to each layer the Animation Composer preset named by the layer;
+// then calibration_dump.jsx dumps keyframes/eases from all of them to calibrate the analyzer.
 var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).parent.parent.fsName.split("\\").join("/");
 (function () {
     var ROOT = SS_ROOT + "/";
@@ -12,11 +12,11 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         "2D Transitions / Fade & Position / Overshoot Fade & Position 1",
         "2D Transitions / Blur & Fade / Gaussian Blur & Fade Eased 1",
         "2D Transitions / Blur & Fade & Warp / Fast Blur & Fade & Warp 1",
-        "2D Transitions / Position & Scale / (primero de la carpeta)",
-        "2D Transitions / Rotate & Scale / (primero de la carpeta)",
-        "2D Transitions / Scale / (primero de la carpeta)",
-        "3D Transitions / Fade & Rotate / (primero de la carpeta)",
-        "Effects / Long Shadow & Extrude / (primero de la carpeta)"
+        "2D Transitions / Position & Scale / (first in folder)",
+        "2D Transitions / Rotate & Scale / (first in folder)",
+        "2D Transitions / Scale / (first in folder)",
+        "3D Transitions / Fade & Rotate / (first in folder)",
+        "Effects / Long Shadow & Extrude / (first in folder)"
     ];
     var proj = app.project;
     var comp = proj.items.addComp("CALIBRATION", 1920, 1080, 1, 3, 30);
@@ -28,7 +28,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var bg = comp.layers.addSolid([0.039, 0.129, 0.122], "BG Pine", 1920, 1080, 1);
     bg.locked = true;
     for (var p = 0; p < PRESETS.length; p++) {
-        // capa simple y limpia (sin keys) para que solo existan las del preset
+        // simple, clean layer (no keys) so only the preset's keys exist
         var L = comp.layers.addShape();
         L.name = ("0" + (p + 1)).slice(-2) + " · " + PRESETS[p];
         var g = L.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
@@ -42,5 +42,5 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     }
     comp.openInViewer();
     proj.save();
-    return "CALIBRATION creada con " + PRESETS.length + " capas";
+    return "CALIBRATION created with " + PRESETS.length + " layers";
 })();

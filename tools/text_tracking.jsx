@@ -1,4 +1,4 @@
-// 04_Text_Tracking_70s: pruebas de animación de texto (fijo y trackeado) sobre el video AI.
+// 04_Text_Tracking_70s: text animation tests (fixed and tracked) over the AI video.
 #include "ss_presets.jsx"
 var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).parent.parent.fsName.split("\\").join("/");
 (function () {
@@ -19,7 +19,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     if (folder) c.parentFolder = folder;
     c.layers.add(vid).name = "Plate · Aaron 70s";
 
-    // Nulls de tracking
+    // Tracking nulls
     var N = {}, fd = 1 / TRK.fps;
     for (var name in TRK.tracks) {
         if (!TRK.tracks.hasOwnProperty(name)) continue;
@@ -51,21 +51,21 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         v.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").setValue(hex(col));
         return L;
     }
-    // pega una capa a un null conservando un offset (en coords del null)
+    // sticks a layer to a null keeping an offset (in the null's coords)
     function stick(L, nullName, dx, dy) { L.parent = N[nullName]; tr(L, "ADBE Position").setValue([50 + dx, 50 + dy]); }
 
     var log = [];
-    // a) Kicker fijo — Tracking Settle
+    // a) Fixed kicker — Tracking Settle
     var kick = text("Kicker", "SUPERSIDE MOTION LAB", SANS, 30, PAL.spark, null, 200);
     tr(kick, "ADBE Position").setValue([110, 110]);
     SSP.applyText(kick, "Tracking Settle", "in", 0.2);
 
-    // b) Título en la escena (pegado al papel tapiz → parallax de fondo) — Chars Rise
+    // b) Title in the scene (stuck to the wallpaper → background parallax) — Chars Rise
     var title = text("Title (wallpaper)", "Aaron, 1974", SERIF, 92, PAL.cloud);
     stick(title, "wallpaper", 40, 300);
     SSP.applyText(title, "Chars Rise", "in", 0.5);
 
-    // c) Etiqueta en la cara — Chars Pop + chip
+    // c) Label on the face — Chars Pop + chip
     var faceChip = pill("Face chip", 260, 58, PAL.cloud);
     var faceTxt = text("Face label", "The host", SANS, 30, PAL.pine, ParagraphJustification.CENTER_JUSTIFY);
     faceTxt.parent = faceChip; tr(faceTxt, "ADBE Position").setValue([0, 10]);
@@ -73,7 +73,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     SSP.apply(faceChip, "Scale Pop", "in", 1.0);
     SSP.applyText(faceTxt, "Chars Pop", "in", 1.1);
 
-    // d) ON AIR en el micrófono — Scale Pop + Pulse
+    // d) ON AIR on the microphone — Scale Pop + Pulse
     var air = pill("On air chip", 170, 50, PAL.coral);
     var airTxt = text("On air", "ON AIR", SANS, 26, PAL.pine, ParagraphJustification.CENTER_JUSTIFY, 80);
     airTxt.parent = air; tr(airTxt, "ADBE Position").setValue([0, 9]);
@@ -81,7 +81,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     SSP.apply(air, "Scale Pop", "in", 1.4);
     SSP.applyFx(air, "Pulse");
 
-    // e) Lower third fijo — Wipe Reveal + Words Fade Up
+    // e) Fixed lower third — Wipe Reveal + Words Fade Up
     var bar = pill("Lower third bar", 760, 96, PAL.pine);
     tr(bar, "ADBE Position").setValue([110 + 380, 900]);
     SSP.apply(bar, "Wipe Reveal", "in", 1.8);
@@ -92,16 +92,16 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     tr(lt2, "ADBE Position").setValue([150, 935]);
     SSP.applyText(lt2, "Words Fade Up", "in", 2.3);
 
-    // f) Subtítulo — Blur Words, centrado abajo
+    // f) Caption — Blur Words, centered at the bottom
     var sub = text("Caption", "Tracking test: text that lives inside the shot", SANS_R, 34, PAL.cloud, ParagraphJustification.CENTER_JUSTIFY);
     tr(sub, "ADBE Position").setValue([c.width / 2, 1020]);
     SSP.applyText(sub, "Blur Words", "in", 3.0);
 
-    // g) Textura: grano y light leak de los asset packs de Animation Composer
+    // g) Texture: grain and light leak from the Animation Composer asset packs
     var AC = $.getenv("LOCALAPPDATA").split("\\").join("/") + "/MisterHorse/ProductManager/AssetPacks/";
     function pack(dir, mask, mode, op, nm) {
         var hits = Folder(AC + dir).getFiles(mask);
-        if (!hits.length) { log.push("sin asset " + mask); return; }
+        if (!hits.length) { log.push("missing asset " + mask); return; }
         var it = findItem(hits[0].displayName) || proj.importFile(new ImportOptions(hits[0]));
         it.mainSource.loop = 10;
         var L = c.layers.add(it); L.name = nm; L.blendingMode = mode;
