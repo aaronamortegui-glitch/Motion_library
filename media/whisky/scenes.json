@@ -250,13 +250,13 @@
     },
     {
      "type": "behind",
-     "text": "Chairman",
+     "text": "Corner Office",
      "anchor": "TRK lamp",
      "offset": [
       450,
       -40
      ],
-     "size": 330,
+     "size": 250,
      "t0": 0.2,
      "opacity": 68
     },
@@ -367,13 +367,13 @@
     },
     {
      "type": "behind",
-     "text": "Dealmaker",
+     "text": "Expense Account",
      "anchor": "TRK lamp",
      "offset": [
       420,
       -30
      ],
-     "size": 300,
+     "size": 220,
      "t0": 0.2,
      "opacity": 68
     },

@@ -107,11 +107,46 @@ var SSM = (function () {
             this.animateRaw(prop, t0, t0 + dur, v0, v1, ae);
             return t0 + dur;
         },
+        // Multi-stop animation: stops = [{ v: value, frames: n, ease: "Settle" }, ...] starting from v0 at t0.
+        // Consecutive segments share keys, so uneven frame spacing creates organic accelerations and decelerations.
+        animateStops: function (prop, t0, v0, stops, fps) {
+            var t = t0, v = v0, rate = fps || T.fps;
+            for (var i = 0; i < stops.length; i++) {
+                var st = stops[i], t1 = t + st.frames / rate;
+                this.animateRaw(prop, t, t1, v, st.v, find(T.easings, st.ease || "Cruise").ae);
+                t = t1; v = st.v;
+            }
+            return t;
+        },
+        // Seeded organic rhythm from v0 to v1 over ~totalFrames: 3–5 uneven segments, varied speeds, short holds.
+        organicStops: function (v0, v1, totalFrames, seed, segments) {
+            var x = (seed || 1) % 2147483647; if (x <= 0) x += 2147483646;
+            function rnd() { x = (x * 16807) % 2147483647; return (x - 1) / 2147483646; }
+            var n = segments || (3 + Math.floor(rnd() * 3)), w = [], sum = 0, i;
+            for (i = 0; i < n; i++) { w.push(0.35 + rnd()); sum += w[i]; }
+            var eases = ["Land", "Cruise", "Settle"], stops = [], acc = 0, used = 0;
+            for (i = 0; i < n; i++) {
+                acc += w[i] / sum;
+                var frac = i === n - 1 ? 1 : acc;
+                var speedJitter = 0.55 + rnd() * 1.1;                    // some strokes rush, others crawl
+                var frames = Math.max(2, Math.round(totalFrames * (w[i] / sum) * speedJitter));
+                var v = v0 + (v1 - v0) * frac;
+                stops.push({ v: v, frames: frames, ease: eases[Math.floor(rnd() * eases.length)] });
+                used += frames;
+                if (i < n - 1 && rnd() < 0.45) stops.push({ v: v, frames: 2 + Math.floor(rnd() * 3), ease: "Flat" });  // micro-hold
+            }
+            return stops;
+        },
         animateRaw: function (prop, t0, t1, v0, v1, ae) {
             v1 = clampTo(prop, v1); v0 = clampTo(prop, v0);
             prop.setValueAtTime(t0, v0);
             prop.setValueAtTime(t1, v1);
             var k0 = prop.nearestKeyIndex(t0), k1 = prop.nearestKeyIndex(t1);
+            if (ae.out === "linear") {   // linear segment (e.g. Flat holds inside multi-stop animations)
+                prop.setInterpolationTypeAtKey(k0, prop.keyInInterpolationType(k0), KeyframeInterpolationType.LINEAR);
+                prop.setInterpolationTypeAtKey(k1, KeyframeInterpolationType.LINEAR, prop.keyOutInterpolationType(k1));
+                return;
+            }
             var avg = avgSpeed(v0, v1, t1 - t0, isSpatial(prop));
             prop.setTemporalEaseAtKey(k0, prop.keyInTemporalEase(k0), eases(ae.out, avg));
             prop.setTemporalEaseAtKey(k1, eases(ae["in"], avg), prop.keyOutTemporalEase(k1));

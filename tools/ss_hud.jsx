@@ -80,7 +80,7 @@ var SSHUD = (function () {
             pathGroup(line, 'var a = thisComp.layer("' + o.anchor + '"); var p = a.toComp(a.transform.anchorPoint);' +
                 " var e = [" + dx * 0.55 + "," + dy + "], f = [" + dx + "," + dy + "];" +
                 " createPath([p, p + e, p + f], [], [], false);", color, 2.5);
-            SSP.apply(line, "Line Draw", "in", t0 + SSM.seconds("Tick"));
+            SSP.apply(line, "Organic Draw", "in", t0 + SSM.seconds("Tick"));
 
             // text block anchored at the end of the line
             var tx = right ? 14 : -14, just = right ? ParagraphJustification.LEFT_JUSTIFY : ParagraphJustification.RIGHT_JUSTIFY;
@@ -198,7 +198,7 @@ var SSHUD = (function () {
             wg.property("ADBE Vector Roughen Detail").setValue(4);
             wg.property("ADBE Vector Roughen Points").setValue(2);                                          // smooth points
             wg.property("ADBE Vector Temporal Freq").setValue(1.2);
-            SSP.apply(L, "Line Draw", "in", o.t0 || 0);
+            SSP.apply(L, o.draw || "Organic Draw", "in", o.t0 || 0);
             var layers = [L];
             if (o.offsetLine !== false) {   // second, thinner line slightly outside the silhouette
                 var L2 = L.duplicate(); L2.name = "HUD contour echo · " + o.key;

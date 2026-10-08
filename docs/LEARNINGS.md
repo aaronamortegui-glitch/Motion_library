@@ -24,6 +24,8 @@ Everything we learned building SS Motion and *The 1974 Boardroom* test, written 
 - Shape modifier match names are not what the UI says: *Wiggle Paths* = `ADBE Vector Filter - Roughen`; `ADBE Vector Filter - Wiggler` is *Wiggle Transform*. Probe unknown match names with a throwaway comp (see `harvest_lib.jsx` style loops).
 - `rq.render()` does nothing inside a scheduled task (the bridge) → schedule it with `app.scheduleTask("app.project.renderQueue.render()", 200, false)` and wait for the files (`tools/wait_files.sh`).
 - A locked layer can't be reordered (`moveToEnd`) → lock at the very end.
+- `Property.setValueAtTime(t, v)` takes **composition time**, not layer time. Offset keys by `layer.startTime` (this broke freeze frames on every shot except the first).
+- Time remap: enabling it resets the layer out point, and removing *all* its keys hides the property ("parent property is hidden"). Set your keys first, then delete AE's default keys that aren't yours.
 - Font names must be PostScript names; AE only sees newly installed fonts after a restart. Use `SSM.font(role)`.
 
 ### Rendering
@@ -56,6 +58,14 @@ Everything we learned building SS Motion and *The 1974 Boardroom* test, written 
 - **Face scan:** a sweeping band used as track matte for (a) a sideways-shifted copy of the plate (the "slice") and (b) Find Edges → Threshold → Tint copy screened on top (holographic face). Without Threshold, hair/beard edges turn into a green blob.
 - **Holographic look:** Glow + faint Venetian Blinds scanlines + a rare opacity flicker; motion always comes from library presets so timing stays on-brand.
 
+## 4b. Organic motion, freezes and voiceover
+- **Organic strokes come from keyframe spacing**, not from a single curve: split the travel into 3–5 uneven segments, give each its own duration (some rush, some crawl) and ease (Land/Cruise/Settle), and drop 2–4 frame holds between some of them. `SSM.organicStops(v0, v1, frames, seed)` + `SSM.animateStops` do it with a repeatable seed per layer. A chasing Trim Start (offset by a Glide) turns it into a traveling brush stroke.
+- Linear segments inside multi-stop animations (`Flat`) must set linear interpolation, not temporal ease — otherwise `KeyframeEase` gets `NaN`.
+- **Freeze frames:** time-remap hold on the shot (keys in comp time!), 7% punch-in (Land in, Launch out), a 2-frame Cloud flash, a 48% Pine scrim, then a big foreground title (Chars Rise) + Tracking Settle subline + Organic Draw underline. A camera-click SFX on the freeze and a pop on the title sell it.
+- Place audio in each shot's **local time** (`{"shot": i, "local": s}`) so changing a freeze never desyncs VO/SFX.
+- **VO:** ElevenLabs v3 accepts tone tags (`[smooth 1970s TV announcer, dry humor]`, `[chuckles]`, `[short pause]`). Generate one file per line, trim silence (`silenceremove` both ends), loudnorm to −16, and if the edit is tight speed up with `atempo=1.07` (inaudible). Design freezes around the measured line lengths; land the punchline on the freeze title.
+- **Ducking:** drop the music ~9 dB under every VO line (0.2 s attack, 0.35 s release); with VO the whole mix lands near −16 LUFS when VO and music sit at −3 dB.
+
 ## 5. Design and layout rules
 - Keep kickers and meters in empty corners; on push-ins faces move toward top labels.
 - Giant behind-the-subject words at ~68% opacity so HUD labels stay readable over them.
@@ -80,4 +90,5 @@ Everything we learned building SS Motion and *The 1974 Boardroom* test, written 
 | Kling 3.0 Pro, 5 s 1080p | 0.706 |
 | VEED background removal (5 s) | 0.135 |
 | ElevenLabs Music (20–26 s) | 0.36 |
-| *The 1974 Boardroom* v2 total (3 stills, 3 clips, 3 mattes, 2 music tracks) | ≈ 4.15 |
+| ElevenLabs v3 VO line | 0.121 |
+| *The 1974 Boardroom* v3 total (3 stills, 3 clips, 3 mattes, 3 music tracks, 6 VO lines) | ≈ 5.24 |

@@ -55,7 +55,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var m = SSP.names();
     for (var a = 0; a < m.length; a++) {
         var c = comp("motion", m[a], 2.4);
-        var L = m[a] === "Wipe Reveal" ? bar(c) : smark(c, m[a], m[a] === "Line Draw");
+        var L = m[a] === "Wipe Reveal" ? bar(c) : smark(c, m[a], /Draw|Stroke/.test(m[a]));
         SSP.apply(L, m[a], "both", 0.2);
         made.push(c.name);
     }

@@ -17,14 +17,18 @@ Every preset has an **energy** level (`soft`, `medium`, `dynamic`) to match the 
 
 ## Showcase: *The 1974 Boardroom*
 
-A 25 s capability test built end to end by Claude with this repo: three consistent AI shots of two project collaborators (Flora: Nano Banana Pro + Kling 3.0 Pro), OpenCV tracking, AI roto mattes (VEED), organic contour lines, face-scan slices, giant titles behind the people, a holographic HUD built from library presets and the *Essentials* Figma palette, Animation Composer UI sounds, a 70s soul-funk score (ElevenLabs Music) and a roto breakdown. Full video: [`docs/examples/whisky_1974_boardroom.mp4`](docs/examples/whisky_1974_boardroom.mp4) · step-by-step: [`docs/case-studies/the-1974-boardroom.md`](docs/case-studies/the-1974-boardroom.md).
+A 36 s capability test built end to end by Claude with this repo: three consistent AI shots of two project collaborators (Flora: Nano Banana Pro + Kling 3.0 Pro), OpenCV tracking, AI roto mattes (VEED), organic hand-drawn contours, face-scan slices, giant titles behind the people, a holographic HUD from library presets and the *Essentials* Figma palette, **freeze frames with foreground titles**, a tongue-in-cheek **70s announcer voiceover** (ElevenLabs v3), a soul-funk score (ElevenLabs Music) auto-ducked under the VO, Animation Composer UI sounds and a roto breakdown. Full video: [`docs/examples/whisky_1974_boardroom.mp4`](docs/examples/whisky_1974_boardroom.mp4) · step-by-step: [`docs/case-studies/the-1974-boardroom.md`](docs/case-studies/the-1974-boardroom.md).
+
+| Freeze · "Zero emails." | Freeze · "The Chairman." | Freeze · "The Dealmaker." |
+|---|---|---|
+| ![Zero emails](docs/examples/whisky-freeze-zero-emails.gif) | ![Chairman](docs/examples/whisky-freeze-chairman.gif) | ![Dealmaker](docs/examples/whisky-freeze-dealmaker.gif) |
 
 | Shot 1 · two-shot | Shot 2 · subject 01 | Shot 3 · subject 02 | Roto breakdown |
 |---|---|---|---|
 | ![Two-shot](docs/examples/whisky-two-shot.gif) | ![Aaron](docs/examples/whisky-aaron.gif) | ![Gian](docs/examples/whisky-gian.gif) | ![Breakdown](docs/examples/whisky-breakdown.gif) |
-| Title behind the people, contours, face scans, liquor tracking, the spirit (fictional price), name cards, deal meter | "Chairman" behind him, liquor bracket on the rising glass, outfit, build scan, style index | "Dealmaker" behind him, the sip, outfit, bar service, charisma | Plate → roto matte → contours → composite |
+| Title behind the people, organic contours, face scans, liquor tracking, the spirit (fictional price), name cards, deal meter | "Corner Office" behind him, liquor bracket on the rising glass, outfit, build scan, style index | "Expense Account" behind him, the sip, outfit, bar service, charisma | Plate → roto matte → contours → composite |
 
-Everything is data-driven: `media/whisky/scenes.json` (shots + breakdown) and `media/whisky/edit.json` (cut, music, SFX, end card). Rebuild with `tools/build_scene.jsx`, `tools/build_breakdown.jsx` and `tools/build_edit.jsx` through `tools/bridge.sh`.
+Everything is data-driven: `media/whisky/scenes.json` (shots + breakdown) and `media/whisky/edit.json` (cut, freezes, VO, music, SFX, end card). Rebuild with `tools/build_scene.jsx`, `tools/build_breakdown.jsx` and `tools/build_edit.jsx` through `tools/bridge.sh`.
 
 More tests on the same pipeline:
 
@@ -69,7 +73,8 @@ bash tools/bridge.sh tools/<job>.jsx      # runs a .jsx in AE and returns OK/ERR
 - **`tools/build_breakdown.jsx`** — 2×2 roto breakdown (plate · matte · contours · composite).
 - **`tools/track_points.py`** — OpenCV KLT tracker: `python tools/track_points.py clip.mp4 tracks.json --regions regions.json --debug debug.mp4` (regions = `{"name": [x, y, radius]}`).
 - **`tools/build_scene.jsx`** — builds comps from a JSON spec: plate + tracking nulls + optional people `matte` + items (`behind` text, `contour`, `faceScan`, `bracket`, `callout`, `meter`, `chip`, `title`, `kicker`; optional `t1` to fade an item out before it leaves the frame). Layer order: plate · behind text · matte · grain · contours · face scans · HUD.
-- **`tools/build_edit.jsx`** — sequences scene comps, music (with fade), SFX looked up by name in the Animation Composer asset packs, and a branded end card.
+- **`tools/build_edit.jsx`** — sequences scene comps with optional **freeze frames** (time remap hold + punch-in + scrim + foreground title + organic underline + click/pop SFX), places **VO** and SFX in each shot's own time (freezes shift them automatically), **ducks the music under the VO**, and adds a branded end card.
+- **Organic strokes** — `Organic Draw` / `Organic Stroke` presets: uneven keyframe spacing (3–5 seeded segments, varied speeds, micro-holds) so lines accelerate, brake and pause like a hand drawing. `SSM.animateStops` / `SSM.organicStops` are reusable for any property.
 
 ## Growing the library with Animation Composer (without touching the plugin)
 

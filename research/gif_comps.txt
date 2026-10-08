@@ -6,6 +6,8 @@ GIF__motion__Slide Land
 GIF__motion__Rotate Settle
 GIF__motion__Squash Warp
 GIF__motion__Wipe Reveal
+GIF__motion__Organic Draw
+GIF__motion__Organic Stroke
 GIF__motion__Line Draw
 GIF__fx__Float
 GIF__fx__Wiggle Rotate

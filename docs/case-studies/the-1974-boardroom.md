@@ -1,6 +1,6 @@
 # Case study: *The 1974 Boardroom*
 
-A 25 s capability test of the whole pipeline: AI footage → tracking → roto → HUD built from library presets → edit with music and SFX → breakdown. Final video: [`docs/examples/whisky_1974_boardroom.mp4`](../examples/whisky_1974_boardroom.mp4).
+A 36 s capability test of the whole pipeline: AI footage → tracking → roto → HUD built from library presets → edit with music and SFX → breakdown. Final video: [`docs/examples/whisky_1974_boardroom.mp4`](../examples/whisky_1974_boardroom.mp4).
 
 | Shot 1 | Shot 2 | Shot 3 | Breakdown |
 |---|---|---|---|
@@ -23,13 +23,25 @@ Two project collaborators as classy 1970s executives drinking whisky and looking
 | 9 | Breakdown 2×2 | `scenes.json → breakdown` → `bash tools/bridge.sh tools/build_breakdown.jsx` |
 | 10 | Music | ElevenLabs Music `t2a-elevenlabs-music-t2a` → `music_70s_funk_26s.mp3` |
 | 11 | Edit (cuts on the beat, SFX, end card) | `media/whisky/edit.json` → `bash tools/bridge.sh tools/build_edit.jsx` |
-| 12 | Render + QA | `tools/render_comps.jsx` + `tools/wait_files.sh`, contact sheets, loudness −16.8 LUFS |
+| 12 | Voiceover (6 lines) | ElevenLabs v3 `t2a-elevenlabs-tts-v3`, voice Adam, stability 0.35 → trimmed, loudnorm, `atempo=1.07` → `media/whisky/vo/vo01..06.wav` |
+| 13 | Freeze frames + VO + ducking | `edit.json` → `freeze` per shot, `vo` in shot-local time → `build_edit.jsx` |
+| 14 | Render + QA | `tools/render_comps.jsx` + `tools/wait_files.sh`, contact sheets, loudness −16.2 LUFS |
 
 ## What each shot shows
 - **Shot 1 (two-shot):** behind-the-subject title "The Boardroom" tracked to the skyline; organic contour lines (spark / coral); face-scan slices; scan brackets with name cards; role chips; liquor brackets on both glasses + "LIQUOR SCAN" callout; "THE SPIRIT" bottle callout (fades out before the bottle leaves frame); deal-confidence meter.
 - **Shot 2 (subject 01):** "Chairman" behind him; contour; face scan; liquor bracket on the glass as it rises to the mouth; outfit, pour and build-scan callouts; style index.
 - **Shot 3 (subject 02):** "Dealmaker" behind him; contour; face scan; liquor bracket on the glass (fades out when the glass leaves frame); outfit and bar-service callouts; charisma meter.
 - **Breakdown:** 01 Plate (Flora + Kling) · 02 Roto matte (VEED) · 03 Contours (OpenCV) · 04 Composite (SS Motion).
+
+## Voiceover script (70s announcer, deadpan)
+| When | Line | Freeze title |
+|---|---|---|
+| Shot 1 opens | "Nineteen seventy-four. The corner office." | — |
+| Shot 1 freeze | "Two executives. One decanter. Zero emails." | **Zero emails.** · 2 EXECUTIVES · 1 DECANTER · 0 MEETINGS |
+| Shot 2 freeze | "The Chairman. Three-piece suit. The smirk? *(chuckles)* Complimentary." | **The Chairman.** · SMIRK INCLUDED · NO EXTRA CHARGE |
+| Shot 3 freeze | "The Dealmaker. Aviators. Indoors. At night. … Bold." | **The Dealmaker.** · AVIATORS · INDOORS · AT NIGHT |
+| Breakdown | "Every pixel? Rotoscoped by robots. *(chuckles)* The robots now want a corner office." | — |
+| End card | "The 1974 Boardroom. Superside Motion Lab." | — |
 
 ## Prompts used
 **Master still (Nano Banana Pro, images: identity A, identity B)**
@@ -51,5 +63,7 @@ Two project collaborators as classy 1970s executives drinking whisky and looking
 - Giant words fighting the HUD → 68% opacity.
 - VEED failed on the raw Kling URL → upload the normalized 1080p clip.
 - `aerender` hang with Animation Composer layers → render through the AE queue.
+- Freeze frames only worked on shot 1 → `setValueAtTime` uses comp time; offset remap keys by the shot start.
+- Contours drew at constant speed → `Organic Draw` (uneven keyframe spacing).
 
 All prices, bottlings and roles are fictional. Subjects are project collaborators who agreed to appear in tests.

@@ -34,6 +34,8 @@ var SSP = (function () {
         e.property("ADBE Linear Wipe-0003").setValue(0);  // hard edge
         return e.property("ADBE Linear Wipe-0001");
     }
+    // stable per-layer seed so organic rhythms differ between layers but are repeatable
+    function seedOf(L) { var s = 0, n = L.name + L.index; for (var i = 0; i < n.length; i++) s = (s * 31 + n.charCodeAt(i)) % 2147483647; return s || 1; }
     function trimEnd(L) {
         var root = L.property("ADBE Root Vectors Group");
         if (!root) return null;
@@ -125,6 +127,29 @@ var SSP = (function () {
             channels: "Mask", energy: "medium", use: "Bars, lower thirds, underlines",
             "in": function (L, t) { return SSM.animate(wipe(L), t, 100, 0, "Sweep", "Cruise"); },
             "out": function (L, t) { return SSM.animate(wipe(L), t, 0, 100, "Arrive", "Launch"); }
+        },
+        "Organic Draw": {
+            channels: "Trim Path", energy: "medium", use: "Hand-drawn feel: contours, underlines, sketch lines (shape layers only)",
+            "in": function (L, t) {
+                var p = trimEnd(L); if (!p) return t;
+                return SSM.animateStops(p, t, 0, SSM.organicStops(0, 100, SSM.frames("Stage") + 6, seedOf(L)));
+            },
+            "out": function (L, t) {
+                var p = trimEnd(L); if (!p) return t;
+                return SSM.animateStops(p, t, 100, SSM.organicStops(100, 0, SSM.frames("Arrive"), seedOf(L) + 7, 3));
+            }
+        },
+        "Organic Stroke": {
+            channels: "Trim Path", energy: "dynamic", use: "Traveling brush stroke: the start chases the end (accent lines, HUD links)",
+            "in": function (L, t) {
+                var root = L.property("ADBE Root Vectors Group"); if (!root) return t;
+                var e = trimEnd(L), s = root.property("SS Trim").property("ADBE Vector Trim Start");
+                var stops = SSM.organicStops(0, 100, SSM.frames("Stage"), seedOf(L));
+                var end = SSM.animateStops(e, t, 0, stops);
+                SSM.animateStops(s, t + SSM.seconds("Glide"), 0, SSM.organicStops(0, 100, SSM.frames("Stage"), seedOf(L) + 3));
+                return end;
+            },
+            "out": function (L, t) { return t; }
         },
         "Line Draw": {
             channels: "Trim Path", energy: "medium", use: "Lines, stroke icons, tracking HUD (shape layers only)",
