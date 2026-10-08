@@ -17,14 +17,14 @@ Every preset has an **energy** level (`soft`, `medium`, `dynamic`) to match the 
 
 ## Showcase: *The 1974 Boardroom*
 
-A 20 s capability test built end to end by Claude with this repo: three consistent AI shots of two project collaborators (Flora: Nano Banana Pro + Kling 3.0 Pro), OpenCV tracking, a holographic HUD built from library presets and the *Essentials* Figma palette, Animation Composer UI sounds, and an AI-generated 70s soul-funk track (ElevenLabs Music). Full video: [`docs/examples/whisky_1974_boardroom.mp4`](docs/examples/whisky_1974_boardroom.mp4).
+A 25 s capability test built end to end by Claude with this repo: three consistent AI shots of two project collaborators (Flora: Nano Banana Pro + Kling 3.0 Pro), OpenCV tracking, AI roto mattes (VEED), organic contour lines, face-scan slices, giant titles behind the people, a holographic HUD built from library presets and the *Essentials* Figma palette, Animation Composer UI sounds, a 70s soul-funk score (ElevenLabs Music) and a roto breakdown. Full video: [`docs/examples/whisky_1974_boardroom.mp4`](docs/examples/whisky_1974_boardroom.mp4) · step-by-step: [`docs/case-studies/the-1974-boardroom.md`](docs/case-studies/the-1974-boardroom.md).
 
-| Shot 1 · two-shot | Shot 2 · subject 01 | Shot 3 · subject 02 |
-|---|---|---|
-| ![Two-shot](docs/examples/whisky-two-shot.gif) | ![Aaron](docs/examples/whisky-aaron.gif) | ![Gian](docs/examples/whisky-gian.gif) |
-| Scan brackets with name cards, role chips, the spirit callout (fictional bottling and price), deal-confidence meter | Outfit with estimated price, the pour, build scan (posture/silhouette), style index | The sip, outfit, bar service, charisma meter |
+| Shot 1 · two-shot | Shot 2 · subject 01 | Shot 3 · subject 02 | Roto breakdown |
+|---|---|---|---|
+| ![Two-shot](docs/examples/whisky-two-shot.gif) | ![Aaron](docs/examples/whisky-aaron.gif) | ![Gian](docs/examples/whisky-gian.gif) | ![Breakdown](docs/examples/whisky-breakdown.gif) |
+| Title behind the people, contours, face scans, liquor tracking, the spirit (fictional price), name cards, deal meter | "Chairman" behind him, liquor bracket on the rising glass, outfit, build scan, style index | "Dealmaker" behind him, the sip, outfit, bar service, charisma | Plate → roto matte → contours → composite |
 
-Everything is data-driven: `media/whisky/scenes.json` describes each shot's HUD and `media/whisky/edit.json` the cut, music, SFX and end card. Rebuild with `bash tools/bridge.sh tools/build_scene.jsx` and `bash tools/bridge.sh tools/build_edit.jsx`.
+Everything is data-driven: `media/whisky/scenes.json` (shots + breakdown) and `media/whisky/edit.json` (cut, music, SFX, end card). Rebuild with `tools/build_scene.jsx`, `tools/build_breakdown.jsx` and `tools/build_edit.jsx` through `tools/bridge.sh`.
 
 More tests on the same pipeline:
 
@@ -64,9 +64,11 @@ bash tools/bridge.sh tools/<job>.jsx      # runs a .jsx in AE and returns OK/ERR
 
 ## HUD, scenes and edits
 
-- **`tools/ss_hud.jsx`** — holographic overlay components that follow tracked nulls: `SSHUD.bracket` (scan corners + sweeping line + label), `SSHUD.callout` (dot, elbow line that draws on, title + body text), `SSHUD.meter` (counting percentage bar) and `SSHUD.chip` (Figma pill). Glow, scanlines and a subtle flicker give the holographic look; motion comes from the library presets.
+- **`tools/ss_hud.jsx`** — holographic overlay components that follow tracked nulls: `SSHUD.bracket` (scan corners + sweeping line + label), `SSHUD.callout` (dot, elbow line that draws on, title + body text), `SSHUD.meter` (counting percentage bar), `SSHUD.chip` (Figma pill), `SSHUD.contour` (organic animated contour lines from a matte) and `SSHUD.faceScan` (sweeping slice + holographic edges of the face). Glow, scanlines and a subtle flicker give the holographic look; motion comes from the library presets.
+- **`tools/matte_contours.py`** — per-frame subject contours from an alpha matte (`--subjects`, `--split-x` for touching people).
+- **`tools/build_breakdown.jsx`** — 2×2 roto breakdown (plate · matte · contours · composite).
 - **`tools/track_points.py`** — OpenCV KLT tracker: `python tools/track_points.py clip.mp4 tracks.json --regions regions.json --debug debug.mp4` (regions = `{"name": [x, y, radius]}`).
-- **`tools/build_scene.jsx`** — builds comps from a JSON spec: plate + tracking nulls + HUD items (`bracket`, `callout`, `meter`, `chip`, `title`, `kicker`; optional `t1` to fade an item out before it leaves the frame).
+- **`tools/build_scene.jsx`** — builds comps from a JSON spec: plate + tracking nulls + optional people `matte` + items (`behind` text, `contour`, `faceScan`, `bracket`, `callout`, `meter`, `chip`, `title`, `kicker`; optional `t1` to fade an item out before it leaves the frame). Layer order: plate · behind text · matte · grain · contours · face scans · HUD.
 - **`tools/build_edit.jsx`** — sequences scene comps, music (with fade), SFX looked up by name in the Animation Composer asset packs, and a branded end card.
 
 ## Growing the library with Animation Composer (without touching the plugin)
@@ -104,7 +106,12 @@ Recipes store *what moves and how* (relative channels, frames, curve or frequenc
 | `04_Text_Tracking_70s` | Text presets, fixed and tracked to the scene (title on the wallpaper, label on the face, ON AIR on the mic) |
 | `05_Text_Behind_70s` | Giant title between the background and the person, using a person matte from Flora (VEED) |
 | `HUD_TEST` | The HUD module on the 70s clip (`tools/hud_demo.jsx`) |
-| `WHISKY_01..03`, `WHISKY_EDIT` | *The 1974 Boardroom* showcase (folder `WHISKY 1974`) |
+| `WHISKY_01..03`, `WHISKY_BREAKDOWN`, `WHISKY_EDIT` | *The 1974 Boardroom* showcase (folder `WHISKY 1974`) |
+
+## Documentation
+
+- [`docs/LEARNINGS.md`](docs/LEARNINGS.md) — everything we learned: driving AE from an LLM, ExtendScript pitfalls, rendering, Animation Composer architecture, AI footage with Flora, tracking/roto/overlays, layout, audio, repo hygiene and costs.
+- [`docs/case-studies/the-1974-boardroom.md`](docs/case-studies/the-1974-boardroom.md) — the full showcase, step by step, with prompts.
 
 ## Structure
 

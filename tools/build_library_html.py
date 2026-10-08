@@ -165,7 +165,7 @@ lines = [
     "# calls: motion SSP.apply(L,N,in|out|both) · fx SSP.applyFx(L,N) · text SSP.applyText(L,N,in|out|both) · recipe SSP.applyRecipe(L,ID,both) · include tools/ss_presets.jsx",
     "# dur(f@30): " + " ".join(f"{d['name']}{d['frames']}" for d in tok["durations"]),
     "# ease(bezier): " + "; ".join(f"{e['name']} {','.join(str(round(v, 2)) for v in e['bezier'])}" for e in tok["easings"]),
-    "# hud: SSHUD.bracket/callout/meter/chip on TRK nulls · include tools/ss_hud.jsx · scenes: tools/build_scene.jsx + JSON · edits: tools/build_edit.jsx + JSON",
+    "# hud: SSHUD.bracket/callout/meter/chip/contour/faceScan on TRK nulls · include tools/ss_hud.jsx · scenes: tools/build_scene.jsx + JSON (matte, behind text) · breakdown: tools/build_breakdown.jsx · edits: tools/build_edit.jsx + JSON · read docs/LEARNINGS.md",
     "# kind|name|channels|e|use",
 ]
 lines += [f"{p['kind']}|{p.get('id', p['name'])}|{p['channels'].replace(' & ', '&').replace('Text · ', '')}|{E.get(p['energy'], p['energy'])}|{p['use']}" for p in lib["presets"]]

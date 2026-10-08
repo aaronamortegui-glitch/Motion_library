@@ -5,6 +5,8 @@ description: Apply, grow and document Superside's own motion library (SS Motion)
 
 # SS Motion Library
 
+Read `docs/LEARNINGS.md` before non-trivial AE work: it lists every pitfall already solved (rendering, ExtendScript, Flora, roto, layout, audio).
+
 Our own motion library for After Effects. Everything creates native keyframes/expressions (no plugins).
 All repo content is English: write code, comments, messages, metadata and commit messages in English.
 
@@ -56,6 +58,7 @@ Rules:
 - `tools/ss_hud.jsx` (`#include "ss_hud.jsx"`): `SSHUD.init(comp)`, then `SSHUD.bracket({anchor:"TRK face", size:[w,h], label, t0})`, `SSHUD.callout({anchor, offset:[dx,dy], title, lines:[...], t0, color})`, `SSHUD.meter({at:[x,y], label, value, t0})`, `SSHUD.chip({anchor, offset, text, color, t0})`. Anchors are tracking nulls named `TRK <name>` (anchor point at the null center).
 - Tracking: `python tools/track_points.py clip.mp4 tracks.json --regions regions.json --debug debug.mp4`; pick regions from a gridded first frame (`ffmpeg ... drawgrid`), check the debug sheet, and give items that leave the frame a `t1`.
 - Scenes are JSON (`media/whisky/scenes.json` is the reference): `bash tools/bridge.sh tools/build_scene.jsx`. Edits (cut + music + Animation Composer SFX by name + end card): `media/whisky/edit.json` → `bash tools/bridge.sh tools/build_edit.jsx`. Render with `render_comps.jsx`; target about -16 LUFS for web.
+- Roto/depth: add `"matte": "<people matte .mov>"` to a scene to get `behind` text between background and people; `contour` items read `tools/matte_contours.py` JSON (use `--split-x` when people touch); `faceScan` needs the plate layer named "Plate". Breakdown: `tools/build_breakdown.jsx` (scenes.json → `breakdown`). Full worked example: `docs/case-studies/the-1974-boardroom.md`.
 - Layout rule: keep kickers/meters in empty corners and check a contact sheet at several frames; a push-in moves faces toward the top labels.
 
 ## Typography

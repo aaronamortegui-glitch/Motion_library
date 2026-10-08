@@ -63,14 +63,26 @@
             tr(N, "ADBE Position").setValuesAtTimes(ts, ps);
             tr(N, "ADBE Scale").setValuesAtTimes(ts, sc);
         }
-        if (S.grain !== false) grain(c);
         SSHUD.init(c);
-        for (var h = 0; h < S.hud.length; h++) {
-            var o = S.hud[h], made_ = [];
+        function runItem(o) {
+            var made_ = [];
             if (o.type === "bracket") made_ = SSHUD.bracket(o);
             else if (o.type === "callout") made_ = SSHUD.callout(o);
             else if (o.type === "meter") made_ = SSHUD.meter(o);
             else if (o.type === "chip") made_ = SSHUD.chip(o);
+            else if (o.type === "contour") made_ = SSHUD.contour(o);
+            else if (o.type === "faceScan") made_ = SSHUD.faceScan(o);
+            else if (o.type === "behind") {
+                // in-world text that sits between the background and the people (needs scene.matte)
+                var B = text(c, o.text, o.role || "display", o.size || 260, o.color || "cloud", o.tracking || 0);
+                var td = B.property("ADBE Text Properties").property("ADBE Text Document"), tv = td.value;
+                tv.justification = ParagraphJustification.CENTER_JUSTIFY; td.setValue(tv);
+                if (o.anchor) tr(B, "ADBE Position").expression = 'var a = thisComp.layer("' + o.anchor + '"); a.toComp(a.transform.anchorPoint) + [' + o.offset[0] + "," + o.offset[1] + "]";
+                else tr(B, "ADBE Position").setValue(o.at);
+                tr(B, "ADBE Opacity").setValue(o.opacity || 92);
+                SSP.applyText(B, o.preset || "Chars Rise", "in", o.t0 || 0);
+                made_ = [B];
+            }
             else if (o.type === "title" || o.type === "kicker") {
                 var isTitle = o.type === "title";
                 var T = text(c, o.text, isTitle ? "display" : "ui", o.size || (isTitle ? 96 : 26), o.color || (isTitle ? "cloud" : "spark"), isTitle ? 0 : 200);
@@ -89,6 +101,19 @@
                 for (var q2 = 0; q2 < made_.length; q2++) if (made_[q2] && made_[q2].parent) made_[q2].outPoint = o.t1;
             }
         }
+        function pass(test) { for (var h = 0; h < S.hud.length; h++) if (test(S.hud[h].type)) runItem(S.hud[h]); }
+        // Layer order (bottom → top): plate · behind texts · people matte · grain · contours · face scans · HUD
+        pass(function (t) { return t === "behind"; });
+        if (S.matte) {
+            var mItem = importOnce(S.matte);
+            mItem.mainSource.alphaMode = AlphaMode.STRAIGHT;
+            var M = c.layers.add(mItem); M.name = "Matte · people (roto)";
+            tr(M, "ADBE Scale").setValue([c.width / mItem.width * 100, c.height / mItem.height * 100, 100]);
+        }
+        if (S.grain !== false) grain(c);
+        pass(function (t) { return t === "contour"; });
+        pass(function (t) { return t === "faceScan"; });
+        pass(function (t) { return t !== "behind" && t !== "contour" && t !== "faceScan"; });
         made.push(S.comp);
     }
     proj.save();

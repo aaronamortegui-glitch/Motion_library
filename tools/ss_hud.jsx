@@ -168,6 +168,97 @@ var SSHUD = (function () {
             return [P, T];
         },
 
+        // Organic contour lines that draw on around a subject. Data: tools/matte_contours.py JSON (one path per frame).
+        // o = { file: "media/whisky/clip01_contours.json", key: "c0", t0, color, width, wiggle, offsetLine }
+        contour: function (o) {
+            var D = SSM.readJSON(SS_ROOT + "/" + o.file), frames = D.contours[o.key], fd = 1 / D.fps;
+            var sx = C.width / D.size[0], sy = C.height / D.size[1], color = o.color || "spark";
+            var L = C.layers.addShape(); L.name = "HUD contour · " + o.key;
+            tr(L, "ADBE Position").setValue([0, 0]);
+            var grp = L.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group");
+            grp.name = "Contour";
+            var v = grp.property("ADBE Vectors Group");
+            var path = v.addProperty("ADBE Vector Shape - Group").property("ADBE Vector Shape");
+            var times = [], shapes = [];
+            for (var f = 0; f < frames.length; f++) {
+                var pts = frames[f], verts = [];
+                for (var p = 0; p < pts.length; p++) verts.push([pts[p][0] * sx, pts[p][1] * sy]);
+                var sh = new Shape(); sh.vertices = verts; sh.closed = true;
+                times.push(f * fd); shapes.push(sh);
+            }
+            path.setValuesAtTimes(times, shapes);
+            var st = v.addProperty("ADBE Vector Graphic - Stroke");
+            st.property("ADBE Vector Stroke Color").setValue(col(color));
+            st.property("ADBE Vector Stroke Width").setValue(o.width || 3);
+            st.property("ADBE Vector Stroke Line Join").setValue(2);
+            st.property("ADBE Vector Stroke Line Cap").setValue(2);
+            // hand-drawn feel: gentle wiggle on the path
+            var wg = L.property("ADBE Root Vectors Group").addProperty("ADBE Vector Filter - Roughen");   // "Wiggle Paths"
+            wg.property("ADBE Vector Roughen Size").setValue(o.wiggle === undefined ? 4 : o.wiggle);
+            wg.property("ADBE Vector Roughen Detail").setValue(4);
+            wg.property("ADBE Vector Roughen Points").setValue(2);                                          // smooth points
+            wg.property("ADBE Vector Temporal Freq").setValue(1.2);
+            SSP.apply(L, "Line Draw", "in", o.t0 || 0);
+            var layers = [L];
+            if (o.offsetLine !== false) {   // second, thinner line slightly outside the silhouette
+                var L2 = L.duplicate(); L2.name = "HUD contour echo · " + o.key;
+                var off = L2.property("ADBE Root Vectors Group").addProperty("ADBE Vector Filter - Offset");
+                off.property("ADBE Vector Offset Amount").setValue(o.echoOffset || 10);
+                L2.property("ADBE Root Vectors Group").property("Contour").property("ADBE Vectors Group")
+                    .property("ADBE Vector Graphic - Stroke").property("ADBE Vector Stroke Width").setValue(1.2);
+                tr(L2, "ADBE Opacity").setValue(55);
+                L2.startTime = L2.startTime + SSM.seconds("Glide");
+                layers.push(L2);
+            }
+            for (var i = 0; i < layers.length; i++) holo(layers[i], 0.7);
+            return layers;
+        },
+
+        // Face scan "slice": a band sweeps the face; inside it the plate is shifted sideways (a cut) and an
+        // edge-detected holographic copy of the face shows through. Needs a footage layer named o.plate (default "Plate").
+        faceScan: function (o) {
+            var t0 = o.t0 || 0, w = o.size[0], h = o.size[1], speed = o.speed || 0.7, color = o.color || "spark";
+            var plate = C.layer(o.plate || "Plate");
+            function band(name, frac) {
+                var B = C.layers.addShape(); B.name = name;
+                tr(B, "ADBE Position").setValue([0, 0]);
+                var g = B.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
+                var r = g.addProperty("ADBE Vector Shape - Rect");
+                r.property("ADBE Vector Rect Size").expression = 'var s = thisComp.layer("' + o.anchor + '").transform.scale[0]/100; [' + w + "*s, " + (h * frac) + "*s]";
+                r.property("ADBE Vector Rect Position").expression = anchorExpr(o.anchor) + "; var s = a.transform.scale[0]/100;" +
+                    " var u = ((time - " + t0 + ") * " + speed + ") % 1; a.toComp(a.transform.anchorPoint) + [0, (-" + h / 2 + " + u * " + h + ") * s]";
+                g.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").setValue([1, 1, 1]);
+                B.inPoint = t0;
+                return B;
+            }
+            // 1) slice: plate copy shifted sideways inside a thin band
+            var slice = plate.duplicate(); slice.name = "HUD face slice · " + o.anchor;
+            slice.moveToBeginning();
+            tr(slice, "ADBE Position").expression = "value + [" + (o.shift || 18) + ", 0]";
+            var b1 = band("HUD face slice matte · " + o.anchor, 0.12);
+            b1.moveBefore(slice);
+            slice.setTrackMatte(b1, TrackMatteType.ALPHA);
+            b1.enabled = false;
+            slice.inPoint = t0;
+            // 2) holographic edges of the face inside a taller band
+            var edges = plate.duplicate(); edges.name = "HUD face edges · " + o.anchor;
+            edges.moveToBeginning();
+            var fx = edges.property("ADBE Effect Parade");
+            var fe = fx.addProperty("ADBE Find Edges"); fe.property("Invert").setValue(1);   // invert → bright edges on black
+            var th = fx.addProperty("ADBE Threshold2"); th.property(1).setValue(o.edgeThreshold || 150);  // keep only strong edges
+            var tint = fx.addProperty("ADBE Tint");
+            tint.property("ADBE Tint-0002").setValue(col(color));                                    // map white to → Spark
+            edges.blendingMode = BlendingMode.SCREEN;
+            tr(edges, "ADBE Opacity").setValue(70);
+            var b2 = band("HUD face edges matte · " + o.anchor, 0.34);
+            b2.moveBefore(edges);
+            edges.setTrackMatte(b2, TrackMatteType.ALPHA);
+            b2.enabled = false;
+            edges.inPoint = t0;
+            holo(edges, 0.5);
+            return [slice, b1, edges, b2];
+        },
+
         holo: holo
     };
 })();

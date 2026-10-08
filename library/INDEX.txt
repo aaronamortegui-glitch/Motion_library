@@ -2,7 +2,7 @@
 # calls: motion SSP.apply(L,N,in|out|both) · fx SSP.applyFx(L,N) · text SSP.applyText(L,N,in|out|both) · recipe SSP.applyRecipe(L,ID,both) · include tools/ss_presets.jsx
 # dur(f@30): Tick4 Blink6 Glide9 Arrive14 Sweep21 Stage33
 # ease(bezier): Flat 0,0,1,1; Land 0.12,0.9,0.28,1; Launch 0.55,0,0.9,0.6; Settle 0.3,0,0.1,1; Cruise 0.5,0,0.15,1; Pop 0.34,1.45,0.64,1; Recoil 0.6,0,0.75,-0.4
-# hud: SSHUD.bracket/callout/meter/chip on TRK nulls · include tools/ss_hud.jsx · scenes: tools/build_scene.jsx + JSON · edits: tools/build_edit.jsx + JSON
+# hud: SSHUD.bracket/callout/meter/chip/contour/faceScan on TRK nulls · include tools/ss_hud.jsx · scenes: tools/build_scene.jsx + JSON (matte, behind text) · breakdown: tools/build_breakdown.jsx · edits: tools/build_edit.jsx + JSON · read docs/LEARNINGS.md
 # kind|name|channels|e|use
 motion|Fade|Fade|s|Corporate, UI, supporting text
 motion|Fade Up|Fade&Position|s|Headlines, paragraphs, lists
