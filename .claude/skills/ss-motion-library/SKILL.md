@@ -52,6 +52,12 @@ Rules:
 - Flow: the user opens `tools/ss_harvest_station.jsx` in AE (section + Start) and the same folder in the AC panel → `python tools/ac_driver.py run` (UI automation: double-clicks each thumbnail, waits for the entry in `research/harvest/station/_log.csv`, scrolls; ESC stops; run `calibrate` and `preview` first) → `bash tools/expand_library.sh` (name OCR, `harvest_to_library.py` → `library/recipes.json`, thumbnails, index).
 - Recipes are applied with `SSP.applyRecipe(L, id, "both")`; they reproduce the behavior with our own keyframes/expressions.
 
+## HUD overlays, scenes and edits
+- `tools/ss_hud.jsx` (`#include "ss_hud.jsx"`): `SSHUD.init(comp)`, then `SSHUD.bracket({anchor:"TRK face", size:[w,h], label, t0})`, `SSHUD.callout({anchor, offset:[dx,dy], title, lines:[...], t0, color})`, `SSHUD.meter({at:[x,y], label, value, t0})`, `SSHUD.chip({anchor, offset, text, color, t0})`. Anchors are tracking nulls named `TRK <name>` (anchor point at the null center).
+- Tracking: `python tools/track_points.py clip.mp4 tracks.json --regions regions.json --debug debug.mp4`; pick regions from a gridded first frame (`ffmpeg ... drawgrid`), check the debug sheet, and give items that leave the frame a `t1`.
+- Scenes are JSON (`media/whisky/scenes.json` is the reference): `bash tools/bridge.sh tools/build_scene.jsx`. Edits (cut + music + Animation Composer SFX by name + end card): `media/whisky/edit.json` → `bash tools/bridge.sh tools/build_edit.jsx`. Render with `render_comps.jsx`; target about -16 LUFS for web.
+- Layout rule: keep kickers/meters in empty corners and check a contact sheet at several frames; a push-in moves faces toward the top labels.
+
 ## Typography
 Use `SSM.font("display" | "ui" | "ui_regular")`: returns Instrument Serif / Inter Tight when installed (files in `assets/fonts/`, OFL), otherwise Georgia / Arial. Never hard-code font names.
 

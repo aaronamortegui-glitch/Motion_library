@@ -15,6 +15,24 @@ Superside's own motion library for After Effects, built so that **an LLM (Claude
 
 Every preset has an **energy** level (`soft`, `medium`, `dynamic`) to match the piece: social/hype → dynamic, corporate/UI → soft.
 
+## Showcase: *The 1974 Boardroom*
+
+A 20 s capability test built end to end by Claude with this repo: three consistent AI shots of two project collaborators (Flora: Nano Banana Pro + Kling 3.0 Pro), OpenCV tracking, a holographic HUD built from library presets and the *Essentials* Figma palette, Animation Composer UI sounds, and an AI-generated 70s soul-funk track (ElevenLabs Music). Full video: [`docs/examples/whisky_1974_boardroom.mp4`](docs/examples/whisky_1974_boardroom.mp4).
+
+| Shot 1 · two-shot | Shot 2 · subject 01 | Shot 3 · subject 02 |
+|---|---|---|
+| ![Two-shot](docs/examples/whisky-two-shot.gif) | ![Aaron](docs/examples/whisky-aaron.gif) | ![Gian](docs/examples/whisky-gian.gif) |
+| Scan brackets with name cards, role chips, the spirit callout (fictional bottling and price), deal-confidence meter | Outfit with estimated price, the pour, build scan (posture/silhouette), style index | The sip, outfit, bar service, charisma meter |
+
+Everything is data-driven: `media/whisky/scenes.json` describes each shot's HUD and `media/whisky/edit.json` the cut, music, SFX and end card. Rebuild with `bash tools/bridge.sh tools/build_scene.jsx` and `bash tools/bridge.sh tools/build_edit.jsx`.
+
+More tests on the same pipeline:
+
+| Text + tracking | Text behind the subject | HUD module |
+|---|---|---|
+| ![Text tracking](docs/examples/text-tracking.gif) | ![Text behind](docs/examples/text-behind-subject.gif) | ![HUD test](docs/examples/hud-test.gif) |
+| Title on the wallpaper (parallax), label on the face, ON AIR on the mic | Giant title between background and person (Flora/VEED matte) | Scan bracket, callouts, meter and chip on tracked points |
+
 ## How it works
 
 ```
@@ -43,6 +61,13 @@ bash tools/bridge.sh tools/<job>.jsx      # runs a .jsx in AE and returns OK/ERR
     return "ok";
 })();
 ```
+
+## HUD, scenes and edits
+
+- **`tools/ss_hud.jsx`** — holographic overlay components that follow tracked nulls: `SSHUD.bracket` (scan corners + sweeping line + label), `SSHUD.callout` (dot, elbow line that draws on, title + body text), `SSHUD.meter` (counting percentage bar) and `SSHUD.chip` (Figma pill). Glow, scanlines and a subtle flicker give the holographic look; motion comes from the library presets.
+- **`tools/track_points.py`** — OpenCV KLT tracker: `python tools/track_points.py clip.mp4 tracks.json --regions regions.json --debug debug.mp4` (regions = `{"name": [x, y, radius]}`).
+- **`tools/build_scene.jsx`** — builds comps from a JSON spec: plate + tracking nulls + HUD items (`bracket`, `callout`, `meter`, `chip`, `title`, `kicker`; optional `t1` to fade an item out before it leaves the frame).
+- **`tools/build_edit.jsx`** — sequences scene comps, music (with fade), SFX looked up by name in the Animation Composer asset packs, and a branded end card.
 
 ## Growing the library with Animation Composer (without touching the plugin)
 
@@ -78,6 +103,8 @@ Recipes store *what moves and how* (relative channels, frames, curve or frequenc
 | `03_Figma_Chips` | The *Essentials* Figma slide animated with tokens (staggered chips) |
 | `04_Text_Tracking_70s` | Text presets, fixed and tracked to the scene (title on the wallpaper, label on the face, ON AIR on the mic) |
 | `05_Text_Behind_70s` | Giant title between the background and the person, using a person matte from Flora (VEED) |
+| `HUD_TEST` | The HUD module on the 70s clip (`tools/hud_demo.jsx`) |
+| `WHISKY_01..03`, `WHISKY_EDIT` | *The 1974 Boardroom* showcase (folder `WHISKY 1974`) |
 
 ## Structure
 
@@ -101,4 +128,4 @@ The repo can be cloned anywhere: scripts compute the repo root (`SS_ROOT`) from 
 - `render_gifs.sh` only uses `aerender` without `SKIP_RENDER`. If the project contains layers with Animation Composer presets, render through `tools/render_queue.jsx` / `tools/render_comps.jsx` (the open AE's render queue), because `aerender` hangs.
 - Brand fonts live in `assets/fonts/` (Inter Tight and Instrument Serif, OFL). Install them in Windows (right-click › Install) before opening AE; scripts pick them with `SSM.font("display" | "ui")` and fall back to Georgia/Arial.
 - Person matte for text-behind-subject: `media/aaron_70s_matte.webm` (Flora · VEED). AE needs the `.mov`: `ffmpeg -c:v libvpx-vp9 -i media/aaron_70s_matte.webm -c:v prores_ks -profile:v 4444 -pix_fmt yuva444p10le media/aaron_70s_matte.mov`.
-- `aaron.png` and the videos in `media/` are personal test material from a project collaborator.
+- `aaron.png`, `collaborator.png` and the people in `media/` are project collaborators (Aaron Amortegui and Gian Orsi) who agreed to be used as test subjects. Prices, bottlings and roles in the showcase are fictional.

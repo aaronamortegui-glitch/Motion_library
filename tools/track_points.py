@@ -1,7 +1,8 @@
 """Region tracking with OpenCV (KLT) → JSON with per-frame position/scale/rotation for AE.
 
-Usage: python track_points.py <video> <output.json> [--debug video_debug.mp4]
-Regions are defined below in video pixels (center x, y, radius).
+Usage: python track_points.py <video> <output.json> [--debug video_debug.mp4] [--regions regions.json]
+Regions are in video pixels (center x, y, radius). Default regions below are for the 70s interview clip;
+pass --regions with {"name": [x, y, r], ...} for any other clip.
 """
 import argparse
 import json
@@ -33,7 +34,9 @@ def main():
     ap.add_argument("video")
     ap.add_argument("out")
     ap.add_argument("--debug")
+    ap.add_argument("--regions", help="JSON file {name: [x, y, radius]} in video pixels")
     a = ap.parse_args()
+    regions = json.load(open(a.regions, encoding="utf-8")) if a.regions else REGIONS
 
     cap = cv2.VideoCapture(a.video)
     fps = cap.get(cv2.CAP_PROP_FPS)
@@ -47,7 +50,7 @@ def main():
     grays = [cv2.cvtColor(f, cv2.COLOR_BGR2GRAY) for f in frames]
 
     tracks = {}
-    for name, (cx, cy, r) in REGIONS.items():
+    for name, (cx, cy, r) in regions.items():
         pts = seed(grays[0], cx, cy, r)
         anchor = np.array([cx, cy], dtype=np.float64)
         pos, scale, rot, conf = [anchor.tolist()], [1.0], [0.0], [1.0]

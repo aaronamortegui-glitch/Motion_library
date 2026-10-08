@@ -17,3 +17,8 @@ ae/Auto-Save/
 media/*_matte.mov
 media/matte_check.png
 research/_render_*.txt
+
+# Whisky showcase temporaries
+media/whisky/_*
+media/whisky/*_raw.mp4
+media/whisky/shot0*.png

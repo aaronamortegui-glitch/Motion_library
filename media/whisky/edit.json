@@ -1,0 +1,114 @@
+{
+  "comp": "WHISKY_EDIT",
+  "fps": 24,
+  "size": [
+    1920,
+    1080
+  ],
+  "music": "media/whisky/music_70s_funk.mp3",
+  "musicGainDb": 0,
+  "shots": [
+    {
+      "comp": "WHISKY_01",
+      "in": 0,
+      "dur": 5
+    },
+    {
+      "comp": "WHISKY_02",
+      "in": 0,
+      "dur": 5
+    },
+    {
+      "comp": "WHISKY_03",
+      "in": 0,
+      "dur": 5
+    }
+  ],
+  "sfx": [
+    {
+      "t": 0.3,
+      "name": "Soft Glitchy Hiss 02",
+      "gainDb": -11
+    },
+    {
+      "t": 0.4,
+      "name": "Data Beep 05",
+      "gainDb": -9
+    },
+    {
+      "t": 1.2,
+      "name": "Single UI Beep 02",
+      "gainDb": -9
+    },
+    {
+      "t": 1.9,
+      "name": "Single UI Beep 02",
+      "gainDb": -10
+    },
+    {
+      "t": 2.6,
+      "name": "Data Miscellaneous 10",
+      "gainDb": -11
+    },
+    {
+      "t": 5.0,
+      "name": "Data Beep 05",
+      "gainDb": -9
+    },
+    {
+      "t": 5.3,
+      "name": "Soft Glitchy Hiss 02",
+      "gainDb": -11
+    },
+    {
+      "t": 6.1,
+      "name": "Single UI Beep 02",
+      "gainDb": -9
+    },
+    {
+      "t": 6.9,
+      "name": "Single UI Beep 02",
+      "gainDb": -10
+    },
+    {
+      "t": 7.6,
+      "name": "Data Miscellaneous 11",
+      "gainDb": -11
+    },
+    {
+      "t": 10.0,
+      "name": "Data Beep 05",
+      "gainDb": -9
+    },
+    {
+      "t": 10.3,
+      "name": "Soft Glitchy Hiss 02",
+      "gainDb": -11
+    },
+    {
+      "t": 11.1,
+      "name": "Single UI Beep 02",
+      "gainDb": -9
+    },
+    {
+      "t": 11.9,
+      "name": "Single UI Beep 02",
+      "gainDb": -10
+    },
+    {
+      "t": 12.6,
+      "name": "Data Miscellaneous 10",
+      "gainDb": -11
+    },
+    {
+      "t": 15.2,
+      "name": "Hollow Pop 06",
+      "gainDb": -7
+    }
+  ],
+  "endCard": {
+    "dur": 5,
+    "title": "The 1974 Boardroom",
+    "kicker": "SS MOTION LAB \u00b7 TRACKING + HUD TEST"
+  }
+}

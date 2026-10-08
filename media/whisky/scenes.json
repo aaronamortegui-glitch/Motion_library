@@ -1,0 +1,243 @@
+{
+  "folder": "WHISKY 1974",
+  "scenes": [
+    {
+      "comp": "WHISKY_01",
+      "plate": "media/whisky/clip01.mp4",
+      "tracks": "media/whisky/clip01_tracks.json",
+      "duration": 5,
+      "hud": [
+        {
+          "type": "kicker",
+          "text": "SS MOTION LAB \u00b7 FILE 1974-A",
+          "at": [
+            110,
+            1010
+          ],
+          "t0": 0.1
+        },
+        {
+          "type": "bracket",
+          "anchor": "TRK aaron_face",
+          "size": [
+            230,
+            290
+          ],
+          "label": "SUBJECT 01 \u00b7 AARON AMORTEGUI",
+          "t0": 0.3
+        },
+        {
+          "type": "bracket",
+          "anchor": "TRK gian_face",
+          "size": [
+            230,
+            290
+          ],
+          "label": "SUBJECT 02 \u00b7 GIAN ORSI",
+          "t0": 0.6
+        },
+        {
+          "type": "chip",
+          "anchor": "TRK aaron_face",
+          "offset": [
+            -270,
+            10
+          ],
+          "text": "CHAIRMAN",
+          "t0": 1.0,
+          "color": "spark"
+        },
+        {
+          "type": "chip",
+          "anchor": "TRK gian_face",
+          "offset": [
+            280,
+            10
+          ],
+          "text": "DEALMAKER",
+          "t0": 1.2,
+          "color": "coral"
+        },
+        {
+          "type": "callout",
+          "id": "spirit",
+          "anchor": "TRK bottle",
+          "offset": [
+            250,
+            -180
+          ],
+          "title": "THE SPIRIT",
+          "lines": [
+            "Single malt \u00b7 aged 18 years",
+            "1974 bottling \u00b7 est. $480"
+          ],
+          "t0": 1.6,
+          "t1": 3.8,
+          "color": "coral"
+        },
+        {
+          "type": "meter",
+          "at": [
+            1450,
+            975
+          ],
+          "width": 340,
+          "label": "DEAL CONFIDENCE",
+          "value": 92,
+          "t0": 2.4
+        }
+      ]
+    },
+    {
+      "comp": "WHISKY_02",
+      "plate": "media/whisky/clip02.mp4",
+      "tracks": "media/whisky/clip02_tracks.json",
+      "duration": 5,
+      "hud": [
+        {
+          "type": "bracket",
+          "anchor": "TRK face",
+          "size": [
+            300,
+            380
+          ],
+          "label": "SUBJECT 01 \u00b7 CHAIRMAN \u00b7 CLASS OF '74",
+          "t0": 0.2
+        },
+        {
+          "type": "callout",
+          "id": "outfit",
+          "anchor": "TRK lapel",
+          "offset": [
+            300,
+            -130
+          ],
+          "title": "OUTFIT",
+          "lines": [
+            "Chocolate three-piece suit",
+            "Rust silk tie \u00b7 est. $1,150"
+          ],
+          "t0": 0.9
+        },
+        {
+          "type": "callout",
+          "id": "pour",
+          "anchor": "TRK glass",
+          "offset": [
+            -330,
+            -170
+          ],
+          "title": "THE POUR",
+          "lines": [
+            "Neat \u00b7 2 oz \u00b7 cut crystal",
+            "Single malt \u00b7 18 YO"
+          ],
+          "t0": 1.5,
+          "color": "coral"
+        },
+        {
+          "type": "callout",
+          "id": "build",
+          "anchor": "TRK vest",
+          "offset": [
+            -430,
+            -60
+          ],
+          "title": "BUILD SCAN",
+          "lines": [
+            "Posture: commanding",
+            "Silhouette: broad, tailored"
+          ],
+          "t0": 2.1
+        },
+        {
+          "type": "meter",
+          "at": [
+            1450,
+            110
+          ],
+          "width": 340,
+          "label": "STYLE INDEX",
+          "value": 97,
+          "t0": 2.6
+        }
+      ]
+    },
+    {
+      "comp": "WHISKY_03",
+      "plate": "media/whisky/clip03.mp4",
+      "tracks": "media/whisky/clip03_tracks.json",
+      "duration": 5,
+      "hud": [
+        {
+          "type": "bracket",
+          "anchor": "TRK face",
+          "size": [
+            300,
+            380
+          ],
+          "label": "SUBJECT 02 \u00b7 DEALMAKER \u00b7 CORNER OFFICE",
+          "t0": 0.2
+        },
+        {
+          "type": "callout",
+          "id": "sip",
+          "anchor": "TRK glass",
+          "offset": [
+            -380,
+            -210
+          ],
+          "title": "THE SIP",
+          "lines": [
+            "Single malt \u00b7 18 YO",
+            "Est. $480 / bottle"
+          ],
+          "t0": 0.6,
+          "t1": 3.2,
+          "color": "coral"
+        },
+        {
+          "type": "callout",
+          "id": "outfit",
+          "anchor": "TRK lapel",
+          "offset": [
+            280,
+            -70
+          ],
+          "title": "OUTFIT",
+          "lines": [
+            "Navy pinstripe double-breast",
+            "Tinted aviators \u00b7 est. $1,380"
+          ],
+          "t0": 1.0
+        },
+        {
+          "type": "callout",
+          "id": "bar",
+          "anchor": "TRK decanter",
+          "offset": [
+            190,
+            -270
+          ],
+          "title": "BAR SERVICE",
+          "lines": [
+            "Lead-crystal decanter",
+            "Est. $220"
+          ],
+          "t0": 1.8
+        },
+        {
+          "type": "meter",
+          "at": [
+            1450,
+            110
+          ],
+          "width": 340,
+          "label": "CHARISMA",
+          "value": 99,
+          "t0": 2.4
+        }
+      ]
+    }
+  ]
+}
