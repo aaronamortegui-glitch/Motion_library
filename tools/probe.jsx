@@ -1,0 +1,2 @@
+var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).parent.parent.fsName.split("\\").join("/");
+﻿var f=new File(SS_ROOT + "/research/ae_probe.txt"); f.open("w"); f.write(app.version + " | project: " + (app.project.file ? app.project.file.fsName : "unsaved") + " | items: " + app.project.numItems + " | active: " + (app.project.activeItem ? app.project.activeItem.name : "none")); f.close();

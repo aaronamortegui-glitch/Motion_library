@@ -1,0 +1,37 @@
+{
+ "source": "figma OGiHZakKWL9iUXUJ8rn7Ko node 56:2 (Essentials)",
+ "colors": {
+  "pine": "#0A211F",
+  "sea": "#174A46",
+  "coral": "#FF9595",
+  "cloud": "#F7F9F2",
+  "spark": "#D8FF85",
+  "grey": "#818C88"
+ },
+ "fonts": {
+  "display": "Instrument Serif",
+  "ui": "Inter Tight"
+ },
+ "components": {
+  "chip": {
+   "h": 55,
+   "radius": 27.5,
+   "pad_x": 26,
+   "font_size": 26
+  },
+  "card": {
+   "w": 540,
+   "h": 300,
+   "radius": 24,
+   "pad": 32
+  },
+  "image_frame": {
+   "radius": 24
+  },
+  "grid": {
+   "margin_x": 120,
+   "eyebrow_y": 96,
+   "footer_y": 1012
+  }
+ }
+}

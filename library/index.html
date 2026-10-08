@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SS Motion Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pine:#0A211F; --sea:#174A46; --cloud:#F7F9F2; --spark:#D8FF85; --coral:#FF9595; --grey:#818C88;
+  --bg:var(--pine); --surface:#10302D; --card:var(--sea); --text:var(--cloud); --muted:#A9B5B0; --line:#24504B;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){ --bg:#F7F9F2; --surface:#ECF0E4; --card:#FFFFFF; --text:#0A211F; --muted:#4F5F5A; --line:#D7DECF; }
+}
+:root[data-theme="light"]{ --bg:#F7F9F2; --surface:#ECF0E4; --card:#FFFFFF; --text:#0A211F; --muted:#4F5F5A; --line:#D7DECF; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Inter Tight",system-ui,sans-serif;line-height:1.45}
+.wrap{max-width:1240px;margin:0 auto;padding:40px 16px 80px}
+.eyebrow{color:var(--spark);font-weight:600;letter-spacing:.02em}
+:root[data-theme="light"] .eyebrow{color:#2F6B2A}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .eyebrow{color:#2F6B2A}}
+h1{font-family:"Instrument Serif",serif;font-weight:400;font-size:clamp(44px,7vw,84px);line-height:1;margin:.25em 0 .3em}
+h2{font-family:"Instrument Serif",serif;font-weight:400;font-size:36px;margin:56px 0 12px}
+p.lead{max-width:760px;color:var(--muted);font-size:18px;margin:0}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:32px 0 20px}
+.chip{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:999px;padding:8px 16px;font:inherit;font-weight:500;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--spark);color:var(--pine);border-color:var(--spark)}
+.search{flex:1;min-width:200px;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;padding:9px 16px;font:inherit}
+.sep{width:1px;height:28px;background:var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.card{background:var(--card);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--line)}
+.card img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--pine)}
+.body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px;flex:1}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.name{font-weight:600;font-size:15px}
+.badge{font-size:11px;font-weight:600;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.e-suave{background:#3B5C57;color:var(--cloud)} .e-medio{background:var(--spark);color:var(--pine)} .e-dinámico{background:var(--coral);color:var(--pine)}
+.meta{color:var(--muted);font-size:12.5px}
+code{font-family:ui-monospace,Consolas,monospace;font-size:10.5px}
+.call{margin-top:auto;display:flex;gap:8px;align-items:center;background:var(--surface);border-radius:10px;padding:8px 10px}
+.call code{flex:1;overflow-x:auto;white-space:nowrap}
+.copy{border:0;background:transparent;color:var(--muted);cursor:pointer;font:inherit;font-size:12px}
+.tokens{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.tok{background:var(--surface);border-radius:16px;padding:14px}
+.tok b{display:block;font-size:16px}
+.tok svg{width:100%;height:70px;margin-top:6px}
+.empty{color:var(--muted);padding:24px 0}
+footer{margin-top:64px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Superside · AI Native Studio</div>
+  <h1>SS Motion Library</h1>
+  <p class="lead">Presets de motion propios para After Effects, construidos con los tokens de Superside. Cada preset crea keyframes y expresiones nativas: se pueden editar y no dependen de plugins.</p>
+
+  <div class="bar" role="toolbar" aria-label="Filtros">
+    <button class="chip" data-kind="all" aria-pressed="true">Todo</button>
+    <button class="chip" data-kind="motion" aria-pressed="false">Motion</button>
+    <button class="chip" data-kind="fx" aria-pressed="false">Effects</button>
+    <button class="chip" data-kind="text" aria-pressed="false">Texto</button>
+    <button class="chip" data-kind="recipe" aria-pressed="false">Recetas</button>
+    <span class="sep"></span>
+    <button class="chip" data-energy="suave" aria-pressed="false">Suave</button>
+    <button class="chip" data-energy="medio" aria-pressed="false">Medio</button>
+    <button class="chip" data-energy="dinámico" aria-pressed="false">Dinámico</button>
+    <input class="search" type="search" placeholder="Buscar por nombre, canal o uso…" aria-label="Buscar">
+  </div>
+  <div class="grid" id="grid"></div>
+
+  <h2>Duraciones</h2>
+  <div class="tokens" id="durs"></div>
+  <h2>Curvas</h2>
+  <div class="tokens" id="eases"></div>
+
+  <footer>Generado por tools/build_library_html.py · tokens v<span id="tv"></span></footer>
+</div>
+<script>
+const DATA = {"presets": [{"name": "Fade", "slug": "fade", "kind": "motion", "channels": "Fade", "energy": "suave", "use": "Corporativo, UI, textos de apoyo", "gif": "gifs/motion/fade.gif", "call": "SSP.apply(layer, \"Fade\", \"both\")"}, {"name": "Fade Up", "slug": "fade-up", "kind": "motion", "channels": "Fade & Position", "energy": "suave", "use": "Titulares, párrafos, listas", "gif": "gifs/motion/fade-up.gif", "call": "SSP.apply(layer, \"Fade Up\", \"both\")"}, {"name": "Scale Pop", "slug": "scale-pop", "kind": "motion", "channels": "Fade & Scale", "energy": "dinámico", "use": "Íconos, chips, stickers, social", "gif": "gifs/motion/scale-pop.gif", "call": "SSP.apply(layer, \"Scale Pop\", \"both\")"}, {"name": "Blur In", "slug": "blur-in", "kind": "motion", "channels": "Blur & Fade", "energy": "suave", "use": "Fotos, fondos, momentos premium", "gif": "gifs/motion/blur-in.gif", "call": "SSP.apply(layer, \"Blur In\", \"both\")"}, {"name": "Slide Land", "slug": "slide-land", "kind": "motion", "channels": "Position", "energy": "medio", "use": "Imágenes y cards que entran desde fuera de cuadro", "gif": "gifs/motion/slide-land.gif", "call": "SSP.apply(layer, \"Slide Land\", \"both\")"}, {"name": "Rotate Settle", "slug": "rotate-settle", "kind": "motion", "channels": "Fade & Rotate & Scale", "energy": "medio", "use": "Logos, badges, piezas con personalidad", "gif": "gifs/motion/rotate-settle.gif", "call": "SSP.apply(layer, \"Rotate Settle\", \"both\")"}, {"name": "Squash Warp", "slug": "squash-warp", "kind": "motion", "channels": "Scale & Warp", "energy": "dinámico", "use": "Social, hype, transiciones con ritmo", "gif": "gifs/motion/squash-warp.gif", "call": "SSP.apply(layer, \"Squash Warp\", \"both\")"}, {"name": "Wipe Reveal", "slug": "wipe-reveal", "kind": "motion", "channels": "Mask", "energy": "medio", "use": "Barras, lower thirds, subrayados", "gif": "gifs/motion/wipe-reveal.gif", "call": "SSP.apply(layer, \"Wipe Reveal\", \"both\")"}, {"name": "Line Draw", "slug": "line-draw", "kind": "motion", "channels": "Trim Path", "energy": "medio", "use": "Líneas, íconos de trazo, tracking HUD (solo shape layers)", "gif": "gifs/motion/line-draw.gif", "call": "SSP.apply(layer, \"Line Draw\", \"both\")"}, {"name": "Float", "slug": "float", "kind": "fx", "channels": "Position", "energy": "suave", "use": "Íconos y cards en reposo, fondos vivos", "gif": "gifs/fx/float.gif", "call": "SSP.applyFx(layer, \"Float\")"}, {"name": "Wiggle Rotate", "slug": "wiggle-rotate", "kind": "fx", "channels": "Rotate", "energy": "medio", "use": "Stickers, ilustraciones con personalidad", "gif": "gifs/fx/wiggle-rotate.gif", "call": "SSP.applyFx(layer, \"Wiggle Rotate\")"}, {"name": "Pulse", "slug": "pulse", "kind": "fx", "channels": "Scale", "energy": "medio", "use": "CTAs, botones, llamadas de atención", "gif": "gifs/fx/pulse.gif", "call": "SSP.applyFx(layer, \"Pulse\")"}, {"name": "Jitter", "slug": "jitter", "kind": "fx", "channels": "Position & Rotate", "energy": "dinámico", "use": "Social, glitch, piezas de alta energía", "gif": "gifs/fx/jitter.gif", "call": "SSP.applyFx(layer, \"Jitter\")"}, {"name": "Chars Rise", "slug": "chars-rise", "kind": "text", "channels": "Text · Position & Fade (carácter)", "energy": "medio", "use": "Titulares cortos, nombres, kickers", "gif": "gifs/text/chars-rise.gif", "call": "SSP.applyText(textLayer, \"Chars Rise\", \"both\")"}, {"name": "Words Fade Up", "slug": "words-fade-up", "kind": "text", "channels": "Text · Position & Fade (palabra)", "energy": "suave", "use": "Frases, subtítulos, citas", "gif": "gifs/text/words-fade-up.gif", "call": "SSP.applyText(textLayer, \"Words Fade Up\", \"both\")"}, {"name": "Blur Words", "slug": "blur-words", "kind": "text", "channels": "Text · Blur & Fade (palabra)", "energy": "suave", "use": "Momentos premium, intros calmadas", "gif": "gifs/text/blur-words.gif", "call": "SSP.applyText(textLayer, \"Blur Words\", \"both\")"}, {"name": "Tracking Settle", "slug": "tracking-settle", "kind": "text", "channels": "Text · Tracking & Fade", "energy": "medio", "use": "Títulos en mayúsculas, logotipos tipográficos", "gif": "gifs/text/tracking-settle.gif", "call": "SSP.applyText(textLayer, \"Tracking Settle\", \"both\")"}, {"name": "Chars Pop", "slug": "chars-pop", "kind": "text", "channels": "Text · Scale (carácter)", "energy": "dinámico", "use": "Social, hype, números grandes", "gif": "gifs/text/chars-pop.gif", "call": "SSP.applyText(textLayer, \"Chars Pop\", \"both\")"}, {"name": "calibration__W3L", "slug": "calibration-w3l", "kind": "recipe", "id": "calibration__W3L", "channels": "position & rotation & scale (loop)", "energy": "dinámico", "use": "Ref. AC · CALIBRATION", "gif": "gifs/recipe/calibration-w3l.gif", "call": "SSP.applyRecipe(layer, \"calibration__W3L\", \"both\")"}, {"name": "calibration__4LC", "slug": "calibration-4lc", "kind": "recipe", "id": "calibration__4LC", "channels": "position & rotation", "energy": "dinámico", "use": "Ref. AC · CALIBRATION", "gif": "gifs/recipe/calibration-4lc.gif", "call": "SSP.applyRecipe(layer, \"calibration__4LC\", \"both\")"}, {"name": "calibration__D2T", "slug": "calibration-d2t", "kind": "recipe", "id": "calibration__D2T", "channels": "position (loop)", "energy": "dinámico", "use": "Ref. AC · CALIBRATION", "gif": "gifs/recipe/calibration-d2t.gif", "call": "SSP.applyRecipe(layer, \"calibration__D2T\", \"both\")"}, {"name": "calibration__2JK", "slug": "calibration-2jk", "kind": "recipe", "id": "calibration__2JK", "channels": "rotation (loop)", "energy": "medio", "use": "Ref. AC · CALIBRATION", "gif": "gifs/recipe/calibration-2jk.gif", "call": "SSP.applyRecipe(layer, \"calibration__2JK\", \"both\")"}, {"name": "calibration__1DF+UNU", "slug": "calibration-1df-unu", "kind": "recipe", "id": "calibration__1DF+UNU", "channels": "scale (loop)", "energy": "dinámico", "use": "Ref. AC · CALIBRATION", "gif": "gifs/recipe/calibration-1df-unu.gif", "call": "SSP.applyRecipe(layer, \"calibration__1DF+UNU\", \"both\")"}, {"name": "calibration__X9R", "slug": "calibration-x9r", "kind": "recipe", "id": "calibration__X9R", "channels": "opacity & scale", "energy": "medio", "use": "Ref. AC · CALIBRATION", "gif": "gifs/recipe/calibration-x9r.gif", "call": "SSP.applyRecipe(layer, \"calibration__X9R\", \"both\")"}, {"name": "calibration__PE6", "slug": "calibration-pe6", "kind": "recipe", "id": "calibration__PE6", "channels": "position", "energy": "medio", "use": "Ref. AC · CALIBRATION", "gif": "gifs/recipe/calibration-pe6.gif", "call": "SSP.applyRecipe(layer, \"calibration__PE6\", \"both\")"}, {"name": "calibration__4VW", "slug": "calibration-4vw", "kind": "recipe", "id": "calibration__4VW", "channels": "position & scale", "energy": "dinámico", "use": "Ref. AC · CALIBRATION", "gif": "gifs/recipe/calibration-4vw.gif", "call": "SSP.applyRecipe(layer, \"calibration__4VW\", \"both\")"}, {"name": "calibration__2JV", "slug": "calibration-2jv", "kind": "recipe", "id": "calibration__2JV", "channels": "scale", "energy": "dinámico", "use": "Ref. AC · CALIBRATION", "gif": "gifs/recipe/calibration-2jv.gif", "call": "SSP.applyRecipe(layer, \"calibration__2JV\", \"both\")"}], "tokens": {"version": "0.2-draft", "fps": 30, "notes": "Propio de Superside. v0.2 calibrado con 6 transiciones reales muestreadas en AE (research/calibration_fit.json): entradas 12-17f, overshoot típico ~5%, salidas con anticipación.", "durations": [{"name": "Tick", "frames": 4, "ms": 133, "use": "Micro-interacciones: clicks, hovers, toggles"}, {"name": "Blink", "frames": 6, "ms": 200, "use": "Fundidos de opacidad in/out"}, {"name": "Glide", "frames": 9, "ms": 300, "use": "Movimientos cortos y eficientes de un elemento"}, {"name": "Arrive", "frames": 14, "ms": 467, "use": "Entradas de elementos, elementos en movimiento"}, {"name": "Sweep", "frames": 21, "ms": 700, "use": "Cambios que cubren media pantalla o más"}, {"name": "Stage", "frames": 33, "ms": 1100, "use": "Momentos a pantalla completa, scrims, transiciones"}], "easings": [{"name": "Flat", "bezier": [0, 0, 1, 1], "use": "Opacidad y micro-interacciones", "ae": {"out": "linear", "in": "linear"}}, {"name": "Land", "bezier": [0.12, 0.9, 0.28, 1], "use": "Entradas desde fuera de cuadro (frenada larga, algo más suave)", "ae": {"out": {"influence": 12, "speed_x_avg": 7.5}, "in": {"influence": 72, "speed_x_avg": 0}}}, {"name": "Launch", "bezier": [0.55, 0, 0.9, 0.6], "use": "Salidas que encadenan con la entrada de otro elemento", "ae": {"out": {"influence": 55, "speed_x_avg": 0}, "in": {"influence": 10, "speed_x_avg": 4}}}, {"name": "Settle", "bezier": [0.3, 0, 0.1, 1], "use": "Movimiento general y salidas que no encadenan", "ae": {"out": {"influence": 30, "speed_x_avg": 0}, "in": {"influence": 90, "speed_x_avg": 0}}}, {"name": "Cruise", "bezier": [0.5, 0, 0.15, 1], "use": "A→B genérico y suave", "ae": {"out": {"influence": 50, "speed_x_avg": 0}, "in": {"influence": 85, "speed_x_avg": 0}}}, {"name": "Pop", "bezier": [0.34, 1.45, 0.64, 1], "use": "Nuevo: entradas con rebote/overshoot para piezas dinámicas", "ae": {"note": "3 keys: 0 → 105% → 100% (Land hasta el pico al 60%, Settle de vuelta)"}, "overshoot": 0.05}, {"name": "Recoil", "bezier": [0.6, 0, 0.75, -0.4], "use": "Salidas con anticipación: retrocede un poco y sale (piezas dinámicas)", "ae": {"note": "Undershoot: 3 keys (100% → -4% del recorrido → destino) o expresión; no cabe en 2 keys"}}], "ae_conversion": "out.influence = x1*100; out.speed = (y1/x1)*avg; in.influence = (1-x2)*100; in.speed = ((1-y2)/(1-x2))*avg", "calibration": {"entrance_frames_range": [12, 17], "exit_frames_range": [13, 20], "typical_overshoot": 0.05, "observed_beziers": {"in_overshoot": [0.26, 1.42, 0.37, 0.98], "in_soft": [0.26, 0.95, 0.56, 0.99], "in_late": [0.4, 0.79, 0.74, 1.0], "out_ease_in": [0.45, 0.01, 0.75, 0.02], "out_anticipate": [0.62, 0.02, 0.74, -0.42]}}}};
+const state = { kind: "all", energy: null, q: "" };
+const grid = document.getElementById("grid");
+function card(p){
+  const el = document.createElement("article");
+  el.className = "card";
+  el.innerHTML = `<img loading="lazy" width="240" height="135" src="${p.gif}" alt="Preview de ${p.name}">
+  <div class="body">
+    <div class="row"><span class="name">${p.name}</span><span class="badge e-${p.energy}">${p.energy}</span></div>
+    <div class="meta">${p.channels}</div>
+    <div class="meta">${p.use}</div>
+    <div class="call"><code>${p.call}</code><button class="copy">Copiar</button></div>
+  </div>`;
+  el.querySelector(".copy").onclick = e => {
+    try { navigator.clipboard.writeText(p.call); e.target.textContent = "Copiado"; setTimeout(()=>e.target.textContent="Copiar",1200); } catch(_){}
+  };
+  return el;
+}
+function render(){
+  grid.innerHTML = "";
+  const q = state.q.toLowerCase();
+  const list = DATA.presets.filter(p =>
+    (state.kind === "all" || p.kind === state.kind) &&
+    (!state.energy || p.energy === state.energy) &&
+    (!q || (p.name + " " + p.channels + " " + p.use).toLowerCase().includes(q)));
+  if (!list.length) { grid.innerHTML = '<div class="empty">Ningún preset coincide con el filtro.</div>'; return; }
+  list.forEach(p => grid.appendChild(card(p)));
+}
+document.querySelectorAll("[data-kind]").forEach(b => b.onclick = () => {
+  state.kind = b.dataset.kind;
+  document.querySelectorAll("[data-kind]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+});
+document.querySelectorAll("[data-energy]").forEach(b => b.onclick = () => {
+  state.energy = state.energy === b.dataset.energy ? null : b.dataset.energy;
+  document.querySelectorAll("[data-energy]").forEach(x => x.setAttribute("aria-pressed", x.dataset.energy === state.energy));
+  render();
+});
+document.querySelector(".search").oninput = e => { state.q = e.target.value; render(); };
+
+// Tokens
+const T = DATA.tokens;
+document.getElementById("tv").textContent = T.version;
+document.getElementById("durs").innerHTML = T.durations.map(d =>
+  `<div class="tok"><b>${d.name}</b><span class="meta">${d.frames} f · ${d.ms} ms</span><div class="meta">${d.use}</div></div>`).join("");
+function curve(b){
+  const [x1,y1,x2,y2] = b, W=160, H=60, pad=6;
+  const X = v => pad + v*(W-2*pad), Y = v => H - pad - v*(H-2*pad)*0.8 - (H-2*pad)*0.1;
+  return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><path d="M${X(0)} ${Y(0)} C${X(x1)} ${Y(y1)} ${X(x2)} ${Y(y2)} ${X(1)} ${Y(1)}" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>`;
+}
+document.getElementById("eases").innerHTML = T.easings.map(e =>
+  `<div class="tok"><b>${e.name}</b><code class="meta">${e.bezier.join(", ")}</code>${curve(e.bezier)}<div class="meta">${e.use}</div></div>`).join("");
+render();
+</script>
+</body>
+</html>

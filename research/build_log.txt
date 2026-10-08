@@ -1,0 +1,4 @@
+01 ok — draw-on termina en 0.90s
+02 ok — 6 tracks
+03 ok
+saved: D:\motion category ai library\ae\motion_lab_v01.aep

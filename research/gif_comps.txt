@@ -1,0 +1,27 @@
+GIF__motion__Fade
+GIF__motion__Fade Up
+GIF__motion__Scale Pop
+GIF__motion__Blur In
+GIF__motion__Slide Land
+GIF__motion__Rotate Settle
+GIF__motion__Squash Warp
+GIF__motion__Wipe Reveal
+GIF__motion__Line Draw
+GIF__fx__Float
+GIF__fx__Wiggle Rotate
+GIF__fx__Pulse
+GIF__fx__Jitter
+GIF__text__Chars Rise
+GIF__text__Words Fade Up
+GIF__text__Blur Words
+GIF__text__Tracking Settle
+GIF__text__Chars Pop
+GIF__recipe__calibration__W3L
+GIF__recipe__calibration__4LC
+GIF__recipe__calibration__D2T
+GIF__recipe__calibration__2JK
+GIF__recipe__calibration__1DF+UNU
+GIF__recipe__calibration__X9R
+GIF__recipe__calibration__PE6
+GIF__recipe__calibration__4VW
+GIF__recipe__calibration__2JV

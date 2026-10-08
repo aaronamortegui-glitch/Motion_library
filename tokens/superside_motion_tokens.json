@@ -1,0 +1,210 @@
+{
+  "version": "0.2-draft",
+  "fps": 30,
+  "notes": "Propio de Superside. v0.2 calibrado con 6 transiciones reales muestreadas en AE (research/calibration_fit.json): entradas 12-17f, overshoot típico ~5%, salidas con anticipación.",
+  "durations": [
+    {
+      "name": "Tick",
+      "frames": 4,
+      "ms": 133,
+      "use": "Micro-interacciones: clicks, hovers, toggles"
+    },
+    {
+      "name": "Blink",
+      "frames": 6,
+      "ms": 200,
+      "use": "Fundidos de opacidad in/out"
+    },
+    {
+      "name": "Glide",
+      "frames": 9,
+      "ms": 300,
+      "use": "Movimientos cortos y eficientes de un elemento"
+    },
+    {
+      "name": "Arrive",
+      "frames": 14,
+      "ms": 467,
+      "use": "Entradas de elementos, elementos en movimiento"
+    },
+    {
+      "name": "Sweep",
+      "frames": 21,
+      "ms": 700,
+      "use": "Cambios que cubren media pantalla o más"
+    },
+    {
+      "name": "Stage",
+      "frames": 33,
+      "ms": 1100,
+      "use": "Momentos a pantalla completa, scrims, transiciones"
+    }
+  ],
+  "easings": [
+    {
+      "name": "Flat",
+      "bezier": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "use": "Opacidad y micro-interacciones",
+      "ae": {
+        "out": "linear",
+        "in": "linear"
+      }
+    },
+    {
+      "name": "Land",
+      "bezier": [
+        0.12,
+        0.9,
+        0.28,
+        1
+      ],
+      "use": "Entradas desde fuera de cuadro (frenada larga, algo más suave)",
+      "ae": {
+        "out": {
+          "influence": 12,
+          "speed_x_avg": 7.5
+        },
+        "in": {
+          "influence": 72,
+          "speed_x_avg": 0
+        }
+      }
+    },
+    {
+      "name": "Launch",
+      "bezier": [
+        0.55,
+        0,
+        0.9,
+        0.6
+      ],
+      "use": "Salidas que encadenan con la entrada de otro elemento",
+      "ae": {
+        "out": {
+          "influence": 55,
+          "speed_x_avg": 0
+        },
+        "in": {
+          "influence": 10,
+          "speed_x_avg": 4
+        }
+      }
+    },
+    {
+      "name": "Settle",
+      "bezier": [
+        0.3,
+        0,
+        0.1,
+        1
+      ],
+      "use": "Movimiento general y salidas que no encadenan",
+      "ae": {
+        "out": {
+          "influence": 30,
+          "speed_x_avg": 0
+        },
+        "in": {
+          "influence": 90,
+          "speed_x_avg": 0
+        }
+      }
+    },
+    {
+      "name": "Cruise",
+      "bezier": [
+        0.5,
+        0,
+        0.15,
+        1
+      ],
+      "use": "A→B genérico y suave",
+      "ae": {
+        "out": {
+          "influence": 50,
+          "speed_x_avg": 0
+        },
+        "in": {
+          "influence": 85,
+          "speed_x_avg": 0
+        }
+      }
+    },
+    {
+      "name": "Pop",
+      "bezier": [
+        0.34,
+        1.45,
+        0.64,
+        1
+      ],
+      "use": "Nuevo: entradas con rebote/overshoot para piezas dinámicas",
+      "ae": {
+        "note": "3 keys: 0 → 105% → 100% (Land hasta el pico al 60%, Settle de vuelta)"
+      },
+      "overshoot": 0.05
+    },
+    {
+      "name": "Recoil",
+      "bezier": [
+        0.6,
+        0,
+        0.75,
+        -0.4
+      ],
+      "use": "Salidas con anticipación: retrocede un poco y sale (piezas dinámicas)",
+      "ae": {
+        "note": "Undershoot: 3 keys (100% → -4% del recorrido → destino) o expresión; no cabe en 2 keys"
+      }
+    }
+  ],
+  "ae_conversion": "out.influence = x1*100; out.speed = (y1/x1)*avg; in.influence = (1-x2)*100; in.speed = ((1-y2)/(1-x2))*avg",
+  "calibration": {
+    "entrance_frames_range": [
+      12,
+      17
+    ],
+    "exit_frames_range": [
+      13,
+      20
+    ],
+    "typical_overshoot": 0.05,
+    "observed_beziers": {
+      "in_overshoot": [
+        0.26,
+        1.42,
+        0.37,
+        0.98
+      ],
+      "in_soft": [
+        0.26,
+        0.95,
+        0.56,
+        0.99
+      ],
+      "in_late": [
+        0.4,
+        0.79,
+        0.74,
+        1.0
+      ],
+      "out_ease_in": [
+        0.45,
+        0.01,
+        0.75,
+        0.02
+      ],
+      "out_anticipate": [
+        0.62,
+        0.02,
+        0.74,
+        -0.42
+      ]
+    }
+  }
+}

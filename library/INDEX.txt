@@ -1,0 +1,32 @@
+# SS Motion · 27 presets · tokens v0.2-draft · energía s=suave m=medio d=dinámico
+# llamadas: motion SSP.apply(L,N,in|out|both) · fx SSP.applyFx(L,N) · text SSP.applyText(L,N,in|out|both) · recipe SSP.applyRecipe(L,ID,both) · include tools/ss_presets.jsx
+# dur(f@30): Tick4 Blink6 Glide9 Arrive14 Sweep21 Stage33
+# ease(bezier): Flat 0,0,1,1; Land 0.12,0.9,0.28,1; Launch 0.55,0,0.9,0.6; Settle 0.3,0,0.1,1; Cruise 0.5,0,0.15,1; Pop 0.34,1.45,0.64,1; Recoil 0.6,0,0.75,-0.4
+# kind|nombre|canales|e|uso
+motion|Fade|Fade|s|Corporativo, UI, textos de apoyo
+motion|Fade Up|Fade&Position|s|Titulares, párrafos, listas
+motion|Scale Pop|Fade&Scale|d|Íconos, chips, stickers, social
+motion|Blur In|Blur&Fade|s|Fotos, fondos, momentos premium
+motion|Slide Land|Position|m|Imágenes y cards que entran desde fuera de cuadro
+motion|Rotate Settle|Fade&Rotate&Scale|m|Logos, badges, piezas con personalidad
+motion|Squash Warp|Scale&Warp|d|Social, hype, transiciones con ritmo
+motion|Wipe Reveal|Mask|m|Barras, lower thirds, subrayados
+motion|Line Draw|Trim Path|m|Líneas, íconos de trazo, tracking HUD (solo shape layers)
+fx|Float|Position|s|Íconos y cards en reposo, fondos vivos
+fx|Wiggle Rotate|Rotate|m|Stickers, ilustraciones con personalidad
+fx|Pulse|Scale|m|CTAs, botones, llamadas de atención
+fx|Jitter|Position&Rotate|d|Social, glitch, piezas de alta energía
+text|Chars Rise|Position&Fade (carácter)|m|Titulares cortos, nombres, kickers
+text|Words Fade Up|Position&Fade (palabra)|s|Frases, subtítulos, citas
+text|Blur Words|Blur&Fade (palabra)|s|Momentos premium, intros calmadas
+text|Tracking Settle|Tracking&Fade|m|Títulos en mayúsculas, logotipos tipográficos
+text|Chars Pop|Scale (carácter)|d|Social, hype, números grandes
+recipe|calibration__W3L|position&rotation&scale (loop)|d|Ref. AC · CALIBRATION
+recipe|calibration__4LC|position&rotation|d|Ref. AC · CALIBRATION
+recipe|calibration__D2T|position (loop)|d|Ref. AC · CALIBRATION
+recipe|calibration__2JK|rotation (loop)|m|Ref. AC · CALIBRATION
+recipe|calibration__1DF+UNU|scale (loop)|d|Ref. AC · CALIBRATION
+recipe|calibration__X9R|opacity&scale|m|Ref. AC · CALIBRATION
+recipe|calibration__PE6|position|m|Ref. AC · CALIBRATION
+recipe|calibration__4VW|position&scale|d|Ref. AC · CALIBRATION
+recipe|calibration__2JV|scale|d|Ref. AC · CALIBRATION

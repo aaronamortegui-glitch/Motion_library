@@ -1,0 +1,16 @@
+# Regenerables / temporales
+renders/
+library/mp4/
+research/analysis/
+research/contact_sheets/
+bridge/inbox/
+bridge/outbox/
+bridge/done/
+ae/Adobe After Effects Auto-Save/
+**/*.aep Logs/
+__pycache__/
+*.pyc
+.claude/launch.json
+.claude/settings.local.json
+tools/ac_driver.local.json
+ae/Auto-Save/
