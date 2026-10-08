@@ -66,12 +66,12 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         made.push(c2.name);
     }
     var tx = SSP.textNames();
-    var sample = { "Chars Rise": ["Superside", "Georgia", 96], "Words Fade Up": ["Built for speed", "Arial-BoldMT", 56],
-        "Blur Words": ["Calm and premium", "Georgia", 64], "Tracking Settle": ["MOTION LAB", "Arial-BoldMT", 54],
-        "Chars Pop": ["5,000", "Arial-BoldMT", 110] };
+    var sample = { "Chars Rise": ["Superside", SSM.font("display"), 96], "Words Fade Up": ["Built for speed", SSM.font("ui"), 56],
+        "Blur Words": ["Calm and premium", SSM.font("display"), 64], "Tracking Settle": ["MOTION LAB", SSM.font("ui"), 54],
+        "Chars Pop": ["5,000", SSM.font("ui"), 110] };
     for (var d = 0; d < tx.length; d++) {
         var c3 = comp("text", tx[d], 2.4);
-        var sm = sample[tx[d]] || [tx[d], "Arial-BoldMT", 60];
+        var sm = sample[tx[d]] || [tx[d], SSM.font("ui"), 60];
         SSP.applyText(text(c3, sm[0], sm[1], sm[2]), tx[d], "both", 0.2);
         made.push(c3.name);
     }

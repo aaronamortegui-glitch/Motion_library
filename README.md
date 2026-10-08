@@ -77,7 +77,7 @@ Las recetas guardan *qué se mueve y cómo* (canales relativos, frames, curva o 
 | `tools/` | Librería JSX, panel, puente, estación de cosecha, controlador, pipelines (`expand_library.sh`, `render_gifs.sh`, `render_queue.jsx`) |
 | `library/` | `INDEX.txt` (LLM), `library.json`, `recipes.json`, `index.html`, `gifs/` |
 | `assets/` | Logos Superside, S-mark para AE, paleta y componentes del Figma *Essentials* |
-| `ae/` | Proyecto de pruebas (incluye tracking y texto sobre video AI) |
+| `ae/` | Proyecto de pruebas: 01 ícono · 02 tracking · 03 Figma · 04 texto + tracking · 05 texto detrás del sujeto (todo sobre video AI) |
 | `media/` | Video base (Flora, 70s 16mm) y datos de tracking |
 | `research/` | Calibración, cosechas, catálogo de previews |
 
@@ -90,4 +90,5 @@ El repo se puede clonar en cualquier carpeta: los scripts calculan la raíz (`SS
 
 - `render_gifs.sh` usa `aerender` solo sin `SKIP_RENDER`. Si el proyecto tiene capas con presets de Animation Composer, renderiza con `tools/render_queue.jsx` (cola del AE abierto), porque `aerender` se queda colgado.
 - `aaron.png` y el video de `media/` son material personal de prueba; revísalos antes de publicar el repo fuera del equipo.
-- Fuentes de marca: Inter Tight e Instrument Serif (OFL), pendientes de instalar en `assets/fonts/`.
+- Fuentes de marca en `assets/fonts/` (Inter Tight e Instrument Serif, licencia OFL). Instálalas en Windows (clic derecho › Instalar) antes de abrir AE; los scripts las eligen con `SSM.font("display" | "ui")` y si faltan usan Georgia/Arial.
+- Matte de la persona para texto detrás del sujeto: `media/aaron_70s_matte.webm` (Flora · VEED). AE necesita el `.mov`: `ffmpeg -c:v libvpx-vp9 -i media/aaron_70s_matte.webm -c:v prores_ks -profile:v 4444 -pix_fmt yuva444p10le media/aaron_70s_matte.mov`.

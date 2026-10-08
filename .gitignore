@@ -14,3 +14,6 @@ __pycache__/
 .claude/settings.local.json
 tools/ac_driver.local.json
 ae/Auto-Save/
+media/*_matte.mov
+media/matte_check.png
+research/_render_*.txt

@@ -14,7 +14,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     function label(txt, x, y, size, col) {
         var L = c.layers.addText(txt);
         var tp = L.property("ADBE Text Properties").property("ADBE Text Document"), td = tp.value;
-        td.resetCharStyle(); td.font = "ArialMT"; td.fontSize = size; td.fillColor = hex(col); td.applyFill = true;
+        td.resetCharStyle(); td.font = SSM.font("ui_regular"); td.fontSize = size; td.fillColor = hex(col); td.applyFill = true;
         td.justification = ParagraphJustification.CENTER_JUSTIFY; tp.setValue(td);
         L.property("ADBE Transform Group").property("ADBE Position").setValue([x, y]);
         return L;

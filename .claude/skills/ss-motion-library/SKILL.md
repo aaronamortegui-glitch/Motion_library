@@ -51,6 +51,14 @@ Reglas:
 - Flujo: el usuario abre `tools/ss_harvest_station.jsx` en AE (sección + Iniciar) y la carpeta equivalente en el panel de AC → `python tools/ac_driver.py run` (UI automation: doble clic por miniatura, espera el registro en `research/harvest/station/_log.csv`, scroll, ESC para parar; calibrar antes con `calibrate`) → `bash tools/expand_library.sh` (OCR de nombres, `harvest_to_library.py` → `library/recipes.json`, miniaturas, índice).
 - Las recetas se aplican con `SSP.applyRecipe(L, id, "both")`; reproducen el comportamiento con keyframes/expresiones propias.
 
+## Tipografía
+Usa `SSM.font("display" | "ui" | "ui_regular")`: devuelve Instrument Serif / Inter Tight si están instaladas (archivos en `assets/fonts/`, OFL) y si no, Georgia / Arial. Nunca escribas nombres de fuente a mano.
+
+## Renders y medios
+- Comps de prueba: lista en `research/_render_list.txt` → `bash tools/bridge.sh tools/render_comps.jsx` → `bash tools/wait_files.sh research/_render_expected.txt` → `renders/<comp>.mp4`.
+- Subir archivos locales a Flora: `flora_create_asset(source="signed-url")` y luego `python tools/signed_upload.py <archivo> '<json de upload>'`.
+- Nunca uses `app.newProject()` en jobs: reconstruye solo tus comps (búscalas por nombre y bórralas) para no perder el resto del proyecto.
+
 ## Trampas conocidas de ExtendScript
 - Regex `/\\/g` rompe el parser → `.split("\\").join("/")`.
 - `new File()` con `#` falla → `Folder.getFiles("Nombre*")`.

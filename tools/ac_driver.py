@@ -8,6 +8,7 @@ Requisitos: Windows, Python 3, Pillow, opencv-python, numpy (sin dependencias de
 
 Uso:
   python tools/ac_driver.py calibrate          # una vez por equipo / tamaño de panel
+  python tools/ac_driver.py preview            # recorre las celdas con el mouse SIN hacer clic (verificar calibración)
   python tools/ac_driver.py run [--max N]      # con la carpeta abierta en el panel y la estación iniciada
   ESC en cualquier momento detiene el recorrido.
 
@@ -109,6 +110,20 @@ def calibrate():
     print(f"OK: {cols} columnas × {rows} filas visibles. Guardado en {CAL.name}")
 
 
+def preview():
+    if not CAL.exists():
+        sys.exit("Falta calibración: python tools/ac_driver.py calibrate")
+    cal = json.loads(CAL.read_text(encoding="utf-8"))
+    print(f"Recorriendo {cal['cols']}×{cal['rows']} celdas sin hacer clic (ESC para parar)…")
+    time.sleep(1.5)
+    for r in range(cal["rows"]):
+        for c in range(cal["cols"]):
+            check_abort()
+            move(cal["x0"] + c * cal["dx"], cal["y0"] + r * cal["dy"])
+            time.sleep(0.35)
+    print("OK: si el mouse pasó por el centro de cada miniatura, la calibración es correcta.")
+
+
 def log_lines():
     return LOG.read_text(encoding="utf-8").splitlines() if LOG.exists() else []
 
@@ -198,11 +213,11 @@ def run(max_items, timeout):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("cmd", choices=["calibrate", "run"])
+    ap.add_argument("cmd", choices=["calibrate", "preview", "run"])
     ap.add_argument("--max", type=int, default=0, help="máximo de presets a cosechar")
     ap.add_argument("--timeout", type=float, default=8.0, help="segundos de espera por preset")
     a = ap.parse_args()
-    calibrate() if a.cmd == "calibrate" else run(a.max, a.timeout)
+    {"calibrate": calibrate, "preview": preview}.get(a.cmd, lambda: run(a.max, a.timeout))()
 
 
 if __name__ == "__main__":

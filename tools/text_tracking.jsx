@@ -5,7 +5,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var ROOT = SS_ROOT + "/";
     var PAL = SSM.readJSON(ROOT + "assets/figma_essentials/palette.json").colors;
     var TRK = SSM.readJSON(ROOT + "media/tracks.json");
-    var SERIF = "Georgia", SANS = "Arial-BoldMT", SANS_R = "ArialMT";
+    var SERIF = SSM.font("display"), SANS = SSM.font("ui"), SANS_R = SSM.font("ui_regular");
     function hex(h) { h = h.replace("#", ""); return [parseInt(h.substr(0, 2), 16) / 255, parseInt(h.substr(2, 2), 16) / 255, parseInt(h.substr(4, 2), 16) / 255]; }
     function tr(L, p) { return L.property("ADBE Transform Group").property(p); }
     var proj = app.project;

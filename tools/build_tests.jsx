@@ -14,15 +14,27 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var PAL = SSM.readJSON(ROOT + "assets/figma_essentials/palette.json").colors;
     var ICON = SSM.readJSON(ROOT + "assets/superside/ss_icon_shape.json");
     var TRK = SSM.readJSON(ROOT + "media/tracks.json");
-    var SERIF = "Georgia", SANS = "Arial-BoldMT"; // fallback: Instrument Serif / Inter Tight no instaladas
+    var SERIF = SSM.font("display"), SANS = SSM.font("ui"); // fallback: Instrument Serif / Inter Tight no instaladas
 
     function hex(h) { h = h.replace("#", ""); return [parseInt(h.substr(0, 2), 16) / 255, parseInt(h.substr(2, 2), 16) / 255, parseInt(h.substr(4, 2), 16) / 255]; }
     function sec(name) { return SSM.seconds(name); }
 
     app.beginUndoGroup("SS motion tests");
-    app.newProject();
-    app.project.expressionEngine = "javascript-1.0";
-    var folder = app.project.items.addFolder("SS Motion Lab");
+    // Reconstruye solo sus comps dentro del proyecto abierto (no crea proyecto nuevo:
+    // así no se pierden CALIBRATION, AC Sections, 04_Text_Tracking, GIF Previews, etc.)
+    if (!app.project.file) app.project.expressionEngine = "javascript-1.0";
+    function findItem(name) { for (var i = 1; i <= app.project.numItems; i++) if (app.project.item(i).name === name) return app.project.item(i); return null; }
+    var OWN = ["01_SS_Icon_Intro", "02_Track_70s", "03_Figma_Chips"];
+    for (var o = 0; o < OWN.length; o++) { var old = findItem(OWN[o]); if (old) old.remove(); }
+    var folder = findItem("SS Motion Lab");
+    if (!(folder instanceof FolderItem)) folder = app.project.items.addFolder("SS Motion Lab");
+    function importOnce(file) {
+        for (var i = 1; i <= app.project.numItems; i++) {
+            var it = app.project.item(i);
+            if (it instanceof FootageItem && it.file && it.file.fsName === file.fsName) return it;
+        }
+        return app.project.importFile(new ImportOptions(file));
+    }
 
     // ---------- helpers ----------
     function solid(comp, name, color) {
@@ -119,7 +131,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     // =========================================================
     // 02 · Tracking sobre video 70s
     // =========================================================
-    var vid = app.project.importFile(new ImportOptions(new File(ROOT + "media/aaron_70s_handheld.mp4")));
+    var vid = importOnce(new File(ROOT + "media/aaron_70s_handheld.mp4"));
     vid.parentFolder = folder;
     var c2 = app.project.items.addComp("02_Track_70s", TRK.size[0], TRK.size[1], 1, vid.duration, TRK.fps);
     c2.parentFolder = folder;
@@ -208,7 +220,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         var hits = Folder(AC_PACKS + parts[0]).getFiles(parts[1].split(" #")[0] + "*");
         var f = hits.length ? hits[0] : null;
         if (!f || !f.exists) { log("asset no encontrado: " + rel); return; }
-        var it = app.project.importFile(new ImportOptions(f));
+        var it = importOnce(f);
         it.parentFolder = folder;
         it.mainSource.loop = 10;
         var L = c2.layers.add(it);
@@ -233,7 +245,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var eb = text(c3, "Eyebrow", "01 · The problem", SANS, 26, PAL.spark);
     tr(eb, "ADBE Position").setValue([120, 120]);
     SSM.animate(tr(eb, "ADBE Opacity"), 0.1, 0, 100, "Blink", "Flat");
-    var head = text(c3, "Headline", "What does it take to shoot\rthousands of product images?", SERIF, 66, PAL.cloud);
+    var head = text(c3, "Headline", "What does it take to shoot\rthousands of product images?", SERIF, SERIF === "Georgia" ? 66 : 92, PAL.cloud);
     tr(head, "ADBE Position").setValue([120, 270]);
     SSM.animate(tr(head, "ADBE Position"), 0.2, [120, 330], [120, 270], "Arrive", "Land");
     SSM.animate(tr(head, "ADBE Opacity"), 0.2, 0, 100, "Blink", "Flat");
@@ -258,7 +270,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var card2 = pill(c3, "Image frame 2", 640, 400, PAL.sea, null);
     tr(card2, "ADBE Position").setValue([1470, 740]);
     SSM.animate(tr(card2, "ADBE Position"), 0.4 + sec("Glide"), [2300, 740], [1470, 740], "Stage", "Land");
-    var foot = text(c3, "Footer", "Superside Essentials · AI fashion imagery at scale", "ArialMT", 20, PAL.grey);
+    var foot = text(c3, "Footer", "Superside Essentials · AI fashion imagery at scale", SSM.font("ui_regular"), 20, PAL.grey);
     tr(foot, "ADBE Position").setValue([120, 1030]);
     log("03 ok");
 

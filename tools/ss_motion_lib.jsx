@@ -116,6 +116,14 @@ var SSM = (function () {
             prop.setTemporalEaseAtKey(k0, prop.keyInTemporalEase(k0), eases(ae.out, avg));
             prop.setTemporalEaseAtKey(k1, eases(ae["in"], avg), prop.keyOutTemporalEase(k1));
         },
+        // Fuente por rol tipográfico (display | ui | ui_regular): primera instalada de la lista de tokens
+        font: function (role) {
+            var list = (T.fonts && T.fonts[role]) || ["ArialMT"];
+            for (var i = 0; i < list.length; i++) {
+                try { if (app.fonts.getFontsByPostScriptName(list[i]).length) return list[i]; } catch (e) { return list[list.length - 1]; }
+            }
+            return list[list.length - 1];
+        },
         readJSON: readJSON
     };
 })();

@@ -206,5 +206,21 @@
         -0.42
       ]
     }
+  },
+  "fonts": {
+    "display": [
+      "InstrumentSerif-Regular",
+      "Georgia"
+    ],
+    "ui": [
+      "InterTight-SemiBold",
+      "InterTight-Bold",
+      "Arial-BoldMT"
+    ],
+    "ui_regular": [
+      "InterTight-Regular",
+      "ArialMT"
+    ],
+    "note": "PostScript names; el primero disponible gana. Archivos en assets/fonts (OFL)."
   }
 }
