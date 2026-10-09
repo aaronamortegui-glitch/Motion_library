@@ -2,7 +2,7 @@
 
 Superside's own motion library for After Effects. Designers apply it from a panel; **an LLM (Claude Code or any local model) can drive it on its own**: apply animations, test them, render and grow the catalog. Everything it creates is native keyframes and expressions, with no plugins required.
 
-![SS Motion Library visualizer](docs/screens/visualizer.png)
+![SS Motion Library visualizer: filters by category and energy](docs/screens/visualizer.gif)
 
 *`library/index.html`: every preset with a live thumbnail, its energy level and the one-line call to apply it.*
 
@@ -119,12 +119,13 @@ All timing comes from the Superside motion tokens: **6 durations** and **10 easi
 
 ### Designers (in After Effects)
 
-<img src="docs/screens/ae-panel.png" width="320" align="right" alt="SS Motion panel in After Effects">
+<img src="docs/screens/ae-panel.gif" width="320" align="right" alt="SS Motion panel in After Effects: gallery, live previews, In/Out/Both">
 
 1. Install the brand fonts from `assets/fonts/` (right-click › Install).
 2. **Install the panel once** (Window menu, dockable, every AE version on the machine):
    ```bash
-   powershell -ExecutionPolicy Bypass -File tools/install_panel.ps1
+   powershell -ExecutionPolicy Bypass -File tools/install_panel.ps1    # Windows
+   bash tools/install_panel.sh                                         # macOS
    ```
    Restart AE, open *Window › SS Motion.jsx* and dock it. It reads the library straight from this repo clone, so a `git pull` brings the new presets. Enable *Edit › Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
 3. **Browse the gallery** by category (Motion, Classics, Text, Effects, Recipes, Packs, Assets) with search and an energy filter. Clicking a thumbnail plays a **live preview**: the preset's real curve, sampled into `library/preview_curves.json` (ScriptUI cannot play GIFs, so the panel redraws the motion as vectors, ~90 KB for the whole library).
@@ -180,6 +181,7 @@ Bigger pieces are data, not code: scenes (`tools/build_scene.jsx`) and edits (`t
 | `tools/build_edit.jsx` | Edit from JSON: cuts, **speed ramps** (`speed`), freeze frames with kinetic type, titles (`texts`), VO, music ducking, SFX, end card |
 | `tools/build_breakdown.jsx` | 2×2 roto breakdown (plate · matte · contours · composite) |
 | `tools/face_check.py` | Likeness QA: real photo next to every face found in AI stills or clips |
+| `tools/build_explainer.jsx` | Slides/explainer scenes from a JSON storyboard (Figma coordinates), every element animated by a preset |
 | `tools/build_app_screen.jsx` | Browser-window recording of the visualizer, rebuilt from screenshots |
 | `tools/render_comps.jsx` | Renders comps through the open AE's render queue |
 | `tools/ss_assets.jsx` (`SSA`) + `tools/index_assets.py` | Local asset packs: index SFX/overlays by category and loudness, place them by name |
@@ -239,8 +241,18 @@ The index measures each sound's loudness and flags the harsh ones (`loud`) and t
 
 ## Requirements
 
-Windows · After Effects 2026 · Python 3 with `numpy`, `opencv-python`, `scipy`, `Pillow` · `ffmpeg` on the PATH · Git LFS.
-The repo can be cloned anywhere: scripts compute the repo root (`SS_ROOT`) from their own location. Run the `.jsx` files from `tools/` (don't copy them into AE's *ScriptUI Panels* folder).
+**Windows or macOS** · After Effects 2025/2026 · Python 3 with `numpy`, `opencv-python`, `scipy`, `Pillow` · `ffmpeg` on the PATH · Git LFS · a bash shell (Git Bash on Windows; built in on macOS).
+The repo can be cloned anywhere: scripts compute the repo root (`SS_ROOT`) from their own location. Run the `.jsx` files from `tools/` (don't copy them into AE's *ScriptUI Panels* folder; the installers add a small loader instead).
+
+| | Windows | macOS |
+|---|---|---|
+| Install the panel | `tools/install_panel.ps1` | `tools/install_panel.sh` |
+| Bridge / MCP start AE scripts with | `AfterFX.exe -s` | `osascript` → AE's `DoScriptFile` |
+| Overrides | `SS_AFTERFX`, `SS_AERENDER` | `SS_AE_APP` (e.g. `Adobe After Effects 2026`), `SS_AERENDER` |
+| Local asset packs | `%LOCALAPPDATA%\MisterHorse\ProductManager\AssetPacks` | `~/Library/Application Support/MisterHorse/ProductManager/AssetPacks` (override: `SS_ASSET_PACKS`) |
+| Animation Composer harvesting (`ac_driver.py`, label OCR) | yes | not available (Windows UI automation and OCR) |
+
+On macOS, the first `osascript` call asks for permission to control After Effects (System Settings › Privacy & Security › Automation): allow it for your terminal. The macOS path is written to mirror the tested Windows one but has not been run on a Mac yet; report anything that breaks.
 
 ## Notes
 
@@ -257,6 +269,14 @@ The repo can be cloned anywhere: scripts compute the repo root (`SS_ROOT`) from 
 ---
 
 ## Tests and showcases
+
+### *SS Motion Library · internal explainer* (68 s)
+
+How we built the library, why it exists (AI-made motion all looks the same) and how to use it, animated **with the library itself**. Storyboard in Figma ([slack_video › motion pluguin](https://www.figma.com/design/OGiHZakKWL9iUXUJ8rn7Ko/slack_video?node-id=70-2)), scenes built from JSON by `tools/build_explainer.jsx`. Video: [`docs/examples/ss_motion_explainer.mp4`](docs/examples/ss_motion_explainer.mp4) · step by step: [`docs/case-studies/ss-motion-explainer.md`](docs/case-studies/ss-motion-explainer.md).
+
+| Our own curves | The plugin | Claude drives it |
+|---|---|---|
+| ![Curves](docs/examples/explainer-curves.gif) | ![Plugin](docs/examples/explainer-plugin.gif) | ![Claude](docs/examples/explainer-claude.gif) |
 
 ### *The 1974 Cypher* (32 s · speed-ramp test)
 

@@ -36,7 +36,7 @@
         }
         for (var q2 = 1; q2 <= rm.numKeys; q2++) rm.setInterpolationTypeAtKey(q2, KeyframeInterpolationType.LINEAR, KeyframeInterpolationType.LINEAR);
     }
-    var AC = Folder($.getenv("LOCALAPPDATA").split("\\").join("/") + "/MisterHorse/ProductManager/AssetPacks/");
+    var AC = Folder(SSM.assetPacks());
     function findSfx(name) {
         var packs = AC.getFiles();
         for (var i = 0; i < packs.length; i++) {

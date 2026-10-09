@@ -1,0 +1,1660 @@
+{
+ "fps": 24,
+ "scenes": [
+  {
+   "comp": "EX_S01",
+   "bg": "pine",
+   "elements": [
+    {
+     "type": "text",
+     "text": "AI motion all looks the\rsame.",
+     "font": "med",
+     "size": 130,
+     "at": [
+      140,
+      250
+     ],
+     "t": 0.3,
+     "preset": "Words Fade Up"
+    },
+    {
+     "type": "text",
+     "text": "Same curves. Same moves.",
+     "font": "ital",
+     "size": 150,
+     "at": [
+      140,
+      590
+     ],
+     "t": 2.2,
+     "motion": "Slam In",
+     "color": "spark"
+    },
+    {
+     "type": "pill",
+     "text": "ease-in-out",
+     "at": [
+      1180,
+      150
+     ],
+     "t": 0.6,
+     "motion": "Bounce In",
+     "size": 34,
+     "fx": "Jitter"
+    },
+    {
+     "type": "pill",
+     "text": "default bounce",
+     "at": [
+      1480,
+      250
+     ],
+     "t": 0.72,
+     "motion": "Bounce In",
+     "size": 34,
+     "fx": "Jitter"
+    },
+    {
+     "type": "pill",
+     "text": "template",
+     "at": [
+      1260,
+      830
+     ],
+     "t": 0.84,
+     "motion": "Bounce In",
+     "size": 34,
+     "fx": "Jitter"
+    },
+    {
+     "type": "pill",
+     "text": "fade + slide",
+     "at": [
+      1520,
+      930
+     ],
+     "t": 0.96,
+     "motion": "Bounce In",
+     "size": 34,
+     "fx": "Jitter"
+    },
+    {
+     "type": "pill",
+     "text": "linear",
+     "at": [
+      1600,
+      700
+     ],
+     "t": 1.08,
+     "motion": "Bounce In",
+     "size": 34,
+     "fx": "Jitter"
+    },
+    {
+     "type": "pill",
+     "text": "overshoot",
+     "at": [
+      1120,
+      960
+     ],
+     "t": 1.2,
+     "motion": "Bounce In",
+     "size": 34,
+     "fx": "Jitter"
+    }
+   ],
+   "dur": 6.65
+  },
+  {
+   "comp": "EX_S02",
+   "bg": "cloud",
+   "elements": [
+    {
+     "type": "text",
+     "text": "We start from",
+     "font": "med",
+     "size": 110,
+     "at": [
+      140,
+      90
+     ],
+     "t": 0.2,
+     "preset": "Chars Rise"
+    },
+    {
+     "type": "text",
+     "text": "our own curves.",
+     "font": "ital",
+     "size": 124,
+     "at": [
+      920,
+      82
+     ],
+     "t": 0.9,
+     "motion": "Slam In"
+    },
+    {
+     "type": "media",
+     "file": "docs/screens/tokens.png",
+     "at": [
+      140,
+      250
+     ],
+     "size": [
+      1180,
+      726
+     ],
+     "t": 1.3,
+     "motion": "Surge Rise",
+     "radius": 24
+    },
+    {
+     "type": "card",
+     "name": "durations",
+     "at": [
+      1380,
+      250
+     ],
+     "size": [
+      400,
+      226
+     ],
+     "t": 2.4,
+     "motion": "Slide Land",
+     "fill": "head",
+     "items": [
+      {
+       "text": "6",
+       "font": "ital",
+       "size": 96,
+       "at": [
+        36,
+        14
+       ]
+      },
+      {
+       "text": "durations",
+       "font": "semi",
+       "size": 44,
+       "at": [
+        36,
+        118
+       ]
+      },
+      {
+       "text": "Tick → Stage, 133 ms to 1.1 s",
+       "font": "reg",
+       "size": 26,
+       "at": [
+        36,
+        176
+       ]
+      }
+     ],
+     "radius": 32
+    },
+    {
+     "type": "card",
+     "name": "curves",
+     "at": [
+      1380,
+      500
+     ],
+     "size": [
+      400,
+      226
+     ],
+     "t": 2.85,
+     "motion": "Slide Land",
+     "fill": "head",
+     "items": [
+      {
+       "text": "10",
+       "font": "ital",
+       "size": 96,
+       "at": [
+        36,
+        14
+       ]
+      },
+      {
+       "text": "curves",
+       "font": "semi",
+       "size": 44,
+       "at": [
+        36,
+        118
+       ]
+      },
+      {
+       "text": "Land, Settle, Pop, Recoil…",
+       "font": "reg",
+       "size": 26,
+       "at": [
+        36,
+        176
+       ]
+      }
+     ],
+     "radius": 32
+    },
+    {
+     "type": "card",
+     "name": "speed ramps",
+     "at": [
+      1380,
+      750
+     ],
+     "size": [
+      400,
+      226
+     ],
+     "t": 3.3,
+     "motion": "Scale Pop",
+     "fill": "spark",
+     "items": [
+      {
+       "text": "3",
+       "font": "ital",
+       "size": 96,
+       "at": [
+        36,
+        14
+       ]
+      },
+      {
+       "text": "speed ramps",
+       "font": "semi",
+       "size": 44,
+       "at": [
+        36,
+        118
+       ]
+      },
+      {
+       "text": "Ramp · Surge · Whip",
+       "font": "reg",
+       "size": 26,
+       "at": [
+        36,
+        176
+       ]
+      }
+     ],
+     "radius": 32
+    }
+   ],
+   "dur": 7.52
+  },
+  {
+   "comp": "EX_S03",
+   "bg": "pine",
+   "elements": [
+    {
+     "type": "text",
+     "text": "Motion by",
+     "font": "med",
+     "size": 110,
+     "at": [
+      140,
+      90
+     ],
+     "t": 0.2,
+     "preset": "Chars Rise"
+    },
+    {
+     "type": "text",
+     "text": "category and style.",
+     "font": "ital",
+     "size": 124,
+     "at": [
+      640,
+      82
+     ],
+     "t": 0.8,
+     "motion": "Slam In",
+     "color": "spark"
+    },
+    {
+     "type": "media",
+     "file": "docs/screens/visualizer.png",
+     "at": [
+      140,
+      260
+     ],
+     "size": [
+      1080,
+      682
+     ],
+     "t": 0.9,
+     "motion": "Whip Pan",
+     "radius": 24
+    },
+    {
+     "type": "pill",
+     "text": "68 presets · 5 categories",
+     "at": [
+      140,
+      975
+     ],
+     "t": 2.0,
+     "motion": "Fade Up",
+     "size": 30
+    },
+    {
+     "type": "card",
+     "name": "pack Dynamic",
+     "at": [
+      1260,
+      260
+     ],
+     "size": [
+      520,
+      132
+     ],
+     "t": 3.6,
+     "motion": "Back In Left",
+     "fill": null,
+     "items": [
+      {
+       "type": "media",
+       "file": "library/packs/dynamic.mp4",
+       "at": [
+        12,
+        12
+       ],
+       "size": [
+        192,
+        108
+       ],
+       "radius": 12,
+       "skip": 1.2
+      },
+      {
+       "text": "Dynamic",
+       "font": "semi",
+       "size": 40,
+       "at": [
+        228,
+        26
+       ],
+       "color": "cloud"
+      },
+      {
+       "text": "pack",
+       "font": "ital",
+       "size": 34,
+       "at": [
+        228,
+        76
+       ],
+       "color": "spark"
+      }
+     ],
+     "radius": 20,
+     "stroke": "pillStroke"
+    },
+    {
+     "type": "card",
+     "name": "pack Elegant",
+     "at": [
+      1260,
+      400
+     ],
+     "size": [
+      520,
+      132
+     ],
+     "t": 3.7600000000000002,
+     "motion": "Back In Left",
+     "fill": null,
+     "items": [
+      {
+       "type": "media",
+       "file": "library/packs/elegant.mp4",
+       "at": [
+        12,
+        12
+       ],
+       "size": [
+        192,
+        108
+       ],
+       "radius": 12,
+       "skip": 1.2
+      },
+      {
+       "text": "Elegant",
+       "font": "semi",
+       "size": 40,
+       "at": [
+        228,
+        26
+       ],
+       "color": "cloud"
+      },
+      {
+       "text": "pack",
+       "font": "ital",
+       "size": 34,
+       "at": [
+        228,
+        76
+       ],
+       "color": "spark"
+      }
+     ],
+     "radius": 20,
+     "stroke": "pillStroke"
+    },
+    {
+     "type": "card",
+     "name": "pack Modern",
+     "at": [
+      1260,
+      540
+     ],
+     "size": [
+      520,
+      132
+     ],
+     "t": 3.92,
+     "motion": "Back In Left",
+     "fill": null,
+     "items": [
+      {
+       "type": "media",
+       "file": "library/packs/modern.mp4",
+       "at": [
+        12,
+        12
+       ],
+       "size": [
+        192,
+        108
+       ],
+       "radius": 12,
+       "skip": 1.2
+      },
+      {
+       "text": "Modern",
+       "font": "semi",
+       "size": 40,
+       "at": [
+        228,
+        26
+       ],
+       "color": "cloud"
+      },
+      {
+       "text": "pack",
+       "font": "ital",
+       "size": 34,
+       "at": [
+        228,
+        76
+       ],
+       "color": "spark"
+      }
+     ],
+     "radius": 20,
+     "stroke": "pillStroke"
+    },
+    {
+     "type": "card",
+     "name": "pack Playful",
+     "at": [
+      1260,
+      680
+     ],
+     "size": [
+      520,
+      132
+     ],
+     "t": 4.08,
+     "motion": "Back In Left",
+     "fill": null,
+     "items": [
+      {
+       "type": "media",
+       "file": "library/packs/playful.mp4",
+       "at": [
+        12,
+        12
+       ],
+       "size": [
+        192,
+        108
+       ],
+       "radius": 12,
+       "skip": 1.2
+      },
+      {
+       "text": "Playful",
+       "font": "semi",
+       "size": 40,
+       "at": [
+        228,
+        26
+       ],
+       "color": "cloud"
+      },
+      {
+       "text": "pack",
+       "font": "ital",
+       "size": 34,
+       "at": [
+        228,
+        76
+       ],
+       "color": "spark"
+      }
+     ],
+     "radius": 20,
+     "stroke": "pillStroke"
+    },
+    {
+     "type": "card",
+     "name": "pack Tech",
+     "at": [
+      1260,
+      820
+     ],
+     "size": [
+      520,
+      132
+     ],
+     "t": 4.24,
+     "motion": "Back In Left",
+     "fill": null,
+     "items": [
+      {
+       "type": "media",
+       "file": "library/packs/tech.mp4",
+       "at": [
+        12,
+        12
+       ],
+       "size": [
+        192,
+        108
+       ],
+       "radius": 12,
+       "skip": 1.2
+      },
+      {
+       "text": "Tech",
+       "font": "semi",
+       "size": 40,
+       "at": [
+        228,
+        26
+       ],
+       "color": "cloud"
+      },
+      {
+       "text": "pack",
+       "font": "ital",
+       "size": 34,
+       "at": [
+        228,
+        76
+       ],
+       "color": "spark"
+      }
+     ],
+     "radius": 20,
+     "stroke": "pillStroke"
+    }
+   ],
+   "dur": 8.2
+  },
+  {
+   "comp": "EX_S04",
+   "bg": "cloud",
+   "elements": [
+    {
+     "type": "text",
+     "text": "A plugin you",
+     "font": "med",
+     "size": 110,
+     "at": [
+      140,
+      110
+     ],
+     "t": 0.2,
+     "preset": "Chars Rise"
+    },
+    {
+     "type": "text",
+     "text": "drive by hand.",
+     "font": "ital",
+     "size": 124,
+     "at": [
+      140,
+      220
+     ],
+     "t": 0.7,
+     "motion": "Slam In"
+    },
+    {
+     "type": "media",
+     "file": "media/explainer/panel_rec.mp4",
+     "at": [
+      1290,
+      60
+     ],
+     "size": [
+      556,
+      954
+     ],
+     "t": 0.4,
+     "motion": "Flip In",
+     "radius": 24
+    },
+    {
+     "type": "pill",
+     "text": "Window › SS Motion.jsx · Windows & macOS",
+     "at": [
+      140,
+      820
+     ],
+     "t": 3.6,
+     "motion": "Fade Up",
+     "size": 28,
+     "light": true
+    },
+    {
+     "type": "card",
+     "name": "Gallery by category",
+     "at": [
+      140,
+      420
+     ],
+     "size": [
+      500,
+      150
+     ],
+     "t": 1.6,
+     "motion": "Stretch Slide",
+     "fill": "head",
+     "items": [
+      {
+       "text": "01",
+       "font": "ital",
+       "size": 56,
+       "at": [
+        30,
+        18
+       ]
+      },
+      {
+       "text": "Gallery by category",
+       "font": "semi",
+       "size": 34,
+       "at": [
+        120,
+        26
+       ]
+      },
+      {
+       "text": "Motion, Classics, Text, Effects,\rRecipes, Packs, Assets",
+       "font": "reg",
+       "size": 22,
+       "at": [
+        120,
+        78
+       ]
+      }
+     ],
+     "radius": 28
+    },
+    {
+     "type": "card",
+     "name": "Live preview",
+     "at": [
+      670,
+      420
+     ],
+     "size": [
+      500,
+      150
+     ],
+     "t": 1.9500000000000002,
+     "motion": "Stretch Slide",
+     "fill": "head",
+     "items": [
+      {
+       "text": "02",
+       "font": "ital",
+       "size": 56,
+       "at": [
+        30,
+        18
+       ]
+      },
+      {
+       "text": "Live preview",
+       "font": "semi",
+       "size": 34,
+       "at": [
+        120,
+        26
+       ]
+      },
+      {
+       "text": "The real curve, redrawn as vectors",
+       "font": "reg",
+       "size": 22,
+       "at": [
+        120,
+        78
+       ]
+      }
+     ],
+     "radius": 28
+    },
+    {
+     "type": "card",
+     "name": "In · Out · Both",
+     "at": [
+      140,
+      595
+     ],
+     "size": [
+      500,
+      150
+     ],
+     "t": 2.3,
+     "motion": "Stretch Slide",
+     "fill": "spark",
+     "items": [
+      {
+       "text": "03",
+       "font": "ital",
+       "size": 56,
+       "at": [
+        30,
+        18
+       ]
+      },
+      {
+       "text": "In · Out · Both",
+       "font": "semi",
+       "size": 34,
+       "at": [
+        120,
+        26
+       ]
+      },
+      {
+       "text": "One click, with a stagger",
+       "font": "reg",
+       "size": 22,
+       "at": [
+        120,
+        78
+       ]
+      }
+     ],
+     "radius": 28,
+     "attention": {
+      "name": "Rubber Band",
+      "t": 5.6
+     }
+    },
+    {
+     "type": "card",
+     "name": "Markers",
+     "at": [
+      670,
+      595
+     ],
+     "size": [
+      500,
+      150
+     ],
+     "t": 2.65,
+     "motion": "Stretch Slide",
+     "fill": "head",
+     "items": [
+      {
+       "text": "04",
+       "font": "ital",
+       "size": 56,
+       "at": [
+        30,
+        18
+       ]
+      },
+      {
+       "text": "Markers",
+       "font": "semi",
+       "size": 34,
+       "at": [
+        120,
+        26
+       ]
+      },
+      {
+       "text": "Drag SS in / SS out to retime",
+       "font": "reg",
+       "size": 22,
+       "at": [
+        120,
+        78
+       ]
+      }
+     ],
+     "radius": 28
+    }
+   ],
+   "dur": 8.38
+  },
+  {
+   "comp": "EX_S05",
+   "bg": "pine",
+   "elements": [
+    {
+     "type": "text",
+     "text": "Drag a marker.",
+     "font": "med",
+     "size": 130,
+     "at": [
+      140,
+      110
+     ],
+     "t": 0.2,
+     "preset": "Words Fade Up"
+    },
+    {
+     "type": "text",
+     "text": "The curve follows.",
+     "font": "ital",
+     "size": 150,
+     "at": [
+      140,
+      240
+     ],
+     "t": 1.7,
+     "preset": "Chars Ramp",
+     "color": "spark"
+    },
+    {
+     "type": "media",
+     "file": "media/explainer/ae_markers_timeline.png",
+     "at": [
+      140,
+      470
+     ],
+     "size": [
+      1640,
+      246
+     ],
+     "t": 0.3,
+     "motion": "Blur In",
+     "radius": 16
+    },
+    {
+     "type": "rect",
+     "at": [
+      140,
+      850
+     ],
+     "size": [
+      1640,
+      56
+     ],
+     "radius": 12,
+     "fill": "bar",
+     "t": 0.6,
+     "motion": "Wipe Reveal"
+    },
+    {
+     "type": "marker",
+     "label": "SS in",
+     "color": "spark",
+     "from": [
+      300,
+      778
+     ],
+     "at": [
+      700,
+      778
+     ],
+     "t": 1.4,
+     "duration": "Stage",
+     "ease": "Whip"
+    },
+    {
+     "type": "marker",
+     "label": "SS out",
+     "color": "coral",
+     "from": [
+      1600,
+      778
+     ],
+     "at": [
+      1300,
+      778
+     ],
+     "t": 2.6,
+     "duration": "Stage",
+     "ease": "Whip"
+    },
+    {
+     "type": "text",
+     "text": "← entrance ends here",
+     "font": "reg",
+     "size": 26,
+     "at": [
+      720,
+      960
+     ],
+     "t": 2.3,
+     "motion": "Fade Up"
+    },
+    {
+     "type": "text",
+     "text": "exit starts here →",
+     "font": "reg",
+     "size": 26,
+     "at": [
+      1060,
+      960
+     ],
+     "t": 3.4,
+     "motion": "Fade Up"
+    }
+   ],
+   "dur": 5.2
+  },
+  {
+   "comp": "EX_S06",
+   "bg": "cloud",
+   "elements": [
+    {
+     "type": "text",
+     "text": "Or let",
+     "font": "med",
+     "size": 110,
+     "at": [
+      140,
+      90
+     ],
+     "t": 0.2,
+     "preset": "Chars Rise"
+    },
+    {
+     "type": "text",
+     "text": "Claude drive it.",
+     "font": "ital",
+     "size": 124,
+     "at": [
+      460,
+      82
+     ],
+     "t": 0.6,
+     "motion": "Slam In"
+    },
+    {
+     "type": "card",
+     "name": "chat",
+     "at": [
+      140,
+      260
+     ],
+     "size": [
+      900,
+      700
+     ],
+     "t": 0.9,
+     "motion": "Fade Up",
+     "fill": "white",
+     "items": [
+      {
+       "type": "box",
+       "at": [
+        60,
+        50
+       ],
+       "size": [
+        780,
+        120
+       ],
+       "radius": 24,
+       "fill": "head"
+      },
+      {
+       "text": "Apply the Elegant pack to this comp\rand show me a frame.",
+       "font": "med",
+       "size": 32,
+       "at": [
+        90,
+        66
+       ]
+      },
+      {
+       "text": "ss-motion MCP server · Claude Code",
+       "font": "reg",
+       "size": 24,
+       "at": [
+        60,
+        640
+       ],
+       "color": "gray"
+      }
+     ],
+     "radius": 32,
+     "stroke": "chipStroke"
+    },
+    {
+     "type": "media",
+     "file": "library/packs/elegant.mp4",
+     "at": [
+      1100,
+      260
+     ],
+     "size": [
+      680,
+      383
+     ],
+     "t": 5.4,
+     "motion": "Ramp Zoom",
+     "radius": 24,
+     "skip": 1.5
+    },
+    {
+     "type": "text",
+     "text": "Checks its own work,",
+     "font": "semi",
+     "size": 44,
+     "at": [
+      1100,
+      680
+     ],
+     "t": 5.9,
+     "preset": "Words Fade Up"
+    },
+    {
+     "type": "text",
+     "text": "frame by frame.",
+     "font": "ital",
+     "size": 60,
+     "at": [
+      1100,
+      736
+     ],
+     "t": 6.3,
+     "preset": "Words Fade Up"
+    },
+    {
+     "type": "card",
+     "name": "tool list_packs",
+     "at": [
+      200,
+      470
+     ],
+     "size": [
+      780,
+      110
+     ],
+     "t": 2.4,
+     "motion": "Back In Left",
+     "fill": "cloud",
+     "items": [
+      {
+       "text": "✓  list_packs",
+       "font": "semi",
+       "size": 32,
+       "at": [
+        30,
+        18
+       ]
+      },
+      {
+       "text": "5 packs",
+       "font": "reg",
+       "size": 24,
+       "at": [
+        76,
+        64
+       ]
+      }
+     ],
+     "radius": 20
+    },
+    {
+     "type": "card",
+     "name": "tool apply_pack · Elegant",
+     "at": [
+      200,
+      600
+     ],
+     "size": [
+      780,
+      110
+     ],
+     "t": 3.3,
+     "motion": "Back In Left",
+     "fill": "spark",
+     "items": [
+      {
+       "text": "✓  apply_pack · Elegant",
+       "font": "semi",
+       "size": 32,
+       "at": [
+        30,
+        18
+       ]
+      },
+      {
+       "text": "8 layers animated · SS in / SS out markers",
+       "font": "reg",
+       "size": 24,
+       "at": [
+        76,
+        64
+       ]
+      }
+     ],
+     "radius": 20
+    },
+    {
+     "type": "card",
+     "name": "tool render_frame · 1.2 s",
+     "at": [
+      200,
+      730
+     ],
+     "size": [
+      780,
+      110
+     ],
+     "t": 4.2,
+     "motion": "Back In Left",
+     "fill": "cloud",
+     "items": [
+      {
+       "text": "✓  render_frame · 1.2 s",
+       "font": "semi",
+       "size": 32,
+       "at": [
+        30,
+        18
+       ]
+      },
+      {
+       "text": "frame.png",
+       "font": "reg",
+       "size": 24,
+       "at": [
+        76,
+        64
+       ]
+      }
+     ],
+     "radius": 20
+    }
+   ],
+   "dur": 8.45
+  },
+  {
+   "comp": "EX_S07",
+   "bg": "pine",
+   "elements": [
+    {
+     "type": "text",
+     "text": "Every test leaves",
+     "font": "med",
+     "size": 110,
+     "at": [
+      140,
+      80
+     ],
+     "t": 0.2,
+     "preset": "Chars Rise"
+    },
+    {
+     "type": "text",
+     "text": "a technique behind.",
+     "font": "ital",
+     "size": 124,
+     "at": [
+      1010,
+      72
+     ],
+     "t": 0.8,
+     "motion": "Slam In",
+     "color": "spark"
+    },
+    {
+     "type": "media",
+     "file": "media/explainer/tech_freeze_type.png",
+     "at": [
+      140,
+      250
+     ],
+     "size": [
+      530,
+      298
+     ],
+     "t": 1.4,
+     "motion": "Scale Pop",
+     "radius": 20
+    },
+    {
+     "type": "pill",
+     "text": "Kinetic type on freezes",
+     "at": [
+      140,
+      564
+     ],
+     "t": 1.7,
+     "motion": "Fade Up",
+     "size": 26
+    },
+    {
+     "type": "media",
+     "file": "media/explainer/tech_roto_breakdown.png",
+     "at": [
+      696,
+      250
+     ],
+     "size": [
+      530,
+      298
+     ],
+     "t": 1.54,
+     "motion": "Scale Pop",
+     "radius": 20
+    },
+    {
+     "type": "pill",
+     "text": "AI roto + contours",
+     "at": [
+      696,
+      564
+     ],
+     "t": 1.8399999999999999,
+     "motion": "Fade Up",
+     "size": 26
+    },
+    {
+     "type": "media",
+     "file": "media/explainer/tech_speed_ramp.png",
+     "at": [
+      1252,
+      250
+     ],
+     "size": [
+      530,
+      298
+     ],
+     "t": 1.68,
+     "motion": "Scale Pop",
+     "radius": 20
+    },
+    {
+     "type": "pill",
+     "text": "Speed ramps",
+     "at": [
+      1252,
+      564
+     ],
+     "t": 1.98,
+     "motion": "Fade Up",
+     "size": 26
+    },
+    {
+     "type": "media",
+     "file": "media/explainer/tech_tracking.png",
+     "at": [
+      140,
+      640
+     ],
+     "size": [
+      530,
+      298
+     ],
+     "t": 1.8199999999999998,
+     "motion": "Scale Pop",
+     "radius": 20
+    },
+    {
+     "type": "pill",
+     "text": "Tracked labels",
+     "at": [
+      140,
+      954
+     ],
+     "t": 2.12,
+     "motion": "Fade Up",
+     "size": 26
+    },
+    {
+     "type": "media",
+     "file": "media/explainer/tech_text_behind.png",
+     "at": [
+      696,
+      640
+     ],
+     "size": [
+      530,
+      298
+     ],
+     "t": 1.96,
+     "motion": "Scale Pop",
+     "radius": 20
+    },
+    {
+     "type": "pill",
+     "text": "Text behind people",
+     "at": [
+      696,
+      954
+     ],
+     "t": 2.26,
+     "motion": "Fade Up",
+     "size": 26
+    },
+    {
+     "type": "media",
+     "file": "media/explainer/tech_hud.png",
+     "at": [
+      1252,
+      640
+     ],
+     "size": [
+      530,
+      298
+     ],
+     "t": 2.1,
+     "motion": "Scale Pop",
+     "radius": 20
+    },
+    {
+     "type": "pill",
+     "text": "HUD on footage",
+     "at": [
+      1252,
+      954
+     ],
+     "t": 2.4,
+     "motion": "Fade Up",
+     "size": 26
+    }
+   ],
+   "dur": 8.91
+  },
+  {
+   "comp": "EX_S08",
+   "bg": "cloud",
+   "elements": [
+    {
+     "type": "text",
+     "text": "Then you",
+     "font": "med",
+     "size": 110,
+     "at": [
+      140,
+      90
+     ],
+     "t": 0.2,
+     "preset": "Chars Rise"
+    },
+    {
+     "type": "text",
+     "text": "refine it.",
+     "font": "ital",
+     "size": 124,
+     "at": [
+      640,
+      82
+     ],
+     "t": 0.7,
+     "motion": "Slam In"
+    },
+    {
+     "type": "media",
+     "file": "media/explainer/ae_markers_window.png",
+     "at": [
+      140,
+      250
+     ],
+     "size": [
+      1280,
+      723
+     ],
+     "t": 0.6,
+     "motion": "Surge Rise",
+     "radius": 20
+    },
+    {
+     "type": "pill",
+     "text": "✓  Native keyframes and expressions",
+     "at": [
+      1450,
+      300
+     ],
+     "t": 1.6,
+     "motion": "Drop Bounce",
+     "size": 22,
+     "light": true,
+     "fill": "spark"
+    },
+    {
+     "type": "pill",
+     "text": "✓  No plugin needed to render",
+     "at": [
+      1450,
+      410
+     ],
+     "t": 1.9000000000000001,
+     "motion": "Drop Bounce",
+     "size": 22,
+     "light": true
+    },
+    {
+     "type": "pill",
+     "text": "✓  Every curve stays editable",
+     "at": [
+      1450,
+      520
+     ],
+     "t": 2.2,
+     "motion": "Drop Bounce",
+     "size": 22,
+     "light": true
+    },
+    {
+     "type": "pill",
+     "text": "✓  Markers, packs or by hand",
+     "at": [
+      1450,
+      630
+     ],
+     "t": 2.5,
+     "motion": "Drop Bounce",
+     "size": 22,
+     "light": true
+    }
+   ],
+   "dur": 5.82
+  },
+  {
+   "comp": "EX_S09",
+   "bg": "pine",
+   "elements": [
+    {
+     "type": "text",
+     "text": "Motion that looks like us.",
+     "font": "ital",
+     "size": 170,
+     "at": [
+      120,
+      150
+     ],
+     "t": 0.3,
+     "preset": "Blur Words",
+     "color": "spark"
+    },
+    {
+     "type": "text",
+     "text": "Not like AI.",
+     "font": "med",
+     "size": 110,
+     "at": [
+      140,
+      470
+     ],
+     "t": 2.4,
+     "motion": "Slam In"
+    },
+    {
+     "type": "media",
+     "file": "media/explainer/reel_cypher.png",
+     "at": [
+      1180,
+      430
+     ],
+     "size": [
+      300,
+      169
+     ],
+     "t": 1.4,
+     "motion": "Flip In X",
+     "radius": 16
+    },
+    {
+     "type": "media",
+     "file": "media/explainer/reel_boardroom.png",
+     "at": [
+      1500,
+      430
+     ],
+     "size": [
+      300,
+      169
+     ],
+     "t": 1.6,
+     "motion": "Flip In X",
+     "radius": 16
+    },
+    {
+     "type": "pill",
+     "text": "68 presets",
+     "at": [
+      140,
+      650
+     ],
+     "t": 3.3,
+     "motion": "Bounce In",
+     "size": 28
+    },
+    {
+     "type": "pill",
+     "text": "5 packs",
+     "at": [
+      360,
+      650
+     ],
+     "t": 3.42,
+     "motion": "Bounce In",
+     "size": 28
+    },
+    {
+     "type": "pill",
+     "text": "plugin + MCP",
+     "at": [
+      540,
+      650
+     ],
+     "t": 3.54,
+     "motion": "Bounce In",
+     "size": 28
+    },
+    {
+     "type": "pill",
+     "text": "open repo",
+     "at": [
+      810,
+      650
+     ],
+     "t": 3.6599999999999997,
+     "motion": "Bounce In",
+     "size": 28
+    },
+    {
+     "type": "media",
+     "file": "media/explainer/superside_logo_cloud.png",
+     "at": [
+      110,
+      880
+     ],
+     "size": [
+      560,
+      201
+     ],
+     "t": 4.4,
+     "motion": "Fade Up",
+     "radius": 0
+    },
+    {
+     "type": "rect",
+     "at": [
+      661,
+      905
+     ],
+     "size": [
+      2,
+      72
+     ],
+     "fill": "muted",
+     "t": 4.6,
+     "motion": "Fade"
+    },
+    {
+     "type": "text",
+     "text": "SS Motion Library",
+     "font": "med",
+     "size": 30,
+     "at": [
+      695,
+      912
+     ],
+     "t": 4.7,
+     "preset": "Words Fade Up",
+     "color": "cloud"
+    },
+    {
+     "type": "text",
+     "text": "by Aaron Amortegui & Gian Orsi · AI Native Studio",
+     "font": "reg",
+     "size": 22,
+     "at": [
+      695,
+      952
+     ],
+     "t": 4.9,
+     "motion": "Fade Up",
+     "color": "muted"
+    },
+    {
+     "type": "text",
+     "text": "github.com/aaronamortegui-glitch/Motion_library",
+     "font": "reg",
+     "size": 22,
+     "at": [
+      1300,
+      930
+     ],
+     "t": 5.1,
+     "motion": "Fade Up",
+     "color": "muted"
+    }
+   ],
+   "dur": 8.5
+  }
+ ]
+}

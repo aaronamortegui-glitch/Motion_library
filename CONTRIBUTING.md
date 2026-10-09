@@ -9,7 +9,7 @@ Every piece of work should end with three things in the repo:
 3. **What we learned**: lines in `docs/LEARNINGS.md`.
 
 ## Setup
-Windows · After Effects 2026 · Python 3 (`numpy`, `opencv-python`, `scipy`, `Pillow`) · `ffmpeg` · Git LFS. Fonts from `assets/fonts/`. AE needs *Allow Scripts to Write Files and Access Network*. Drive AE with `bash tools/bridge.sh tools/<job>.jsx` (see the skill in `.claude/skills/ss-motion-library`).
+Windows or macOS · After Effects 2025/2026 · Python 3 (`numpy`, `opencv-python`, `scipy`, `Pillow`) · `ffmpeg` · Git LFS. Fonts from `assets/fonts/`. AE needs *Allow Scripts to Write Files and Access Network*. Install the panel with `tools/install_panel.ps1` (Windows) or `tools/install_panel.sh` (macOS). Drive AE with `bash tools/bridge.sh tools/<job>.jsx`, which works on both systems, (see the skill in `.claude/skills/ss-motion-library`).
 
 ---
 
@@ -104,9 +104,19 @@ Windows · After Effects 2026 · Python 3 (`numpy`, `opencv-python`, `scipy`, `P
   - costs spent
   - which LEARNINGS lines you added
 
+## 7. Interfaces always ship with a GIF
+Any UI (the AE panel, the visualizer, a new tool window) must have an animated GIF in `docs/screens/` showing it in use, linked from the README. When the UI changes, re-record it in the same commit.
+- **AE panel:** open it, drive it with its scripting hook (`SS_PANEL.tab("Classics")`, `SS_PANEL.select("motion", "Tada")`) from scheduled tasks, record the window with `PrintWindow` at 8 fps (DPI-aware), then:
+  ```bash
+  ffmpeg -framerate 8 -i f%04d.png -vf "scale=380:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=96:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" docs/screens/ae-panel.gif
+  ```
+- **Web pages:** headless Edge or Chrome screenshots per state (`--screenshot`, URL params such as `?kind=text`), assembled the same way.
+- Keep them under ~500 KB.
+
 ## Checklist before you push
 - [ ] Everything in English, no temporary jobs or candidates in the diff
 - [ ] New presets have metadata, a GIF, a poster and a panel thumb; `INDEX.txt`, visualizer and README catalog regenerated
 - [ ] Open-source data has source, version and license recorded
 - [ ] Case study: specs + rebuild script + doc + GIFs + README section
+- [ ] Any UI you touched has a fresh GIF in `docs/screens/`
 - [ ] LEARNINGS updated; costs recorded

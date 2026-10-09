@@ -41,3 +41,7 @@ media/cypher/clip03_aaron_tracks.json
 media/cypher/shot0*.png
 research/mcp/
 renders/mcp/
+research/qa_ex/
+research/ui_rec/
+media/explainer/vo/raw_*.mp3
+media/explainer/ae_markers_full.png

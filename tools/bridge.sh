@@ -1,29 +1,43 @@
 #!/usr/bin/env bash
 # Runs a .jsx in After Effects through the bridge (tools/ss_bridge.jsx must be active) and waits for the result.
 # Usage: bash tools/bridge.sh tools/file.jsx [timeout_sec]
-# Exits with code 1 if AE returns ERROR or does not respond in time. Starts the bridge if it is not active.
+# Exits with code 1 if AE returns ERROR or does not respond in time. Starts AE and the bridge if they are not running.
+# Works on Windows (Git Bash) and macOS. Overrides: SS_AFTERFX (Windows AfterFX.exe), SS_AE_APP (macOS app name,
+# e.g. "Adobe After Effects 2026"), SS_AE_PROJECT (project to open when AE is closed).
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="$1"; TIMEOUT="${2:-180}"
-AFX="/c/Program Files/Adobe/Adobe After Effects 2026/Support Files/AfterFX.exe"
-win() { cygpath -m "$1" 2>/dev/null || echo "$1"; }
 mkdir -p "$ROOT/bridge/inbox" "$ROOT/bridge/outbox"
 
-ae_running() { tasklist //FI "IMAGENAME eq AfterFX.exe" 2>/dev/null | grep -qi afterfx; }
-# AE closed (or crashed): the old marker is stale. Open AE normally first — launching it with -s runs the
-# script and then quits — and only then attach the bridge.
+if [ "$(uname -s)" = "Darwin" ]; then
+  # newest installed version unless SS_AE_APP says otherwise
+  AE_APP="${SS_AE_APP:-$(ls -d /Applications/Adobe\ After\ Effects\ 20*/ 2>/dev/null | sort | tail -1 | xargs -I{} basename {})}"
+  [ -n "$AE_APP" ] || { echo "After Effects not found in /Applications (set SS_AE_APP)"; exit 1; }
+  native() { echo "$1"; }
+  ae_running() { pgrep -f "$AE_APP.app/Contents/MacOS" >/dev/null 2>&1 || pgrep -x "After Effects" >/dev/null 2>&1; }
+  ae_open() { open -a "$AE_APP" "$1"; }
+  ae_script() { osascript -e "tell application \"$AE_APP\" to DoScriptFile \"$1\"" >/dev/null 2>&1; }
+else
+  AFX="${SS_AFTERFX:-/c/Program Files/Adobe/Adobe After Effects 2026/Support Files/AfterFX.exe}"
+  native() { cygpath -m "$1" 2>/dev/null || echo "$1"; }
+  ae_running() { tasklist //FI "IMAGENAME eq AfterFX.exe" 2>/dev/null | grep -qi afterfx; }
+  ae_open() { "$AFX" "$(cygpath -w "$1" 2>/dev/null || echo "$1")" >/dev/null 2>&1 & }
+  ae_script() { "$AFX" -s "\$.evalFile(new File('$1'))" >/dev/null 2>&1; }
+fi
+
+# AE closed (or crashed): the old marker is stale. Open AE normally first (on Windows, launching a closed AE with
+# -s runs the script and then quits), and only then attach the bridge.
 if ! ae_running; then
   rm -f "$ROOT/bridge/outbox/_bridge_started.txt"
-  PROJ="${SS_AE_PROJECT:-$ROOT/ae/motion_lab_v01.aep}"
-  "$AFX" "$(cygpath -w "$PROJ" 2>/dev/null || echo "$PROJ")" >/dev/null 2>&1 &
+  ae_open "${SS_AE_PROJECT:-$ROOT/ae/motion_lab_v01.aep}"
   for ((w = 0; w < 120; w++)); do ae_running && break; sleep 2; done
   sleep 20   # let AE finish loading the project
 fi
 if [ ! -f "$ROOT/bridge/outbox/_bridge_started.txt" ]; then
-  "$AFX" -s "\$.evalFile(new File('$(win "$ROOT/tools/ss_bridge.jsx")'))" >/dev/null 2>&1 || true
+  ae_script "$(native "$ROOT/tools/ss_bridge.jsx")" || true
 fi
-name="$(date +%s%N)_$(basename "$SRC" .jsx)"
-printf '$.evalFile(new File("%s"));\n' "$(win "$(cd "$(dirname "$SRC")" && pwd)/$(basename "$SRC")")" > "$ROOT/bridge/inbox/$name.jsx"
+name="$(date +%s)_$$_${RANDOM}_$(basename "$SRC" .jsx)"   # no %N: BSD date (macOS) does not support it
+printf '$.evalFile(new File("%s"));\n' "$(native "$(cd "$(dirname "$SRC")" && pwd)/$(basename "$SRC")")" > "$ROOT/bridge/inbox/$name.jsx"
 out="$ROOT/bridge/outbox/$name.txt"
 for ((i = 0; i < TIMEOUT * 2; i++)); do
   [ -f "$out" ] && break

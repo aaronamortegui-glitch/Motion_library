@@ -160,6 +160,14 @@ var SSM = (function () {
             }
             return list[list.length - 1];
         },
+        // Folder of the locally installed asset packs (Animation Composer). Override with the SS_ASSET_PACKS env var.
+        assetPacks: function () {
+            var env = $.getenv("SS_ASSET_PACKS");
+            if (env) return env.split("\\").join("/").replace(/\/?$/, "/");
+            if ($.os.indexOf("Windows") >= 0) return ($.getenv("LOCALAPPDATA") || "").split("\\").join("/") + "/MisterHorse/ProductManager/AssetPacks/";
+            return Folder("~/Library/Application Support/MisterHorse/ProductManager/AssetPacks/").fsName + "/";
+        },
+        isMac: function () { return $.os.indexOf("Windows") < 0; },
         readJSON: readJSON
     };
 })();

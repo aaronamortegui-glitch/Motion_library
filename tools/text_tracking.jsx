@@ -98,7 +98,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     SSP.applyText(sub, "Blur Words", "in", 3.0);
 
     // g) Texture: grain and light leak from the Animation Composer asset packs
-    var AC = $.getenv("LOCALAPPDATA").split("\\").join("/") + "/MisterHorse/ProductManager/AssetPacks/";
+    var AC = SSM.assetPacks();
     function pack(dir, mask, mode, op, nm) {
         var hits = Folder(AC + dir).getFiles(mask);
         if (!hits.length) { log.push("missing asset " + mask); return; }

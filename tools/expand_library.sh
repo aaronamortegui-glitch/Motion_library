@@ -7,7 +7,9 @@ set -euo pipefail
 export PYTHONIOENCODING=utf-8 PYTHONUTF8=1
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-if ls research/harvest/station/labels/*.png >/dev/null 2>&1; then
+if [ "$(uname -s)" = "Darwin" ]; then
+  echo "1/6 label OCR skipped (Windows OCR only; name recipes by hand in research/harvest)"
+elif ls research/harvest/station/labels/*.png >/dev/null 2>&1; then
   echo "1/6 label OCR";  powershell -NoProfile -ExecutionPolicy Bypass -File tools/ocr_labels.ps1
 else echo "1/6 no labels to read"; fi
 echo "2/6 recipes";             (cd tools && python harvest_to_library.py | head -1)

@@ -112,7 +112,11 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
             if (!meta) return "unknown preset";
             select(kind, name, meta); return "selected " + kind + "/" + name;
         },
-        frame: function () { return CUR ? CUR.key + " @" + FRAME : "none"; }
+        frame: function () { return CUR ? CUR.key + " @" + FRAME : "none"; },
+        tab: function (title) {   // switch gallery tab by title (used for UI recordings)
+            for (var i = 0; i < tabs.children.length; i++) if (tabs.children[i].text === title) { tabs.selection = tabs.children[i]; return "tab " + title; }
+            return "no tab " + title;
+        }
     };
 
     // ---------- apply controls (shared) ----------

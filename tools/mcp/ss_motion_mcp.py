@@ -18,17 +18,35 @@ import time
 ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 TOOLS = ROOT / "tools"
 INBOX, OUTBOX = ROOT / "bridge" / "inbox", ROOT / "bridge" / "outbox"
+IS_MAC = sys.platform == "darwin"
 AFX = os.environ.get("SS_AFTERFX", r"C:\Program Files\Adobe\Adobe After Effects 2026\Support Files\AfterFX.exe")
+
+
+def mac_app():
+    if os.environ.get("SS_AE_APP"):
+        return os.environ["SS_AE_APP"]
+    apps = sorted(p.name for p in pathlib.Path("/Applications").glob("Adobe After Effects 20*"))
+    return apps[-1] if apps else "Adobe After Effects 2026"
 PROTOCOL = "2025-06-18"
 
 
 # ---------------------------------------------------------------- bridge
 def ae_running():
     try:
+        if IS_MAC:
+            return subprocess.run(["pgrep", "-f", mac_app() + ".app/Contents/MacOS"], capture_output=True, timeout=10).returncode == 0
         out = subprocess.run(["tasklist", "/FI", "IMAGENAME eq AfterFX.exe"], capture_output=True, text=True, timeout=10).stdout
         return "afterfx" in out.lower()
     except Exception:
         return False
+
+
+def start_bridge_script(path):
+    if IS_MAC:   # AE's AppleScript dictionary: DoScriptFile runs a .jsx in the running app
+        subprocess.Popen(["osascript", "-e", f'tell application "{mac_app()}" to DoScriptFile "{path}"'],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    else:
+        subprocess.Popen([AFX, "-s", f"$.evalFile(new File('{path}'))"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def ensure_bridge():
@@ -37,8 +55,7 @@ def ensure_bridge():
         marker.unlink(missing_ok=True)
         raise RuntimeError("After Effects is not running. Open it (with the SS Motion panel docked the bridge starts by itself).")
     if not marker.exists():
-        bridge = str(TOOLS / "ss_bridge.jsx").replace("\\", "/")
-        subprocess.Popen([AFX, "-s", f"$.evalFile(new File('{bridge}'))"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        start_bridge_script((TOOLS / "ss_bridge.jsx").as_posix())
         for _ in range(60):
             if marker.exists():
                 break

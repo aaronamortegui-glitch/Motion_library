@@ -5,7 +5,7 @@
 //        SSA.sfx(comp, "Swoosh Wood 01_Variant Main", 1.2, -9);            // name, time, gain dB [, max length s]
 //        SSA.overlay(comp, "Light Leak B1 10", 0, "screen", 60);           // name, time [, blend, opacity %]
 var SSA = (function () {
-    var PACKS = Folder($.getenv("LOCALAPPDATA").split("\\").join("/") + "/MisterHorse/ProductManager/AssetPacks/");
+    var PACKS = Folder(SSM.assetPacks());
     var BLEND = { normal: BlendingMode.NORMAL, screen: BlendingMode.SCREEN, add: BlendingMode.ADD, overlay: BlendingMode.OVERLAY,
                   "soft-light": BlendingMode.SOFT_LIGHT, multiply: BlendingMode.MULTIPLY, lighten: BlendingMode.LIGHTEN };
     // sensible defaults per overlay family (from library/ASSETS.local.txt categories)

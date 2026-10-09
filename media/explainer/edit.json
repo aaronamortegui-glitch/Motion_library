@@ -1,0 +1,155 @@
+{
+ "comp": "EXPLAINER_EDIT",
+ "fps": 24,
+ "size": [
+  1920,
+  1080
+ ],
+ "music": "media/explainer/music_explainer_slow.wav",
+ "musicGainDb": -4,
+ "duckDb": -8,
+ "shots": [
+  {
+   "comp": "EX_S01",
+   "dur": 6.65
+  },
+  {
+   "comp": "EX_S02",
+   "dur": 7.52
+  },
+  {
+   "comp": "EX_S03",
+   "dur": 8.2
+  },
+  {
+   "comp": "EX_S04",
+   "dur": 8.38
+  },
+  {
+   "comp": "EX_S05",
+   "dur": 5.2
+  },
+  {
+   "comp": "EX_S06",
+   "dur": 8.45
+  },
+  {
+   "comp": "EX_S07",
+   "dur": 8.91
+  },
+  {
+   "comp": "EX_S08",
+   "dur": 5.82
+  },
+  {
+   "comp": "EX_S09",
+   "dur": 8.5
+  }
+ ],
+ "vo": [
+  {
+   "file": "media/explainer/vo/v_01.wav",
+   "shot": 0,
+   "local": 0.3,
+   "gainDb": -2
+  },
+  {
+   "file": "media/explainer/vo/v_02.wav",
+   "shot": 1,
+   "local": 0.3,
+   "gainDb": -2
+  },
+  {
+   "file": "media/explainer/vo/v_03.wav",
+   "shot": 2,
+   "local": 0.3,
+   "gainDb": -2
+  },
+  {
+   "file": "media/explainer/vo/v_04.wav",
+   "shot": 3,
+   "local": 0.3,
+   "gainDb": -2
+  },
+  {
+   "file": "media/explainer/vo/v_05.wav",
+   "shot": 4,
+   "local": 0.3,
+   "gainDb": -2
+  },
+  {
+   "file": "media/explainer/vo/v_06.wav",
+   "shot": 5,
+   "local": 0.3,
+   "gainDb": -2
+  },
+  {
+   "file": "media/explainer/vo/v_07.wav",
+   "shot": 6,
+   "local": 0.3,
+   "gainDb": -2
+  },
+  {
+   "file": "media/explainer/vo/v_08.wav",
+   "shot": 7,
+   "local": 0.3,
+   "gainDb": -2
+  },
+  {
+   "file": "media/explainer/vo/v_09.wav",
+   "shot": 8,
+   "local": 0.3,
+   "gainDb": -2
+  }
+ ],
+ "sfx": [
+  {
+   "name": "Swoosh Transition 23",
+   "shot": 1,
+   "local": 0.0,
+   "gainDb": -20
+  },
+  {
+   "name": "Swoosh Transition 23",
+   "shot": 2,
+   "local": 0.0,
+   "gainDb": -20
+  },
+  {
+   "name": "Swoosh Transition 23",
+   "shot": 3,
+   "local": 0.0,
+   "gainDb": -20
+  },
+  {
+   "name": "Swoosh Transition 23",
+   "shot": 4,
+   "local": 0.0,
+   "gainDb": -20
+  },
+  {
+   "name": "Swoosh Transition 23",
+   "shot": 5,
+   "local": 0.0,
+   "gainDb": -20
+  },
+  {
+   "name": "Swoosh Transition 23",
+   "shot": 6,
+   "local": 0.0,
+   "gainDb": -20
+  },
+  {
+   "name": "Swoosh Transition 23",
+   "shot": 7,
+   "local": 0.0,
+   "gainDb": -20
+  },
+  {
+   "name": "Swoosh Transition 23",
+   "shot": 8,
+   "local": 0.0,
+   "gainDb": -20
+  }
+ ]
+}

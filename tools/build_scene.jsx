@@ -30,7 +30,7 @@
         tp.setValue(td);
         return L;
     }
-    var AC = $.getenv("LOCALAPPDATA").split("\\").join("/") + "/MisterHorse/ProductManager/AssetPacks/";
+    var AC = SSM.assetPacks();
     function grain(c) {
         var hits = Folder(AC + "178fd44c06a96db4cd0c3d15eb6c50b158d26ee0f02fc060b2a7a4e2d248a1e1").getFiles("Grain Footage 01*");
         if (!hits.length) return;

@@ -6,7 +6,11 @@ set -euo pipefail
 export PYTHONIOENCODING=utf-8 PYTHONUTF8=1
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 AEP="${1:-$ROOT/ae/motion_lab_v01.aep}"
-AER="/c/Program Files/Adobe/Adobe After Effects 2026/Support Files/aerender.exe"
+if [ "$(uname -s)" = "Darwin" ]; then
+  AER="${SS_AERENDER:-$(ls -d /Applications/Adobe\ After\ Effects\ 20*/aerender 2>/dev/null | sort | tail -1)}"
+else
+  AER="${SS_AERENDER:-/c/Program Files/Adobe/Adobe After Effects 2026/Support Files/aerender.exe}"
+fi
 LIST="${LIST:-$ROOT/research/gif_comps.txt}"
 OUTDIR="${OUTDIR:-$ROOT/library}"
 [ -f "$LIST" ] || { echo "Missing $LIST (comp list)"; exit 1; }

@@ -13,9 +13,15 @@ import os
 import pathlib
 import re
 import subprocess
+import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-DEFAULT = pathlib.Path(os.environ.get("LOCALAPPDATA", "")) / "MisterHorse/ProductManager/AssetPacks"
+if os.environ.get("SS_ASSET_PACKS"):
+    DEFAULT = pathlib.Path(os.environ["SS_ASSET_PACKS"])
+elif sys.platform == "darwin":
+    DEFAULT = pathlib.Path.home() / "Library/Application Support/MisterHorse/ProductManager/AssetPacks"
+else:
+    DEFAULT = pathlib.Path(os.environ.get("LOCALAPPDATA", "")) / "MisterHorse/ProductManager/AssetPacks"
 
 SFX_CATS = [  # first match wins
     ("whoosh", r"swoosh|whoosh|swish|swipe|transition|approach"),

@@ -6,7 +6,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
 (function () {
   try {
     var ROOT = SS_ROOT + "/";
-    var AC_PACKS = $.getenv("LOCALAPPDATA").split("\\").join("/") + "/MisterHorse/ProductManager/AssetPacks/";
+    var AC_PACKS = SSM.assetPacks();
     var LOG = [];
     function log(s) { LOG.push(s); }
 

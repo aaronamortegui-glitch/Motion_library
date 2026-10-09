@@ -15,6 +15,7 @@ You are working in **SS Motion Library**, Superside's own motion library for Aft
 - **Real people** appear only with their consent; check likeness with `tools/face_check.py` before spending on video. Brands, prices and names on screen are fictional.
 - **Generation costs**: quote USD before generating with Flora (or similar) unless the user already approved the spend, and record real costs in `docs/LEARNINGS.md` §8.
 - **Commit or push only when the user asks.** End commit messages with the co-author line your harness gives you.
+- **Every user interface has an animated GIF in the repo** (`docs/screens/`, under ~500 KB) showing it in use. If you change the panel, the visualizer or any UI, re-record its GIF (see CONTRIBUTING §7) in the same commit.
 - Never commit temporary jobs (`tools/_*.jsx`), candidates, A/B tests or raw downloads (see `.gitignore`).
 
 ## Where things go
