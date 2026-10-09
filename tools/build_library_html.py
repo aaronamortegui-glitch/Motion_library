@@ -19,7 +19,18 @@ for r in (json.loads(rp.read_text(encoding="utf-8"))["recipes"] if rp.exists() e
                            "channels": " & ".join(r["channels"]) + (" (loop)" if r["kind"] == "fx" else ""),
                            "energy": EN.get(r["energy"], r["energy"]), "use": (r["name"] + " · " if r["name"] else "") + "AC ref · " + (r["section"] or "?"),
                            "gif": f"gifs/recipe/{s}.gif", "call": f'SSP.applyRecipe(layer, "{r["id"]}", "both")'})
-data = json.dumps({"presets": lib["presets"], "tokens": tok}, ensure_ascii=False)
+tags = json.loads((ROOT / "library/tags.json").read_text(encoding="utf-8"))
+packs = json.loads((ROOT / "library/packs.json").read_text(encoding="utf-8"))["packs"]
+techs = json.loads((ROOT / "library/techniques.json").read_text(encoding="utf-8"))["techniques"]
+TAGOF = {t["name"]: t for t in tags["presets"]}
+for p in lib["presets"]:   # energy range, tones and roles from library/tags.json (tools/tag_library.py)
+    t = TAGOF.get(p["name"])
+    if t:
+        p["tones"], p["range"], p["roles"] = t["tones"], t["energy"], t["roles"]
+TT = {t["name"]: t for t in tags["techniques"]}
+for t in techs:
+    t["tags"] = TT.get(t["name"], {})
+data = json.dumps({"presets": lib["presets"], "tokens": tok, "tones": tags["tones"], "packs": packs, "techniques": techs}, ensure_ascii=False)
 
 HTML = r"""<!doctype html>
 <html lang="en">
@@ -61,6 +72,8 @@ p.lead{max-width:760px;color:var(--muted);font-size:18px;margin:0}
 .badge{font-size:11px;font-weight:600;border-radius:999px;padding:3px 10px;white-space:nowrap}
 .e-soft{background:#3B5C57;color:var(--cloud)} .e-medium{background:var(--spark);color:var(--pine)} .e-dynamic{background:var(--coral);color:var(--pine)}
 .meta{color:var(--muted);font-size:12.5px}
+.tones{display:flex;flex-wrap:wrap;gap:4px}
+.tone{font-size:11px;border:1px solid rgba(216,255,133,.35);color:var(--spark);border-radius:999px;padding:1px 8px}
 code{font-family:ui-monospace,Consolas,monospace;font-size:10.5px}
 .call{margin-top:auto;display:flex;gap:8px;align-items:center;background:var(--surface);border-radius:10px;padding:8px 10px}
 .call code{flex:1;white-space:normal;word-break:break-word;line-height:1.35}
@@ -77,21 +90,30 @@ footer{margin-top:64px;color:var(--muted);font-size:13px}
 <div class="wrap">
   <div class="eyebrow">Motion library for After Effects</div>
   <h1>Motion DNA</h1>
-  <p class="lead">Our own motion presets for After Effects, built on our own motion tokens. Each preset creates native keyframes and expressions: they are editable and do not depend on plugins.</p>
+  <p class="lead">Motion made with AI all looks the same. Motion DNA is a library of moves, styles and techniques, tagged by energy (1 calm → 5 explosive) and tone, so you or Claude can pick, mix and grow an identity. Everything is native keyframes and expressions.</p>
 
   <div class="bar" role="toolbar" aria-label="Filters">
     <button class="chip" data-kind="all" aria-pressed="true">All</button>
     <button class="chip" data-kind="motion" aria-pressed="false">Motion</button>
     <button class="chip" data-kind="fx" aria-pressed="false">Effects</button>
     <button class="chip" data-kind="text" aria-pressed="false">Text</button>
+    <button class="chip" data-kind="transition" aria-pressed="false">Transitions</button>
     <button class="chip" data-kind="recipe" aria-pressed="false">Recipes</button>
     <span class="sep"></span>
     <button class="chip" data-energy="soft" aria-pressed="false">Soft</button>
     <button class="chip" data-energy="medium" aria-pressed="false">Medium</button>
     <button class="chip" data-energy="dynamic" aria-pressed="false">Dynamic</button>
-    <input class="search" type="search" placeholder="Search by name, channel or use…" aria-label="Search">
+    <input class="search" type="search" placeholder="Search by name, channel, use or tone…" aria-label="Search">
   </div>
+  <div class="bar" role="toolbar" aria-label="Tones" id="tones"></div>
   <div class="grid" id="grid"></div>
+
+  <h2>Styles</h2>
+  <p class="meta">A whole comp in one click: each layer gets the preset of its role, with the style's own curve. Preview: title · text · shapes · media.</p>
+  <div class="grid" id="styles"></div>
+  <h2>Techniques</h2>
+  <p class="meta">Script workflows that leave a technique in every project. Each one says what it needs and what to ask Claude.</p>
+  <div class="grid" id="techs"></div>
 
   <h2>Durations</h2>
   <div class="tokens" id="durs"></div>
@@ -104,14 +126,16 @@ footer{margin-top:64px;color:var(--muted);font-size:13px}
 const DATA = __DATA__;
 const QS = new URLSearchParams(location.search);
 const POSTER = QS.get("poster") === "1";   // static mid-animation frames (for screenshots / video capture)
-const state = { kind: QS.get("kind") || "all", energy: QS.get("energy"), q: "" };
+const state = { kind: QS.get("kind") || "all", energy: QS.get("energy"), tone: QS.get("tone"), q: "" };
+const tonesHTML = t => (t || []).map(x => `<span class="tone">${x}</span>`).join("");
 const grid = document.getElementById("grid");
 function card(p){
   const el = document.createElement("article");
   el.className = "card";
   el.innerHTML = `<img width="240" height="135" decoding="async" src="${POSTER ? p.gif.replace("gifs/", "posters/").replace(".gif", ".png") : p.gif}" alt="Preview of ${p.name}">
   <div class="body">
-    <div class="row"><span class="name">${p.name}</span><span class="badge e-${p.energy}">${p.energy}</span></div>
+    <div class="row"><span class="name">${p.name}</span><span class="badge e-${p.energy}">${p.energy}${p.range ? " " + p.range[0] + "–" + p.range[1] : ""}</span></div>
+    <div class="tones">${tonesHTML(p.tones)}</div>
     <div class="meta">${p.channels}</div>
     <div class="meta">${p.use}</div>
     <div class="call"><code>${p.call}</code><button class="copy">Copy</button></div>
@@ -125,12 +149,38 @@ function render(){
   grid.innerHTML = "";
   const q = state.q.toLowerCase();
   const list = DATA.presets.filter(p =>
-    (state.kind === "all" || p.kind === state.kind) &&
+    (state.kind === "all" || p.kind === state.kind || (state.kind === "transition" && (p.roles || []).includes("transition"))) &&
     (!state.energy || p.energy === state.energy) &&
-    (!q || (p.name + " " + p.channels + " " + p.use).toLowerCase().includes(q)));
+    (!state.tone || (p.tones || []).includes(state.tone)) &&
+    (!q || (p.name + " " + p.channels + " " + p.use + " " + (p.tones || []).join(" ")).toLowerCase().includes(q)));
   if (!list.length) { grid.innerHTML = '<div class="empty">No preset matches the filter.</div>'; return; }
   list.forEach(p => grid.appendChild(card(p)));
+  renderStyles(); renderTechs();
 }
+function renderStyles(){
+  const el = document.getElementById("styles");
+  el.innerHTML = DATA.packs.filter(s => !state.tone || (s.tones || []).includes(state.tone)).map(s => `<article class="card">
+    <img width="240" height="135" decoding="async" src="${POSTER ? "packs/" + s.slug + ".png" : "packs/" + s.slug + ".gif"}" alt="Style ${s.name}">
+    <div class="body"><div class="row"><span class="name">${s.name}</span><span class="badge e-${s.energy}">${s.energy}${s.energy_range ? " " + s.energy_range[0] + "–" + s.energy_range[1] : ""}</span></div>
+    <div class="tones">${tonesHTML(s.tones)}</div><div class="meta">${s.desc}</div>
+    <div class="meta">${s.curve ? "curve " + s.curve + " · " : ""}transition ${s.transition || "-"}${s.source && s.source.startsWith("reference:") ? " · from " + s.source.slice(10) : ""}</div>
+    <div class="call"><code>SSP.applyPack(comp, "${s.name}")</code></div></div></article>`).join("");
+}
+function renderTechs(){
+  const el = document.getElementById("techs");
+  el.innerHTML = DATA.techniques.filter(t => !state.tone || !(t.tags.tones || []).length || t.tags.tones.includes(state.tone)).map(t => `<article class="card">
+    ${t.image ? `<img width="240" height="135" decoding="async" src="${t.image}" alt="${t.name}">` : ""}
+    <div class="body"><div class="row"><span class="name">${t.name}</span>${t.tags.energy ? `<span class="badge e-medium">${t.tags.energy[0]}–${t.tags.energy[1]}</span>` : ""}</div>
+    <div class="tones">${tonesHTML(t.tags.tones)}</div><div class="meta">${t.what}</div>
+    ${(t.tags.needs || []).length ? `<div class="meta">needs ${t.tags.needs.join(", ")}</div>` : ""}
+    <div class="call"><code>Ask Claude: ${t.ask}</code></div></div></article>`).join("");
+}
+document.getElementById("tones").innerHTML = DATA.tones.map(t => `<button class="chip" data-tone="${t}" aria-pressed="${state.tone === t}">${t}</button>`).join("");
+document.querySelectorAll("[data-tone]").forEach(b => b.onclick = () => {
+  state.tone = state.tone === b.dataset.tone ? null : b.dataset.tone;
+  document.querySelectorAll("[data-tone]").forEach(x => x.setAttribute("aria-pressed", x.dataset.tone === state.tone));
+  render();
+});
 document.querySelectorAll("[data-kind]").forEach(b => b.onclick = () => {
   state.kind = b.dataset.kind;
   document.querySelectorAll("[data-kind]").forEach(x => x.setAttribute("aria-pressed", x === b));
@@ -169,14 +219,22 @@ lines = [
     "# calls: motion SSP.apply(L,N,in|out|both) · fx SSP.applyFx(L,N) · text SSP.applyText(L,N,in|out|both) · recipe SSP.applyRecipe(L,ID,both) · include tools/ss_presets.jsx",
     "# dur(f@30): " + " ".join(f"{d['name']}{d['frames']}" for d in tok["durations"]),
     "# ease(bezier): " + "; ".join(f"{e['name']} {','.join(str(round(v, 2)) for v in e['bezier'])}" for e in tok["easings"]),
-    "# packs: SSP.applyPack(comp, Dynamic|Elegant|Modern|Playful|Tech[, layers, in|out|both]) · roles title/subtitle/body/shape/media/logo · library/packs.json",
+    "# styles: SSP.applyPack(comp, name[, layers, in|out|both]) · roles title/subtitle/body/shape/media/logo · library/packs.json · listed at the end",
     "# markers: SSP.markerTiming(true) before apply → layer markers 'SS in'/'SS out' retime the animation when dragged · classics (family classic) = animate.css 4.1.1 MIT",
-    "# mcp: .mcp.json → tools/mcp/ss_motion_mcp.py (list_presets, apply_preset, apply_pack, add_asset, render_frame, run_jsx…)",
+    "# mcp: .mcp.json motion-dna → tools/mcp/ss_motion_mcp.py (list_tags, suggest_mix, match_reference, list_presets, apply_preset[duration,intensity,direction,ease], remove_animation, apply_pack, add_asset, render_frame, run_jsx…)",
     "# assets (local, licensed, not in repo): python tools/index_assets.py -> library/ASSETS.local.txt (sfx/overlays by category + loudness) · include tools/ss_assets.jsx · SSA.sfx(comp,name,t,gainDb[,len]) · SSA.overlay(comp,name,t[,blend,opacity])",
     "# hud: SSHUD.bracket/callout/meter/chip/contour/faceScan on TRK nulls · include tools/ss_hud.jsx · scenes: tools/build_scene.jsx + JSON (matte, behind text) · breakdown: tools/build_breakdown.jsx · edits: tools/build_edit.jsx + JSON · read docs/LEARNINGS.md",
-    "# kind|name|channels|e|use",
+    "# tags (library/tags.json): roles enter/exit/emphasis/loop/transition · energy range 1 calm..5 explosive · tones " + ", ".join(tags["tones"]) + " · MCP list_tags / suggest_mix / match_reference",
+    "# references: a brand or video analysed into energy + tones → library/references/<slug>.json → match_reference → build what fits, CREATE the gaps (CONTRIBUTING §8)",
+    "# kind|name|channels|e|use|roles|energy|tones",
 ]
-lines += [f"{p['kind']}|{p.get('id', p['name'])}|{p['channels'].replace(' & ', '&').replace('Text · ', '')}|{E.get(p['energy'], p['energy'])}|{p['use']}" for p in lib["presets"]]
+lines += [f"{p['kind']}|{p.get('id', p['name'])}|{p['channels'].replace(' & ', '&').replace('Text · ', '')}|{E.get(p['energy'], p['energy'])}|{p['use']}"
+          + (f"|{'/'.join(p['roles'])}|{p['range'][0]}-{p['range'][1]}|{'/'.join(p['tones'])}" if p.get("tones") else "") for p in lib["presets"]]
+lines += ["# styles: name|energy range|tones|curve|transition|title,subtitle,body,shape,media,logo"]
+lines += [f"style|{s['name']}|{s.get('energy_range', ['?', '?'])[0]}-{s.get('energy_range', ['?', '?'])[1]}|{'/'.join(s.get('tones', []))}|{s.get('curve', '-')}|{s.get('transition', '-')}|"
+          + ",".join((s['roles'].get(r) or {}).get('text') or (s['roles'].get(r) or {}).get('motion') or '-' for r in ['title', 'subtitle', 'body', 'shape', 'media', 'logo']) for s in packs]
+lines += ["# techniques: name|energy range|tones|needs (library/techniques.json has what/how/ask)"]
+lines += [f"technique|{t['name']}|{t['tags'].get('energy', [1, 5])[0]}-{t['tags'].get('energy', [1, 5])[1]}|{'/'.join(t['tags'].get('tones', []))}|{'/'.join(t['tags'].get('needs', []))}" for t in techs]
 (ROOT / "library/INDEX.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 (ROOT / "library/index.html").write_text(HTML.replace("__DATA__", data), encoding="utf-8")
 print("library/index.html", len(lib["presets"]), "presets")

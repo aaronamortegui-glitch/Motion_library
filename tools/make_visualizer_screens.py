@@ -40,7 +40,21 @@ def main():
     finally:
         tmp.unlink(missing_ok=True)
     slugs = [p["slug"] for p in __import__("json").loads(re.search(r"const DATA = (\{.*?\});\n", html).group(1))["presets"]][:12]
-    xs, ys = [117, 320, 524, 727, 930, 1134], [342, 660]   # thumbnail boxes of the first two card rows at 1440 px
+    from PIL import Image   # find the thumbnail boxes of the first two card rows (the header height changes with the filters)
+    im = Image.open(SCREENS / "visualizer.png").convert("RGB")
+    T = (10, 34, 28)
+    col = [im.getpixel((122, y)) == T for y in range(im.height)]   # near the card edge, away from the sample
+    ys, y = [], 0
+    while y < im.height and len(ys) < 2:
+        if col[y] and (y == 0 or not col[y - 1]):
+            run = 0
+            while y + run < im.height and col[y + run]: run += 1
+            if run > 40: ys.append(y)
+            y += run
+        y += 1
+    xs = [117, 320, 524, 727, 930, 1134]
+    if len(ys) < 2:
+        ys = [342, 660]
     args = ["ffmpeg", "-v", "error", "-y", "-loop", "1", "-framerate", "12", "-t", "2.4", "-i", str(SCREENS / "visualizer.png")]
     for s in slugs:
         args += ["-t", "2.4", "-i", str(ROOT / "library" / "mp4" / "motion" / f"{s}.mp4")]

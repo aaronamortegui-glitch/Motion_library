@@ -24,6 +24,9 @@ Windows or macOS · After Effects 2025/2026 · Python 3 (`numpy`, `opencv-python
    - `energy` is `soft` / `medium` / `dynamic`.
    - `use` says where it shines, in a few words.
    LLMs choose presets from this text alone.
+   - **Tag it** in `tools/tag_library.py` (roles, targets, direction, energy range 1–5, tones) and run
+     `python tools/tag_library.py`. An untagged preset is invisible to `match_reference`, `suggest_mix`, the
+     Tone filter and the styles; the script prints the ones you forgot.
 4. **Test it** with a throwaway job (`tools/_test_x.jsx`, deleted afterwards): apply it in a temp comp, read values back with `valueAtTime`, remove the comp.
 5. **Run the library pipeline** (AE open):
    ```bash
@@ -58,8 +61,13 @@ Windows or macOS · After Effects 2025/2026 · Python 3 (`numpy`, `opencv-python
 3. **Record attribution** in the file's `source` field and in the README.
 4. Run the pipeline from §1. The presets join the motion catalog with `family: "classic"`.
 
-## 3. Add a style pack
-`library/packs.json`: a pack maps layer roles (`title`, `subtitle`, `body`, `shape`, `media`, `logo`) to presets, with a `stagger` in frames, an optional `delay` and an optional `fx` loop per role. `SSP.applyPack(comp, name)` classifies the layers and applies them. Test it on a comp with every role. If you add a pack, render a demo for its thumbnail (see `tools/pack_demos.jsx`).
+## 3. Add a style
+`library/packs.json`: a style maps layer roles (`title`, `subtitle`, `body`, `shape`, `media`, `logo`) to presets, with a
+`stagger` in frames, an optional `delay` and an optional `fx` loop per role. It is **tagged like the presets** —
+`tones`, `energy_range` [1–5], `energy` word — and can carry its own `curve` (a token easing that re-eases every move
+of the style), the `transition` preset it uses between scenes, and its `source` (`handmade` or `reference:<slug>`).
+`SSP.applyPack(comp, name)` classifies the layers and applies them. Its preview is a **2×2 grid** (title · text ·
+shapes · media): `bash tools/rebuild_previews.sh` renders it (`tools/pack_demos.jsx`) and makes the panel stills.
 
 ## 4. Add a case study (a test video)
 1. **Folder** `media/<case>/`:
@@ -111,6 +119,30 @@ Any UI (the AE panel, the visualizer, a new tool window) must have an animated G
   ```
 - **Web pages:** headless Edge or Chrome screenshots per state (`--screenshot`, URL params such as `?kind=text`), assembled the same way.
 - Keep them under ~500 KB.
+
+## 8. Grow the library from a reference (brands, videos, another Claude's analysis)
+References are analysed into a feel (an energy range on 1 calm … 5 explosive, and tones) plus the moves, curves and
+techniques they use. This is how the library learns new identities:
+1. **Write the profile** `library/references/<slug>.json` (format: [`library/references/_schema.md`](library/references/_schema.md)).
+   One file per reference; keep the sources and who analysed it.
+2. **Compare it with the library:** `python tools/match_reference.py library/references/<slug>.json` (or the MCP tool
+   `match_reference`). Read `research/references/<slug>.md`: what fits, how to build each move (preset + curve +
+   duration), and the **gaps** (`<slug>.gaps.json`).
+3. **Create every gap — nothing observed is left out:**
+   - a move → a new preset (§1), named for what it does, not for the brand; tag it with the suggested tags.
+   - a curve → a new token easing in `tokens/superside_motion_tokens.json` (bezier + AE influence/speed) and a row in
+     `CURVES` in `tools/tag_library.py`.
+   - a technique → an entry in `library/techniques.json` (what, how, what to ask Claude) and in `TECH` in
+     `tools/tag_library.py`; the scripts that implement it go in `tools/`.
+   - a transition → a preset with the role `transition` (it shows up in the panel's Transitions).
+   - a new tone → just use it in the tags; the vocabulary is open.
+4. **Re-run the match** until the gaps are empty or explained in the report.
+5. **Add the proposed style** (from the report) to `library/packs.json` with its tags, curve and transition, under a
+   neutral name (no brand names, no logos).
+6. **Render the samples:** `bash tools/rebuild_previews.sh` (new presets, the style's 2×2 grid, stills, visualizer,
+   README catalog), then `python tools/tag_library.py`.
+7. **Commit** the profile, the new presets/curves/techniques, the style and the samples together, and add what you
+   learned to `docs/LEARNINGS.md`.
 
 ## Checklist before you push
 - [ ] Everything in English, no temporary jobs or candidates in the diff

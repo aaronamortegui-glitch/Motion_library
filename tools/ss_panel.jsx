@@ -1,6 +1,7 @@
 // Motion DNA — After Effects panel: the library by category with live vector previews, per-apply controls
 // (duration, intensity, direction, easing), In / Out / Both / Remove, marker-driven timing, one-click styles,
-// technique guides, local assets, favorites, and the Claude connection (file bridge used by the MCP server).
+// a Mix by tags (energy + tone → move and curve per layer, saved as a new style), technique guides, local assets,
+// favorites, and the Claude connection (file bridge used by the MCP server).
 // Install once (adds "Motion DNA" to AE's Window menu, dockable): tools/install_panel.ps1 (Windows) or
 // tools/install_panel.sh (macOS). Or run it directly: File > Scripts > Run Script File… > tools/ss_panel.jsx.
 // The installed loader sets SS_ROOT (repo path) and SS_PANEL_HOST (the dockable panel) before evaluating this file.
@@ -22,8 +23,20 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     try { var lib = SSM.readJSON(SS_ROOT + "/library/library.json").presets; for (var i = 0; i < lib.length; i++) META[lib[i].name] = lib[i]; } catch (e) {}
     try { CURVES = SSM.readJSON(SS_ROOT + "/library/preview_curves.json"); } catch (e) {}
     var TECH = []; try { TECH = SSM.readJSON(SS_ROOT + "/library/techniques.json").techniques; } catch (e) {}
+    // tags (library/tags.json, tools/tag_library.py): roles, targets, energy range, tones — used for the Tone filter,
+    // the Transitions category and the style grid
+    var TAGS = { presets: [], tones: [] }, TAGOF = {};
+    try { TAGS = SSM.readJSON(SS_ROOT + "/library/tags.json"); for (var ti = 0; ti < TAGS.presets.length; ti++) TAGOF[TAGS.presets[ti].name] = TAGS.presets[ti]; } catch (e) {}
+    function techSlug(n) { return n.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+    function packSlug(n) { var ps = SSP.packs(); for (var i = 0; i < ps.length; i++) if (ps[i].name === n) return ps[i].slug; return techSlug(n); }
     function slugOf(name) { var m = META[name]; return m ? m.slug : name.toLowerCase().replace(/__/g, "-").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
-    function thumb(kind, name) { var f = new File(SS_ROOT + "/library/thumbs_sm/" + kind + "/" + slugOf(name) + ".png"); return f.exists ? f : null; }
+    function thumb(kind, name) {
+        var base = "/library/thumbs_sm/" + kind + "/" + slugOf(name);
+        if (kind === "sfx" || kind === "overlay") base = "/library/assets_cache/" + kind + "/" + techSlug(name);
+        if (kind === "pack") base = "/library/packs/" + packSlug(name) + "_sm";
+        if (kind === "technique") base = "/library/techniques/" + techSlug(name) + "_sm";
+        var f = new File(SS_ROOT + base + ".png"); return f.exists ? f : null;
+    }
 
     // favorites persist in AE's settings (per machine)
     var FAV = {};
@@ -44,7 +57,9 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         for (var i = 0; i < fs.length; i++) if (fs[i].name.charAt(0) !== "_" && fs[i].modified && fs[i].modified.getTime() > best) best = fs[i].modified.getTime();
         if (!best) return "";
         var m = Math.round((new Date().getTime() - best) / 60000);
-        return m <= 1 ? " · active now" : m < 60 ? " · last " + m + " min ago" : "";
+        if (m <= 1) return " · active now";   // ifs: ExtendScript breaks chained ternaries
+        if (m < 60) return " · last " + m + " min ago";
+        return "";
     }
     function status() {
         var on = bridgeOn();
@@ -63,11 +78,14 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     };
 
     // ---------- category + filters ----------
-    var CATS = ["Moves", "Classics", "Text", "Loops", "Recipes", "Styles", "Techniques", "Assets", "★ Favorites"];
+    var CATS = ["Moves", "Classics", "Text", "Loops", "Transitions", "Recipes", "Styles", "Mix", "Techniques", "Assets", "★ Favorites"];
     var fRow = win.add("group"); fRow.alignChildren = ["left", "center"]; fRow.alignment = ["fill", "top"];
     var cat = fRow.add("dropdownlist", undefined, CATS); cat.preferredSize.width = 120; cat.selection = 0;
     var search = fRow.add("edittext", undefined, ""); search.preferredSize.width = 140; search.helpTip = "Search by name, channel or use";
-    var energy = fRow.add("dropdownlist", undefined, ["all energies", "soft", "medium", "dynamic"]); energy.selection = 0;
+    var energy = fRow.add("dropdownlist", undefined, ["all energies", "1 calm", "2 soft", "3 medium", "4 dynamic", "5 explosive"]); energy.selection = 0;
+    energy.helpTip = "Energy level (library/tags.json): shows what covers it, and sets the feel for Mix";
+    function inRange(r) { var l = energy.selection.index; return !l || !r || (r[0] <= l && l <= r[1]); }
+    var tone = fRow.add("dropdownlist", undefined, ["all tones"].concat(TAGS.tones || [])); tone.selection = 0; tone.helpTip = "Filter by tone (library/tags.json)";
 
     // ---------- live preview ----------
     var PW = 320, PH = 150;
@@ -78,6 +96,8 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var bFav = selRow.add("button", undefined, "☆"); bFav.preferredSize = [30, 22]; bFav.helpTip = "Add to / remove from favorites";
     var selInfo = prevBox.add("statictext", [0, 0, PW, 32], " ", { multiline: true }); selInfo.alignment = ["fill", "top"];
     var CUR = null, FRAME = 0;   // CUR = { key, kind, name } of the selected preset
+    var PREV_IMG = null;          // still shown in the preview for styles, techniques and assets
+    function setPreview(path) { PREV_IMG = null; try { var f = new File(SS_ROOT + path); if (f.exists) PREV_IMG = ScriptUI.newImage(f); } catch (e) {} }
     // the neutral sample: a Spark arrow (assets/motion_dna/sample_shape.json), so direction and rotation read at a glance
     var ARROW = (function () {
         var pts = [[-330, -55], [60, -55], [60, -160], [330, 0], [60, 160], [60, 55], [-330, 55]];
@@ -103,6 +123,10 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     view.onDraw = function () {
         var g = this.graphics, W = this.size.width, H = this.size.height;
         g.rectPath(0, 0, W, H); g.fillPath(g.newBrush(g.BrushType.SOLID_COLOR, C.pine));
+        if (PREV_IMG) {   // styles (2x2 grid), techniques, assets: their still, fitted
+            try { var iw = PREV_IMG.size[0], ih = PREV_IMG.size[1], k = Math.min(W / iw, H / ih); g.drawImage(PREV_IMG, (W - iw * k) / 2, (H - ih * k) / 2, iw * k, ih * k); } catch (e) {}
+            return;
+        }
         if (!CUR) { g.drawString("Pick a preset to preview it", g.newPen(g.PenType.SOLID_COLOR, C.muted, 1), 12, H / 2 - 8); return; }
         var it = CURVES.items[CUR.key];
         if (!it) { g.drawString(CUR.kind === "pack" ? "Style: applies a preset per layer role" : "(no preview)", g.newPen(g.PenType.SOLID_COLOR, C.muted, 1), 12, H / 2 - 8); return; }
@@ -135,7 +159,9 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     $.global.SS_PANEL_TASK = app.scheduleTask("if (typeof SS_PANEL_TICK === \"function\") SS_PANEL_TICK();", Math.round(1000 / (CURVES.fps || 12)), true);
     function favKey() { return CUR ? CUR.kind + "/" + CUR.name : ""; }
     function select(kind, name, meta) {
-        CUR = { key: kind + "/" + name, kind: kind, name: name }; FRAME = 0;
+        CUR = { key: kind + "/" + name, kind: kind, name: name }; FRAME = 0; PREV_IMG = null;
+        if (kind === "pack") setPreview("/library/packs/" + packSlug(name) + "_md.png");
+        if (kind === "technique") setPreview("/library/techniques/" + techSlug(name) + "_md.png");
         selName.text = name + (meta.energy ? "  ·  " + meta.energy : "");
         selInfo.text = (meta.channels || "") + "\n" + (meta.use || "");
         bFav.text = FAV[favKey()] ? "★" : "☆";
@@ -236,7 +262,10 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         "Classics": { kind: "motion", names: classic, meta: function (n) { return SSP.presets[n]; } },
         "Text": { kind: "text", names: SSP.textNames(), meta: function (n) { return SSP.text[n]; } },
         "Loops": { kind: "fx", names: SSP.effectNames(), meta: function (n) { return SSP.effects[n]; } },
-        "Recipes": { kind: "recipe", names: SSP.recipeIds(), meta: recipeMeta }
+        "Recipes": { kind: "recipe", names: SSP.recipeIds(), meta: recipeMeta },
+        "Transitions": { kind: "motion", names: (function () {   // presets tagged role "transition" (the Techniques tab has the shape wipes)
+            var a = []; for (var i = 0; i < TAGS.presets.length; i++) { var t = TAGS.presets[i]; if (("," + t.roles.join(",") + ",").indexOf(",transition,") >= 0 && t.kind === "motion") a.push(t.name); }
+            return a; })(), meta: function (n) { return SSP.presets[n]; } }
     };
     function metaOf(kind, name) {
         if (kind === "text") return SSP.text[name]; if (kind === "fx") return SSP.effects[name];
@@ -245,7 +274,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var page = 0;
     function cols() { var w = (win.size && win.size.width) || 380; return Math.max(2, Math.floor((w - 24) / 118)); }
     function clear() { while (body.children.length) body.remove(body.children[0]); }
-    function grid(items) {   // items: [{kind, name, meta}]
+    function grid(items, onPick) {   // items: [{kind, name, meta}]; onPick(item) replaces the preset selection
         var COLS = cols(), ROWS = 3, PER = COLS * ROWS, pages = Math.max(1, Math.ceil(items.length / PER));
         page = Math.max(0, Math.min(page, pages - 1));
         var g = body.add("group"); g.orientation = "column"; g.alignChildren = ["left", "top"]; g.spacing = 2;
@@ -262,7 +291,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
                     btn.helpTip = it.name + " · " + (it.meta.energy || "") + "\n" + (it.meta.use || "");
                     var nm = (FAV[it.kind + "/" + it.name] ? "★ " : "") + it.name;
                     var lbl = cell.add("statictext", [0, 0, 112, 16], nm.length > 18 ? nm.substr(0, 17) + "…" : nm); lbl.justify = "center";
-                    btn.onClick = function () { select(it.kind, it.name, it.meta); };
+                    btn.onClick = function () { if (onPick) onPick(it); else select(it.kind, it.name, it.meta); };
                 })(items[idx]);
             }
         }
@@ -273,7 +302,9 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     }
     function matches(name, m) {
         var want = energy.selection.index === 0 ? "" : energy.selection.text, q = search.text.toLowerCase();
-        if (want && m.energy !== want) return false;
+        var tgE = TAGOF[name], rng = tgE ? tgE.energy : ({ soft: [1, 2], medium: [3, 3], dynamic: [4, 5] })[m.energy];
+        if (!inRange(rng)) return false;
+        if (tone.selection.index > 0) { var tg = TAGOF[name]; if (!tg || ("," + tg.tones.join(",") + ",").indexOf("," + tone.selection.text + ",") < 0) return false; }
         return !q || (name + " " + (m.channels || "") + " " + (m.use || "")).toLowerCase().indexOf(q) >= 0;
     }
     function show() {
@@ -286,38 +317,49 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         } else if (c === "★ Favorites") {
             for (var k in FAV) if (FAV.hasOwnProperty(k)) {
                 var kind = k.split("/")[0], name = k.substr(kind.length + 1);
-                if (kind === "pack" || kind === "technique") { items.push({ kind: kind, name: name, meta: { use: kind } }); continue; }
+                if (kind === "pack" || kind === "technique") { items.push({ kind: kind, name: name, meta: { use: kind === "pack" ? "style" : "technique" } }); continue; }
                 var mm = metaOf(kind, name); if (mm && matches(name, mm)) items.push({ kind: kind, name: name, meta: mm });
             }
             if (!items.length) body.add("statictext", undefined, "No favorites yet: pick a preset and press ☆.");
             else grid(items);
         } else if (c === "Styles") styles();
+        else if (c === "Mix") mix();
         else if (c === "Techniques") techniques();
         else if (c === "Assets") assets();
         win.layout.layout(true);
     }
-    cat.onChange = function () { page = 0; show(); };
+    cat.onChange = function () { page = 0; PREV_IMG = null; A_SEL = null; show(); redraw(); };
     energy.onChange = function () { page = 0; show(); };
+    tone.onChange = function () { page = 0; show(); };
     search.onChanging = function () { page = 0; show(); };
 
     // ---------- styles (packs) ----------
     var scopeAll = null;
     function styles() {
-        body.add("statictext", undefined, "One click gives the whole comp (or the selected layers) a look: titles, text,\nshapes, media and logos each get the style's preset. Then In / Out / Both.", { multiline: true }).preferredSize.height = 34;
+        body.add("statictext", undefined, "Each style animates a whole comp (or the selected layers): every layer gets the preset\nof its role, with the style's own curve. Pick one, then In / Out / Both.", { multiline: true }).preferredSize.height = 34;
         scopeAll = body.add("checkbox", undefined, "Whole comp (otherwise only the selected layers)"); scopeAll.value = true;
-        var packs = SSP.packs();
-        for (var p = 0; p < packs.length; p++) (function (pk) {
-            if (search.text && (pk.name + " " + pk.desc).toLowerCase().indexOf(search.text.toLowerCase()) < 0) return;
-            var row = body.add("group"); row.alignChildren = ["left", "center"];
-            var f = new File(SS_ROOT + "/library/packs/" + pk.slug + "_sm.png"), btn;
-            if (f.exists) btn = row.add("iconbutton", undefined, ScriptUI.newImage(f), { style: "toolbutton" });
-            else { btn = row.add("button", undefined, pk.name); btn.preferredSize = [112, 40]; }
-            row.add("statictext", [0, 0, 230, 44], (FAV["pack/" + pk.name] ? "★ " : "") + pk.name + " · " + pk.energy + "\n" + pk.desc, { multiline: true });
-            btn.onClick = function () {
-                CUR = { key: "pack/" + pk.name, kind: "pack", name: pk.name }; FRAME = 0;
-                selName.text = "Style: " + pk.name; selInfo.text = pk.desc; bFav.text = FAV[favKey()] ? "★" : "☆"; redraw();
-            };
-        })(packs[p]);
+        var packs = SSP.packs(), shown = [], q = search.text.toLowerCase(), tn = tone.selection.index > 0 ? tone.selection.text : "";
+        for (var p = 0; p < packs.length; p++) {
+            var pk = packs[p], tones = pk.tones || [];
+            if (q && (pk.name + " " + pk.desc + " " + tones.join(" ")).toLowerCase().indexOf(q) < 0) continue;
+            if (tn && ("," + tones.join(",") + ",").indexOf("," + tn + ",") < 0) continue;
+            if (!inRange(pk.energy_range)) continue;
+            shown.push(pk);
+        }
+        if (!shown.length) { body.add("statictext", undefined, "No style matches the filters."); return; }
+        var COLS = Math.max(1, Math.floor((((win.size && win.size.width) || 380) - 24) / 236)), row = null;
+        for (var k = 0; k < shown.length; k++) (function (pk, k) {
+            if (k % COLS === 0) { row = body.add("group"); row.spacing = 6; row.alignChildren = ["left", "top"]; }
+            var cell = row.add("group"); cell.orientation = "column"; cell.spacing = 1; cell.alignChildren = ["left", "top"];
+            var f = new File(SS_ROOT + "/library/packs/" + pk.slug + "_md.png"), btn;   // 2x2 grid preview (title · text · shapes · media)
+            if (f.exists) btn = cell.add("iconbutton", undefined, ScriptUI.newImage(f), { style: "toolbutton" });
+            else { btn = cell.add("button", undefined, pk.name); btn.preferredSize = [224, 126]; }
+            var er = pk.energy_range ? " " + pk.energy_range[0] + "–" + pk.energy_range[1] : "";
+            cell.add("statictext", [0, 0, 224, 16], (FAV["pack/" + pk.name] ? "★ " : "") + pk.name + " · " + pk.energy + er);
+            cell.add("statictext", [0, 0, 224, 16], (pk.tones || []).join(" · ") + (pk.curve ? "  ·  " + pk.curve : ""));
+            btn.helpTip = pk.desc + (pk.source && pk.source.indexOf("reference:") === 0 ? "\nFrom " + pk.source : "");
+            btn.onClick = function () { select("pack", pk.name, { use: pk.desc }); selName.text = "Style: " + pk.name; };
+        })(shown[k], k);
     }
     function applyPack(phase) {
         var c = app.project.activeItem;
@@ -333,30 +375,162 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         selInfo.text = res.length ? res.length + " layers animated with " + CUR.name : "No layers matched (backgrounds, nulls and locked layers are skipped).";
     }
 
-    // ---------- techniques (guides: what each one does and how to run it, alone or with Claude) ----------
+    // ---------- mix: pick moves and curves by tags for the layers in the comp, apply them, save them as a style ----------
+    var MIX = null, MIX_ACT = {};   // MIX = { comp, rows: [{ L, role, isText, preset, curve }] }; MIX_ACT = button actions (hooks)
+    var ROLE_TARGET = { title: "title", subtitle: "text", body: "text", shape: "shape", media: "media", logo: "logo" };
+    function feel() {   // the energy level and tone chosen in the filters (defaults: 3 medium, any tone)
+        return { level: energy.selection.index || 3, tone: tone.selection.index > 0 ? tone.selection.text : "" };
+    }
+    function scoreTags(t, fl) {
+        var s = (t.energy[0] <= fl.level && fl.level <= t.energy[1]) ? 2 : -Math.abs(fl.level - (t.energy[0] + t.energy[1]) / 2);
+        if (fl.tone && ("," + t.tones.join(",") + ",").indexOf("," + fl.tone + ",") >= 0) s += 2;
+        return s;
+    }
+    function bestMove(target, isText, fl, role) {
+        var best = null, bs = -99;
+        for (var i = 0; i < TAGS.presets.length; i++) {
+            var t = TAGS.presets[i];
+            if (("," + t.roles.join(",") + ",").indexOf("," + (role || "enter") + ",") < 0) continue;
+            if (("," + t.targets.join(",") + ",").indexOf("," + target + ",") < 0) continue;
+            if (t.kind === "text" && !isText) continue;
+            if (t.kind === "fx") continue;
+            var s = scoreTags(t, fl) + (isText && t.kind === "text" ? 0.5 : 0);
+            if (s > bs) { bs = s; best = t; }
+        }
+        return best;
+    }
+    function bestCurve(fl) {
+        var best = null, bs = -99, playful = fl.tone === "playful" || fl.tone === "bold";
+        for (var i = 0; i < (TAGS.curves || []).length; i++) {
+            var c = TAGS.curves[i];
+            if ((c.family === "overshoot" || c.family === "anticipation") && !playful) continue;
+            if (c.family === "linear" && fl.tone !== "technical") continue;   // linear only reads as intentional in technical pieces
+            var s = scoreTags(c, fl);
+            if (s > bs) { bs = s; best = c; }
+        }
+        return best ? best.name : null;
+    }
+    function mix() {
+        var fl = feel();
+        body.add("statictext", undefined, "Choose an energy and a tone in the filters above, then Analyze: every layer gets the move\nand the curve whose tags fit (title, text, shapes, media, logo). Apply them, or save them as a style.", { multiline: true }).preferredSize.height = 34;
+        body.add("statictext", undefined, "Feel: energy " + fl.level + (energy.selection.index ? "" : " (default)") + " · tone " + (fl.tone || "any") + " · curve " + (bestCurve(fl) || "-"));
+        var g = body.add("group");
+        var bAn = g.add("button", undefined, "Analyze selection (or whole comp)");
+        var lb = body.add("listbox", [0, 0, 380, 150]);
+        if (MIX) for (var i = 0; i < MIX.rows.length; i++) { var r = MIX.rows[i]; lb.add("item", r.L.name + "  →  " + r.role + ": " + (r.preset ? r.preset.name : "(no match: a gap to create)") + "  ·  " + r.curve); }
+        var g2 = body.add("group");
+        var bAp = g2.add("button", undefined, "Apply mix"), bSave = g2.add("button", undefined, "Save as style…");
+        bAn.onClick = function () {
+            var c = app.project.activeItem;
+            if (!(c instanceof CompItem)) { alert("Open a composition first."); return; }
+            var ls = c.selectedLayers.length ? c.selectedLayers : (function () { var a = []; for (var k = 1; k <= c.numLayers; k++) a.push(c.layer(k)); return a; })();
+            var f2 = feel(), cv = bestCurve(f2), rows = [];
+            for (var j = 0; j < ls.length; j++) {
+                var role = SSP.roleOf(ls[j]); if (!role) continue;
+                var isText = ls[j] instanceof TextLayer;
+                rows.push({ L: ls[j], role: role, isText: isText, preset: bestMove(ROLE_TARGET[role], isText, f2), curve: cv });
+            }
+            MIX = { comp: c, rows: rows, feel: f2 };
+            show();
+        };
+        bAp.onClick = function () {
+            if (!MIX || !MIX.rows.length) { alert("Analyze a comp first."); return; }
+            var st = (parseFloat(stag.text) || 0) * MIX.comp.frameDuration, n = 0;
+            app.beginUndoGroup(NAME + ": mix");
+            try {
+                for (var k = 0; k < MIX.rows.length; k++) {
+                    var r = MIX.rows[k]; if (!r.preset) continue;
+                    var o = tuning(); o.ease = r.curve; SSP.markerTiming(mk.value); SSP.tune(o);
+                    var t0 = r.L.inPoint + (n++) * st;
+                    if (r.preset.kind === "text") SSP.applyText(r.L, r.preset.name, "in", t0); else SSP.apply(r.L, r.preset.name, "in", t0);
+                }
+            } catch (e) { alert(NAME + ": " + e.toString()); }
+            SSP.markerTiming(false); SSP.tune();
+            app.endUndoGroup();
+            selInfo.text = n + " layers animated by the mix.";
+        };
+        MIX_ACT = { analyze: bAn.onClick, apply: bAp.onClick };
+        bSave.onClick = function () {
+            if (!MIX) { alert("Analyze a comp first."); return; }
+            var name = prompt("Name of the new style (neutral, no brand names):", "My Style");
+            if (!name) return;
+            try { saveStyle(name); alert("Saved the style \"" + name + "\" in library/packs.json.\nRender its 2x2 preview with: bash tools/rebuild_previews.sh"); }
+            catch (e) { alert(NAME + ": could not save the style: " + e.toString()); }
+        };
+    }
+    function staggerFor(level) { if (level <= 2) return 6; if (level === 3) return 4; return 3; }   // ifs: ExtendScript breaks chained ternaries
+    // the current mix as a style in library/packs.json (roles missing from the comp are filled by tags too)
+    function saveStyle(name, path) {
+        var f3 = MIX.feel, roles = {}, all = ["title", "subtitle", "body", "shape", "media", "logo"];
+        for (var k = 0; k < all.length; k++) {
+            var pr = null;
+            for (var r = 0; r < MIX.rows.length; r++) if (MIX.rows[r].role === all[k] && MIX.rows[r].preset) pr = MIX.rows[r].preset;
+            if (!pr) pr = bestMove(ROLE_TARGET[all[k]], k < 3, f3);
+            if (pr) { roles[all[k]] = {}; roles[all[k]][pr.kind === "text" ? "text" : "motion"] = pr.name; }
+        }
+        var tr = bestMove("media", false, f3, "transition"), words = ["", "soft", "soft", "medium", "dynamic", "dynamic"];
+        var style = { name: name, slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""), energy: words[f3.level],
+                      energy_range: [Math.max(1, f3.level - 1), Math.min(5, f3.level + 1)], tones: f3.tone ? [f3.tone] : [],
+                      desc: "Mixed in the panel from tags (energy " + f3.level + (f3.tone ? ", " + f3.tone : "") + ").",
+                      stagger: staggerFor(f3.level), curve: MIX.rows.length ? MIX.rows[0].curve : bestCurve(f3),
+                      transition: tr ? tr.name : "Ramp Slide", source: "mix", roles: roles };
+        var pf = new File(SS_ROOT + "/library/packs.json"), data = SSM.readJSON(pf.fsName.split("\\").join("/"));
+        for (var d = data.packs.length - 1; d >= 0; d--) if (data.packs[d].name === name) data.packs.splice(d, 1);
+        data.packs.push(style);
+        var out = path ? new File(path) : pf;
+        out.encoding = "UTF-8"; out.open("w"); out.write(toJSON(data, "")); out.close();
+        if (!path) SSP.reloadPacks();
+        return style;
+    }
+    // ExtendScript has no JSON.stringify: a small writer for packs.json (strings, numbers, booleans, arrays, objects)
+    function toJSON(v, ind) {
+        if (v === null || v === undefined) return "null";
+        if (typeof v === "number" || typeof v === "boolean") return String(v);
+        if (typeof v === "string") return '"' + v.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n") + '"';
+        var n = ind + " ", i, out = [];
+        if (v instanceof Array) { for (i = 0; i < v.length; i++) out.push(toJSON(v[i], n)); return "[" + out.join(", ") + "]"; }
+        for (var k in v) if (v.hasOwnProperty(k)) out.push(n + '"' + k + '": ' + toJSON(v[k], n));
+        return "{\n" + out.join(",\n") + "\n" + ind + "}";
+    }
+
+    // ---------- techniques (script workflows: a frame of the result, tags, how to run it alone or with Claude) ----------
     function techText(name) {
         for (var i = 0; i < TECH.length; i++) if (TECH[i].name === name) return TECH[i].what + "\n\nHow: " + TECH[i].how + "\n\nWith Claude: \"" + TECH[i].ask + "\"";
         return "";
     }
     function techniques() {
         if (!TECH.length) { body.add("statictext", undefined, "library/techniques.json is missing."); return; }
-        var lb = body.add("listbox", [0, 0, 360, 150]);
-        for (var i = 0; i < TECH.length; i++) {
-            if (search.text && (TECH[i].name + " " + TECH[i].what).toLowerCase().indexOf(search.text.toLowerCase()) < 0) continue;
-            var it = lb.add("item", (FAV["technique/" + TECH[i].name] ? "★ " : "") + TECH[i].name); it.tech = TECH[i];
+        var shown = [], q = search.text.toLowerCase(), tn = tone.selection.index > 0 ? tone.selection.text : "";
+        var TT = {}; for (var i = 0; i < (TAGS.techniques || []).length; i++) TT[TAGS.techniques[i].name] = TAGS.techniques[i];
+        for (i = 0; i < TECH.length; i++) {
+            var t = TECH[i], tg = TT[t.name] || { energy: [1, 5], tones: [], needs: [] };
+            if (q && (t.name + " " + t.what + " " + tg.tones.join(" ")).toLowerCase().indexOf(q) < 0) continue;
+            if (tn && tg.tones.length && ("," + tg.tones.join(",") + ",").indexOf("," + tn + ",") < 0) continue;
+            if (!inRange(tg.energy)) continue;
+            shown.push({ t: t, tg: tg });
         }
-        var info = body.add("statictext", [0, 0, 360, 110], "Pick a technique.", { multiline: true });
-        lb.onChange = function () {
-            if (!lb.selection) return;
-            var t = lb.selection.tech;
-            CUR = { key: "technique/" + t.name, kind: "technique", name: t.name }; FRAME = 0;
-            selName.text = "Technique: " + t.name; selInfo.text = t.what; bFav.text = FAV[favKey()] ? "★" : "☆"; redraw();
-            info.text = "How: " + t.how + "\nWith Claude: \"" + t.ask + "\"";
-        };
+        if (!shown.length) { body.add("statictext", undefined, "No technique matches the filters."); return; }
+        var COLS = Math.max(1, Math.floor((((win.size && win.size.width) || 380) - 24) / 236)), row = null;
+        for (var k = 0; k < shown.length; k++) (function (it, k) {
+            if (k % COLS === 0) { row = body.add("group"); row.spacing = 6; row.alignChildren = ["left", "top"]; }
+            var cell = row.add("group"); cell.orientation = "column"; cell.spacing = 1; cell.alignChildren = ["left", "top"];
+            var slug = it.t.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+            var f = new File(SS_ROOT + "/library/techniques/" + slug + "_md.png"), btn;
+            if (f.exists) btn = cell.add("iconbutton", undefined, ScriptUI.newImage(f), { style: "toolbutton" });
+            else { btn = cell.add("button", undefined, it.t.name); btn.preferredSize = [224, 126]; }
+            cell.add("statictext", [0, 0, 224, 16], (FAV["technique/" + it.t.name] ? "★ " : "") + it.t.name + " · energy " + it.tg.energy[0] + "–" + it.tg.energy[1]);
+            cell.add("statictext", [0, 0, 224, 30], (it.tg.tones.join(" · ") || "any tone") + (it.tg.needs.length ? "\nneeds " + it.tg.needs.join(", ") : ""), { multiline: true });
+            btn.helpTip = it.t.what;
+            btn.onClick = function () {
+                select("technique", it.t.name, {}); selName.text = "Technique: " + it.t.name;
+                selInfo.text = it.t.what + "\nHow: " + it.t.how + "\nWith Claude: \"" + it.t.ask + "\"";
+            };
+        })(shown[k], k);
     }
 
     // ---------- assets (local asset packs, licensed, never in the repo) ----------
-    var ROWS_A = null;
+    // a grid like the presets: SFX show their waveform, overlays a frame (library/assets_cache, python tools/asset_previews.py)
+    var ROWS_A = null, A_TYPE = "sfx", A_CAT = "all categories", A_SEL = null;
     function assets() {
         if (!ROWS_A) {
             ROWS_A = [];
@@ -372,60 +546,50 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
             }
         }
         if (!ROWS_A.length) {
-            body.add("statictext", undefined, "No local asset index yet. In a terminal, from the repo:\n  python tools/index_assets.py\nthen reopen this panel.", { multiline: true }).preferredSize.height = 70;
+            body.add("statictext", undefined, "No local asset index yet. In a terminal, from the repo:\n  python tools/index_assets.py\n  python tools/asset_previews.py\nthen reopen this panel.", { multiline: true }).preferredSize.height = 84;
             return;
         }
         var g = body.add("group");
-        var type = g.add("dropdownlist", undefined, ["sfx", "overlay"]); type.selection = 0;
-        var cg = g.add("dropdownlist", undefined, []); cg.preferredSize.width = 130;
-        var list = body.add("listbox", [0, 0, 360, 150]);
-        var info = body.add("statictext", undefined, " ", { multiline: true }); info.preferredSize.height = 30;
+        var type = g.add("dropdownlist", undefined, ["sfx", "overlay"]); type.selection = A_TYPE === "sfx" ? 0 : 1;
+        var cats = ["all categories"], seen = {};
+        for (var r = 0; r < ROWS_A.length; r++) if (ROWS_A[r].type === A_TYPE && !seen[ROWS_A[r].cat]) { seen[ROWS_A[r].cat] = 1; cats.push(ROWS_A[r].cat); }
+        var cg = g.add("dropdownlist", undefined, cats); cg.preferredSize.width = 130;
+        for (var ci = 0; ci < cats.length; ci++) if (cats[ci] === A_CAT) cg.selection = ci;
+        if (!cg.selection) cg.selection = 0;
+        type.onChange = function () { A_TYPE = type.selection.text; A_CAT = "all categories"; page = 0; show(); };
+        cg.onChange = function () { A_CAT = cg.selection.text; page = 0; show(); };
+        var q = search.text.toLowerCase(), items = [];
+        for (var a = 0; a < ROWS_A.length; a++) {
+            var row = ROWS_A[a];
+            if (row.type !== A_TYPE || (A_CAT !== "all categories" && row.cat !== A_CAT)) continue;
+            if (q && (row.name + " " + row.cat).toLowerCase().indexOf(q) < 0) continue;
+            items.push({ kind: row.type, name: row.name, row: row, meta: { energy: "", use: row.cat + " · " + row.sec + " s" + (row.mean ? " · mean " + row.mean + " dB" : "") } });
+        }
+        grid(items, function (it) {   // selecting an asset: show its info, Add places it
+            A_SEL = it.row; CUR = null; selName.text = it.row.name; bFav.text = "☆"; setPreview("/library/assets_cache/" + it.row.type + "/" + techSlug(it.row.name) + ".png");
+            selInfo.text = it.row.cat + " · " + it.row.sec + " s" + (it.row.mean ? " · mean " + it.row.mean + " dB" : "") + (it.row.flags.indexOf("loud") >= 0 ? " · loud: lower the gain" : "");
+            redraw();
+        });
         var g2 = body.add("group");
         g2.add("statictext", undefined, "Gain dB:"); var gain = g2.add("edittext", undefined, "-9"); gain.characters = 4;
         g2.add("statictext", undefined, " Opacity %:"); var opac = g2.add("edittext", undefined, "70"); opac.characters = 4;
-        var add = body.add("button", undefined, "Add at the playhead");
-        function cats() {
-            cg.removeAll(); cg.add("item", "all categories");
-            var seen = {};
-            for (var i = 0; i < ROWS_A.length; i++) if (ROWS_A[i].type === type.selection.text && !seen[ROWS_A[i].cat]) { seen[ROWS_A[i].cat] = 1; cg.add("item", ROWS_A[i].cat); }
-            cg.selection = 0;
-        }
-        function fill() {
-            list.removeAll();
-            var q = search.text.toLowerCase(), c = cg.selection ? cg.selection.text : "all categories";
-            for (var i = 0; i < ROWS_A.length; i++) {
-                var r = ROWS_A[i];
-                if (r.type !== type.selection.text || (c !== "all categories" && r.cat !== c)) continue;
-                if (q && r.name.toLowerCase().indexOf(q) < 0) continue;
-                var it = list.add("item", r.name + (r.flags ? "   [" + r.flags + "]" : "")); it.row = r;
-            }
-            if (list.items.length) list.selection = 0;
-        }
-        type.onChange = function () { cats(); fill(); };
-        cg.onChange = fill;
-        list.onChange = function () {
-            if (!list.selection) return;
-            var r = list.selection.row;
-            info.text = r.cat + " · " + r.sec + " s" + (r.mean ? " · mean " + r.mean + " dB" : "") + (r.flags.indexOf("loud") >= 0 ? " · loud: lower the gain" : "");
-        };
+        var add = g2.add("button", undefined, "Add at the playhead");
         add.onClick = function () {
             var comp = app.project.activeItem;
-            if (!(comp instanceof CompItem) || !list.selection) { alert("Open a composition and pick an asset."); return; }
-            var r = list.selection.row;
-            app.beginUndoGroup(NAME + " asset: " + r.name);
+            if (!(comp instanceof CompItem) || !A_SEL) { alert("Open a composition and pick an asset."); return; }
+            app.beginUndoGroup(NAME + " asset: " + A_SEL.name);
             try {
-                if (r.type === "sfx") SSA.sfx(comp, r.name, comp.time, parseFloat(gain.text) || -9);
-                else SSA.overlay(comp, r.name, comp.time, null, parseFloat(opac.text) || 70);
+                if (A_SEL.type === "sfx") SSA.sfx(comp, A_SEL.name, comp.time, parseFloat(gain.text) || -9);
+                else SSA.overlay(comp, A_SEL.name, comp.time, null, parseFloat(opac.text) || 70);
             } catch (e) { alert(NAME + ": " + e.toString()); }
             app.endUndoGroup();
         };
-        list.onDoubleClick = function () { add.notify("onClick"); };
-        cats(); fill();
     }
 
     // hook for scripts and the MCP server: SS_PANEL.select("motion", "Scale Pop"); SS_PANEL.frame(); SS_PANEL.tab("Styles")
     $.global.SS_PANEL = {
         select: function (kind, name) {
+            if (kind === "pack" || kind === "technique") { select(kind, name, {}); selName.text = (kind === "pack" ? "Style: " : "Technique: ") + name; return "selected " + kind + "/" + name; }
             var meta = metaOf(kind, name);
             if (!meta) return "unknown preset";
             select(kind, name, meta); return "selected " + kind + "/" + name;
@@ -436,6 +600,14 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
             for (var i = 0; i < CATS.length; i++) if (CATS[i] === t) { cat.selection = i; page = 0; show(); return "category " + t; }
             return "no category " + t;
         },
+        filters: function (o) {   // energy level 0-5 and tone, from a script (recordings, tests)
+            o = o || {}; if (o.energy !== undefined) energy.selection = o.energy;
+            if (o.tone !== undefined) for (var i = 0; i < tone.items.length; i++) if (tone.items[i].text === (o.tone || "all tones")) tone.selection = i;
+            page = 0; show(); return "filters set";
+        },
+        mix: function (action) { if (MIX_ACT[action]) { MIX_ACT[action](); return MIX ? MIX.rows.length + " rows" : "no mix"; } return "open the Mix category first"; },
+        saveStyle: function (name, path) { return MIX ? saveStyle(name, path).slug : "no mix"; },   // path: write a copy elsewhere (tests)
+        mixRows: function () { if (!MIX) return "none"; var a = []; for (var i = 0; i < MIX.rows.length; i++) a.push(MIX.rows[i].L.name + ">" + MIX.rows[i].role + ":" + (MIX.rows[i].preset ? MIX.rows[i].preset.name : "-") + "·" + MIX.rows[i].curve); return a.join(" | "); },
         controls: function (o) {   // set the controls from a script (recordings, tests)
             o = o || {};
             if (o.speed) sDur.value = o.speed; if (o.intensity) sInt.value = o.intensity;

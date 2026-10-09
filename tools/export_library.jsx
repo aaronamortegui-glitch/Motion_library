@@ -9,7 +9,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         for (var i = 0; i < names.length; i++) {
             var p = src[names[i]], s = slug(names[i]);
             out.push('{"name":"' + esc(names[i]) + '","slug":"' + s + '","kind":"' + kind + '","channels":"' + esc(p.channels) +
-                '","energy":"' + p.energy + '","use":"' + esc(p.use) + '","family":"' + (p.family || "ss") + '","gif":"gifs/' + kind + "/" + s + '.gif","call":"' + esc(call.replace("%s", names[i])) + '"}');
+                '","energy":"' + p.energy + '","use":"' + esc(p.use) + '","family":"' + (p.family || "own") + '","gif":"gifs/' + kind + "/" + s + '.gif","call":"' + esc(call.replace("%s", names[i])) + '"}');
         }
     }
     add("motion", 'SSP.apply(layer, "%s", "both")', SSP.names(), SSP.presets);

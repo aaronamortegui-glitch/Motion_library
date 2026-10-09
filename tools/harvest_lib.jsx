@@ -37,7 +37,7 @@ var SSH = (function () {
                     try { val = num(P.value); } catch (x) {}
                     if (P.name !== "Compositing Options") params.push('"' + esc(P.name) + '":' + val);
                 }
-                var role = E.name.indexOf("AC IN") === 0 ? "in" : E.name.indexOf("AC OUT") === 0 ? "out" : "fx";
+                var role = "fx"; if (E.name.indexOf("AC IN") === 0) role = "in"; else if (E.name.indexOf("AC OUT") === 0) role = "out";   // ifs: chained ternaries break in ExtendScript
                 if (m) codes.push(m[1]);
                 controls.push('{"role":"' + role + '","code":"' + (m ? m[1] : "?") + '","ver":"' + (m ? m[2] : "?") + '","params":{' + params.join(",") + "}}");
             } else if (E.name.indexOf("AC ") === 0) natives.push('"' + esc(E.matchName) + '"');

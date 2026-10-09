@@ -2,11 +2,27 @@
 
 You are working in **Motion DNA**, a motion library for After Effects (moves, techniques, scripts and styles that give AI-made motion its own identity), built to be driven by an LLM. Never put a brand logo in the library or its demos; colours and fonts come from the tokens. Several people (and their Claude sessions) contribute to it, so follow the conventions below exactly; they exist so nothing we learned gets lost.
 
+## When someone asks you to install Motion DNA
+Install everything, library included — the panel reads the library from the repo clone, so never copy it elsewhere:
+1. Clone the repo if it is not on the machine yet (`git clone https://github.com/aaronamortegui-glitch/Motion_library`), or `git pull` an existing clone.
+2. Run `python tools/setup.py` from the repo (add `--mcp-user` if they want Claude to drive AE from any folder). It installs the
+   panel in every AE version, the fonts, the local asset-pack index and previews, and checks the library and the tools.
+3. Tell them the two steps only they can do: restart After Effects and open *Window › Motion DNA.jsx*, and tick
+   *Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
+4. With AE open and the panel docked, confirm the connection with the MCP tool `ae_status` (the panel header shows "Claude connected").
+
 ## Before you start
 1. Read `CONTRIBUTING.md` (how to add presets, open-source effects, packs, case studies and learnings).
 2. Skim `docs/LEARNINGS.md`: every pitfall already solved (ExtendScript, rendering, Flora/AI video, likeness, tracking, audio, costs). Do not rediscover them.
 3. To pick or apply presets, read only `library/INDEX.txt`. The skill `.claude/skills/motion-dna/SKILL.md` explains the bridge and the API.
-4. **Prefer the MCP server** (`motion-dna`, registered in `.mcp.json`): `list_presets`, `apply_preset`, `apply_pack`, `add_asset`, `render_frame`, `run_jsx`… It drives the open After Effects through the file bridge (started by the Motion DNA panel). Check your work with `render_frame` and look at the PNG.
+4. **Choose by tags.** Every preset, curve, technique and style is tagged in `library/tags.json` / `library/packs.json`:
+   roles, targets, channels, direction, an energy range (1 calm · 2 soft · 3 medium · 4 dynamic · 5 explosive) and
+   tones. Use `list_tags` / `suggest_mix` to combine a move, a token curve and a duration for the feel you need.
+5. **When you get a reference analysis** (a brand or video placed in an energy range and tones, e.g. "calm, modern"):
+   write it as `library/references/<slug>.json`, run `match_reference`, build what fits from existing presets, and
+   **create everything that does not exist yet** — moves, curves, transitions, techniques — tag it, render its
+   samples and add a style for it. The full procedure is CONTRIBUTING §8. The library grows with every reference.
+6. **Prefer the MCP server** (`motion-dna`, registered in `.mcp.json`): `list_presets`, `apply_preset`, `apply_pack`, `add_asset`, `render_frame`, `run_jsx`… It drives the open After Effects through the file bridge (started by the Motion DNA panel). Check your work with `render_frame` and look at the PNG.
 
 ## Non-negotiable rules
 - **Everything in the repo is English**: code, comments, metadata, docs, commit messages. Chat with the user can be in their language.
@@ -28,5 +44,7 @@ You are working in **Motion DNA**, a motion library for After Effects (moves, te
 | A new MCP tool | `tools/mcp/ss_motion_mcp.py` (`TOOLS_DEF`), documented in README |
 | A new curve or duration | `tokens/superside_motion_tokens.json` (bezier + AE influence/speed) |
 | A test video / case study | `media/<case>/` (specs + final assets), `docs/case-studies/<case>.md` (from `_TEMPLATE.md`), GIFs in `docs/examples/`, a section at the end of `README.md` |
+| A reference analysis | `library/references/<slug>.json`, then CONTRIBUTING §8 (match, create the gaps, add a style) |
+| Tags for a new preset, curve or technique | `tools/tag_library.py` → `python tools/tag_library.py` (writes `library/tags.json`) |
 | Something you learned | `docs/LEARNINGS.md`, in the matching section, as *symptom → cause → fix* |
 | A reusable script | `tools/` with a header comment (what, usage) and an entry in the README tools table |

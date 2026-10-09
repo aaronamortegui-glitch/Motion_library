@@ -22,6 +22,14 @@ All repo content is English: write code, comments, messages, metadata and commit
 | `library/index.html` | Human visualizer with filters |
 | `bridge/` | AE bridge: `.jsx` jobs in `inbox/` → result in `outbox/<name>.txt` |
 
+## Tags and references (read first)
+- `library/tags.json` tags every preset, curve and technique (roles, targets, channels, direction, energy 1–5, tones);
+  `library/packs.json` tags every style. MCP: `list_tags`, `suggest_mix`, `list_packs`.
+- A reference analysis (brand/video → energy range + tones + observed moves/curves/techniques) goes to
+  `library/references/<slug>.json` and through `match_reference`. Build what fits; **create what is missing** (presets,
+  token curves, transitions, techniques), tag it in `tools/tag_library.py`, render the samples
+  (`bash tools/rebuild_previews.sh`) and add a style. CONTRIBUTING §8 has the steps.
+
 ## Picking a preset
 Read ONLY `library/INDEX.txt` (one line per preset: `kind|name|channels|energy s/m/d|use`, tokens in the header).
 Do not open `index.html`, `library.json`, GIFs or MP4s to decide: they are for humans/tools and waste context.

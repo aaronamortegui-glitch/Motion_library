@@ -1,0 +1,28 @@
+{
+ "name": "Google — calm, modern product motion (example profile)",
+ "slug": "google-calm-modern",
+ "sources": ["Example written from public product-motion conventions (Material-style easing and durations), to show the format. Replace it with Gian's analysis of real reference videos."],
+ "analysed_by": "example",
+ "energy": [1, 2],
+ "tones": ["modern", "friendly", "corporate"],
+ "avoid": ["overshoot", "anticipation", "retro", "Shake", "Jitter"],
+ "moves": [
+  {"describe": "cards and chips rise a little while fading in", "role": "enter", "target": "ui", "channels": ["opacity", "position"], "direction": "up", "duration_ms": 300, "bezier": [0.05, 0.7, 0.1, 1], "frequency": "often"},
+  {"describe": "headline fades in word by word", "role": "enter", "target": "title", "channels": ["opacity", "per-word"], "direction": "in-place", "duration_ms": 400, "bezier": [0.2, 0, 0, 1], "frequency": "often"},
+  {"describe": "a container grows from a button into a full card (shape morph)", "role": "transition", "target": "ui", "channels": ["scale", "position", "mask"], "direction": "in-place", "duration_ms": 500, "bezier": [0.2, 0, 0, 1], "frequency": "often"},
+  {"describe": "elements leave quickly and quietly", "role": "exit", "target": "ui", "channels": ["opacity", "scale"], "direction": "in-place", "duration_ms": 200, "bezier": [0.3, 0, 0.8, 0.15], "frequency": "often"},
+  {"describe": "icons draw their stroke in", "role": "enter", "target": "icon", "channels": ["trim"], "direction": "in-place", "duration_ms": 450, "bezier": [0.2, 0, 0, 1], "frequency": "sometimes"},
+  {"describe": "colourful dots bounce gently in a loop (loading)", "role": "loop", "target": "shape", "channels": ["position", "scale"], "direction": "up", "duration_ms": 900, "frequency": "sometimes"},
+  {"describe": "product footage pushes in slowly", "role": "emphasis", "target": "footage", "channels": ["scale"], "direction": "in-place", "duration_ms": 3000, "bezier": [0.4, 0, 0.2, 1], "frequency": "sometimes"}
+ ],
+ "curves": [
+  {"name": "standard", "bezier": [0.2, 0, 0, 1], "use": "most moves"},
+  {"name": "emphasized decelerate", "bezier": [0.05, 0.7, 0.1, 1], "use": "elements entering"},
+  {"name": "emphasized accelerate", "bezier": [0.3, 0, 0.8, 0.15], "use": "elements leaving"}
+ ],
+ "techniques": [
+  {"name": "shape morph", "describe": "a shape (button, chip) grows and changes radius into the next layout", "needs": []},
+  {"name": "tracked labels", "describe": "subtle labels pinned to product details", "needs": ["footage", "tracks"]}
+ ],
+ "notes": "Calm and clean: short travel distances, no bounce, colour does the talking."
+}

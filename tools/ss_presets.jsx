@@ -933,6 +933,14 @@ var SSP = (function () {
         markerTiming: function (on) { if (on !== undefined) SSP_STATE.markerTiming = !!on; return SSP_STATE.markerTiming; },
         classicNames: function () { var a = []; for (var k in P) if (P.hasOwnProperty(k) && P[k].family === "classic") a.push(k); return a; },
         packs: function () { return PACKS.packs; },
+        // re-read library/packs.json (after a style is saved from the panel or added by Claude)
+        reloadPacks: function () { var f = new File(SS_ROOT + "/library/packs.json"); if (f.exists) PACKS = SSM.readJSON(f.fsName.split("\\").join("/")); return PACKS.packs.length; },
+        // the layer role a style would give this layer: title | subtitle | body | shape | media | logo | null (skipped)
+        roleOf: function (L) {
+            var comp = L.containingComp, maxText = 0;
+            for (var i = 1; i <= comp.numLayers; i++) if (comp.layer(i) instanceof TextLayer) maxText = Math.max(maxText, comp.layer(i).property("ADBE Text Properties").property("ADBE Text Document").value.fontSize);
+            return roleOf(L, comp, maxText);
+        },
         // Applies a pack (library/packs.json) to the given layers (default: every layer of the comp): each layer gets
         // the preset of its role (title, subtitle, body, shape, media, logo), staggered in stacking order.
         applyPack: function (comp, packName, layers, phase) {
@@ -945,6 +953,9 @@ var SSP = (function () {
             var maxText = 0;
             for (var c = 0; c < ls.length; c++) if (ls[c] instanceof TextLayer) maxText = Math.max(maxText, ls[c].property("ADBE Text Properties").property("ADBE Text Document").value.fontSize);
             var order = pk.order || ["media", "shape", "logo", "title", "subtitle", "body"], applied = [], st = (pk.stagger || 3) * comp.frameDuration, n = 0;
+            // the style's own curve re-eases every move (unless the caller already chose one in the Controls / tune)
+            var ownEase = pk.curve && !SSP_STATE.tune.ease;
+            if (ownEase) SSP_STATE.tune.ease = pk.curve;
             for (var o = 0; o < order.length; o++) {
                 for (var d = 0; d < ls.length; d++) {
                     var L = ls[d], role = roleOf(L, comp, maxText);
@@ -959,6 +970,7 @@ var SSP = (function () {
                     n++;
                 }
             }
+            if (ownEase) SSP_STATE.tune.ease = null;
             return applied;
         }
     };

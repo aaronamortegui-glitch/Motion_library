@@ -2,71 +2,73 @@
 # calls: motion SSP.apply(L,N,in|out|both) · fx SSP.applyFx(L,N) · text SSP.applyText(L,N,in|out|both) · recipe SSP.applyRecipe(L,ID,both) · include tools/ss_presets.jsx
 # dur(f@30): Tick4 Blink6 Glide9 Arrive14 Sweep21 Stage33
 # ease(bezier): Flat 0,0,1,1; Land 0.12,0.9,0.28,1; Launch 0.55,0,0.9,0.6; Settle 0.3,0,0.1,1; Cruise 0.5,0,0.15,1; Pop 0.34,1.45,0.64,1; Recoil 0.6,0,0.75,-0.4; Ramp 0.87,0,0.13,1; Surge 0.7,0,0.3,1; Whip 0.75,0,0.05,1
-# packs: SSP.applyPack(comp, Dynamic|Elegant|Modern|Playful|Tech[, layers, in|out|both]) · roles title/subtitle/body/shape/media/logo · library/packs.json
+# styles: SSP.applyPack(comp, name[, layers, in|out|both]) · roles title/subtitle/body/shape/media/logo · library/packs.json · listed at the end
 # markers: SSP.markerTiming(true) before apply → layer markers 'SS in'/'SS out' retime the animation when dragged · classics (family classic) = animate.css 4.1.1 MIT
-# mcp: .mcp.json → tools/mcp/ss_motion_mcp.py (list_presets, apply_preset, apply_pack, add_asset, render_frame, run_jsx…)
+# mcp: .mcp.json motion-dna → tools/mcp/ss_motion_mcp.py (list_tags, suggest_mix, match_reference, list_presets, apply_preset[duration,intensity,direction,ease], remove_animation, apply_pack, add_asset, render_frame, run_jsx…)
 # assets (local, licensed, not in repo): python tools/index_assets.py -> library/ASSETS.local.txt (sfx/overlays by category + loudness) · include tools/ss_assets.jsx · SSA.sfx(comp,name,t,gainDb[,len]) · SSA.overlay(comp,name,t[,blend,opacity])
 # hud: SSHUD.bracket/callout/meter/chip/contour/faceScan on TRK nulls · include tools/ss_hud.jsx · scenes: tools/build_scene.jsx + JSON (matte, behind text) · breakdown: tools/build_breakdown.jsx · edits: tools/build_edit.jsx + JSON · read docs/LEARNINGS.md
-# kind|name|channels|e|use
-motion|Fade|Fade|s|Corporate, UI, supporting text
-motion|Fade Up|Fade&Position|s|Headlines, paragraphs, lists
-motion|Scale Pop|Fade&Scale|d|Icons, chips, stickers, social
-motion|Blur In|Blur&Fade|s|Photos, backgrounds, premium moments
-motion|Slide Land|Position|m|Images and cards entering from off-screen
-motion|Rotate Settle|Fade&Rotate&Scale|m|Logos, badges, pieces with personality
-motion|Squash Warp|Scale&Warp|d|Social, hype, rhythmic transitions
-motion|Wipe Reveal|Mask|m|Bars, lower thirds, underlines
-motion|Organic Draw|Trim Path|m|Hand-drawn feel: contours, underlines, sketch lines (shape layers only)
-motion|Organic Stroke|Trim Path|d|Traveling brush stroke: the start chases the end (accent lines, HUD links)
-motion|Line Draw|Trim Path|m|Lines, stroke icons, tracking HUD (shape layers only)
-motion|Slam In|Fade, Scale, Blur&Rotate|d|Hero words, titles over footage, kinetic type
-motion|Flip In|Fade&Rotate Y (3D)|m|Cards, tiles, reveals, before/after
-motion|Spin Pop|Fade, Scale&Rotate|d|Badges, stickers, stamps, icons
-motion|Drop Bounce|Fade&Position|d|Icons, products, emoji, playful drops
-motion|Stretch Slide|Fade, Position&Scale|d|Cards, chips, pills, fast UI moves
-motion|Ramp Slide|Fade&Position (Ramp curve)|d|Transitions, product slides, bold entrances
-motion|Ramp Zoom|Fade&Scale (Ramp curve)|d|Logo reveals, hero products, end cards
-motion|Ramp Spin|Fade, Rotate&Scale (Ramp curve)|d|Icons, badges, logo spins
-motion|Whip Pan|Position + motion blur (Whip curve)|d|Swipe transitions, camera-style moves, carousels
-motion|Surge Rise|Fade&Position (Surge curve)|m|Headlines, cards, elegant entrances
-motion|Speed Ramp|Time Remap (footage / precomps)|d|Footage, product shots, action beats, transitions
-motion|Punch Zoom|Scale (camera)|m|Footage, precomps, freeze frames, cut emphasis
-motion|Back In Down|Position · Scale · Fade|d|Cards, product shots, bold drops (enter)
-motion|Back In Left|Position · Scale · Fade|d|Slides, lower thirds, carousels (enter)
-motion|Bounce In|Scale · Fade|d|Icons, badges, buttons, emoji (enter)
-motion|Bounce In Up|Position · Scale · Fade|d|Notifications, stickers, playful entrances (enter)
-motion|Rubber Band|Scale|d|CTAs, logos, a beat accent (attention)
-motion|Jello|Skew|d|Playful accents, stickers (attention)
-motion|Heart Beat|Scale|m|Likes, prices, a pulse on the beat (attention)
-motion|Tada|Scale · Rotate|d|Reveals, wins, offers (attention)
-motion|Wobble|Position · Rotate|d|Errors, jokes, quirky accents (attention)
-motion|Swing Hinge|Rotate|m|Signs, tags, hanging elements (attention)
-motion|Flip In X|Rotate X (3D) · Fade|m|Cards, tiles, scoreboard flips (enter)
-motion|Light Speed In|Position · Skew · Fade|d|Speed, sport, fast lower thirds (enter)
-motion|Roll In|Position · Rotate · Fade|d|Wheels, coins, round icons (enter)
-motion|Zoom In Down|Position · Scale · Fade|m|Titles that drop in from above (enter)
-motion|Jack In The Box|Scale · Rotate · Fade|d|Surprises, reveals, kids and playful brands (enter)
-motion|Back Out Up|Position · Scale · Fade|d|Exits upward, cards leaving (exit)
-motion|Zoom Out|Scale · Fade|s|Quiet exits, scene changes (exit)
-fx|Float|Position|s|Idle icons and cards, living backgrounds
-fx|Wiggle Rotate|Rotate|m|Stickers, illustrations with personality
-fx|Pulse|Scale|m|CTAs, buttons, attention grabbers
-fx|Jitter|Position&Rotate|d|Social, glitch, high-energy pieces
-fx|Breathe|Scale&Opacity|s|Ambient glows, background shapes, calm idle states
-fx|Swing|Rotate|s|Hanging tags, badges, signs, pendulums
-fx|Orbit|Position|s|Dots and satellites around a logo, decorative loops
-fx|Shake|Position&Rotate|d|Impacts, bass hits, alarms, energetic footage
-fx|Holo Flicker|Opacity · Glow&Scanlines|m|HUD labels, tech overlays, holographic UI
-text|Chars Rise|Position&Fade (char)|m|Short headlines, names, kickers
-text|Words Fade Up|Position&Fade (word)|s|Phrases, captions, quotes
-text|Blur Words|Blur&Fade (word)|s|Premium moments, calm intros
-text|Tracking Settle|Tracking&Fade|m|All-caps titles, typographic logos
-text|Chars Pop|Scale (char)|d|Social, hype, big numbers
-text|Typewriter|Opacity (char, stepped)|m|Captions, terminals, UI, quotes
-text|Scramble|Source Text (decode)|d|Tech, data, HUD labels, reveals
-text|Count Up|Source Text (number)|m|Stats, KPIs, prices, counters
-text|Chars Ramp|Position&Fade (char, Ramp curve)|m|Titles that build tension, trailers, reveals
-text|Words Slam|Scale, Blur&Rotate (word)|d|Punchy statements, social hooks, VO beats
+# tags (library/tags.json): roles enter/exit/emphasis/loop/transition · energy range 1 calm..5 explosive · tones bold, cinematic, corporate, elegant, friendly, luxury, modern, organic, playful, retro, technical · MCP list_tags / suggest_mix / match_reference
+# references: a brand or video analysed into energy + tones → library/references/<slug>.json → match_reference → build what fits, CREATE the gaps (CONTRIBUTING §8)
+# kind|name|channels|e|use|roles|energy|tones
+motion|Fade|Fade|s|Corporate, UI, supporting text|enter/exit|1-2|modern/corporate/elegant
+motion|Fade Up|Fade&Position|s|Headlines, paragraphs, lists|enter/exit|1-3|modern/corporate/elegant
+motion|Scale Pop|Fade&Scale|d|Icons, chips, stickers, social|enter|3-4|playful/bold
+motion|Blur In|Blur&Fade|s|Photos, backgrounds, premium moments|enter/exit|1-2|elegant/cinematic/luxury
+motion|Slide Land|Position|m|Images and cards entering from off-screen|enter/exit|2-3|modern/corporate
+motion|Rotate Settle|Fade&Rotate&Scale|m|Logos, badges, pieces with personality|enter|2-3|playful/modern
+motion|Squash Warp|Scale&Warp|d|Social, hype, rhythmic transitions|enter/transition|4-5|playful/bold
+motion|Wipe Reveal|Mask|m|Bars, lower thirds, underlines|enter/exit|2-3|modern/corporate/technical
+motion|Organic Draw|Trim Path|m|Hand-drawn feel: contours, underlines, sketch lines (shape layers only)|enter|2-3|organic/playful
+motion|Organic Stroke|Trim Path|d|Traveling brush stroke: the start chases the end (accent lines, HUD links)|enter/emphasis|3-4|organic/bold
+motion|Line Draw|Trim Path|m|Lines, stroke icons, tracking HUD (shape layers only)|enter|2-3|technical/modern
+motion|Slam In|Fade, Scale, Blur&Rotate|d|Hero words, titles over footage, kinetic type|enter|4-5|bold/cinematic
+motion|Flip In|Fade&Rotate Y (3D)|m|Cards, tiles, reveals, before/after|enter|2-3|modern/playful
+motion|Spin Pop|Fade, Scale&Rotate|d|Badges, stickers, stamps, icons|enter|4-5|playful/bold
+motion|Drop Bounce|Fade&Position|d|Icons, products, emoji, playful drops|enter|3-4|playful
+motion|Stretch Slide|Fade, Position&Scale|d|Cards, chips, pills, fast UI moves|enter|3-4|modern/playful
+motion|Ramp Slide|Fade&Position (Ramp curve)|d|Transitions, product slides, bold entrances|enter/transition|3-4|cinematic/modern
+motion|Ramp Zoom|Fade&Scale (Ramp curve)|d|Logo reveals, hero products, end cards|enter|3-4|cinematic/bold
+motion|Ramp Spin|Fade, Rotate&Scale (Ramp curve)|d|Icons, badges, logo spins|enter|3-5|bold/playful
+motion|Whip Pan|Position + motion blur (Whip curve)|d|Swipe transitions, camera-style moves, carousels|transition/enter|4-5|cinematic/bold
+motion|Surge Rise|Fade&Position (Surge curve)|m|Headlines, cards, elegant entrances|enter|2-3|elegant/cinematic/modern
+motion|Speed Ramp|Time Remap (footage / precomps)|d|Footage, product shots, action beats, transitions|transition/emphasis|3-5|cinematic/bold
+motion|Punch Zoom|Scale (camera)|m|Footage, precomps, freeze frames, cut emphasis|emphasis|3-4|cinematic/bold
+motion|Back In Down|Position · Scale · Fade|d|Cards, product shots, bold drops (enter)|enter|4-5|playful/bold/retro
+motion|Back In Left|Position · Scale · Fade|d|Slides, lower thirds, carousels (enter)|enter|4-5|playful/bold
+motion|Bounce In|Scale · Fade|d|Icons, badges, buttons, emoji (enter)|enter|4-4|playful/retro
+motion|Bounce In Up|Position · Scale · Fade|d|Notifications, stickers, playful entrances (enter)|enter|4-4|playful
+motion|Rubber Band|Scale|d|CTAs, logos, a beat accent (attention)|emphasis|4-4|playful/retro
+motion|Jello|Skew|d|Playful accents, stickers (attention)|emphasis|4-4|playful
+motion|Heart Beat|Scale|m|Likes, prices, a pulse on the beat (attention)|emphasis|3-3|playful/modern
+motion|Tada|Scale · Rotate|d|Reveals, wins, offers (attention)|emphasis|4-4|playful/retro
+motion|Wobble|Position · Rotate|d|Errors, jokes, quirky accents (attention)|emphasis|4-4|playful/retro
+motion|Swing Hinge|Rotate|m|Signs, tags, hanging elements (attention)|emphasis|3-3|playful/retro
+motion|Flip In X|Rotate X (3D) · Fade|m|Cards, tiles, scoreboard flips (enter)|enter|2-3|modern/technical
+motion|Light Speed In|Position · Skew · Fade|d|Speed, sport, fast lower thirds (enter)|enter|4-5|bold/retro
+motion|Roll In|Position · Rotate · Fade|d|Wheels, coins, round icons (enter)|enter|3-4|playful
+motion|Zoom In Down|Position · Scale · Fade|m|Titles that drop in from above (enter)|enter|3-3|bold/retro
+motion|Jack In The Box|Scale · Rotate · Fade|d|Surprises, reveals, kids and playful brands (enter)|enter|4-5|playful
+motion|Back Out Up|Position · Scale · Fade|d|Exits upward, cards leaving (exit)|exit|4-5|playful/bold
+motion|Zoom Out|Scale · Fade|s|Quiet exits, scene changes (exit)|exit|1-2|modern/elegant/corporate
+fx|Float|Position|s|Idle icons and cards, living backgrounds|loop|1-2|modern/organic
+fx|Wiggle Rotate|Rotate|m|Stickers, illustrations with personality|loop|2-3|playful/organic
+fx|Pulse|Scale|m|CTAs, buttons, attention grabbers|loop/emphasis|2-3|modern/playful
+fx|Jitter|Position&Rotate|d|Social, glitch, high-energy pieces|loop|4-5|bold/technical/retro
+fx|Breathe|Scale&Opacity|s|Ambient glows, background shapes, calm idle states|loop|1-1|elegant/organic
+fx|Swing|Rotate|s|Hanging tags, badges, signs, pendulums|loop|1-2|playful/organic
+fx|Orbit|Position|s|Dots and satellites around a logo, decorative loops|loop|1-2|technical/playful
+fx|Shake|Position&Rotate|d|Impacts, bass hits, alarms, energetic footage|emphasis/loop|4-5|bold
+fx|Holo Flicker|Opacity · Glow&Scanlines|m|HUD labels, tech overlays, holographic UI|loop|3-3|technical/retro
+text|Chars Rise|Position&Fade (char)|m|Short headlines, names, kickers|enter/exit|2-3|modern/elegant
+text|Words Fade Up|Position&Fade (word)|s|Phrases, captions, quotes|enter/exit|1-2|corporate/modern/elegant
+text|Blur Words|Blur&Fade (word)|s|Premium moments, calm intros|enter/exit|1-2|elegant/cinematic/luxury
+text|Tracking Settle|Tracking&Fade|m|All-caps titles, typographic logos|enter/exit|2-3|elegant/luxury/cinematic
+text|Chars Pop|Scale (char)|d|Social, hype, big numbers|enter|4-5|playful/bold
+text|Typewriter|Opacity (char, stepped)|m|Captions, terminals, UI, quotes|enter|2-3|technical/retro
+text|Scramble|Source Text (decode)|d|Tech, data, HUD labels, reveals|enter|4-4|technical/bold
+text|Count Up|Source Text (number)|m|Stats, KPIs, prices, counters|enter|2-3|corporate/technical/modern
+text|Chars Ramp|Position&Fade (char, Ramp curve)|m|Titles that build tension, trailers, reveals|enter|2-4|cinematic/elegant
+text|Words Slam|Scale, Blur&Rotate (word)|d|Punchy statements, social hooks, VO beats|enter|4-5|bold/cinematic
 recipe|calibration__W3L|position&rotation&scale (loop)|d|AC ref · CALIBRATION
 recipe|calibration__4LC|position&rotation|d|AC ref · CALIBRATION
 recipe|calibration__D2T|position (loop)|d|AC ref · CALIBRATION
@@ -76,3 +78,22 @@ recipe|calibration__X9R|opacity&scale|m|AC ref · CALIBRATION
 recipe|calibration__PE6|position|m|AC ref · CALIBRATION
 recipe|calibration__4VW|position&scale|d|AC ref · CALIBRATION
 recipe|calibration__2JV|scale|d|AC ref · CALIBRATION
+# styles: name|energy range|tones|curve|transition|title,subtitle,body,shape,media,logo
+style|Dynamic|4-5|bold/playful/cinematic|-|Whip Pan|Words Slam,Scramble,Chars Pop,Spin Pop,Whip Pan,Ramp Zoom
+style|Elegant|1-2|elegant/luxury/cinematic|Surge|Ramp Slide|Blur Words,Tracking Settle,Words Fade Up,Blur In,Surge Rise,Fade Up
+style|Modern|2-3|modern/corporate|Land|Ramp Slide|Chars Rise,Typewriter,Words Fade Up,Slide Land,Flip In,Scale Pop
+style|Playful|3-5|playful|-|Squash Warp|Chars Pop,Words Fade Up,Words Fade Up,Bounce In,Jack In The Box,Rubber Band
+style|Tech|3-4|technical/retro|-|Whip Pan|Scramble,Typewriter,Typewriter,Line Draw,Light Speed In,Flip In X
+style|Calm Modern|1-2|modern/corporate/friendly|Settle|Ramp Slide|Chars Rise,Words Fade Up,Words Fade Up,Fade Up,Surge Rise,Line Draw
+# techniques: name|energy range|tones|needs (library/techniques.json has what/how/ask)
+technique|Tracked labels|2-4|technical/modern/cinematic|footage/tracks
+technique|Text behind people|2-4|cinematic/bold/modern|footage/matte
+technique|Roto breakdown|2-3|technical|footage/matte
+technique|HUD overlays|3-4|technical/retro|footage/tracks
+technique|Speed ramps|3-5|cinematic/bold|footage
+technique|Freeze frame + kinetic type|4-5|bold/cinematic|footage/matte
+technique|Shape-wipe transitions|3-5|bold/modern/playful|
+technique|Marker timing|1-5||
+technique|Styles|1-5||
+technique|Cut on the voice|1-5||voiceover
+technique|Face refinement|1-5||footage/real people

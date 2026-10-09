@@ -68,14 +68,14 @@ Behavior measured from reference animations and rebuilt with our own keyframes. 
 | <img src="library/gifs/recipe/calibration-1df-unu.gif" width="200"><br>**1DF+UNU** · `dynamic`<br><sub>scale · loop</sub> | <img src="library/gifs/recipe/calibration-x9r.gif" width="200"><br>**X9R** · `medium`<br><sub>opacity & scale · transition</sub> | <img src="library/gifs/recipe/calibration-pe6.gif" width="200"><br>**PE6** · `medium`<br><sub>position · transition</sub> | <img src="library/gifs/recipe/calibration-4vw.gif" width="200"><br>**4VW** · `dynamic`<br><sub>position & scale · transition</sub> |
 | <img src="library/gifs/recipe/calibration-2jv.gif" width="200"><br>**2JV** · `dynamic`<br><sub>scale · transition</sub> |   |   |   |
 
-### Packs (5)
+### Packs (6)
 
 One click gives a whole comp an identity: each layer gets the preset of its role (title, subtitle, body, shape, media, logo), staggered. `SSP.applyPack(comp, name)`
 
 |   |   |   |   |
 |---|---|---|---|
 | <img src="library/packs/dynamic.gif" width="260"><br>**Dynamic** · `dynamic`<br><sub>Social, launches, hype: fast slams, whips and speed ramps.</sub> | <img src="library/packs/elegant.gif" width="260"><br>**Elegant** · `soft`<br><sub>Premium, fashion, hospitality: slow blurs, soft rises, generous timing.</sub> | <img src="library/packs/modern.gif" width="260"><br>**Modern** · `medium`<br><sub>Corporate, SaaS, product: clean rises and slides on the brand curves.</sub> | <img src="library/packs/playful.gif" width="260"><br>**Playful** · `dynamic`<br><sub>Kids, food, consumer apps: bounces, wobbles and jack-in-the-box reveals.</sub> |
-| <img src="library/packs/tech.gif" width="260"><br>**Tech** · `medium`<br><sub>Data, AI, fintech, HUDs: decoding text, line draws and holographic flicker.</sub> |   |   |   |
+| <img src="library/packs/tech.gif" width="260"><br>**Tech** · `medium`<br><sub>Data, AI, fintech, HUDs: decoding text, line draws and holographic flicker.</sub> | <img src="library/packs/calm-modern.gif" width="260"><br>**Calm Modern** · `soft`<br><sub>Product and brand pieces: small travel, word-by-word text, quiet exits, no bounce.</sub> |   |   |
 <!-- catalog:end -->
 
 ### Pick by energy
@@ -107,6 +107,21 @@ Real pieces animated only with library presets and tokens, with no hand-set keyf
 | ![Text tracking](docs/examples/text-tracking.gif) | ![HUD](docs/examples/hud-test.gif) |
 | `Chars Rise`, `Tracking Settle` and callouts pinned to points tracked with OpenCV | `SSHUD` brackets, callouts, meter and chip, all animated with library presets |
 
+## Tags, references and styles
+
+Everything in the library is tagged on independent axes, so moves, curves and timings can be recombined:
+**move** (role: enter · exit · emphasis · loop · transition; target: title · text · shape · icon · logo · ui · media ·
+footage · background; channels; direction), **feel** (energy 1 calm → 5 explosive; tones: modern, elegant, playful,
+bold, technical, organic, cinematic, corporate, retro, luxury… open), and **curve** (each token easing has a family,
+an energy range and tones). Styles carry the same tags plus their own curve and transition, and show a 2×2 preview
+(title · text · shapes · media) in the panel.
+
+A **reference** (a brand or video analysed into an energy range and tones, with the moves, curves and techniques it
+uses) is matched against the library with `tools/match_reference.py` or the MCP tool `match_reference`; what is
+missing gets created, tagged and rendered, and the reference becomes a new style. Example:
+[`library/references/google-calm-modern.json`](library/references/google-calm-modern.json) → the *Calm Modern* style.
+Claude can also ask `suggest_mix` for a role, a target and a feel.
+
 ## How it works
 
 ![How it works](docs/screens/how-it-works.png)
@@ -122,15 +137,16 @@ All timing comes from our motion tokens: **6 durations** and **10 easing curves*
 <img src="docs/screens/ae-panel.gif" width="320" align="right" alt="Motion DNA panel in After Effects: gallery, live previews, In/Out/Both">
 
 1. Install the fonts from `assets/fonts/` (right-click › Install).
-2. **Install the panel once:** double-click `INSTALL-Windows.cmd` (Windows) or `INSTALL-macOS.command` (macOS). It adds *Window › Motion DNA.jsx* (dockable) to every AE version on the machine; restart AE and dock it. It reads the library straight from this repo clone, so a `git pull` brings the new presets. Enable *Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
-3. **Browse by category:** Moves, Classics, Text, Loops, Recipes, Styles, Techniques, Assets and ★ Favorites, with search and an energy filter; the grid adapts to the panel width. Clicking a thumbnail plays a **live preview** of the preset's real curve on the neutral Spark arrow (sampled into `library/preview_curves.json`; ScriptUI cannot play GIFs, so the panel redraws the motion as vectors). ☆ adds it to your favorites.
+2. **Install everything once:** double-click `INSTALL-Windows.cmd` (Windows) or `INSTALL-macOS.command` (macOS), or run `python tools/setup.py` (Claude does the same when you ask it to install Motion DNA). It installs the panel, the fonts and the local asset previews and checks the library. It adds *Window › Motion DNA.jsx* (dockable) to every AE version on the machine; restart AE and dock it. It reads the library straight from this repo clone, so a `git pull` brings the new presets. Enable *Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
+3. **Browse by category:** Moves, Classics, Text, Loops, Transitions, Recipes, Styles, Mix, Techniques, Assets and ★ Favorites, with search, an energy filter (1 calm → 5 explosive) and a tone filter (modern, elegant, playful…); the grid adapts to the panel width. Clicking a thumbnail plays a **live preview** of the preset's real curve on the neutral Spark arrow (sampled into `library/preview_curves.json`; ScriptUI cannot play GIFs, so the panel redraws the motion as vectors). ☆ adds it to your favorites.
 4. **Tune before applying (Controls):** *Duration* (0.5–2×), *Intensity* (how far it travels, 25–200 %), *Direction* (as designed or mirrored), *Easing* (keep the preset's curve or use any token curve), *Stagger* for several layers.
 5. **Select layers → In, Out or Both.** **Remove** takes Motion DNA's keyframes, expressions and markers off the selected layers; each property keeps its resting value.
 6. **Retime with markers:** with *Marker timing* on, each layer gets an `SS in` marker (where the entrance ends) and an `SS out` marker (where the exit starts). Drag them and the animation stretches or compresses with the same curve.
-7. **Styles:** pick one and press In/Both. Every layer gets the preset of its role (title, subtitle, body, shape, media, logo) with the style's rhythm. Backgrounds, nulls and locked layers are left alone.
-8. **Techniques:** guides for the script workflows (tracked labels, text behind people, roto breakdown, HUD, speed ramps, freeze + kinetic type, shape wipes, cutting on the voice, face refinement): what each does, how to run it, and what to ask Claude.
-9. **Claude:** the header shows whether Claude is connected. *Connect Claude* starts the bridge so the MCP server (`motion-dna`) can drive this After Effects.
-10. **Assets:** drop local sound effects and overlays at the playhead.
+7. **Styles:** a grid of 2×2 previews (title · text · shapes · media) with their tags. Pick one and press In/Both: every layer gets the preset of its role (title, subtitle, body, shape, media, logo) with the style's own curve. Backgrounds, nulls and locked layers are left alone.
+8. **Mix:** choose an energy and a tone, press *Analyze*: every layer in the comp (or the selection) gets the move and the curve whose tags fit. *Apply mix*, or *Save as style…* to add it to `library/packs.json`.
+9. **Techniques:** a grid with a frame of each script workflow's result (tracked labels, text behind people, roto breakdown, HUD, speed ramps, freeze + kinetic type, shape wipes, cutting on the voice, face refinement): what each does, how to run it, and what to ask Claude.
+10. **Claude:** the header shows whether Claude is connected. *Connect Claude* starts the bridge so the MCP server (`motion-dna`) can drive this After Effects.
+11. **Assets:** a grid of local sound effects (waveforms) and overlays (frames); add one at the playhead.
 
 <br clear="right">
 
@@ -183,6 +199,9 @@ Bigger pieces are data, not code: scenes (`tools/build_scene.jsx`) and edits (`t
 | `tools/build_app_screen.jsx` | Browser-window recording of the visualizer, rebuilt from screenshots |
 | `tools/render_comps.jsx` | Renders comps through the open AE's render queue |
 | `tools/build_promo_all.jsx` + `media/promo/make_promo.py` | Promotional cut: full-screen footage, oversized type, shape wipes, scenes cut on the VO word times |
+| `tools/setup.py` (+ `INSTALL-*.cmd/.command`) | One-step install: panel in every AE version, fonts, local asset previews, checks; `--mcp-user` registers the MCP server everywhere |
+| `tools/tag_library.py` → `library/tags.json` | Tags for every preset, curve and technique: roles, targets, channels, direction, energy range (1–5), tones |
+| `tools/match_reference.py` | Compares a reference profile (`library/references/<slug>.json`) with the library: what fits, how to build each move, the gaps to create, a proposed style |
 | `tools/vo_words.py` | Word timestamps of a voiceover (openai-whisper) to cut scenes on the spoken word |
 | `tools/qa_frames.jsx` | QA stills of a comp at given times |
 | `tools/faceswap_refine.py` + `media/faceswap/jobs.json` | **Face refinement pass** for every clip with a real person (MiniMax H3 head inpainting, local GPU); `faceswap_apply.py`, `footage_relink_*.jsx`, `reload_footage.jsx` put the refined clips in place |

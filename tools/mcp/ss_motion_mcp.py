@@ -114,7 +114,7 @@ def lib_presets():
     rec = json.loads((ROOT / "library" / "recipes.json").read_text(encoding="utf-8"))
     rec = rec.get("recipes", rec) if isinstance(rec, dict) else rec
     energy = {"s": "soft", "m": "medium", "d": "dynamic"}
-    out = [{"name": p["name"], "kind": p["kind"], "family": p.get("family", "ss"), "channels": p["channels"], "energy": p["energy"], "use": p["use"]} for p in lib]
+    out = [{"name": p["name"], "kind": p["kind"], "family": p.get("family", "own"), "channels": p["channels"], "energy": p["energy"], "use": p["use"]} for p in lib]
     out += [{"name": r["id"], "kind": "recipe", "family": "recipe", "channels": " & ".join(r.get("channels", [])),
              "energy": energy.get(r.get("energy"), r.get("energy")), "use": "measured reference"} for r in rec]
     return out
@@ -138,9 +138,75 @@ def t_list_presets(kind=None, energy=None, family=None, query=None):
 
 def t_list_packs():
     packs = json.loads((ROOT / "library" / "packs.json").read_text(encoding="utf-8"))["packs"]
-    return "\n".join(f'{p["name"]} ({p["energy"]}, stagger {p.get("stagger", 3)}f): {p["desc"]} · ' +
+    return "\n".join(f'{p["name"]} ({p["energy"]} {p.get("energy_range", "")}, tones {"/".join(p.get("tones", []))}, curve {p.get("curve", "per preset")}, '
+                     f'transition {p.get("transition", "-")}, stagger {p.get("stagger", 3)}f): {p["desc"]} · ' +
                      ", ".join(f'{k}={v.get("text") or v.get("motion")}{"+" + v["fx"] if v.get("fx") else ""}' for k, v in p["roles"].items())
                      for p in packs)
+
+
+def _tags():
+    return json.loads((ROOT / "library" / "tags.json").read_text(encoding="utf-8"))
+
+
+def t_list_tags(role=None, target=None, tone=None, energy=None, kind=None):
+    """Presets, curves and techniques with their tags, filtered. energy: a level 1-5 the preset's range must include."""
+    t, out = _tags(), []
+    for p in t["presets"]:
+        if role and role not in p["roles"]: continue
+        if target and target not in p["targets"]: continue
+        if tone and tone not in p["tones"]: continue
+        if kind and kind != p["kind"]: continue
+        if energy and not (p["energy"][0] <= int(energy) <= p["energy"][1]): continue
+        out.append(f'{p["kind"]}|{p["name"]}|roles {"/".join(p["roles"])}|targets {"/".join(p["targets"])}|channels {"/".join(p["channels"])}|'
+                   f'dir {p["direction"]}|energy {p["energy"][0]}-{p["energy"][1]}|tones {"/".join(p["tones"])}')
+    out.append("# curves: " + "; ".join(f'{c["name"]} ({c["family"]}, energy {c["energy"][0]}-{c["energy"][1]}, {"/".join(c["tones"])})' for c in t["curves"]))
+    out.append("# techniques: " + "; ".join(f'{c["name"]} (energy {c["energy"][0]}-{c["energy"][1]}, needs {"/".join(c["needs"]) or "-"})' for c in t["techniques"]))
+    out.append(f'# energy scale: {t["energy_scale"]} · tones: {", ".join(t["tones"])} (open vocabulary: add new tones in tools/tag_library.py)')
+    return "\n".join(out)
+
+
+def t_match_reference(profile_path=None, profile_json=None):
+    """Compare a reference profile (library/references/_schema.md) with the library: what fits, how to build each move, gaps."""
+    import contextlib
+    import importlib
+    import io
+    sys.path.insert(0, str(ROOT / "tools"))
+    mr = importlib.import_module("match_reference")
+    if profile_json:
+        data = json.loads(profile_json) if isinstance(profile_json, str) else profile_json
+        path = ROOT / "library" / "references" / f'{data.get("slug") or "reference"}.json'
+        path.write_text(json.dumps(data, indent=1, ensure_ascii=False), encoding="utf-8")
+    else:
+        path = pathlib.Path(profile_path)
+        if not path.is_absolute():
+            path = ROOT / path
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        gaps = mr.main(str(path))
+    return buf.getvalue() + f'\n(gaps saved to research/references/{gaps["reference"]}.gaps.json)'
+
+
+def t_suggest_mix(role="enter", target="title", tones=None, energy=None, avoid=None, limit=5):
+    """Ranked combinations move x curve x duration for a layer role/target and a feel (tones, energy 1-5)."""
+    t = _tags()
+    tones, avoid = tones or [], avoid or []
+    e = max(1, min(5, int(energy) if energy else 3))
+    timing = t["timing"][str(e)]
+    moves = []
+    for p in t["presets"]:
+        if role not in p["roles"] or target not in p["targets"] or p["name"] in avoid or set(p["tones"]) & set(avoid):
+            continue
+        sc = (2 if p["energy"][0] <= e <= p["energy"][1] else -abs(e - sum(p["energy"]) / 2)) + len(set(p["tones"]) & set(tones))
+        moves.append((sc, p))
+    moves.sort(key=lambda x: -x[0])
+    curves = sorted((((2 if c["energy"][0] <= e <= c["energy"][1] else -1) + len(set(c["tones"]) & set(tones)), c["name"]) for c in t["curves"]
+                     if c["family"] not in avoid and c["name"] not in avoid), key=lambda x: -x[0])
+    cv = [c for _, c in curves[:2]]
+    lines = [f"duration tokens for energy {e}: {', '.join(timing)} · curves for this feel: {', '.join(cv)}"]
+    for sc, p in moves[:limit]:
+        lines.append(f'{p["name"]} ({p["kind"]}, tones {"/".join(p["tones"])}, energy {p["energy"][0]}-{p["energy"][1]}) -> '
+                     f'apply_preset(preset="{p["name"]}", ease="{cv[0]}")')
+    return "\n".join(lines) if moves else "No preset for that role/target: it is a gap (create it, see CONTRIBUTING.md §8)."
 
 
 def t_list_assets(type=None, category=None, query=None, limit=60):
@@ -263,9 +329,16 @@ def t_run_jsx(code, timeout_s=180):
 
 TOOLS_DEF = [
     ("ae_status", t_ae_status, "After Effects status: version, project, active comp, selection, whether the Motion DNA panel is loaded.", {}),
-    ("list_presets", t_list_presets, "List library presets (one line each: kind|name|channels|energy|use). Filter by kind (motion|text|fx|recipe), energy (soft|medium|dynamic), family (ss|classic|recipe) or a text query. Pick presets from this before applying.",
+    ("list_presets", t_list_presets, "List library presets (one line each: kind|name|channels|energy|use). Filter by kind (motion|text|fx|recipe), energy (soft|medium|dynamic), family (own|classic|recipe) or a text query. Pick presets from this before applying.",
      {"kind": {"type": "string"}, "energy": {"type": "string"}, "family": {"type": "string"}, "query": {"type": "string"}}),
-    ("list_packs", t_list_packs, "List styles (Dynamic, Elegant, Modern, Playful, Tech…) and which preset each layer role gets.", {}),
+    ("list_packs", t_list_packs, "List styles (Dynamic, Elegant, Modern, Playful, Tech, Calm Modern…) with their tags (energy range, tones, curve, transition) and which preset each layer role gets.", {}),
+    ("list_tags", t_list_tags, "The tag vocabulary: every preset with roles, targets, channels, direction, energy range (1 calm … 5 explosive) and tones; the curves and techniques with theirs. Filter by role, target, tone, energy, kind. Use it to choose or combine moves for a feel.",
+     {"role": {"type": "string"}, "target": {"type": "string"}, "tone": {"type": "string"}, "energy": {"type": "integer"}, "kind": {"type": "string"}}),
+    ("match_reference", t_match_reference, "Compare a reference analysis (a brand or video placed in an energy range and tones, with observed moves, curves and techniques; schema in library/references/_schema.md) with the library: what already fits, how to build each observed move (preset + curve + duration), the gaps to create, and a proposed style. Pass profile_path (library/references/<slug>.json) or profile_json.",
+     {"profile_path": {"type": "string"}, "profile_json": {"type": "string"}}),
+    ("suggest_mix", t_suggest_mix, "Ranked move x curve x duration combinations for a layer (role: enter/exit/emphasis/loop/transition, target: title/text/shape/icon/logo/ui/media/footage/background) and a feel (tones, energy 1-5, avoid). Each line says how to apply it.",
+     {"role": {"type": "string"}, "target": {"type": "string"}, "tones": {"type": "array", "items": {"type": "string"}}, "energy": {"type": "integer"},
+      "avoid": {"type": "array", "items": {"type": "string"}}, "limit": {"type": "integer"}}),
     ("list_assets", t_list_assets, "List locally installed SFX and overlays (licensed, never in the repo) with category, seconds, loudness and flags.",
      {"type": {"type": "string", "description": "sfx | overlay"}, "category": {"type": "string"}, "query": {"type": "string"}, "limit": {"type": "integer"}}),
     ("list_layers", t_list_layers, "List the layers of a comp (default: the active comp) with type, timing and selection.", {"comp": {"type": "string"}}),
@@ -312,8 +385,13 @@ def handle(req):
     if method == "initialize":
         return {"protocolVersion": req.get("params", {}).get("protocolVersion", PROTOCOL),
                 "capabilities": {"tools": {}}, "serverInfo": {"name": "motion-dna", "version": "0.1"},
-                "instructions": "Motion DNA, a motion library for After Effects. Browse with list_presets/list_packs/list_assets (no AE needed); "
-                                "apply with apply_preset/apply_pack/add_asset; check results with render_frame. Read CLAUDE.md in the repo for the rules."}
+                "instructions": "Motion DNA: a motion library for After Effects that gives AI-made motion its own identity. Everything is tagged "
+                                "(roles, targets, channels, direction, energy 1 calm..5 explosive, tones): use list_tags, suggest_mix and list_packs "
+                                "(styles) to pick or combine a move + token curve + duration for a feel. If you bring a reference analysis (a brand or "
+                                "video placed in an energy range and tones, e.g. calm + modern), run match_reference: build what fits from existing "
+                                "presets and CREATE what is missing (moves, curves, transitions, techniques), tag it, render its samples and add a style "
+                                "(CONTRIBUTING.md section 8). Apply with apply_preset (duration, intensity, direction, ease), apply_pack, add_asset; undo "
+                                "with remove_animation; check with render_frame. Read CLAUDE.md in the repo for the rules."}
     if method == "tools/list":
         return {"tools": tool_list()}
     if method == "tools/call":

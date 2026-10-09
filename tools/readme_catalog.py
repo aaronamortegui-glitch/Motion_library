@@ -53,7 +53,7 @@ def main():
             if kind == "classic":
                 cells = [cell("library/" + p["gif"], p["name"], p["energy"], p["use"]) for p in lib if p.get("family") == "classic"]
             else:
-                cells = [cell("library/" + p["gif"], p["name"], p["energy"], p["use"]) for p in lib if p["kind"] == kind and p.get("family", "ss") != "classic"]
+                cells = [cell("library/" + p["gif"], p["name"], p["energy"], p["use"]) for p in lib if p["kind"] == kind and p.get("family", "own") != "classic"]
         blocks.append(f"### {title} ({len(cells)})\n\n{blurb}\n\n{table(cells)}\n")
     packs = json.loads((ROOT / "library/packs.json").read_text(encoding="utf-8"))["packs"]
     pc = [f"<img src=\"library/packs/{p['slug']}.gif\" width=\"260\"><br>**{p['name']}** · `{p['energy']}`<br><sub>{p['desc']}</sub>" for p in packs]

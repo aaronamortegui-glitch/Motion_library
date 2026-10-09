@@ -1,6 +1,6 @@
 {
  "version": "0.1",
- "note": "A pack gives a whole comp one identity. SSP.applyPack(comp, name[, layers, phase]) classifies each layer (title/subtitle/body by font size, shape, media, logo by name) and applies the role's preset, staggered. Full-frame backgrounds, nulls, adjustment, guide, locked and audio-only layers are left alone.",
+ "note": "A pack gives a whole comp one identity. SSP.applyPack(comp, name[, layers, phase]) classifies each layer (title/subtitle/body by font size, shape, media, logo by name) and applies the role's preset, staggered. Full-frame backgrounds, nulls, adjustment, guide, locked and audio-only layers are left alone. Each style is tagged (tones, energy_range) like the presets, so an LLM can pick or build one from a reference; 'curve' re-eases every move of the style with that token easing, 'transition' is the preset used between scenes.",
  "packs": [
   {
    "name": "Dynamic",
@@ -28,7 +28,18 @@
     "logo": {
      "motion": "Ramp Zoom"
     }
-   }
+   },
+   "tones": [
+    "bold",
+    "playful",
+    "cinematic"
+   ],
+   "energy_range": [
+    4,
+    5
+   ],
+   "transition": "Whip Pan",
+   "source": "handmade"
   },
   {
    "name": "Elegant",
@@ -57,7 +68,19 @@
      "motion": "Fade Up",
      "fx": "Breathe"
     }
-   }
+   },
+   "tones": [
+    "elegant",
+    "luxury",
+    "cinematic"
+   ],
+   "energy_range": [
+    1,
+    2
+   ],
+   "transition": "Ramp Slide",
+   "source": "handmade",
+   "curve": "Surge"
   },
   {
    "name": "Modern",
@@ -85,7 +108,18 @@
     "logo": {
      "motion": "Scale Pop"
     }
-   }
+   },
+   "tones": [
+    "modern",
+    "corporate"
+   ],
+   "energy_range": [
+    2,
+    3
+   ],
+   "transition": "Ramp Slide",
+   "source": "handmade",
+   "curve": "Land"
   },
   {
    "name": "Playful",
@@ -114,7 +148,16 @@
     "logo": {
      "motion": "Rubber Band"
     }
-   }
+   },
+   "tones": [
+    "playful"
+   ],
+   "energy_range": [
+    3,
+    5
+   ],
+   "transition": "Squash Warp",
+   "source": "handmade"
   },
   {
    "name": "Tech",
@@ -142,6 +185,55 @@
     "logo": {
      "motion": "Flip In X",
      "fx": "Holo Flicker"
+    }
+   },
+   "tones": [
+    "technical",
+    "retro"
+   ],
+   "energy_range": [
+    3,
+    4
+   ],
+   "transition": "Whip Pan",
+   "source": "handmade"
+  },
+  {
+   "name": "Calm Modern",
+   "slug": "calm-modern",
+   "energy": "soft",
+   "energy_range": [
+    1,
+    2
+   ],
+   "tones": [
+    "modern",
+    "corporate",
+    "friendly"
+   ],
+   "desc": "Product and brand pieces: small travel, word-by-word text, quiet exits, no bounce.",
+   "stagger": 6,
+   "curve": "Settle",
+   "transition": "Ramp Slide",
+   "source": "reference:google-calm-modern",
+   "roles": {
+    "title": {
+     "text": "Chars Rise"
+    },
+    "subtitle": {
+     "text": "Words Fade Up"
+    },
+    "body": {
+     "text": "Words Fade Up"
+    },
+    "shape": {
+     "motion": "Fade Up"
+    },
+    "media": {
+     "motion": "Surge Rise"
+    },
+    "logo": {
+     "motion": "Line Draw"
     }
    }
   }
