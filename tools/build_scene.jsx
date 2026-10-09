@@ -46,6 +46,7 @@
 
     for (var s = 0; s < SPEC.scenes.length; s++) {
         var S = SPEC.scenes[s];
+        if (S.prebuild) $.evalFile(new File(SS_ROOT + "/" + S.prebuild));   // builds comps this scene uses (e.g. APP_SCREEN)
         var old = findItem(S.comp); if (old) old.remove();
         var plate = importOnce(S.plate);
         var TRK = SSM.readJSON(SS_ROOT + "/" + S.tracks);
@@ -72,6 +73,7 @@
             else if (o.type === "chip") made_ = SSHUD.chip(o);
             else if (o.type === "contour") made_ = SSHUD.contour(o);
             else if (o.type === "faceScan") made_ = SSHUD.faceScan(o);
+            else if (o.type === "panel") made_ = SSHUD.panel(o);
             else if (o.type === "behind") {
                 // in-world text that sits between the background and the people (needs scene.matte)
                 var B = text(c, o.text, o.role || "display", o.size || 260, o.color || "cloud", o.tracking || 0);
@@ -114,8 +116,15 @@
         pass(function (t) { return t === "contour"; });
         pass(function (t) { return t === "faceScan"; });
         pass(function (t) { return t !== "behind" && t !== "contour" && t !== "faceScan"; });
+        c.motionBlur = true;   // motion blur on every animated graphic layer (HUD, text, contours)
+        for (var mb = 1; mb <= c.numLayers; mb++) {
+            var LL = c.layer(mb);
+            if (LL instanceof TextLayer || LL instanceof ShapeLayer) { try { LL.motionBlur = true; } catch (e) {} }
+        }
         made.push(S.comp);
     }
     proj.save();
-    return "scenes: " + made.join(", ");
+    // rebuilding a scene comp deletes it from every comp that nests it: rebuild the breakdown grid too
+    var bd = SPEC.breakdown ? " · " + $.evalFile(new File(SS_ROOT + "/tools/build_breakdown.jsx")) : "";
+    return "scenes: " + made.join(", ") + bd;
 })();

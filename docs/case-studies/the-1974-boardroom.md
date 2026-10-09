@@ -1,10 +1,10 @@
 # Case study: *The 1974 Boardroom*
 
-A 36 s capability test of the whole pipeline: AI footage → tracking → roto → HUD built from library presets → edit with music and SFX → breakdown. Final video: [`docs/examples/whisky_1974_boardroom.mp4`](../examples/whisky_1974_boardroom.mp4).
+A 45 s capability test of the whole pipeline, made to present the library to the team: AI footage → tracking → roto → HUD built from library presets → freeze frames with kinetic type → roto breakdown → the library app in the empty office → end card. Final video: [`docs/examples/whisky_1974_boardroom.mp4`](../examples/whisky_1974_boardroom.mp4).
 
-| Shot 1 | Shot 2 | Shot 3 | Breakdown |
-|---|---|---|---|
-| ![](../examples/whisky-two-shot.gif) | ![](../examples/whisky-aaron.gif) | ![](../examples/whisky-gian.gif) | ![](../examples/whisky-breakdown.gif) |
+| "Zero keyframes." | "Tracked." | "Rotoscoped." | Library app | Breakdown |
+|---|---|---|---|---|
+| ![](../examples/reel-freeze-keyframes.gif) | ![](../examples/reel-freeze-tracked.gif) | ![](../examples/reel-freeze-rotoscoped.gif) | ![](../examples/reel-library-app.gif) | ![](../examples/whisky-breakdown.gif) |
 
 ## Brief
 Two project collaborators as classy 1970s executives drinking whisky and looking at camera. Lines reveal descriptions of the outfit, the liquor and its cost, a "build scan" of each character and holographic character info — all tracked, using the SS Motion library and the *Essentials* Figma graphics. Three consistent clips, music, text behind the people, and a roto/mask breakdown.
@@ -21,11 +21,12 @@ Two project collaborators as classy 1970s executives drinking whisky and looking
 | 7 | Contours | `tools/matte_contours.py` (`--subjects 2 --split-x 960` for the two-shot) → `clipNN_contours.json` |
 | 8 | Scenes | `media/whisky/scenes.json` → `bash tools/bridge.sh tools/build_scene.jsx` |
 | 9 | Breakdown 2×2 | `scenes.json → breakdown` → `bash tools/bridge.sh tools/build_breakdown.jsx` |
-| 10 | Music | ElevenLabs Music `t2a-elevenlabs-music-t2a` → `music_70s_funk_26s.mp3` |
+| 10 | Music | ElevenLabs Music `t2a-elevenlabs-music-t2a` → `music_70s_funk_46s.mp3` (46 s version for the final cut) |
 | 11 | Edit (cuts on the beat, SFX, end card) | `media/whisky/edit.json` → `bash tools/bridge.sh tools/build_edit.jsx` |
-| 12 | Voiceover (6 lines) | ElevenLabs v3 `t2a-elevenlabs-tts-v3`, voice Adam, stability 0.35 → trimmed, loudnorm, `atempo=1.07` → `media/whisky/vo/vo01..06.wav` |
-| 13 | Freeze frames + VO + ducking | `edit.json` → `freeze` per shot, `vo` in shot-local time → `build_edit.jsx` |
-| 14 | Render + QA | `tools/render_comps.jsx` + `tools/wait_files.sh`, contact sheets, loudness −16.2 LUFS |
+| 12 | Voiceover (6 lines) | ElevenLabs v3 `t2a-elevenlabs-tts-v3`, voice Adam, **stability 0.15** + tone tags → trimmed, loudnorm → `media/whisky/vo/v4_01..06.wav` |
+| 13 | Library app screen | Visualizer screenshots per filter (`msedge --headless --screenshot "library/index.html?poster=1&kind=<kind>"`) → `tools/build_app_screen.jsx` (browser window, cursor clicks each filter) → `panel` item in `WHISKY_LIBRARY` |
+| 14 | Freeze frames + kinetic type + VO + ducking | `edit.json` → `freeze` per shot (`beats`, `title`, `sub`, clean `plate` for the cut-out) → `build_edit.jsx` |
+| 15 | Render + QA | `tools/render_comps.jsx` + `tools/wait_files.sh`, contact sheets, loudness −16 LUFS |
 
 ## What each shot shows
 - **Shot 1 (two-shot):** behind-the-subject title "The Boardroom" tracked to the skyline; organic contour lines (spark / coral); face-scan slices; scan brackets with name cards; role chips; liquor brackets on both glasses + "LIQUOR SCAN" callout; "THE SPIRIT" bottle callout (fades out before the bottle leaves frame); deal-confidence meter.
@@ -33,15 +34,17 @@ Two project collaborators as classy 1970s executives drinking whisky and looking
 - **Shot 3 (subject 02):** "Dealmaker" behind him; contour; face scan; liquor bracket on the glass (fades out when the glass leaves frame); outfit and bar-service callouts; charisma meter.
 - **Breakdown:** 01 Plate (Flora + Kling) · 02 Roto matte (VEED) · 03 Contours (OpenCV) · 04 Composite (SS Motion).
 
-## Voiceover script (70s announcer, deadpan)
-| When | Line | Freeze title |
+## Voiceover script (70s announcer, expressive)
+| When | Line (tone tags in brackets) | On screen |
 |---|---|---|
-| Shot 1 opens | "Nineteen seventy-four. The corner office." | — |
-| Shot 1 freeze | "Two executives. One decanter. Zero emails." | **Zero emails.** · 2 EXECUTIVES · 1 DECANTER · 0 MEETINGS |
-| Shot 2 freeze | "The Chairman. Three-piece suit. The smirk? *(chuckles)* Complimentary." | **The Chairman.** · SMIRK INCLUDED · NO EXTRA CHARGE |
-| Shot 3 freeze | "The Dealmaker. Aviators. Indoors. At night. … Bold." | **The Dealmaker.** · AVIATORS · INDOORS · AT NIGHT |
-| Breakdown | "Every pixel? Rotoscoped by robots. *(chuckles)* The robots now want a corner office." | — |
-| End card | "The 1974 Boardroom. Superside Motion Lab." | — |
+| Shot 1 opens | "[theatrical, big warm smile] Nineteen seventy-four. Two executives… [beat] and a brand-new motion library." | — |
+| Shot 1 freeze | "[building excitement] Every line. Every label. Every glass. [proud, punchy] Zero keyframes set by hand!" | EVERY **LINE.** · EVERY **LABEL.** · EVERY **GLASS.** · Zero **keyframes.** |
+| Shot 2 freeze | "[impressed and playful] The Chairman. Tracked, scanned… [chuckles] and annotated before his first sip." | **Tracked.** · SCANNED. · ANNOTATED. |
+| Shot 3 freeze | "[sly and amused] The Dealmaker. Rotoscoped by robots. [laughs] The aviators… were his idea." | **Rotoscoped.** · BY ROBOTS |
+| Breakdown | "[confident and fast-paced] Plate. Matte. Contours. Composite. [slower, proud] One library… every shot." | 01 Plate · 02 Roto matte · 03 Contours · 04 Composite |
+| Library + end card | "[grand finale, warm] S S Motion. Superside's motion library. [chuckles] Now with whisky." | The library app · SS Motion Library · by Aaron Amortegui & Gian Orsi |
+
+**Freeze typography:** each line lands big and centered (scale overshoot + blur + slight tilt, swoosh SFX), with contrasting sizes (small tracked caps lead + huge serif hero). Lines replace each other instead of stacking; beats after the title cycle in the title's lead slot. The background darkens and defocuses; the people are cut from the clean plate so HUD lines don't run under the type.
 
 ## Prompts used
 **Master still (Nano Banana Pro, images: identity A, identity B)**
@@ -65,5 +68,10 @@ Two project collaborators as classy 1970s executives drinking whisky and looking
 - `aerender` hang with Animation Composer layers → render through the AE queue.
 - Freeze frames only worked on shot 1 → `setValueAtTime` uses comp time; offset remap keys by the shot start.
 - Contours drew at constant speed → `Organic Draw` (uneven keyframe spacing).
+- People darkened during freezes → matte cut-out above the scrim.
+- Flat VO → stability 0.15 + tone tags; harsh beep → soft blips.
+- Kicker lines stacked and overlapped → one centered line at a time with contrasting sizes.
+- Breakdown composite cell went empty after rebuilding scenes → `build_scene.jsx` rebuilds the breakdown.
+- Basic preview panels in the office → a real screenshot of the library app with a cursor clicking each category.
 
 All prices, bottlings and roles are fictional. Subjects are project collaborators who agreed to appear in tests.

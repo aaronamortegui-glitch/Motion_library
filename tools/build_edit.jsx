@@ -24,6 +24,17 @@
         return proj.importFile(new ImportOptions(f));
     }
     function tr(L, p) { return L.property("ADBE Transform Group").property(p); }
+    // set our time-remap keys, then drop AE's default keys that aren't ours (removing all keys hides the property)
+    // NOTE: setValueAtTime uses COMP time, so keys must already be offset by the shot's start
+    function setRemap(rm, keys) {
+        for (var q = 0; q < keys.length; q++) rm.setValueAtTime(keys[q][0], keys[q][1]);
+        for (var r = rm.numKeys; r >= 1; r--) {
+            var kt = rm.keyTime(r), ours = false;
+            for (var q3 = 0; q3 < keys.length; q3++) if (Math.abs(kt - keys[q3][0]) < 0.001) ours = true;
+            if (!ours) rm.removeKey(r);
+        }
+        for (var q2 = 1; q2 <= rm.numKeys; q2++) rm.setInterpolationTypeAtKey(q2, KeyframeInterpolationType.LINEAR, KeyframeInterpolationType.LINEAR);
+    }
     var AC = Folder($.getenv("LOCALAPPDATA").split("\\").join("/") + "/MisterHorse/ProductManager/AssetPacks/");
     function findSfx(name) {
         var packs = AC.getFiles();
@@ -41,6 +52,42 @@
         td.justification = just || ParagraphJustification.LEFT_JUSTIFY; if (tracking) td.tracking = tracking; tp.setValue(td);
         tr(T, "ADBE Position").setValue(at);
         T.inPoint = t0; T.outPoint = t1;
+        return T;
+    }
+
+    // pivot a text layer around its visual center (scale/rotation feel centered); returns its box
+    function centerOn(T, pos, at) {
+        var r = T.sourceRectAtTime(at, false);
+        tr(T, "ADBE Anchor Point").setValue([r.left + r.width / 2, r.top + r.height / 2]);
+        tr(T, "ADBE Position").setValue(pos);
+        return { w: r.width, h: r.height };
+    }
+    function fadeOut(T, t1) {
+        SSM.animate(tr(T, "ADBE Opacity"), t1 - SSM.seconds("Blink"), 100, 0, "Blink", "Flat");
+    }
+    // big display word that slams in (scale overshoot + blur + slight tilt) and shrinks away
+    function heroWord(str, size, color, pos, t0, t1, fromScale, rot) {
+        var T = text(E, str, "display", size, color, pos, ParagraphJustification.CENTER_JUSTIFY, 0, t0, t1);
+        var box = centerOn(T, pos, t0);
+        var ds = T.property("ADBE Effect Parade").addProperty("ADBE Drop Shadow");
+        ds.property("ADBE Drop Shadow-0001").setValue(hex(PAL.pine)); ds.property("ADBE Drop Shadow-0002").setValue(70);
+        ds.property("ADBE Drop Shadow-0004").setValue(6); ds.property("ADBE Drop Shadow-0005").setValue(40);
+        var bl = T.property("ADBE Effect Parade").addProperty("ADBE Gaussian Blur 2");
+        SSM.animate(bl.property("ADBE Gaussian Blur 2-0001"), t0, 40, 0, "Glide", "Land");
+        SSM.animate(tr(T, "ADBE Scale"), t0, [fromScale, fromScale, 100], [100, 100, 100], "Arrive", "Pop");
+        SSM.animate(tr(T, "ADBE Opacity"), t0, 0, 100, "Tick", "Flat");
+        if (rot) SSM.animate(tr(T, "ADBE Rotate Z"), t0, rot * 3, rot, "Arrive", "Settle");
+        SSM.animate(tr(T, "ADBE Scale"), t1 - SSM.seconds("Blink"), [100, 100, 100], [86, 86, 100], "Blink", "Launch");
+        fadeOut(T, t1);
+        return { layer: T, w: box.w, h: box.h };
+    }
+    // small tracked-out caps line above a hero word
+    function leadWord(str, pos, t0, t1, pop) {
+        var T = text(E, str, "ui", 54, "spark", pos, ParagraphJustification.CENTER_JUSTIFY, 480, t0, t1);
+        centerOn(T, pos, t0);
+        SSP.applyText(T, "Tracking Settle", "in", t0);
+        if (pop) SSM.animate(tr(T, "ADBE Scale"), t0, [130, 130, 100], [100, 100, 100], "Glide", "Pop");
+        fadeOut(T, t1);
         return T;
     }
 
@@ -78,17 +125,9 @@
         if (fz) {
             L.timeRemapEnabled = true;
             var rm = L.property("ADBE Time Remapping");
-            // set our keys first, then drop AE's default keys that aren't ours (removing all keys hides the property)
-            // NOTE: setValueAtTime uses COMP time, so offset every key by the shot's start
             var s0 = starts[k];
             var keys = [[s0, inT], [s0 + fz.at, inT + fz.at], [s0 + fz.at + fz.dur, inT + fz.at], [s0 + shot.dur + fz.dur, inT + shot.dur]];
-            for (var q = 0; q < keys.length; q++) rm.setValueAtTime(keys[q][0], keys[q][1]);
-            for (var r = rm.numKeys; r >= 1; r--) {
-                var kt = rm.keyTime(r), ours = false;
-                for (var q3 = 0; q3 < keys.length; q3++) if (Math.abs(kt - keys[q3][0]) < 0.001) ours = true;
-                if (!ours) rm.removeKey(r);
-            }
-            for (var q2 = 1; q2 <= rm.numKeys; q2++) rm.setInterpolationTypeAtKey(q2, KeyframeInterpolationType.LINEAR, KeyframeInterpolationType.LINEAR);
+            setRemap(rm, keys);
             L.outPoint = starts[k] + lens[k];      // enabling time remap resets the out point
             var f0 = starts[k] + fz.at, f1 = f0 + fz.dur;
             // punch-in on the frozen frame, then back out
@@ -97,35 +136,93 @@
             // flash + darken scrim
             var flash = E.layers.addSolid(hex(PAL.cloud), "Freeze flash " + (k + 1), W, H, 1);
             flash.inPoint = f0; flash.outPoint = f0 + SSM.seconds("Glide");
-            SSM.animate(tr(flash, "ADBE Opacity"), f0, 55, 0, "Blink", "Flat");
+            SSM.animate(tr(flash, "ADBE Opacity"), f0, 30, 0, "Blink", "Flat");
             var scrim = E.layers.addSolid(hex(PAL.pine), "Freeze scrim " + (k + 1), W, H, 1);
             scrim.inPoint = f0; scrim.outPoint = f1;
-            SSM.animate(tr(scrim, "ADBE Opacity"), f0, 0, 48, "Blink", "Flat");
-            SSM.animate(tr(scrim, "ADBE Opacity"), f1 - SSM.seconds("Blink"), 48, 0, "Blink", "Flat");
-            // foreground title + subline + organic underline
-            var tIn = f0 + (fz.titleAt || 0.15), tOut = f1;
-            autoSfx.push({ name: fz.clickSfx || "Mechanical Keyboard Click 03", t: f0, gainDb: -6 });
-            autoSfx.push({ name: fz.popSfx || "Hollow Pop 06", t: tIn, gainDb: -8 });
-            var x0 = fz.x || 150, y0 = fz.y || 600;
-            var T1 = text(E, fz.title, "display", fz.size || 200, "cloud", [x0, y0], null, 0, tIn, tOut);
-            SSP.applyText(T1, "Chars Rise", "in", tIn);
-            SSM.animate(tr(T1, "ADBE Opacity"), tOut - SSM.seconds("Blink"), 100, 0, "Blink", "Flat");
+            SSM.animate(tr(scrim, "ADBE Opacity"), f0, 0, 66, "Blink", "Flat");
+            SSM.animate(tr(scrim, "ADBE Opacity"), f1 - SSM.seconds("Blink"), 66, 0, "Blink", "Flat");
+            // defocus the frozen background (and its HUD) so the foreground type reads cleanly
+            var dof = E.layers.addSolid([0, 0, 0], "Freeze defocus " + (k + 1), W, H, 1);
+            dof.adjustmentLayer = true; dof.inPoint = f0; dof.outPoint = f1;
+            var fb = dof.property("ADBE Effect Parade").addProperty("ADBE Box Blur2");
+            fb.property("ADBE Box Blur2-0002").setValue(1);   // iterations
+            SSM.animate(fb.property("ADBE Box Blur2-0001"), f0, 0, 9, "Glide", "Land");
+            SSM.animate(fb.property("ADBE Box Blur2-0001"), f1 - SSM.seconds("Glide"), 9, 0, "Glide", "Launch");
+            dof.moveBefore(L);
+            // keep the people bright: a matte-cut copy of the frozen shot above the scrim
+            if (shot.matte) {
+                var mItem = importFile(new File(SS_ROOT + "/" + shot.matte));
+                mItem.mainSource.alphaMode = AlphaMode.STRAIGHT;
+                var MM = E.layers.add(mItem); MM.name = "Freeze people matte " + (k + 1);
+                MM.startTime = starts[k] - inT;
+                MM.timeRemapEnabled = true;
+                setRemap(MM.property("ADBE Time Remapping"), keys);
+                tr(MM, "ADBE Scale").expression = 'thisComp.layer("' + L.name + '").transform.scale';
+                MM.inPoint = f0; MM.outPoint = f1;
+                // the cut-out uses the clean plate (when given) so HUD lines don't run through the people under the type
+                var CUT;
+                if (shot.plate) {
+                    CUT = E.layers.add(importFile(new File(SS_ROOT + "/" + shot.plate)));
+                    CUT.startTime = starts[k] - inT; CUT.timeRemapEnabled = true;
+                    setRemap(CUT.property("ADBE Time Remapping"), keys);
+                    tr(CUT, "ADBE Scale").expression = 'thisComp.layer("' + L.name + '").transform.scale';
+                    try { CUT.audioEnabled = false; } catch (eA) {}
+                } else CUT = L.duplicate();
+                CUT.name = "Freeze people " + (k + 1);
+                CUT.moveBefore(MM); MM.moveAfter(CUT);
+                CUT.inPoint = f0; CUT.outPoint = f1;
+                CUT.setTrackMatte(MM, TrackMatteType.ALPHA);
+                MM.enabled = false;
+                // the cut-out sits above the scrim; keep the scrim right below it
+                scrim.moveAfter(MM);
+            }
+            // ---- kinetic type: every line lands big in the center; word sizes contrast (small lead + huge hero) ----
+            // Beats before the title are full-screen cards that replace each other; beats after the title cycle in
+            // the title's lead slot, so nothing ever overlaps.
+            var tIn = f0 + (fz.titleAt || 0.15), tOut = f1, CX = W / 2, CY = H / 2 + 30;
+            var beats = fz.beats || [], pre = [], post = [];
+            for (var bt = 0; bt < beats.length; bt++) (f0 + beats[bt].at < tIn ? pre : post).push(beats[bt]);
+            var heroSizes = [250, 310, 270], tilt = [-2.5, 2, -1.5];
+            for (var pb = 0; pb < pre.length; pb++) {
+                var BB = pre[pb], bIn = f0 + BB.at, bOut = pb + 1 < pre.length ? f0 + pre[pb + 1].at : tIn;
+                var ws = BB.text.split(" "), hero = ws.pop(), lead = ws.join(" ");
+                var HB = heroWord(hero, BB.size || heroSizes[pb % 3], "cloud", [CX, CY + 40], bIn, bOut, 165, tilt[pb % 3]);
+                if (lead) leadWord(lead, [CX, CY + 40 - HB.h / 2 - 70], bIn, bOut);
+                autoSfx.push({ name: fz.beatSfx || "Swoosh Wood 01_Variant Main", t: Math.max(0, bIn - 0.05), gainDb: -9 });
+            }
+            var tw = fz.title.split(" "), tHero = tw.pop(), tLead = tw.join(" ");
+            var heroY = CY + (tLead ? 70 : 20);
+            var TH = heroWord(tHero, fz.size || 290, "cloud", [CX, heroY], tIn, tOut, 128, 0);
+            SSP.applyText(TH.layer, "Chars Rise", "in", tIn);
+            var leadY = heroY - TH.h / 2 - 80;
+            if (tLead) {
+                var TLd = heroWord(tLead, Math.round((fz.size || 290) * 0.5), "spark", [CX, leadY + 20], tIn + 0.12, post.length ? f0 + post[0].at : tOut, 140, -3);
+                SSP.applyText(TLd.layer, "Words Fade Up", "in", tIn + 0.12);
+            }
+            for (var qb = 0; qb < post.length; qb++) {
+                var PB = post[qb], pIn = f0 + PB.at, pOut = qb + 1 < post.length ? f0 + post[qb + 1].at : tOut;
+                leadWord(PB.text, [CX, leadY], pIn, pOut, true);
+                autoSfx.push({ name: fz.beatSfx || "Swoosh Wood 01_Variant Main", t: Math.max(0, pIn - 0.05), gainDb: -10 });
+            }
+            autoSfx.push({ name: fz.clickSfx || "Mechanical Keyboard Click 03", t: f0, gainDb: -8 });
+            autoSfx.push({ name: fz.titleSfx || "Medium Cinematic Boom 04", t: Math.max(0, tIn - 0.03), gainDb: -17, len: 1.8 });
             if (fz.sub) {
-                var T2 = text(E, fz.sub, "ui", 30, "spark", [x0 + 6, y0 + 80], null, 220, tIn + SSM.seconds("Glide"), tOut);
+                var T2 = text(E, fz.sub, "ui", 30, "cloud", [CX, heroY + TH.h / 2 + 95], ParagraphJustification.CENTER_JUSTIFY, 260, tIn + SSM.seconds("Glide"), tOut);
                 SSP.applyText(T2, "Tracking Settle", "in", tIn + SSM.seconds("Glide"));
-                SSM.animate(tr(T2, "ADBE Opacity"), tOut - SSM.seconds("Blink"), 100, 0, "Blink", "Flat");
+                fadeOut(T2, tOut);
             }
             var U = E.layers.addShape(); U.name = "Freeze underline " + (k + 1);
             tr(U, "ADBE Position").setValue([0, 0]);
             var ug = U.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
-            var us = new Shape(); us.vertices = [[x0, y0 + 30], [x0 + (fz.lineW || 760), y0 + 30]]; us.closed = false;
+            var uw = TH.w * 0.82, uy = heroY + TH.h / 2 + 38;
+            var us = new Shape(); us.vertices = [[CX - uw / 2, uy], [CX + uw / 2, uy]]; us.closed = false;
             ug.addProperty("ADBE Vector Shape - Group").property("ADBE Vector Shape").setValue(us);
             var ust = ug.addProperty("ADBE Vector Graphic - Stroke");
             ust.property("ADBE Vector Stroke Color").setValue(hex(PAL.spark)); ust.property("ADBE Vector Stroke Width").setValue(5);
             ust.property("ADBE Vector Stroke Line Cap").setValue(2);
             U.inPoint = tIn; U.outPoint = tOut;
             SSP.apply(U, "Organic Draw", "in", tIn + SSM.seconds("Tick"));
-            SSM.animate(tr(U, "ADBE Opacity"), tOut - SSM.seconds("Blink"), 100, 0, "Blink", "Flat");
+            fadeOut(U, tOut);
         }
     }
 
@@ -182,7 +279,16 @@
     for (var x = 0; x < allSfx.length; x++) {
         var fx = allSfx[x], f = findSfx(fx.name);
         if (!f) { log.push("sfx not found: " + fx.name); continue; }
-        audioAt(f, when(fx), fx.gainDb || -9, "SFX · " + fx.name);
+        var SA = audioAt(f, when(fx), fx.gainDb || -9, "SFX · " + fx.name);
+        if (fx.len) {
+            var sl = SA.property("ADBE Audio Group").property("ADBE Audio Levels"), g = fx.gainDb || -9, te = when(fx) + fx.len;
+            sl.setValueAtTime(te - 0.5, [g, g]); sl.setValueAtTime(te, [-48, -48]); SA.outPoint = te;
+        }
+    }
+    E.motionBlur = true;
+    for (var mb = 1; mb <= E.numLayers; mb++) {
+        var LL = E.layer(mb);
+        if (LL instanceof TextLayer || LL instanceof ShapeLayer || (LL.source instanceof CompItem)) { try { LL.motionBlur = true; } catch (e) {} }
     }
     BG.moveToEnd(); BG.locked = true;
     proj.save();

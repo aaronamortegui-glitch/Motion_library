@@ -33,6 +33,11 @@ Everything we learned building SS Motion and *The 1974 Boardroom* test, written 
 - Output template `H.264 - Match Render Settings - 15 Mbps` includes audio when the comp has it.
 - Contact sheets are the fastest QA: `ffmpeg -i out.mp4 -vf "select='eq(n\,30)+eq(n\,90)',scale=800:-1,tile=2x2" -frames:v 1 sheet.png`. Check several frames, not one — push-ins move things into labels.
 
+- Rebuilding a comp (remove + recreate) silently deletes its layers from every comp that nested it (e.g. the breakdown grid lost its composite cell). Rebuild dependents in the same run: `build_scene.jsx` now rebuilds the breakdown.
+- Quick QA without a full render: `comp.saveFrameToPng(time, file)` from a bridge job writes stills in seconds (asynchronously: wait for the files).
+- Screenshots of ScriptUI windows: open the palette from a job with `#targetengine` (otherwise it closes when the job ends), then `PrintWindow` from a **DPI-aware** process (`SetProcessDPIAware`), or the capture is cropped on scaled displays.
+- AE shows "Not Responding" during a scripted render queue run; check that the output file keeps growing before assuming a hang.
+
 ## 2. Animation Composer as a behavioral reference
 - Presets are encrypted (`.mhcitem`/`.mhitemdata`). We never decrypt or modify the plugin, and we never enable CEP debug modes.
 - Architecture (observed in AE): a preset creates **no keyframes**. Properties get the expression `getAnimationComposerPresetValue()`, driven by pseudo-effects `MHAC PrCtrl <CODE> <ver>` (`AC IN`, `AC OUT`, `AC FX`) whose parameters are the recipe (offset, angle, bounces, scale; FX = frequency/range/time offset), plus `TR In`/`TR Out` markers.
@@ -64,7 +69,16 @@ Everything we learned building SS Motion and *The 1974 Boardroom* test, written 
 - **Freeze frames:** time-remap hold on the shot (keys in comp time!), 7% punch-in (Land in, Launch out), a 2-frame Cloud flash, a 48% Pine scrim, then a big foreground title (Chars Rise) + Tracking Settle subline + Organic Draw underline. A camera-click SFX on the freeze and a pop on the title sell it.
 - Place audio in each shot's **local time** (`{"shot": i, "local": s}`) so changing a freeze never desyncs VO/SFX.
 - **VO:** ElevenLabs v3 accepts tone tags (`[smooth 1970s TV announcer, dry humor]`, `[chuckles]`, `[short pause]`). Generate one file per line, trim silence (`silenceremove` both ends), loudnorm to −16, and if the edit is tight speed up with `atempo=1.07` (inaudible). Design freezes around the measured line lengths; land the punchline on the freeze title.
+- **Freeze with the subject lit:** the scrim darkens only the background — duplicate the frozen shot above the scrim and track-matte it with the person matte (same time-remap keys, scale linked by expression), so the people stay at full brightness while the title lands.
+- **Copy must sell the product, not just the joke.** First pass was funny but about the characters; second pass ties every punchline to what the library does ("Zero keyframes", "Tracked.", "Rotoscoped.") and the freeze title repeats the exact keyword the VO says. Use kicker "beats" that pop in sync with each VO phrase (`freeze.beats`, timed from silence detection).
+- **Expressive VO:** ElevenLabs v3 at stability ~0.15 with energy tags (`[theatrical 1970s TV commercial announcer, big warm smile in the voice]`, `[beat]`, `[laughs]`) is far less flat than 0.35. Detect phrase starts with `silencedetect=noise=-35dB:d=0.16` to time beats and titles.
+- **Harsh SFX:** measure before using — `Single UI Beep 02` sits at −3.9 dB mean with strong highs and sounds like an alarm; soft blips/plastic pops (`Blip 01_Variant Minus 18`, `Pop Plastic Micro 03`) read as "data" without hurting.
+- **Text needs effects, not just position:** per-character blur + 118% scale in the reveal animator, animated horizontal blur on tracking reveals, motion blur on every graphic layer, and glow + soft drop shadow on big foreground titles.
 - **Ducking:** drop the music ~9 dB under every VO line (0.2 s attack, 0.35 s release); with VO the whole mix lands near −16 LUFS when VO and music sit at −3 dB.
+
+- **Kinetic type on freezes:** one line at a time, big and centered; contrast sizes (small tracked caps lead + huge serif hero) instead of same-size stacked kickers. Lines replace each other (shrink + fade out as the next slams in); beats that fall after the title cycle in the title's lead slot so nothing overlaps. Pivot text around its visual center (`sourceRectAtTime` → anchor) before scaling or tilting. Each entrance gets a short swoosh; the title a soft boom trimmed to ~1.8 s with a fade.
+- **Clean freezes:** darken (~66%) *and* defocus the background (adjustment layer with Box Blur) under the type; cut the people from the clean plate, not from the finished scene, so HUD lines don't run through them under the title. Drop heavy glows on titles: they read as saturated noise behind big type.
+- **Showing the product in the video:** a real screenshot of the app beats mock panels. Capture each state headless (`msedge --headless --screenshot "index.html?kind=…"`), rebuild it as a browser window comp with a cursor clicking each filter (`tools/build_app_screen.jsx`).
 
 ## 5. Design and layout rules
 - Keep kickers and meters in empty corners; on push-ins faces move toward top labels.

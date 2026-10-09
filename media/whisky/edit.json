@@ -5,7 +5,7 @@
   1920,
   1080
  ],
- "music": "media/whisky/music_70s_funk_32s.mp3",
+ "music": "media/whisky/music_70s_funk_46s.mp3",
  "musicGainDb": -3,
  "duckDb": -9,
  "shots": [
@@ -13,88 +13,108 @@
    "comp": "WHISKY_01",
    "in": 0,
    "dur": 5,
+   "matte": "media/whisky/clip01_matte.mov",
    "freeze": {
-    "at": 3.6,
-    "dur": 3.9,
-    "titleAt": 2.45,
-    "title": "Zero emails.",
-    "sub": "2 EXECUTIVES · 1 DECANTER · 0 MEETINGS",
-    "x": 150,
-    "y": 870,
-    "lineW": 820
-   }
+    "at": 4.6,
+    "dur": 7.0,
+    "titleAt": 5.13,
+    "title": "Zero keyframes.",
+    "sub": "SET BY HAND · 100% SS MOTION LIBRARY",
+    "beats": [
+     {
+      "text": "EVERY LINE.",
+      "at": 0.9
+     },
+     {
+      "text": "EVERY LABEL.",
+      "at": 2.33
+     },
+     {
+      "text": "EVERY GLASS.",
+      "at": 3.68
+     }
+    ]
+   },
+   "plate": "media/whisky/clip01.mp4"
   },
   {
    "comp": "WHISKY_02",
    "in": 0,
    "dur": 5,
+   "matte": "media/whisky/clip02_matte.mov",
    "freeze": {
     "at": 1.25,
-    "dur": 3.0,
-    "titleAt": 0.2,
-    "title": "The Chairman.",
-    "sub": "SMIRK INCLUDED · NO EXTRA CHARGE",
-    "x": 150,
-    "y": 860,
-    "lineW": 1000
-   }
+    "dur": 4.75,
+    "titleAt": 1.13,
+    "title": "Tracked.",
+    "sub": "THE CHAIRMAN · 9 POINTS · 0 KEYFRAMES BY HAND",
+    "beats": [
+     {
+      "text": "SCANNED.",
+      "at": 1.75
+     },
+     {
+      "text": "ANNOTATED.",
+      "at": 3.15
+     }
+    ]
+   },
+   "plate": "media/whisky/clip02.mp4"
   },
   {
    "comp": "WHISKY_03",
    "in": 0,
    "dur": 5,
+   "matte": "media/whisky/clip03_matte.mov",
    "freeze": {
     "at": 1.25,
-    "dur": 3.4,
-    "titleAt": 0.25,
-    "title": "The Dealmaker.",
-    "sub": "AVIATORS · INDOORS · AT NIGHT",
-    "x": 150,
-    "y": 860,
-    "lineW": 1080
-   }
+    "dur": 3.6,
+    "titleAt": 1.24,
+    "title": "Rotoscoped.",
+    "sub": "BY ROBOTS · AI MATTE + OPENCV CONTOURS"
+   },
+   "plate": "media/whisky/clip03.mp4"
   },
   {
    "comp": "WHISKY_BREAKDOWN",
    "in": 0,
    "dur": 5
+  },
+  {
+   "comp": "WHISKY_LIBRARY",
+   "in": 0,
+   "dur": 6
   }
  ],
  "vo": [
   {
-   "file": "media/whisky/vo/vo01.wav",
-   "shot": 0,
-   "local": 0.05,
+   "file": "media/whisky/vo/v4_01.wav",
+   "t": 0.1,
    "gainDb": -3
   },
   {
-   "file": "media/whisky/vo/vo02.wav",
-   "shot": 0,
-   "local": 3.55,
+   "file": "media/whisky/vo/v4_02.wav",
+   "t": 5.5,
    "gainDb": -3
   },
   {
-   "file": "media/whisky/vo/vo03.wav",
-   "shot": 1,
-   "local": 1.0,
+   "file": "media/whisky/vo/v4_03.wav",
+   "t": 13.0,
    "gainDb": -3
   },
   {
-   "file": "media/whisky/vo/vo04.wav",
-   "shot": 2,
-   "local": 0.9,
+   "file": "media/whisky/vo/v4_04.wav",
+   "t": 22.65,
    "gainDb": -3
   },
   {
-   "file": "media/whisky/vo/vo05.wav",
-   "shot": 3,
-   "local": 0.2,
+   "file": "media/whisky/vo/v4_05.wav",
+   "t": 30.55,
    "gainDb": -3
   },
   {
-   "file": "media/whisky/vo/vo06.wav",
-   "shot": 4,
-   "local": 2.2,
+   "file": "media/whisky/vo/v4_06.wav",
+   "t": 36.6,
    "gainDb": -3
   }
  ],
@@ -103,25 +123,25 @@
    "name": "Soft Glitchy Hiss 02",
    "shot": 0,
    "local": 0.3,
-   "gainDb": -13
+   "gainDb": -14
   },
   {
    "name": "Data Beep 05",
    "shot": 0,
    "local": 0.4,
-   "gainDb": -11
+   "gainDb": -12
   },
   {
-   "name": "Single UI Beep 02",
+   "name": "Blip 01_Variant Minus 18",
    "shot": 0,
    "local": 1.2,
-   "gainDb": -11
+   "gainDb": -4
   },
   {
-   "name": "Single UI Beep 02",
+   "name": "Blip 01_Variant Minus 18",
    "shot": 0,
    "local": 1.9,
-   "gainDb": -12
+   "gainDb": -5
   },
   {
    "name": "Data Miscellaneous 10",
@@ -133,19 +153,19 @@
    "name": "Soft Glitchy Hiss 02",
    "shot": 1,
    "local": 0.3,
-   "gainDb": -13
+   "gainDb": -14
   },
   {
    "name": "Data Beep 05",
    "shot": 1,
    "local": 0.4,
-   "gainDb": -11
+   "gainDb": -12
   },
   {
-   "name": "Single UI Beep 02",
+   "name": "Blip 01_Variant Minus 18",
    "shot": 1,
    "local": 1.9,
-   "gainDb": -12
+   "gainDb": -5
   },
   {
    "name": "Data Miscellaneous 10",
@@ -157,19 +177,19 @@
    "name": "Soft Glitchy Hiss 02",
    "shot": 2,
    "local": 0.3,
-   "gainDb": -13
+   "gainDb": -14
   },
   {
    "name": "Data Beep 05",
    "shot": 2,
    "local": 0.4,
-   "gainDb": -11
+   "gainDb": -12
   },
   {
-   "name": "Single UI Beep 02",
+   "name": "Blip 01_Variant Minus 18",
    "shot": 2,
    "local": 1.9,
-   "gainDb": -12
+   "gainDb": -5
   },
   {
    "name": "Data Miscellaneous 10",
@@ -178,39 +198,87 @@
    "gainDb": -13
   },
   {
-   "name": "Single UI Beep 02",
+   "name": "Pop Plastic Micro 03",
    "shot": 3,
    "local": 0.15,
    "gainDb": -12
   },
   {
-   "name": "Single UI Beep 02",
+   "name": "Pop Plastic Micro 03",
    "shot": 3,
    "local": 0.6,
    "gainDb": -12
   },
   {
-   "name": "Single UI Beep 02",
+   "name": "Pop Plastic Micro 03",
    "shot": 3,
    "local": 1.05,
    "gainDb": -12
   },
   {
-   "name": "Single UI Beep 02",
+   "name": "Pop Plastic Micro 03",
    "shot": 3,
    "local": 1.5,
    "gainDb": -12
   },
   {
-   "name": "Hollow Pop 06",
+   "name": "Pop Plastic Micro 03",
    "shot": 4,
+   "local": 0.4,
+   "gainDb": -13
+  },
+  {
+   "name": "Pop Plastic Micro 03",
+   "shot": 4,
+   "local": 0.7,
+   "gainDb": -13
+  },
+  {
+   "name": "Pop Plastic Micro 03",
+   "shot": 4,
+   "local": 1.0,
+   "gainDb": -13
+  },
+  {
+   "name": "Pop Plastic Micro 03",
+   "shot": 4,
+   "local": 1.3,
+   "gainDb": -13
+  },
+  {
+   "name": "Pop Plastic Micro 03",
+   "shot": 4,
+   "local": 1.6,
+   "gainDb": -13
+  },
+  {
+   "name": "Pop Plastic Micro 03",
+   "shot": 4,
+   "local": 1.9,
+   "gainDb": -13
+  },
+  {
+   "name": "Pop Plastic Micro 03",
+   "shot": 4,
+   "local": 2.2,
+   "gainDb": -13
+  },
+  {
+   "name": "Pop Plastic Micro 03",
+   "shot": 4,
+   "local": 2.5,
+   "gainDb": -13
+  },
+  {
+   "name": "Hollow Pop 06",
+   "shot": 5,
    "local": 0.2,
-   "gainDb": -9
+   "gainDb": -10
   }
  ],
  "endCard": {
-  "dur": 6.3,
-  "title": "The 1974 Boardroom",
-  "kicker": "SS MOTION LAB · TRACKING · ROTO · HUD TEST"
+  "dur": 4,
+  "title": "SS Motion Library",
+  "kicker": "BY AARON AMORTEGUI & GIAN ORSI · SUPERSIDE AI NATIVE STUDIO"
  }
 }

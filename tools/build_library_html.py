@@ -63,7 +63,7 @@ p.lead{max-width:760px;color:var(--muted);font-size:18px;margin:0}
 .meta{color:var(--muted);font-size:12.5px}
 code{font-family:ui-monospace,Consolas,monospace;font-size:10.5px}
 .call{margin-top:auto;display:flex;gap:8px;align-items:center;background:var(--surface);border-radius:10px;padding:8px 10px}
-.call code{flex:1;overflow-x:auto;white-space:nowrap}
+.call code{flex:1;white-space:normal;word-break:break-word;line-height:1.35}
 .copy{border:0;background:transparent;color:var(--muted);cursor:pointer;font:inherit;font-size:12px}
 .tokens{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
 .tok{background:var(--surface);border-radius:16px;padding:14px}
@@ -102,12 +102,14 @@ footer{margin-top:64px;color:var(--muted);font-size:13px}
 </div>
 <script>
 const DATA = __DATA__;
-const state = { kind: "all", energy: null, q: "" };
+const QS = new URLSearchParams(location.search);
+const POSTER = QS.get("poster") === "1";   // static mid-animation frames (for screenshots / video capture)
+const state = { kind: QS.get("kind") || "all", energy: QS.get("energy"), q: "" };
 const grid = document.getElementById("grid");
 function card(p){
   const el = document.createElement("article");
   el.className = "card";
-  el.innerHTML = `<img loading="lazy" width="240" height="135" src="${p.gif}" alt="Preview of ${p.name}">
+  el.innerHTML = `<img width="240" height="135" decoding="async" src="${POSTER ? p.gif.replace("gifs/", "posters/").replace(".gif", ".png") : p.gif}" alt="Preview of ${p.name}">
   <div class="body">
     <div class="row"><span class="name">${p.name}</span><span class="badge e-${p.energy}">${p.energy}</span></div>
     <div class="meta">${p.channels}</div>
@@ -140,6 +142,8 @@ document.querySelectorAll("[data-energy]").forEach(b => b.onclick = () => {
   render();
 });
 document.querySelector(".search").oninput = e => { state.q = e.target.value; render(); };
+document.querySelectorAll("[data-kind]").forEach(x => x.setAttribute("aria-pressed", x.dataset.kind === state.kind));
+document.querySelectorAll("[data-energy]").forEach(x => x.setAttribute("aria-pressed", x.dataset.energy === state.energy));
 
 // Tokens
 const T = DATA.tokens;

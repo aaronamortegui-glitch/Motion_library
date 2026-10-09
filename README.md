@@ -1,84 +1,147 @@
 # SS Motion Library
 
-Superside's own motion library for After Effects, built so that **an LLM (Claude or any other) can use it locally to drive AE**: apply animations, test them, render, and grow the catalog. Everything it creates is native keyframes and expressions, with no plugins required.
+Superside's own motion library for After Effects. Designers apply it from a panel; **an LLM (Claude Code or any local model) can drive it on its own**: apply animations, test them, render and grow the catalog. Everything it creates is native keyframes and expressions, with no plugins required.
 
-## What it looks like
+![SS Motion Library visualizer](docs/screens/visualizer.png)
 
-240 px thumbnails (the full catalog lives in `library/index.html`).
+*`library/index.html`: every preset with a live thumbnail, its energy level and the one-line call to apply it.*
 
-| Category | Example | Example | Good for |
+## What's inside
+
+<!-- catalog:start -->
+**29 presets** in 4 categories. Every one is also listed in `library/INDEX.txt` (for LLMs) and `library/index.html` (for people).
+
+### Motion (11)
+
+Entrances and exits for any layer. `SSP.apply(layer, name, "in" | "out" | "both")`
+
+|   |   |   |   |
 |---|---|---|---|
-| **Motion** — entrances and exits | ![Scale Pop](library/gifs/motion/scale-pop.gif) `Scale Pop` | ![Line Draw](library/gifs/motion/line-draw.gif) `Line Draw` | Icons, chips, cards, lines |
-| **Effects** — continuous loops | ![Float](library/gifs/fx/float.gif) `Float` | ![Jitter](library/gifs/fx/jitter.gif) `Jitter` | Idle elements, high-energy pieces |
-| **Text** — per character or word | ![Chars Rise](library/gifs/text/chars-rise.gif) `Chars Rise` | ![Tracking Settle](library/gifs/text/tracking-settle.gif) `Tracking Settle` | Headlines, kickers, captions |
-| **Recipes** — behavior harvested from Animation Composer and reproduced with our own code | ![2JV](library/gifs/recipe/calibration-2jv.gif) `2JV` bouncy pop | ![4VW](library/gifs/recipe/calibration-4vw.gif) `4VW` bouncy drop | Growing the catalog from real references |
+| <img src="library/gifs/motion/fade.gif" width="200"><br>**Fade** · `soft`<br><sub>Corporate, UI, supporting text</sub> | <img src="library/gifs/motion/fade-up.gif" width="200"><br>**Fade Up** · `soft`<br><sub>Headlines, paragraphs, lists</sub> | <img src="library/gifs/motion/scale-pop.gif" width="200"><br>**Scale Pop** · `dynamic`<br><sub>Icons, chips, stickers, social</sub> | <img src="library/gifs/motion/blur-in.gif" width="200"><br>**Blur In** · `soft`<br><sub>Photos, backgrounds, premium moments</sub> |
+| <img src="library/gifs/motion/slide-land.gif" width="200"><br>**Slide Land** · `medium`<br><sub>Images and cards entering from off-screen</sub> | <img src="library/gifs/motion/rotate-settle.gif" width="200"><br>**Rotate Settle** · `medium`<br><sub>Logos, badges, pieces with personality</sub> | <img src="library/gifs/motion/squash-warp.gif" width="200"><br>**Squash Warp** · `dynamic`<br><sub>Social, hype, rhythmic transitions</sub> | <img src="library/gifs/motion/wipe-reveal.gif" width="200"><br>**Wipe Reveal** · `medium`<br><sub>Bars, lower thirds, underlines</sub> |
+| <img src="library/gifs/motion/organic-draw.gif" width="200"><br>**Organic Draw** · `medium`<br><sub>Hand-drawn feel: contours, underlines, sketch lines (shape layers only)</sub> | <img src="library/gifs/motion/organic-stroke.gif" width="200"><br>**Organic Stroke** · `dynamic`<br><sub>Traveling brush stroke: the start chases the end (accent lines, HUD links)</sub> | <img src="library/gifs/motion/line-draw.gif" width="200"><br>**Line Draw** · `medium`<br><sub>Lines, stroke icons, tracking HUD (shape layers only)</sub> |   |
 
-Every preset has an **energy** level (`soft`, `medium`, `dynamic`) to match the piece: social/hype → dynamic, corporate/UI → soft.
+### Text (5)
 
-## Showcase: *The 1974 Boardroom*
+Per character or per word, on text layers. `SSP.applyText(layer, name, "in" | "out" | "both")`
 
-A 36 s capability test built end to end by Claude with this repo: three consistent AI shots of two project collaborators (Flora: Nano Banana Pro + Kling 3.0 Pro), OpenCV tracking, AI roto mattes (VEED), organic hand-drawn contours, face-scan slices, giant titles behind the people, a holographic HUD from library presets and the *Essentials* Figma palette, **freeze frames with foreground titles**, a tongue-in-cheek **70s announcer voiceover** (ElevenLabs v3), a soul-funk score (ElevenLabs Music) auto-ducked under the VO, Animation Composer UI sounds and a roto breakdown. Full video: [`docs/examples/whisky_1974_boardroom.mp4`](docs/examples/whisky_1974_boardroom.mp4) · step-by-step: [`docs/case-studies/the-1974-boardroom.md`](docs/case-studies/the-1974-boardroom.md).
-
-| Freeze · "Zero emails." | Freeze · "The Chairman." | Freeze · "The Dealmaker." |
-|---|---|---|
-| ![Zero emails](docs/examples/whisky-freeze-zero-emails.gif) | ![Chairman](docs/examples/whisky-freeze-chairman.gif) | ![Dealmaker](docs/examples/whisky-freeze-dealmaker.gif) |
-
-| Shot 1 · two-shot | Shot 2 · subject 01 | Shot 3 · subject 02 | Roto breakdown |
+|   |   |   |   |
 |---|---|---|---|
-| ![Two-shot](docs/examples/whisky-two-shot.gif) | ![Aaron](docs/examples/whisky-aaron.gif) | ![Gian](docs/examples/whisky-gian.gif) | ![Breakdown](docs/examples/whisky-breakdown.gif) |
-| Title behind the people, organic contours, face scans, liquor tracking, the spirit (fictional price), name cards, deal meter | "Corner Office" behind him, liquor bracket on the rising glass, outfit, build scan, style index | "Expense Account" behind him, the sip, outfit, bar service, charisma | Plate → roto matte → contours → composite |
+| <img src="library/gifs/text/chars-rise.gif" width="200"><br>**Chars Rise** · `medium`<br><sub>Short headlines, names, kickers</sub> | <img src="library/gifs/text/words-fade-up.gif" width="200"><br>**Words Fade Up** · `soft`<br><sub>Phrases, captions, quotes</sub> | <img src="library/gifs/text/blur-words.gif" width="200"><br>**Blur Words** · `soft`<br><sub>Premium moments, calm intros</sub> | <img src="library/gifs/text/tracking-settle.gif" width="200"><br>**Tracking Settle** · `medium`<br><sub>All-caps titles, typographic logos</sub> |
+| <img src="library/gifs/text/chars-pop.gif" width="200"><br>**Chars Pop** · `dynamic`<br><sub>Social, hype, big numbers</sub> |   |   |   |
 
-Everything is data-driven: `media/whisky/scenes.json` (shots + breakdown) and `media/whisky/edit.json` (cut, freezes, VO, music, SFX, end card). Rebuild with `tools/build_scene.jsx`, `tools/build_breakdown.jsx` and `tools/build_edit.jsx` through `tools/bridge.sh`.
+### Effects (4)
 
-More tests on the same pipeline:
+Continuous loops driven by expressions. `SSP.applyFx(layer, name)`
 
-| Text + tracking | Text behind the subject | HUD module |
+|   |   |   |   |
+|---|---|---|---|
+| <img src="library/gifs/fx/float.gif" width="200"><br>**Float** · `soft`<br><sub>Idle icons and cards, living backgrounds</sub> | <img src="library/gifs/fx/wiggle-rotate.gif" width="200"><br>**Wiggle Rotate** · `medium`<br><sub>Stickers, illustrations with personality</sub> | <img src="library/gifs/fx/pulse.gif" width="200"><br>**Pulse** · `medium`<br><sub>CTAs, buttons, attention grabbers</sub> | <img src="library/gifs/fx/jitter.gif" width="200"><br>**Jitter** · `dynamic`<br><sub>Social, glitch, high-energy pieces</sub> |
+
+### Recipes (9)
+
+Behavior measured from reference animations and rebuilt with our own keyframes. `SSP.applyRecipe(layer, id, "both")`
+
+|   |   |   |   |
+|---|---|---|---|
+| <img src="library/gifs/recipe/calibration-w3l.gif" width="200"><br>**W3L** · `dynamic`<br><sub>position & rotation & scale · loop</sub> | <img src="library/gifs/recipe/calibration-4lc.gif" width="200"><br>**4LC** · `dynamic`<br><sub>position & rotation · transition</sub> | <img src="library/gifs/recipe/calibration-d2t.gif" width="200"><br>**D2T** · `dynamic`<br><sub>position · loop</sub> | <img src="library/gifs/recipe/calibration-2jk.gif" width="200"><br>**2JK** · `medium`<br><sub>rotation · loop</sub> |
+| <img src="library/gifs/recipe/calibration-1df-unu.gif" width="200"><br>**1DF+UNU** · `dynamic`<br><sub>scale · loop</sub> | <img src="library/gifs/recipe/calibration-x9r.gif" width="200"><br>**X9R** · `medium`<br><sub>opacity & scale · transition</sub> | <img src="library/gifs/recipe/calibration-pe6.gif" width="200"><br>**PE6** · `medium`<br><sub>position · transition</sub> | <img src="library/gifs/recipe/calibration-4vw.gif" width="200"><br>**4VW** · `dynamic`<br><sub>position & scale · transition</sub> |
+| <img src="library/gifs/recipe/calibration-2jv.gif" width="200"><br>**2JV** · `dynamic`<br><sub>scale · transition</sub> |   |   |   |
+<!-- catalog:end -->
+
+### Pick by energy
+
+Every preset has an **energy** level, so you can choose by the tone of the piece:
+
+| Energy | Use it for | Examples |
 |---|---|---|
-| ![Text tracking](docs/examples/text-tracking.gif) | ![Text behind](docs/examples/text-behind-subject.gif) | ![HUD test](docs/examples/hud-test.gif) |
-| Title on the wallpaper (parallax), label on the face, ON AIR on the mic | Giant title between background and person (Flora/VEED matte) | Scan bracket, callouts, meter and chip on tracked points |
+| `soft` | Corporate, UI, premium, calm | Fade, Blur In, Words Fade Up, Float |
+| `medium` | Most brand work | Slide Land, Organic Draw, Chars Rise, Pulse |
+| `dynamic` | Social, hype, launches | Scale Pop, Squash Warp, Jitter, Chars Pop |
+
+![Filtering the library by energy](docs/screens/visualizer-dynamic.png)
+
+*The visualizer filtered to `dynamic`. Filters can be linked: `index.html?kind=text&energy=soft`.*
+
+## The library in use
+
+Real pieces animated only with library presets and tokens, with no hand-set keyframes:
+
+| A Figma slide, animated | The S-mark intro |
+|---|---|
+| ![Figma slide](docs/examples/use-figma-slide.gif) | ![S-mark intro](docs/examples/use-icon-intro.gif) |
+| The *Essentials* slide rebuilt in AE: title `Arrive` + `Land`, image cards `Stage` + `Land` with a stagger, chips scaling in one by one, the coral chip with `Pop` | Outline draws on (`Sweep` + `Cruise`), fill lands with `Pop`, tagline `Arrive` + `Land`, chained `Launch` exit |
+| **Motion presets side by side** | **Effects running as loops** |
+| ![Presets grid](docs/examples/use-presets-grid.gif) | ![FX loops](docs/examples/use-fx-loops.gif) |
+| Same element, different presets: compare timing and energy at a glance | `Float`, `Wiggle Rotate`, `Pulse`, `Jitter` on the same shape |
+| **Text and tracking on video** | **Holographic HUD on tracked points** |
+| ![Text tracking](docs/examples/text-tracking.gif) | ![HUD](docs/examples/hud-test.gif) |
+| `Chars Rise`, `Tracking Settle` and callouts pinned to points tracked with OpenCV | `SSHUD` brackets, callouts, meter and chip, all animated with library presets |
 
 ## How it works
 
-```
-tokens (timing + curves) ──► ss_motion_lib.jsx (SSM.animate) ──► ss_presets.jsx (SSP.apply / applyFx / applyText / applyRecipe)
-                                                                        │
-            LLM ──► bridge/inbox/*.jsx ──► AE (ss_bridge.jsx) ──► bridge/outbox/*.txt   (apply, test, render)
-                                                                        │
-                                       library/INDEX.txt  ◄── the only file the LLM reads (~1 line per preset)
-```
+![How it works](docs/screens/how-it-works.png)
 
-- **`tokens/superside_motion_tokens.json`**: 6 durations (Tick 4f … Stage 33f), 7 easing curves (Flat, Land, Launch, Settle, Cruise, Pop, Recoil) calibrated against real transitions, and font roles.
-- **`library/INDEX.txt`**: ultra-compact index `kind|name|channels|energy|use`. An LLM reads it whole for very few tokens; the HTML and GIFs are for humans only.
+All timing comes from the Superside motion tokens: **6 durations** and **7 easing curves** (`tokens/superside_motion_tokens.json`). Presets never hard-code a speed: they ask for `Arrive` + `Land`, so the whole library stays consistent and can be retuned in one place.
 
-## For the LLM (Claude Code)
+![Durations and easing curves](docs/screens/tokens.png)
 
-The skill in `.claude/skills/ss-motion-library` explains everything. The essentials:
+## How to use it
 
-```bash
-bash tools/bridge.sh tools/<job>.jsx      # runs a .jsx in AE and returns OK/ERROR with the line number (starts the bridge if needed)
-```
-```js
-#include "ss_presets.jsx"   // keep the job inside tools/ (or use the path to tools/ss_presets.jsx)
-(function () {
-    var L = app.project.activeItem.layer("Title");
-    SSP.applyText(L, "Chars Rise", "both");
-    return "ok";
-})();
-```
+### Designers (in After Effects)
 
-## HUD, scenes and edits
+<img src="docs/screens/ae-panel.png" width="380" align="right" alt="SS Motion panel in After Effects">
 
-- **`tools/ss_hud.jsx`** — holographic overlay components that follow tracked nulls: `SSHUD.bracket` (scan corners + sweeping line + label), `SSHUD.callout` (dot, elbow line that draws on, title + body text), `SSHUD.meter` (counting percentage bar), `SSHUD.chip` (Figma pill), `SSHUD.contour` (organic animated contour lines from a matte) and `SSHUD.faceScan` (sweeping slice + holographic edges of the face). Glow, scanlines and a subtle flicker give the holographic look; motion comes from the library presets.
-- **`tools/matte_contours.py`** — per-frame subject contours from an alpha matte (`--subjects`, `--split-x` for touching people).
-- **`tools/build_breakdown.jsx`** — 2×2 roto breakdown (plate · matte · contours · composite).
-- **`tools/track_points.py`** — OpenCV KLT tracker: `python tools/track_points.py clip.mp4 tracks.json --regions regions.json --debug debug.mp4` (regions = `{"name": [x, y, radius]}`).
-- **`tools/build_scene.jsx`** — builds comps from a JSON spec: plate + tracking nulls + optional people `matte` + items (`behind` text, `contour`, `faceScan`, `bracket`, `callout`, `meter`, `chip`, `title`, `kicker`; optional `t1` to fade an item out before it leaves the frame). Layer order: plate · behind text · matte · grain · contours · face scans · HUD.
-- **`tools/build_edit.jsx`** — sequences scene comps with optional **freeze frames** (time remap hold + punch-in + scrim + foreground title + organic underline + click/pop SFX), places **VO** and SFX in each shot's own time (freezes shift them automatically), **ducks the music under the VO**, and adds a branded end card.
-- **Organic strokes** — `Organic Draw` / `Organic Stroke` presets: uneven keyframe spacing (3–5 seeded segments, varied speeds, micro-holds) so lines accelerate, brake and pause like a hand drawing. `SSM.animateStops` / `SSM.organicStops` are reusable for any property.
+1. Install the brand fonts from `assets/fonts/` (right-click › Install) and restart AE.
+2. **Open the panel:** *File › Scripts › Run Script File…* → `tools/ss_panel.jsx`.
+3. **Browse** `library/index.html` to choose a preset (filter by category and energy).
+4. **Select layers → pick the preset → Apply.** Choose `in`, `out` or `both`, and a stagger for several layers. Tabs: Motion, Text, Effects, Recipes.
+5. **Tweak freely:** the result is plain keyframes and expressions on your layers.
 
-## Growing the library with Animation Composer (without touching the plugin)
+<br clear="right">
 
-Animation Composer has no scripting API and its presets are encrypted: **we never decrypt or modify it**. Instead we automate its UI, the way a person would, and observe the result.
+### LLM agents (Claude Code or any local model)
+
+The skill in `.claude/skills/ss-motion-library` explains everything. The short version:
+
+1. **Read `library/INDEX.txt`**: one line per preset (`kind|name|channels|energy|use`) plus the calls, tokens and tools. The HTML and GIFs are for humans only.
+2. **Write a job** in `tools/`:
+   ```js
+   #include "ss_presets.jsx"
+   (function () {
+       var L = app.project.activeItem.layer("Title");
+       SSP.applyText(L, "Chars Rise", "both");      // SSP.apply · SSP.applyFx · SSP.applyText · SSP.applyRecipe
+       return "ok";
+   })();
+   ```
+3. **Run it in the open AE** and read the answer (`OK`, or `ERROR` with the line number):
+   ```bash
+   bash tools/bridge.sh tools/my_job.jsx
+   ```
+4. **Render and review** through AE's own render queue (`tools/render_comps.jsx` + `tools/wait_files.sh`), then iterate.
+
+Bigger pieces are data, not code: a scene (`tools/build_scene.jsx`) or a full edit (`tools/build_edit.jsx`) is described in JSON and rebuilt in one call. See the showcase at the end.
+
+## Tools
+
+| Tool | What it does |
+|---|---|
+| `tools/ss_motion_lib.jsx` (`SSM`) | Token-driven keyframes: `animate`, `pop`, `recoil`, `animateBezier`, `animateStops`, `organicStops` (hand-drawn rhythm), `font(role)` |
+| `tools/ss_presets.jsx` (`SSP`) | The presets: `apply`, `applyFx`, `applyText`, `applyRecipe` |
+| `tools/ss_panel.jsx` | Designer panel |
+| `tools/bridge.sh` + `tools/ss_bridge.jsx` | Runs `.jsx` jobs in the open AE from the terminal |
+| `tools/ss_hud.jsx` (`SSHUD`) | Holographic overlays on tracked points: bracket, callout, meter, chip, contour, face scan, floating panel |
+| `tools/track_points.py` | OpenCV point tracker → JSON for AE nulls (`--regions regions.json`) |
+| `tools/matte_contours.py` | Per-frame subject contours from an AI matte (`--subjects`, `--split-x`) |
+| `tools/build_scene.jsx` | Scene from JSON: plate, tracking, matte, text behind people, HUD |
+| `tools/build_edit.jsx` | Edit from JSON: cuts, freeze frames with kinetic type, VO, music ducking, SFX, end card |
+| `tools/build_breakdown.jsx` | 2×2 roto breakdown (plate · matte · contours · composite) |
+| `tools/build_app_screen.jsx` | Browser-window recording of the visualizer, rebuilt from screenshots |
+| `tools/render_comps.jsx` | Renders comps through the open AE's render queue |
+
+## Growing the library
+
+New presets come from measuring reference animations, never from copying them. With Animation Composer as the reference:
 
 1. **AE:** *File › Scripts › Run Script File…* → `tools/ss_harvest_station.jsx`. Pick the section and press **Start**.
 2. **Animation Composer panel:** open the same folder.
@@ -86,7 +149,7 @@ Animation Composer has no scripting API and its presets are encrypted: **we neve
    ```bash
    python tools/ac_driver.py run
    ```
-   It double-clicks thumbnail after thumbnail, waits for the station to log each preset (recipe, curves and name), scrolls, and stops on its own. ESC aborts.
+   It double-clicks thumbnail after thumbnail, waits for the station to log each preset (curves, channels and name), scrolls, and stops on its own. ESC aborts.
 4. **Merge into the library** (name OCR → recipes → thumbnails → index):
    ```bash
    bash tools/expand_library.sh
@@ -94,41 +157,20 @@ Animation Composer has no scripting API and its presets are encrypted: **we neve
 
 Recipes store *what moves and how* (relative channels, frames, curve or frequency/amplitude), and `SSP.applyRecipe` reproduces them with our own keyframes. When a measured curve matches a token, the token is used.
 
-> Animation Composer is licensed software by Mister Horse. Harvests (`research/harvest/`) are internal behavioral references; no presets or plugin renders are redistributed.
-
-## For designers
-
-- **Panel:** `tools/ss_panel.jsx` → select layers → pick a preset → Apply (tabs: Motion, Text, Effects, Recipes; energy filter; stagger).
-- **Visualizer:** `library/index.html`.
-
-## Test comps (`ae/motion_lab_v01.aep`, all on an AI-generated video)
-
-| Comp | What it tests |
-|---|---|
-| `01_SS_Icon_Intro` | Superside S-mark: line draw-on, Pop fill, Launch exit |
-| `02_Track_70s` | 6 OpenCV-tracked points, constellation lines, tracked callout, Animation Composer grain/light leak |
-| `03_Figma_Chips` | The *Essentials* Figma slide animated with tokens (staggered chips) |
-| `04_Text_Tracking_70s` | Text presets, fixed and tracked to the scene (title on the wallpaper, label on the face, ON AIR on the mic) |
-| `05_Text_Behind_70s` | Giant title between the background and the person, using a person matte from Flora (VEED) |
-| `HUD_TEST` | The HUD module on the 70s clip (`tools/hud_demo.jsx`) |
-| `WHISKY_01..03`, `WHISKY_BREAKDOWN`, `WHISKY_EDIT` | *The 1974 Boardroom* showcase (folder `WHISKY 1974`) |
-
-## Documentation
-
-- [`docs/LEARNINGS.md`](docs/LEARNINGS.md) — everything we learned: driving AE from an LLM, ExtendScript pitfalls, rendering, Animation Composer architecture, AI footage with Flora, tracking/roto/overlays, layout, audio, repo hygiene and costs.
-- [`docs/case-studies/the-1974-boardroom.md`](docs/case-studies/the-1974-boardroom.md) — the full showcase, step by step, with prompts.
+> Animation Composer is licensed software by Mister Horse. It has no scripting API and its presets are encrypted: **we never decrypt or modify it**, we only automate its UI and observe the result. Harvests (`research/harvest/`) are internal behavioral references; no presets or plugin renders are redistributed.
 
 ## Structure
 
 | Folder | Contents |
 |---|---|
 | `tokens/` | Timing, curves and font roles |
-| `tools/` | JSX library, panel, bridge, harvest station, AC driver, pipelines (`expand_library.sh`, `render_gifs.sh`, `render_queue.jsx`, `render_comps.jsx`) |
-| `library/` | `INDEX.txt` (LLM), `library.json`, `recipes.json`, `index.html`, `gifs/` |
+| `library/` | `INDEX.txt` (LLM), `library.json`, `recipes.json`, `index.html`, `gifs/`, `posters/` |
+| `tools/` | JSX library, panel, bridge, HUD, scene/edit builders, harvest station, AC driver, render pipelines |
 | `assets/` | Superside logos, S-mark shape for AE, palette and components from the *Essentials* Figma, brand fonts |
-| `ae/` | Test project (see above) |
-| `media/` | Base video (Flora, 70s 16mm look), person matte and tracking data |
-| `research/` | Calibration, Animation Composer harvests, preview catalog |
+| `docs/` | `LEARNINGS.md`, case studies, screens and examples |
+| `ae/` | Test project |
+| `media/` | AI test footage, mattes, tracking data, music and VO for the showcases |
+| `research/` | Calibration, harvests, preview catalog |
 
 ## Requirements
 
@@ -137,7 +179,49 @@ The repo can be cloned anywhere: scripts compute the repo root (`SS_ROOT`) from 
 
 ## Notes
 
-- `render_gifs.sh` only uses `aerender` without `SKIP_RENDER`. If the project contains layers with Animation Composer presets, render through `tools/render_queue.jsx` / `tools/render_comps.jsx` (the open AE's render queue), because `aerender` hangs.
-- Brand fonts live in `assets/fonts/` (Inter Tight and Instrument Serif, OFL). Install them in Windows (right-click › Install) before opening AE; scripts pick them with `SSM.font("display" | "ui")` and fall back to Georgia/Arial.
-- Person matte for text-behind-subject: `media/aaron_70s_matte.webm` (Flora · VEED). AE needs the `.mov`: `ffmpeg -c:v libvpx-vp9 -i media/aaron_70s_matte.webm -c:v prores_ks -profile:v 4444 -pix_fmt yuva444p10le media/aaron_70s_matte.mov`.
-- `aaron.png`, `collaborator.png` and the people in `media/` are project collaborators (Aaron Amortegui and Gian Orsi) who agreed to be used as test subjects. Prices, bottlings and roles in the showcase are fictional.
+- If a project contains Animation Composer layers, `aerender` hangs: render through `tools/render_comps.jsx` / `tools/render_queue.jsx` (the open AE's queue). AE shows "Not Responding" while a scripted render runs; that is expected.
+- Brand fonts (Inter Tight and Instrument Serif, OFL) are picked with `SSM.font("display" | "ui" | "ui_regular")`, falling back to Georgia/Arial.
+- Rebuilding a scene comp removes it from every comp that nests it; `build_scene.jsx` rebuilds the breakdown automatically, and `build_edit.jsx` should run after it.
+
+## Documentation
+
+- [`docs/LEARNINGS.md`](docs/LEARNINGS.md) — everything we learned: driving AE from an LLM, ExtendScript pitfalls, rendering, AI footage with Flora, tracking/roto/overlays, typography, audio, repo hygiene and costs.
+- [`docs/case-studies/the-1974-boardroom.md`](docs/case-studies/the-1974-boardroom.md) — the showcase below, step by step, with prompts.
+
+---
+
+## Tests and showcases
+
+### *The 1974 Boardroom* (45 s)
+
+A capability test built end to end by Claude with this repo, to show the team what the library can do: three consistent AI shots of the two project collaborators (Flora: Nano Banana Pro + Kling 3.0 Pro), OpenCV tracking, AI roto mattes (VEED), organic hand-drawn contours, face scans, titles behind the people, a holographic HUD built from library presets, **freeze frames with kinetic type**, a 70s announcer voiceover (ElevenLabs v3), a soul-funk score ducked under the VO, a roto breakdown, and the library app itself. Full video: [`docs/examples/whisky_1974_boardroom.mp4`](docs/examples/whisky_1974_boardroom.mp4).
+
+| "Zero keyframes." | "Tracked." | "Rotoscoped." |
+|---|---|---|
+| ![Zero keyframes](docs/examples/reel-freeze-keyframes.gif) | ![Tracked](docs/examples/reel-freeze-tracked.gif) | ![Rotoscoped](docs/examples/reel-freeze-rotoscoped.gif) |
+
+| The library, in the office | Roto breakdown |
+|---|---|
+| ![Library app](docs/examples/reel-library-app.gif) | ![Breakdown](docs/examples/whisky-breakdown.gif) |
+
+| Shot 1 · two-shot | Shot 2 · subject 01 | Shot 3 · subject 02 |
+|---|---|---|
+| ![Two-shot](docs/examples/whisky-two-shot.gif) | ![Aaron](docs/examples/whisky-aaron.gif) | ![Gian](docs/examples/whisky-gian.gif) |
+
+Everything is data-driven: `media/whisky/scenes.json` (shots, app screen, breakdown) and `media/whisky/edit.json` (cut, freezes, VO, music, SFX, end card):
+
+```bash
+bash tools/bridge.sh tools/build_scene.jsx     # scenes + app screen + breakdown
+bash tools/bridge.sh tools/build_edit.jsx      # the edit
+```
+
+### Earlier tests
+
+| Text behind the subject |
+|---|
+| ![Text behind](docs/examples/text-behind-subject.gif) |
+| Giant title between background and person, using an AI person matte |
+
+Test comps in `ae/motion_lab_v01.aep`: `01_SS_Icon_Intro` (S-mark draw-on), `02_Track_70s` (tracked points and callout), `03_Figma_Chips` (*Essentials* slide with tokens), `04_Text_Tracking_70s`, `05_Text_Behind_70s`, `HUD_TEST`, and the `WHISKY 1974` folder.
+
+People in `media/` and the showcases are project collaborators (Aaron Amortegui and Gian Orsi) who agreed to be used as test subjects. Prices, bottlings and roles are fictional.

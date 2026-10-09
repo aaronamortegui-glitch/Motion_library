@@ -223,6 +223,8 @@ var SSP = (function () {
             "in": function (L, t) {
                 var a = textAnimator(L, "SS Chars Rise", 1, 2);
                 a.props.addProperty("ADBE Text Position 3D").setValue([0, 50, 0]);
+                a.props.addProperty("ADBE Text Scale 3D").setValue([118, 118, 100]);
+                a.props.addProperty("ADBE Text Blur").setValue([14, 14]);
                 a.props.addProperty("ADBE Text Opacity").setValue(0);
                 return SSM.animate(a.start, t, a.from, 100, "Sweep", "Cruise");
             }
@@ -232,6 +234,7 @@ var SSP = (function () {
             "in": function (L, t) {
                 var a = textAnimator(L, "SS Words Fade Up", 3, 2);
                 a.props.addProperty("ADBE Text Position 3D").setValue([0, 24, 0]);
+                a.props.addProperty("ADBE Text Blur").setValue([8, 8]);
                 a.props.addProperty("ADBE Text Opacity").setValue(0);
                 return SSM.animate(a.start, t, a.from, 100, "Stage", "Settle");
             }
@@ -250,12 +253,14 @@ var SSP = (function () {
             "in": function (L, t) {
                 var a = textAnimator(L, "SS Tracking Settle", 1, 1);
                 var tr = a.props.addProperty("ADBE Text Tracking Amount");
+                var bl = a.props.addProperty("ADBE Text Blur");
                 a.props.addProperty("ADBE Text Opacity").setValue(0);
                 a.sel.property("ADBE Text Percent End").setValue(100);
                 a.start.setValue(0);
                 SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Glide", "Flat");
                 // the selector covers everything; animate tracking 60 → 0 and animator opacity 0 → 100
                 SSM.animate(tr, t, 60, 0, "Stage", "Settle");
+                SSM.animate(bl, t, [8, 0], [0, 0], "Sweep", "Settle");   // horizontal motion-blur feel while it settles
                 return SSM.animate(a.props.property("ADBE Text Opacity"), t, 0, 100, "Arrive", "Flat");
             }
         },

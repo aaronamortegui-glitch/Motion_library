@@ -259,6 +259,47 @@ var SSHUD = (function () {
             return [slice, b1, edges, b2];
         },
 
+        // Floating holographic screen that plays a library preview comp in a loop, pinned to a tracked point.
+        // o = { anchor: "TRK window", offset: [dx, dy], comp: "GIF__motion__Scale Pop", w: 300, label: "Scale Pop", t0, color }
+        panel: function (o) {
+            var src = null;
+            for (var i = 1; i <= app.project.numItems; i++) if (app.project.item(i).name === o.comp) src = app.project.item(i);
+            if (!(src instanceof CompItem)) return [];
+            var t0 = o.t0 || 0, w = o.w || 300, h = w * src.height / src.width, color = o.color || "spark";
+            var k = w / src.width * 100;
+            var posExpr = 'var a = thisComp.layer("' + o.anchor + '"), s = a.transform.scale[0]/100; a.toComp(a.transform.anchorPoint) + [' + o.offset[0] + "," + o.offset[1] + "]*s";
+            var sclExpr = 'var s = thisComp.layer("' + o.anchor + '").transform.scale[0]/100; ';
+            var N = C.layers.add(src); N.name = "HUD panel · " + (o.label || o.comp);
+            N.timeRemapEnabled = true;
+            N.property("ADBE Time Remapping").expression = "(time - inPoint) % source.duration";
+            N.inPoint = t0; N.outPoint = C.duration;
+            tr(N, "ADBE Position").expression = posExpr;
+            tr(N, "ADBE Scale").expression = sclExpr + "var v = value; [v[0]*s, v[1]*s]";
+            tr(N, "ADBE Scale").setValue([k, k, 100]);
+            var F = C.layers.addShape(); F.name = "HUD panel frame · " + (o.label || o.comp);
+            var g = F.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
+            var r = g.addProperty("ADBE Vector Shape - Rect"); r.property("ADBE Vector Rect Size").setValue([w + 14, h + 14]); r.property("ADBE Vector Rect Roundness").setValue(10);
+            var st = g.addProperty("ADBE Vector Graphic - Stroke");
+            st.property("ADBE Vector Stroke Color").setValue(col(color)); st.property("ADBE Vector Stroke Width").setValue(2.5);
+            tr(F, "ADBE Position").expression = posExpr;
+            tr(F, "ADBE Scale").expression = sclExpr + "[100*s, 100*s]";
+            F.inPoint = t0;
+            SSP.apply(F, "Scale Pop", "in", t0);
+            SSP.apply(N, "Fade", "in", t0 + SSM.seconds("Tick"));
+            var layers = [N, F];
+            if (o.label) {
+                var T = text("HUD panel label · " + o.label, o.label.toUpperCase(), "ui", 18, color, 160, ParagraphJustification.CENTER_JUSTIFY);
+                tr(T, "ADBE Position").expression = posExpr + " + [0, " + (h / 2 + 34) + "]*s";
+                tr(T, "ADBE Scale").expression = sclExpr + "[100*s, 100*s]";
+                T.inPoint = t0;
+                SSP.applyText(T, "Tracking Settle", "in", t0 + SSM.seconds("Glide"));
+                layers.push(T);
+            }
+            holo(F, 1);   // glow only on the frame: glowing the preview itself washes out its Pine background
+            if (layers[2]) holo(layers[2], 0.5);
+            return layers;
+        },
+
         holo: holo
     };
 })();
