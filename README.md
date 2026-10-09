@@ -8,10 +8,12 @@ Superside's own motion library for After Effects. Designers apply it from a pane
 
 ## What's inside
 
-<!-- catalog:start -->
-**29 presets** in 4 categories. Every one is also listed in `library/INDEX.txt` (for LLMs) and `library/index.html` (for people).
+> **Latest additions:** `Slam In`, `Punch Zoom`, `Words Slam`, `Breathe` and `Holo Flicker`, promoted to presets from what we built for *The 1974 Boardroom* reel (see the end of this page). Every piece we make should leave something new in the library.
 
-### Motion (11)
+<!-- catalog:start -->
+**34 presets** in 4 categories. Every one is also listed in `library/INDEX.txt` (for LLMs) and `library/index.html` (for people).
+
+### Motion (13)
 
 Entrances and exits for any layer. `SSP.apply(layer, name, "in" | "out" | "both")`
 
@@ -19,24 +21,26 @@ Entrances and exits for any layer. `SSP.apply(layer, name, "in" | "out" | "both"
 |---|---|---|---|
 | <img src="library/gifs/motion/fade.gif" width="200"><br>**Fade** · `soft`<br><sub>Corporate, UI, supporting text</sub> | <img src="library/gifs/motion/fade-up.gif" width="200"><br>**Fade Up** · `soft`<br><sub>Headlines, paragraphs, lists</sub> | <img src="library/gifs/motion/scale-pop.gif" width="200"><br>**Scale Pop** · `dynamic`<br><sub>Icons, chips, stickers, social</sub> | <img src="library/gifs/motion/blur-in.gif" width="200"><br>**Blur In** · `soft`<br><sub>Photos, backgrounds, premium moments</sub> |
 | <img src="library/gifs/motion/slide-land.gif" width="200"><br>**Slide Land** · `medium`<br><sub>Images and cards entering from off-screen</sub> | <img src="library/gifs/motion/rotate-settle.gif" width="200"><br>**Rotate Settle** · `medium`<br><sub>Logos, badges, pieces with personality</sub> | <img src="library/gifs/motion/squash-warp.gif" width="200"><br>**Squash Warp** · `dynamic`<br><sub>Social, hype, rhythmic transitions</sub> | <img src="library/gifs/motion/wipe-reveal.gif" width="200"><br>**Wipe Reveal** · `medium`<br><sub>Bars, lower thirds, underlines</sub> |
-| <img src="library/gifs/motion/organic-draw.gif" width="200"><br>**Organic Draw** · `medium`<br><sub>Hand-drawn feel: contours, underlines, sketch lines (shape layers only)</sub> | <img src="library/gifs/motion/organic-stroke.gif" width="200"><br>**Organic Stroke** · `dynamic`<br><sub>Traveling brush stroke: the start chases the end (accent lines, HUD links)</sub> | <img src="library/gifs/motion/line-draw.gif" width="200"><br>**Line Draw** · `medium`<br><sub>Lines, stroke icons, tracking HUD (shape layers only)</sub> |   |
+| <img src="library/gifs/motion/organic-draw.gif" width="200"><br>**Organic Draw** · `medium`<br><sub>Hand-drawn feel: contours, underlines, sketch lines (shape layers only)</sub> | <img src="library/gifs/motion/organic-stroke.gif" width="200"><br>**Organic Stroke** · `dynamic`<br><sub>Traveling brush stroke: the start chases the end (accent lines, HUD links)</sub> | <img src="library/gifs/motion/line-draw.gif" width="200"><br>**Line Draw** · `medium`<br><sub>Lines, stroke icons, tracking HUD (shape layers only)</sub> | <img src="library/gifs/motion/slam-in.gif" width="200"><br>**Slam In** · `dynamic`<br><sub>Hero words, titles over footage, kinetic type</sub> |
+| <img src="library/gifs/motion/punch-zoom.gif" width="200"><br>**Punch Zoom** · `medium`<br><sub>Footage, precomps, freeze frames, cut emphasis</sub> |   |   |   |
 
-### Text (5)
+### Text (6)
 
 Per character or per word, on text layers. `SSP.applyText(layer, name, "in" | "out" | "both")`
 
 |   |   |   |   |
 |---|---|---|---|
 | <img src="library/gifs/text/chars-rise.gif" width="200"><br>**Chars Rise** · `medium`<br><sub>Short headlines, names, kickers</sub> | <img src="library/gifs/text/words-fade-up.gif" width="200"><br>**Words Fade Up** · `soft`<br><sub>Phrases, captions, quotes</sub> | <img src="library/gifs/text/blur-words.gif" width="200"><br>**Blur Words** · `soft`<br><sub>Premium moments, calm intros</sub> | <img src="library/gifs/text/tracking-settle.gif" width="200"><br>**Tracking Settle** · `medium`<br><sub>All-caps titles, typographic logos</sub> |
-| <img src="library/gifs/text/chars-pop.gif" width="200"><br>**Chars Pop** · `dynamic`<br><sub>Social, hype, big numbers</sub> |   |   |   |
+| <img src="library/gifs/text/chars-pop.gif" width="200"><br>**Chars Pop** · `dynamic`<br><sub>Social, hype, big numbers</sub> | <img src="library/gifs/text/words-slam.gif" width="200"><br>**Words Slam** · `dynamic`<br><sub>Punchy statements, social hooks, VO beats</sub> |   |   |
 
-### Effects (4)
+### Effects (6)
 
 Continuous loops driven by expressions. `SSP.applyFx(layer, name)`
 
 |   |   |   |   |
 |---|---|---|---|
 | <img src="library/gifs/fx/float.gif" width="200"><br>**Float** · `soft`<br><sub>Idle icons and cards, living backgrounds</sub> | <img src="library/gifs/fx/wiggle-rotate.gif" width="200"><br>**Wiggle Rotate** · `medium`<br><sub>Stickers, illustrations with personality</sub> | <img src="library/gifs/fx/pulse.gif" width="200"><br>**Pulse** · `medium`<br><sub>CTAs, buttons, attention grabbers</sub> | <img src="library/gifs/fx/jitter.gif" width="200"><br>**Jitter** · `dynamic`<br><sub>Social, glitch, high-energy pieces</sub> |
+| <img src="library/gifs/fx/breathe.gif" width="200"><br>**Breathe** · `soft`<br><sub>Ambient glows, background shapes, calm idle states</sub> | <img src="library/gifs/fx/holo-flicker.gif" width="200"><br>**Holo Flicker** · `medium`<br><sub>HUD labels, tech overlays, holographic UI</sub> |   |   |
 
 ### Recipes (9)
 
@@ -55,9 +59,9 @@ Every preset has an **energy** level, so you can choose by the tone of the piece
 
 | Energy | Use it for | Examples |
 |---|---|---|
-| `soft` | Corporate, UI, premium, calm | Fade, Blur In, Words Fade Up, Float |
-| `medium` | Most brand work | Slide Land, Organic Draw, Chars Rise, Pulse |
-| `dynamic` | Social, hype, launches | Scale Pop, Squash Warp, Jitter, Chars Pop |
+| `soft` | Corporate, UI, premium, calm | Fade, Blur In, Words Fade Up, Float, Breathe |
+| `medium` | Most brand work | Slide Land, Organic Draw, Punch Zoom, Chars Rise, Pulse, Holo Flicker |
+| `dynamic` | Social, hype, launches | Scale Pop, Slam In, Squash Warp, Words Slam, Chars Pop, Jitter |
 
 ![Filtering the library by energy](docs/screens/visualizer-dynamic.png)
 

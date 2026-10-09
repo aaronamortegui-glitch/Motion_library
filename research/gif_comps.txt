@@ -9,15 +9,20 @@ GIF__motion__Wipe Reveal
 GIF__motion__Organic Draw
 GIF__motion__Organic Stroke
 GIF__motion__Line Draw
+GIF__motion__Slam In
+GIF__motion__Punch Zoom
 GIF__fx__Float
 GIF__fx__Wiggle Rotate
 GIF__fx__Pulse
 GIF__fx__Jitter
+GIF__fx__Breathe
+GIF__fx__Holo Flicker
 GIF__text__Chars Rise
 GIF__text__Words Fade Up
 GIF__text__Blur Words
 GIF__text__Tracking Settle
 GIF__text__Chars Pop
+GIF__text__Words Slam
 GIF__recipe__calibration__W3L
 GIF__recipe__calibration__4LC
 GIF__recipe__calibration__D2T

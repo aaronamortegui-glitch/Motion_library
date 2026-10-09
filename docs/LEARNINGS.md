@@ -36,6 +36,7 @@ Everything we learned building SS Motion and *The 1974 Boardroom* test, written 
 - Rebuilding a comp (remove + recreate) silently deletes its layers from every comp that nested it (e.g. the breakdown grid lost its composite cell). Rebuild dependents in the same run: `build_scene.jsx` now rebuilds the breakdown.
 - Quick QA without a full render: `comp.saveFrameToPng(time, file)` from a bridge job writes stills in seconds (asynchronously: wait for the files).
 - Screenshots of ScriptUI windows: open the palette from a job with `#targetengine` (otherwise it closes when the job ends), then `PrintWindow` from a **DPI-aware** process (`SetProcessDPIAware`), or the capture is cropped on scaled displays.
+- If AE closes or crashes, the bridge marker (`bridge/outbox/_bridge_started.txt`) goes stale and jobs wait forever. Launching a closed AE with `AfterFX.exe -s "..."` runs the script and then quits; open AE normally with the project first, then attach the bridge. `tools/bridge.sh` now does this on its own (`SS_AE_PROJECT` overrides the project).
 - AE shows "Not Responding" during a scripted render queue run; check that the output file keeps growing before assuming a hang.
 
 ## 2. Animation Composer as a behavioral reference

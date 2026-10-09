@@ -9,6 +9,16 @@ AFX="/c/Program Files/Adobe/Adobe After Effects 2026/Support Files/AfterFX.exe"
 win() { cygpath -m "$1" 2>/dev/null || echo "$1"; }
 mkdir -p "$ROOT/bridge/inbox" "$ROOT/bridge/outbox"
 
+ae_running() { tasklist //FI "IMAGENAME eq AfterFX.exe" 2>/dev/null | grep -qi afterfx; }
+# AE closed (or crashed): the old marker is stale. Open AE normally first — launching it with -s runs the
+# script and then quits — and only then attach the bridge.
+if ! ae_running; then
+  rm -f "$ROOT/bridge/outbox/_bridge_started.txt"
+  PROJ="${SS_AE_PROJECT:-$ROOT/ae/motion_lab_v01.aep}"
+  "$AFX" "$(cygpath -w "$PROJ" 2>/dev/null || echo "$PROJ")" >/dev/null 2>&1 &
+  for ((w = 0; w < 120; w++)); do ae_running && break; sleep 2; done
+  sleep 20   # let AE finish loading the project
+fi
 if [ ! -f "$ROOT/bridge/outbox/_bridge_started.txt" ]; then
   "$AFX" -s "\$.evalFile(new File('$(win "$ROOT/tools/ss_bridge.jsx")'))" >/dev/null 2>&1 || true
 fi

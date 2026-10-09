@@ -155,6 +155,27 @@ var SSP = (function () {
             channels: "Trim Path", energy: "medium", use: "Lines, stroke icons, tracking HUD (shape layers only)",
             "in": function (L, t) { var p = trimEnd(L); return p ? SSM.animate(p, t, 0, 100, "Sweep", "Cruise") : t; },
             "out": function (L, t) { var p = trimEnd(L); return p ? SSM.animate(p, t, 100, 0, "Arrive", "Launch") : t; }
+        },
+        // From the Boardroom freeze titles: lands big, blurred and tilted, overshoots and settles; shrinks away.
+        "Slam In": {
+            channels: "Fade, Scale, Blur & Rotate", energy: "dynamic", use: "Hero words, titles over footage, kinetic type",
+            "in": function (L, t) {
+                SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Tick", "Flat");
+                SSM.animate(blur(L), t, 40, 0, "Glide", "Land");
+                SSM.animate(T(L, "ADBE Rotate Z"), t, rot(L) - 7.5, rot(L), "Arrive", "Settle");
+                return SSM.animate(T(L, "ADBE Scale"), t, mul(scl(L), 1.65), scl(L), "Arrive", "Pop");
+            },
+            "out": function (L, t) {
+                SSM.animate(T(L, "ADBE Opacity"), t, opa(L), 0, "Blink", "Flat");
+                SSM.animate(blur(L), t, 0, 20, "Blink", "Launch");
+                return SSM.animate(T(L, "ADBE Scale"), t, scl(L), mul(scl(L), 0.86), "Blink", "Launch");
+            }
+        },
+        // Camera-style punch on footage or precomps: starts pushed in and eases back to frame (out: pushes in).
+        "Punch Zoom": {
+            channels: "Scale (camera)", energy: "medium", use: "Footage, precomps, freeze frames, cut emphasis",
+            "in": function (L, t) { return SSM.animate(T(L, "ADBE Scale"), t, mul(scl(L), 1.08), scl(L), "Glide", "Land"); },
+            "out": function (L, t) { return SSM.animate(T(L, "ADBE Scale"), t, scl(L), mul(scl(L), 1.08), "Glide", "Launch"); }
         }
     };
 
@@ -195,6 +216,26 @@ var SSP = (function () {
                 var a = slider(L, "SS Jitter · Amplitude px", 8), f = slider(L, "SS Jitter · Frames per jump", 2);
                 T(L, "ADBE Position").expression = "var n=" + f + "; var t=Math.floor(timeToFrames(time)/n)*n; seedRandom(t,true); value + random([-1,-1],[1,1])*" + a + ";";
                 T(L, "ADBE Rotate Z").expression = "var n=" + f + "; var t=Math.floor(timeToFrames(time)/n)*n; seedRandom(t+7,true); value + random(-2,2);";
+            }
+        },
+        "Breathe": {
+            channels: "Scale & Opacity", energy: "soft", use: "Ambient glows, background shapes, calm idle states",
+            build: function (L) {
+                var a = slider(L, "SS Breathe · Scale %", 3), f = slider(L, "SS Breathe · Frequency Hz", 0.35);
+                T(L, "ADBE Scale").expression = "var k = 1 + (Math.sin(time*" + f + "*Math.PI*2)*0.5+0.5)*" + a + "/100; [value[0]*k, value[1]*k];";
+                T(L, "ADBE Opacity").expression = "value * (0.85 + 0.15*(Math.sin(time*" + f + "*Math.PI*2)*0.5+0.5));";
+            }
+        },
+        // From the Boardroom HUD: soft glow, scanlines and an occasional flicker frame.
+        "Holo Flicker": {
+            channels: "Opacity · Glow & Scanlines", energy: "medium", use: "HUD labels, tech overlays, holographic UI",
+            build: function (L) {
+                var r = slider(L, "SS Holo · Flicker chance %", 4);
+                var g = effect(L, "ADBE Glo2", "SS Holo Glow");
+                g.property("ADBE Glo2-0002").setValue(70); g.property("ADBE Glo2-0003").setValue(22); g.property("ADBE Glo2-0004").setValue(0.25);   // low intensity: additive glow turns light colors white
+                var v = effect(L, "ADBE Venetian Blinds", "SS Holo Scanlines");
+                v.property("ADBE Venetian Blinds-0001").setValue(18); v.property("ADBE Venetian Blinds-0002").setValue(90); v.property("ADBE Venetian Blinds-0003").setValue(4);
+                T(L, "ADBE Opacity").expression = "seedRandom(Math.floor(time*24), true); value * (random() < " + r + "/100 ? 0.55 : 1);";
             }
         }
     };
@@ -271,6 +312,18 @@ var SSP = (function () {
                 a.props.addProperty("ADBE Text Scale 3D").setValue([0, 0, 100]);
                 a.props.addProperty("ADBE Text Opacity").setValue(0);
                 return SSM.animate(a.start, t, a.from, 100, "Sweep", "Land");
+            }
+        },
+        // Kinetic type: each word lands big, blurred and slightly tilted, one after another.
+        "Words Slam": {
+            channels: "Text · Scale, Blur & Rotate (word)", energy: "dynamic", use: "Punchy statements, social hooks, VO beats",
+            "in": function (L, t) {
+                var a = textAnimator(L, "SS Words Slam", 3, 2);
+                a.props.addProperty("ADBE Text Scale 3D").setValue([170, 170, 100]);
+                a.props.addProperty("ADBE Text Blur").setValue([30, 30]);
+                a.props.addProperty("ADBE Text Rotation").setValue(-8);
+                a.props.addProperty("ADBE Text Opacity").setValue(0);
+                return SSM.animate(a.start, t, a.from, 100, "Stage", "Land");
             }
         }
     };
