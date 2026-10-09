@@ -8,12 +8,12 @@ Superside's own motion library for After Effects. Designers apply it from a pane
 
 ## What's inside
 
-> **Latest additions (15):** from *The 1974 Boardroom* reel: `Slam In`, `Punch Zoom`, `Words Slam`, `Breathe`, `Holo Flicker`. New motion: `Flip In`, `Spin Pop`, `Drop Bounce`, `Stretch Slide`. New text: `Typewriter`, `Scramble`, `Count Up`. New effects: `Swing`, `Orbit`, `Shake`. Every piece we make should leave something new in the library.
+> **Latest additions (22):** speed-ramp curves (`Ramp`, `Surge`, `Whip`) and the presets that use them: `Ramp Slide`, `Ramp Zoom`, `Ramp Spin`, `Whip Pan`, `Surge Rise`, `Chars Ramp`, and a real `Speed Ramp` for footage (time remap: slow → fast → slow). From *The 1974 Boardroom* reel: `Slam In`, `Punch Zoom`, `Words Slam`, `Breathe`, `Holo Flicker`. Also `Flip In`, `Spin Pop`, `Drop Bounce`, `Stretch Slide`, `Typewriter`, `Scramble`, `Count Up`, `Swing`, `Orbit`, `Shake`. Every piece we make should leave something new in the library.
 
 <!-- catalog:start -->
-**44 presets** in 4 categories. Every one is also listed in `library/INDEX.txt` (for LLMs) and `library/index.html` (for people).
+**51 presets** in 4 categories. Every one is also listed in `library/INDEX.txt` (for LLMs) and `library/index.html` (for people).
 
-### Motion (17)
+### Motion (23)
 
 Entrances and exits for any layer. `SSP.apply(layer, name, "in" | "out" | "both")`
 
@@ -23,9 +23,10 @@ Entrances and exits for any layer. `SSP.apply(layer, name, "in" | "out" | "both"
 | <img src="library/gifs/motion/slide-land.gif" width="200"><br>**Slide Land** · `medium`<br><sub>Images and cards entering from off-screen</sub> | <img src="library/gifs/motion/rotate-settle.gif" width="200"><br>**Rotate Settle** · `medium`<br><sub>Logos, badges, pieces with personality</sub> | <img src="library/gifs/motion/squash-warp.gif" width="200"><br>**Squash Warp** · `dynamic`<br><sub>Social, hype, rhythmic transitions</sub> | <img src="library/gifs/motion/wipe-reveal.gif" width="200"><br>**Wipe Reveal** · `medium`<br><sub>Bars, lower thirds, underlines</sub> |
 | <img src="library/gifs/motion/organic-draw.gif" width="200"><br>**Organic Draw** · `medium`<br><sub>Hand-drawn feel: contours, underlines, sketch lines (shape layers only)</sub> | <img src="library/gifs/motion/organic-stroke.gif" width="200"><br>**Organic Stroke** · `dynamic`<br><sub>Traveling brush stroke: the start chases the end (accent lines, HUD links)</sub> | <img src="library/gifs/motion/line-draw.gif" width="200"><br>**Line Draw** · `medium`<br><sub>Lines, stroke icons, tracking HUD (shape layers only)</sub> | <img src="library/gifs/motion/slam-in.gif" width="200"><br>**Slam In** · `dynamic`<br><sub>Hero words, titles over footage, kinetic type</sub> |
 | <img src="library/gifs/motion/flip-in.gif" width="200"><br>**Flip In** · `medium`<br><sub>Cards, tiles, reveals, before/after</sub> | <img src="library/gifs/motion/spin-pop.gif" width="200"><br>**Spin Pop** · `dynamic`<br><sub>Badges, stickers, stamps, icons</sub> | <img src="library/gifs/motion/drop-bounce.gif" width="200"><br>**Drop Bounce** · `dynamic`<br><sub>Icons, products, emoji, playful drops</sub> | <img src="library/gifs/motion/stretch-slide.gif" width="200"><br>**Stretch Slide** · `dynamic`<br><sub>Cards, chips, pills, fast UI moves</sub> |
-| <img src="library/gifs/motion/punch-zoom.gif" width="200"><br>**Punch Zoom** · `medium`<br><sub>Footage, precomps, freeze frames, cut emphasis</sub> |   |   |   |
+| <img src="library/gifs/motion/ramp-slide.gif" width="200"><br>**Ramp Slide** · `dynamic`<br><sub>Transitions, product slides, bold entrances</sub> | <img src="library/gifs/motion/ramp-zoom.gif" width="200"><br>**Ramp Zoom** · `dynamic`<br><sub>Logo reveals, hero products, end cards</sub> | <img src="library/gifs/motion/ramp-spin.gif" width="200"><br>**Ramp Spin** · `dynamic`<br><sub>Icons, badges, logo spins</sub> | <img src="library/gifs/motion/whip-pan.gif" width="200"><br>**Whip Pan** · `dynamic`<br><sub>Swipe transitions, camera-style moves, carousels</sub> |
+| <img src="library/gifs/motion/surge-rise.gif" width="200"><br>**Surge Rise** · `medium`<br><sub>Headlines, cards, elegant entrances</sub> | <img src="library/gifs/motion/speed-ramp.gif" width="200"><br>**Speed Ramp** · `dynamic`<br><sub>Footage, product shots, action beats, transitions</sub> | <img src="library/gifs/motion/punch-zoom.gif" width="200"><br>**Punch Zoom** · `medium`<br><sub>Footage, precomps, freeze frames, cut emphasis</sub> |   |
 
-### Text (9)
+### Text (10)
 
 Per character or per word, on text layers. `SSP.applyText(layer, name, "in" | "out" | "both")`
 
@@ -33,7 +34,7 @@ Per character or per word, on text layers. `SSP.applyText(layer, name, "in" | "o
 |---|---|---|---|
 | <img src="library/gifs/text/chars-rise.gif" width="200"><br>**Chars Rise** · `medium`<br><sub>Short headlines, names, kickers</sub> | <img src="library/gifs/text/words-fade-up.gif" width="200"><br>**Words Fade Up** · `soft`<br><sub>Phrases, captions, quotes</sub> | <img src="library/gifs/text/blur-words.gif" width="200"><br>**Blur Words** · `soft`<br><sub>Premium moments, calm intros</sub> | <img src="library/gifs/text/tracking-settle.gif" width="200"><br>**Tracking Settle** · `medium`<br><sub>All-caps titles, typographic logos</sub> |
 | <img src="library/gifs/text/chars-pop.gif" width="200"><br>**Chars Pop** · `dynamic`<br><sub>Social, hype, big numbers</sub> | <img src="library/gifs/text/typewriter.gif" width="200"><br>**Typewriter** · `medium`<br><sub>Captions, terminals, UI, quotes</sub> | <img src="library/gifs/text/scramble.gif" width="200"><br>**Scramble** · `dynamic`<br><sub>Tech, data, HUD labels, reveals</sub> | <img src="library/gifs/text/count-up.gif" width="200"><br>**Count Up** · `medium`<br><sub>Stats, KPIs, prices, counters</sub> |
-| <img src="library/gifs/text/words-slam.gif" width="200"><br>**Words Slam** · `dynamic`<br><sub>Punchy statements, social hooks, VO beats</sub> |   |   |   |
+| <img src="library/gifs/text/chars-ramp.gif" width="200"><br>**Chars Ramp** · `medium`<br><sub>Titles that build tension, trailers, reveals</sub> | <img src="library/gifs/text/words-slam.gif" width="200"><br>**Words Slam** · `dynamic`<br><sub>Punchy statements, social hooks, VO beats</sub> |   |   |
 
 ### Effects (9)
 
@@ -63,8 +64,8 @@ Every preset has an **energy** level, so you can choose by the tone of the piece
 | Energy | Use it for | Examples |
 |---|---|---|
 | `soft` | Corporate, UI, premium, calm | Fade, Blur In, Words Fade Up, Float, Breathe, Swing, Orbit |
-| `medium` | Most brand work | Slide Land, Flip In, Organic Draw, Punch Zoom, Chars Rise, Typewriter, Count Up, Pulse, Holo Flicker |
-| `dynamic` | Social, hype, launches | Scale Pop, Slam In, Spin Pop, Drop Bounce, Stretch Slide, Words Slam, Scramble, Chars Pop, Jitter, Shake |
+| `medium` | Most brand work | Surge Rise, Chars Ramp, Slide Land, Flip In, Organic Draw, Punch Zoom, Chars Rise, Typewriter, Count Up, Pulse, Holo Flicker |
+| `dynamic` | Social, hype, launches | Ramp Slide, Ramp Zoom, Whip Pan, Speed Ramp, Scale Pop, Slam In, Spin Pop, Drop Bounce, Stretch Slide, Words Slam, Scramble, Chars Pop, Jitter, Shake |
 
 ![Filtering the library by energy](docs/screens/visualizer-dynamic.png)
 
@@ -89,7 +90,7 @@ Real pieces animated only with library presets and tokens, with no hand-set keyf
 
 ![How it works](docs/screens/how-it-works.png)
 
-All timing comes from the Superside motion tokens: **6 durations** and **7 easing curves** (`tokens/superside_motion_tokens.json`). Presets never hard-code a speed: they ask for `Arrive` + `Land`, so the whole library stays consistent and can be retuned in one place.
+All timing comes from the Superside motion tokens: **6 durations** and **10 easing curves**, including three speed-ramp curves (`Ramp`, `Surge`, `Whip`: slow → burst of speed → slow) (`tokens/superside_motion_tokens.json`). Presets never hard-code a speed: they ask for `Arrive` + `Land`, so the whole library stays consistent and can be retuned in one place.
 
 ![Durations and easing curves](docs/screens/tokens.png)
 
@@ -99,10 +100,14 @@ All timing comes from the Superside motion tokens: **6 durations** and **7 easin
 
 <img src="docs/screens/ae-panel.png" width="380" align="right" alt="SS Motion panel in After Effects">
 
-1. Install the brand fonts from `assets/fonts/` (right-click › Install) and restart AE.
-2. **Open the panel:** *File › Scripts › Run Script File…* → `tools/ss_panel.jsx`.
-3. **Browse** `library/index.html` to choose a preset (filter by category and energy).
-4. **Select layers → pick the preset → Apply.** Choose `in`, `out` or `both`, and a stagger for several layers. Tabs: Motion, Text, Effects, Recipes.
+1. Install the brand fonts from `assets/fonts/` (right-click › Install).
+2. **Install the panel once** (adds it to AE's *Window* menu, dockable, for every AE version on the machine):
+   ```bash
+   powershell -ExecutionPolicy Bypass -File tools/install_panel.ps1
+   ```
+   Restart AE, open *Window › SS Motion.jsx* and dock it. The panel reads the library straight from this repo clone, so after a `git pull` it already shows the new presets. In *Edit › Preferences › Scripting & Expressions*, enable *Allow Scripts to Write Files and Access Network*.
+3. **Pick a preset:** tabs Motion, Text, Effects, Recipes and Assets; search, energy filter and a preview of each preset. *Visualizer* opens `library/index.html`.
+4. **Select layers → Apply** (or double-click the preset). Choose `In`, `Out` or `In + Out`, and a stagger in frames for several layers. The **Assets** tab drops local sound effects and overlays at the playhead.
 5. **Tweak freely:** the result is plain keyframes and expressions on your layers.
 
 <br clear="right">
@@ -135,7 +140,7 @@ Bigger pieces are data, not code: a scene (`tools/build_scene.jsx`) or a full ed
 |---|---|
 | `tools/ss_motion_lib.jsx` (`SSM`) | Token-driven keyframes: `animate`, `pop`, `recoil`, `animateBezier`, `animateStops`, `organicStops` (hand-drawn rhythm), `font(role)` |
 | `tools/ss_presets.jsx` (`SSP`) | The presets: `apply`, `applyFx`, `applyText`, `applyRecipe` |
-| `tools/ss_panel.jsx` | Designer panel |
+| `tools/ss_panel.jsx` + `tools/install_panel.ps1` | Designer panel (Window menu, dockable) with previews and an Assets tab; `tools/make_panel_thumbs.sh` makes its preview stills |
 | `tools/bridge.sh` + `tools/ss_bridge.jsx` | Runs `.jsx` jobs in the open AE from the terminal |
 | `tools/ss_hud.jsx` (`SSHUD`) | Holographic overlays on tracked points: bracket, callout, meter, chip, contour, face scan, floating panel |
 | `tools/track_points.py` | OpenCV point tracker → JSON for AE nulls (`--regions regions.json`) |

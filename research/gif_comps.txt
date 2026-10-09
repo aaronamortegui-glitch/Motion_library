@@ -14,6 +14,12 @@ GIF__motion__Flip In
 GIF__motion__Spin Pop
 GIF__motion__Drop Bounce
 GIF__motion__Stretch Slide
+GIF__motion__Ramp Slide
+GIF__motion__Ramp Zoom
+GIF__motion__Ramp Spin
+GIF__motion__Whip Pan
+GIF__motion__Surge Rise
+GIF__motion__Speed Ramp
 GIF__motion__Punch Zoom
 GIF__fx__Float
 GIF__fx__Wiggle Rotate
@@ -32,6 +38,7 @@ GIF__text__Chars Pop
 GIF__text__Typewriter
 GIF__text__Scramble
 GIF__text__Count Up
+GIF__text__Chars Ramp
 GIF__text__Words Slam
 GIF__recipe__calibration__W3L
 GIF__recipe__calibration__4LC

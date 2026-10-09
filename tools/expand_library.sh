@@ -14,5 +14,5 @@ echo "2/6 recipes";             (cd tools && python harvest_to_library.py | head
 echo "3/6 thumbnail comps"; bash tools/bridge.sh tools/gif_comps.jsx 600
 echo "4/6 render (AE queue) + GIF"; bash tools/bridge.sh tools/render_queue.jsx 120; bash tools/wait_files.sh research/_render_expected.txt 1800; SKIP_RENDER=1 bash tools/render_gifs.sh | tail -3
 echo "5/6 library.json";        bash tools/bridge.sh tools/export_library.jsx 120
-echo "6/6 HTML + INDEX";        python tools/build_library_html.py
+echo "6/6 HTML + INDEX + panel previews"; python tools/build_library_html.py; bash tools/make_panel_thumbs.sh
 echo "Done: $(grep -vc '^#' library/INDEX.txt) entries in library/INDEX.txt"

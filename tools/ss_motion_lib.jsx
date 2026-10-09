@@ -49,6 +49,7 @@ var SSM = (function () {
         tokens: function () { return T; },
         frames: function (durName) { return find(T.durations, durName).frames; },
         seconds: function (durName, fps) { return find(T.durations, durName).frames / (fps || T.fps); },
+        ease: function (easeName) { return find(T.easings, easeName).ae; },
 
         // Animates prop from v0 to v1 starting at t0 (s); duration and easing come from tokens. Returns the end time.
         animate: function (prop, t0, v0, v1, durName, easeName, fps) {

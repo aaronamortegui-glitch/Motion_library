@@ -11,7 +11,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var folder = null;
     for (var i = proj.numItems; i >= 1; i--) {
         var it = proj.item(i);
-        if (it instanceof CompItem && it.name.indexOf("GIF__") === 0) it.remove();
+        if (it instanceof CompItem && (it.name.indexOf("GIF__") === 0 || it.name.indexOf("GIF_src__") === 0)) it.remove();
         else if (it instanceof FolderItem && it.name === "GIF Previews") folder = it;
     }
     if (!folder) folder = proj.items.addFolder("GIF Previews");
@@ -51,11 +51,21 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         L.property("ADBE Transform Group").property("ADBE Position").setValue([W / 2, H / 2 + size * 0.35]);
         return L;
     }
+    // Speed Ramp works on footage: a precomp where the S-mark crosses the frame at constant speed, trailed by dots
+    function constantMotion(c) {
+        var src = proj.items.addComp("GIF_src__constant_motion", W, H, 1, 10, 30); src.parentFolder = folder;
+        var S = smark(src, "S constant", false), p = S.property("ADBE Transform Group").property("ADBE Position");
+        p.setValueAtTime(0, [-120, H / 2]); p.setValueAtTime(10, [W * 3, H / 2]);
+        p.setInterpolationTypeAtKey(1, KeyframeInterpolationType.LINEAR); p.setInterpolationTypeAtKey(2, KeyframeInterpolationType.LINEAR);
+        p.expression = "var x = (value[0] + 120) % (" + W + " + 240) - 120; [x, value[1]]";
+        var L = c.layers.add(src); L.name = "Speed Ramp";
+        return L;
+    }
     var made = [];
     var m = SSP.names();
     for (var a = 0; a < m.length; a++) {
         var c = comp("motion", m[a], 2.4);
-        var L = m[a] === "Wipe Reveal" ? bar(c) : smark(c, m[a], /Draw|Stroke/.test(m[a]));
+        var L = m[a] === "Wipe Reveal" ? bar(c) : m[a] === "Speed Ramp" ? constantMotion(c) : smark(c, m[a], /Draw|Stroke/.test(m[a]));
         SSP.apply(L, m[a], "both", 0.2);
         made.push(c.name);
     }
@@ -70,7 +80,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         "Blur Words": ["Calm and premium", SSM.font("display"), 64], "Tracking Settle": ["MOTION LAB", SSM.font("ui"), 54],
         "Chars Pop": ["5,000", SSM.font("ui"), 110], "Typewriter": ["Hello, Superside", SSM.font("ui"), 60],
         "Scramble": ["SS MOTION", SSM.font("ui"), 84], "Count Up": ["12,480", SSM.font("ui"), 110],
-        "Words Slam": ["Words Slam", SSM.font("display"), 80] };
+        "Words Slam": ["Words Slam", SSM.font("display"), 80], "Chars Ramp": ["Speed Ramp", SSM.font("display"), 96] };
     for (var d = 0; d < tx.length; d++) {
         var c3 = comp("text", tx[d], 2.4);
         var sm = sample[tx[d]] || [tx[d], SSM.font("ui"), 60];

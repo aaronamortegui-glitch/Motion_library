@@ -236,6 +236,96 @@ var SSP = (function () {
                 return SSM.animate(T(L, "ADBE Position"), t, p, add(p, [420, 0]), "Glide", "Launch");
             }
         },
+        // ---- Speed-ramp family (tokens Ramp, Surge, Whip): slow → burst of speed → slow ----
+        "Ramp Slide": {
+            channels: "Fade & Position (Ramp curve)", energy: "dynamic", use: "Transitions, product slides, bold entrances",
+            "in": function (L, t) {
+                var p = pos(L);
+                SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Blink", "Flat");
+                return SSM.animate(T(L, "ADBE Position"), t, add(p, [-760, 0]), p, "Stage", "Ramp");
+            },
+            "out": function (L, t) {
+                var p = pos(L);
+                SSM.animate(T(L, "ADBE Opacity"), t + SSM.seconds("Glide"), opa(L), 0, "Blink", "Flat");
+                return SSM.animate(T(L, "ADBE Position"), t, p, add(p, [760, 0]), "Arrive", "Surge");
+            }
+        },
+        "Ramp Zoom": {
+            channels: "Fade & Scale (Ramp curve)", energy: "dynamic", use: "Logo reveals, hero products, end cards",
+            "in": function (L, t) {
+                SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Glide", "Flat");
+                return SSM.animate(T(L, "ADBE Scale"), t, [0, 0, 100], scl(L), "Stage", "Ramp");
+            },
+            "out": function (L, t) {
+                SSM.animate(T(L, "ADBE Opacity"), t + SSM.seconds("Glide"), opa(L), 0, "Blink", "Flat");
+                return SSM.animate(T(L, "ADBE Scale"), t, scl(L), mul(scl(L), 2.2), "Arrive", "Surge");
+            }
+        },
+        "Ramp Spin": {
+            channels: "Fade, Rotate & Scale (Ramp curve)", energy: "dynamic", use: "Icons, badges, logo spins",
+            "in": function (L, t) {
+                SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Blink", "Flat");
+                SSM.animate(T(L, "ADBE Scale"), t, mul(scl(L), 0.6), scl(L), "Stage", "Surge");
+                return SSM.animate(T(L, "ADBE Rotate Z"), t, rot(L) - 360, rot(L), "Stage", "Ramp");
+            },
+            "out": function (L, t) {
+                SSM.animate(T(L, "ADBE Opacity"), t + SSM.seconds("Glide"), opa(L), 0, "Blink", "Flat");
+                return SSM.animate(T(L, "ADBE Rotate Z"), t, rot(L), rot(L) + 180, "Arrive", "Surge");
+            }
+        },
+        "Whip Pan": {
+            channels: "Position + motion blur (Whip curve)", energy: "dynamic", use: "Swipe transitions, camera-style moves, carousels",
+            "in": function (L, t) {
+                var p = pos(L);
+                try { L.motionBlur = true; L.containingComp.motionBlur = true; } catch (e) {}
+                SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Tick", "Flat");
+                return SSM.animate(T(L, "ADBE Position"), t, add(p, [980, 0]), p, "Sweep", "Whip");
+            },
+            "out": function (L, t) {
+                var p = pos(L);
+                try { L.motionBlur = true; L.containingComp.motionBlur = true; } catch (e) {}
+                SSM.animate(T(L, "ADBE Opacity"), t + SSM.seconds("Glide"), opa(L), 0, "Tick", "Flat");
+                return SSM.animate(T(L, "ADBE Position"), t, p, add(p, [-980, 0]), "Arrive", "Whip");
+            }
+        },
+        "Surge Rise": {
+            channels: "Fade & Position (Surge curve)", energy: "medium", use: "Headlines, cards, elegant entrances",
+            "in": function (L, t) {
+                var p = pos(L);
+                SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Glide", "Flat");
+                return SSM.animate(T(L, "ADBE Position"), t, add(p, [0, 140]), p, "Sweep", "Surge");
+            },
+            "out": function (L, t) {
+                var p = pos(L);
+                SSM.animate(T(L, "ADBE Opacity"), t + SSM.seconds("Blink"), opa(L), 0, "Blink", "Flat");
+                return SSM.animate(T(L, "ADBE Position"), t, p, add(p, [0, -140]), "Arrive", "Surge");
+            }
+        },
+        // Real speed ramp on footage or precomps (Time Remap): slow → fast → slow, then back to normal speed.
+        "Speed Ramp": {
+            channels: "Time Remap (footage / precomps)", energy: "dynamic", use: "Footage, product shots, action beats, transitions",
+            "in": function (L, t) {
+                if (!L.canSetTimeRemapEnabled) return t;
+                L.timeRemapEnabled = true;
+                var rm = L.property("ADBE Time Remapping"), dur = L.source.duration;
+                var D = SSM.seconds("Stage") * 2, src0 = Math.max(0, t - L.startTime);
+                var src1 = Math.min(dur, src0 + D * 2.5);            // the ramp covers 2.5x its length of footage
+                var tEnd = L.outPoint, src2 = Math.min(dur, src1 + (tEnd - (t + D)));
+                var keys = [[t, src0], [t + D, src1], [tEnd, src2]];
+                for (var q = 0; q < keys.length; q++) rm.setValueAtTime(keys[q][0], keys[q][1]);
+                for (var r = rm.numKeys; r >= 1; r--) {               // keep only our keys (AE adds its own)
+                    var ours = false;
+                    for (var q2 = 0; q2 < keys.length; q2++) if (Math.abs(rm.keyTime(r) - keys[q2][0]) < 0.001) ours = true;
+                    if (!ours) rm.removeKey(r);
+                }
+                SSM.animateRaw(rm, t, t + D, src0, src1, SSM.ease("Ramp"));
+                var k = rm.nearestKeyIndex(tEnd);
+                rm.setInterpolationTypeAtKey(k, KeyframeInterpolationType.LINEAR, KeyframeInterpolationType.LINEAR);
+                L.outPoint = tEnd;
+                return t + D;
+            },
+            "out": function (L, t) { return t; }
+        },
         // Camera-style punch on footage or precomps: starts pushed in and eases back to frame (out: pushes in).
         "Punch Zoom": {
             channels: "Scale (camera)", energy: "medium", use: "Footage, precomps, freeze frames, cut emphasis",
@@ -448,6 +538,16 @@ var SSP = (function () {
                     "  if (comma) f[0] = f[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n" +
                     "  s.replace(raw, f.join('.'));\n}";
                 return t + d;
+            }
+        },
+        // Characters reveal on the Ramp curve: a slow start, a rush through the middle, a slow landing.
+        "Chars Ramp": {
+            channels: "Text · Position & Fade (char, Ramp curve)", energy: "medium", use: "Titles that build tension, trailers, reveals",
+            "in": function (L, t) {
+                var a = textAnimator(L, "SS Chars Ramp", 1, 2);
+                a.props.addProperty("ADBE Text Position 3D").setValue([0, 70, 0]);
+                a.props.addProperty("ADBE Text Opacity").setValue(0);
+                return SSM.animate(a.start, t, a.from, 100, "Stage", "Ramp");
             }
         },
         // Kinetic type: each word lands big, blurred and slightly tilted, one after another.

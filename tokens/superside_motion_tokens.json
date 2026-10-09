@@ -1,226 +1,286 @@
 {
-  "version": "0.2-draft",
-  "fps": 30,
-  "notes": "Superside's own motion tokens. v0.2 calibrated against 6 real transitions sampled in AE (research/calibration_fit.json): entrances 12-17f, typical overshoot ~5%, exits with anticipation.",
-  "durations": [
-    {
-      "name": "Tick",
-      "frames": 4,
-      "ms": 133,
-      "use": "Micro-interactions: clicks, hovers, toggles"
-    },
-    {
-      "name": "Blink",
-      "frames": 6,
-      "ms": 200,
-      "use": "Opacity fades in/out"
-    },
-    {
-      "name": "Glide",
-      "frames": 9,
-      "ms": 300,
-      "use": "Short, efficient element moves"
-    },
-    {
-      "name": "Arrive",
-      "frames": 14,
-      "ms": 467,
-      "use": "Element entrances, elements in motion"
-    },
-    {
-      "name": "Sweep",
-      "frames": 21,
-      "ms": 700,
-      "use": "Changes covering half the screen or more"
-    },
-    {
-      "name": "Stage",
-      "frames": 33,
-      "ms": 1100,
-      "use": "Full-screen moments, scrims, transitions"
-    }
-  ],
-  "easings": [
-    {
-      "name": "Flat",
-      "bezier": [
-        0,
-        0,
-        1,
-        1
-      ],
-      "use": "Opacity and micro-interactions",
-      "ae": {
-        "out": "linear",
-        "in": "linear"
-      }
-    },
-    {
-      "name": "Land",
-      "bezier": [
-        0.12,
-        0.9,
-        0.28,
-        1
-      ],
-      "use": "Entrances from off-screen (long, softer brake)",
-      "ae": {
-        "out": {
-          "influence": 12,
-          "speed_x_avg": 7.5
-        },
-        "in": {
-          "influence": 72,
-          "speed_x_avg": 0
-        }
-      }
-    },
-    {
-      "name": "Launch",
-      "bezier": [
-        0.55,
-        0,
-        0.9,
-        0.6
-      ],
-      "use": "Exits that chain into another element's entrance",
-      "ae": {
-        "out": {
-          "influence": 55,
-          "speed_x_avg": 0
-        },
-        "in": {
-          "influence": 10,
-          "speed_x_avg": 4
-        }
-      }
-    },
-    {
-      "name": "Settle",
-      "bezier": [
-        0.3,
-        0,
-        0.1,
-        1
-      ],
-      "use": "General motion and exits that don't chain",
-      "ae": {
-        "out": {
-          "influence": 30,
-          "speed_x_avg": 0
-        },
-        "in": {
-          "influence": 90,
-          "speed_x_avg": 0
-        }
-      }
-    },
-    {
-      "name": "Cruise",
-      "bezier": [
-        0.5,
-        0,
-        0.15,
-        1
-      ],
-      "use": "Generic, smooth A→B",
-      "ae": {
-        "out": {
-          "influence": 50,
-          "speed_x_avg": 0
-        },
-        "in": {
-          "influence": 85,
-          "speed_x_avg": 0
-        }
-      }
-    },
-    {
-      "name": "Pop",
-      "bezier": [
-        0.34,
-        1.45,
-        0.64,
-        1
-      ],
-      "use": "Entrances with overshoot/bounce for dynamic pieces",
-      "ae": {
-        "note": "3 keys: 0 → 105% → 100% (Land up to the peak at 60%, Settle back)"
-      },
-      "overshoot": 0.05
-    },
-    {
-      "name": "Recoil",
-      "bezier": [
-        0.6,
-        0,
-        0.75,
-        -0.4
-      ],
-      "use": "Exits with anticipation: pulls back slightly, then leaves (dynamic pieces)",
-      "ae": {
-        "note": "Undershoot: 3 keys (100% → -4% of the travel → target) or an expression; does not fit in 2 AE keys"
-      }
-    }
-  ],
-  "ae_conversion": "out.influence = x1*100; out.speed = (y1/x1)*avg; in.influence = (1-x2)*100; in.speed = ((1-y2)/(1-x2))*avg",
-  "calibration": {
-    "entrance_frames_range": [
-      12,
-      17
-    ],
-    "exit_frames_range": [
-      13,
-      20
-    ],
-    "typical_overshoot": 0.05,
-    "observed_beziers": {
-      "in_overshoot": [
-        0.26,
-        1.42,
-        0.37,
-        0.98
-      ],
-      "in_soft": [
-        0.26,
-        0.95,
-        0.56,
-        0.99
-      ],
-      "in_late": [
-        0.4,
-        0.79,
-        0.74,
-        1.0
-      ],
-      "out_ease_in": [
-        0.45,
-        0.01,
-        0.75,
-        0.02
-      ],
-      "out_anticipate": [
-        0.62,
-        0.02,
-        0.74,
-        -0.42
-      ]
-    }
+ "version": "0.2-draft",
+ "fps": 30,
+ "notes": "Superside's own motion tokens. v0.2 calibrated against 6 real transitions sampled in AE (research/calibration_fit.json): entrances 12-17f, typical overshoot ~5%, exits with anticipation.",
+ "durations": [
+  {
+   "name": "Tick",
+   "frames": 4,
+   "ms": 133,
+   "use": "Micro-interactions: clicks, hovers, toggles"
   },
-  "fonts": {
-    "display": [
-      "InstrumentSerif-Regular",
-      "Georgia"
-    ],
-    "ui": [
-      "InterTight-SemiBold",
-      "InterTight-Bold",
-      "Arial-BoldMT"
-    ],
-    "ui_regular": [
-      "InterTight-Regular",
-      "ArialMT"
-    ],
-    "note": "PostScript names; the first installed one wins. Font files in assets/fonts (OFL)."
+  {
+   "name": "Blink",
+   "frames": 6,
+   "ms": 200,
+   "use": "Opacity fades in/out"
+  },
+  {
+   "name": "Glide",
+   "frames": 9,
+   "ms": 300,
+   "use": "Short, efficient element moves"
+  },
+  {
+   "name": "Arrive",
+   "frames": 14,
+   "ms": 467,
+   "use": "Element entrances, elements in motion"
+  },
+  {
+   "name": "Sweep",
+   "frames": 21,
+   "ms": 700,
+   "use": "Changes covering half the screen or more"
+  },
+  {
+   "name": "Stage",
+   "frames": 33,
+   "ms": 1100,
+   "use": "Full-screen moments, scrims, transitions"
   }
+ ],
+ "easings": [
+  {
+   "name": "Flat",
+   "bezier": [
+    0,
+    0,
+    1,
+    1
+   ],
+   "use": "Opacity and micro-interactions",
+   "ae": {
+    "out": "linear",
+    "in": "linear"
+   }
+  },
+  {
+   "name": "Land",
+   "bezier": [
+    0.12,
+    0.9,
+    0.28,
+    1
+   ],
+   "use": "Entrances from off-screen (long, softer brake)",
+   "ae": {
+    "out": {
+     "influence": 12,
+     "speed_x_avg": 7.5
+    },
+    "in": {
+     "influence": 72,
+     "speed_x_avg": 0
+    }
+   }
+  },
+  {
+   "name": "Launch",
+   "bezier": [
+    0.55,
+    0,
+    0.9,
+    0.6
+   ],
+   "use": "Exits that chain into another element's entrance",
+   "ae": {
+    "out": {
+     "influence": 55,
+     "speed_x_avg": 0
+    },
+    "in": {
+     "influence": 10,
+     "speed_x_avg": 4
+    }
+   }
+  },
+  {
+   "name": "Settle",
+   "bezier": [
+    0.3,
+    0,
+    0.1,
+    1
+   ],
+   "use": "General motion and exits that don't chain",
+   "ae": {
+    "out": {
+     "influence": 30,
+     "speed_x_avg": 0
+    },
+    "in": {
+     "influence": 90,
+     "speed_x_avg": 0
+    }
+   }
+  },
+  {
+   "name": "Cruise",
+   "bezier": [
+    0.5,
+    0,
+    0.15,
+    1
+   ],
+   "use": "Generic, smooth A→B",
+   "ae": {
+    "out": {
+     "influence": 50,
+     "speed_x_avg": 0
+    },
+    "in": {
+     "influence": 85,
+     "speed_x_avg": 0
+    }
+   }
+  },
+  {
+   "name": "Pop",
+   "bezier": [
+    0.34,
+    1.45,
+    0.64,
+    1
+   ],
+   "use": "Entrances with overshoot/bounce for dynamic pieces",
+   "ae": {
+    "note": "3 keys: 0 → 105% → 100% (Land up to the peak at 60%, Settle back)"
+   },
+   "overshoot": 0.05
+  },
+  {
+   "name": "Recoil",
+   "bezier": [
+    0.6,
+    0,
+    0.75,
+    -0.4
+   ],
+   "use": "Exits with anticipation: pulls back slightly, then leaves (dynamic pieces)",
+   "ae": {
+    "note": "Undershoot: 3 keys (100% → -4% of the travel → target) or an expression; does not fit in 2 AE keys"
+   }
+  },
+  {
+   "name": "Ramp",
+   "bezier": [
+    0.87,
+    0,
+    0.13,
+    1
+   ],
+   "use": "Speed ramp: very slow start, a burst of speed, very slow landing (transitions, reveals, footage ramps)",
+   "ae": {
+    "out": {
+     "influence": 87,
+     "speed_x_avg": 0
+    },
+    "in": {
+     "influence": 87,
+     "speed_x_avg": 0
+    }
+   }
+  },
+  {
+   "name": "Surge",
+   "bezier": [
+    0.7,
+    0,
+    0.3,
+    1
+   ],
+   "use": "Softer speed ramp: slow, fast, slow without the extreme hold (premium moves, headlines)",
+   "ae": {
+    "out": {
+     "influence": 70,
+     "speed_x_avg": 0
+    },
+    "in": {
+     "influence": 70,
+     "speed_x_avg": 0
+    }
+   }
+  },
+  {
+   "name": "Whip",
+   "bezier": [
+    0.75,
+    0,
+    0.05,
+    1
+   ],
+   "use": "Holds back, fires, then a long soft brake (whip pans, swipes, camera moves)",
+   "ae": {
+    "out": {
+     "influence": 75,
+     "speed_x_avg": 0
+    },
+    "in": {
+     "influence": 95,
+     "speed_x_avg": 0
+    }
+   }
+  }
+ ],
+ "ae_conversion": "out.influence = x1*100; out.speed = (y1/x1)*avg; in.influence = (1-x2)*100; in.speed = ((1-y2)/(1-x2))*avg",
+ "calibration": {
+  "entrance_frames_range": [
+   12,
+   17
+  ],
+  "exit_frames_range": [
+   13,
+   20
+  ],
+  "typical_overshoot": 0.05,
+  "observed_beziers": {
+   "in_overshoot": [
+    0.26,
+    1.42,
+    0.37,
+    0.98
+   ],
+   "in_soft": [
+    0.26,
+    0.95,
+    0.56,
+    0.99
+   ],
+   "in_late": [
+    0.4,
+    0.79,
+    0.74,
+    1.0
+   ],
+   "out_ease_in": [
+    0.45,
+    0.01,
+    0.75,
+    0.02
+   ],
+   "out_anticipate": [
+    0.62,
+    0.02,
+    0.74,
+    -0.42
+   ]
+  }
+ },
+ "fonts": {
+  "display": [
+   "InstrumentSerif-Regular",
+   "Georgia"
+  ],
+  "ui": [
+   "InterTight-SemiBold",
+   "InterTight-Bold",
+   "Arial-BoldMT"
+  ],
+  "ui_regular": [
+   "InterTight-Regular",
+   "ArialMT"
+  ],
+  "note": "PostScript names; the first installed one wins. Font files in assets/fonts (OFL)."
+ }
 }
