@@ -8,10 +8,10 @@ Superside's own motion library for After Effects. Designers apply it from a pane
 
 ## What's inside
 
-> **Latest additions (22):** speed-ramp curves (`Ramp`, `Surge`, `Whip`) and the presets that use them: `Ramp Slide`, `Ramp Zoom`, `Ramp Spin`, `Whip Pan`, `Surge Rise`, `Chars Ramp`, and a real `Speed Ramp` for footage (time remap: slow → fast → slow). From *The 1974 Boardroom* reel: `Slam In`, `Punch Zoom`, `Words Slam`, `Breathe`, `Holo Flicker`. Also `Flip In`, `Spin Pop`, `Drop Bounce`, `Stretch Slide`, `Typewriter`, `Scramble`, `Count Up`, `Swing`, `Orbit`, `Shake`. Every piece we make should leave something new in the library.
+> **Latest additions:** a gallery plugin with live previews and **marker-driven timing** (drag *SS in* / *SS out* to retime any preset), **style packs** (Dynamic, Elegant, Modern, Playful, Tech) that animate a whole comp in one click, 17 **Classics** adapted from animate.css 4.1.1 (MIT), speed-ramp curves (`Ramp`, `Surge`, `Whip`), and an **MCP server** so Claude can drive After Effects and the library directly. Every piece we make should leave something new in the library.
 
 <!-- catalog:start -->
-**51 presets** in 4 categories. Every one is also listed in `library/INDEX.txt` (for LLMs) and `library/index.html` (for people).
+**68 presets** in 5 categories, plus style packs. Every one is also listed in `library/INDEX.txt` (for LLMs) and `library/index.html` (for people).
 
 ### Motion (23)
 
@@ -25,6 +25,18 @@ Entrances and exits for any layer. `SSP.apply(layer, name, "in" | "out" | "both"
 | <img src="library/gifs/motion/flip-in.gif" width="200"><br>**Flip In** · `medium`<br><sub>Cards, tiles, reveals, before/after</sub> | <img src="library/gifs/motion/spin-pop.gif" width="200"><br>**Spin Pop** · `dynamic`<br><sub>Badges, stickers, stamps, icons</sub> | <img src="library/gifs/motion/drop-bounce.gif" width="200"><br>**Drop Bounce** · `dynamic`<br><sub>Icons, products, emoji, playful drops</sub> | <img src="library/gifs/motion/stretch-slide.gif" width="200"><br>**Stretch Slide** · `dynamic`<br><sub>Cards, chips, pills, fast UI moves</sub> |
 | <img src="library/gifs/motion/ramp-slide.gif" width="200"><br>**Ramp Slide** · `dynamic`<br><sub>Transitions, product slides, bold entrances</sub> | <img src="library/gifs/motion/ramp-zoom.gif" width="200"><br>**Ramp Zoom** · `dynamic`<br><sub>Logo reveals, hero products, end cards</sub> | <img src="library/gifs/motion/ramp-spin.gif" width="200"><br>**Ramp Spin** · `dynamic`<br><sub>Icons, badges, logo spins</sub> | <img src="library/gifs/motion/whip-pan.gif" width="200"><br>**Whip Pan** · `dynamic`<br><sub>Swipe transitions, camera-style moves, carousels</sub> |
 | <img src="library/gifs/motion/surge-rise.gif" width="200"><br>**Surge Rise** · `medium`<br><sub>Headlines, cards, elegant entrances</sub> | <img src="library/gifs/motion/speed-ramp.gif" width="200"><br>**Speed Ramp** · `dynamic`<br><sub>Footage, product shots, action beats, transitions</sub> | <img src="library/gifs/motion/punch-zoom.gif" width="200"><br>**Punch Zoom** · `medium`<br><sub>Footage, precomps, freeze frames, cut emphasis</sub> |   |
+
+### Classics (17)
+
+Effects adapted from animate.css 4.1.1 (MIT) into native keyframes: entrances, exits and attention moves. Same call as Motion.
+
+|   |   |   |   |
+|---|---|---|---|
+| <img src="library/gifs/motion/back-in-down.gif" width="200"><br>**Back In Down** · `dynamic`<br><sub>Cards, product shots, bold drops (enter)</sub> | <img src="library/gifs/motion/back-in-left.gif" width="200"><br>**Back In Left** · `dynamic`<br><sub>Slides, lower thirds, carousels (enter)</sub> | <img src="library/gifs/motion/bounce-in.gif" width="200"><br>**Bounce In** · `dynamic`<br><sub>Icons, badges, buttons, emoji (enter)</sub> | <img src="library/gifs/motion/bounce-in-up.gif" width="200"><br>**Bounce In Up** · `dynamic`<br><sub>Notifications, stickers, playful entrances (enter)</sub> |
+| <img src="library/gifs/motion/rubber-band.gif" width="200"><br>**Rubber Band** · `dynamic`<br><sub>CTAs, logos, a beat accent (attention)</sub> | <img src="library/gifs/motion/jello.gif" width="200"><br>**Jello** · `dynamic`<br><sub>Playful accents, stickers (attention)</sub> | <img src="library/gifs/motion/heart-beat.gif" width="200"><br>**Heart Beat** · `medium`<br><sub>Likes, prices, a pulse on the beat (attention)</sub> | <img src="library/gifs/motion/tada.gif" width="200"><br>**Tada** · `dynamic`<br><sub>Reveals, wins, offers (attention)</sub> |
+| <img src="library/gifs/motion/wobble.gif" width="200"><br>**Wobble** · `dynamic`<br><sub>Errors, jokes, quirky accents (attention)</sub> | <img src="library/gifs/motion/swing-hinge.gif" width="200"><br>**Swing Hinge** · `medium`<br><sub>Signs, tags, hanging elements (attention)</sub> | <img src="library/gifs/motion/flip-in-x.gif" width="200"><br>**Flip In X** · `medium`<br><sub>Cards, tiles, scoreboard flips (enter)</sub> | <img src="library/gifs/motion/light-speed-in.gif" width="200"><br>**Light Speed In** · `dynamic`<br><sub>Speed, sport, fast lower thirds (enter)</sub> |
+| <img src="library/gifs/motion/roll-in.gif" width="200"><br>**Roll In** · `dynamic`<br><sub>Wheels, coins, round icons (enter)</sub> | <img src="library/gifs/motion/zoom-in-down.gif" width="200"><br>**Zoom In Down** · `medium`<br><sub>Titles that drop in from above (enter)</sub> | <img src="library/gifs/motion/jack-in-the-box.gif" width="200"><br>**Jack In The Box** · `dynamic`<br><sub>Surprises, reveals, kids and playful brands (enter)</sub> | <img src="library/gifs/motion/back-out-up.gif" width="200"><br>**Back Out Up** · `dynamic`<br><sub>Exits upward, cards leaving (exit)</sub> |
+| <img src="library/gifs/motion/zoom-out.gif" width="200"><br>**Zoom Out** · `soft`<br><sub>Quiet exits, scene changes (exit)</sub> |   |   |   |
 
 ### Text (10)
 
@@ -55,6 +67,15 @@ Behavior measured from reference animations and rebuilt with our own keyframes. 
 | <img src="library/gifs/recipe/calibration-w3l.gif" width="200"><br>**W3L** · `dynamic`<br><sub>position & rotation & scale · loop</sub> | <img src="library/gifs/recipe/calibration-4lc.gif" width="200"><br>**4LC** · `dynamic`<br><sub>position & rotation · transition</sub> | <img src="library/gifs/recipe/calibration-d2t.gif" width="200"><br>**D2T** · `dynamic`<br><sub>position · loop</sub> | <img src="library/gifs/recipe/calibration-2jk.gif" width="200"><br>**2JK** · `medium`<br><sub>rotation · loop</sub> |
 | <img src="library/gifs/recipe/calibration-1df-unu.gif" width="200"><br>**1DF+UNU** · `dynamic`<br><sub>scale · loop</sub> | <img src="library/gifs/recipe/calibration-x9r.gif" width="200"><br>**X9R** · `medium`<br><sub>opacity & scale · transition</sub> | <img src="library/gifs/recipe/calibration-pe6.gif" width="200"><br>**PE6** · `medium`<br><sub>position · transition</sub> | <img src="library/gifs/recipe/calibration-4vw.gif" width="200"><br>**4VW** · `dynamic`<br><sub>position & scale · transition</sub> |
 | <img src="library/gifs/recipe/calibration-2jv.gif" width="200"><br>**2JV** · `dynamic`<br><sub>scale · transition</sub> |   |   |   |
+
+### Packs (5)
+
+One click gives a whole comp an identity: each layer gets the preset of its role (title, subtitle, body, shape, media, logo), staggered. `SSP.applyPack(comp, name)`
+
+|   |   |   |   |
+|---|---|---|---|
+| <img src="library/packs/dynamic.gif" width="260"><br>**Dynamic** · `dynamic`<br><sub>Social, launches, hype: fast slams, whips and speed ramps.</sub> | <img src="library/packs/elegant.gif" width="260"><br>**Elegant** · `soft`<br><sub>Premium, fashion, hospitality: slow blurs, soft rises, generous timing.</sub> | <img src="library/packs/modern.gif" width="260"><br>**Modern** · `medium`<br><sub>Corporate, SaaS, product: clean rises and slides on the brand curves.</sub> | <img src="library/packs/playful.gif" width="260"><br>**Playful** · `dynamic`<br><sub>Kids, food, consumer apps: bounces, wobbles and jack-in-the-box reveals.</sub> |
+| <img src="library/packs/tech.gif" width="260"><br>**Tech** · `medium`<br><sub>Data, AI, fintech, HUDs: decoding text, line draws and holographic flicker.</sub> |   |   |   |
 <!-- catalog:end -->
 
 ### Pick by energy
@@ -98,41 +119,49 @@ All timing comes from the Superside motion tokens: **6 durations** and **10 easi
 
 ### Designers (in After Effects)
 
-<img src="docs/screens/ae-panel.png" width="380" align="right" alt="SS Motion panel in After Effects">
+<img src="docs/screens/ae-panel.png" width="320" align="right" alt="SS Motion panel in After Effects">
 
 1. Install the brand fonts from `assets/fonts/` (right-click › Install).
-2. **Install the panel once** (adds it to AE's *Window* menu, dockable, for every AE version on the machine):
+2. **Install the panel once** (Window menu, dockable, every AE version on the machine):
    ```bash
    powershell -ExecutionPolicy Bypass -File tools/install_panel.ps1
    ```
-   Restart AE, open *Window › SS Motion.jsx* and dock it. The panel reads the library straight from this repo clone, so after a `git pull` it already shows the new presets. In *Edit › Preferences › Scripting & Expressions*, enable *Allow Scripts to Write Files and Access Network*.
-3. **Pick a preset:** tabs Motion, Text, Effects, Recipes and Assets; search, energy filter and a preview of each preset. *Visualizer* opens `library/index.html`.
-4. **Select layers → Apply** (or double-click the preset). Choose `In`, `Out` or `In + Out`, and a stagger in frames for several layers. The **Assets** tab drops local sound effects and overlays at the playhead.
-5. **Tweak freely:** the result is plain keyframes and expressions on your layers.
+   Restart AE, open *Window › SS Motion.jsx* and dock it. It reads the library straight from this repo clone, so a `git pull` brings the new presets. Enable *Edit › Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
+3. **Browse the gallery** by category (Motion, Classics, Text, Effects, Recipes, Packs, Assets) with search and an energy filter. Clicking a thumbnail plays a **live preview**: the preset's real curve, sampled into `library/preview_curves.json` (ScriptUI cannot play GIFs, so the panel redraws the motion as vectors, ~90 KB for the whole library).
+4. **Select layers → In, Out or Both.** Stagger in frames for several layers.
+5. **Retime with markers:** with *Marker timing* on, each layer gets an `SS in` marker (where the entrance ends) and an `SS out` marker (where the exit starts). Drag them and the animation stretches or compresses with the same curve, no keyframe editing.
+6. **Packs:** pick a pack and press In/Both. Every layer gets the preset of its role (title, subtitle, body, shape, media, logo) with the pack's rhythm. Backgrounds, nulls and locked layers are left alone.
+7. **Assets:** drop local sound effects and overlays at the playhead.
 
 <br clear="right">
 
-### LLM agents (Claude Code or any local model)
+### LLM agents (Claude Code or any MCP client)
 
-The skill in `.claude/skills/ss-motion-library` explains everything. The short version:
+**MCP server (recommended).** The repo ships a dependency-free MCP server (`tools/mcp/ss_motion_mcp.py`, registered in `.mcp.json`). Open the repo in Claude Code, approve the `ss-motion` server, and Claude gets these tools:
+- **Browse (no AE needed):** `list_presets`, `list_packs`, `list_assets`.
+- **Inspect AE:** `ae_status`, `list_layers`.
+- **Act:** `apply_preset` (in/out/both, stagger, marker timing), `apply_pack`, `add_asset`, `show_in_panel`.
+- **Check:** `render_frame` (to look at the result), `render_comp`.
+- **Escape hatch:** `run_jsx`.
 
-1. **Read `library/INDEX.txt`**: one line per preset (`kind|name|channels|energy|use`) plus the calls, tokens and tools. The HTML and GIFs are for humans only.
+It talks to AE through the file bridge, which starts by itself when the SS Motion panel loads (dock it once).
+
+**Without MCP**, any LLM can do the same with plain files:
+1. **Read `library/INDEX.txt`**: one line per preset (`kind|name|channels|energy|use`) plus the calls, tokens, packs and tools.
 2. **Write a job** in `tools/`:
    ```js
    #include "ss_presets.jsx"
    (function () {
        var L = app.project.activeItem.layer("Title");
-       SSP.applyText(L, "Chars Rise", "both");      // SSP.apply · SSP.applyFx · SSP.applyText · SSP.applyRecipe
+       SSP.markerTiming(true);                       // optional: SS in / SS out markers
+       SSP.applyText(L, "Chars Rise", "both");      // SSP.apply · applyText · applyFx · applyRecipe · applyPack
        return "ok";
    })();
    ```
-3. **Run it in the open AE** and read the answer (`OK`, or `ERROR` with the line number):
-   ```bash
-   bash tools/bridge.sh tools/my_job.jsx
-   ```
-4. **Render and review** through AE's own render queue (`tools/render_comps.jsx` + `tools/wait_files.sh`), then iterate.
+3. **Run it:** `bash tools/bridge.sh tools/my_job.jsx` (answers `OK` or `ERROR` with the line number).
+4. **Render and review** with `tools/render_comps.jsx` + `tools/wait_files.sh`, or `comp.saveFrameToPng` for single frames.
 
-Bigger pieces are data, not code: a scene (`tools/build_scene.jsx`) or a full edit (`tools/build_edit.jsx`) is described in JSON and rebuilt in one call. See the showcase at the end.
+Bigger pieces are data, not code: scenes (`tools/build_scene.jsx`) and edits (`tools/build_edit.jsx`) are JSON. Contributors and their agents: read [`CLAUDE.md`](CLAUDE.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Tools
 
@@ -140,7 +169,9 @@ Bigger pieces are data, not code: a scene (`tools/build_scene.jsx`) or a full ed
 |---|---|
 | `tools/ss_motion_lib.jsx` (`SSM`) | Token-driven keyframes: `animate`, `pop`, `recoil`, `animateBezier`, `animateStops`, `organicStops` (hand-drawn rhythm), `font(role)` |
 | `tools/ss_presets.jsx` (`SSP`) | The presets: `apply`, `applyFx`, `applyText`, `applyRecipe` |
-| `tools/ss_panel.jsx` + `tools/install_panel.ps1` | Designer panel (Window menu, dockable) with previews and an Assets tab; `tools/make_panel_thumbs.sh` makes its preview stills |
+| `tools/ss_panel.jsx` + `tools/install_panel.ps1` | Gallery panel (Window menu, dockable): categories, live vector previews, In/Out/Both, marker timing, packs, assets |
+| `tools/mcp/ss_motion_mcp.py` (`.mcp.json`) | MCP server: Claude browses the library and drives AE (apply presets and packs, add assets, render frames) |
+| `tools/sample_previews.jsx` · `tools/make_panel_thumbs.sh` · `tools/pack_demos.jsx` | Panel previews (sampled curves), panel thumbnails, pack demo renders |
 | `tools/bridge.sh` + `tools/ss_bridge.jsx` | Runs `.jsx` jobs in the open AE from the terminal |
 | `tools/ss_hud.jsx` (`SSHUD`) | Holographic overlays on tracked points: bracket, callout, meter, chip, contour, face scan, floating panel |
 | `tools/track_points.py` | OpenCV point tracker → JSON for AE nulls (`--regions regions.json`) |
@@ -187,6 +218,11 @@ SSA.overlay(comp, "Light Leak B1 10", 0);                   // blend picked by f
 ```
 
 The index measures each sound's loudness and flags the harsh ones (`loud`) and the long ones (`long`), so an LLM picks a soft blip for UI and trims a boom instead of guessing.
+
+## Credits
+
+- **Classics** adapt the keyframes of [animate.css](https://animate.style) **4.1.1** (MIT License, © 2020 Daniel Eden / Animate.css) into native After Effects keyframes (`library/css_presets.json`). Later animate.css releases use the Hippocratic License and are not used.
+- Fonts: Inter Tight and Instrument Serif (SIL Open Font License).
 
 ## Structure
 

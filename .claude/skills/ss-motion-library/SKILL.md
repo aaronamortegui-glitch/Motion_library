@@ -60,6 +60,12 @@ Animation Composer's asset packs (≈300 SFX, light leaks, grain, film burns, VH
 2. Pick by category (sfx: whoosh, ui, impact, glitch, slide, sparkle, cartoon, sci-fi, film, riser; overlays: light-leak, grain, film-burn, scratches, vhs, glitch, film-texture). Avoid `loud` SFX for UI sounds, or drop them 12 dB or more; trim `long` ones with `len`.
 3. In AE: `#include "ss_assets.jsx"` → `SSA.sfx(comp, name, t, gainDb, len)` and `SSA.overlay(comp, name, t, blend, opacity)` (blend defaults by family: light leaks/burns screen, grain/film overlay).
 
+## MCP, markers, packs and classics
+- If the `ss-motion` MCP server is available, use it: `list_presets` / `list_packs` / `list_assets` to choose, `apply_preset` (phase in|out|both, `marker_timing`) / `apply_pack` / `add_asset` to act, `render_frame` to look at the result.
+- Marker timing: `SSP.markerTiming(true)` before applying adds layer markers `SS in` / `SS out`; moving them retimes the animation (expression remap, the curve is kept). Off by default for scripted builds.
+- Packs: `SSP.applyPack(comp, "Dynamic"|"Elegant"|"Modern"|"Playful"|"Tech", layers?, phase?)` classifies layers by role (title/subtitle/body by font size, shape, media, logo by name) and applies the role's preset.
+- Classics (`family: "classic"` in INDEX): animate.css 4.1.1 (MIT) effects as native keyframes; same `SSP.apply` call. Attention moves (Rubber Band, Tada, Heart Beat…) play at the `in` time.
+
 ## HUD overlays, scenes and edits
 - `tools/ss_hud.jsx` (`#include "ss_hud.jsx"`): `SSHUD.init(comp)`, then `SSHUD.bracket({anchor:"TRK face", size:[w,h], label, t0})`, `SSHUD.callout({anchor, offset:[dx,dy], title, lines:[...], t0, color})`, `SSHUD.meter({at:[x,y], label, value, t0})`, `SSHUD.chip({anchor, offset, text, color, t0})`. Anchors are tracking nulls named `TRK <name>` (anchor point at the null center).
 - Tracking: `python tools/track_points.py clip.mp4 tracks.json --regions regions.json --debug debug.mp4`; pick regions from a gridded first frame (`ffmpeg ... drawgrid`), check the debug sheet, and give items that leave the frame a `t1`.

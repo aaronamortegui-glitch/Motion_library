@@ -1,0 +1,149 @@
+{
+ "version": "0.1",
+ "note": "A pack gives a whole comp one identity. SSP.applyPack(comp, name[, layers, phase]) classifies each layer (title/subtitle/body by font size, shape, media, logo by name) and applies the role's preset, staggered. Full-frame backgrounds, nulls, adjustment, guide, locked and audio-only layers are left alone.",
+ "packs": [
+  {
+   "name": "Dynamic",
+   "slug": "dynamic",
+   "energy": "dynamic",
+   "desc": "Social, launches, hype: fast slams, whips and speed ramps.",
+   "stagger": 3,
+   "delay": 0,
+   "roles": {
+    "title": {
+     "text": "Words Slam"
+    },
+    "subtitle": {
+     "text": "Scramble"
+    },
+    "body": {
+     "text": "Chars Pop"
+    },
+    "shape": {
+     "motion": "Spin Pop"
+    },
+    "media": {
+     "motion": "Whip Pan"
+    },
+    "logo": {
+     "motion": "Ramp Zoom"
+    }
+   }
+  },
+  {
+   "name": "Elegant",
+   "slug": "elegant",
+   "energy": "soft",
+   "desc": "Premium, fashion, hospitality: slow blurs, soft rises, generous timing.",
+   "stagger": 6,
+   "delay": 0.1,
+   "roles": {
+    "title": {
+     "text": "Blur Words"
+    },
+    "subtitle": {
+     "text": "Tracking Settle"
+    },
+    "body": {
+     "text": "Words Fade Up"
+    },
+    "shape": {
+     "motion": "Blur In"
+    },
+    "media": {
+     "motion": "Surge Rise"
+    },
+    "logo": {
+     "motion": "Fade Up",
+     "fx": "Breathe"
+    }
+   }
+  },
+  {
+   "name": "Modern",
+   "slug": "modern",
+   "energy": "medium",
+   "desc": "Corporate, SaaS, product: clean rises and slides on the brand curves.",
+   "stagger": 4,
+   "delay": 0,
+   "roles": {
+    "title": {
+     "text": "Chars Rise"
+    },
+    "subtitle": {
+     "text": "Typewriter"
+    },
+    "body": {
+     "text": "Words Fade Up"
+    },
+    "shape": {
+     "motion": "Slide Land"
+    },
+    "media": {
+     "motion": "Flip In"
+    },
+    "logo": {
+     "motion": "Scale Pop"
+    }
+   }
+  },
+  {
+   "name": "Playful",
+   "slug": "playful",
+   "energy": "dynamic",
+   "desc": "Kids, food, consumer apps: bounces, wobbles and jack-in-the-box reveals.",
+   "stagger": 4,
+   "delay": 0,
+   "roles": {
+    "title": {
+     "text": "Chars Pop"
+    },
+    "subtitle": {
+     "text": "Words Fade Up"
+    },
+    "body": {
+     "text": "Words Fade Up"
+    },
+    "shape": {
+     "motion": "Bounce In",
+     "fx": "Swing"
+    },
+    "media": {
+     "motion": "Jack In The Box"
+    },
+    "logo": {
+     "motion": "Rubber Band"
+    }
+   }
+  },
+  {
+   "name": "Tech",
+   "slug": "tech",
+   "energy": "medium",
+   "desc": "Data, AI, fintech, HUDs: decoding text, line draws and holographic flicker.",
+   "stagger": 3,
+   "delay": 0,
+   "roles": {
+    "title": {
+     "text": "Scramble"
+    },
+    "subtitle": {
+     "text": "Typewriter"
+    },
+    "body": {
+     "text": "Typewriter"
+    },
+    "shape": {
+     "motion": "Line Draw"
+    },
+    "media": {
+     "motion": "Light Speed In"
+    },
+    "logo": {
+     "motion": "Flip In X",
+     "fx": "Holo Flicker"
+    }
+   }
+  }
+ ]
+}

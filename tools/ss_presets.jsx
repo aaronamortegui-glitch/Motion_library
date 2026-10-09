@@ -625,6 +625,186 @@ var SSP = (function () {
             prop.expression = "var k=" + k + "/100; value + " + (n > 1 ? "[" + parts.join(",") + "]" : parts[0]) + "*k;";
         }
     }
+    // ---------- Classic presets: animate.css 4.1.1 (MIT) keyframes → native AE keyframes ----------
+    // library/css_presets.json: stops {p (0–1), tx/ty px, txp/typ % of the layer box, s/sx/sy scale factor, r deg,
+    // rx deg (3D), skx deg (Transform effect skew), o opacity factor, e cubic-bezier of the segment that starts here}.
+    function bezAE(bz) {
+        var x1 = bz[0], y1 = bz[1], x2 = bz[2], y2 = bz[3];
+        return { out: { influence: Math.max(x1 * 100, 0.1), speed_x_avg: x1 > 0 ? y1 / x1 : 0 },
+                 "in": { influence: Math.max((1 - x2) * 100, 0.1), speed_x_avg: x2 < 1 ? (1 - y2) / (1 - x2) : 0 } };
+    }
+    function skewProp(L) {
+        var fx = L.property("ADBE Effect Parade"), e = fx.property("SS Skew") || fx.addProperty("ADBE Geometry2");
+        e.name = "SS Skew";
+        return e.property("ADBE Geometry2-0006");   // Skew
+    }
+    function playCss(L, def, t0, reverse) {
+        var dur = def.dur, R = L.sourceRectAtTime(REF(L), false), bw = R.width || 100, bh = R.height || 100;
+        var stops = def.stops.slice(0);
+        if (reverse) {   // mirror in time: p → 1 − p, each segment's bezier reversed
+            var rv = [];
+            for (var i = stops.length - 1; i >= 0; i--) {
+                var c = {}, k;
+                for (k in stops[i]) if (stops[i].hasOwnProperty(k)) c[k] = stops[i][k];
+                c.p = 1 - stops[i].p;
+                var prevE = i > 0 ? (stops[i - 1].e || def.ease) : def.ease;
+                c.e = [1 - prevE[2], 1 - prevE[3], 1 - prevE[0], 1 - prevE[1]];
+                rv.push(c);
+            }
+            stops = rv;
+        }
+        var p0 = pos(L), s0 = scl(L), r0 = rot(L), o0 = opa(L);
+        function chain(prop, fn, has) {   // keys only on stops that define this channel
+            var pts = [];
+            for (var i = 0; i < stops.length; i++) if (has(stops[i])) pts.push(stops[i]);
+            if (pts.length < 2) return;
+            for (var j = 0; j < pts.length - 1; j++)
+                SSM.animateRaw(prop, t0 + pts[j].p * dur, t0 + pts[j + 1].p * dur, fn(pts[j]), fn(pts[j + 1]), bezAE(pts[j].e || def.ease));
+        }
+        function tf(st) { return st.tx !== undefined || st.ty !== undefined || st.txp !== undefined || st.typ !== undefined; }
+        function sc(st) { return st.s !== undefined || st.sx !== undefined || st.sy !== undefined; }
+        var hasT = false;
+        for (var qt = 0; qt < stops.length; qt++) if (tf(stops[qt])) hasT = true;
+        if (hasT) chain(T(L, "ADBE Position"), function (st) {
+            var dx = (st.tx || 0) + (st.txp || 0) / 100 * bw, dy = (st.ty || 0) + (st.typ || 0) / 100 * bh;
+            return add(p0, [dx, dy]);
+        }, function (st) { return tf(st) || st.p === 0 || st.p === 1; });
+        chain(T(L, "ADBE Scale"), function (st) {
+            var k = st.s !== undefined ? st.s : 1;
+            return [s0[0] * (st.sx !== undefined ? st.sx : k), s0[1] * (st.sy !== undefined ? st.sy : k), 100];
+        }, function (st) { return sc(st); });
+        var hasS = false, hasR = false, hasO = false, hasRX = false, hasK = false;
+        for (var q = 0; q < stops.length; q++) {
+            if (sc(stops[q])) hasS = true; if (stops[q].r !== undefined) hasR = true; if (stops[q].o !== undefined) hasO = true;
+            if (stops[q].rx !== undefined) hasRX = true; if (stops[q].skx !== undefined) hasK = true;
+        }
+        if (hasR) chain(T(L, "ADBE Rotate Z"), function (st) { return r0 + (st.r || 0); }, function (st) { return st.r !== undefined || st.p === 0 || st.p === 1; });
+        if (hasO) chain(T(L, "ADBE Opacity"), function (st) { return o0 * st.o; }, function (st) { return st.o !== undefined; });
+        if (hasRX) { L.threeDLayer = true; chain(T(L, "ADBE Rotate X"), function (st) { return st.rx || 0; }, function (st) { return st.rx !== undefined || st.p === 1; }); }
+        if (hasK) chain(skewProp(L), function (st) { return st.skx || 0; }, function (st) { return true; });
+        return t0 + dur;
+    }
+    var CLASSIC = (function () {
+        var f = new File(SS_ROOT + "/library/css_presets.json"), m = {};
+        if (!f.exists) return m;
+        var d = SSM.readJSON(f.fsName.split("\\").join("/"));
+        for (var i = 0; i < d.presets.length; i++) (function (def) {
+            var ch = [];
+            for (var j = 0; j < def.stops.length; j++) for (var k in def.stops[j]) if (def.stops[j].hasOwnProperty(k) && k !== "p" && k !== "e") ch.push(k);
+            var label = (/(^|,)(tx|ty|txp|typ)(,|$)/.test(ch.join(",")) ? "Position · " : "") + (/(^|,)(s|sx|sy)(,|$)/.test(ch.join(",")) ? "Scale · " : "") +
+                        (/(^|,)r(,|$)/.test(ch.join(",")) ? "Rotate · " : "") + (/rx/.test(ch.join(",")) ? "Rotate X (3D) · " : "") +
+                        (/skx/.test(ch.join(",")) ? "Skew · " : "") + (/(^|,)o(,|$)/.test(ch.join(",")) ? "Fade · " : "");
+            m[def.name] = {
+                channels: label.replace(/ · $/, ""), energy: def.energy, use: def.use + " (" + def.role + ")", family: "classic", role: def.role,
+                "in": function (L, t) { return playCss(L, def, t, def.role === "exit"); },
+                "out": function (L, t) {
+                    var t1 = L.outPoint - def.dur;
+                    return playCss(L, def, Math.min(t, t1), def.role === "enter");
+                }
+            };
+        })(d.presets[i]);
+        return m;
+    })();
+    for (var cn in CLASSIC) if (CLASSIC.hasOwnProperty(cn) && !P[cn]) P[cn] = CLASSIC[cn];
+
+    // ---------- Marker-driven timing ----------
+    // With SSP.markerTiming = true (the panel turns it on), apply() records the keyframes each phase creates, drops
+    // "SS in" / "SS out" layer markers where the entrance ends and the exit starts, and adds an expression to every
+    // animated property that remaps time from those markers: drag a marker and the animation (and its curve) stretches.
+    var TAG = "// SS marker timing";
+    function walkKeys(L) {
+        var map = {};
+        (function walk(g, path) {
+            for (var i = 1; i <= g.numProperties; i++) {
+                var pr = g.property(i);
+                if (!pr || pr.matchName === "ADBE Marker" || pr.matchName === "ADBE Time Remapping") continue;
+                var ph = path + "/" + i;
+                if (pr.propertyType === PropertyType.PROPERTY) {
+                    if (pr.numKeys > 0) { var ts = []; for (var k = 1; k <= pr.numKeys; k++) ts.push(pr.keyTime(k)); map[ph] = { prop: pr, t: ts }; }
+                } else if (pr.numProperties) walk(pr, ph);
+            }
+        })(L, "");
+        return map;
+    }
+    function diffKeys(before, after) {   // → { span: [min, max] of new key times, paths: [...] }
+        var lo = 1e9, hi = -1e9, paths = [];
+        for (var ph in after) {
+            if (!after.hasOwnProperty(ph)) continue;
+            var old = before[ph] ? before[ph].t : [], nu = false;
+            for (var i = 0; i < after[ph].t.length; i++) {
+                var t = after[ph].t[i], seen = false;
+                for (var j = 0; j < old.length; j++) if (Math.abs(old[j] - t) < 1e-4) { seen = true; break; }
+                if (!seen) { nu = true; lo = Math.min(lo, t); hi = Math.max(hi, t); }
+            }
+            if (nu) paths.push(ph);
+        }
+        return paths.length ? { span: [lo, hi], paths: paths } : null;
+    }
+    function setMarker(L, label, t) {
+        var M = L.property("ADBE Marker");
+        for (var i = M.numKeys; i >= 1; i--) if (M.keyValue(i).comment === label) M.removeKey(i);
+        M.setValueAtTime(t, new MarkerValue(label));
+    }
+    function markerExpr(A, B, C, D) {
+        return TAG + "\nvar A=" + A + ", B=" + B + ", C=" + C + ", D=" + D + ";\n" +
+            "var st=thisLayer.startTime, lt=time-st, mi=B, mo=C, M=thisLayer.marker;\n" +
+            "for (var i=1;i<=M.numKeys;i++){ var k=M.key(i); if (k.comment==\"SS in\") mi=k.time-st; else if (k.comment==\"SS out\") mo=k.time-st; }\n" +
+            "var u=lt;\n" +
+            "if (A>=0 && lt<mi) u = lt<=A ? lt : A+(lt-A)*(B-A)/Math.max(mi-A,0.001);\n" +
+            "else if (C>=0 && lt>mo) u = lt>=D ? lt : C+(lt-mo)*(D-C)/Math.max(D-mo,0.001);\n" +
+            "else if (A>=0 && C>=0) u = B+(lt-mi)*(C-B)/Math.max(mo-mi,0.001);\n" +
+            "else if (A>=0) u = B+(lt-mi);\n" +
+            "else if (C>=0) u = C-(mo-lt);\n" +
+            "valueAtTime(u+st);";
+    }
+    function withMarkers(L, phase, runIn, runOut) {
+        if (!SSP_STATE.markerTiming) { if (runIn) runIn(); if (runOut) runOut(); return; }
+        var st = L.startTime, k0 = walkKeys(L), dIn = null, dOut = null;
+        if (runIn) { runIn(); var k1 = walkKeys(L); dIn = diffKeys(k0, k1); k0 = k1; }
+        if (runOut) { runOut(); dOut = diffKeys(k0, walkKeys(L)); }
+        if (!dIn && !dOut) return;
+        var all = walkKeys(L), paths = {}, i;
+        if (dIn) for (i = 0; i < dIn.paths.length; i++) paths[dIn.paths[i]] = 1;
+        if (dOut) for (i = 0; i < dOut.paths.length; i++) paths[dOut.paths[i]] = 1;
+        for (var ph in paths) {
+            if (!paths.hasOwnProperty(ph) || !all[ph]) continue;
+            var pr = all[ph].prop;
+            if (!pr.canSetExpression) continue;
+            var ex = pr.expression || "";
+            if (ex && ex.indexOf(TAG) !== 0) continue;   // never overwrite someone else's expression
+            var m = /var A=([-\d.e]+), B=([-\d.e]+), C=([-\d.e]+), D=([-\d.e]+);/.exec(ex);
+            var A = m ? +m[1] : -1, B = m ? +m[2] : -1, C = m ? +m[3] : -1, D = m ? +m[4] : -1;
+            if (dIn) { A = dIn.span[0] - st; B = dIn.span[1] - st; }
+            if (dOut) { C = dOut.span[0] - st; D = dOut.span[1] - st; }
+            pr.expression = markerExpr(A, B, C, D);
+        }
+        if (dIn) setMarker(L, "SS in", dIn.span[1]);
+        if (dOut) setMarker(L, "SS out", dOut.span[0]);
+    }
+    var SSP_STATE = { markerTiming: false };
+
+    // ---------- Packs: one button gives a whole comp a look (library/packs.json) ----------
+    var PACKS = (function () {
+        var f = new File(SS_ROOT + "/library/packs.json");
+        return f.exists ? SSM.readJSON(f.fsName.split("\\").join("/")) : { packs: [] };
+    })();
+    function roleOf(L, comp, maxText) {
+        if (!(L instanceof AVLayer) && !(L instanceof TextLayer) && !(L instanceof ShapeLayer)) return null;
+        if (L.adjustmentLayer || L.guideLayer || L.nullLayer || !L.enabled || L.locked) return null;
+        if (L instanceof AVLayer && !(L instanceof TextLayer) && !(L instanceof ShapeLayer) && !L.hasVideo) return null;
+        if (/logo|brand|mark/i.test(L.name)) return "logo";
+        if (L instanceof TextLayer) {
+            var sz = L.property("ADBE Text Properties").property("ADBE Text Document").value.fontSize;
+            // explicit ifs: ExtendScript mis-evaluates this as a chained ternary
+            if (sz >= maxText * 0.85) return "title";
+            if (sz >= maxText * 0.45) return "subtitle";
+            return "body";
+        }
+        if (L instanceof ShapeLayer) return "shape";
+        var r = L.sourceRectAtTime(L.inPoint, false), sc = L.property("ADBE Transform Group").property("ADBE Scale").value;
+        if (r.width * sc[0] / 100 >= comp.width * 0.98 && r.height * sc[1] / 100 >= comp.height * 0.98) return null;   // full-frame backgrounds stay still
+        return "media";
+    }
     return {
         presets: P,
         recipes: RECIPES,
@@ -646,8 +826,10 @@ var SSP = (function () {
             var pr = TX[name];
             if (!pr) throw new Error("Text preset not found: " + name);
             if (!isText(L)) throw new Error("Layer is not a text layer: " + L.name);
-            if (phase === "in" || phase === "both") pr["in"](L, t0 === undefined ? L.inPoint : t0);
-            if (phase === "out" || phase === "both") pr["out"](L, L.outPoint - SSM.seconds("Arrive"));
+            var doIn = phase === "in" || phase === "both", doOut = phase === "out" || phase === "both";
+            withMarkers(L, phase,
+                doIn ? function () { pr["in"](L, t0 === undefined ? L.inPoint : t0); } : null,
+                doOut ? function () { pr["out"](L, L.outPoint - SSM.seconds("Arrive")); } : null);
             L.comment = "SS text: " + name + " (" + pr.channels + ", " + pr.energy + ")";
         },
         effects: FX,
@@ -663,12 +845,43 @@ var SSP = (function () {
         apply: function (L, name, phase, t0) {
             var pr = P[name];
             if (!pr) throw new Error("Preset not found: " + name);
-            if (phase === "in" || phase === "both") pr["in"](L, t0 === undefined ? L.inPoint : t0);
-            if (phase === "out" || phase === "both") {
-                var dur = SSM.seconds("Arrive");
-                pr["out"](L, phase === "out" && t0 !== undefined ? t0 : L.outPoint - dur);
-            }
+            var doIn = phase === "in" || phase === "both", doOut = phase === "out" || phase === "both";
+            withMarkers(L, phase,
+                doIn ? function () { pr["in"](L, t0 === undefined ? L.inPoint : t0); } : null,
+                doOut ? function () { pr["out"](L, phase === "out" && t0 !== undefined ? t0 : L.outPoint - SSM.seconds("Arrive")); } : null);
             L.comment = "SS preset: " + name + " (" + pr.channels + ", " + pr.energy + ")";
+        },
+        // marker-driven timing on/off (off by default so scripted builds stay plain keyframes)
+        markerTiming: function (on) { if (on !== undefined) SSP_STATE.markerTiming = !!on; return SSP_STATE.markerTiming; },
+        classicNames: function () { var a = []; for (var k in P) if (P.hasOwnProperty(k) && P[k].family === "classic") a.push(k); return a; },
+        packs: function () { return PACKS.packs; },
+        // Applies a pack (library/packs.json) to the given layers (default: every layer of the comp): each layer gets
+        // the preset of its role (title, subtitle, body, shape, media, logo), staggered in stacking order.
+        applyPack: function (comp, packName, layers, phase) {
+            var pk = null;
+            for (var i = 0; i < PACKS.packs.length; i++) if (PACKS.packs[i].name === packName) pk = PACKS.packs[i];
+            if (!pk) throw new Error("Pack not found: " + packName);
+            var ls = [];
+            if (layers && layers.length) for (var a = 0; a < layers.length; a++) ls.push(layers[a]);
+            else for (var b = comp.numLayers; b >= 1; b--) ls.push(comp.layer(b));   // bottom-up: backgrounds first
+            var maxText = 0;
+            for (var c = 0; c < ls.length; c++) if (ls[c] instanceof TextLayer) maxText = Math.max(maxText, ls[c].property("ADBE Text Properties").property("ADBE Text Document").value.fontSize);
+            var order = pk.order || ["media", "shape", "logo", "title", "subtitle", "body"], applied = [], st = (pk.stagger || 3) * comp.frameDuration, n = 0;
+            for (var o = 0; o < order.length; o++) {
+                for (var d = 0; d < ls.length; d++) {
+                    var L = ls[d], role = roleOf(L, comp, maxText);
+                    if (role !== order[o]) continue;
+                    var r = pk.roles[role];
+                    if (!r) continue;
+                    var t0 = L.inPoint + (pk.delay || 0) + n * st;
+                    if (r.text && L instanceof TextLayer) this.applyText(L, r.text, phase || pk.phase || "both", t0);
+                    else if (r.motion) this.apply(L, r.motion, phase || pk.phase || "both", t0);
+                    if (r.fx) this.applyFx(L, r.fx);
+                    applied.push(L.name + " → " + role + ": " + (r.text && L instanceof TextLayer ? r.text : r.motion || "") + (r.fx ? " + " + r.fx : ""));
+                    n++;
+                }
+            }
+            return applied;
         }
     };
 })();

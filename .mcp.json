@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ss-motion": {
+      "command": "python",
+      "args": ["tools/mcp/ss_motion_mcp.py"]
+    }
+  }
+}

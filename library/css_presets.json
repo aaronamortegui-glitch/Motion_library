@@ -1,0 +1,708 @@
+{
+ "source": "Behaviors adapted from animate.css v4.1.1 (MIT License, Copyright (c) 2020 Animate.css / Daniel Eden): keyframe percentages, transforms and timing functions translated to native After Effects keyframes. Later animate.css releases use the Hippocratic License; only the MIT 4.1.1 release is used.",
+ "license_url": "https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.css",
+ "family": "classic",
+ "presets": [
+  {
+   "name": "Back In Down",
+   "css": "backInDown",
+   "role": "enter",
+   "energy": "dynamic",
+   "use": "Cards, product shots, bold drops",
+   "dur": 1.0,
+   "stops": [
+    {
+     "p": 0,
+     "ty": -1200,
+     "s": 0.7,
+     "o": 0.7
+    },
+    {
+     "p": 0.8,
+     "ty": 0,
+     "s": 0.7,
+     "o": 0.7
+    },
+    {
+     "p": 1,
+     "s": 1,
+     "o": 1
+    }
+   ],
+   "ease": [
+    0.25,
+    0.1,
+    0.25,
+    1
+   ]
+  },
+  {
+   "name": "Back In Left",
+   "css": "backInLeft",
+   "role": "enter",
+   "energy": "dynamic",
+   "use": "Slides, lower thirds, carousels",
+   "dur": 1.0,
+   "stops": [
+    {
+     "p": 0,
+     "tx": -2000,
+     "s": 0.7,
+     "o": 0.7
+    },
+    {
+     "p": 0.8,
+     "tx": 0,
+     "s": 0.7,
+     "o": 0.7
+    },
+    {
+     "p": 1,
+     "s": 1,
+     "o": 1
+    }
+   ],
+   "ease": [
+    0.25,
+    0.1,
+    0.25,
+    1
+   ]
+  },
+  {
+   "name": "Bounce In",
+   "css": "bounceIn",
+   "role": "enter",
+   "energy": "dynamic",
+   "use": "Icons, badges, buttons, emoji",
+   "dur": 0.75,
+   "ease": [
+    0.215,
+    0.61,
+    0.355,
+    1
+   ],
+   "stops": [
+    {
+     "p": 0,
+     "s": 0.3,
+     "o": 0
+    },
+    {
+     "p": 0.2,
+     "s": 1.1
+    },
+    {
+     "p": 0.4,
+     "s": 0.9
+    },
+    {
+     "p": 0.6,
+     "s": 1.03,
+     "o": 1
+    },
+    {
+     "p": 0.8,
+     "s": 0.97
+    },
+    {
+     "p": 1,
+     "s": 1,
+     "o": 1
+    }
+   ]
+  },
+  {
+   "name": "Bounce In Up",
+   "css": "bounceInUp",
+   "role": "enter",
+   "energy": "dynamic",
+   "use": "Notifications, stickers, playful entrances",
+   "dur": 1.0,
+   "ease": [
+    0.215,
+    0.61,
+    0.355,
+    1
+   ],
+   "stops": [
+    {
+     "p": 0,
+     "ty": 1400,
+     "sy": 3,
+     "o": 0
+    },
+    {
+     "p": 0.6,
+     "ty": -20,
+     "sy": 0.9,
+     "o": 1
+    },
+    {
+     "p": 0.75,
+     "ty": 10,
+     "sy": 0.95
+    },
+    {
+     "p": 0.9,
+     "ty": -5,
+     "sy": 0.985
+    },
+    {
+     "p": 1,
+     "ty": 0
+    }
+   ]
+  },
+  {
+   "name": "Rubber Band",
+   "css": "rubberBand",
+   "role": "attention",
+   "energy": "dynamic",
+   "use": "CTAs, logos, a beat accent",
+   "dur": 1.0,
+   "stops": [
+    {
+     "p": 0,
+     "s": 1
+    },
+    {
+     "p": 0.3,
+     "sx": 1.25,
+     "sy": 0.75
+    },
+    {
+     "p": 0.4,
+     "sx": 0.75,
+     "sy": 1.25
+    },
+    {
+     "p": 0.5,
+     "sx": 1.15,
+     "sy": 0.85
+    },
+    {
+     "p": 0.65,
+     "sx": 0.95,
+     "sy": 1.05
+    },
+    {
+     "p": 0.75,
+     "sx": 1.05,
+     "sy": 0.95
+    },
+    {
+     "p": 1,
+     "s": 1
+    }
+   ],
+   "ease": [
+    0.25,
+    0.1,
+    0.25,
+    1
+   ]
+  },
+  {
+   "name": "Jello",
+   "css": "jello",
+   "role": "attention",
+   "energy": "dynamic",
+   "use": "Playful accents, stickers",
+   "dur": 1.0,
+   "stops": [
+    {
+     "p": 0
+    },
+    {
+     "p": 0.111
+    },
+    {
+     "p": 0.222,
+     "skx": -12.5
+    },
+    {
+     "p": 0.333,
+     "skx": 6.25
+    },
+    {
+     "p": 0.444,
+     "skx": -3.125
+    },
+    {
+     "p": 0.555,
+     "skx": 1.5625
+    },
+    {
+     "p": 0.666,
+     "skx": -0.78125
+    },
+    {
+     "p": 0.777,
+     "skx": 0.390625
+    },
+    {
+     "p": 0.888,
+     "skx": -0.1953125
+    },
+    {
+     "p": 1
+    }
+   ],
+   "ease": [
+    0.25,
+    0.1,
+    0.25,
+    1
+   ]
+  },
+  {
+   "name": "Heart Beat",
+   "css": "heartBeat",
+   "role": "attention",
+   "energy": "medium",
+   "use": "Likes, prices, a pulse on the beat",
+   "dur": 1.3,
+   "ease": [
+    0.42,
+    0,
+    0.58,
+    1
+   ],
+   "stops": [
+    {
+     "p": 0,
+     "s": 1
+    },
+    {
+     "p": 0.14,
+     "s": 1.3
+    },
+    {
+     "p": 0.28,
+     "s": 1
+    },
+    {
+     "p": 0.42,
+     "s": 1.3
+    },
+    {
+     "p": 0.7,
+     "s": 1
+    },
+    {
+     "p": 1,
+     "s": 1
+    }
+   ]
+  },
+  {
+   "name": "Tada",
+   "css": "tada",
+   "role": "attention",
+   "energy": "dynamic",
+   "use": "Reveals, wins, offers",
+   "dur": 1.0,
+   "stops": [
+    {
+     "p": 0,
+     "s": 1
+    },
+    {
+     "p": 0.1,
+     "s": 0.9,
+     "r": -3
+    },
+    {
+     "p": 0.2,
+     "s": 0.9,
+     "r": -3
+    },
+    {
+     "p": 0.3,
+     "s": 1.1,
+     "r": 3
+    },
+    {
+     "p": 0.4,
+     "s": 1.1,
+     "r": -3
+    },
+    {
+     "p": 0.5,
+     "s": 1.1,
+     "r": 3
+    },
+    {
+     "p": 0.6,
+     "s": 1.1,
+     "r": -3
+    },
+    {
+     "p": 0.7,
+     "s": 1.1,
+     "r": 3
+    },
+    {
+     "p": 0.8,
+     "s": 1.1,
+     "r": -3
+    },
+    {
+     "p": 0.9,
+     "s": 1.1,
+     "r": 3
+    },
+    {
+     "p": 1,
+     "s": 1
+    }
+   ],
+   "ease": [
+    0.25,
+    0.1,
+    0.25,
+    1
+   ]
+  },
+  {
+   "name": "Wobble",
+   "css": "wobble",
+   "role": "attention",
+   "energy": "dynamic",
+   "use": "Errors, jokes, quirky accents",
+   "dur": 1.0,
+   "stops": [
+    {
+     "p": 0
+    },
+    {
+     "p": 0.15,
+     "txp": -25,
+     "r": -5
+    },
+    {
+     "p": 0.3,
+     "txp": 20,
+     "r": 3
+    },
+    {
+     "p": 0.45,
+     "txp": -15,
+     "r": -3
+    },
+    {
+     "p": 0.6,
+     "txp": 10,
+     "r": 2
+    },
+    {
+     "p": 0.75,
+     "txp": -5,
+     "r": -1
+    },
+    {
+     "p": 1
+    }
+   ],
+   "ease": [
+    0.25,
+    0.1,
+    0.25,
+    1
+   ]
+  },
+  {
+   "name": "Swing Hinge",
+   "css": "swing",
+   "role": "attention",
+   "energy": "medium",
+   "use": "Signs, tags, hanging elements",
+   "dur": 1.0,
+   "stops": [
+    {
+     "p": 0
+    },
+    {
+     "p": 0.2,
+     "r": 15
+    },
+    {
+     "p": 0.4,
+     "r": -10
+    },
+    {
+     "p": 0.6,
+     "r": 5
+    },
+    {
+     "p": 0.8,
+     "r": -5
+    },
+    {
+     "p": 1,
+     "r": 0
+    }
+   ],
+   "ease": [
+    0.25,
+    0.1,
+    0.25,
+    1
+   ]
+  },
+  {
+   "name": "Flip In X",
+   "css": "flipInX",
+   "role": "enter",
+   "energy": "medium",
+   "use": "Cards, tiles, scoreboard flips",
+   "dur": 1.0,
+   "stops": [
+    {
+     "p": 0,
+     "rx": 90,
+     "o": 0,
+     "e": [
+      0.42,
+      0,
+      1,
+      1
+     ]
+    },
+    {
+     "p": 0.4,
+     "rx": -20,
+     "e": [
+      0.42,
+      0,
+      1,
+      1
+     ]
+    },
+    {
+     "p": 0.6,
+     "rx": 10,
+     "o": 1
+    },
+    {
+     "p": 0.8,
+     "rx": -5
+    },
+    {
+     "p": 1,
+     "rx": 0
+    }
+   ],
+   "ease": [
+    0.25,
+    0.1,
+    0.25,
+    1
+   ]
+  },
+  {
+   "name": "Light Speed In",
+   "css": "lightSpeedInRight",
+   "role": "enter",
+   "energy": "dynamic",
+   "use": "Speed, sport, fast lower thirds",
+   "dur": 1.0,
+   "ease": [
+    0,
+    0,
+    0.58,
+    1
+   ],
+   "stops": [
+    {
+     "p": 0,
+     "txp": 100,
+     "skx": -30,
+     "o": 0
+    },
+    {
+     "p": 0.6,
+     "skx": 20,
+     "o": 1
+    },
+    {
+     "p": 0.8,
+     "skx": -5
+    },
+    {
+     "p": 1
+    }
+   ]
+  },
+  {
+   "name": "Roll In",
+   "css": "rollIn",
+   "role": "enter",
+   "energy": "dynamic",
+   "use": "Wheels, coins, round icons",
+   "dur": 1.0,
+   "stops": [
+    {
+     "p": 0,
+     "txp": -100,
+     "r": -120,
+     "o": 0
+    },
+    {
+     "p": 1,
+     "o": 1
+    }
+   ],
+   "ease": [
+    0.25,
+    0.1,
+    0.25,
+    1
+   ]
+  },
+  {
+   "name": "Zoom In Down",
+   "css": "zoomInDown",
+   "role": "enter",
+   "energy": "medium",
+   "use": "Titles that drop in from above",
+   "dur": 1.0,
+   "stops": [
+    {
+     "p": 0,
+     "s": 0.1,
+     "ty": -300,
+     "o": 0,
+     "e": [
+      0.55,
+      0.055,
+      0.675,
+      0.19
+     ]
+    },
+    {
+     "p": 0.6,
+     "s": 0.475,
+     "ty": 28,
+     "o": 1,
+     "e": [
+      0.175,
+      0.885,
+      0.32,
+      1
+     ]
+    },
+    {
+     "p": 1,
+     "s": 1,
+     "ty": 0
+    }
+   ],
+   "ease": [
+    0.25,
+    0.1,
+    0.25,
+    1
+   ]
+  },
+  {
+   "name": "Jack In The Box",
+   "css": "jackInTheBox",
+   "role": "enter",
+   "energy": "dynamic",
+   "use": "Surprises, reveals, kids and playful brands",
+   "dur": 1.0,
+   "stops": [
+    {
+     "p": 0,
+     "s": 0.1,
+     "r": 30,
+     "o": 0
+    },
+    {
+     "p": 0.5,
+     "r": -10
+    },
+    {
+     "p": 0.7,
+     "r": 3
+    },
+    {
+     "p": 1,
+     "s": 1,
+     "o": 1
+    }
+   ],
+   "ease": [
+    0.25,
+    0.1,
+    0.25,
+    1
+   ]
+  },
+  {
+   "name": "Back Out Up",
+   "css": "backOutUp",
+   "role": "exit",
+   "energy": "dynamic",
+   "use": "Exits upward, cards leaving",
+   "dur": 1.0,
+   "stops": [
+    {
+     "p": 0,
+     "s": 1,
+     "o": 1
+    },
+    {
+     "p": 0.2,
+     "ty": 0,
+     "s": 0.7,
+     "o": 0.7
+    },
+    {
+     "p": 1,
+     "ty": -1200,
+     "s": 0.7,
+     "o": 0.7
+    }
+   ],
+   "ease": [
+    0.25,
+    0.1,
+    0.25,
+    1
+   ]
+  },
+  {
+   "name": "Zoom Out",
+   "css": "zoomOut",
+   "role": "exit",
+   "energy": "soft",
+   "use": "Quiet exits, scene changes",
+   "dur": 1.0,
+   "stops": [
+    {
+     "p": 0,
+     "o": 1
+    },
+    {
+     "p": 0.5,
+     "s": 0.3,
+     "o": 0
+    },
+    {
+     "p": 1,
+     "s": 0.3,
+     "o": 0
+    }
+   ],
+   "ease": [
+    0.25,
+    0.1,
+    0.25,
+    1
+   ]
+  }
+ ]
+}

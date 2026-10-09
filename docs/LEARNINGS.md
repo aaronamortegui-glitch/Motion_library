@@ -39,6 +39,13 @@ Everything we learned building SS Motion and *The 1974 Boardroom* test, written 
 - If AE closes or crashes, the bridge marker (`bridge/outbox/_bridge_started.txt`) goes stale and jobs wait forever. Launching a closed AE with `AfterFX.exe -s "..."` runs the script and then quits; open AE normally with the project first, then attach the bridge. `tools/bridge.sh` now does this on its own (`SS_AE_PROJECT` overrides the project).
 - AE shows "Not Responding" during a scripted render queue run; check that the output file keeps growing before assuming a hang.
 
+- **Chained ternaries with comparisons are mis-evaluated by ExtendScript**: `return sz >= max*0.85 ? "title" : sz >= max*0.45 ? "subtitle" : "body"` returned "subtitle" for the largest text, and `L instanceof TextLayer ? "text" : L instanceof ShapeLayer ? …` fell through. Use explicit `if` chains.
+- **ScriptUI cannot play GIFs or video.** For live previews, sample each preset's real motion (`tools/sample_previews.jsx` → `library/preview_curves.json`, ~90 KB for 68 presets) and redraw it as vectors in a custom `onDraw`, ticking with `app.scheduleTask(…, 83, true)`; redraw with `hide()/show()`. A flipbook of PNG frames would weigh ~6 MB and stutter.
+- **Marker-driven timing** (like Animation Composer): record the keyframes each phase creates, drop `SS in` / `SS out` layer markers, and put `valueAtTime(remapped time)` expressions on those properties; the keyframes and curves stay intact. Never overwrite an expression that is not ours.
+- Simulated mouse clicks (SendInput) do not reliably reach ScriptUI palettes; expose a scripting hook instead (`SS_PANEL.select(kind, name)`), which the MCP server also uses.
+- **MCP over stdio on Windows:** force UTF-8 on stdin/stdout (`sys.stdout.reconfigure(encoding="utf-8")`); a reader that dies on a non-cp1252 character (`→`) breaks the pipe and looks like a server crash.
+- **License drift in open-source sources:** animate.css moved from MIT to the Hippocratic License after 4.1.1; pin the last permissive version and record it next to the data.
+
 ## 2. Animation Composer as a behavioral reference
 - Presets are encrypted (`.mhcitem`/`.mhitemdata`). We never decrypt or modify the plugin, and we never enable CEP debug modes.
 - Architecture (observed in AE): a preset creates **no keyframes**. Properties get the expression `getAnimationComposerPresetValue()`, driven by pseudo-effects `MHAC PrCtrl <CODE> <ver>` (`AC IN`, `AC OUT`, `AC FX`) whose parameters are the recipe (offset, angle, bounces, scale; FX = frequency/range/time offset), plus `TR In`/`TR Out` markers.

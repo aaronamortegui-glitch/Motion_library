@@ -12,6 +12,7 @@ COLS = 4
 ENERGY = {"s": "soft", "m": "medium", "d": "dynamic"}
 SECTIONS = [
     ("motion", "Motion", "Entrances and exits for any layer. `SSP.apply(layer, name, \"in\" | \"out\" | \"both\")`"),
+    ("classic", "Classics", "Effects adapted from animate.css 4.1.1 (MIT) into native keyframes: entrances, exits and attention moves. Same call as Motion."),
     ("text", "Text", "Per character or per word, on text layers. `SSP.applyText(layer, name, \"in\" | \"out\" | \"both\")`"),
     ("fx", "Effects", "Continuous loops driven by expressions. `SSP.applyFx(layer, name)`"),
     ("recipe", "Recipes", "Behavior measured from reference animations and rebuilt with our own keyframes. `SSP.applyRecipe(layer, id, \"both\")`"),
@@ -36,7 +37,7 @@ def main():
     recipes = recipes.get("recipes", []) if isinstance(recipes, dict) else recipes
     blocks = []
     total = len(lib) + len(recipes)
-    blocks.append(f"**{total} presets** in 4 categories. Every one is also listed in `library/INDEX.txt` (for LLMs) and `library/index.html` (for people).\n")
+    blocks.append(f"**{total} presets** in 5 categories, plus style packs. Every one is also listed in `library/INDEX.txt` (for LLMs) and `library/index.html` (for people).\n")
     for kind, title, blurb in SECTIONS:
         if kind == "recipe":
             cells = []
@@ -49,8 +50,15 @@ def main():
                 style = "loop" if "loop" in r.get("phases", {}) else "transition"
                 cells.append(cell(gif, r.get("name") or r["code"], ENERGY.get(r.get("energy"), r.get("energy", "")), f"{chans} · {style}"))
         else:
-            cells = [cell("library/" + p["gif"], p["name"], p["energy"], p["use"]) for p in lib if p["kind"] == kind]
+            if kind == "classic":
+                cells = [cell("library/" + p["gif"], p["name"], p["energy"], p["use"]) for p in lib if p.get("family") == "classic"]
+            else:
+                cells = [cell("library/" + p["gif"], p["name"], p["energy"], p["use"]) for p in lib if p["kind"] == kind and p.get("family", "ss") != "classic"]
         blocks.append(f"### {title} ({len(cells)})\n\n{blurb}\n\n{table(cells)}\n")
+    packs = json.loads((ROOT / "library/packs.json").read_text(encoding="utf-8"))["packs"]
+    pc = [f"<img src=\"library/packs/{p['slug']}.gif\" width=\"260\"><br>**{p['name']}** · `{p['energy']}`<br><sub>{p['desc']}</sub>" for p in packs]
+    blocks.append(f"### Packs ({len(packs)})\n\nOne click gives a whole comp an identity: each layer gets the preset of its role "
+                  "(title, subtitle, body, shape, media, logo), staggered. `SSP.applyPack(comp, name)`\n\n" + table(pc) + "\n")
     body = "\n".join(blocks)
     s = README.read_text(encoding="utf-8")
     a, b = "<!-- catalog:start -->", "<!-- catalog:end -->"

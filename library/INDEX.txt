@@ -1,7 +1,10 @@
-# SS Motion · 51 presets · tokens v0.2-draft · energy s=soft m=medium d=dynamic
+# SS Motion · 68 presets · tokens v0.2-draft · energy s=soft m=medium d=dynamic
 # calls: motion SSP.apply(L,N,in|out|both) · fx SSP.applyFx(L,N) · text SSP.applyText(L,N,in|out|both) · recipe SSP.applyRecipe(L,ID,both) · include tools/ss_presets.jsx
 # dur(f@30): Tick4 Blink6 Glide9 Arrive14 Sweep21 Stage33
 # ease(bezier): Flat 0,0,1,1; Land 0.12,0.9,0.28,1; Launch 0.55,0,0.9,0.6; Settle 0.3,0,0.1,1; Cruise 0.5,0,0.15,1; Pop 0.34,1.45,0.64,1; Recoil 0.6,0,0.75,-0.4; Ramp 0.87,0,0.13,1; Surge 0.7,0,0.3,1; Whip 0.75,0,0.05,1
+# packs: SSP.applyPack(comp, Dynamic|Elegant|Modern|Playful|Tech[, layers, in|out|both]) · roles title/subtitle/body/shape/media/logo · library/packs.json
+# markers: SSP.markerTiming(true) before apply → layer markers 'SS in'/'SS out' retime the animation when dragged · classics (family classic) = animate.css 4.1.1 MIT
+# mcp: .mcp.json → tools/mcp/ss_motion_mcp.py (list_presets, apply_preset, apply_pack, add_asset, render_frame, run_jsx…)
 # assets (local, licensed, not in repo): python tools/index_assets.py -> library/ASSETS.local.txt (sfx/overlays by category + loudness) · include tools/ss_assets.jsx · SSA.sfx(comp,name,t,gainDb[,len]) · SSA.overlay(comp,name,t[,blend,opacity])
 # hud: SSHUD.bracket/callout/meter/chip/contour/faceScan on TRK nulls · include tools/ss_hud.jsx · scenes: tools/build_scene.jsx + JSON (matte, behind text) · breakdown: tools/build_breakdown.jsx · edits: tools/build_edit.jsx + JSON · read docs/LEARNINGS.md
 # kind|name|channels|e|use
@@ -28,6 +31,23 @@ motion|Whip Pan|Position + motion blur (Whip curve)|d|Swipe transitions, camera-
 motion|Surge Rise|Fade&Position (Surge curve)|m|Headlines, cards, elegant entrances
 motion|Speed Ramp|Time Remap (footage / precomps)|d|Footage, product shots, action beats, transitions
 motion|Punch Zoom|Scale (camera)|m|Footage, precomps, freeze frames, cut emphasis
+motion|Back In Down|Position · Scale · Fade|d|Cards, product shots, bold drops (enter)
+motion|Back In Left|Position · Scale · Fade|d|Slides, lower thirds, carousels (enter)
+motion|Bounce In|Scale · Fade|d|Icons, badges, buttons, emoji (enter)
+motion|Bounce In Up|Position · Scale · Fade|d|Notifications, stickers, playful entrances (enter)
+motion|Rubber Band|Scale|d|CTAs, logos, a beat accent (attention)
+motion|Jello|Skew|d|Playful accents, stickers (attention)
+motion|Heart Beat|Scale|m|Likes, prices, a pulse on the beat (attention)
+motion|Tada|Scale · Rotate|d|Reveals, wins, offers (attention)
+motion|Wobble|Position · Rotate|d|Errors, jokes, quirky accents (attention)
+motion|Swing Hinge|Rotate|m|Signs, tags, hanging elements (attention)
+motion|Flip In X|Rotate X (3D) · Fade|m|Cards, tiles, scoreboard flips (enter)
+motion|Light Speed In|Position · Skew · Fade|d|Speed, sport, fast lower thirds (enter)
+motion|Roll In|Position · Rotate · Fade|d|Wheels, coins, round icons (enter)
+motion|Zoom In Down|Position · Scale · Fade|m|Titles that drop in from above (enter)
+motion|Jack In The Box|Scale · Rotate · Fade|d|Surprises, reveals, kids and playful brands (enter)
+motion|Back Out Up|Position · Scale · Fade|d|Exits upward, cards leaving (exit)
+motion|Zoom Out|Scale · Fade|s|Quiet exits, scene changes (exit)
 fx|Float|Position|s|Idle icons and cards, living backgrounds
 fx|Wiggle Rotate|Rotate|m|Stickers, illustrations with personality
 fx|Pulse|Scale|m|CTAs, buttons, attention grabbers

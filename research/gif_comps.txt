@@ -21,6 +21,23 @@ GIF__motion__Whip Pan
 GIF__motion__Surge Rise
 GIF__motion__Speed Ramp
 GIF__motion__Punch Zoom
+GIF__motion__Back In Down
+GIF__motion__Back In Left
+GIF__motion__Bounce In
+GIF__motion__Bounce In Up
+GIF__motion__Rubber Band
+GIF__motion__Jello
+GIF__motion__Heart Beat
+GIF__motion__Tada
+GIF__motion__Wobble
+GIF__motion__Swing Hinge
+GIF__motion__Flip In X
+GIF__motion__Light Speed In
+GIF__motion__Roll In
+GIF__motion__Zoom In Down
+GIF__motion__Jack In The Box
+GIF__motion__Back Out Up
+GIF__motion__Zoom Out
 GIF__fx__Float
 GIF__fx__Wiggle Rotate
 GIF__fx__Pulse
