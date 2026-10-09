@@ -27,3 +27,15 @@ media/whisky/*_matte.mov
 # Local asset-pack index (licensed assets: names and measurements stay on this machine)
 library/assets.local.json
 library/ASSETS.local.txt
+research/_*.log
+
+# Cypher: candidates, A/B tests and raw downloads stay local
+media/cypher/cand/
+media/cypher/abtest/
+media/cypher/v1_rejected/
+media/cypher/*_raw.mp4
+media/cypher/_*_debug.mp4
+research/qa/
+media/cypher/clip03_aaron.mp4
+media/cypher/clip03_aaron_tracks.json
+media/cypher/shot0*.png

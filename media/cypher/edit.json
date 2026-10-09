@@ -1,0 +1,240 @@
+{
+ "comp": "CYPHER_EDIT",
+ "fps": 24,
+ "size": [
+  1920,
+  1080
+ ],
+ "music": "media/cypher/music_cypher_edit.wav",
+ "musicGainDb": -2,
+ "duckDb": 0,
+ "shots": [
+  {
+   "comp": "CY_SNEAKERS",
+   "dur": 5.05,
+   "speed": [
+    [
+     0,
+     0,
+     "Flat"
+    ],
+    [
+     2.0,
+     1.0,
+     "Ramp",
+     "Swoosh Transition 23"
+    ],
+    [
+     3.4,
+     4.1,
+     "Flat"
+    ],
+    [
+     5.05,
+     5.0
+    ]
+   ],
+   "whooshDb": -12
+  },
+  {
+   "comp": "CY_WIDE",
+   "dur": 5.05,
+   "speed": [
+    [
+     0,
+     0.2,
+     "Flat"
+    ],
+    [
+     1.9,
+     1.2,
+     "Ramp",
+     "Swoosh Transition 23"
+    ],
+    [
+     3.3,
+     5.0,
+     "Flat"
+    ],
+    [
+     5.05,
+     6.4
+    ]
+   ],
+   "whooshDb": -12
+  },
+  {
+   "comp": "CY_AARON",
+   "dur": 5.05,
+   "speed": [
+    [
+     0,
+     0,
+     "Flat"
+    ],
+    [
+     2.2,
+     1.1,
+     "Ramp",
+     "Swoosh Transition 23"
+    ],
+    [
+     3.4,
+     3.9,
+     "Flat"
+    ],
+    [
+     5.05,
+     5.0
+    ]
+   ],
+   "whooshDb": -12
+  },
+  {
+   "comp": "CY_GIAN",
+   "dur": 5.05,
+   "speed": [
+    [
+     0,
+     0,
+     "Flat"
+    ],
+    [
+     2.2,
+     1.1,
+     "Ramp",
+     "Swoosh Transition 23"
+    ],
+    [
+     3.4,
+     3.9,
+     "Flat"
+    ],
+    [
+     5.05,
+     5.1
+    ]
+   ],
+   "whooshDb": -12
+  },
+  {
+   "comp": "CY_DETAILS",
+   "dur": 5.05,
+   "speed": [
+    [
+     0,
+     0,
+     "Flat"
+    ],
+    [
+     1.6,
+     0.9,
+     "Ramp",
+     "Swoosh Transition 23"
+    ],
+    [
+     3.0,
+     3.9,
+     "Flat"
+    ],
+    [
+     5.05,
+     5.0
+    ]
+   ],
+   "whooshDb": -12
+  },
+  {
+   "comp": "CY_WIDE",
+   "dur": 2.53,
+   "speed": [
+    [
+     0,
+     6.4,
+     "Ramp",
+     "Swoosh Transition 23 Reversed"
+    ],
+    [
+     2.53,
+     0.6
+    ]
+   ],
+   "whooshDb": -12
+  }
+ ],
+ "texts": [
+  {
+   "text": "BRONX · 1974",
+   "t": 0.3,
+   "dur": 4.4,
+   "role": "ui",
+   "size": 54,
+   "color": "spark",
+   "tracking": 600,
+   "at": [
+    960,
+    170
+   ],
+   "preset": "Tracking Settle"
+  },
+  {
+   "text": "The Cypher.",
+   "t": 5.25,
+   "dur": 4.2,
+   "size": 170,
+   "at": [
+    960,
+    905
+   ],
+   "preset": "Words Slam",
+   "sfx": "Swoosh Wood 01_Variant Main",
+   "sfxDb": -9,
+   "band": true
+  },
+  {
+   "text": "A SPEED-RAMP TEST · SS MOTION LIBRARY",
+   "t": 5.9,
+   "dur": 3.55,
+   "role": "ui",
+   "size": 30,
+   "tracking": 300,
+   "at": [
+    960,
+    1000
+   ],
+   "preset": "Scramble"
+  },
+  {
+   "text": "Speed ramps.",
+   "t": 25.4,
+   "dur": 2.3,
+   "size": 160,
+   "at": [
+    960,
+    905
+   ],
+   "preset": "Chars Ramp",
+   "band": true
+  },
+  {
+   "text": "RAMP · SURGE · WHIP · NEW IN THE LIBRARY",
+   "t": 25.9,
+   "dur": 1.8,
+   "role": "ui",
+   "size": 30,
+   "color": "spark",
+   "tracking": 300,
+   "at": [
+    960,
+    1000
+   ],
+   "preset": "Scramble"
+  }
+ ],
+ "sfx": [],
+ "endCard": {
+  "dur": 4.6,
+  "title": "SS Motion Library",
+  "kicker": "51 PRESETS · SPEED RAMPS · TRACKING · BY AARON AMORTEGUI & GIAN ORSI"
+ }
+}

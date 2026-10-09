@@ -1,0 +1,314 @@
+{
+ "scenes": [
+  {
+   "comp": "CY_SNEAKERS",
+   "plate": "media/cypher/clip02_sneakers.mp4",
+   "tracks": "media/cypher/clip02_sneakers_tracks.json",
+   "duration": 5.04,
+   "hud": [
+    {
+     "type": "callout",
+     "anchor": "TRK shell_toe_r",
+     "offset": [
+      -300,
+      -330
+     ],
+     "title": "SHELL-TOE LOW",
+     "lines": [
+      "White leather · rubber toe cap",
+      "Est. 1974 · $24.99"
+     ],
+     "t0": 0.15
+    },
+    {
+     "type": "callout",
+     "anchor": "TRK hightop_r",
+     "offset": [
+      -120,
+      -380
+     ],
+     "title": "CANVAS HIGH-TOP",
+     "lines": [
+      "Vulcanized sole · $12.50"
+     ],
+     "t0": 0.45,
+     "color": "coral"
+    },
+    {
+     "type": "bracket",
+     "anchor": "TRK boombox",
+     "size": [
+      260,
+      180
+     ],
+     "label": "THE BOX · 2×6.5\" · 40 W",
+     "t0": 0.3,
+     "t1": 1.9
+    },
+    {
+     "type": "kicker",
+     "text": "BRONX · NEW YORK · SUMMER '74",
+     "at": [
+      110,
+      1010
+     ],
+     "t0": 0.2
+    }
+   ]
+  },
+  {
+   "comp": "CY_WIDE",
+   "plate": "media/cypher/clip01_wide.mp4",
+   "tracks": "media/cypher/clip01_wide_tracks.json",
+   "duration": 6.58,
+   "hud": [
+    {
+     "type": "chip",
+     "anchor": "TRK aaron_face",
+     "offset": [
+      -250,
+      -40
+     ],
+     "text": "AARON",
+     "t0": 0.2,
+     "color": "spark"
+    },
+    {
+     "type": "chip",
+     "anchor": "TRK gian_face",
+     "offset": [
+      230,
+      -40
+     ],
+     "text": "GIAN",
+     "t0": 0.35,
+     "color": "coral"
+    },
+    {
+     "type": "bracket",
+     "anchor": "TRK boombox",
+     "size": [
+      300,
+      170
+     ],
+     "label": "BOOMBOX · STEREO",
+     "t0": 0.5
+    },
+    {
+     "type": "callout",
+     "anchor": "TRK sneaker_a",
+     "offset": [
+      -330,
+      -120
+     ],
+     "title": "SHELL-TOES",
+     "lines": [
+      "Laced loose"
+     ],
+     "t0": 0.7
+    },
+    {
+     "type": "callout",
+     "anchor": "TRK sneaker_g",
+     "offset": [
+      260,
+      -140
+     ],
+     "title": "HIGH-TOPS",
+     "lines": [
+      "Canvas · white"
+     ],
+     "t0": 0.85,
+     "color": "coral"
+    }
+   ]
+  },
+  {
+   "comp": "CY_AARON",
+   "plate": "media/cypher/clip03_aaron_sd.mp4",
+   "tracks": "media/cypher/clip03_aaron_sd_tracks.json",
+   "duration": 5.06,
+   "hud": [
+    {
+     "type": "bracket",
+     "anchor": "TRK glasses",
+     "size": [
+      440,
+      170
+     ],
+     "label": "AMBER TINT · SQUARE FRAME",
+     "t0": 0.2,
+     "t1": 4.0
+    },
+    {
+     "type": "callout",
+     "anchor": "TRK hat",
+     "offset": [
+      420,
+      -10
+     ],
+     "title": "CORDUROY BUCKET",
+     "lines": [
+      "Tan wale · size 7 3/8"
+     ],
+     "t0": 0.45,
+     "t1": 4.0
+    },
+    {
+     "type": "callout",
+     "anchor": "TRK chain",
+     "offset": [
+      -520,
+      -40
+     ],
+     "title": "ROPE CHAIN",
+     "lines": [
+      "14K gold · 30 in",
+      "Est. $480"
+     ],
+     "t0": 0.65,
+     "color": "coral",
+     "t1": 3.4
+    },
+    {
+     "type": "callout",
+     "anchor": "TRK beard",
+     "offset": [
+      470,
+      230
+     ],
+     "title": "VELOUR TRACKSUIT",
+     "lines": [
+      "Burgundy · cream piping"
+     ],
+     "t0": 0.85
+    },
+    {
+     "type": "meter",
+     "at": [
+      1450,
+      110
+     ],
+     "width": 340,
+     "label": "DRIP INDEX",
+     "value": 98,
+     "t0": 1.0
+    }
+   ]
+  },
+  {
+   "comp": "CY_GIAN",
+   "plate": "media/cypher/clip04_gian.mp4",
+   "tracks": "media/cypher/clip04_gian_tracks.json",
+   "duration": 5.17,
+   "hud": [
+    {
+     "type": "callout",
+     "anchor": "TRK cap",
+     "offset": [
+      -440,
+      10
+     ],
+     "title": "SIX-PANEL CAP",
+     "lines": [
+      "Brown wool · curved brim"
+     ],
+     "t0": 0.2,
+     "t1": 4.2
+    },
+    {
+     "type": "callout",
+     "anchor": "TRK turtleneck",
+     "offset": [
+      440,
+      150
+     ],
+     "title": "GOLD AVIATORS",
+     "lines": [
+      "Hooked on the collar",
+      "Clear lenses · '72"
+     ],
+     "t0": 0.45,
+     "color": "coral"
+    },
+    {
+     "type": "callout",
+     "anchor": "TRK stubble",
+     "offset": [
+      470,
+      -60
+     ],
+     "title": "LEATHER BOMBER",
+     "lines": [
+      "Black cowhide · ribbed cuffs"
+     ],
+     "t0": 0.65
+    },
+    {
+     "type": "meter",
+     "at": [
+      110,
+      110
+     ],
+     "width": 340,
+     "label": "COOL FACTOR",
+     "value": 99,
+     "t0": 0.9
+    }
+   ]
+  },
+  {
+   "comp": "CY_DETAILS",
+   "plate": "media/cypher/clip05_details.mp4",
+   "tracks": "media/cypher/clip05_details_tracks.json",
+   "duration": 5.04,
+   "hud": [
+    {
+     "type": "bracket",
+     "anchor": "TRK rope_chain",
+     "size": [
+      300,
+      240
+     ],
+     "label": "ROPE · 8 MM · 14K",
+     "t0": 0.15,
+     "t1": 2.9
+    },
+    {
+     "type": "bracket",
+     "anchor": "TRK watch",
+     "size": [
+      200,
+      200
+     ],
+     "label": "GOLD WATCH · '71",
+     "t0": 0.3,
+     "t1": 1.5,
+     "color": "coral"
+    },
+    {
+     "type": "callout",
+     "anchor": "TRK nameplate",
+     "offset": [
+      -420,
+      -260
+     ],
+     "title": "NAMEPLATE",
+     "lines": [
+      "Script cut · one of one"
+     ],
+     "t0": 0.5
+    },
+    {
+     "type": "kicker",
+     "text": "DETAILS · TRACKED · ZERO KEYFRAMES BY HAND",
+     "at": [
+      110,
+      1010
+     ],
+     "t0": 0.4
+    }
+   ]
+  }
+ ]
+}

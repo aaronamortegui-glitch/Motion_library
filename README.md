@@ -146,8 +146,9 @@ Bigger pieces are data, not code: a scene (`tools/build_scene.jsx`) or a full ed
 | `tools/track_points.py` | OpenCV point tracker → JSON for AE nulls (`--regions regions.json`) |
 | `tools/matte_contours.py` | Per-frame subject contours from an AI matte (`--subjects`, `--split-x`) |
 | `tools/build_scene.jsx` | Scene from JSON: plate, tracking, matte, text behind people, HUD |
-| `tools/build_edit.jsx` | Edit from JSON: cuts, freeze frames with kinetic type, VO, music ducking, SFX, end card |
+| `tools/build_edit.jsx` | Edit from JSON: cuts, **speed ramps** (`speed`), freeze frames with kinetic type, titles (`texts`), VO, music ducking, SFX, end card |
 | `tools/build_breakdown.jsx` | 2×2 roto breakdown (plate · matte · contours · composite) |
+| `tools/face_check.py` | Likeness QA: real photo next to every face found in AI stills or clips |
 | `tools/build_app_screen.jsx` | Browser-window recording of the visualizer, rebuilt from screenshots |
 | `tools/render_comps.jsx` | Renders comps through the open AE's render queue |
 | `tools/ss_assets.jsx` (`SSA`) + `tools/index_assets.py` | Local asset packs: index SFX/overlays by category and loudness, place them by name |
@@ -214,11 +215,20 @@ The repo can be cloned anywhere: scripts compute the repo root (`SS_ROOT`) from 
 ## Documentation
 
 - [`docs/LEARNINGS.md`](docs/LEARNINGS.md) — everything we learned: driving AE from an LLM, ExtendScript pitfalls, rendering, AI footage with Flora, tracking/roto/overlays, typography, audio, repo hygiene and costs.
-- [`docs/case-studies/the-1974-boardroom.md`](docs/case-studies/the-1974-boardroom.md) — the showcase below, step by step, with prompts.
+- [`docs/case-studies/the-1974-cypher.md`](docs/case-studies/the-1974-cypher.md) — speed ramps and likeness QA, step by step.
+- [`docs/case-studies/the-1974-boardroom.md`](docs/case-studies/the-1974-boardroom.md) — the Boardroom showcase, step by step, with prompts.
 
 ---
 
 ## Tests and showcases
+
+### *The 1974 Cypher* (32 s · speed-ramp test)
+
+The two collaborators as a 1970s Bronx crew, back to back. Orbital moves around the outfit details are speed-ramped on the beat with the new `Ramp` curve (slow-mo → burst → slow-mo, a rewind whip on the last beat), with tracked labels on every detail. It also tested likeness: real photos only as identity references, a face-check sheet before spending on video, and an A/B of Seedance 2.5 vs MiniMax H3 Max. Full video: [`docs/examples/cypher_1974.mp4`](docs/examples/cypher_1974.mp4) · step by step: [`docs/case-studies/the-1974-cypher.md`](docs/case-studies/the-1974-cypher.md).
+
+| Ramp on the sneakers | Wide orbit + title | Tracked details |
+|---|---|---|
+| ![Sneakers](docs/examples/cypher-sneakers.gif) | ![Wide](docs/examples/cypher-wide.gif) | ![Details](docs/examples/cypher-details.gif) |
 
 ### *The 1974 Boardroom* (45 s)
 

@@ -56,6 +56,22 @@ Everything we learned building SS Motion and *The 1974 Boardroom* test, written 
 - Music: ElevenLabs Music follows duration and structure from the prompt ("26 seconds… breakdown at second 15…"); design the edit to the BPM (96 BPM → 8 beats = 5 s = one shot).
 - Use blank labels / fictional brands in prompts ("whisky bottle with a blank cream label") so overlays can carry fictional data.
 
+## 3b. Keeping real people's likeness (The 1974 Cypher)
+- **Identity references = real photos only.** Using earlier AI shots of the same person as extra references compounds drift (the Boardroom close-ups had already made both collaborators slimmer and younger; reusing them made it worse).
+- **Describe the person's traits in the prompt** (age, build, face shape, beard, hair texture, eyelids, nose) and say "same age, not idealized". Models default to a younger, more handsome actor.
+- **Wardrobe can break a likeness.** One collaborator stopped reading as himself with a flat cap plus aviators on the face; a cap like the one in his real photo, with the glasses hooked on the collar, fixed it instantly.
+- **Never pass the old master as a reference when fixing faces**: the model copies its faces. Build the new master from real photos + approved close-ups, and describe the scene in text.
+- **Nano Banana 2.1 (`is2i-elote-gateway`) kept likeness better than Nano Banana Pro** in our tests, even with glasses, at ~USD 0.05 per image; `thinking_level: HIGH`.
+- **QA before spending on video:** `python tools/face_check.py --ref <real photo> --out sheet.png <stills or clips>` puts every detected face next to the real one. Run it on stills, then again on the generated clips.
+- **Video models, same shot and prompt (orbit around a face):** Seedance 2.5 (`i2v-gengateway-seedance-2-5-i2v`, 1080p) kept the face *and* the background consistent with a real orbit, but billed **USD 6.05** for 5 s (the estimate said 2.48). MiniMax H3 Max (`i2v-minimax-h3-max-gateway`, 768p, ~USD 0.48, ~15 s) kept the face but the background drifted; upscale to 1080 with lanczos + light unsharp. Kling 3.0 Pro is fine for shots without faces. Use Seedance for the hero face shot, MiniMax for the rest.
+- Flora routes a two-image MiniMax "mixed" request to first-frame/last-frame (`f2v`): the second image becomes the ending, not an identity reference.
+
+## 4c. Speed ramps
+- A speed ramp is a time-remap curve: `edit.json` shots take `"speed": [[editLocal, clipTime, "Ramp"|"Surge"|"Whip"|"Flat", "whoosh sfx"], ...]`. A good pattern per 2-bar shot: slow-mo (≈0.5×) → a `Ramp` burst through most of the clip → slow-mo landing, with the whoosh centred on the burst.
+- Turn on pixel-motion frame blending for the slow parts (`build_edit.jsx` does it); AI clips at 24 fps stutter otherwise.
+- Reversing a clip with a ramp (`[[0, 6.4, "Ramp"], [2.53, 0.6]]`) gives a free "rewind whip" for the last beat.
+- Cut the music on the bar grid (tempo + phase from onset flux) and drop long silences; titles go in a soft lower-third band because orbiting shots move the people across the whole frame.
+
 ## 4. Tracking, roto and overlays
 - **Tracking** (`tools/track_points.py`): pick regions from a gridded first frame (`drawgrid`), radius 40–90 px, textured areas (faces, ties, lapels, glass rims, skyline). Check the debug sheet; low `conf_min` or big drift means the object left the frame → give HUD items a `t1`.
 - Nulls are 100×100 with anchor `[50, 50]`; expressions use `a.toComp(a.transform.anchorPoint)` so tracked points are exact in comp space.
@@ -106,4 +122,7 @@ Everything we learned building SS Motion and *The 1974 Boardroom* test, written 
 | VEED background removal (5 s) | 0.135 |
 | ElevenLabs Music (20–26 s) | 0.36 |
 | ElevenLabs v3 VO line | 0.121 |
+| Nano Banana 2.1 still (2K) | 0.053 |
+| MiniMax H3 Max, 5–6 s 768p | 0.48–0.58 |
+| Seedance 2.5, 5 s 1080p | 6.05 (estimate said 2.48) |
 | *The 1974 Boardroom* v3 total (3 stills, 3 clips, 3 mattes, 3 music tracks, 6 VO lines) | ≈ 5.24 |

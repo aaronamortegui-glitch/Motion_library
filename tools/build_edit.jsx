@@ -6,7 +6,8 @@
 //   "shots": [ { "comp": "WHISKY_01", "in": 0, "dur": 5,
 //                "freeze": { "at": 3.6, "dur": 3.3, "title": "Zero emails.", "sub": "2 EXECUTIVES · 1 DECANTER", "titleAt": 2.6 } } ],
 //   "vo":  [ { "file": "media/whisky/vo/vo01.wav", "shot": 0, "local": 0.1, "gainDb": 0 } ],
-//   "sfx": [ { "name": "Data Beep 05", "shot": 0, "local": 0.4, "gainDb": -9 } ],     // or { "t": absolute seconds }
+//   "sfx": [ { "name": "Data Beep 05", "shot": 0, "local": 0.4, "gainDb": -9 } ],
+//   shots may also carry "speed": [[0, 0, "Ramp", "Swoosh 2"], [2.5, 4.2, "Flat"], [3.2, 4.9]] (speed ramp; dur = last time)     // or { "t": absolute seconds }
 //   "endCard": { "dur": 6, "title": "...", "kicker": "..." } }
 // "shot"/"local" place audio in the shot's own (scene) time, so freezes shift it automatically.
 // The end card is shot index = shots.length. Run: bash tools/bridge.sh tools/build_edit.jsx
@@ -122,6 +123,21 @@
         var sc = Math.max(W / src.width, H / src.height) * 100;
         tr(L, "ADBE Scale").setValue([sc, sc, 100]);
         var fz = shot.freeze, inT = shot["in"] || 0;
+        // speed ramp: "speed": [[editLocal, clipTime, "Ramp"|"Surge"|"Whip"|"Flat", "whoosh sfx"?], ...]
+        // each segment eases from one key to the next; slow parts get pixel-motion frame blending
+        if (shot.speed) {
+            L.timeRemapEnabled = true;
+            var sp = shot.speed, rk = [], rmp = L.property("ADBE Time Remapping");
+            for (var si = 0; si < sp.length; si++) rk.push([starts[k] + sp[si][0], inT + sp[si][1]]);
+            setRemap(rmp, rk);
+            for (var sj = 0; sj < sp.length - 1; sj++) {
+                var ez = sp[sj][2] || "Flat";
+                if (ez !== "Flat") SSM.animateRaw(rmp, rk[sj][0], rk[sj + 1][0], rk[sj][1], rk[sj + 1][1], SSM.ease(ez));
+                if (sp[sj][3]) autoSfx.push({ name: sp[sj][3], t: Math.max(0, (rk[sj][0] + rk[sj + 1][0]) / 2 - 0.3), gainDb: shot.whooshDb || -11 });
+            }
+            L.outPoint = starts[k] + lens[k];
+            try { L.frameBlendingType = FrameBlendingType.PIXEL_MOTION; E.frameBlending = true; } catch (eFB) {}
+        }
         if (fz) {
             L.timeRemapEnabled = true;
             var rm = L.property("ADBE Time Remapping");
@@ -224,6 +240,32 @@
             SSP.apply(U, "Organic Draw", "in", tIn + SSM.seconds("Tick"));
             fadeOut(U, tOut);
         }
+    }
+
+    // ---- 1b) free-standing titles: "texts": [{ text, t, dur, preset, role, size, color, at, tracking, sfx }] ----
+    for (var tx = 0; tx < (spec.texts || []).length; tx++) {
+        var X = spec.texts[tx], tEnd = X.t + X.dur;
+        if (X.band) {   // soft dark lower-third band so type never sits on faces (faces live in the upper half)
+            var BD = E.layers.addSolid(hex(PAL.pine), "Lower third band " + (tx + 1), W, 460, 1);
+            tr(BD, "ADBE Position").setValue([W / 2, H - 230]);
+            var lw = BD.property("ADBE Effect Parade").addProperty("ADBE Linear Wipe");
+            lw.property("ADBE Linear Wipe-0001").setValue(18); lw.property("ADBE Linear Wipe-0002").setValue(180); lw.property("ADBE Linear Wipe-0003").setValue(360);
+            BD.inPoint = X.t; BD.outPoint = tEnd;
+            SSM.animate(tr(BD, "ADBE Opacity"), X.t, 0, 72, "Glide", "Flat");
+            SSM.animate(tr(BD, "ADBE Opacity"), tEnd - SSM.seconds("Glide"), 72, 0, "Glide", "Flat");
+        }
+        var TL = text(E, X.text, X.role || "display", X.size || 180, X.color || "cloud", X.at || [W / 2, H / 2],
+                      ParagraphJustification.CENTER_JUSTIFY, X.tracking || 0, X.t, tEnd);
+        centerOn(TL, X.at || [W / 2, H / 2], X.t);
+        if ((X.role || "display") === "display") {
+            var dsx = TL.property("ADBE Effect Parade").addProperty("ADBE Drop Shadow");
+            dsx.property("ADBE Drop Shadow-0001").setValue(hex(PAL.pine)); dsx.property("ADBE Drop Shadow-0002").setValue(70);
+            dsx.property("ADBE Drop Shadow-0004").setValue(5); dsx.property("ADBE Drop Shadow-0005").setValue(36);
+        }
+        if (X.preset) SSP.applyText(TL, X.preset, "in", X.t);
+        if (X.motion) SSP.apply(TL, X.motion, "in", X.t);
+        fadeOut(TL, tEnd);
+        if (X.sfx) autoSfx.push({ name: X.sfx, t: Math.max(0, X.t - 0.05), gainDb: X.sfxDb || -12 });
     }
 
     // ---- 2) end card ----
