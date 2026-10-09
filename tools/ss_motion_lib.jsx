@@ -54,8 +54,13 @@ var SSM = (function () {
         // Re-eases the segment between keys k and k+1 of prop with a token curve (keeps values and times)
         easeSegment: function (prop, k, easeName) {
             var e = find(T.easings, easeName);
-            // Pop / Recoil are 3-key moves, not 2-key curves: re-ease with their closest 2-key token
-            if (e && !e.ae.out) e = find(T.easings, easeName === "Recoil" ? "Launch" : "Land");
+            // multi-key tokens (Pop, Recoil, Nudge, Wind-up, Snap) are not 2-key curves: re-ease with their closest 2-key token
+            if (e && (!e.ae || !e.ae.out)) {   // explicit ifs: chained ternaries with comparisons misbehave in ExtendScript (LEARNINGS)
+                var alt = "Coast";
+                if (easeName === "Recoil") alt = "Launch";
+                if (easeName === "Pop") alt = "Land";
+                e = find(T.easings, alt);
+            }
             if (!e || k < 1 || k >= prop.numKeys) return;
             if (e.ae.out === "linear") { prop.setInterpolationTypeAtKey(k, prop.keyInInterpolationType(k), KeyframeInterpolationType.LINEAR); prop.setInterpolationTypeAtKey(k + 1, KeyframeInterpolationType.LINEAR, prop.keyOutInterpolationType(k + 1)); return; }
             if (prop.keyOutInterpolationType(k) === KeyframeInterpolationType.HOLD) return;
@@ -75,6 +80,10 @@ var SSM = (function () {
             var e = find(T.easings, easeName);
             if (easeName === "Pop") return this.pop(prop, t0, v0, v1, durName, fps);
             if (easeName === "Recoil") return this.recoil(prop, t0, v0, v1, durName, fps);
+            // multi-key tokens described by their fields (Snap: jump · Nudge: overshoot · Wind-up: anticipation)
+            if (e.jump) return this.snap(prop, t0, v0, v1, durName, fps, null, e);
+            if (e.overshoot) return this.pop(prop, t0, v0, v1, durName, fps, null, e);
+            if (e.anticipation) return this.windup(prop, t0, v0, v1, durName, fps, null, e);
             var k0 = prop.addKey(t0), k1;
             prop.setValueAtKey(k0, v0);
             k1 = prop.addKey(t1);
@@ -94,15 +103,38 @@ var SSM = (function () {
         },
 
         // Overshoot: v0 → v1 + overshoot% of the distance → v1 (Land up to the peak, Settle back)
-        pop: function (prop, t0, v0, v1, durName, fps, durSec) {
+        // tok (optional): a token with overshoot + segments {peak, to, back} (e.g. Nudge); defaults to Pop's shape
+        pop: function (prop, t0, v0, v1, durName, fps, durSec, tok) {
             var dur = durSec || this.seconds(durName, fps);
-            var peak;
-            var ov = find(T.easings, "Pop").overshoot || 0.05;
+            var peak, sg = (tok && tok.segments) || {};
+            var ov = (tok || find(T.easings, "Pop")).overshoot || 0.05;
             if (v0 instanceof Array) { peak = []; for (var i = 0; i < v0.length; i++) peak.push(v1[i] + (v1[i] - v0[i]) * ov); }
             else peak = v1 + (v1 - v0) * ov;
-            var tm = t0 + dur * 0.6;
-            this.animateRaw(prop, t0, tm, v0, peak, find(T.easings, "Land").ae);
-            this.animateRaw(prop, tm, t0 + dur, peak, v1, find(T.easings, "Settle").ae);
+            var tm = t0 + dur * (sg.peak || 0.6);
+            this.animateRaw(prop, t0, tm, v0, peak, find(T.easings, sg.to || "Land").ae);
+            this.animateRaw(prop, tm, t0 + dur, peak, v1, find(T.easings, sg.back || "Settle").ae);
+            return t0 + dur;
+        },
+        // Entrance anticipation (Wind-up): v0 → pulls back anticipation% of the travel → v1 with a long ease-out
+        windup: function (prop, t0, v0, v1, durName, fps, durSec, tok) {
+            var dur = durSec || this.seconds(durName, fps), sg = tok.segments || {}, a = tok.anticipation || 0.04, back;
+            if (v0 instanceof Array) { back = []; for (var i = 0; i < v0.length; i++) back.push(v0[i] - (v1[i] - v0[i]) * a); }
+            else back = v0 - (v1 - v0) * a;
+            var tm = t0 + dur * (sg.split || 0.2);
+            this.animateRaw(prop, t0, tm, v0, back, find(T.easings, sg.back || "Settle").ae);
+            this.animateRaw(prop, tm, t0 + dur, back, v1, find(T.easings, sg.main || "Coast").ae);
+            return t0 + dur;
+        },
+        // Snap: holds v0, jumps jump% of the change in one frame, then settles the rest with a token curve
+        snap: function (prop, t0, v0, v1, durName, fps, durSec, tok) {
+            var dur = durSec || this.seconds(durName, fps), rate = fps || T.fps, j = tok.jump || 0.92, mid;
+            if (v0 instanceof Array) { mid = []; for (var i = 0; i < v0.length; i++) mid.push(v0[i] + (v1[i] - v0[i]) * j); }
+            else mid = v0 + (v1 - v0) * j;
+            var tj = t0 + 1 / rate;
+            prop.setValueAtTime(t0, clampTo(prop, v0));
+            var k0 = prop.nearestKeyIndex(t0);
+            prop.setInterpolationTypeAtKey(k0, prop.keyInInterpolationType(k0), KeyframeInterpolationType.HOLD);
+            this.animateRaw(prop, tj, t0 + dur, mid, v1, find(T.easings, (tok.segments && tok.segments.settle) || "Coast").ae);
             return t0 + dur;
         },
         // Anticipation: v0 → pulls back 4% of the travel (Settle) → v1 (Launch)

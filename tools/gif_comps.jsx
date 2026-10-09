@@ -54,6 +54,16 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         L.property("ADBE Transform Group").property("ADBE Position").setValue([W / 2, H / 2 + size * 0.35]);
         return L;
     }
+    // a column whose anchor sits at its base (grows upward)
+    function column(c) {
+        var L = c.layers.addShape(); L.name = "column";
+        var v = L.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
+        var r = v.addProperty("ADBE Vector Shape - Rect"); r.property("ADBE Vector Rect Size").setValue([110, 230]); r.property("ADBE Vector Rect Roundness").setValue(14);
+        r.property("ADBE Vector Rect Position").setValue([0, -115]);
+        v.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").setValue(hex(PAL.spark));
+        L.property("ADBE Transform Group").property("ADBE Position").setValue([W / 2, H / 2 + 115]);
+        return L;
+    }
     // Speed Ramp works on footage: a precomp where the sample crosses the frame at constant speed
     function constantMotion(c) {
         var src = proj.items.addComp("GIF_src__constant_motion", W, H, 1, 10, 30); src.parentFolder = folder;
@@ -71,6 +81,11 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         var L;   // explicit ifs: ExtendScript runs both branches of this as a chained ternary (see LEARNINGS)
         if (m[a] === "Wipe Reveal") L = bar(c);
         else if (m[a] === "Speed Ramp") L = constantMotion(c);
+        // Motion Style Map set: subjects that show the behavior (full-frame color, a growing bar, a mark + wordmark)
+        else if (m[a] === "Color Wipe") L = c.layers.addSolid(hex(PAL.coral), "Color Wipe", W, H, 1);
+        else if (m[a] === "Iris Reveal") L = c.layers.addSolid(hex(PAL.spark), "Iris Reveal", W, H, 1);
+        else if (m[a] === "Nudge Grow") L = column(c);
+        else if (m[a] === "Wordmark Reveal") { L = text(c, "Motion DNA", SSM.font("ui"), 56); L.property("ADBE Transform Group").property("ADBE Position").setValue([440, H / 2 + 20]); var mk = smark(c, "mark", false); mk.property("ADBE Transform Group").property("ADBE Position").setValue([150, H / 2]); mk.property("ADBE Transform Group").property("ADBE Scale").setValue([75, 75]); mk.moveToBeginning(); }
         else L = smark(c, m[a], /Draw|Stroke/.test(m[a]));
         SSP.apply(L, m[a], "both", 0.2);
         made.push(c.name);
@@ -86,7 +101,8 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         "Blur Words": ["Calm and premium", SSM.font("display"), 64], "Tracking Settle": ["MOTION LAB", SSM.font("ui"), 54],
         "Chars Pop": ["5,000", SSM.font("ui"), 110], "Typewriter": ["Hello, Motion DNA", SSM.font("ui"), 60],
         "Scramble": ["MOTION DNA", SSM.font("ui"), 84], "Count Up": ["12,480", SSM.font("ui"), 110],
-        "Words Slam": ["Words Slam", SSM.font("display"), 80], "Chars Ramp": ["Speed Ramp", SSM.font("display"), 96] };
+        "Words Slam": ["Words Slam", SSM.font("display"), 80], "Chars Ramp": ["Speed Ramp", SSM.font("display"), 96],
+        "Chars Blur": ["Introducing", SSM.font("display"), 96] };
     for (var d = 0; d < tx.length; d++) {
         var c3 = comp("text", tx[d], 2.4);
         var sm = sample[tx[d]] || [tx[d], SSM.font("ui"), 60];

@@ -331,8 +331,107 @@ var SSP = (function () {
             channels: "Scale (camera)", energy: "medium", use: "Footage, precomps, freeze frames, cut emphasis",
             "in": function (L, t) { return SSM.animate(T(L, "ADBE Scale"), t, mul(scl(L), 1.08), scl(L), "Glide", "Land"); },
             "out": function (L, t) { return SSM.animate(T(L, "ADBE Scale"), t, scl(L), mul(scl(L), 1.08), "Glide", "Launch"); }
+        },
+        // ---- Motion Style Map set: behaviors measured on 20 references (research/styles), curves Coast / Nudge / Wind-up / Snap ----
+        "Coast Rise": {
+            channels: "Fade & Position (Coast curve)", energy: "soft", use: "Product UI, editorial headlines, icons: fast start, clean stop", family: "stylemap",
+            "in": function (L, t) {
+                var p = pos(L);
+                SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Blink", "Flat");
+                return SSM.animate(T(L, "ADBE Position"), t, add(p, [0, 90]), p, "Arrive", "Coast");
+            },
+            "out": function (L, t) {   // measured asymmetry: ease-out in, ease-in out (ref08)
+                var p = pos(L);
+                SSM.animate(T(L, "ADBE Opacity"), t + SSM.seconds("Tick"), opa(L), 0, "Blink", "Flat");
+                return SSM.animate(T(L, "ADBE Position"), t, p, add(p, [0, -90]), "Glide", "Launch");
+            }
+        },
+        "Wind-up Slide": {
+            channels: "Fade & Position (Wind-up curve)", energy: "soft", use: "Logo slides, premium reveals: a small pull-back, then a long glide", family: "stylemap",
+            "in": function (L, t) {
+                var p = pos(L);
+                SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Glide", "Flat");
+                return SSM.animate(T(L, "ADBE Position"), t, add(p, [-420, 0]), p, "Stage", "Wind-up");
+            },
+            "out": function (L, t) {
+                var p = pos(L);
+                SSM.animate(T(L, "ADBE Opacity"), t + SSM.seconds("Glide"), opa(L), 0, "Blink", "Flat");
+                return SSM.animate(T(L, "ADBE Position"), t, p, add(p, [420, 0]), "Arrive", "Recoil");
+            }
+        },
+        "Nudge Grow": {
+            channels: "Scale Y (Nudge curve)", energy: "soft", use: "Bars, charts, columns, panels growing from their anchor (put the anchor at the base)", family: "stylemap",
+            "in": function (L, t) { var s = scl(L); return SSM.animate(T(L, "ADBE Scale"), t, [s[0], 0, 100], s, "Sweep", "Nudge"); },
+            "out": function (L, t) { var s = scl(L); return SSM.animate(T(L, "ADBE Scale"), t, s, [s[0], 0, 100], "Glide", "Launch"); }
+        },
+        "Snap Scale": {
+            channels: "Scale & Fade (Snap curve)", energy: "medium", use: "Editorial cuts on the action: shapes and type that jump in size and settle", family: "stylemap",
+            "in": function (L, t) {
+                SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Glide", "Snap");
+                return SSM.animate(T(L, "ADBE Scale"), t, mul(scl(L), 0.15), scl(L), "Glide", "Snap");
+            },
+            "out": function (L, t) {
+                SSM.animate(T(L, "ADBE Opacity"), t, opa(L), 0, "Glide", "Snap");
+                return SSM.animate(T(L, "ADBE Scale"), t, scl(L), mul(scl(L), 0.15), "Glide", "Snap");
+            }
+        },
+        "Iris Reveal": {
+            channels: "Mask (circle expansion, Wind-up curve)", energy: "medium", use: "Scene changes, photo reveals, opening a new section from a point", family: "stylemap",
+            "in": function (L, t) { var m = irisMask(L, t); return SSM.animate(m.ex, t, 0, m.R, "Glide", "Wind-up"); },
+            "out": function (L, t) { var m = irisMask(L, t); return SSM.animate(m.ex, t, m.R, 0, "Glide", "Launch"); }
+        },
+        "Wordmark Reveal": {
+            channels: "Position & Linear Wipe (Surge curve)", energy: "medium", use: "Wordmarks sliding out from behind their logo mark, names after an icon", family: "stylemap",
+            // slides right by the layer width while a wipe (90°: hides from the left) covers the trailing part: the edge stays fixed in the comp, as if the mark covered it
+            "in": function (L, t) {
+                var p = pos(L), w = layerWidth(L, t), wp = linearWipe(L, "SS Wordmark Wipe", 90);
+                SSM.animate(wp.property("ADBE Linear Wipe-0001"), t, 100, 0, "Sweep", "Surge");
+                return SSM.animate(T(L, "ADBE Position"), t, add(p, [-w, 0]), p, "Sweep", "Surge");
+            },
+            "out": function (L, t) {
+                var p = pos(L), w = layerWidth(L, t), wp = linearWipe(L, "SS Wordmark Wipe", 90);
+                SSM.animate(wp.property("ADBE Linear Wipe-0001"), t, 0, 100, "Arrive", "Launch");
+                return SSM.animate(T(L, "ADBE Position"), t, p, add(p, [-w, 0]), "Arrive", "Launch");
+            }
+        },
+        "Push Through": {
+            channels: "Scale & Fade (Launch curve)", energy: "medium", use: "Fly-through transitions: the camera pushes into a word, a logo or a planet and through it", family: "stylemap",
+            "in": function (L, t) {   // the next scene arrives already pushed in and settles
+                SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Blink", "Flat");
+                return SSM.animate(T(L, "ADBE Scale"), t, mul(scl(L), 1.6), scl(L), "Arrive", "Coast");
+            },
+            "out": function (L, t) {  // measured on ref13 / ref17 / ref20: pure ease-in that never lands
+                SSM.animate(T(L, "ADBE Opacity"), t + SSM.seconds("Glide") * 1.2, opa(L), 0, "Tick", "Flat");
+                return SSM.animate(T(L, "ADBE Scale"), t, scl(L), mul(scl(L), 7), "Arrive", "Launch");
+            }
+        },
+        "Color Wipe": {
+            channels: "Linear Wipe 45° (Surge curve)", energy: "medium", use: "Section changes: a full-frame color solid sweeps in diagonally (put it on a solid)", family: "stylemap",
+            "in": function (L, t) { var wp = linearWipe(L, "SS Color Wipe In", 225); return SSM.animate(wp.property("ADBE Linear Wipe-0001"), t, 100, 0, "Glide", "Surge"); },
+            "out": function (L, t) { var wp = linearWipe(L, "SS Color Wipe Out", 45); return SSM.animate(wp.property("ADBE Linear Wipe-0001"), t, 0, 100, "Glide", "Surge"); }
         }
     };
+    // helpers for the Motion Style Map set
+    function layerWidth(L, t) { var r = L.sourceRectAtTime(t, false); return r.width * scl(L)[0] / 100; }
+    function linearWipe(L, name, angle) {
+        var fx = L.property("ADBE Effect Parade"), w = fx.property(name);
+        if (!w) { w = fx.addProperty("ADBE Linear Wipe"); w.name = name; w.property("ADBE Linear Wipe-0002").setValue(angle); w.property("ADBE Linear Wipe-0003").setValue(0); }
+        return w;
+    }
+    function irisMask(L, t) {   // small circle at the layer center; Mask Expansion opens it to cover the whole layer
+        var masks = L.property("ADBE Mask Parade"), m = masks.property("SS Iris");
+        var r = L.sourceRectAtTime(t, false), cx = r.left + r.width / 2, cy = r.top + r.height / 2, R = Math.sqrt(r.width * r.width + r.height * r.height) / 2 + 4;
+        if (!m) {
+            m = masks.addProperty("ADBE Mask Atom"); m.name = "SS Iris";
+            var c = 6, k = c * 0.5523, sh = new Shape();
+            sh.vertices = [[cx, cy - c], [cx + c, cy], [cx, cy + c], [cx - c, cy]];
+            sh.inTangents = [[-k, 0], [0, -k], [k, 0], [0, k]];
+            sh.outTangents = [[k, 0], [0, k], [-k, 0], [0, -k]];
+            sh.closed = true;
+            m.property("ADBE Mask Shape").setValue(sh);
+        }
+        return { ex: m.property("ADBE Mask Offset"), R: R };
+    }
 
 
     // ---------- Effects: continuous loops with editable controls (same idea as AC FX: controls + expression) ----------
@@ -414,6 +513,26 @@ var SSP = (function () {
                 var v = effect(L, "ADBE Venetian Blinds", "SS Holo Scanlines");
                 v.property("ADBE Venetian Blinds-0001").setValue(18); v.property("ADBE Venetian Blinds-0002").setValue(90); v.property("ADBE Venetian Blinds-0003").setValue(4);
                 T(L, "ADBE Opacity").expression = "seedRandom(Math.floor(time*24), true); value * (random() < " + r + "/100 ? 0.55 : 1);";
+            }
+        },
+        // Motion Style Map: hand-made time texture measured on ref04 (texture boil every 3 f) and ref12 (camera on twos)
+        "Boil": {
+            channels: "Position & Rotate (stepped, on 3s)", energy: "medium", use: "Collage, cut-outs, paper and texture layers: a subtle hand-made boil", family: "stylemap",
+            build: function (L) {
+                var a = slider(L, "SS Boil · Amplitude px", 1.5), n = slider(L, "SS Boil · Frames per step", 3);
+                T(L, "ADBE Position").expression = "var n=Math.max(1,Math.round(" + n + ")); seedRandom(Math.floor(timeToFrames(time)/n),true); value + random([-1,-1],[1,1])*" + a + ";";
+                T(L, "ADBE Rotate Z").expression = "var n=Math.max(1,Math.round(" + n + ")); seedRandom(Math.floor(timeToFrames(time)/n)+11,true); value + random(-1,1)*" + a + "*0.35;";
+            }
+        },
+        "On Twos": {
+            channels: "Keyframed transform (stepped time)", energy: "medium", use: "Stop-motion feel: plays the layer's existing animation on 2s or 3s (apply after a motion preset)", family: "stylemap",
+            build: function (L) {
+                var n = slider(L, "SS On Twos · Frames per step", 2);
+                var props = ["ADBE Position", "ADBE Scale", "ADBE Rotate Z", "ADBE Opacity", "ADBE Anchor Point"];
+                for (var i = 0; i < props.length; i++) {
+                    var pr = T(L, props[i]);
+                    if (pr && pr.numKeys > 0 && !pr.expression) pr.expression = "var n=Math.max(1,Math.round(" + n + ")); valueAtTime(framesToTime(Math.floor(timeToFrames(time)/n)*n));";
+                }
             }
         }
     };
@@ -560,6 +679,16 @@ var SSP = (function () {
                 a.props.addProperty("ADBE Text Rotation").setValue(-8);
                 a.props.addProperty("ADBE Text Opacity").setValue(0);
                 return SSM.animate(a.start, t, a.from, 100, "Stage", "Land");
+            }
+        },
+        // Motion Style Map: per-character blur resolve (ref01 opening title: ~2 f per character)
+        "Chars Blur": {
+            channels: "Text · Blur & Fade (char)", energy: "soft", use: "Opening titles, premium intros: characters resolve from blur one after another", family: "stylemap",
+            "in": function (L, t) {
+                var a = textAnimator(L, "SS Chars Blur", 1, 2);
+                a.props.addProperty("ADBE Text Blur").setValue([14, 14]);
+                a.props.addProperty("ADBE Text Opacity").setValue(0);
+                return SSM.animate(a.start, t, a.from, 100, "Stage", "Coast");
             }
         }
     };

@@ -1,7 +1,7 @@
-# Motion DNA · 68 presets · tokens v0.2-draft · energy s=soft m=medium d=dynamic
+# Motion DNA · 79 presets · tokens v0.2-draft · energy s=soft m=medium d=dynamic
 # calls: motion SSP.apply(L,N,in|out|both) · fx SSP.applyFx(L,N) · text SSP.applyText(L,N,in|out|both) · recipe SSP.applyRecipe(L,ID,both) · include tools/ss_presets.jsx
 # dur(f@30): Tick4 Blink6 Glide9 Arrive14 Sweep21 Stage33
-# ease(bezier): Flat 0,0,1,1; Land 0.12,0.9,0.28,1; Launch 0.55,0,0.9,0.6; Settle 0.3,0,0.1,1; Cruise 0.5,0,0.15,1; Pop 0.34,1.45,0.64,1; Recoil 0.6,0,0.75,-0.4; Ramp 0.87,0,0.13,1; Surge 0.7,0,0.3,1; Whip 0.75,0,0.05,1
+# ease(bezier): Flat 0,0,1,1; Land 0.12,0.9,0.28,1; Launch 0.55,0,0.9,0.6; Settle 0.3,0,0.1,1; Cruise 0.5,0,0.15,1; Pop 0.34,1.45,0.64,1; Recoil 0.6,0,0.75,-0.4; Ramp 0.87,0,0.13,1; Surge 0.7,0,0.3,1; Whip 0.75,0,0.05,1; Coast 0.18,0.28,0.0,0.9; Nudge 0.22,0.38,0.05,1.08; Wind-up 0.53,-0.25,0.28,0.89; Snap 0.0,1.17,0.0,0.91
 # styles: SSP.applyPack(comp, name[, layers, in|out|both]) · roles title/subtitle/body/shape/media/logo · library/packs.json · listed at the end
 # markers: SSP.markerTiming(true) before apply → layer markers 'SS in'/'SS out' retime the animation when dragged · classics (family classic) = animate.css 4.1.1 MIT
 # mcp: .mcp.json motion-dna → tools/mcp/ss_motion_mcp.py (list_tags, suggest_mix, match_reference, list_presets, apply_preset[duration,intensity,direction,ease], remove_animation, apply_pack, add_asset, render_frame, run_jsx…)
@@ -33,6 +33,14 @@ motion|Whip Pan|Position + motion blur (Whip curve)|d|Swipe transitions, camera-
 motion|Surge Rise|Fade&Position (Surge curve)|m|Headlines, cards, elegant entrances|enter|2-3|elegant/cinematic/modern
 motion|Speed Ramp|Time Remap (footage / precomps)|d|Footage, product shots, action beats, transitions|transition/emphasis|3-5|cinematic/bold
 motion|Punch Zoom|Scale (camera)|m|Footage, precomps, freeze frames, cut emphasis|emphasis|3-4|cinematic/bold
+motion|Coast Rise|Fade&Position (Coast curve)|s|Product UI, editorial headlines, icons: fast start, clean stop
+motion|Wind-up Slide|Fade&Position (Wind-up curve)|s|Logo slides, premium reveals: a small pull-back, then a long glide
+motion|Nudge Grow|Scale Y (Nudge curve)|s|Bars, charts, columns, panels growing from their anchor (put the anchor at the base)
+motion|Snap Scale|Scale&Fade (Snap curve)|m|Editorial cuts on the action: shapes and type that jump in size and settle
+motion|Iris Reveal|Mask (circle expansion, Wind-up curve)|m|Scene changes, photo reveals, opening a new section from a point
+motion|Wordmark Reveal|Position&Linear Wipe (Surge curve)|m|Wordmarks sliding out from behind their logo mark, names after an icon
+motion|Push Through|Scale&Fade (Launch curve)|m|Fly-through transitions: the camera pushes into a word, a logo or a planet and through it
+motion|Color Wipe|Linear Wipe 45° (Surge curve)|m|Section changes: a full-frame color solid sweeps in diagonally (put it on a solid)
 motion|Back In Down|Position · Scale · Fade|d|Cards, product shots, bold drops (enter)|enter|4-5|playful/bold/retro
 motion|Back In Left|Position · Scale · Fade|d|Slides, lower thirds, carousels (enter)|enter|4-5|playful/bold
 motion|Bounce In|Scale · Fade|d|Icons, badges, buttons, emoji (enter)|enter|4-4|playful/retro
@@ -59,6 +67,8 @@ fx|Swing|Rotate|s|Hanging tags, badges, signs, pendulums|loop|1-2|playful/organi
 fx|Orbit|Position|s|Dots and satellites around a logo, decorative loops|loop|1-2|technical/playful
 fx|Shake|Position&Rotate|d|Impacts, bass hits, alarms, energetic footage|emphasis/loop|4-5|bold
 fx|Holo Flicker|Opacity · Glow&Scanlines|m|HUD labels, tech overlays, holographic UI|loop|3-3|technical/retro
+fx|Boil|Position&Rotate (stepped, on 3s)|m|Collage, cut-outs, paper and texture layers: a subtle hand-made boil
+fx|On Twos|Keyframed transform (stepped time)|m|Stop-motion feel: plays the layer's existing animation on 2s or 3s (apply after a motion preset)
 text|Chars Rise|Position&Fade (char)|m|Short headlines, names, kickers|enter/exit|2-3|modern/elegant
 text|Words Fade Up|Position&Fade (word)|s|Phrases, captions, quotes|enter/exit|1-2|corporate/modern/elegant
 text|Blur Words|Blur&Fade (word)|s|Premium moments, calm intros|enter/exit|1-2|elegant/cinematic/luxury
@@ -69,6 +79,7 @@ text|Scramble|Source Text (decode)|d|Tech, data, HUD labels, reveals|enter|4-4|t
 text|Count Up|Source Text (number)|m|Stats, KPIs, prices, counters|enter|2-3|corporate/technical/modern
 text|Chars Ramp|Position&Fade (char, Ramp curve)|m|Titles that build tension, trailers, reveals|enter|2-4|cinematic/elegant
 text|Words Slam|Scale, Blur&Rotate (word)|d|Punchy statements, social hooks, VO beats|enter|4-5|bold/cinematic
+text|Chars Blur|Blur&Fade (char)|s|Opening titles, premium intros: characters resolve from blur one after another
 recipe|calibration__W3L|position&rotation&scale (loop)|d|AC ref · CALIBRATION
 recipe|calibration__4LC|position&rotation|d|AC ref · CALIBRATION
 recipe|calibration__D2T|position (loop)|d|AC ref · CALIBRATION
@@ -85,6 +96,9 @@ style|Modern|2-3|modern/corporate|Land|Ramp Slide|Chars Rise,Typewriter,Words Fa
 style|Playful|3-5|playful|-|Squash Warp|Chars Pop,Words Fade Up,Words Fade Up,Bounce In,Jack In The Box,Rubber Band
 style|Tech|3-4|technical/retro|-|Whip Pan|Scramble,Typewriter,Typewriter,Line Draw,Light Speed In,Flip In X
 style|Calm Modern|1-2|modern/corporate/friendly|Settle|Ramp Slide|Chars Rise,Words Fade Up,Words Fade Up,Fade Up,Surge Rise,Line Draw
+style|Editorial|2-3|technical/modern/editorial|Coast|Color Wipe|Typewriter,Words Fade Up,Coast Rise,Snap Scale,Iris Reveal,Wordmark Reveal
+style|Storybook|1-3|friendly/warm/playful/organic|Nudge|Iris Reveal|Chars Rise,Blur Words,Words Fade Up,Nudge Grow,Iris Reveal,Wordmark Reveal
+style|Collage|3-5|retro/handmade/bold/organic|Cruise|Whip Pan|Scramble,Typewriter,Words Fade Up,Scale Pop,Whip Pan,Push Through
 # techniques: name|energy range|tones|needs (library/techniques.json has what/how/ask)
 technique|Tracked labels|2-4|technical/modern/cinematic|footage/tracks
 technique|Text behind people|2-4|cinematic/bold/modern|footage/matte

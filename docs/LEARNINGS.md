@@ -28,6 +28,10 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - Time remap: enabling it resets the layer out point, and removing *all* its keys hides the property ("parent property is hidden"). Set your keys first, then delete AE's default keys that aren't yours.
 - Font names must be PostScript names; AE only sees newly installed fonts after a restart. Use `SSM.font(role)`.
 
+- **Helper names in `ss_presets.jsx` share one scope**: a new `function wipe(L, name, angle)` silently replaced the existing `wipe(L)` and broke *Wipe Reveal* ("Unable to call property… undefined"). Grep `function <name>(` before adding a helper; the Style Map set uses `linearWipe`.
+- Multi-key curves (Pop, Recoil, Nudge, Wind-up, Snap) have no 2-key `ae.out/in`: `SSM.animate` dispatches them by their token fields (`overshoot`, `anticipation`, `jump`), and `easeSegment` (the panel's Easing control) re-eases them with their closest 2-key token.
+- **Scheduled tasks from a `#targetengine` job did not reach the panel** on the second recording (the `SS_PANEL` calls were no-ops), while the same call sent as a normal bridge job worked. `tools/record_panel.py` drops one bridge job per step into `bridge/inbox` instead.
+
 ### Rendering
 - `aerender` **hangs** when the project contains layers with Animation Composer presets (the plugin waits for UI). Use the open AE's render queue: `tools/render_comps.jsx` / `tools/render_queue.jsx`.
 - **Prefer `aerender` now that the project has no AC layers**, one process per comp in parallel: `aerender -project <abs .aep> -comp CYPHER_EDIT -OMtemplate "H.264 - Match Render Settings - 15 Mbps" -output <abs .mp4> -mfr ON 100`. The 32 s Cypher edit took **50 s** this way, while the in-app queue sat 40 min at half the file. Paths must be absolute (`cygpath -aw`). It renders the *saved* project, so save after a build.
@@ -142,6 +146,12 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - README GIFs: 400 px, 10 fps, 2.5 s, `hqdn3d` + 48-color palette → ~0.5 MB each even with film grain.
 - Binary assets via Git LFS (`.aep`, `.mp4`, `.mov`, `.webm`, `.ttf`); temporaries (`_*.png`, `*_raw.mp4`, renders) are ignored.
 - Windows console: `PYTHONIOENCODING=utf-8` (or ASCII-only prints) — `→` crashes cp1252 consoles.
+
+- The preview pipeline re-renders **existing** previews too (text GIFs fall back to Arial when AE cannot see Inter Tight, a per-user variable font): after running it for a few new presets, restore the modified old GIFs/MP4s with `git checkout --` and commit only the new files.
+- `make_library_mosaic.py` past ~70 presets: the inline ffmpeg filter graph hit the Windows command-line limit (WinError 206) and the 9-row grid had an odd height for libx264. The graph now goes in a file (`-/filter_complex`) and the grid is padded to even size.
+- `pack_demos.jsx` / `queue_previews_and_styles.jsx` call `app.project.save()`: save the open project to `renders/_preview_build.aep` first, or they overwrite whatever project is open.
+- Motion Style Map: reference videos stay out of git (`references/`, size and third-party rights); measure 60 fps sources on a 30 fps copy (per-frame thresholds depend on fps); continuous transitions don't count as cuts in the energy metric.
+- Subagents can't write `.md` files in this environment: have them return the analysis text and write it from the lead session (never work around the block).
 
 ## 8. Costs observed (Flora, USD)
 | Item | Cost |

@@ -21,6 +21,14 @@ GIF__motion__Whip Pan
 GIF__motion__Surge Rise
 GIF__motion__Speed Ramp
 GIF__motion__Punch Zoom
+GIF__motion__Coast Rise
+GIF__motion__Wind-up Slide
+GIF__motion__Nudge Grow
+GIF__motion__Snap Scale
+GIF__motion__Iris Reveal
+GIF__motion__Wordmark Reveal
+GIF__motion__Push Through
+GIF__motion__Color Wipe
 GIF__motion__Back In Down
 GIF__motion__Back In Left
 GIF__motion__Bounce In
@@ -47,6 +55,8 @@ GIF__fx__Swing
 GIF__fx__Orbit
 GIF__fx__Shake
 GIF__fx__Holo Flicker
+GIF__fx__Boil
+GIF__fx__On Twos
 GIF__text__Chars Rise
 GIF__text__Words Fade Up
 GIF__text__Blur Words
@@ -57,6 +67,7 @@ GIF__text__Scramble
 GIF__text__Count Up
 GIF__text__Chars Ramp
 GIF__text__Words Slam
+GIF__text__Chars Blur
 GIF__recipe__calibration__W3L
 GIF__recipe__calibration__4LC
 GIF__recipe__calibration__D2T

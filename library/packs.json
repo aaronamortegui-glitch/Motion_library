@@ -236,6 +236,131 @@
      "motion": "Line Draw"
     }
    }
+  },
+  {
+   "name": "Editorial",
+   "slug": "editorial",
+   "energy": "medium",
+   "desc": "Brand systems, tech launches, type-led films: typing, snaps on the action, construction lines, clean ease-outs (Motion Style Map: Editorial).",
+   "stagger": 4,
+   "delay": 0,
+   "roles": {
+    "title": {
+     "text": "Typewriter"
+    },
+    "subtitle": {
+     "text": "Words Fade Up"
+    },
+    "body": {
+     "motion": "Coast Rise"
+    },
+    "shape": {
+     "motion": "Snap Scale"
+    },
+    "media": {
+     "motion": "Iris Reveal"
+    },
+    "logo": {
+     "motion": "Wordmark Reveal"
+    }
+   },
+   "tones": [
+    "technical",
+    "modern",
+    "editorial"
+   ],
+   "energy_range": [
+    2,
+    3
+   ],
+   "curve": "Coast",
+   "transition": "Color Wipe",
+   "source": "reference:motion-style-map"
+  },
+  {
+   "name": "Storybook",
+   "slug": "storybook",
+   "energy": "soft",
+   "desc": "Warm product launches and character explainers: line-by-line rises, soft 3% overshoots, circular reveals (Motion Style Map: Warm editorial, Character).",
+   "stagger": 5,
+   "delay": 0.05,
+   "roles": {
+    "title": {
+     "text": "Chars Rise"
+    },
+    "subtitle": {
+     "text": "Blur Words"
+    },
+    "body": {
+     "text": "Words Fade Up"
+    },
+    "shape": {
+     "motion": "Nudge Grow"
+    },
+    "media": {
+     "motion": "Iris Reveal"
+    },
+    "logo": {
+     "motion": "Wordmark Reveal",
+     "fx": "Float"
+    }
+   },
+   "tones": [
+    "friendly",
+    "warm",
+    "playful",
+    "organic"
+   ],
+   "energy_range": [
+    1,
+    3
+   ],
+   "curve": "Nudge",
+   "transition": "Iris Reveal",
+   "source": "reference:motion-style-map"
+  },
+  {
+   "name": "Collage",
+   "slug": "collage",
+   "energy": "dynamic",
+   "desc": "Mixed media, cut-outs, archive and texture: whips through layers, hand-made boil on 3s, decoding type (Motion Style Map: Mixed media).",
+   "stagger": 3,
+   "delay": 0,
+   "roles": {
+    "title": {
+     "text": "Scramble"
+    },
+    "subtitle": {
+     "text": "Typewriter"
+    },
+    "body": {
+     "text": "Words Fade Up"
+    },
+    "shape": {
+     "motion": "Scale Pop",
+     "fx": "Boil"
+    },
+    "media": {
+     "motion": "Whip Pan",
+     "fx": "Boil"
+    },
+    "logo": {
+     "motion": "Push Through"
+    }
+   },
+   "tones": [
+    "retro",
+    "handmade",
+    "bold",
+    "organic"
+   ],
+   "energy_range": [
+    3,
+    5
+   ],
+   "curve": "Cruise",
+   "transition": "Whip Pan",
+   "source": "reference:motion-style-map"
   }
  ]
 }

@@ -3,7 +3,7 @@
   "tool": "ae_status",
   "ok": true,
   "args": {},
-  "answer": "AE 26.5x89 · project: motion_lab_v01.aep · active: _MCP_TEST (1280x720, 4.00s, 2 layers, selected: 1) · panel: loaded"
+  "answer": "AE 26.3x87 · project: _preview_build.aep · active: none · panel: loaded"
  },
  {
   "tool": "list_presets",
@@ -12,7 +12,7 @@
    "kind": "motion",
    "energy": "soft"
   },
-  "answer": "motion|Fade|Fade|soft|Corporate, UI, supporting text\nmotion|Fade Up|Fade & Position|soft|Headlines, paragraphs, lists\nmotion|Blur In|Blur & Fade|soft|Photos, backgrounds, premium moments\nmotion|Zoom Out|Scale · Fade|soft|Quiet exits, scene changes (exit)"
+  "answer": "motion|Fade|Fade|soft|Corporate, UI, supporting text\nmotion|Fade Up|Fade & Position|soft|Headlines, paragraphs, lists\nmotion|Blur In|Blur & Fade|soft|Photos, backgrounds, premium moments\nmotion|Coast Rise|Fade & Position (Coast curve)|soft|Product UI, editorial headlines, icons: fast start, clean st"
  },
  {
   "tool": "list_packs",
@@ -47,7 +47,7 @@
   "args": {
    "profile_path": "library/references/google-calm-modern.json"
   },
-  "answer": "# Reference match: Google — calm, modern product motion (example profile)\n\nEnergy 1–2 (calm to soft) · tones: modern, friendly, corporate · avoid: overshoot, anticipation, retro, Shake, Jitter\n\n## Presets that fit (15)\nChars Rise, Count Up, Fade, Fade Up, Flip In, Flip In X, Float, Line Draw, Pulse,"
+  "answer": "# Reference match: Google — calm, modern product motion (example profile)\n\nEnergy 1–2 (calm to soft) · tones: modern, friendly, corporate · avoid: overshoot, anticipation, retro, Shake, Jitter\n\n## Presets that fit (20)\nChars Rise, Coast Rise, Count Up, Fade, Fade Up, Flip In, Flip In X, Float, Iris "
  },
  {
   "tool": "list_assets",
@@ -56,7 +56,7 @@
    "type": "sfx",
    "limit": 3
   },
-  "answer": "sfx|cartoon|Balloon Blow 04|1.01|-26.0|-12.0|\nsfx|cartoon|Clean Decelerating Creak 01|0.91|-22.9|-3.4|\nsfx|cartoon|Creaking Rubber 05|0.79|-26.8|-0.4|\n… 154 more"
+  "answer": "No local asset index. Run: python tools/index_assets.py"
  },
  {
   "tool": "run_jsx",
@@ -118,7 +118,7 @@
    "comp": "_MCP_TEST",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1791575179.png (open it to look at the frame)"
+  "answer": "Saved C:\\Documentos\\Trabajos Clientes\\Superside\\R+D\\Motion Library Claude\\research\\mcp\\frame_1791577745.png (open it to look at the frame)"
  },
  {
   "tool": "remove_animation",
@@ -143,14 +143,14 @@
  },
  {
   "tool": "add_asset",
-  "ok": true,
+  "ok": false,
   "args": {
    "name": "Swoosh Transition 28",
    "type": "sfx",
    "comp": "_MCP_TEST",
    "time_s": 0.2
   },
-  "answer": "added SFX · Swoosh Transition 28 at 0.2"
+  "answer": "Error: ERROR line 31 in /c/Documentos/Trabajos%20Clientes/Superside/R+D/Motion%20Library%20Claude/tools/ss_assets.jsx\nError: Asset not found in local packs: Swoosh Transition 28 (see library/ASSETS.local.txt)"
  },
  {
   "tool": "run_jsx",

@@ -1,7 +1,7 @@
 {
  "version": "0.2-draft",
  "fps": 30,
- "notes": "Motion DNA tokens. v0.2 calibrated against 6 real transitions sampled in AE (research/calibration_fit.json): entrances 12-17f, typical overshoot ~5%, exits with anticipation.",
+ "notes": "Motion DNA tokens. v0.2 calibrated against 6 real transitions sampled in AE (research/calibration_fit.json): entrances 12-17f, typical overshoot ~5%, exits with anticipation. v0.3: Coast, Nudge, Wind-up and Snap added from the Motion Style Map (20 analyzed references, research/styles).",
  "durations": [
   {
    "name": "Tick",
@@ -221,6 +221,85 @@
      "speed_x_avg": 0
     }
    }
+  },
+  {
+   "name": "Coast",
+   "bezier": [
+    0.18,
+    0.28,
+    0.0,
+    0.9
+   ],
+   "use": "Clean entrances that start fast and coast to a stop (product UI, editorial type, icons)",
+   "ae": {
+    "out": {
+     "influence": 18.0,
+     "speed_x_avg": 1.556
+    },
+    "in": {
+     "influence": 100.0,
+     "speed_x_avg": 0.1
+    }
+   },
+   "source": "Motion Style Map: measured on ref08 title rise, ref05 iris open, ref15 icon hero shrink (distance 0.03-0.06)"
+  },
+  {
+   "name": "Nudge",
+   "bezier": [
+    0.22,
+    0.38,
+    0.05,
+    1.08
+   ],
+   "use": "Soft arrival with a small 3% overshoot and a long settle (charts, emblems, premium UI)",
+   "overshoot": 0.03,
+   "segments": {
+    "peak": 0.7,
+    "to": "Cruise",
+    "back": "Settle"
+   },
+   "ae": {
+    "note": "3 keys: 0 -> 103% (Cruise, 70% of the time) -> 100% (Settle)"
+   },
+   "source": "Motion Style Map: ref03 bar grow, ref19 emblem slide (distance 0.02)"
+  },
+  {
+   "name": "Wind-up",
+   "bezier": [
+    0.53,
+    -0.25,
+    0.28,
+    0.89
+   ],
+   "use": "Entrances with anticipation: pulls back 4%, then a long ease-out (logo slides, reveals)",
+   "anticipation": 0.04,
+   "segments": {
+    "split": 0.2,
+    "back": "Settle",
+    "main": "Coast"
+   },
+   "ae": {
+    "note": "3 keys: 0 -> -4% of the travel (Settle, 20% of the time) -> target (Coast)"
+   },
+   "source": "Motion Style Map: ref01 logo slide, ref03 iris reveal (distance 0.04); entrance counterpart of Recoil"
+  },
+  {
+   "name": "Snap",
+   "bezier": [
+    0.0,
+    1.17,
+    0.0,
+    0.91
+   ],
+   "use": "Editorial cut-on-the-action: jumps 92% of the change in one frame, then settles the rest (scale changes, layout swaps)",
+   "jump": 0.92,
+   "segments": {
+    "settle": "Coast"
+   },
+   "ae": {
+    "note": "hold key: v0 -> (1 frame) 92% of the change -> target with Coast over the rest of the duration"
+   },
+   "source": "Motion Style Map: ref02 OpenAI (measured 4x: 80-97% in one frame, 8-10 f settle)"
   }
  ],
  "ae_conversion": "out.influence = x1*100; out.speed = (y1/x1)*avg; in.influence = (1-x2)*100; in.speed = ((1-y2)/(1-x2))*avg",

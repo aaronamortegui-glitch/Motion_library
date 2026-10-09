@@ -12,14 +12,17 @@
   "bold",
   "cinematic",
   "corporate",
+  "editorial",
   "elegant",
   "friendly",
+  "handmade",
   "luxury",
   "modern",
   "organic",
   "playful",
   "retro",
-  "technical"
+  "technical",
+  "warm"
  ],
  "presets": [
   {
@@ -618,6 +621,220 @@
    "tones": [
     "cinematic",
     "bold"
+   ]
+  },
+  {
+   "name": "Coast Rise",
+   "kind": "motion",
+   "family": "stylemap",
+   "roles": [
+    "enter",
+    "exit"
+   ],
+   "targets": [
+    "title",
+    "text",
+    "ui",
+    "icon"
+   ],
+   "channels": [
+    "opacity",
+    "position"
+   ],
+   "direction": "up",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "corporate",
+    "technical"
+   ]
+  },
+  {
+   "name": "Wind-up Slide",
+   "kind": "motion",
+   "family": "stylemap",
+   "roles": [
+    "enter",
+    "exit"
+   ],
+   "targets": [
+    "logo",
+    "title",
+    "media"
+   ],
+   "channels": [
+    "opacity",
+    "position"
+   ],
+   "direction": "right",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "elegant",
+    "cinematic",
+    "luxury"
+   ]
+  },
+  {
+   "name": "Nudge Grow",
+   "kind": "motion",
+   "family": "stylemap",
+   "roles": [
+    "enter",
+    "exit"
+   ],
+   "targets": [
+    "ui",
+    "shape"
+   ],
+   "channels": [
+    "scale"
+   ],
+   "direction": "up",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "modern",
+    "corporate",
+    "friendly"
+   ]
+  },
+  {
+   "name": "Snap Scale",
+   "kind": "motion",
+   "family": "stylemap",
+   "roles": [
+    "enter",
+    "exit",
+    "emphasis"
+   ],
+   "targets": [
+    "shape",
+    "title",
+    "icon",
+    "ui"
+   ],
+   "channels": [
+    "opacity",
+    "scale"
+   ],
+   "direction": "in-place",
+   "energy": [
+    2,
+    4
+   ],
+   "tones": [
+    "technical",
+    "modern",
+    "bold"
+   ]
+  },
+  {
+   "name": "Iris Reveal",
+   "kind": "motion",
+   "family": "stylemap",
+   "roles": [
+    "transition",
+    "enter"
+   ],
+   "targets": [
+    "media",
+    "background"
+   ],
+   "channels": [
+    "mask"
+   ],
+   "direction": "in-place",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "friendly",
+    "playful",
+    "modern"
+   ]
+  },
+  {
+   "name": "Wordmark Reveal",
+   "kind": "motion",
+   "family": "stylemap",
+   "roles": [
+    "enter",
+    "exit"
+   ],
+   "targets": [
+    "logo",
+    "title"
+   ],
+   "channels": [
+    "position"
+   ],
+   "direction": "right",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "elegant",
+    "corporate"
+   ]
+  },
+  {
+   "name": "Push Through",
+   "kind": "motion",
+   "family": "stylemap",
+   "roles": [
+    "transition",
+    "exit"
+   ],
+   "targets": [
+    "title",
+    "logo",
+    "media"
+   ],
+   "channels": [
+    "opacity",
+    "scale"
+   ],
+   "direction": "in-place",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "cinematic",
+    "bold"
+   ]
+  },
+  {
+   "name": "Color Wipe",
+   "kind": "motion",
+   "family": "stylemap",
+   "roles": [
+    "transition"
+   ],
+   "targets": [
+    "background"
+   ],
+   "channels": [],
+   "direction": "in-place",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "bold",
+    "modern"
    ]
   },
   {
@@ -1271,6 +1488,57 @@
    ]
   },
   {
+   "name": "Boil",
+   "kind": "fx",
+   "family": "stylemap",
+   "roles": [
+    "loop"
+   ],
+   "targets": [
+    "shape",
+    "media",
+    "text"
+   ],
+   "channels": [
+    "position",
+    "rotation"
+   ],
+   "direction": "in-place",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "organic",
+    "retro",
+    "handmade"
+   ]
+  },
+  {
+   "name": "On Twos",
+   "kind": "fx",
+   "family": "stylemap",
+   "roles": [
+    "loop"
+   ],
+   "targets": [
+    "shape",
+    "media",
+    "title"
+   ],
+   "channels": [],
+   "direction": "in-place",
+   "energy": [
+    2,
+    4
+   ],
+   "tones": [
+    "retro",
+    "handmade",
+    "organic"
+   ]
+  },
+  {
    "name": "Chars Rise",
    "kind": "text",
    "family": "own",
@@ -1526,6 +1794,32 @@
     "bold",
     "cinematic"
    ]
+  },
+  {
+   "name": "Chars Blur",
+   "kind": "text",
+   "family": "stylemap",
+   "roles": [
+    "enter"
+   ],
+   "targets": [
+    "title"
+   ],
+   "channels": [
+    "opacity",
+    "blur",
+    "per-char"
+   ],
+   "direction": "in-place",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "elegant",
+    "cinematic",
+    "luxury"
+   ]
   }
  ],
  "curves": [
@@ -1648,6 +1942,58 @@
    ],
    "tones": [
     "cinematic",
+    "bold"
+   ]
+  },
+  {
+   "name": "Coast",
+   "family": "decelerate",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "corporate",
+    "technical"
+   ]
+  },
+  {
+   "name": "Nudge",
+   "family": "overshoot",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "friendly",
+    "elegant",
+    "modern"
+   ]
+  },
+  {
+   "name": "Wind-up",
+   "family": "anticipation",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "elegant",
+    "cinematic",
+    "luxury"
+   ]
+  },
+  {
+   "name": "Snap",
+   "family": "snap",
+   "energy": [
+    2,
+    4
+   ],
+   "tones": [
+    "technical",
+    "modern",
     "bold"
    ]
   }

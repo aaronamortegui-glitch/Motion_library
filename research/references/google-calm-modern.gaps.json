@@ -19,8 +19,8 @@
     1
    ],
    "frequency": "often",
-   "closest": "Ramp Slide",
-   "score": 2.5,
+   "closest": "Iris Reveal",
+   "score": 4.3,
    "suggested_tags": {
     "roles": [
      "transition"
@@ -142,13 +142,13 @@
     "text": "Words Fade Up"
    },
    "shape": {
-    "motion": "Fade"
+    "motion": "Nudge Grow"
    },
    "media": {
     "motion": "Fade"
    },
    "logo": {
-    "motion": "Rotate Settle"
+    "motion": "Coast Rise"
    }
   }
  }

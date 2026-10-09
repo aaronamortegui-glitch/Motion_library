@@ -45,6 +45,15 @@ P = {
     "Surge Rise": (["enter"], ["title", "ui", "media"], "up", [2, 3], ["elegant", "cinematic", "modern"]),
     "Speed Ramp": (["transition", "emphasis"], ["footage"], "in-place", [3, 5], ["cinematic", "bold"]),
     "Punch Zoom": (["emphasis"], ["footage", "media"], "in-place", [3, 4], ["cinematic", "bold"]),
+    # --- Motion Style Map set (measured on 20 references, research/styles) ---
+    "Coast Rise": (["enter", "exit"], ["title", "text", "ui", "icon"], "up", [2, 3], ["modern", "corporate", "technical"]),
+    "Wind-up Slide": (["enter", "exit"], ["logo", "title", "media"], "right", [1, 3], ["elegant", "cinematic", "luxury"]),
+    "Nudge Grow": (["enter", "exit"], ["ui", "shape"], "up", [1, 3], ["modern", "corporate", "friendly"]),
+    "Snap Scale": (["enter", "exit", "emphasis"], ["shape", "title", "icon", "ui"], "in-place", [2, 4], ["technical", "modern", "bold"]),
+    "Iris Reveal": (["transition", "enter"], ["media", "background"], "in-place", [2, 3], ["friendly", "playful", "modern"]),
+    "Wordmark Reveal": (["enter", "exit"], ["logo", "title"], "right", [2, 3], ["modern", "elegant", "corporate"]),
+    "Push Through": (["transition", "exit"], ["title", "logo", "media"], "in-place", [3, 4], ["cinematic", "bold"]),
+    "Color Wipe": (["transition"], ["background"], "in-place", [3, 4], ["playful", "bold", "modern"]),
     # --- classics (animate.css 4.1.1, MIT) ---
     "Back In Down": (["enter"], ["ui", "media"], "down", [4, 5], ["playful", "bold", "retro"]),
     "Back In Left": (["enter"], ["ui"], "right", [4, 5], ["playful", "bold"]),
@@ -73,6 +82,8 @@ P = {
     "Orbit": (["loop"], ["icon", "shape"], "in-place", [1, 2], ["technical", "playful"]),
     "Shake": (["emphasis", "loop"], ["footage", "title"], "in-place", [4, 5], ["bold"]),
     "Holo Flicker": (["loop"], ["ui", "text"], "in-place", [3, 3], ["technical", "retro"]),
+    "Boil": (["loop"], ["shape", "media", "text"], "in-place", [3, 4], ["organic", "retro", "handmade"]),
+    "On Twos": (["loop"], ["shape", "media", "title"], "in-place", [2, 4], ["retro", "handmade", "organic"]),
     # --- text ---
     "Chars Rise": (["enter", "exit"], ["title"], "up", [2, 3], ["modern", "elegant"]),
     "Words Fade Up": (["enter", "exit"], ["text", "title"], "up", [1, 2], ["corporate", "modern", "elegant"]),
@@ -84,6 +95,7 @@ P = {
     "Count Up": (["enter"], ["text"], "in-place", [2, 3], ["corporate", "technical", "modern"]),
     "Chars Ramp": (["enter"], ["title"], "up", [2, 4], ["cinematic", "elegant"]),
     "Words Slam": (["enter"], ["title", "text"], "in-place", [4, 5], ["bold", "cinematic"]),
+    "Chars Blur": (["enter"], ["title"], "in-place", [1, 2], ["elegant", "cinematic", "luxury"]),
 }
 
 # token easings: family, energy range, tones (re-ease any move with these through SSP.tune({ease}))
@@ -98,6 +110,10 @@ CURVES = {
     "Ramp": ("ramp", [3, 5], ["cinematic", "bold"]),
     "Surge": ("ramp", [2, 4], ["elegant", "cinematic", "luxury"]),
     "Whip": ("ramp", [3, 5], ["cinematic", "bold"]),
+    "Coast": ("decelerate", [2, 3], ["modern", "corporate", "technical"]),
+    "Nudge": ("overshoot", [1, 3], ["friendly", "elegant", "modern"]),
+    "Wind-up": ("anticipation", [1, 3], ["elegant", "cinematic", "luxury"]),
+    "Snap": ("snap", [2, 4], ["technical", "modern", "bold"]),
 }
 # durations that fit each energy level (token names)
 TIMING = {"1": ["Stage", "Sweep"], "2": ["Sweep", "Arrive"], "3": ["Arrive", "Glide"], "4": ["Glide", "Blink"], "5": ["Blink", "Tick"]}

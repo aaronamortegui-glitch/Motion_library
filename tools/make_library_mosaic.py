@@ -27,7 +27,7 @@ def esc(s):
 
 args, f = ["ffmpeg", "-v", "error", "-y"], []
 for i, p in enumerate(items):
-    args += ["-stream_loop", "-1", "-t", str(DUR), "-i", str(ROOT / "library/mp4" / p["kind"] / f'{p["slug"]}.mp4')]
+    args += ["-stream_loop", "-1", "-t", str(DUR), "-i", f'library/mp4/{p["kind"]}/{p["slug"]}.mp4']   # relative (cwd=ROOT): shorter command line
     t = tags.get(p["name"], {})
     line2 = (f'{t["energy"][0]}-{t["energy"][1]} · ' + "/".join(t["tones"])) if t else p["energy"]
     f.append(f"[{i}:v]fps=12,scale={CW}:{CH},pad={CW}:{CH + LH}:0:0:color=0x0A211F,"
@@ -37,9 +37,16 @@ rows = (len(items) + COLS - 1) // COLS
 for k in range(len(items), rows * COLS):   # pad the last row
     f.append(f"color=c=0x0A211F:s={CW}x{CH + LH}:d={DUR}:r=12[c{k}]")
 layout = "|".join(f"{(k % COLS) * CW}_{(k // COLS) * (CH + LH)}" for k in range(rows * COLS))
-f.append("".join(f"[c{k}]" for k in range(rows * COLS)) + f"xstack=inputs={rows * COLS}:layout={layout}[g]")
+f.append("".join(f"[c{k}]" for k in range(rows * COLS)) + f"xstack=inputs={rows * COLS}:layout={layout}[gx]")
+f.append("[gx]pad=ceil(iw/2)*2:ceil(ih/2)*2:color=0x0A211F[g]")   # libx264 needs even sizes (rows x 173 px can be odd)
 out = ROOT / "docs/examples/library-mosaic.mp4"
-subprocess.run(args + ["-filter_complex", ";".join(f), "-map", "[g]", "-t", str(DUR), "-c:v", "libx264", "-crf", "24", "-pix_fmt", "yuv420p", str(out)], check=True)
+# the filter graph goes in a file: inline it exceeds the Windows command-line limit (WinError 206) past ~70 presets
+graph = tmp / "graph.txt"
+graph.write_text(";".join(f), encoding="utf-8")
+tail = ["-map", "[g]", "-t", str(DUR), "-c:v", "libx264", "-crf", "24", "-pix_fmt", "yuv420p", str(out)]
+r = subprocess.run(args + ["-/filter_complex", str(graph)] + tail, cwd=ROOT)              # ffmpeg 7+
+if r.returncode != 0:
+    subprocess.run(args + ["-filter_complex_script", str(graph)] + tail, cwd=ROOT, check=True)   # older ffmpeg
 subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(out), "-vf", "fps=8,scale=960:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=48:stats_mode=diff[p];[b][p]paletteuse=dither=none:diff_mode=rectangle",
                 str(ROOT / "docs/examples/library-mosaic.gif")], check=True)
 (ROOT / "research/tests").mkdir(parents=True, exist_ok=True)

@@ -192,7 +192,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var dir = dRow.add("dropdownlist", undefined, ["As designed", "Mirror horizontal", "Mirror vertical", "Mirror both"]); dir.selection = 0;
     var eRow = ctlBox.add("group"); eRow.alignChildren = ["left", "center"];
     eRow.add("statictext", [0, 0, 64, 18], "Easing");
-    var EASES = ["Preset curve", "Land", "Settle", "Launch", "Cruise", "Surge", "Ramp", "Whip", "Flat"];
+    var EASES = ["Preset curve", "Land", "Coast", "Settle", "Launch", "Cruise", "Surge", "Ramp", "Whip", "Flat"];
     var ease = eRow.add("dropdownlist", undefined, EASES); ease.selection = 0;
     var sRow = ctlBox.add("group"); sRow.alignChildren = ["left", "center"];
     sRow.add("statictext", [0, 0, 64, 18], "Stagger");
