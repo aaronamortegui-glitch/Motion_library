@@ -1,0 +1,20 @@
+{
+ "audio": true,
+ "duration_s": 15.1,
+ "bpm": 129.2,
+ "beat_period_s": 0.464,
+ "pulse_clarity": 0.51,
+ "tempo_stability": 0.96,
+ "percussive_share": 0.28,
+ "cuts": 11,
+ "motion_accents": 5,
+ "sync_tolerance_ms": 70,
+ "cuts_on_beat": 0.636,
+ "cuts_on_half_beat": 1.0,
+ "accents_on_beat": 0.2,
+ "chance_on_beat": 0.301,
+ "avg_shot_beats": 2.7,
+ "median_shot_beats": 1.0,
+ "loudness_dynamic_db": 13.5,
+ "verdict": "cut on the beat"
+}

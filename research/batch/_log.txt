@@ -1,0 +1,23 @@
+ref09 done · 1080x1920 @30.000 · {"duration_s": 28.4, "fps": 30.0, "cuts": 41, "cuts_per_min": 86.7, "avg_shot_s": 0.68, "motion_pct": 93.8, "speed_pct_w
+C:\Users\gianc\AppData\Local\Programs\Python\Python312\Lib\site-packages\numba\np\ufunc\dufunc.py:303: RuntimeWarning: invalid value encountered in cast
+  return super().__call__(*args, **kws)
+ref10 done · 1920x1080 @60.000 · {"duration_s": 15.1, "fps": 30.0, "cuts": 11, "cuts_per_min": 43.8, "avg_shot_s": 1.26, "motion_pct": 80.8, "speed_pct_w
+[out#0/wav @ 00000198a5c2c700] Output file does not contain any stream
+Error opening output file C:\Users\gianc\AppData\Local\Temp\_aud_audio.wav.
+Error opening output files: Invalid argument
+ref11 done · 1280x720 @60.000 · {"duration_s": 11.4, "fps": 30.0, "cuts": 5, "cuts_per_min": 26.2, "avg_shot_s": 1.91, "motion_pct": 43.7, "speed_pct_wi
+C:\Users\gianc\AppData\Local\Programs\Python\Python312\Lib\site-packages\numba\np\ufunc\dufunc.py:303: RuntimeWarning: invalid value encountered in cast
+  return super().__call__(*args, **kws)
+ref12 done · 1920x1080 @23.976 · {"duration_s": 17.2, "fps": 23.98, "cuts": 35, "cuts_per_min": 122.2, "avg_shot_s": 0.48, "motion_pct": 44.2, "speed_pct
+ref13 done · 1344x768 @24.000 · {"duration_s": 15.1, "fps": 24.0, "cuts": 5, "cuts_per_min": 19.8, "avg_shot_s": 2.52, "motion_pct": 55.6, "speed_pct_wi
+ref14 done · 1280x720 @60.000 · {"duration_s": 21.6, "fps": 30.0, "cuts": 12, "cuts_per_min": 33.3, "avg_shot_s": 1.66, "motion_pct": 44.1, "speed_pct_w
+ref15 done · 1920x1080 @60.000 · {"duration_s": 38.6, "fps": 30.0, "cuts": 18, "cuts_per_min": 28.0, "avg_shot_s": 2.03, "motion_pct": 54.5, "speed_pct_w
+ref06 done · 1920x1080 @29.970 · {"duration_s": 64.4, "fps": 29.97, "cuts": 26, "cuts_per_min": 24.2, "avg_shot_s": 2.38, "motion_pct": 60.7, "speed_pct_
+ref07 done · 1920x1080 @30.000 · {"duration_s": 60.6, "fps": 30.0, "cuts": 61, "cuts_per_min": 60.4, "avg_shot_s": 0.98, "motion_pct": 30.5, "speed_pct_w
+ref18 done · 1920x1080 @24.000 · {"duration_s": 30.0, "fps": 24.0, "cuts": 10, "cuts_per_min": 20.0, "avg_shot_s": 2.73, "motion_pct": 73.5, "speed_pct_w
+ref16 done · 1280x720 @25.000 · {"duration_s": 60.0, "fps": 25.0, "cuts": 15, "cuts_per_min": 15.0, "avg_shot_s": 3.75, "motion_pct": 77.4, "speed_pct_w
+ref19 done · 1920x480 @24.000 · {"duration_s": 94.6, "fps": 24.0, "cuts": 8, "cuts_per_min": 5.1, "avg_shot_s": 10.51, "motion_pct": 50.9, "speed_pct_wi
+C:\Users\gianc\AppData\Local\Programs\Python\Python312\Lib\site-packages\numba\np\ufunc\dufunc.py:303: RuntimeWarning: invalid value encountered in cast
+  return super().__call__(*args, **kws)
+ref20 done · 1920x816 @25.000 · {"duration_s": 162.0, "fps": 25.0, "cuts": 34, "cuts_per_min": 12.6, "avg_shot_s": 4.63, "motion_pct": 94.7, "speed_pct_
+ref17 done · 1280x720 @29.970 · {"duration_s": 186.8, "fps": 29.97, "cuts": 25, "cuts_per_min": 8.0, "avg_shot_s": 7.18, "motion_pct": 46.3, "speed_pct_

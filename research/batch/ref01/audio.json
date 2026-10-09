@@ -1,0 +1,20 @@
+{
+ "audio": true,
+ "duration_s": 26.6,
+ "bpm": 129.2,
+ "beat_period_s": 0.464,
+ "pulse_clarity": 0.16,
+ "tempo_stability": 0.96,
+ "percussive_share": 0.03,
+ "cuts": 5,
+ "motion_accents": 7,
+ "sync_tolerance_ms": 70,
+ "cuts_on_beat": 0.2,
+ "cuts_on_half_beat": 0.4,
+ "accents_on_beat": 0.286,
+ "chance_on_beat": 0.301,
+ "avg_shot_beats": 9.53,
+ "median_shot_beats": 8.84,
+ "loudness_dynamic_db": 18.2,
+ "verdict": "no clear beat (ambient / voiceover-led)"
+}

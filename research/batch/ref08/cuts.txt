@@ -1,0 +1,2 @@
+fps 30.0 frames 600
+candidate cuts (frame,t,hist,diff):

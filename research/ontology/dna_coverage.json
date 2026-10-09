@@ -1,0 +1,235 @@
+{
+ "stats": {
+  "behaviors": 209,
+  "curve_measured_matched": 29,
+  "curve_measured": 36,
+  "preset_rule": 146,
+  "gap_craft": 47,
+  "gap_other": 16
+ },
+ "presets_used": [
+  [
+   "Scale Pop",
+   17
+  ],
+  [
+   "Float",
+   14
+  ],
+  [
+   "Wordmark Reveal",
+   11
+  ],
+  [
+   "Line Draw",
+   11
+  ],
+  [
+   "Slide Land",
+   11
+  ],
+  [
+   "Push Through",
+   10
+  ],
+  [
+   "Fade",
+   9
+  ],
+  [
+   "Snap Scale",
+   7
+  ],
+  [
+   "Typewriter",
+   7
+  ],
+  [
+   "Color Wipe",
+   7
+  ],
+  [
+   "Blur Words",
+   5
+  ],
+  [
+   "Iris Reveal",
+   5
+  ],
+  [
+   "Jitter",
+   5
+  ],
+  [
+   "Chars Rise",
+   4
+  ],
+  [
+   "Words Fade Up",
+   4
+  ],
+  [
+   "Count Up",
+   3
+  ],
+  [
+   "Orbit",
+   3
+  ],
+  [
+   "Nudge Grow",
+   2
+  ],
+  [
+   "Whip Pan",
+   2
+  ],
+  [
+   "Boil",
+   2
+  ],
+  [
+   "Swing",
+   2
+  ],
+  [
+   "Chars Blur",
+   1
+  ],
+  [
+   "Scramble",
+   1
+  ],
+  [
+   "On Twos",
+   1
+  ],
+  [
+   "Wind-up Slide",
+   1
+  ],
+  [
+   "Drop Bounce",
+   1
+  ]
+ ],
+ "curves_used": [
+  [
+   "Flat",
+   8
+  ],
+  [
+   "Launch",
+   7
+  ],
+  [
+   "Wind-up",
+   4
+  ],
+  [
+   "Coast",
+   4
+  ],
+  [
+   "Snap",
+   3
+  ],
+  [
+   "Cruise",
+   3
+  ],
+  [
+   "Pop",
+   2
+  ],
+  [
+   "Nudge",
+   2
+  ],
+  [
+   "Surge",
+   2
+  ],
+  [
+   "Land",
+   2
+  ],
+  [
+   "Settle",
+   2
+  ],
+  [
+   "Ramp",
+   1
+  ]
+ ],
+ "gaps": {
+  "craft": [
+   "ref01-text-smear-collapse: text smears horizontally (directional blur) and collapses into a point of light that becomes the next element",
+   "ref01-transition-flash-resolve: bloom / flash to flat gray or white; next scene emerges washed out and resolves to full contrast",
+   "ref01-transition-occlusion-wipe: camera passes behind a large out-of-focus foreground object that fills the frame, revealing the next scene",
+   "ref02-particles-converge: scattered particles accelerate toward the center and merge into a single dot",
+   "ref02-match-cut-on-element: the protagonist dot stays fixed while the world around it changes by cut (or it transforms into the next eleme",
+   "ref03-dot-continuity: the same accent dot persists across scenes: cursor → reveal → center node → drops and squashes into the first ",
+   "ref04-camera-travel-layers: camera travels fast through 2.5D collage layers (up / diagonal) to the next composition, with motion blur",
+   "ref04-silhouette-collage-fill: a B/W photo silhouette fills with colorful collage (pink, pills) as a scribbled wipe",
+   "ref04-label-morph: a pill-shaped label shrinks, empties and refills with the next text",
+   "ref04-walk-cycle-silhouettes: silhouette people walk in cycles along a line",
+   "ref05-walk-in-stop: character walks in from the frame edge in a walk cycle and stops in pose",
+   "ref05-gag-chair-roll-in: character rolls into frame on an office chair with speed lines and decelerates into place (gag entrance)",
+   "ref05-narrator-acting: narrator bust acts while talking: head tilts, blinks, brow raises, mouth shapes",
+   "ref05-character-jump-arc: character jumps in arcs from bar to bar",
+   "ref05-object-continuity-pan: the phone stays in place while the world behind it changes (tower → map → body → restaurant)",
+   "ref05-zoom-out-scales: camera zooms out across scales: landscape → map → globe",
+   "ref08-edit-off-beat: card changes paced by reading time (~3.5 s ≈ 5 beats at 89 BPM), not locked to the beat; accents on beat 14% v",
+   "ref09-hud-frame-persistent: persistent HUD overlay in all scenes: corner brackets, title 'KAMI CIRCUIT 神回路 — 01', running timecode T+xx.xx",
+   "ref09-split-word-cards: a word is split across consecutive full-frame cards (KA / MI / CIR / CUIT), each card a different background (",
+   "ref11-whiteout-to-window: blue gradient bleaches to white (flash/white-out ~0.4 s), then the white browser window is revealed as the cam",
+   "ref06-teaser-flash-cuts: cold open flashes later shots of the film, about one every 4 f, before the logo",
+   "ref06-edit-off-beat: music-sync: cuts follow the copy, not the beat; shots run about one bar",
+   "ref07-cuts-ignore-beat: music-sync: clear beat but cuts deliberately off it (below chance); only section changes follow the music",
+   "ref07-particles-form-word: a field of pixel glyphs and shapes rains down and resolves into the word 'PIXEL' in the pixel typeface, then t",
+   "ref07-liquid-drip-open: black liquid simulation dripping over a hidden triangle on white (the mark implied by fluid), then cut to a ci",
+   "ref12-tile-repeat-cut: cut from a single patent drawing to a 3-up repeat of the same drawing",
+   "ref12-lut-section-switch: same x-ray imagery recolored with a thermal yellow/green LUT on a cut; color treatment marks the section",
+   "ref12-circle-graphic-match: click wheel shrinks to a concentric target, cut to a giant bright ring of the same shape, then ~3% slow push",
+   "ref12-stepped-list-scroll: camera tracks down the patent's SONG 1…8 list, roughly one line per 2 frames (stepped)",
+   "ref14-tracking-hud-boxes: thin rectangles follow each flying dove (computer-vision tracking HUD over footage)",
+   "ref15-icon-hero-shrink: lime app-icon square arrives oversized (fills most of the frame) and shrinks toward icon size with a fast star",
+   "ref15-icon-color-fill: app icon on a phone home screen fills from dark through an orange gradient to lime",
+   "ref15-page-peel-montage: brand-identity applications (logo plate, app UI, type specimen, badge, social posts, poster) change by page-cu",
+   "ref16-long-camera-flight: one continuous overhead camera flight over a low-poly papercraft landscape (coral land, faceted water, teal br",
+   "ref16-follow-tag: small blue tag 'Follow this truck!' pinned to one truck in the swarm, tracking it through the flight; a yellow",
+   "ref16-banner-continuity-dissolve: the 'READY?' banner keeps its screen position while the scene behind it dissolves from the blue backdrop to th",
+   "ref18-pullback-word-reveal: after the letter-by-letter journey, a cut to a wide shot reveals the whole word TEAMWORK as one playground, wi",
+   "ref18-character-climb-assist: figures climb, pull and boost each other up structures, then celebrate together (high-five); acting built on c",
+   "ref18-logo-cut-endcard: cut to a static cream end card: PNC Bank logo with tagline and a single figure standing beside it; no logo ani",
+   "ref18-build-to-reveal: music-sync: the music builds through the letter shots and peaks around the wide TEAMWORK reveal, then decays u",
+   "ref19-cursor-bar-erase: a thin vertical bar travels left to right across 'AMÉRICA LATINA / INTEGRACIÓN ENERGÉTICA', erasing the letter",
+   "ref19-edit-free-of-beat: scenes change mostly through continuous camera moves and wipes; the 8 hard cuts do not follow the 129 BPM grid",
+   "ref17-edit-free-of-beat: scene changes and text builds follow the sequence of facts, not the music: no clear pulse and cuts land on bea",
+   "ref20-camera-fall-to-ground: camera drops past a falling icon bubble onto the textured ground plane, holds on the ground, then tilts up int",
+   "ref20-bubble-icon-swap: the bubble stays put and its icon is replaced by a cut (clock -> briefcase -> document; clock -> car) to show ",
+   "ref20-flip-clock-digits: flip-clock digits roll to 07:00 in close-up as the morning beat, then a match cut to the commuter",
+   "ref20-flow-over-clear-pulse: a clear tonal pulse runs under a camera that never stops; cuts and motion accents fall on beat at chance level"
+  ],
+  "other": [
+   "ref01-accent-fast-crosser: one small element (arrow, paper plane) crosses the frame much faster than everything else",
+   "ref02-hold-still: absolutely still hold before the next change",
+   "ref03-accent-word-roll-accelerando: accent word rolls vertically (slot machine) to the next word; the interval between rolls shrinks to build tens",
+   "ref03-list-tick-sync: task list items appear one by one with a check, synced with a progress bar",
+   "ref04-particle-stream-objects: a stream of objects (pills) pours out of a figure",
+   "ref05-rocket-launch: rocket accelerates upward off frame with a smoke puff trail",
+   "ref09-manga-speedline-hit: tomoe emblem slams in center with radial manga speed lines, katakana SFX (ドンッ, ゴゴ, ドッ) and an empty speech bub",
+   "ref11-logo-spin-shrink-in: asterisk mark enters oversized (bigger than frame) and spins ~60° while shrinking to rest with motion blur, ov",
+   "ref06-chat-bubble-stack: chat bubble arrives as a blurred dark bar stretched right, resolves into the pill, text types in; stack scroll",
+   "ref07-highlight-bar-type: black highlight bars wipe across a serif headline letter-group by letter-group, inverting it to white on black",
+   "ref07-mascot-blink: robot mascot's '||' eyes squash to '..' and back (blink), police lights flash",
+   "ref13-still-slow-push: every still keeps a slow push while the text holds; never fully static until the end poster",
+   "ref13-phrase-cadence-2s: scene changes on a regular ~2 s cadence (one phrase per scene), not locked to a musical beat",
+   "ref14-black-text-card: key lines on a plain near-black card, small centered type, no animation, held 1.5–2.2 s",
+   "ref15-logo-before-drop: quiet 3 s intro; the logo resolves to the solid icon at 2.93 s and the full track kicks in on the next beat (~",
+   "ref16-ribbon-banner-flyin: a small dark cube drops in, then unfolds into a folded-paper ribbon banner that flies in from the right with s"
+  ]
+ }
+}

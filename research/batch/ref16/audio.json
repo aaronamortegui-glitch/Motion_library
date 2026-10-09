@@ -1,0 +1,20 @@
+{
+ "audio": true,
+ "duration_s": 60.1,
+ "bpm": 117.5,
+ "beat_period_s": 0.511,
+ "pulse_clarity": 0.45,
+ "tempo_stability": 0.97,
+ "percussive_share": 0.28,
+ "cuts": 15,
+ "motion_accents": 22,
+ "sync_tolerance_ms": 70,
+ "cuts_on_beat": 0.4,
+ "cuts_on_half_beat": 0.467,
+ "accents_on_beat": 0.364,
+ "chance_on_beat": 0.274,
+ "avg_shot_beats": 7.35,
+ "median_shot_beats": 1.41,
+ "loudness_dynamic_db": 10.7,
+ "verdict": "loosely beat-aware"
+}

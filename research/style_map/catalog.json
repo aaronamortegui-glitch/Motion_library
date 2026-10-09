@@ -1,0 +1,1613 @@
+{
+  "version": 1,
+  "videos": [
+    {
+      "id": "ref01",
+      "title": "Linear — brand film",
+      "file": "references/01_elegant_corporate/ref01.mp4",
+      "analysis": "research/styles/01_elegant_corporate/ref01_linear.md",
+      "thumb": "thumbs/ref01.jpg",
+      "family": "01 Elegant",
+      "substyle": "Cinematic",
+      "format": "Brand film",
+      "mood": [
+        "Contemplative",
+        "Premium",
+        "Elegant"
+      ],
+      "cast": "Abstract shapes",
+      "space": "3D",
+      "motion_language": "Smooth tween",
+      "transitions": [
+        "Light (flash, bloom)",
+        "Camera move"
+      ],
+      "tone": {
+        "secondary_motion": [
+          0.5,
+          "4% anticipation and 4% overshoot on the logo, no oscillation"
+        ],
+        "color": [
+          0,
+          "fully monochrome"
+        ],
+        "typography": [
+          0,
+          "small light italic phrases, blur-fade per word"
+        ],
+        "shape_language": [
+          0,
+          "precise 3D geometry: spheres, cubes, rings"
+        ],
+        "character_humor": [
+          0,
+          "none; people only as a tiny crowd"
+        ]
+      },
+      "metrics": {
+        "duration_s": 26.5,
+        "fps": 24.0,
+        "cuts": 5,
+        "cuts_per_min": 11.3,
+        "avg_shot_s": 4.42,
+        "motion_pct": 63.1,
+        "speed_pct_width_per_s": 2.9,
+        "holds_count": 7,
+        "hold_median_s": 1.38,
+        "hold_max_s": 2.63,
+        "colorfulness": 2.1,
+        "energy_score": 4.0,
+        "energy_parts": {
+          "cuts": 5.2,
+          "motion": 6.3,
+          "speed": 0.5
+        }
+      },
+      "signature": "Slow tweens with long deceleration, blur as a tool, light-based transitions, logo built by a slide-reveal.",
+      "music": {
+        "audio": true,
+        "bpm": 129.2,
+        "pulse_clarity": 0.16,
+        "percussive_share": 0.03,
+        "cuts_on_beat": 0.2,
+        "cuts_on_half_beat": 0.4,
+        "accents_on_beat": 0.286,
+        "chance_on_beat": 0.301,
+        "median_shot_beats": 8.84,
+        "verdict": "no clear beat (ambient / voiceover-led)",
+        "summary": "Ambient score with no clear beat (pulse 0.16, almost no percussion); the light-flash transitions follow the copy, not the music."
+      },
+      "variant": "3D light & depth",
+      "substyle_status": "draft"
+    },
+    {
+      "id": "ref02",
+      "title": "OpenAI — brand film",
+      "file": "references/01_elegant_corporate/ref02.mp4",
+      "analysis": "research/styles/01_elegant_corporate/ref02_openai.md",
+      "thumb": "thumbs/ref02.jpg",
+      "family": "01 Elegant",
+      "substyle": "Editorial",
+      "format": "Brand film",
+      "mood": [
+        "Precise",
+        "Confident",
+        "Technical"
+      ],
+      "cast": "Typography",
+      "space": "2D flat",
+      "motion_language": "Snap",
+      "transitions": [
+        "Cut / match cut",
+        "Morph / transform"
+      ],
+      "tone": {
+        "secondary_motion": [
+          0,
+          "none; only an 8–10 f micro-settle after each snap"
+        ],
+        "color": [
+          0.5,
+          "black on white; color only in one section and in the photos"
+        ],
+        "typography": [
+          1,
+          "editorial bursts with big glyphs and rotated words, but never deformed"
+        ],
+        "shape_language": [
+          0,
+          "precise geometry and construction lines"
+        ],
+        "character_humor": [
+          0,
+          "none"
+        ]
+      },
+      "metrics": {
+        "duration_s": 110.0,
+        "fps": 30.0,
+        "cuts": 58,
+        "cuts_per_min": 31.6,
+        "avg_shot_s": 1.86,
+        "motion_pct": 19.8,
+        "speed_pct_width_per_s": 18.5,
+        "holds_count": 50,
+        "hold_median_s": 0.8,
+        "hold_max_s": 9.63,
+        "colorfulness": 12.3,
+        "energy_score": 4.1,
+        "energy_parts": {
+          "cuts": 7.3,
+          "motion": 2.0,
+          "speed": 3.1
+        }
+      },
+      "signature": "A single dot carries the film; snap + micro-settle instead of tweens; construction lines → solid; human-cadence typing.",
+      "music": {
+        "audio": true,
+        "bpm": 95.7,
+        "pulse_clarity": 0.27,
+        "percussive_share": 0.31,
+        "cuts_on_beat": 0.328,
+        "cuts_on_half_beat": 0.431,
+        "accents_on_beat": 0.387,
+        "chance_on_beat": 0.223,
+        "median_shot_beats": 1.12,
+        "verdict": "loosely beat-aware",
+        "summary": "~96 BPM pulse with moderate percussion; the fast layout bursts sit loosely on the beat (33% of cuts on beat vs 22% by chance, 43% on half-beats); shots last ~1 beat."
+      },
+      "variant": "Swiss snap",
+      "substyle_status": "draft"
+    },
+    {
+      "id": "ref03",
+      "title": "Claude Fable 5.5 — launch film",
+      "file": "references/01_elegant_corporate/ref03.mp4",
+      "analysis": "research/styles/01_elegant_corporate/ref03_claude_fable.md",
+      "thumb": "thumbs/ref03.jpg",
+      "family": "01 Elegant",
+      "substyle": "Warm editorial",
+      "format": "Product launch / demo",
+      "mood": [
+        "Warm",
+        "Optimistic",
+        "Confident"
+      ],
+      "cast": "Mixed",
+      "space": "2D flat",
+      "motion_language": "Smooth tween",
+      "transitions": [
+        "Shape / mask wipe",
+        "Morph / transform"
+      ],
+      "tone": {
+        "secondary_motion": [
+          1,
+          "squash on impact, ~3% overshoot on bars, idle loops (spiral, day/night cycle)"
+        ],
+        "color": [
+          1.5,
+          "cream + coral accent, muted multi-color shapes and section wipes throughout"
+        ],
+        "typography": [
+          1,
+          "large serif headlines, coral italic accent words, rolling word swaps, hand-drawn underline; never deformed"
+        ],
+        "shape_language": [
+          1.5,
+          "organic blobs, asterisk, spiral, wavy liquid wipes, illustrated landscape"
+        ],
+        "character_humor": [
+          0.5,
+          "storybook framing (once upon a time / every fable has a moral); no characters"
+        ]
+      },
+      "metrics": {
+        "duration_s": 62.5,
+        "fps": 30.0,
+        "source_fps": 60,
+        "cuts": 7,
+        "cuts_per_min": 6.7,
+        "avg_shot_s": 7.81,
+        "motion_pct": 32.7,
+        "speed_pct_width_per_s": 7.4,
+        "holds_count": 24,
+        "hold_median_s": 0.92,
+        "hold_max_s": 4.0,
+        "colorfulness": 20.7,
+        "energy_score": 2.9,
+        "energy_parts": {
+          "cuts": 4.3,
+          "motion": 3.3,
+          "speed": 1.2
+        }
+      },
+      "signature": "A coral dot carries continuity through every section; headlines rise line by line with a coral italic accent; organic liquid wipes in a new color per section; elements change role instead of exiting.",
+      "music": {
+        "audio": true,
+        "bpm": 99.4,
+        "pulse_clarity": 0.54,
+        "percussive_share": 0.03,
+        "cuts_on_beat": 0.286,
+        "cuts_on_half_beat": 0.429,
+        "accents_on_beat": 0.143,
+        "chance_on_beat": 0.232,
+        "median_shot_beats": 5.95,
+        "verdict": "edit independent of the beat",
+        "summary": "Steady melodic pulse at ~99 BPM (pulse 0.54) with almost no percussion; the edit follows the copy, not the beat (29% of cuts on beat vs 23% by chance)."
+      },
+      "variant": "Storybook launch",
+      "substyle_status": "draft"
+    },
+    {
+      "id": "ref04",
+      "title": "Health care consumers — explainer",
+      "file": "references/04_mixed_media_collage/ref04.mp4",
+      "analysis": "research/styles/04_mixed_media_collage/ref04_health_care_consumers.md",
+      "thumb": "thumbs/ref04.jpg",
+      "family": "04 Mixed media (proposed)",
+      "substyle": "Grunge collage",
+      "format": "Explainer",
+      "mood": [
+        "Gritty",
+        "Bold",
+        "Technical"
+      ],
+      "cast": "Mixed",
+      "space": "2.5D",
+      "motion_language": "Smooth tween",
+      "transitions": [
+        "Camera move",
+        "Shape / mask wipe",
+        "Cut / match cut"
+      ],
+      "tone": {
+        "secondary_motion": [
+          1.5,
+          "texture boil every 3 f, flicker/glitch, looping arrows and strips, radial bursts; no squash"
+        ],
+        "color": [
+          1.5,
+          "neon magenta, mint, lime and pharmacy green on a desaturated paper base; highest colorfulness so far"
+        ],
+        "typography": [
+          1,
+          "condensed stencil caps with glitch builds, labels in pill frames that morph, segment digits"
+        ],
+        "shape_language": [
+          2,
+          "torn paper, grunge textures, halftone cutouts, hand-drawn rings, brush strokes"
+        ],
+        "character_humor": [
+          0.5,
+          "walking silhouettes and crowds illustrate patients; nobody acts"
+        ]
+      },
+      "metrics": {
+        "duration_s": 155.3,
+        "fps": 29.97,
+        "cuts": 8,
+        "cuts_per_min": 3.1,
+        "avg_shot_s": 17.25,
+        "motion_pct": 84.5,
+        "speed_pct_width_per_s": 7.5,
+        "holds_count": 1,
+        "hold_median_s": 0.9,
+        "hold_max_s": 0.9,
+        "colorfulness": 41.5,
+        "energy_score": 4.2,
+        "energy_parts": {
+          "cuts": 2.9,
+          "motion": 8.5,
+          "speed": 1.3
+        }
+      },
+      "signature": "Photo-cutout collage with grunge textures; the camera travels through 2.5D layers instead of cutting; smooth motion on ones with texture boil on threes; never still.",
+      "music": {
+        "audio": true,
+        "bpm": 89.1,
+        "pulse_clarity": 0.26,
+        "percussive_share": 0.38,
+        "cuts_on_beat": 0.375,
+        "cuts_on_half_beat": 0.5,
+        "accents_on_beat": 0.193,
+        "chance_on_beat": 0.208,
+        "median_shot_beats": 22.25,
+        "verdict": "loosely beat-aware",
+        "summary": "~89 BPM with clear percussion; few cuts because the camera travels, loosely on the beat (38% vs 21% by chance, 50% on half-beats); shots last ~22 beats."
+      },
+      "variant": "Photo cut-outs + texture boil",
+      "substyle_status": "draft"
+    },
+    {
+      "id": "ref05",
+      "title": "OpenToscana — explainer",
+      "file": "references/03_character_animation/ref05.mp4",
+      "analysis": "research/styles/03_character_animation/ref05_opentoscana.md",
+      "thumb": "thumbs/ref05.jpg",
+      "family": "03 Character",
+      "substyle": "Flat vector explainer",
+      "format": "Explainer",
+      "mood": [
+        "Optimistic",
+        "Playful",
+        "Warm"
+      ],
+      "cast": "Characters",
+      "space": "2D flat",
+      "motion_language": "Rigged / puppet",
+      "transitions": [
+        "Camera move",
+        "Shape / mask wipe",
+        "Morph / transform"
+      ],
+      "tone": {
+        "secondary_motion": [
+          1.5,
+          "character acting and idle loops, ~4% overshoot on arrivals, speed lines, smoke trails; springs stay soft"
+        ],
+        "color": [
+          2,
+          "saturated solid background per section, orange/teal characters; colorfulness 87.8"
+        ],
+        "typography": [
+          0.5,
+          "a few bold sans labels; icons and speech bubbles replace text"
+        ],
+        "shape_language": [
+          1,
+          "flat vector, rounded and friendly; clean geometry plus organic landscape"
+        ],
+        "character_humor": [
+          2,
+          "characters carry the story; gags (chair roll-in, light bulb idea, rocket)"
+        ]
+      },
+      "metrics": {
+        "duration_s": 108.5,
+        "fps": 24.0,
+        "cuts": 8,
+        "cuts_per_min": 4.4,
+        "avg_shot_s": 12.05,
+        "motion_pct": 33.7,
+        "speed_pct_width_per_s": 6.2,
+        "holds_count": 32,
+        "hold_median_s": 1.48,
+        "hold_max_s": 8.79,
+        "colorfulness": 87.8,
+        "energy_score": 2.6,
+        "energy_parts": {
+          "cuts": 3.5,
+          "motion": 3.4,
+          "speed": 1.0
+        }
+      },
+      "signature": "Rigged flat-vector characters act and gag through each idea; one saturated background color per section; sets assemble prop by prop; soft ~4% springs.",
+      "music": {
+        "audio": true,
+        "bpm": 117.5,
+        "pulse_clarity": 0.04,
+        "percussive_share": 0.32,
+        "cuts_on_beat": 0.125,
+        "cuts_on_half_beat": 0.5,
+        "accents_on_beat": 0.267,
+        "chance_on_beat": 0.274,
+        "median_shot_beats": 24.63,
+        "verdict": "no clear beat (ambient / voiceover-led)",
+        "summary": "Voiceover-led, no clear beat (pulse 0.04); cuts and gags follow the narration."
+      },
+      "variant": "Rigged cut-out",
+      "substyle_status": "draft"
+    },
+    {
+      "id": "ref06",
+      "title": "AchX Studio — launch-video service promo",
+      "family": "02 Playful reel",
+      "substyle": "Kinetic type",
+      "format": "Social ad",
+      "mood": [
+        "Confident",
+        "Playful",
+        "Bold"
+      ],
+      "cast": "Typography",
+      "space": "Mixed with footage",
+      "motion_language": "Smooth tween",
+      "transitions": [
+        "Cut / match cut",
+        "Shape / mask wipe",
+        "Light (flash, bloom)"
+      ],
+      "tone": {
+        "secondary_motion": [
+          1,
+          "heavy motion blur, ghost echoes and smears on type, slight wobble on chat bubbles; no springs or squash"
+        ],
+        "color": [
+          1,
+          "black/white type and UI; color only in inserts (lilac 3D renders, logo color strobe, warm rocket footage)"
+        ],
+        "typography": [
+          1.5,
+          "thin grotesk but big kinetic moments: scattered letters assembling 'Unicorns', full-width smeared words, typing"
+        ],
+        "shape_language": [
+          1,
+          "precise UI pills and type mixed with soft claymorphic 3D and dithered organic clouds"
+        ],
+        "character_humor": [
+          1,
+          "one toon character gag, chat banter, cursors with name tags acting on words, 'Post & Praying' wit"
+        ]
+      },
+      "signature": "Monochrome one-statement type cards linked by motion-blur smears, with chat UI, named cursors and one-beat inserts of 3D renders and AI footage.",
+      "file": "references/02_playful_reel/ref06.mp4",
+      "analysis": "research/styles/02_playful_reel/ref06_achx_studio.md",
+      "thumb": "thumbs/ref06.jpg",
+      "metrics": {
+        "duration_s": 64.4,
+        "fps": 29.97,
+        "cuts": 26,
+        "cuts_per_min": 24.2,
+        "avg_shot_s": 2.38,
+        "motion_pct": 60.7,
+        "speed_pct_width_per_s": 12.6,
+        "holds_count": 10,
+        "hold_median_s": 0.92,
+        "hold_max_s": 3.37,
+        "colorfulness": 19.0,
+        "energy_score": 5.0,
+        "energy_parts": {
+          "cuts": 6.7,
+          "motion": 6.1,
+          "speed": 2.1
+        }
+      },
+      "music": {
+        "audio": true,
+        "bpm": 117.5,
+        "pulse_clarity": 0.24,
+        "percussive_share": 0.2,
+        "cuts_on_beat": 0.231,
+        "cuts_on_half_beat": 0.538,
+        "accents_on_beat": 0.265,
+        "chance_on_beat": 0.274,
+        "median_shot_beats": 4.25,
+        "verdict": "edit independent of the beat",
+        "summary": "Soft 117.5 BPM bed with a weak pulse (0.24); cuts land on the beat at chance level (23% vs 27%), shots run about one bar, and the loudest music (49-54 s) sits under the quiet logo cards: the edit follows the copy, not the beat."
+      },
+      "family_note": "Between 01 Elegant · Editorial (mono palette, thin type, one statement at a time) and 02 Playful reel (gags, smeared letters, strobes, media mixing). Filed as 02 because of the tone (5.5) and the jokes; energy 5.0 sits at the low edge of the Playful zone. The media mixing (toon, 3D, AI footage) also echoes 04, but without collage texture or camera travel.",
+      "variant": "Monochrome kinetic-type reel",
+      "substyle_status": "proposed"
+    },
+    {
+      "id": "ref07",
+      "title": "Vercel Ship LDN — brand/event sizzle",
+      "family": "01 Elegant",
+      "substyle": "Editorial",
+      "format": "Event opener",
+      "mood": [
+        "Precise",
+        "Technical",
+        "Confident"
+      ],
+      "cast": "Mixed",
+      "space": "Mixed with footage",
+      "motion_language": "Snap",
+      "transitions": [
+        "Cut / match cut",
+        "Morph / transform"
+      ],
+      "tone": {
+        "secondary_motion": [
+          0.5,
+          "almost none: shots are near-still frames cut fast; only the mascot blinks and a few drifts"
+        ],
+        "color": [
+          0.5,
+          "black and white throughout (colorfulness 5.5); rare accents: red wireframe globe, blue Geist plate, gradient beam, colored charts"
+        ],
+        "typography": [
+          1.5,
+          "big type moments from the brand system: Geist Serif with highlight bars, particles forming 'PIXEL', full-frame 'If it's agentic it's on Vercel'"
+        ],
+        "shape_language": [
+          0.5,
+          "precise geometry, pixel grids, triangles, circuit boards; one liquid drip as the organic exception"
+        ],
+        "character_humor": [
+          1,
+          "the boxy robot mascot with '||' eyes, police lights and blinks; claw-machine gag"
+        ]
+      },
+      "signature": "A fast black-and-white montage of brand-system frames, product UI, 3D objects and event photos, each held a fraction of a second, resolved by a stepped logo build.",
+      "file": "references/01_elegant_corporate/ref07.mp4",
+      "analysis": "research/styles/01_elegant_corporate/ref07_vercel_ship_ldn.md",
+      "thumb": "thumbs/ref07.jpg",
+      "metrics": {
+        "duration_s": 60.6,
+        "fps": 30.0,
+        "cuts": 61,
+        "cuts_per_min": 60.4,
+        "avg_shot_s": 0.98,
+        "motion_pct": 30.5,
+        "speed_pct_width_per_s": 12.9,
+        "holds_count": 18,
+        "hold_median_s": 0.83,
+        "hold_max_s": 2.53,
+        "colorfulness": 5.5,
+        "energy_score": 4.6,
+        "energy_parts": {
+          "cuts": 8.6,
+          "motion": 3.0,
+          "speed": 2.1
+        }
+      },
+      "music": {
+        "audio": true,
+        "bpm": 99.4,
+        "pulse_clarity": 0.66,
+        "percussive_share": 0.16,
+        "cuts_on_beat": 0.148,
+        "cuts_on_half_beat": 0.377,
+        "accents_on_beat": 0.143,
+        "chance_on_beat": 0.232,
+        "median_shot_beats": 0.72,
+        "verdict": "edit independent of the beat",
+        "summary": "Clear 99.4 BPM pulse (0.66) but cuts land on the beat below chance (15% vs 23%) and shots last a median 0.72 beats: the cuts run faster than the beat and ignore it, while the macro shape (quiet intro, louder sections from ~20 s and ~40 s, decay under the logo) follows the music."
+      },
+      "family_note": "Restrained tone (4.0) and monochrome discipline put it in 01 Elegant; the change-by-snap grammar is closest to Editorial (ref02). It differs from the existing Elegant refs by its montage density (60 cuts/min, cut-driven rhythm) and the event/brand sizzle format, hence a proposed sub-style. Could also be read as a calm-toned showreel.",
+      "variant": "Monochrome sizzle montage",
+      "substyle_status": "proposed"
+    },
+    {
+      "id": "ref08",
+      "title": "motionmaxxing — agent skill type teaser",
+      "family": "01 Elegant",
+      "substyle": "Editorial",
+      "format": "Product launch / demo",
+      "mood": [
+        "Confident",
+        "Technical",
+        "Precise"
+      ],
+      "cast": "Typography",
+      "space": "2D flat",
+      "motion_language": "Smooth tween",
+      "transitions": [
+        "Light (flash, bloom)",
+        "Morph / transform"
+      ],
+      "tone": {
+        "secondary_motion": [
+          0.5,
+          "motion blur on every slide and 2–4 f RGB-split glitches; no overshoot, no idle loops"
+        ],
+        "color": [
+          1,
+          "dark navy plate, light grey type, one coral accent per card; cyan/magenta only inside glitches; colorfulness 20.3"
+        ],
+        "typography": [
+          1.5,
+          "type is the whole cast: bold keyword cards, words joining into the product name, spec annotations (weight, tracking, easing) over the word; not deformed"
+        ],
+        "shape_language": [
+          0,
+          "precise guide lines, baselines, brackets and a drawn easing curve"
+        ],
+        "character_humor": [
+          1,
+          "wit in the copy: 'looksmaxxing', 'AI slop.' set in a dull default serif as the bad example"
+        ]
+      },
+      "signature": "One statement per card on a still dark plate; blurred slides with strong ease-out in / ease-in out, RGB-split glitches between ideas, and designer spec annotations drawn over the type.",
+      "file": "references/01_elegant_corporate/ref08.mp4",
+      "analysis": "research/styles/01_elegant_corporate/ref08_motionmaxxing.md",
+      "thumb": "thumbs/ref08.jpg",
+      "metrics": {
+        "duration_s": 20.0,
+        "fps": 30.0,
+        "cuts": 0,
+        "cuts_per_min": 0.0,
+        "avg_shot_s": 20.0,
+        "motion_pct": 21.7,
+        "speed_pct_width_per_s": 8.4,
+        "holds_count": 8,
+        "hold_median_s": 1.7,
+        "hold_max_s": 3.1,
+        "colorfulness": 20.3,
+        "energy_score": 1.2,
+        "energy_parts": {
+          "cuts": 0.0,
+          "motion": 2.2,
+          "speed": 1.4
+        }
+      },
+      "music": {
+        "audio": true,
+        "bpm": 89.1,
+        "pulse_clarity": 0.37,
+        "percussive_share": 0.16,
+        "cuts_on_beat": null,
+        "cuts_on_half_beat": null,
+        "accents_on_beat": 0.143,
+        "chance_on_beat": 0.208,
+        "median_shot_beats": 29.78,
+        "verdict": "edit independent of the beat",
+        "summary": "Soft 89 BPM bed with a weak pulse (0.37); no cuts and motion bursts land on beats less than chance (14% vs 21%): the edit follows reading time, not the beat."
+      },
+      "family_note": "Restraint, one statement at a time, short copy, still holds, mono + one accent, clean landings without overshoot: Elegant core rules. Glitch punctuation and tech-meme copy push it toward a darker, edgier sub-style than Cinematic (no 3D/light) or Editorial (no snaps); proposed 'Dark type teaser'.",
+      "variant": "Dark type teaser",
+      "substyle_status": "proposed"
+    },
+    {
+      "id": "ref09",
+      "title": "aratama 'KAMI CIRCUIT 神回路' — vertical trailer",
+      "family": "02 Playful reel",
+      "substyle": "Hype montage",
+      "format": "Social ad",
+      "mood": [
+        "Epic",
+        "Exciting",
+        "Gritty"
+      ],
+      "cast": "Mixed",
+      "space": "3D",
+      "motion_language": "Snap",
+      "transitions": [
+        "Cut / match cut",
+        "Light (flash, bloom)",
+        "Morph / transform"
+      ],
+      "tone": {
+        "secondary_motion": [
+          1.5,
+          "glitch slicing, RGB split, strobe dropouts, datamosh/pixel-sort, manga speed-line bursts and screen shake; no springs or squash"
+        ],
+        "color": [
+          1.5,
+          "saturated vermilion + black + white throughout, cyan as second accent, a blue/violet outro; limited palette but loud (colorfulness 39)"
+        ],
+        "typography": [
+          2,
+          "kanji and Latin words fill the frame, sliced, extruded in 3D, glitched and split across cards (KA / MI / CIR / CUIT); manga SFX katakana"
+        ],
+        "shape_language": [
+          1,
+          "precise HUD grids, circles and wireframes against organic fractal 3D architecture and hand-drawn manga speed lines"
+        ],
+        "character_humor": [
+          1,
+          "no characters; manga onomatopoeia (ドンッ, ゴゴ) and a speech bubble give it a comic wink"
+        ]
+      },
+      "signature": "Vertical cyber-Shinto trailer: a slow HUD build (mandala push, torii tunnel, wireframe core) drops at 12.4 s into a 0.3–0.7 s card montage of sliced kanji, manga speed lines and fractal 3D, framed by a persistent HUD with timecode and BPM.",
+      "file": "references/02_playful_reel/ref09.mp4",
+      "analysis": "research/styles/02_playful_reel/ref09_aratama_kami_circuit.md",
+      "thumb": "thumbs/ref09.jpg",
+      "metrics": {
+        "duration_s": 28.4,
+        "fps": 30.0,
+        "cuts": 41,
+        "cuts_per_min": 86.7,
+        "avg_shot_s": 0.68,
+        "motion_pct": 93.8,
+        "speed_pct_width_per_s": 26.4,
+        "holds_count": 1,
+        "hold_median_s": 0.67,
+        "hold_max_s": 0.67,
+        "colorfulness": 39.0,
+        "energy_score": 7.7,
+        "energy_parts": {
+          "cuts": 9.3,
+          "motion": 9.4,
+          "speed": 4.4
+        }
+      },
+      "music": {
+        "audio": true,
+        "bpm": 136.0,
+        "pulse_clarity": 0.61,
+        "percussive_share": 0.16,
+        "cuts_on_beat": 0.244,
+        "cuts_on_half_beat": 0.61,
+        "accents_on_beat": 0.208,
+        "chance_on_beat": 0.317,
+        "median_shot_beats": 0.6,
+        "verdict": "edit independent of the beat",
+        "summary": "137 BPM electronic track (the HUD even prints '137.14 BPM'), clear pulse 0.61; the build is cut-free for ~28 beats, the montage starts on the beat at 12.4 s, then cuts follow the busy rhythm (dotted-eighth runs of 0.76 beat) rather than the quarter-note grid: overall cuts on beat 24% vs 32% chance."
+      },
+      "family_note": "High energy (7.7, cut-driven montage) and expressive tone (7.0) put it in the Playful reel zone, but the mood is epic/gritty, not playful. Proposed sub-style 'Cyber-HUD montage'; if more references like it arrive, the family name 'Playful reel' may need to become 'High-energy reel' or this becomes its own family. Two-part structure (flow build → cut-driven drop) is also notable.",
+      "variant": "Cyber-HUD",
+      "substyle_status": "proposed"
+    },
+    {
+      "id": "ref10",
+      "title": "Claude, motion designer — self-promo reel",
+      "family": "02 Playful reel",
+      "substyle": "Kinetic type",
+      "format": "Showreel",
+      "mood": [
+        "Bold",
+        "Playful",
+        "Confident"
+      ],
+      "cast": "Mixed",
+      "space": "2D flat",
+      "motion_language": "Snap",
+      "transitions": [
+        "Cut / match cut",
+        "Shape / mask wipe",
+        "Morph / transform"
+      ],
+      "tone": {
+        "secondary_motion": [
+          2,
+          "back-out (17% overshoot), elastic and bounce shown explicitly; heavy motion-blur smears on type, stretched letters, particle sparks on the logo burst"
+        ],
+        "color": [
+          2,
+          "coral, electric blue, acid lime, cream and black, a new flat color per section; colorfulness 59"
+        ],
+        "typography": [
+          2,
+          "frame-filling extended black caps (EASE / IN. / OUT. / NEVER / LINEAR.) that smear, stretch, bounce per letter and tile into a repeating pattern"
+        ],
+        "shape_language": [
+          1,
+          "precise geometry (circle → triangle → star → square morphs, dot sphere) mixed with organic truchet curves and a hand-drawn spark mark"
+        ],
+        "character_humor": [
+          1,
+          "wit through the subject: 'Six ways to get from A to B', 'EASE IN. EASE OUT. NEVER LINEAR.'; no characters"
+        ]
+      },
+      "signature": "A motion designer's manifesto: each section demonstrates a principle (easing lanes, shape morphs, pattern, 3D dots) on a new flat color, then cuts on eighth notes into frame-filling smeared type that spells 'EASE IN. EASE OUT. NEVER LINEAR.'",
+      "file": "references/02_playful_reel/ref10.mp4",
+      "analysis": "research/styles/02_playful_reel/ref10_claude_motion_designer.md",
+      "thumb": "thumbs/ref10.jpg",
+      "metrics": {
+        "duration_s": 15.1,
+        "fps": 30.0,
+        "cuts": 11,
+        "cuts_per_min": 43.8,
+        "avg_shot_s": 1.26,
+        "motion_pct": 80.8,
+        "speed_pct_width_per_s": 14.1,
+        "holds_count": 2,
+        "hold_median_s": 0.8,
+        "hold_max_s": 0.97,
+        "colorfulness": 59.0,
+        "energy_score": 6.1,
+        "energy_parts": {
+          "cuts": 7.9,
+          "motion": 8.1,
+          "speed": 2.3
+        }
+      },
+      "music": {
+        "audio": true,
+        "bpm": 129.2,
+        "pulse_clarity": 0.51,
+        "percussive_share": 0.28,
+        "cuts_on_beat": 0.636,
+        "cuts_on_half_beat": 1.0,
+        "accents_on_beat": 0.2,
+        "chance_on_beat": 0.301,
+        "median_shot_beats": 1.0,
+        "verdict": "cut on the beat",
+        "summary": "129 BPM track with a clear pulse (0.51); the edit is locked to it: section cuts land on beats 4 and 8 beats apart, the type finale cuts every half beat then every beat, and the easing demo moves last exactly 2 beats (~0.93 s)."
+      },
+      "family_note": "High energy (6.1) and expressive tone (8.0): squarely in the Playful reel zone. The content is self-referential (a demo of motion principles), so it doubles as a reference for the library's own token vocabulary.",
+      "variant": "Motion-principles demo",
+      "substyle_status": "proposed"
+    },
+    {
+      "id": "ref11",
+      "title": "Helium browser — UI update teaser",
+      "family": "01 Elegant",
+      "substyle": "Product UI",
+      "format": "Product launch / demo",
+      "mood": [
+        "Precise",
+        "Optimistic",
+        "Confident"
+      ],
+      "cast": "Product / UI",
+      "space": "2.5D",
+      "motion_language": "Smooth tween",
+      "transitions": [
+        "Camera move",
+        "Light (flash, bloom)",
+        "Morph / transform"
+      ],
+      "tone": {
+        "secondary_motion": [
+          1,
+          "anticipation shrink (~19%) before the zoom-through, motion blur on the logo spin, ~2% overshoot; no bounce"
+        ],
+        "color": [
+          1,
+          "one brand blue with soft white light gradients, then near-white UI; colorfulness 54 comes from the single saturated blue"
+        ],
+        "typography": [
+          0.5,
+          "small clean sans wordmark and 'Update' line; the only play is 'UI' letters closing into a boxed icon"
+        ],
+        "shape_language": [
+          0.5,
+          "precise UI chrome and a geometric asterisk mark, softened by blurred light blobs"
+        ],
+        "character_humor": [
+          0,
+          "none"
+        ]
+      },
+      "signature": "Brand-blue logo intro (wordmark slides out from the asterisk, 'UI' snaps into an icon), the asterisk spins in huge, breathes in and zooms through to an app tile, then a white-out reveals the browser and the camera glides into the new tab sidebar.",
+      "file": "references/01_elegant_corporate/ref11.mp4",
+      "analysis": "research/styles/01_elegant_corporate/ref11_helium_browser.md",
+      "thumb": "thumbs/ref11.jpg",
+      "metrics": {
+        "duration_s": 11.4,
+        "fps": 30.0,
+        "cuts": 5,
+        "cuts_per_min": 26.2,
+        "avg_shot_s": 1.91,
+        "motion_pct": 43.7,
+        "speed_pct_width_per_s": 9.9,
+        "holds_count": 4,
+        "hold_median_s": 1.13,
+        "hold_max_s": 2.33,
+        "colorfulness": 54.4,
+        "energy_score": 4.3,
+        "energy_parts": {
+          "cuts": 6.9,
+          "motion": 4.4,
+          "speed": 1.6
+        }
+      },
+      "music": {
+        "audio": false,
+        "bpm": null,
+        "pulse_clarity": null,
+        "percussive_share": null,
+        "cuts_on_beat": null,
+        "cuts_on_half_beat": null,
+        "accents_on_beat": null,
+        "chance_on_beat": null,
+        "median_shot_beats": null,
+        "verdict": null,
+        "summary": "No audio track in the file: pacing follows the visual build only (holds of ~1.1 s median between moves)."
+      },
+      "family_note": "Restrained, single accent color, one idea at a time, clean landings, logo built on screen: Elegant core. Not Cinematic (no dark/3D light) nor Editorial (no snaps); it's the typical SaaS/app 'product UI' launch look, proposed as sub-style 'Product UI'. Cuts part of energy (6.9) is inflated by flashes/white-outs counted as cuts; real hard cuts are ~2.",
+      "variant": "Light & UI glide",
+      "substyle_status": "proposed"
+    },
+    {
+      "id": "ref12",
+      "title": "Blueprint — iPod patent / x-ray sizzle",
+      "family": "04 Mixed media (proposed)",
+      "substyle": "Technical collage",
+      "format": "Social ad",
+      "mood": [
+        "Technical",
+        "Gritty",
+        "Exciting"
+      ],
+      "cast": "Mixed",
+      "space": "Mixed with footage",
+      "motion_language": "Snap",
+      "transitions": [
+        "Cut / match cut",
+        "Light (flash, bloom)"
+      ],
+      "tone": {
+        "secondary_motion": [
+          0.5,
+          "no springs or overshoot; only film grain boiling on every plate and on-twos stepping"
+        ],
+        "color": [
+          1.5,
+          "saturated electric blue, x-ray blue/black and a thermal yellow/green LUT; strong but one treatment per section"
+        ],
+        "typography": [
+          0.5,
+          "almost no type: labels inside patent drawings and a small blackletter wordmark at the end"
+        ],
+        "shape_language": [
+          1,
+          "precise technical linework and x-rays, roughened by grain and mixed with handheld footage"
+        ],
+        "character_humor": [
+          0.5,
+          "no characters; hands in footage and a witty 'show the product through its patents' device"
+        ]
+      },
+      "signature": "The iPod told through its patent drawings and x-rays: grainy blueprint-blue plates, stepped camera moves on twos and a 3-frame strobe montage, cut faster than the music.",
+      "file": "references/04_mixed_media_collage/ref12.mp4",
+      "analysis": "research/styles/04_mixed_media_collage/ref12_blueprint.md",
+      "thumb": "thumbs/ref12.jpg",
+      "metrics": {
+        "duration_s": 17.2,
+        "fps": 23.98,
+        "cuts": 35,
+        "cuts_per_min": 122.2,
+        "avg_shot_s": 0.48,
+        "motion_pct": 44.2,
+        "speed_pct_width_per_s": 28.0,
+        "holds_count": 2,
+        "hold_median_s": 1.15,
+        "hold_max_s": 1.71,
+        "colorfulness": 67.1,
+        "energy_score": 6.4,
+        "energy_parts": {
+          "cuts": 10.0,
+          "motion": 4.4,
+          "speed": 4.7
+        }
+      },
+      "music": {
+        "audio": true,
+        "bpm": 103.4,
+        "pulse_clarity": 0.62,
+        "percussive_share": 0.32,
+        "cuts_on_beat": 0.143,
+        "cuts_on_half_beat": 0.257,
+        "accents_on_beat": 0.176,
+        "chance_on_beat": 0.241,
+        "median_shot_beats": 0.57,
+        "verdict": "edit independent of the beat",
+        "summary": "103 BPM groove with a fairly clear pulse (0.62) but the edit ignores it (cuts on beat 14% vs 24% chance, median shot ~0.6 beats); the loudest hits land on the still end plates."
+      },
+      "family_note": "Mixed media: collage of footage, archive drawings and scans with heavy texture and color treatments, cut-driven. Not Elegant (grain, saturated blue, frantic cutting) nor Playful (no springs, no kinetic type). Differs from ref04 (2.5D camera flow) by being cut-driven with stepped moves; could justify a 'technical/archive collage' sub-style.",
+      "variant": "Blueprint / x-ray",
+      "substyle_status": "proposed"
+    },
+    {
+      "id": "ref13",
+      "title": "1984 (Orwell) — typographic zoom-through trailer",
+      "family": "01 Elegant",
+      "substyle": "Cinematic",
+      "format": "Social ad",
+      "mood": [
+        "Gritty",
+        "Emotional",
+        "Bold"
+      ],
+      "cast": "Mixed",
+      "space": "2.5D",
+      "motion_language": "Smooth tween",
+      "transitions": [
+        "Camera move",
+        "Shape / mask wipe",
+        "Cut / match cut"
+      ],
+      "tone": {
+        "secondary_motion": [
+          0.5,
+          "no springs or overshoot; stamps hit without bounce; only slow pushes and light sweeps"
+        ],
+        "color": [
+          0.5,
+          "desaturated low-key palette (colorfulness 17) with a single red accent"
+        ],
+        "typography": [
+          1.5,
+          "big heavy-serif statements built word by word, zoomed through as transitions; not deformed or bouncing"
+        ],
+        "shape_language": [
+          1,
+          "photographic/organic scenes plus crisp serif type and rectangular stamps"
+        ],
+        "character_humor": [
+          1,
+          "silhouetted figures and a watching eye carry a story, but no acting or humor"
+        ]
+      },
+      "signature": "One lowercase heavy-serif statement per moody still, built word by word, then an accelerating zoom-through into a letter or the eye carries it out to the next scene.",
+      "file": "references/01_elegant_corporate/ref13.mp4",
+      "analysis": "research/styles/01_elegant_corporate/ref13_1984_orwell.md",
+      "thumb": "thumbs/ref13.jpg",
+      "metrics": {
+        "duration_s": 15.1,
+        "fps": 24.0,
+        "cuts": 5,
+        "cuts_per_min": 19.8,
+        "avg_shot_s": 2.52,
+        "motion_pct": 55.6,
+        "speed_pct_width_per_s": 21.5,
+        "holds_count": 5,
+        "hold_median_s": 1.12,
+        "hold_max_s": 1.62,
+        "colorfulness": 17.1,
+        "energy_score": 5.2,
+        "energy_parts": {
+          "cuts": 6.3,
+          "motion": 5.6,
+          "speed": 3.6
+        }
+      },
+      "music": {
+        "audio": true,
+        "bpm": 112.3,
+        "pulse_clarity": 0.1,
+        "percussive_share": 0.38,
+        "cuts_on_beat": 0.2,
+        "cuts_on_half_beat": 0.2,
+        "accents_on_beat": 0.0,
+        "chance_on_beat": 0.262,
+        "median_shot_beats": 4.02,
+        "verdict": "no clear beat (ambient / voiceover-led)",
+        "summary": "No clear beat (pulse clarity 0.10, ambient/score-led); cuts and accents ignore the grid, the only aligned hit is the stamp slam at 0.2 s, and pacing follows a regular ~2 s phrase cadence."
+      },
+      "family_note": "Elegant · Cinematic in restraint (desaturated, no springs, one statement at a time, smooth camera) but with editorial big type and a grim, gritty mood; the photo/still imagery with stamps and redaction marks also leans toward Mixed media. Proposed sub-style 'Cinematic editorial'.",
+      "variant": "Zoom-through typographic trailer",
+      "substyle_status": "proposed"
+    },
+    {
+      "id": "ref14",
+      "title": "Osmo Studio — word-per-shot launch teaser",
+      "family": "02 Playful reel",
+      "substyle": "Kinetic type",
+      "format": "Product launch / demo",
+      "mood": [
+        "Confident",
+        "Exciting",
+        "Technical"
+      ],
+      "cast": "Mixed",
+      "space": "Mixed with footage",
+      "motion_language": "Snap",
+      "transitions": [
+        "Cut / match cut"
+      ],
+      "tone": {
+        "secondary_motion": [
+          0.5,
+          "no springs or overshoot; backgrounds loop on their own (particles, HUD boxes, ink growth) while the type is still"
+        ],
+        "color": [
+          1.5,
+          "saturated neon and posterized backgrounds on a near-black base; varies shot to shot"
+        ],
+        "typography": [
+          0.5,
+          "one tiny lowercase grotesk word, centered, never animated"
+        ],
+        "shape_language": [
+          1.5,
+          "organic blobs, ink smoke, doves, particles and light forms, plus some precise UI"
+        ],
+        "character_humor": [
+          0.5,
+          "no characters; a dry line ('without the slop') and silhouettes"
+        ]
+      },
+      "signature": "A tiny, motionless centered word over a new animated visual every 1.083 s: the sentence is read across metronomic cuts, then the hero visual reappears inside the product UI.",
+      "file": "references/02_playful_reel/ref14.mp4",
+      "analysis": "research/styles/02_playful_reel/ref14_osmo_studio.md",
+      "thumb": "thumbs/ref14.jpg",
+      "metrics": {
+        "duration_s": 21.6,
+        "fps": 30.0,
+        "cuts": 12,
+        "cuts_per_min": 33.3,
+        "avg_shot_s": 1.66,
+        "motion_pct": 44.1,
+        "speed_pct_width_per_s": 8.7,
+        "holds_count": 6,
+        "hold_median_s": 1.73,
+        "hold_max_s": 2.13,
+        "colorfulness": 37.4,
+        "energy_score": 4.4,
+        "energy_parts": {
+          "cuts": 7.4,
+          "motion": 4.4,
+          "speed": 1.4
+        }
+      },
+      "music": {
+        "audio": true,
+        "bpm": 107.7,
+        "pulse_clarity": 0.55,
+        "percussive_share": 0.11,
+        "cuts_on_beat": 0.25,
+        "cuts_on_half_beat": 0.667,
+        "accents_on_beat": 0.357,
+        "chance_on_beat": 0.251,
+        "median_shot_beats": 1.97,
+        "verdict": "edit independent of the beat",
+        "summary": "107.7 BPM low-percussion bed with a fairly clear pulse; the edit cuts on a metronomic 1.083 s clock (~2 beats at 110.8 BPM), so cuts drift across the beat instead of locking (on beat 25% = chance, on half-beat 67%)."
+      },
+      "family_note": "A showreel of the tool's possible outputs, cut to a regular rhythm, saturated and varied: Playful reel in intent, but at mid energy (4.4) and with deadpan tiny type and no springs. Could also sit in Mixed media (footage + generative + UI), but it lacks texture/collage layering. Proposed sub-style 'Minimal word-per-shot showreel'.",
+      "variant": "Minimal word-per-shot",
+      "substyle_status": "proposed"
+    },
+    {
+      "id": "ref15",
+      "title": "Payy — fintech brand identity film",
+      "family": "01 Elegant",
+      "substyle": "Product UI",
+      "format": "Brand film",
+      "mood": [
+        "Bold",
+        "Confident",
+        "Precise"
+      ],
+      "cast": "Mixed",
+      "space": "2.5D",
+      "motion_language": "Smooth tween",
+      "transitions": [
+        "Cut / match cut",
+        "Morph / transform",
+        "Shape / mask wipe"
+      ],
+      "tone": {
+        "secondary_motion": [
+          0.5,
+          "no overshoot measured; smear/motion blur on the logo build and glitch distortion on type, no springs or idle loops"
+        ],
+        "color": [
+          1,
+          "restricted palette: black, white/grey and acid lime, with a violet photo accent"
+        ],
+        "typography": [
+          1.5,
+          "big bold condensed statements, giant 'PRIVATE' wiping behind a flying card, glitch-distorted letters, distorted display wordmark"
+        ],
+        "shape_language": [
+          1,
+          "precise UI pills/cards and cards in 3D, plus an organic scribble/smear logo build"
+        ],
+        "character_humor": [
+          0,
+          "no characters or humor (a hand holding a phone, a badge photo)"
+        ]
+      },
+      "signature": "Black and acid-lime fintech identity: a scribbled smear resolves into the app icon, which shrinks into the UI; pills morph into cards, giant type wipes behind a flying card, and the identity closes on a run of page-peel transitions.",
+      "file": "references/01_elegant_corporate/ref15.mp4",
+      "analysis": "research/styles/01_elegant_corporate/ref15_payy.md",
+      "thumb": "thumbs/ref15.jpg",
+      "metrics": {
+        "duration_s": 38.6,
+        "fps": 30.0,
+        "cuts": 18,
+        "cuts_per_min": 28.0,
+        "avg_shot_s": 2.03,
+        "motion_pct": 54.5,
+        "speed_pct_width_per_s": 15.4,
+        "holds_count": 9,
+        "hold_median_s": 0.9,
+        "hold_max_s": 6.3,
+        "colorfulness": 37.7,
+        "energy_score": 5.0,
+        "energy_parts": {
+          "cuts": 7.0,
+          "motion": 5.5,
+          "speed": 2.6
+        }
+      },
+      "music": {
+        "audio": true,
+        "bpm": 143.6,
+        "pulse_clarity": 0.4,
+        "percussive_share": 0.1,
+        "cuts_on_beat": 0.333,
+        "cuts_on_half_beat": 0.611,
+        "accents_on_beat": 0.429,
+        "chance_on_beat": 0.335,
+        "median_shot_beats": 4.23,
+        "verdict": "edit independent of the beat",
+        "summary": "143.6 BPM low-percussion track (pulse 0.40) that kicks in at ~3.3 s, one beat after the logo icon lands; overall cuts on beat = chance (33%), though several mid-film scene changes sit within ±0.15 beat; the music fades from ~29 s under the page-peel montage and the end card plays over silence."
+      },
+      "family_note": "Elegant core (restricted palette, product UI, clean ease-outs, no springs, one statement at a time) pushed toward Playful by bold type moments, glitch letters and a fast page-peel montage. Mid energy 5.0. Proposed sub-style 'Bold tech brand'; could also be read as a bridge between Editorial and Playful reel.",
+      "variant": "Bold tech brand",
+      "substyle_status": "proposed"
+    },
+    {
+      "id": "ref16",
+      "title": "Hyundai i10 — #i10inside game teaser",
+      "family": "02 Playful reel",
+      "substyle": "3D toy world",
+      "format": "Social ad",
+      "mood": [
+        "Playful",
+        "Optimistic",
+        "Exciting"
+      ],
+      "cast": "Mixed",
+      "space": "3D",
+      "motion_language": "Smooth tween",
+      "transitions": [
+        "Shape / mask wipe",
+        "Camera move",
+        "Light (flash, bloom)"
+      ],
+      "tone": {
+        "secondary_motion": [
+          1,
+          "confetti and balloon bursts, flapping birds, banners that unfold and flutter, flash pops; but camera and truck moves are smooth tweens with no visible springs (wipes overshoot <=2%)"
+        ],
+        "color": [
+          2,
+          "saturated flat backdrops that switch per beat of the story: teal, mustard yellow, steel blue, coral, plus orange/red accents"
+        ],
+        "typography": [
+          1.5,
+          "folded paper ribbon banners with condensed italic type that writes on with a smeared streak; big 'READY?' / 'GO!' / countdown badges; not deformed"
+        ],
+        "shape_language": [
+          1.5,
+          "low-poly faceted papercraft world (folded paper water, hills, buildings), toy trucks; geometric but hand-made feel"
+        ],
+        "character_humor": [
+          1,
+          "a shell-game premise ('Follow this truck!', 'Which one?', 'Bingo!'), two small scooter riders taking flash photos; props carry the wit, characters are secondary"
+        ]
+      },
+      "signature": "A toy-like low-poly papercraft world where white trucks play a shell game, framed by paper-ribbon banners that write on with smeared streaks and separated by quick diagonal color wipes.",
+      "file": "references/02_playful_reel/ref16.mp4",
+      "analysis": "research/styles/02_playful_reel/ref16_hyundai_i10.md",
+      "thumb": "thumbs/ref16.jpg",
+      "metrics": {
+        "duration_s": 60.0,
+        "fps": 25.0,
+        "cuts": 15,
+        "cuts_per_min": 15.0,
+        "avg_shot_s": 3.75,
+        "motion_pct": 77.4,
+        "speed_pct_width_per_s": 12.5,
+        "holds_count": 7,
+        "hold_median_s": 0.92,
+        "hold_max_s": 4.36,
+        "colorfulness": 71.7,
+        "energy_score": 5.2,
+        "energy_parts": {
+          "cuts": 5.8,
+          "motion": 7.7,
+          "speed": 2.1
+        }
+      },
+      "music": {
+        "audio": true,
+        "bpm": 117.5,
+        "pulse_clarity": 0.45,
+        "percussive_share": 0.28,
+        "cuts_on_beat": 0.4,
+        "cuts_on_half_beat": 0.467,
+        "accents_on_beat": 0.364,
+        "chance_on_beat": 0.274,
+        "median_shot_beats": 1.41,
+        "verdict": "loosely beat-aware",
+        "summary": "117.5 BPM track with a moderate pulse (0.45); the edit is loosely beat-aware (cuts on beat 40% vs 27% chance, on half-beat 47%), the dense onset passage (0-8 s) matches the title build, and the long 28 s camera flight runs over a steadier, quieter bed."
+      },
+      "family_note": "Playful reel by tone (saturated colors, game premise, banners, confetti) but energy 5.2 sits at the edge of the zone because most of the film is one long smooth camera flight (Flow), not fast cuts or springs. Its 3D low-poly papercraft look is new: proposed sub-style '3D papercraft toy world'. Could also be read as a Character-family piece in 3D, but characters are minor.",
+      "variant": "Papercraft",
+      "substyle_status": "proposed"
+    },
+    {
+      "id": "ref17",
+      "title": "Film Brazil — retro infographic explainer with a Brazil mascot",
+      "family": "03 Character",
+      "substyle": "Retro flat infographic",
+      "format": "Explainer",
+      "mood": [
+        "Playful",
+        "Optimistic",
+        "Confident"
+      ],
+      "cast": "Mixed",
+      "space": "2D flat",
+      "motion_language": "Smooth tween",
+      "transitions": [
+        "Morph / transform",
+        "Shape / mask wipe",
+        "Camera move",
+        "Cut / match cut"
+      ],
+      "tone": {
+        "secondary_motion": [
+          1.5,
+          "letters hop in arcs and settle, scattered letters assemble, sparkles and ribbon waves on holds, a dancing mascot; overshoot visible on sheets but not measured"
+        ],
+        "color": [
+          1.5,
+          "saturated retro 5-color palette (mustard, teal, burnt orange, navy, cream) used throughout; one or two colors dominate per scene"
+        ],
+        "typography": [
+          2,
+          "type is the main cast: giant numerals with ordinals, mixed retro faces (slab, script, stencil), letters fly, bounce and assemble, words become wipes"
+        ],
+        "shape_language": [
+          1,
+          "precise flat geometry (circles, diamonds, bars) softened by paper grain and a rubber-hose mascot"
+        ],
+        "character_humor": [
+          1.5,
+          "Brazil-shaped mascot with sunglasses walks, dances and plays scale gags (giant shoe) at start, middle and end; most of the film is data"
+        ]
+      },
+      "signature": "A Brazil-shaped rubber-hose mascot bookends a fast parade of retro kinetic statistics in which every number, letter or coin grows into the wipe that opens the next fact.",
+      "file": "references/03_character_animation/ref17.mp4",
+      "analysis": "research/styles/03_character_animation/ref17_film_brazil.md",
+      "thumb": "thumbs/ref17.jpg",
+      "metrics": {
+        "duration_s": 186.8,
+        "fps": 29.97,
+        "cuts": 25,
+        "cuts_per_min": 8.0,
+        "avg_shot_s": 7.18,
+        "motion_pct": 46.3,
+        "speed_pct_width_per_s": 12.7,
+        "holds_count": 45,
+        "hold_median_s": 1.13,
+        "hold_max_s": 6.27,
+        "colorfulness": 65.7,
+        "energy_score": 3.8,
+        "energy_parts": {
+          "cuts": 4.6,
+          "motion": 4.6,
+          "speed": 2.1
+        }
+      },
+      "music": {
+        "audio": true,
+        "bpm": 129.2,
+        "pulse_clarity": 0.14,
+        "percussive_share": 0.37,
+        "cuts_on_beat": 0.2,
+        "cuts_on_half_beat": 0.6,
+        "accents_on_beat": 0.377,
+        "chance_on_beat": 0.301,
+        "median_shot_beats": 4.96,
+        "verdict": "no clear beat (ambient / voiceover-led)",
+        "summary": "No usable beat (129 BPM detected but pulse clarity 0.14, percussive share 0.37); cuts on beat 20% vs 30% chance and median shot ~5 beats, so pacing follows the phrase/fact structure (likely narration-led), not the music."
+      },
+      "family_note": "Placed in 03 Character because a mascot carries the opening, a mid section and the ending and the tone is expressive (7.5) at mid energy (3.8), inside the Character zone. Doubt: ~70% of screen time is kinetic infographic typography, closer to a missing 'kinetic infographic explainer' sub-style (could also sit under 02 Playful reel at lower energy). Retro paper grain hints at 04 but there is no collage or footage.",
+      "variant": "Rubber-hose mascot + kinetic stats",
+      "substyle_status": "proposed"
+    },
+    {
+      "id": "ref18",
+      "title": "PNC Bank \"Teamwork\" — 30 s brand spot",
+      "family": "03 Character",
+      "substyle": "Typographic playground",
+      "format": "Brand film",
+      "mood": [
+        "Warm",
+        "Optimistic",
+        "Playful"
+      ],
+      "cast": "Characters",
+      "space": "2.5D",
+      "motion_language": "Rigged / puppet",
+      "transitions": [
+        "Cut / match cut",
+        "Camera move"
+      ],
+      "tone": {
+        "secondary_motion": [
+          1.5,
+          "follow-through and overlapping action on limbs, pendulum swings on rings, arcs on jumps; no squash on objects or type"
+        ],
+        "color": [
+          1.5,
+          "several colors throughout (teal, burgundy, orange, slate blue, olive) but muted on a cream ground"
+        ],
+        "typography": [
+          1.5,
+          "the word TEAMWORK is the set: each giant letter is an obstacle-course structure; letters are not deformed or kinetic themselves"
+        ],
+        "shape_language": [
+          1.5,
+          "hand-made props (wood grain, ropes, nets, trees, a deer) on geometric extruded letters; elongated stylized figures"
+        ],
+        "character_humor": [
+          2,
+          "characters are the story: climbing, pulling each other up, high-fives, swinging, a relay toward a finish flag"
+        ]
+      },
+      "signature": "A slow, constant camera truck along the word TEAMWORK built as a playground, cutting letter to letter while stylized figures help each other through it, then a pull-back reveal of the whole word and the logo.",
+      "file": "references/03_character_animation/ref18.mp4",
+      "analysis": "research/styles/03_character_animation/ref18_pnc_bank_teamwork.md",
+      "thumb": "thumbs/ref18.jpg",
+      "metrics": {
+        "duration_s": 30.0,
+        "fps": 24.0,
+        "cuts": 10,
+        "cuts_per_min": 20.0,
+        "avg_shot_s": 2.73,
+        "motion_pct": 73.5,
+        "speed_pct_width_per_s": 4.8,
+        "holds_count": 2,
+        "hold_median_s": 2.98,
+        "hold_max_s": 3.0,
+        "colorfulness": 39.8,
+        "energy_score": 4.8,
+        "energy_parts": {
+          "cuts": 6.3,
+          "motion": 7.3,
+          "speed": 0.8
+        }
+      },
+      "music": {
+        "audio": true,
+        "bpm": 136.0,
+        "pulse_clarity": 0.51,
+        "percussive_share": 0.1,
+        "cuts_on_beat": 0.4,
+        "cuts_on_half_beat": 0.7,
+        "accents_on_beat": 0.471,
+        "chance_on_beat": 0.317,
+        "median_shot_beats": 5.1,
+        "verdict": "edit independent of the beat",
+        "summary": "136 BPM with a moderate pulse (0.51) and very low percussive share (0.10); cuts and accents lean slightly toward the beat (40% / 47% vs 32% chance, only 10 cuts) and the music builds to its peak around the TEAMWORK reveal at 24 s, then decays under the logo."
+      },
+      "family_note": "03 Character: characters acting and helping each other carry the message, like ref05. Different look from ref05 (dimensional letters, cream background, elongated figures, no section colors) and a calmer edit (continuous trucking camera, one letter per shot), so a sub-style is proposed. Typography is the environment, which links it to typographic brand films.",
+      "variant": "Characters in 3D letters",
+      "substyle_status": "proposed"
+    },
+    {
+      "id": "ref19",
+      "title": "CEAL — Energy integration event opener",
+      "family": "01 Elegant",
+      "substyle": "Illustrated editorial",
+      "format": "Event opener",
+      "mood": [
+        "Contemplative",
+        "Elegant",
+        "Technical"
+      ],
+      "cast": "Mixed",
+      "space": "2.5D",
+      "motion_language": "Smooth tween",
+      "transitions": [
+        "Camera move",
+        "Shape / mask wipe",
+        "Morph / transform"
+      ],
+      "tone": {
+        "secondary_motion": [
+          0.5,
+          "almost no springs (emblem slide ~2% overshoot); motion comes from camera drift, rotating orbit rings, swaying pumpjacks and a Newton's-cradle loop"
+        ],
+        "color": [
+          1,
+          "restricted palette: dusty steel blue / navy base with orange and yellow accents, plus paper/grain texture"
+        ],
+        "typography": [
+          1,
+          "large condensed all-caps questions and a letterspaced 'COMBUSTIBLES FÓSILES' title; calm builds, no kinetic deformation"
+        ],
+        "shape_language": [
+          1,
+          "flat geometric vector (pylons, turbines, rigs, arrows) softened by grain, soft gradients and low-poly hills"
+        ],
+        "character_humor": [
+          0.5,
+          "one small worker character appears briefly; otherwise objects and infographics only"
+        ]
+      },
+      "signature": "A widescreen (4:1) flat-vector essay on Latin American energy in steel blue and orange: the camera drifts through layered parallax landscapes of pylons, turbines and rigs, punctuated by orbiting rings and big quiet questions.",
+      "file": "references/01_elegant_corporate/ref19.mp4",
+      "analysis": "research/styles/01_elegant_corporate/ref19_ceal.md",
+      "thumb": "thumbs/ref19.jpg",
+      "metrics": {
+        "duration_s": 94.6,
+        "fps": 24.0,
+        "cuts": 8,
+        "cuts_per_min": 5.1,
+        "avg_shot_s": 10.51,
+        "motion_pct": 50.9,
+        "speed_pct_width_per_s": 13.1,
+        "holds_count": 18,
+        "hold_median_s": 1.46,
+        "hold_max_s": 6.08,
+        "colorfulness": 43.4,
+        "energy_score": 3.7,
+        "energy_parts": {
+          "cuts": 3.8,
+          "motion": 5.1,
+          "speed": 2.2
+        }
+      },
+      "music": {
+        "audio": true,
+        "bpm": 129.2,
+        "pulse_clarity": 0.27,
+        "percussive_share": 0.23,
+        "cuts_on_beat": 0.375,
+        "cuts_on_half_beat": 0.875,
+        "accents_on_beat": 0.342,
+        "chance_on_beat": 0.301,
+        "median_shot_beats": 5.38,
+        "verdict": "edit independent of the beat",
+        "summary": "129 BPM bed with a weak pulse (0.27) and low percussive share (0.23); only 8 hard cuts and the edit is independent of the beat (37% on beat vs 30% chance), with long shots (median 5.4 beats); the busiest onset stretch (44-58 s) overlaps the denser infographic section."
+      },
+      "family_note": "Elegant by restraint (restricted palette, one statement at a time, long holds, clean long ease-outs, energy 3.7, tone 4.0), but illustrated and 2.5D with texture, which pulls it toward 04 Mixed media's camera-flow-through-layers. Proposed sub-style 'Illustrated 2.5D editorial'. Doubt: tone 4.0 is at the Elegant upper bound.",
+      "variant": "2.5D infographic",
+      "substyle_status": "proposed"
+    },
+    {
+      "id": "ref20",
+      "title": "Volkswagen “Think Blue” (Sehsucht) — monochrome 3D city brand film",
+      "family": "01 Elegant",
+      "substyle": "Cinematic",
+      "format": "Brand film",
+      "mood": [
+        "Contemplative",
+        "Optimistic",
+        "Premium"
+      ],
+      "cast": "Mixed",
+      "space": "3D",
+      "motion_language": "Smooth tween",
+      "transitions": [
+        "Camera move",
+        "Cut / match cut",
+        "Morph / transform"
+      ],
+      "tone": {
+        "secondary_motion": [
+          0.5,
+          "no springs or squash; bubbles draw on and fill without visible overshoot; only small character gestures and puddle ripples"
+        ],
+        "color": [
+          0.5,
+          "a single blue tint over the whole 3D world plus black/white silhouettes; colorfulness 52.7 comes from the saturated blue, not from many hues"
+        ],
+        "typography": [
+          0,
+          "no type until the end card 'Think Blue.' in small light-cyan type, then the VW logo with 'Das Auto.'"
+        ],
+        "shape_language": [
+          1,
+          "precise low-poly 3D architecture and cars, contrasted with organic flat silhouettes"
+        ],
+        "character_humor": [
+          1,
+          "silhouette people act out small everyday scenes (commute, coffee, a girl stepping in a puddle) with thought-bubble icons; gentle wit, no gags"
+        ]
+      },
+      "signature": "A single-blue 3D city seen through an almost unbroken flying camera, where flat black-and-white silhouettes live small everyday moments and white thought-bubble icons appear beside them.",
+      "file": "references/01_elegant_corporate/ref20.mp4",
+      "analysis": "research/styles/01_elegant_corporate/ref20_volkswagen_think_blue_sehsucht.md",
+      "thumb": "thumbs/ref20.jpg",
+      "metrics": {
+        "duration_s": 162.0,
+        "fps": 25.0,
+        "cuts": 34,
+        "cuts_per_min": 12.6,
+        "avg_shot_s": 4.63,
+        "motion_pct": 94.7,
+        "speed_pct_width_per_s": 13.5,
+        "holds_count": 4,
+        "hold_median_s": 1.66,
+        "hold_max_s": 2.68,
+        "colorfulness": 52.7,
+        "energy_score": 5.7,
+        "energy_parts": {
+          "cuts": 5.4,
+          "motion": 9.5,
+          "speed": 2.3
+        }
+      },
+      "music": {
+        "audio": true,
+        "bpm": 99.4,
+        "pulse_clarity": 0.63,
+        "percussive_share": 0.02,
+        "cuts_on_beat": 0.235,
+        "cuts_on_half_beat": 0.559,
+        "accents_on_beat": 0.261,
+        "chance_on_beat": 0.232,
+        "median_shot_beats": 3.78,
+        "verdict": "edit independent of the beat",
+        "summary": "Clear but non-percussive pulse at 99 BPM (pulse 0.63, percussive share 0.02, enters ~10 s); the edit ignores it (cuts on beat 23.5% vs 23.2% chance, median shot ~3.8 beats) and the camera keeps moving through it."
+      },
+      "family_note": "01 Elegant · Cinematic: 3D space, continuous camera travel, monochrome palette, restrained secondary motion and almost no type (tone 3.0). Energy 5.7 sits just above the Elegant zone only because the camera is always moving (motion part 9.5); cuts and speed parts are mid. Doubt: people are present throughout, so it touches 03 Character, but they are flat silhouettes with small acting, not a character-led story.",
+      "variant": "Monochrome 3D city",
+      "substyle_status": "proposed"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+ "audio": true,
+ "duration_s": 94.5,
+ "bpm": 129.2,
+ "beat_period_s": 0.464,
+ "pulse_clarity": 0.27,
+ "tempo_stability": 0.94,
+ "percussive_share": 0.23,
+ "cuts": 8,
+ "motion_accents": 38,
+ "sync_tolerance_ms": 70,
+ "cuts_on_beat": 0.375,
+ "cuts_on_half_beat": 0.875,
+ "accents_on_beat": 0.342,
+ "chance_on_beat": 0.301,
+ "avg_shot_beats": 22.62,
+ "median_shot_beats": 5.38,
+ "loudness_dynamic_db": 7.8,
+ "verdict": "edit independent of the beat"
+}

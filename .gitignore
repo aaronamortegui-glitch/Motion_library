@@ -64,3 +64,8 @@ media/promo/vo/*.wav
 media/promo/music_promo_cut.wav
 media/promo/vo/chris_a*
 library/assets_cache/
+
+# Motion Style Map research: reference videos and regenerable sheets stay local (size, third-party footage)
+/references/
+research/batch/*/_30fps.mp4
+research/batch/*/ov_*.png

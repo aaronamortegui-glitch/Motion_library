@@ -8,12 +8,12 @@ Motion made with AI all looks the same: same curves, same moves, same templates.
 
 ## What's inside
 
-> **Latest additions:** a gallery plugin with live previews and **marker-driven timing** (drag *SS in* / *SS out* to retime any preset), **styles** (Dynamic, Elegant, Modern, Playful, Tech) that animate a whole comp in one click, 17 **Classics** adapted from animate.css 4.1.1 (MIT), speed-ramp curves (`Ramp`, `Surge`, `Whip`), and an **MCP server** so Claude can drive After Effects and the library directly. Every piece we make should leave something new in the library.
+> **Latest additions:** a gallery plugin with live previews and **marker-driven timing** (drag *SS in* / *SS out* to retime any preset), **styles** (Dynamic, Elegant, Modern, Playful, Tech) that animate a whole comp in one click, 17 **Classics** adapted from animate.css 4.1.1 (MIT), speed-ramp curves (`Ramp`, `Surge`, `Whip`), and an **MCP server** so Claude can drive After Effects and the library directly. New from the **Motion Style Map** (20 analysed reference films): curves `Coast`, `Nudge`, `Wind-up` and `Snap`, 11 presets measured on real work (Coast Rise, Wind-up Slide, Nudge Grow, Snap Scale, Iris Reveal, Wordmark Reveal, Push Through, Color Wipe, Chars Blur, Boil, On Twos) and the *Editorial*, *Storybook* and *Collage* styles. Every piece we make should leave something new in the library.
 
 <!-- catalog:start -->
-**68 presets** in 5 categories, plus style packs. Every one is also listed in `library/INDEX.txt` (for LLMs) and `library/index.html` (for people).
+**79 presets** in 5 categories, plus style packs. Every one is also listed in `library/INDEX.txt` (for LLMs) and `library/index.html` (for people).
 
-### Motion (23)
+### Motion (31)
 
 Entrances and exits for any layer. `SSP.apply(layer, name, "in" | "out" | "both")`
 
@@ -24,7 +24,9 @@ Entrances and exits for any layer. `SSP.apply(layer, name, "in" | "out" | "both"
 | <img src="library/gifs/motion/organic-draw.gif" width="200"><br>**Organic Draw** · `medium`<br><sub>Hand-drawn feel: contours, underlines, sketch lines (shape layers only)</sub> | <img src="library/gifs/motion/organic-stroke.gif" width="200"><br>**Organic Stroke** · `dynamic`<br><sub>Traveling brush stroke: the start chases the end (accent lines, HUD links)</sub> | <img src="library/gifs/motion/line-draw.gif" width="200"><br>**Line Draw** · `medium`<br><sub>Lines, stroke icons, tracking HUD (shape layers only)</sub> | <img src="library/gifs/motion/slam-in.gif" width="200"><br>**Slam In** · `dynamic`<br><sub>Hero words, titles over footage, kinetic type</sub> |
 | <img src="library/gifs/motion/flip-in.gif" width="200"><br>**Flip In** · `medium`<br><sub>Cards, tiles, reveals, before/after</sub> | <img src="library/gifs/motion/spin-pop.gif" width="200"><br>**Spin Pop** · `dynamic`<br><sub>Badges, stickers, stamps, icons</sub> | <img src="library/gifs/motion/drop-bounce.gif" width="200"><br>**Drop Bounce** · `dynamic`<br><sub>Icons, products, emoji, playful drops</sub> | <img src="library/gifs/motion/stretch-slide.gif" width="200"><br>**Stretch Slide** · `dynamic`<br><sub>Cards, chips, pills, fast UI moves</sub> |
 | <img src="library/gifs/motion/ramp-slide.gif" width="200"><br>**Ramp Slide** · `dynamic`<br><sub>Transitions, product slides, bold entrances</sub> | <img src="library/gifs/motion/ramp-zoom.gif" width="200"><br>**Ramp Zoom** · `dynamic`<br><sub>Logo reveals, hero products, end cards</sub> | <img src="library/gifs/motion/ramp-spin.gif" width="200"><br>**Ramp Spin** · `dynamic`<br><sub>Icons, badges, logo spins</sub> | <img src="library/gifs/motion/whip-pan.gif" width="200"><br>**Whip Pan** · `dynamic`<br><sub>Swipe transitions, camera-style moves, carousels</sub> |
-| <img src="library/gifs/motion/surge-rise.gif" width="200"><br>**Surge Rise** · `medium`<br><sub>Headlines, cards, elegant entrances</sub> | <img src="library/gifs/motion/speed-ramp.gif" width="200"><br>**Speed Ramp** · `dynamic`<br><sub>Footage, product shots, action beats, transitions</sub> | <img src="library/gifs/motion/punch-zoom.gif" width="200"><br>**Punch Zoom** · `medium`<br><sub>Footage, precomps, freeze frames, cut emphasis</sub> |   |
+| <img src="library/gifs/motion/surge-rise.gif" width="200"><br>**Surge Rise** · `medium`<br><sub>Headlines, cards, elegant entrances</sub> | <img src="library/gifs/motion/speed-ramp.gif" width="200"><br>**Speed Ramp** · `dynamic`<br><sub>Footage, product shots, action beats, transitions</sub> | <img src="library/gifs/motion/punch-zoom.gif" width="200"><br>**Punch Zoom** · `medium`<br><sub>Footage, precomps, freeze frames, cut emphasis</sub> | <img src="library/gifs/motion/coast-rise.gif" width="200"><br>**Coast Rise** · `soft`<br><sub>Product UI, editorial headlines, icons: fast start, clean stop</sub> |
+| <img src="library/gifs/motion/wind-up-slide.gif" width="200"><br>**Wind-up Slide** · `soft`<br><sub>Logo slides, premium reveals: a small pull-back, then a long glide</sub> | <img src="library/gifs/motion/nudge-grow.gif" width="200"><br>**Nudge Grow** · `soft`<br><sub>Bars, charts, columns, panels growing from their anchor (put the anchor at the base)</sub> | <img src="library/gifs/motion/snap-scale.gif" width="200"><br>**Snap Scale** · `medium`<br><sub>Editorial cuts on the action: shapes and type that jump in size and settle</sub> | <img src="library/gifs/motion/iris-reveal.gif" width="200"><br>**Iris Reveal** · `medium`<br><sub>Scene changes, photo reveals, opening a new section from a point</sub> |
+| <img src="library/gifs/motion/wordmark-reveal.gif" width="200"><br>**Wordmark Reveal** · `medium`<br><sub>Wordmarks sliding out from behind their logo mark, names after an icon</sub> | <img src="library/gifs/motion/push-through.gif" width="200"><br>**Push Through** · `medium`<br><sub>Fly-through transitions: the camera pushes into a word, a logo or a planet and through it</sub> | <img src="library/gifs/motion/color-wipe.gif" width="200"><br>**Color Wipe** · `medium`<br><sub>Section changes: a full-frame color solid sweeps in diagonally (put it on a solid)</sub> |   |
 
 ### Classics (17)
 
@@ -38,7 +40,7 @@ Effects adapted from animate.css 4.1.1 (MIT) into native keyframes: entrances, e
 | <img src="library/gifs/motion/roll-in.gif" width="200"><br>**Roll In** · `dynamic`<br><sub>Wheels, coins, round icons (enter)</sub> | <img src="library/gifs/motion/zoom-in-down.gif" width="200"><br>**Zoom In Down** · `medium`<br><sub>Titles that drop in from above (enter)</sub> | <img src="library/gifs/motion/jack-in-the-box.gif" width="200"><br>**Jack In The Box** · `dynamic`<br><sub>Surprises, reveals, kids and playful brands (enter)</sub> | <img src="library/gifs/motion/back-out-up.gif" width="200"><br>**Back Out Up** · `dynamic`<br><sub>Exits upward, cards leaving (exit)</sub> |
 | <img src="library/gifs/motion/zoom-out.gif" width="200"><br>**Zoom Out** · `soft`<br><sub>Quiet exits, scene changes (exit)</sub> |   |   |   |
 
-### Text (10)
+### Text (11)
 
 Per character or per word, on text layers. `SSP.applyText(layer, name, "in" | "out" | "both")`
 
@@ -46,9 +48,9 @@ Per character or per word, on text layers. `SSP.applyText(layer, name, "in" | "o
 |---|---|---|---|
 | <img src="library/gifs/text/chars-rise.gif" width="200"><br>**Chars Rise** · `medium`<br><sub>Short headlines, names, kickers</sub> | <img src="library/gifs/text/words-fade-up.gif" width="200"><br>**Words Fade Up** · `soft`<br><sub>Phrases, captions, quotes</sub> | <img src="library/gifs/text/blur-words.gif" width="200"><br>**Blur Words** · `soft`<br><sub>Premium moments, calm intros</sub> | <img src="library/gifs/text/tracking-settle.gif" width="200"><br>**Tracking Settle** · `medium`<br><sub>All-caps titles, typographic logos</sub> |
 | <img src="library/gifs/text/chars-pop.gif" width="200"><br>**Chars Pop** · `dynamic`<br><sub>Social, hype, big numbers</sub> | <img src="library/gifs/text/typewriter.gif" width="200"><br>**Typewriter** · `medium`<br><sub>Captions, terminals, UI, quotes</sub> | <img src="library/gifs/text/scramble.gif" width="200"><br>**Scramble** · `dynamic`<br><sub>Tech, data, HUD labels, reveals</sub> | <img src="library/gifs/text/count-up.gif" width="200"><br>**Count Up** · `medium`<br><sub>Stats, KPIs, prices, counters</sub> |
-| <img src="library/gifs/text/chars-ramp.gif" width="200"><br>**Chars Ramp** · `medium`<br><sub>Titles that build tension, trailers, reveals</sub> | <img src="library/gifs/text/words-slam.gif" width="200"><br>**Words Slam** · `dynamic`<br><sub>Punchy statements, social hooks, VO beats</sub> |   |   |
+| <img src="library/gifs/text/chars-ramp.gif" width="200"><br>**Chars Ramp** · `medium`<br><sub>Titles that build tension, trailers, reveals</sub> | <img src="library/gifs/text/words-slam.gif" width="200"><br>**Words Slam** · `dynamic`<br><sub>Punchy statements, social hooks, VO beats</sub> | <img src="library/gifs/text/chars-blur.gif" width="200"><br>**Chars Blur** · `soft`<br><sub>Opening titles, premium intros: characters resolve from blur one after another</sub> |   |
 
-### Effects (9)
+### Effects (11)
 
 Continuous loops driven by expressions. `SSP.applyFx(layer, name)`
 
@@ -56,7 +58,7 @@ Continuous loops driven by expressions. `SSP.applyFx(layer, name)`
 |---|---|---|---|
 | <img src="library/gifs/fx/float.gif" width="200"><br>**Float** · `soft`<br><sub>Idle icons and cards, living backgrounds</sub> | <img src="library/gifs/fx/wiggle-rotate.gif" width="200"><br>**Wiggle Rotate** · `medium`<br><sub>Stickers, illustrations with personality</sub> | <img src="library/gifs/fx/pulse.gif" width="200"><br>**Pulse** · `medium`<br><sub>CTAs, buttons, attention grabbers</sub> | <img src="library/gifs/fx/jitter.gif" width="200"><br>**Jitter** · `dynamic`<br><sub>Social, glitch, high-energy pieces</sub> |
 | <img src="library/gifs/fx/breathe.gif" width="200"><br>**Breathe** · `soft`<br><sub>Ambient glows, background shapes, calm idle states</sub> | <img src="library/gifs/fx/swing.gif" width="200"><br>**Swing** · `soft`<br><sub>Hanging tags, badges, signs, pendulums</sub> | <img src="library/gifs/fx/orbit.gif" width="200"><br>**Orbit** · `soft`<br><sub>Dots and satellites around a logo, decorative loops</sub> | <img src="library/gifs/fx/shake.gif" width="200"><br>**Shake** · `dynamic`<br><sub>Impacts, bass hits, alarms, energetic footage</sub> |
-| <img src="library/gifs/fx/holo-flicker.gif" width="200"><br>**Holo Flicker** · `medium`<br><sub>HUD labels, tech overlays, holographic UI</sub> |   |   |   |
+| <img src="library/gifs/fx/holo-flicker.gif" width="200"><br>**Holo Flicker** · `medium`<br><sub>HUD labels, tech overlays, holographic UI</sub> | <img src="library/gifs/fx/boil.gif" width="200"><br>**Boil** · `medium`<br><sub>Collage, cut-outs, paper and texture layers: a subtle hand-made boil</sub> | <img src="library/gifs/fx/on-twos.gif" width="200"><br>**On Twos** · `medium`<br><sub>Stop-motion feel: plays the layer's existing animation on 2s or 3s (apply after a motion preset)</sub> |   |
 
 ### Recipes (9)
 
@@ -68,14 +70,15 @@ Behavior measured from reference animations and rebuilt with our own keyframes. 
 | <img src="library/gifs/recipe/calibration-1df-unu.gif" width="200"><br>**1DF+UNU** · `dynamic`<br><sub>scale · loop</sub> | <img src="library/gifs/recipe/calibration-x9r.gif" width="200"><br>**X9R** · `medium`<br><sub>opacity & scale · transition</sub> | <img src="library/gifs/recipe/calibration-pe6.gif" width="200"><br>**PE6** · `medium`<br><sub>position · transition</sub> | <img src="library/gifs/recipe/calibration-4vw.gif" width="200"><br>**4VW** · `dynamic`<br><sub>position & scale · transition</sub> |
 | <img src="library/gifs/recipe/calibration-2jv.gif" width="200"><br>**2JV** · `dynamic`<br><sub>scale · transition</sub> |   |   |   |
 
-### Packs (6)
+### Packs (9)
 
 One click gives a whole comp an identity: each layer gets the preset of its role (title, subtitle, body, shape, media, logo), staggered. `SSP.applyPack(comp, name)`
 
 |   |   |   |   |
 |---|---|---|---|
 | <img src="library/packs/dynamic.gif" width="260"><br>**Dynamic** · `dynamic`<br><sub>Social, launches, hype: fast slams, whips and speed ramps.</sub> | <img src="library/packs/elegant.gif" width="260"><br>**Elegant** · `soft`<br><sub>Premium, fashion, hospitality: slow blurs, soft rises, generous timing.</sub> | <img src="library/packs/modern.gif" width="260"><br>**Modern** · `medium`<br><sub>Corporate, SaaS, product: clean rises and slides on the brand curves.</sub> | <img src="library/packs/playful.gif" width="260"><br>**Playful** · `dynamic`<br><sub>Kids, food, consumer apps: bounces, wobbles and jack-in-the-box reveals.</sub> |
-| <img src="library/packs/tech.gif" width="260"><br>**Tech** · `medium`<br><sub>Data, AI, fintech, HUDs: decoding text, line draws and holographic flicker.</sub> | <img src="library/packs/calm-modern.gif" width="260"><br>**Calm Modern** · `soft`<br><sub>Product and brand pieces: small travel, word-by-word text, quiet exits, no bounce.</sub> |   |   |
+| <img src="library/packs/tech.gif" width="260"><br>**Tech** · `medium`<br><sub>Data, AI, fintech, HUDs: decoding text, line draws and holographic flicker.</sub> | <img src="library/packs/calm-modern.gif" width="260"><br>**Calm Modern** · `soft`<br><sub>Product and brand pieces: small travel, word-by-word text, quiet exits, no bounce.</sub> | <img src="library/packs/editorial.gif" width="260"><br>**Editorial** · `medium`<br><sub>Brand systems, tech launches, type-led films: typing, snaps on the action, construction lines, clean ease-outs (Motion Style Map: Editorial).</sub> | <img src="library/packs/storybook.gif" width="260"><br>**Storybook** · `soft`<br><sub>Warm product launches and character explainers: line-by-line rises, soft 3% overshoots, circular reveals (Motion Style Map: Warm editorial, Character).</sub> |
+| <img src="library/packs/collage.gif" width="260"><br>**Collage** · `dynamic`<br><sub>Mixed media, cut-outs, archive and texture: whips through layers, hand-made boil on 3s, decoding type (Motion Style Map: Mixed media).</sub> |   |   |   |
 <!-- catalog:end -->
 
 ### Pick by energy
@@ -121,6 +124,17 @@ uses) is matched against the library with `tools/match_reference.py` or the MCP 
 missing gets created, tagged and rendered, and the reference becomes a new style. Example:
 [`library/references/google-calm-modern.json`](library/references/google-calm-modern.json) → the *Calm Modern* style.
 Claude can also ask `suggest_mix` for a role, a target and a feel.
+
+### Motion Style Map (research)
+20 reference films (brand films, launches, explainers, reels) measured frame by frame and by ear: cuts, % of time in
+motion, speed, color, fitted Bézier curves per move, and the music (BPM, pulse clarity, cuts on the beat vs chance, shot
+length in beats). Each film is placed on a map (measured energy × scored tone), tagged, and broken into **behaviors**
+(element × phase × curve) named with Motion DNA's own terms. Four families so far (Elegant, Playful reel, Character,
+Mixed media) with sub-styles; what the library was missing became the curves, presets and styles above.
+- Map: [`research/style_map/style_map.html`](research/style_map/style_map.html) · taxonomy: [`research/style_map/taxonomy.md`](research/style_map/taxonomy.md)
+- Behaviors and the mapping to presets/curves: [`research/ontology/`](research/ontology/) (`terminology.md`, `behaviors.json`, `dna_coverage.json`)
+- Family syntheses, music and cross-family patterns: [`research/styles/`](research/styles/)
+- Pipeline: `tools/style_research/` (`batch_auto.sh` → `research/batch/AGENT_BRIEF.md` → `integrate.py` → `build_map.py`; `map_to_dna.py` re-aligns the terms)
 
 ## Tested, and what it looks like
 
@@ -219,6 +233,8 @@ Bigger pieces are data, not code: scenes (`tools/build_scene.jsx`) and edits (`t
 | `tools/qa_frames.jsx` | QA stills of a comp at given times |
 | `tools/faceswap_refine.py` + `media/faceswap/jobs.json` | **Face refinement pass** for every clip with a real person (MiniMax H3 head inpainting, local GPU); `faceswap_apply.py`, `footage_relink_*.jsx`, `reload_footage.jsx` put the refined clips in place |
 | `tools/ss_assets.jsx` (`SSA`) + `tools/index_assets.py` | Local asset packs: index SFX/overlays by category and loudness, place them by name |
+| `tools/style_research/` | Motion Style Map pipeline: per-video energy, metrics, music/BPM sync (`audio.py`), contact sheets, curve fitting, catalog integration, the map, and `map_to_dna.py` (behaviors → Motion DNA presets and curves) |
+| `tools/record_panel.py` | Records the panel in use (SS_PANEL hook driven through the bridge, DPI-aware PrintWindow) → `docs/screens/ae-panel.gif` |
 
 ## Growing the library
 
@@ -271,7 +287,7 @@ The index measures each sound's loudness and flags the harsh ones (`loud`) and t
 | `docs/` | `LEARNINGS.md`, case studies, screens and examples |
 | `ae/` | Test project |
 | `media/` | AI test footage, mattes, tracking data, music and VO for the showcases |
-| `research/` | Calibration, harvests, preview catalog |
+| `research/` | Calibration, harvests, preview catalog, Motion Style Map (`style_map/`, `ontology/`, `styles/`, `batch/`) |
 
 ## Requirements
 
