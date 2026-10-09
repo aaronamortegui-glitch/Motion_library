@@ -54,6 +54,12 @@ Rules:
 - Flow: the user opens `tools/ss_harvest_station.jsx` in AE (section + Start) and the same folder in the AC panel → `python tools/ac_driver.py run` (UI automation: double-clicks each thumbnail, waits for the entry in `research/harvest/station/_log.csv`, scrolls; ESC stops; run `calibrate` and `preview` first) → `bash tools/expand_library.sh` (name OCR, `harvest_to_library.py` → `library/recipes.json`, thumbnails, index).
 - Recipes are applied with `SSP.applyRecipe(L, id, "both")`; they reproduce the behavior with our own keyframes/expressions.
 
+## Asset packs (SFX, overlays) — local only
+Animation Composer's asset packs (≈300 SFX, light leaks, grain, film burns, VHS, glitch masks, textures) are licensed: never copy them into the repo or publish them.
+1. `python tools/index_assets.py` → `library/ASSETS.local.txt` (git-ignored): `type|category|name|seconds|mean dB|peak dB|flags`.
+2. Pick by category (sfx: whoosh, ui, impact, glitch, slide, sparkle, cartoon, sci-fi, film, riser; overlays: light-leak, grain, film-burn, scratches, vhs, glitch, film-texture). Avoid `loud` SFX for UI sounds, or drop them 12 dB or more; trim `long` ones with `len`.
+3. In AE: `#include "ss_assets.jsx"` → `SSA.sfx(comp, name, t, gainDb, len)` and `SSA.overlay(comp, name, t, blend, opacity)` (blend defaults by family: light leaks/burns screen, grain/film overlay).
+
 ## HUD overlays, scenes and edits
 - `tools/ss_hud.jsx` (`#include "ss_hud.jsx"`): `SSHUD.init(comp)`, then `SSHUD.bracket({anchor:"TRK face", size:[w,h], label, t0})`, `SSHUD.callout({anchor, offset:[dx,dy], title, lines:[...], t0, color})`, `SSHUD.meter({at:[x,y], label, value, t0})`, `SSHUD.chip({anchor, offset, text, color, t0})`. Anchors are tracking nulls named `TRK <name>` (anchor point at the null center).
 - Tracking: `python tools/track_points.py clip.mp4 tracks.json --regions regions.json --debug debug.mp4`; pick regions from a gridded first frame (`ffmpeg ... drawgrid`), check the debug sheet, and give items that leave the frame a `t1`.

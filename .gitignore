@@ -23,3 +23,7 @@ media/whisky/_*
 media/whisky/*_raw.mp4
 media/whisky/shot0*.png
 media/whisky/*_matte.mov
+
+# Local asset-pack index (licensed assets: names and measurements stay on this machine)
+library/assets.local.json
+library/ASSETS.local.txt

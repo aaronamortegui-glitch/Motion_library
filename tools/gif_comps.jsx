@@ -68,7 +68,9 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var tx = SSP.textNames();
     var sample = { "Chars Rise": ["Superside", SSM.font("display"), 96], "Words Fade Up": ["Built for speed", SSM.font("ui"), 56],
         "Blur Words": ["Calm and premium", SSM.font("display"), 64], "Tracking Settle": ["MOTION LAB", SSM.font("ui"), 54],
-        "Chars Pop": ["5,000", SSM.font("ui"), 110] };
+        "Chars Pop": ["5,000", SSM.font("ui"), 110], "Typewriter": ["Hello, Superside", SSM.font("ui"), 60],
+        "Scramble": ["SS MOTION", SSM.font("ui"), 84], "Count Up": ["12,480", SSM.font("ui"), 110],
+        "Words Slam": ["Words Slam", SSM.font("display"), 80] };
     for (var d = 0; d < tx.length; d++) {
         var c3 = comp("text", tx[d], 2.4);
         var sm = sample[tx[d]] || [tx[d], SSM.font("ui"), 60];

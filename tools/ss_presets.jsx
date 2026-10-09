@@ -171,6 +171,71 @@ var SSP = (function () {
                 return SSM.animate(T(L, "ADBE Scale"), t, scl(L), mul(scl(L), 0.86), "Blink", "Launch");
             }
         },
+        // Card flip on Y (turns the layer 3D).
+        "Flip In": {
+            channels: "Fade & Rotate Y (3D)", energy: "medium", use: "Cards, tiles, reveals, before/after",
+            "in": function (L, t) {
+                L.threeDLayer = true;
+                var r = T(L, "ADBE Rotate Y").valueAtTime(REF(L), true);
+                SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Blink", "Flat");
+                return SSM.animate(T(L, "ADBE Rotate Y"), t, r + 90, r, "Arrive", "Land");
+            },
+            "out": function (L, t) {
+                L.threeDLayer = true;
+                var r = T(L, "ADBE Rotate Y").valueAtTime(REF(L), true);
+                SSM.animate(T(L, "ADBE Opacity"), t + SSM.seconds("Blink"), opa(L), 0, "Blink", "Flat");
+                return SSM.animate(T(L, "ADBE Rotate Y"), t, r, r - 90, "Glide", "Launch");
+            }
+        },
+        "Spin Pop": {
+            channels: "Fade, Scale & Rotate", energy: "dynamic", use: "Badges, stickers, stamps, icons",
+            "in": function (L, t) {
+                SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Tick", "Flat");
+                SSM.animate(T(L, "ADBE Rotate Z"), t, rot(L) - 180, rot(L), "Arrive", "Settle");
+                return SSM.animate(T(L, "ADBE Scale"), t, [0, 0, 100], scl(L), "Arrive", "Pop");
+            },
+            "out": function (L, t) {
+                SSM.animate(T(L, "ADBE Rotate Z"), t, rot(L), rot(L) + 120, "Glide", "Launch");
+                SSM.animate(T(L, "ADBE Opacity"), t + SSM.seconds("Tick"), opa(L), 0, "Blink", "Flat");
+                return SSM.animate(T(L, "ADBE Scale"), t, scl(L), [0, 0, 100], "Glide", "Launch");
+            }
+        },
+        // Falls in under gravity (accelerating), then two shrinking bounces.
+        "Drop Bounce": {
+            channels: "Fade & Position", energy: "dynamic", use: "Icons, products, emoji, playful drops",
+            "in": function (L, t) {
+                var p = pos(L);
+                SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Tick", "Flat");
+                return SSM.animateStops(T(L, "ADBE Position"), t, add(p, [0, -320]), [
+                    { v: p, frames: 10, ease: "Launch" },
+                    { v: add(p, [0, -48]), frames: 5, ease: "Settle" },
+                    { v: p, frames: 5, ease: "Launch" },
+                    { v: add(p, [0, -14]), frames: 3, ease: "Settle" },
+                    { v: p, frames: 3, ease: "Launch" }
+                ]);
+            },
+            "out": function (L, t) {
+                var p = pos(L);
+                SSM.animate(T(L, "ADBE Opacity"), t + SSM.seconds("Blink"), opa(L), 0, "Blink", "Flat");
+                return SSM.animate(T(L, "ADBE Position"), t, p, add(p, [0, 360]), "Glide", "Launch");
+            }
+        },
+        // Slides in stretched along the motion and relaxes into shape (cartoon squash & stretch).
+        "Stretch Slide": {
+            channels: "Fade, Position & Scale", energy: "dynamic", use: "Cards, chips, pills, fast UI moves",
+            "in": function (L, t) {
+                var p = pos(L), s = scl(L);
+                SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Tick", "Flat");
+                SSM.animate(T(L, "ADBE Scale"), t, [s[0] * 1.35, s[1] * 0.8, 100], s, "Arrive", "Pop");
+                return SSM.animate(T(L, "ADBE Position"), t, add(p, [-420, 0]), p, "Arrive", "Land");
+            },
+            "out": function (L, t) {
+                var p = pos(L), s = scl(L);
+                SSM.animate(T(L, "ADBE Scale"), t, s, [s[0] * 1.35, s[1] * 0.8, 100], "Glide", "Launch");
+                SSM.animate(T(L, "ADBE Opacity"), t + SSM.seconds("Tick"), opa(L), 0, "Blink", "Flat");
+                return SSM.animate(T(L, "ADBE Position"), t, p, add(p, [420, 0]), "Glide", "Launch");
+            }
+        },
         // Camera-style punch on footage or precomps: starts pushed in and eases back to frame (out: pushes in).
         "Punch Zoom": {
             channels: "Scale (camera)", energy: "medium", use: "Footage, precomps, freeze frames, cut emphasis",
@@ -226,6 +291,29 @@ var SSP = (function () {
                 T(L, "ADBE Opacity").expression = "value * (0.85 + 0.15*(Math.sin(time*" + f + "*Math.PI*2)*0.5+0.5));";
             }
         },
+        "Swing": {
+            channels: "Rotate", energy: "soft", use: "Hanging tags, badges, signs, pendulums",
+            build: function (L) {
+                var a = slider(L, "SS Swing · Angle deg", 8), f = slider(L, "SS Swing · Frequency Hz", 0.6);
+                T(L, "ADBE Rotate Z").expression = "value + Math.sin(time*" + f + "*Math.PI*2)*" + a + ";";
+            }
+        },
+        "Orbit": {
+            channels: "Position", energy: "soft", use: "Dots and satellites around a logo, decorative loops",
+            build: function (L) {
+                var r = slider(L, "SS Orbit · Radius px", 40), f = slider(L, "SS Orbit · Turns per second", 0.25);
+                T(L, "ADBE Position").expression = "var a = time*" + f + "*Math.PI*2; value + [Math.cos(a), Math.sin(a)]*" + r + ";";
+            }
+        },
+        // Smooth camera shake (unlike Jitter's stepped jumps): good under impacts and bass hits.
+        "Shake": {
+            channels: "Position & Rotate", energy: "dynamic", use: "Impacts, bass hits, alarms, energetic footage",
+            build: function (L) {
+                var a = slider(L, "SS Shake · Amplitude px", 10), f = slider(L, "SS Shake · Frequency Hz", 12);
+                T(L, "ADBE Position").expression = "wiggle(" + f + ", " + a + ");";
+                T(L, "ADBE Rotate Z").expression = "wiggle(" + f + ", " + a + "/8);";
+            }
+        },
         // From the Boardroom HUD: soft glow, scanlines and an occasional flicker frame.
         "Holo Flicker": {
             channels: "Opacity · Glow & Scanlines", energy: "medium", use: "HUD labels, tech overlays, holographic UI",
@@ -258,6 +346,21 @@ var SSP = (function () {
         return { props: A.property("ADBE Text Animator Properties"), start: off, from: -W, sel: sel };
     }
     function isText(L) { return L.property("ADBE Text Properties") !== null; }
+    // Source Text expression that decodes (in) and/or encodes (out) the text with random glyphs.
+    // In/out times live on the first line so a later phase can update them.
+    function scramble(L, phase, t, d) {
+        var st = L.property("ADBE Text Properties").property("ADBE Text Document");
+        var m = /^var tin=([-\d.]+), din=([-\d.]+), tout=([-\d.]+), dout=([-\d.]+);/.exec(st.expression || "");
+        var tin = m ? +m[1] : -1, din = m ? +m[2] : 1, tout = m ? +m[3] : 1e6, dout = m ? +m[4] : 1;
+        if (phase === "in") { tin = t; din = d; } else { tout = t; dout = d; }
+        st.expression = "var tin=" + tin + ", din=" + din + ", tout=" + tout + ", dout=" + dout + ";\n" +
+            "var s = String(value), g = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*/<>';\n" +
+            "var p = Math.min(clamp((time - tin) / din, 0, 1), 1 - clamp((time - tout) / dout, 0, 1));\n" +
+            "var n = Math.floor(p * s.length); seedRandom(Math.floor(time * 24), true);\n" +
+            "var o = s.substr(0, n); for (var i = n; i < s.length; i++) o += (s.charAt(i) === ' ' || p <= 0) ? (p <= 0 ? '' : ' ') : g.charAt(Math.floor(random(g.length)));\n" +
+            "o;";
+        return t + d;
+    }
     var TX = {
         "Chars Rise": {
             channels: "Text · Position & Fade (char)", energy: "medium", use: "Short headlines, names, kickers",
@@ -314,6 +417,39 @@ var SSP = (function () {
                 return SSM.animate(a.start, t, a.from, 100, "Sweep", "Land");
             }
         },
+        // Characters appear one by one, hard cut (no ramp), ~2 frames per character.
+        "Typewriter": {
+            channels: "Text · Opacity (char, stepped)", energy: "medium", use: "Captions, terminals, UI, quotes",
+            "in": function (L, t) {
+                var a = textAnimator(L, "SS Typewriter", 1, 1);   // shape 1 = square: no soft edge
+                a.props.addProperty("ADBE Text Opacity").setValue(0);
+                a.sel.property("ADBE Text Percent End").setValue(100);
+                a.start.setValue(0);
+                var n = String(L.property("ADBE Text Properties").property("ADBE Text Document").value.text).length;
+                return SSM.animateStops(a.sel.property("ADBE Text Percent Start"), t, 0, [{ v: 100, frames: Math.max(8, n * 2), ease: "Flat" }]);
+            }
+        },
+        // Decodes from random characters, left to right (Source Text expression; style is kept).
+        "Scramble": {
+            channels: "Text · Source Text (decode)", energy: "dynamic", use: "Tech, data, HUD labels, reveals",
+            "in": function (L, t) { return scramble(L, "in", t, SSM.seconds("Stage")); }
+        },
+        // Counts a number up from 0 to the value in the text, keeping prefix, suffix, separators and decimals.
+        "Count Up": {
+            channels: "Text · Source Text (number)", energy: "medium", use: "Stats, KPIs, prices, counters",
+            "in": function (L, t) {
+                var d = SSM.seconds("Stage") * 1.5;
+                L.property("ADBE Text Properties").property("ADBE Text Document").expression =
+                    "var s = String(value), m = s.match(/[\\d][\\d,.]*/);\n" +
+                    "if (!m) s; else {\n" +
+                    "  var raw = m[0], comma = raw.indexOf(',') >= 0, dec = (raw.split('.')[1] || '').length;\n" +
+                    "  var n = parseFloat(raw.replace(/,/g, '')), v = easeOut(time, " + t + ", " + (t + d) + ", 0, n);\n" +
+                    "  var f = v.toFixed(dec).split('.');\n" +
+                    "  if (comma) f[0] = f[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n" +
+                    "  s.replace(raw, f.join('.'));\n}";
+                return t + d;
+            }
+        },
         // Kinetic type: each word lands big, blurred and slightly tilted, one after another.
         "Words Slam": {
             channels: "Text · Scale, Blur & Rotate (word)", energy: "dynamic", use: "Punchy statements, social hooks, VO beats",
@@ -329,6 +465,7 @@ var SSP = (function () {
     };
     // Shared text exit: fade + slight rise (Glide/Launch)
     for (var tk in TX) if (TX.hasOwnProperty(tk)) TX[tk]["out"] = P["Fade Up"]["out"];
+    TX["Scramble"]["out"] = function (L, t) { return scramble(L, "out", t, SSM.seconds("Arrive")); };
 
     // ---------- Recipes: harvested behaviors → reproduced with our own keyframes/expressions ----------
     var RECIPES = (function () {

@@ -10,18 +10,28 @@ GIF__motion__Organic Draw
 GIF__motion__Organic Stroke
 GIF__motion__Line Draw
 GIF__motion__Slam In
+GIF__motion__Flip In
+GIF__motion__Spin Pop
+GIF__motion__Drop Bounce
+GIF__motion__Stretch Slide
 GIF__motion__Punch Zoom
 GIF__fx__Float
 GIF__fx__Wiggle Rotate
 GIF__fx__Pulse
 GIF__fx__Jitter
 GIF__fx__Breathe
+GIF__fx__Swing
+GIF__fx__Orbit
+GIF__fx__Shake
 GIF__fx__Holo Flicker
 GIF__text__Chars Rise
 GIF__text__Words Fade Up
 GIF__text__Blur Words
 GIF__text__Tracking Settle
 GIF__text__Chars Pop
+GIF__text__Typewriter
+GIF__text__Scramble
+GIF__text__Count Up
 GIF__text__Words Slam
 GIF__recipe__calibration__W3L
 GIF__recipe__calibration__4LC
