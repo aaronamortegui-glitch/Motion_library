@@ -20,7 +20,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         "FX · Blur & Warp", "FX · Color Effects", "FX · Isometric", "FX · Long Shadow & Extrude", "FX · Position",
         "FX · Position & Rotate & Scale", "FX · Position & Rotation", "FX · Position & Scale", "FX · Rotate", "FX · Scale", "FX · Warp",
         "TEXT · Text Presets", "TITLES · Titles & Typography"];
-    var ICON = (function () { var f = new File(ROOT + "assets/superside/ss_icon_shape.json"); f.encoding = "UTF-8"; f.open("r"); var s = f.read(); f.close(); return eval("(" + s + ")"); })();
+    var ICON = (function () { var f = new File(ROOT + "assets/motion_dna/sample_shape.json"); f.encoding = "UTF-8"; f.open("r"); var s = f.read(); f.close(); return eval("(" + s + ")"); })();
     var PINE = [0.039, 0.129, 0.122], SPARK = [0.847, 1, 0.522], CLOUD = [0.969, 0.976, 0.949];
     var proj = app.project;
 

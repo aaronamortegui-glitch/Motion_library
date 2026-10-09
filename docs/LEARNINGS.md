@@ -1,6 +1,6 @@
 # Learnings
 
-Everything we learned building SS Motion and *The 1974 Boardroom* test, written so the next person (or LLM) doesn't have to rediscover it. Keep this file up to date when something new bites you.
+Everything we learned building Motion DNA and *The 1974 Boardroom* test, written so the next person (or LLM) doesn't have to rediscover it. Keep this file up to date when something new bites you.
 
 ## 1. Driving After Effects from an LLM
 
@@ -30,6 +30,12 @@ Everything we learned building SS Motion and *The 1974 Boardroom* test, written 
 
 ### Rendering
 - `aerender` **hangs** when the project contains layers with Animation Composer presets (the plugin waits for UI). Use the open AE's render queue: `tools/render_comps.jsx` / `tools/render_queue.jsx`.
+- **Prefer `aerender` now that the project has no AC layers**, one process per comp in parallel: `aerender -project <abs .aep> -comp CYPHER_EDIT -OMtemplate "H.264 - Match Render Settings - 15 Mbps" -output <abs .mp4> -mfr ON 100`. The 32 s Cypher edit took **50 s** this way, while the in-app queue sat 40 min at half the file. Paths must be absolute (`cygpath -aw`). It renders the *saved* project, so save after a build.
+- **The bridge stops when another scheduled task throws.** A ScriptUI palette opened from a job with `#targetengine` scheduled `"SS_PANEL_TICK()"`; that string runs in the main engine, where the function does not exist, and the error stopped the bridge's polling task too (jobs piled up in `bridge/inbox`, AE idle). Guard scheduled strings (`if (typeof F === "function") F();`), close test palettes, and restart the bridge (`app.cancelTask` + `ss_bridge.jsx`). If AE does not even run `AfterFX.exe -s`, a modal error dialog is open: ask the user to dismiss it.
+- **Re-rendering a file AE has imported can leave the footage item broken** (`elegant.mp4` came back with `hasVideo false`, and the builder failed with "property is hidden"). Run `tools/reload_footage.jsx` (it calls `mainSource.reload()`) before rebuilding comps that use it.
+- Headless Edge screenshots catch animated GIFs on their first frame (empty for entrances): `tools/make_visualizer_screens.py` shoots a copy of the page that shows the posters, and builds the README GIF by overlaying the preset MP4s on the cards. `PrintWindow` cannot capture Edge (GPU content comes back grey).
+- **A stalled in-app render looks like a slow one.** Measure: if the `*.m4v` temp file grows only a few hundred KB in two minutes, it is stuck. Stop it and switch to `aerender`; do not wait.
+- Force-closing AE shows a "Crash Repair Options" dialog on the next launch; click **Continue** (Safe Mode disables scripts, so the bridge and the panel would not load). `bridge.sh` can launch two instances if it runs while the dialog is up: close both and start one.
 - Output template `H.264 - Match Render Settings - 15 Mbps` includes audio when the comp has it.
 - Contact sheets are the fastest QA: `ffmpeg -i out.mp4 -vf "select='eq(n\,30)+eq(n\,90)',scale=800:-1,tile=2x2" -frames:v 1 sheet.png`. Check several frames, not one — push-ins move things into labels.
 
@@ -75,6 +81,11 @@ Everything we learned building SS Motion and *The 1974 Boardroom* test, written 
 - **Nano Banana 2.1 (`is2i-elote-gateway`) kept likeness better than Nano Banana Pro** in our tests, even with glasses, at ~USD 0.05 per image; `thinking_level: HIGH`.
 - **QA before spending on video:** `python tools/face_check.py --ref <real photo> --out sheet.png <stills or clips>` puts every detected face next to the real one. Run it on stills, then again on the generated clips.
 - **Video models, same shot and prompt (orbit around a face):** Seedance 2.5 (`i2v-gengateway-seedance-2-5-i2v`, 1080p) kept the face *and* the background consistent with a real orbit, but billed **USD 6.05** for 5 s (the estimate said 2.48). MiniMax H3 Max (`i2v-minimax-h3-max-gateway`, 768p, ~USD 0.48, ~15 s) kept the face but the background drifted; upscale to 1080 with lanczos + light unsharp. Kling 3.0 Pro is fine for shots without faces. Use Seedance for the hero face shot, MiniMax for the rest.
+- **Face refinement pass (MiniMax H3, local):** every generated clip with Aaron or Gian goes through `tools/faceswap_refine.py` before editing. Head inpainting (`h3_swap.py`, SAM3 head mask, denoise 0.9, expand 25, 8 steps, `--ref-size max`) keeps wardrobe, hats, glasses, background and camera, and moves the face back to the real person (Cypher close-up of Gian: ~6.8 min for 5 s on an RTX 5090, 1080p kept by the uncrop). Character Swap would bring the reference photo's t-shirt into the shot; inpainting does not.
+- **The reference must be in colour.** Our real portraits are black and white; MiniMax turns a B&W reference into a grey, high-contrast face. Colorize the real photo first (Nano Banana 2.1: "colorize, change nothing else, plain light grey background", ~USD 0.035) and cut the background out (the tool runs `rembg`).
+- Two people in one shot: one pass per person, the second fed with the first's result, **and pick the head with `"object": 0|1`** (SAM3 track index, left to right in our shots). The detect text does not single anyone out: "the head of the man in the navy pinstripe suit" tracked both heads, so the second pass painted Gian's face over Aaron too (he lost his beard and his hat).
+- Clips longer than 5.17 s (124 frames) run as two overlapping chunks joined by a 0.5 s cross-fade; the first version silently cut a 6.6 s clip to 5.2 s.
+- AE locks open footage on Windows: relink it before overwriting (`tools/footage_relink_release.jsx`, `faceswap_apply.py`, `tools/footage_relink_restore.jsx`).
 - Flora routes a two-image MiniMax "mixed" request to first-frame/last-frame (`f2v`): the second image becomes the ending, not an identity reference.
 
 ## 4c. Speed ramps
@@ -114,9 +125,13 @@ Everything we learned building SS Motion and *The 1974 Boardroom* test, written 
 - Stagger HUD entrances by ~0.3–0.6 s and sync SFX to them; one UI beep per element reads as "data arriving".
 - Brand: Pine/Sea/Cloud/Spark/Coral from the *Essentials* Figma, Instrument Serif for display, Inter Tight for UI (`assets/fonts/`, OFL).
 
+- **Promotional cut (not a slide explainer):** full-screen footage under oversized type (150–300 px), one idea per beat, hard cuts on the spoken word, and big two-colour shape wipes (Spark + Pine bars on the Whip curve) as transitions: the closing bars cover the last frames so the cut happens under a solid colour. Put the type on a bottom band (Pine at ~50 %) or on the empty side of the frame, never on faces. Busy demo footage goes into a big card next to the word, not full screen behind it (its own text fights the title). **One hero per beat**: a huge word (250–330 px) with a small kicker (60–76 px); two stacked lines of similar size read as a fight. Shape wipes need time and **continuity**: the bars that cover the end of a scene and the bars that reveal the next must have the same colours and direction (a colour swap at the cut reads as a flash), accelerate in (Launch) and decelerate out (Land), ~0.5 s + ~0.75 s; and every cut gets one (hard cuts between scenes felt abrupt). Short scenes lose half their time to the bars: open breaths in the VO (silence inserted in the pause before a phrase, `BREATHS` in `make_promo.py`) so each beat stays on screen ≥ 2.5 s and a speed ramp ~3 s. SFX must be set against the bed: at −14/−19 dB under a −13 LUFS pop track they disappear; a whoosh per cut at −3 dB and swooshes on hero words at −8 dB read clearly. Static pattern backgrounds look cheap; slow drifting lines (`lines` element) keep empty frames alive. Over footage, reuse the tracked scene comps (HUD chips, callouts) instead of the bare clip (`media` with `comp` and `hide`). Never put type over footage that has its own titles (the end card's reel showed through a Pine veil); use a clean plate. `tools/build_promo_all.jsx`.
+- **Voice for promos:** one continuous read (ElevenLabs Multilingual v2, Chris, stability 0.45), never line by line, never stretched. Cut the scenes to the VO word times (`tools/vo_words.py`, whisper): a scene changes only in a pause, after its last word.
+
 ## 6. Audio
 - Target about **−16 LUFS integrated** for web (measure: `ffmpeg -i out.mp4 -af ebur128 -f null -`).
 - Music at 0 dB with a 1 s fade at the end; UI SFX around −9 to −11 dB.
+- **Fit generated music without splicing:** find the drop with an RMS envelope (0.5 s windows) and offset the whole track so the drop lands on the key word; with ElevenLabs Music the structure in the prompt is followed roughly (asked 6.5 s, got the drop at 16.3 s), so measure, then shift.
 
 ## 7. Repo hygiene
 - All repo content is **English** (code, UI, docs, commits).
@@ -133,6 +148,8 @@ Everything we learned building SS Motion and *The 1974 Boardroom* test, written 
 | VEED background removal (5 s) | 0.135 |
 | ElevenLabs Music (20–26 s) | 0.36 |
 | ElevenLabs v3 VO line | 0.121 |
+| ElevenLabs Multilingual v2, full 56 s read in one take | 0.121 |
+| Nano Banana 2.1 colorize a reference photo | 0.035 |
 | Nano Banana 2.1 still (2K) | 0.053 |
 | MiniMax H3 Max, 5–6 s 768p | 0.48–0.58 |
 | Seedance 2.5, 5 s 1080p | 6.05 (estimate said 2.48) |

@@ -5,7 +5,6 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
 (function () {
     var ROOT = SS_ROOT + "/";
     var PAL = SSM.readJSON(ROOT + "assets/figma_essentials/palette.json").colors;
-    var ICON = SSM.readJSON(ROOT + "assets/superside/ss_icon_shape.json");
     function hex(h) { h = h.replace("#", ""); return [parseInt(h.substr(0, 2), 16) / 255, parseInt(h.substr(2, 2), 16) / 255, parseInt(h.substr(4, 2), 16) / 255]; }
     var proj = app.project, W = 640, H = 360;
     var folder = null;
@@ -21,16 +20,20 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         c.layers.addSolid(hex(PAL.pine), "BG", W, H, 1).locked = true;
         return c;
     }
+    // The neutral sample every move is shown on: a Spark arrow (assets/motion_dna/sample_shape.json), so direction and
+    // rotation read at a glance. Trim-path presets (Draw / Stroke) get its outline.
+    var ARROW = SSM.readJSON(ROOT + "assets/motion_dna/sample_shape.json").paths[0];
     function smark(c, name, stroke) {
         var L = c.layers.addShape(); L.name = name;
         var g = L.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group");
-        g.property("ADBE Vector Transform Group").property("ADBE Vector Scale").setValue([30, 30]);
-        var v = g.property("ADBE Vectors Group"), P = ICON.paths[0], sh = new Shape();
-        sh.vertices = P.v; sh.inTangents = P.i; sh.outTangents = P.o; sh.closed = P.closed;
+        g.property("ADBE Vector Transform Group").property("ADBE Vector Scale").setValue([34, 34]);
+        var v = g.property("ADBE Vectors Group"), sh = new Shape();
+        sh.vertices = ARROW.v; sh.inTangents = ARROW.i; sh.outTangents = ARROW.o; sh.closed = ARROW.closed;
         v.addProperty("ADBE Vector Shape - Group").property("ADBE Vector Shape").setValue(sh);
         if (stroke) {
             var st = v.addProperty("ADBE Vector Graphic - Stroke");
-            st.property("ADBE Vector Stroke Color").setValue(hex(PAL.spark)); st.property("ADBE Vector Stroke Width").setValue(14);
+            st.property("ADBE Vector Stroke Color").setValue(hex(PAL.spark)); st.property("ADBE Vector Stroke Width").setValue(12);
+            st.property("ADBE Vector Stroke Line Join").setValue(2);
         } else v.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").setValue(hex(PAL.spark));
         L.property("ADBE Transform Group").property("ADBE Position").setValue([W / 2, H / 2]);
         return L;
@@ -51,10 +54,10 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         L.property("ADBE Transform Group").property("ADBE Position").setValue([W / 2, H / 2 + size * 0.35]);
         return L;
     }
-    // Speed Ramp works on footage: a precomp where the S-mark crosses the frame at constant speed, trailed by dots
+    // Speed Ramp works on footage: a precomp where the sample crosses the frame at constant speed
     function constantMotion(c) {
         var src = proj.items.addComp("GIF_src__constant_motion", W, H, 1, 10, 30); src.parentFolder = folder;
-        var S = smark(src, "S constant", false), p = S.property("ADBE Transform Group").property("ADBE Position");
+        var S = smark(src, "sample constant", false), p = S.property("ADBE Transform Group").property("ADBE Position");
         p.setValueAtTime(0, [-120, H / 2]); p.setValueAtTime(10, [W * 3, H / 2]);
         p.setInterpolationTypeAtKey(1, KeyframeInterpolationType.LINEAR); p.setInterpolationTypeAtKey(2, KeyframeInterpolationType.LINEAR);
         p.expression = "var x = (value[0] + 120) % (" + W + " + 240) - 120; [x, value[1]]";
@@ -65,7 +68,10 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var m = SSP.names();
     for (var a = 0; a < m.length; a++) {
         var c = comp("motion", m[a], 2.4);
-        var L = m[a] === "Wipe Reveal" ? bar(c) : m[a] === "Speed Ramp" ? constantMotion(c) : smark(c, m[a], /Draw|Stroke/.test(m[a]));
+        var L;   // explicit ifs: ExtendScript runs both branches of this as a chained ternary (see LEARNINGS)
+        if (m[a] === "Wipe Reveal") L = bar(c);
+        else if (m[a] === "Speed Ramp") L = constantMotion(c);
+        else L = smark(c, m[a], /Draw|Stroke/.test(m[a]));
         SSP.apply(L, m[a], "both", 0.2);
         made.push(c.name);
     }
@@ -76,10 +82,10 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         made.push(c2.name);
     }
     var tx = SSP.textNames();
-    var sample = { "Chars Rise": ["Superside", SSM.font("display"), 96], "Words Fade Up": ["Built for speed", SSM.font("ui"), 56],
+    var sample = { "Chars Rise": ["Motion DNA", SSM.font("display"), 96], "Words Fade Up": ["Built for speed", SSM.font("ui"), 56],
         "Blur Words": ["Calm and premium", SSM.font("display"), 64], "Tracking Settle": ["MOTION LAB", SSM.font("ui"), 54],
-        "Chars Pop": ["5,000", SSM.font("ui"), 110], "Typewriter": ["Hello, Superside", SSM.font("ui"), 60],
-        "Scramble": ["SS MOTION", SSM.font("ui"), 84], "Count Up": ["12,480", SSM.font("ui"), 110],
+        "Chars Pop": ["5,000", SSM.font("ui"), 110], "Typewriter": ["Hello, Motion DNA", SSM.font("ui"), 60],
+        "Scramble": ["MOTION DNA", SSM.font("ui"), 84], "Count Up": ["12,480", SSM.font("ui"), 110],
         "Words Slam": ["Words Slam", SSM.font("display"), 80], "Chars Ramp": ["Speed Ramp", SSM.font("display"), 96] };
     for (var d = 0; d < tx.length; d++) {
         var c3 = comp("text", tx[d], 2.4);

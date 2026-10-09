@@ -1,8 +1,10 @@
 {
   "mcpServers": {
-    "ss-motion": {
+    "motion-dna": {
       "command": "python",
-      "args": ["tools/mcp/ss_motion_mcp.py"]
+      "args": [
+        "tools/mcp/ss_motion_mcp.py"
+      ]
     }
   }
 }

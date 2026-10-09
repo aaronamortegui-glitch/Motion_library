@@ -1,0 +1,308 @@
+{
+ "comp": "PROMO_EDIT",
+ "fps": 24,
+ "size": [
+  1920,
+  1080
+ ],
+ "music": "media/promo/music_promo_cut.wav",
+ "musicGainDb": -6,
+ "duckDb": -8,
+ "shots": [
+  {
+   "comp": "PR_S01",
+   "dur": 5.61
+  },
+  {
+   "comp": "PR_S02",
+   "dur": 3.98
+  },
+  {
+   "comp": "PR_S03",
+   "dur": 3.02
+  },
+  {
+   "comp": "PR_S04",
+   "dur": 6.54
+  },
+  {
+   "comp": "PR_S05",
+   "dur": 7.3
+  },
+  {
+   "comp": "PR_S06",
+   "dur": 3.32
+  },
+  {
+   "comp": "PR_S07",
+   "dur": 7.54
+  },
+  {
+   "comp": "PR_S08",
+   "dur": 11.76
+  },
+  {
+   "comp": "PR_S09",
+   "dur": 4.96
+  },
+  {
+   "comp": "PR_S10",
+   "dur": 5.36
+  },
+  {
+   "comp": "PR_S11",
+   "dur": 8.05
+  }
+ ],
+ "vo": [
+  {
+   "file": "media/promo/vo/chris_c_b3173d9.wav",
+   "shot": 0,
+   "local": 0.4,
+   "gainDb": 6
+  }
+ ],
+ "sfx": [
+  {
+   "name": "Swoosh Transition 28",
+   "t": 5.16,
+   "gainDb": -3
+  },
+  {
+   "name": "Swoosh Transition 28",
+   "t": 9.14,
+   "gainDb": -3
+  },
+  {
+   "name": "Swoosh Transition 28",
+   "t": 12.16,
+   "gainDb": -3
+  },
+  {
+   "name": "Swoosh Transition 28",
+   "t": 18.7,
+   "gainDb": -3
+  },
+  {
+   "name": "Swoosh Transition 28",
+   "t": 26.0,
+   "gainDb": -3
+  },
+  {
+   "name": "Swoosh Transition 28",
+   "t": 29.32,
+   "gainDb": -3
+  },
+  {
+   "name": "Swoosh Transition 28",
+   "t": 36.86,
+   "gainDb": -3
+  },
+  {
+   "name": "Swoosh Transition 28",
+   "t": 48.62,
+   "gainDb": -3
+  },
+  {
+   "name": "Swoosh Transition 28",
+   "t": 53.58,
+   "gainDb": -3
+  },
+  {
+   "name": "Swoosh Transition 28",
+   "t": 58.94,
+   "gainDb": -3
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 0.37,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 0.89,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 2.87,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 3.71,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 4.61,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 6.43,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 9.86,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 11.15,
+   "gainDb": -8
+  },
+  {
+   "name": "Pop Mouth 01_Variant Plus 3",
+   "t": 11.38,
+   "gainDb": -9
+  },
+  {
+   "name": "Pop Mouth 01_Variant Plus 3",
+   "t": 11.48,
+   "gainDb": -9
+  },
+  {
+   "name": "Pop Mouth 01_Variant Plus 3",
+   "t": 11.58,
+   "gainDb": -9
+  },
+  {
+   "name": "Pop Mouth 01_Variant Plus 3",
+   "t": 11.68,
+   "gainDb": -9
+  },
+  {
+   "name": "Pop Mouth 01_Variant Plus 3",
+   "t": 11.78,
+   "gainDb": -9
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 15.15,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 16.17,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 17.25,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 20.15,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 24.11,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 24.45,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 25.1,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 27.59,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 30.09,
+   "gainDb": -8
+  },
+  {
+   "name": "Pop Mouth 01_Variant Plus 3",
+   "t": 32.62,
+   "gainDb": -9
+  },
+  {
+   "name": "Pop Mouth 01_Variant Plus 3",
+   "t": 33.24,
+   "gainDb": -9
+  },
+  {
+   "name": "Pop Mouth 01_Variant Plus 3",
+   "t": 34.58,
+   "gainDb": -9
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 38.67,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 39.93,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 41.49,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 43.23,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 43.53,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 45.09,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 50.06,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 55.35,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 57.05,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 59.66,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Plastic Big 03",
+   "t": 60.61,
+   "gainDb": -8
+  },
+  {
+   "name": "Pop Mouth 01_Variant Plus 3",
+   "t": 61.19,
+   "gainDb": -9
+  },
+  {
+   "name": "Clean Bass Bend 05",
+   "t": 57.03,
+   "gainDb": -5,
+   "len": 1.4
+  }
+ ]
+}

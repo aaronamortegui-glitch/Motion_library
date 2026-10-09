@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""SS Motion MCP server: lets Claude (or any MCP client) browse the library and drive After Effects.
+"""Motion DNA MCP server: lets Claude (or any MCP client) browse the library and drive After Effects.
 
 No dependencies (Python 3 standard library). Speaks MCP over stdio (JSON-RPC 2.0, one message per line) and talks to
 After Effects through the repo's file bridge (tools/ss_bridge.jsx polls bridge/inbox and writes bridge/outbox).
-The bridge starts by itself when the SS Motion panel loads in AE (see tools/install_panel.ps1); if it is not running,
+The bridge starts by itself when the Motion DNA panel loads in AE (see tools/install_panel.ps1); if it is not running,
 the server starts it the same way tools/bridge.sh does.
 
 Registered for Claude Code in .mcp.json at the repo root. Manual run (for debugging): python tools/mcp/ss_motion_mcp.py
@@ -53,7 +53,7 @@ def ensure_bridge():
     marker = OUTBOX / "_bridge_started.txt"
     if not ae_running():
         marker.unlink(missing_ok=True)
-        raise RuntimeError("After Effects is not running. Open it (with the SS Motion panel docked the bridge starts by itself).")
+        raise RuntimeError("After Effects is not running. Open it (with the Motion DNA panel docked the bridge starts by itself).")
     if not marker.exists():
         start_bridge_script((TOOLS / "ss_bridge.jsx").as_posix())
         for _ in range(60):
@@ -176,24 +176,40 @@ for (var i = 1; i <= c.numLayers; i++) {{ var L = c.layer(i);
 return c.name + "\\n" + o.join("\\n");""", includes=())
 
 
-def t_apply_preset(preset, layers=None, comp=None, phase="both", stagger_frames=4, marker_timing=True):
+def tune_js(duration=1.0, intensity=1.0, direction="as designed", ease=None):
+    d = (direction or "").lower()
+    o = {"speed": float(duration or 1), "intensity": float(intensity if intensity is not None else 1),
+         "flipX": d in ("mirror horizontal", "mirror both", "horizontal", "both"), "flipY": d in ("mirror vertical", "mirror both", "vertical", "both"),
+         "ease": ease or None}
+    return "SSP.tune(" + json.dumps(o) + ");"
+
+
+def t_apply_preset(preset, layers=None, comp=None, phase="both", stagger_frames=4, marker_timing=True,
+                   duration=1.0, intensity=1.0, direction="as designed", ease=None):
     kind = kind_of(preset)
     call = {"text": f"SSP.applyText(L, {js(preset)}, {js(phase)}, t0)", "fx": f"SSP.applyFx(L, {js(preset)})",
             "recipe": f"SSP.applyRecipe(L, {js(preset)}, {js(phase)})"}.get(kind, f"SSP.apply(L, {js(preset)}, {js(phase)}, t0)")
     return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), ls = findLayers(c, {js(layers or [])}), st = {float(stagger_frames)} * c.frameDuration, done = [];
-SSP.markerTiming({str(bool(marker_timing)).lower()});
-app.beginUndoGroup("SS Motion (MCP): {preset}");
+SSP.markerTiming({str(bool(marker_timing)).lower()}); {tune_js(duration, intensity, direction, ease)}
+app.beginUndoGroup("Motion DNA (MCP): {preset}");
 try {{ for (var i = 0; i < ls.length; i++) {{ var L = ls[i], t0 = ({js(phase)} === "out" ? L.outPoint - SSM.seconds("Arrive") : L.inPoint) + i * st; {call}; done.push(L.name); }} }}
-finally {{ SSP.markerTiming(false); app.endUndoGroup(); }}
+finally {{ SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); }}
 return "{preset} ({kind}, {phase}) → " + done.join(", ");""")
 
 
-def t_apply_pack(pack, comp=None, layers=None, phase="both", marker_timing=True):
+def t_remove_animation(layers=None, comp=None):
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), ls = findLayers(c, {js(layers or [])}), n = 0, done = [];
+app.beginUndoGroup("Motion DNA (MCP): remove");
+try {{ for (var i = 0; i < ls.length; i++) {{ n += SSP.remove(ls[i]); done.push(ls[i].name); }} }} finally {{ app.endUndoGroup(); }}
+return "cleared " + n + " properties on " + done.join(", ");""")
+
+
+def t_apply_pack(pack, comp=None, layers=None, phase="both", marker_timing=True, duration=1.0, intensity=1.0):
     return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), names = {js(layers or [])}, ls = null;
 if (names.length) ls = findLayers(c, names);
-SSP.markerTiming({str(bool(marker_timing)).lower()});
-app.beginUndoGroup("SS Motion pack (MCP): {pack}");
-var r; try {{ r = SSP.applyPack(c, {js(pack)}, ls, {js(phase)}); }} finally {{ SSP.markerTiming(false); app.endUndoGroup(); }}
+SSP.markerTiming({str(bool(marker_timing)).lower()}); {tune_js(duration, intensity)}
+app.beginUndoGroup("Motion DNA style (MCP): {pack}");
+var r; try {{ r = SSP.applyPack(c, {js(pack)}, ls, {js(phase)}); }} finally {{ SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); }}
 return r.length ? r.join("\\n") : "No layers matched";""")
 
 
@@ -204,7 +220,7 @@ def t_add_asset(name, type="sfx", time_s=None, gain_db=-9, opacity=70, comp=None
 
 
 def t_show_in_panel(kind, name):
-    return run_jsx(f"""if (typeof SS_PANEL === "undefined") return "SS Motion panel is not open (Window > SS Motion.jsx)"; return SS_PANEL.select({js(kind)}, {js(name)});""", includes=())
+    return run_jsx(f"""if (typeof SS_PANEL === "undefined") return "Motion DNA panel is not open (Window > Motion DNA.jsx)"; return SS_PANEL.select({js(kind)}, {js(name)});""", includes=())
 
 
 def t_render_frame(time_s=None, comp=None):
@@ -246,23 +262,26 @@ def t_run_jsx(code, timeout_s=180):
 
 
 TOOLS_DEF = [
-    ("ae_status", t_ae_status, "After Effects status: version, project, active comp, selection, whether the SS Motion panel is loaded.", {}),
+    ("ae_status", t_ae_status, "After Effects status: version, project, active comp, selection, whether the Motion DNA panel is loaded.", {}),
     ("list_presets", t_list_presets, "List library presets (one line each: kind|name|channels|energy|use). Filter by kind (motion|text|fx|recipe), energy (soft|medium|dynamic), family (ss|classic|recipe) or a text query. Pick presets from this before applying.",
      {"kind": {"type": "string"}, "energy": {"type": "string"}, "family": {"type": "string"}, "query": {"type": "string"}}),
-    ("list_packs", t_list_packs, "List style packs (Dynamic, Elegant, Modern, Playful, Tech…) and which preset each layer role gets.", {}),
+    ("list_packs", t_list_packs, "List styles (Dynamic, Elegant, Modern, Playful, Tech…) and which preset each layer role gets.", {}),
     ("list_assets", t_list_assets, "List locally installed SFX and overlays (licensed, never in the repo) with category, seconds, loudness and flags.",
      {"type": {"type": "string", "description": "sfx | overlay"}, "category": {"type": "string"}, "query": {"type": "string"}, "limit": {"type": "integer"}}),
     ("list_layers", t_list_layers, "List the layers of a comp (default: the active comp) with type, timing and selection.", {"comp": {"type": "string"}}),
-    ("apply_preset", t_apply_preset, "Apply a preset to layers (by name, or the selected layers) of a comp (default: active). phase in|out|both. With marker_timing the layer gets 'SS in'/'SS out' markers: dragging them retimes the animation.",
+    ("apply_preset", t_apply_preset, "Apply a preset to layers (by name, or the selected layers) of a comp (default: active). phase in|out|both. With marker_timing the layer gets 'SS in'/'SS out' markers: dragging them retimes the animation. Tuning (same as the panel's Controls): duration multiplier (0.5-2), intensity (0.25-2, scales the travel), direction (as designed | mirror horizontal | mirror vertical | mirror both), ease (token: Land, Settle, Launch, Cruise, Surge, Ramp, Whip, Flat).",
      {"preset": {"type": "string"}, "layers": {"type": "array", "items": {"type": "string"}}, "comp": {"type": "string"},
-      "phase": {"type": "string", "enum": ["in", "out", "both"]}, "stagger_frames": {"type": "number"}, "marker_timing": {"type": "boolean"}}, ["preset"]),
+      "phase": {"type": "string", "enum": ["in", "out", "both"]}, "stagger_frames": {"type": "number"}, "marker_timing": {"type": "boolean"},
+      "duration": {"type": "number"}, "intensity": {"type": "number"}, "direction": {"type": "string"}, "ease": {"type": "string"}}, ["preset"]),
+    ("remove_animation", t_remove_animation, "Remove what Motion DNA added to layers (keyframes, our expressions, SS in/out markers, SS text animators and effects); each property keeps its resting value.",
+     {"layers": {"type": "array", "items": {"type": "string"}}, "comp": {"type": "string"}}),
     ("apply_pack", t_apply_pack, "Apply a style pack to a whole comp (or the named layers): titles, text, shapes, media and logo each get the pack's preset, staggered.",
      {"pack": {"type": "string"}, "comp": {"type": "string"}, "layers": {"type": "array", "items": {"type": "string"}},
-      "phase": {"type": "string", "enum": ["in", "out", "both"]}, "marker_timing": {"type": "boolean"}}, ["pack"]),
+      "phase": {"type": "string", "enum": ["in", "out", "both"]}, "marker_timing": {"type": "boolean"}, "duration": {"type": "number"}, "intensity": {"type": "number"}}, ["pack"]),
     ("add_asset", t_add_asset, "Place a local SFX or overlay (by exact name from list_assets) in a comp at a time (default: playhead).",
      {"name": {"type": "string"}, "type": {"type": "string", "enum": ["sfx", "overlay"]}, "time_s": {"type": "number"}, "gain_db": {"type": "number"},
       "opacity": {"type": "number"}, "comp": {"type": "string"}}, ["name"]),
-    ("show_in_panel", t_show_in_panel, "Select a preset in the open SS Motion panel so the user sees its live preview.",
+    ("show_in_panel", t_show_in_panel, "Select a preset in the open Motion DNA panel so the user sees its live preview.",
      {"kind": {"type": "string"}, "name": {"type": "string"}}, ["kind", "name"]),
     ("render_frame", t_render_frame, "Save one frame of a comp as PNG (default: active comp at the playhead) and return its path, to check the result visually.",
      {"time_s": {"type": "number"}, "comp": {"type": "string"}}),
@@ -292,8 +311,8 @@ def handle(req):
     method, rid = req.get("method"), req.get("id")
     if method == "initialize":
         return {"protocolVersion": req.get("params", {}).get("protocolVersion", PROTOCOL),
-                "capabilities": {"tools": {}}, "serverInfo": {"name": "ss-motion", "version": "0.1"},
-                "instructions": "SS Motion Library for After Effects. Browse with list_presets/list_packs/list_assets (no AE needed); "
+                "capabilities": {"tools": {}}, "serverInfo": {"name": "motion-dna", "version": "0.1"},
+                "instructions": "Motion DNA, a motion library for After Effects. Browse with list_presets/list_packs/list_assets (no AE needed); "
                                 "apply with apply_preset/apply_pack/add_asset; check results with render_frame. Read CLAUDE.md in the repo for the rules."}
     if method == "tools/list":
         return {"tools": tool_list()}

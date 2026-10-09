@@ -1,0 +1,120 @@
+{
+ "refs": {
+  "aaron": "media/faceswap/refs/aaron_color.png",
+  "gian": "media/faceswap/refs/gian_color.png"
+ },
+ "jobs": [
+  {
+   "id": "cypher04_gian",
+   "src": "media/cypher/clip04_gian.mp4",
+   "out": "media/faceswap/out/cypher_clip04_gian.mp4",
+   "passes": [
+    {
+     "ref": "gian",
+     "detect": "the head of the man",
+     "denoise": 0.9,
+     "prompt": "The head of the man in <Picture 1>: the same face, eyes, nose, eyebrows, short dark stubble beard and curly dark brown hair as <Picture 1>. He wears a dark brown six-panel cap with a curved brim. His expression and head movement follow the original video. Warm golden-hour light from the side, 1970s 35mm film look, matching the scene."
+    }
+   ]
+  },
+  {
+   "id": "cypher03_aaron",
+   "src": "media/cypher/clip03_aaron_sd.mp4",
+   "out": "media/faceswap/out/cypher_clip03_aaron_sd.mp4",
+   "passes": [
+    {
+     "ref": "aaron",
+     "detect": "the head of the man",
+     "denoise": 0.9,
+     "prompt": "The head of the man in <Picture 1>: the same face, eyes, nose, eyebrows, full dark beard and short dark hair as <Picture 1>. He wears a tan corduroy bucket hat and square light-amber tinted glasses with his eyes visible through them. His expression and head movement follow the original video. Warm golden-hour light, 1970s 35mm film look, matching the scene."
+    }
+   ]
+  },
+  {
+   "id": "whisky02_aaron",
+   "src": "media/whisky/clip02.mp4",
+   "out": "media/faceswap/out/whisky_clip02.mp4",
+   "passes": [
+    {
+     "ref": "aaron",
+     "detect": "the head of the man",
+     "denoise": 0.9,
+     "prompt": "The head of the man in <Picture 1>: the same face, eyes, nose, eyebrows, full dark beard and short dark hair as <Picture 1>. His expression and head movement follow the original video, including drinking from the glass. Warm tungsten lamp light, 1970s 35mm film look, matching the scene."
+    }
+   ]
+  },
+  {
+   "id": "whisky03_gian",
+   "src": "media/whisky/clip03.mp4",
+   "out": "media/faceswap/out/whisky_clip03.mp4",
+   "passes": [
+    {
+     "ref": "gian",
+     "detect": "the head of the man",
+     "denoise": 0.9,
+     "prompt": "The head of the man in <Picture 1>: the same face, eyes, nose, eyebrows, short dark stubble beard and curly dark brown hair as <Picture 1>. He wears thin gold aviator glasses with light amber lenses. His expression and head movement follow the original video, including drinking from the glass. Warm tungsten lamp light, 1970s 35mm film look, matching the scene."
+    }
+   ]
+  },
+  {
+   "id": "aaron70s",
+   "src": "media/aaron_70s_1080.mp4",
+   "out": "media/faceswap/out/aaron_70s_1080.mp4",
+   "passes": [
+    {
+     "ref": "aaron",
+     "detect": "the head of the man",
+     "denoise": 0.9,
+     "prompt": "The head of the man in <Picture 1>: the same face, eyes, nose, eyebrows, full dark beard and short dark hair as <Picture 1>. His expression and head movement follow the original video. Warm lamp light, 1970s 35mm film look, matching the scene."
+    }
+   ]
+  },
+  {
+   "id": "cypher01_wide",
+   "src": "media/cypher/clip01_wide.mp4",
+   "out": "media/faceswap/out/cypher_clip01_wide_v2.mp4",
+   "passes": [
+    {
+     "ref": "aaron",
+     "detect": "the head of the man",
+     "denoise": 0.85,
+     "upscale_mp": 1.2,
+     "prompt": "The head of the man in <Picture 1>: the same face, eyes, nose, eyebrows and full dark beard as <Picture 1>. He keeps the tan corduroy bucket hat and the square light-amber tinted glasses from <Video 1> in every frame. His expression and head movement follow the original video. Golden-hour backlight, 1970s 35mm film look, matching the scene.",
+     "expand": 15,
+     "object": 0
+    },
+    {
+     "ref": "gian",
+     "detect": "the head of the man",
+     "denoise": 0.85,
+     "upscale_mp": 1.2,
+     "prompt": "The head of the man in <Picture 1>: the same face, eyes, nose, eyebrows, short dark stubble beard and curly dark brown hair as <Picture 1>. He keeps the dark brown six-panel cap from <Video 1> in every frame. His expression and head movement follow the original video. Golden-hour backlight, 1970s 35mm film look, matching the scene.",
+     "expand": 15,
+     "object": 1
+    }
+   ]
+  },
+  {
+   "id": "whisky01_both",
+   "src": "media/whisky/clip01.mp4",
+   "out": "media/faceswap/out/whisky_clip01.mp4",
+   "passes": [
+    {
+     "ref": "aaron",
+     "detect": "the head of the bearded man in the brown suit",
+     "denoise": 0.9,
+     "upscale_mp": 1.2,
+     "prompt": "The head of the man in <Picture 1>: the same face, eyes, nose, eyebrows, full dark beard and short dark hair as <Picture 1>. His expression and head movement follow the original video. Warm tungsten lamp light, 1970s 35mm film look, matching the scene."
+    },
+    {
+     "ref": "gian",
+     "detect": "the head of the man",
+     "denoise": 0.9,
+     "upscale_mp": 1.2,
+     "prompt": "The head of the man in <Picture 1>: the same face, eyes, nose, eyebrows, short dark stubble beard and curly dark brown hair as <Picture 1>. He wears thin gold aviator glasses with light amber lenses. His expression and head movement follow the original video. Warm tungsten lamp light, 1970s 35mm film look, matching the scene.",
+     "object": 1
+    }
+   ]
+  }
+ ]
+}

@@ -7,7 +7,7 @@ A 45 s capability test of the whole pipeline, made to present the library to the
 | ![](../examples/reel-freeze-keyframes.gif) | ![](../examples/reel-freeze-tracked.gif) | ![](../examples/reel-freeze-rotoscoped.gif) | ![](../examples/reel-library-app.gif) | ![](../examples/whisky-breakdown.gif) |
 
 ## Brief
-Two project collaborators as classy 1970s executives drinking whisky and looking at camera. Lines reveal descriptions of the outfit, the liquor and its cost, a "build scan" of each character and holographic character info — all tracked, using the SS Motion library and the *Essentials* Figma graphics. Three consistent clips, music, text behind the people, and a roto/mask breakdown.
+Two project collaborators as classy 1970s executives drinking whisky and looking at camera. Lines reveal descriptions of the outfit, the liquor and its cost, a "build scan" of each character and holographic character info — all tracked, using the Motion DNA library and the *Essentials* Figma graphics. Three consistent clips, music, text behind the people, and a roto/mask breakdown.
 
 ## Steps (reproducible)
 | # | Step | Tool / file |
@@ -32,7 +32,7 @@ Two project collaborators as classy 1970s executives drinking whisky and looking
 - **Shot 1 (two-shot):** behind-the-subject title "The Boardroom" tracked to the skyline; organic contour lines (spark / coral); face-scan slices; scan brackets with name cards; role chips; liquor brackets on both glasses + "LIQUOR SCAN" callout; "THE SPIRIT" bottle callout (fades out before the bottle leaves frame); deal-confidence meter.
 - **Shot 2 (subject 01):** "Chairman" behind him; contour; face scan; liquor bracket on the glass as it rises to the mouth; outfit, pour and build-scan callouts; style index.
 - **Shot 3 (subject 02):** "Dealmaker" behind him; contour; face scan; liquor bracket on the glass (fades out when the glass leaves frame); outfit and bar-service callouts; charisma meter.
-- **Breakdown:** 01 Plate (Flora + Kling) · 02 Roto matte (VEED) · 03 Contours (OpenCV) · 04 Composite (SS Motion).
+- **Breakdown:** 01 Plate (Flora + Kling) · 02 Roto matte (VEED) · 03 Contours (OpenCV) · 04 Composite (Motion DNA).
 
 ## Voiceover script (70s announcer, expressive)
 | When | Line (tone tags in brackets) | On screen |
@@ -42,7 +42,7 @@ Two project collaborators as classy 1970s executives drinking whisky and looking
 | Shot 2 freeze | "[impressed and playful] The Chairman. Tracked, scanned… [chuckles] and annotated before his first sip." | **Tracked.** · SCANNED. · ANNOTATED. |
 | Shot 3 freeze | "[sly and amused] The Dealmaker. Rotoscoped by robots. [laughs] The aviators… were his idea." | **Rotoscoped.** · BY ROBOTS |
 | Breakdown | "[confident and fast-paced] Plate. Matte. Contours. Composite. [slower, proud] One library… every shot." | 01 Plate · 02 Roto matte · 03 Contours · 04 Composite |
-| Library + end card | "[grand finale, warm] S S Motion. Superside's motion library. [chuckles] Now with whisky." | The library app · SS Motion Library · by Aaron Amortegui & Gian Orsi |
+| Library + end card | "[grand finale, warm] S S Motion. Superside's motion library. [chuckles] Now with whisky." | The library app · Motion DNA · by Aaron Amortegui & Gian Orsi |
 
 **Freeze typography:** each line lands big and centered (scale overshoot + blur + slight tilt, swoosh SFX), with contrasting sizes (small tracked caps lead + huge serif hero). Lines replace each other instead of stacking; beats after the title cycle in the title's lead slot. The background darkens and defocuses; the people are cut from the clean plate so HUD lines don't run under the type.
 

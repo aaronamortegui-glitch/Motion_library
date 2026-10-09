@@ -1,4 +1,4 @@
-"""Generates library/index.html (SS Motion library viewer) from library.json and the tokens.
+"""Generates library/index.html (Motion DNA library viewer) from library.json and the tokens.
 
 Usage: python tools/build_library_html.py
 The data is embedded in the HTML so it works by opening the file directly (no server).
@@ -26,7 +26,7 @@ HTML = r"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SS Motion Library</title>
+<title>Motion DNA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
 <style>
@@ -75,9 +75,9 @@ footer{margin-top:64px;color:var(--muted);font-size:13px}
 </head>
 <body>
 <div class="wrap">
-  <div class="eyebrow">Superside · AI Native Studio</div>
-  <h1>SS Motion Library</h1>
-  <p class="lead">Our own motion presets for After Effects, built with the Superside tokens. Each preset creates native keyframes and expressions: they are editable and do not depend on plugins.</p>
+  <div class="eyebrow">Motion library for After Effects</div>
+  <h1>Motion DNA</h1>
+  <p class="lead">Our own motion presets for After Effects, built on our own motion tokens. Each preset creates native keyframes and expressions: they are editable and do not depend on plugins.</p>
 
   <div class="bar" role="toolbar" aria-label="Filters">
     <button class="chip" data-kind="all" aria-pressed="true">All</button>
@@ -165,7 +165,7 @@ render();
 # Ultra-compact index for LLMs: the only thing Claude needs to read (no HTML or images)
 E = {"soft": "s", "medium": "m", "dynamic": "d"}
 lines = [
-    f"# SS Motion · {len(lib['presets'])} presets · tokens v{tok['version']} · energy s=soft m=medium d=dynamic",
+    f"# Motion DNA · {len(lib['presets'])} presets · tokens v{tok['version']} · energy s=soft m=medium d=dynamic",
     "# calls: motion SSP.apply(L,N,in|out|both) · fx SSP.applyFx(L,N) · text SSP.applyText(L,N,in|out|both) · recipe SSP.applyRecipe(L,ID,both) · include tools/ss_presets.jsx",
     "# dur(f@30): " + " ".join(f"{d['name']}{d['frames']}" for d in tok["durations"]),
     "# ease(bezier): " + "; ".join(f"{e['name']} {','.join(str(round(v, 2)) for v in e['bezier'])}" for e in tok["easings"]),

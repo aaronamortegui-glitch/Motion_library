@@ -55,7 +55,7 @@
                 txt.push(s2 === lastTxt ? 0 : s2); lastTxt = s2;
             }
         }
-        var shape = isText ? "text" : (name === "Wipe Reveal" ? "bar" : (/Draw|Stroke/.test(name) ? "stroke" : "smark"));
+        var shape = isText ? "text" : (name === "Wipe Reveal" ? "bar" : (/Draw|Stroke/.test(name) ? "stroke" : "sample"));
         var entry = '"' + kind + "/" + name.split('"').join("") + '":{"dur":' + r3(c.duration) + ',"shape":"' + shape + '"' +
             (isText ? ',"text":"' + String(L.property("ADBE Text Properties").property("ADBE Text Document").value.text).split('"').join("") + '","txt":' + txt.toSource() : "") +
             ',"f":' + frames.toSource() + "}";

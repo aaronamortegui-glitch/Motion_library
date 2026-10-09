@@ -38,5 +38,5 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     $.global.SS_BRIDGE_TASK = app.scheduleTask("$.global.SS_BRIDGE_POLL()", 1000, true);
     var hb = new File(BASE + "outbox/_bridge_started.txt");
     hb.open("w"); hb.write("AE " + app.version + " · " + new Date().toString()); hb.close();
-    writeLn("SS Bridge active: " + BASE + "inbox");
+    writeLn("Motion DNA bridge active: " + BASE + "inbox");
 })();

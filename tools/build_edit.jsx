@@ -16,7 +16,7 @@
 (function () {
     var spec = SSM.readJSON(SS_ROOT + "/" + ((typeof EDIT_SPEC !== "undefined" && EDIT_SPEC) || "media/whisky/edit.json"));
     var proj = app.project;
-    var PAL = SSHUD.palette, ICON = SSM.readJSON(SS_ROOT + "/assets/superside/ss_icon_shape.json");
+    var PAL = SSHUD.palette;
     var W = spec.size[0], H = spec.size[1];
     function hex(h) { h = h.replace("#", ""); return [parseInt(h.substr(0, 2), 16) / 255, parseInt(h.substr(2, 2), 16) / 255, parseInt(h.substr(4, 2), 16) / 255]; }
     function findItem(n) { for (var i = 1; i <= proj.numItems; i++) if (proj.item(i).name === n) return proj.item(i); return null; }
@@ -271,18 +271,8 @@
     // ---- 2) end card ----
     if (spec.endCard) {
         var t0 = starts[spec.shots.length], ec = spec.endCard;
-        var S = E.layers.addShape(); S.name = "End card · S-mark";
-        var g = S.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group");
-        g.property("ADBE Vector Transform Group").property("ADBE Vector Scale").setValue([22, 22]);
-        var v = g.property("ADBE Vectors Group"), P = ICON.paths[0], shp = new Shape();
-        shp.vertices = P.v; shp.inTangents = P.i; shp.outTangents = P.o; shp.closed = P.closed;
-        v.addProperty("ADBE Vector Shape - Group").property("ADBE Vector Shape").setValue(shp);
-        v.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").setValue(hex(PAL.spark));
-        tr(S, "ADBE Position").setValue([W / 2, H / 2 - 150]);
-        S.inPoint = t0; S.outPoint = total;
-        SSP.apply(S, "Scale Pop", "in", t0 + 0.2);
-        SSP.applyText(text(E, ec.title, "display", 120, "cloud", [W / 2, H / 2 + 70], ParagraphJustification.CENTER_JUSTIFY, 0, t0, total), "Chars Rise", "in", t0 + 0.5);
-        SSP.applyText(text(E, ec.kicker, "ui", 26, "spark", [W / 2, H / 2 + 150], ParagraphJustification.CENTER_JUSTIFY, 220, t0, total), "Tracking Settle", "in", t0 + 1.0);
+        SSP.applyText(text(E, ec.title, "display", 120, "cloud", [W / 2, H / 2 + 20], ParagraphJustification.CENTER_JUSTIFY, 0, t0, total), "Chars Rise", "in", t0 + 0.3);
+        SSP.applyText(text(E, ec.kicker, "ui", 26, "spark", [W / 2, H / 2 + 110], ParagraphJustification.CENTER_JUSTIFY, 220, t0, total), "Tracking Settle", "in", t0 + 0.8);
         var fadeOut = E.layers.addSolid(hex(PAL.pine), "End fade", W, H, 1);
         fadeOut.inPoint = total - 0.8; fadeOut.outPoint = total;
         SSM.animate(tr(fadeOut, "ADBE Opacity"), total - 0.8, 0, 100, "Sweep", "Cruise");

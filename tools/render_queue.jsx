@@ -1,6 +1,5 @@
 // Renders in the open AE (render queue) the comps listed in research/gif_comps.txt that don't have an MP4 yet.
-// Used instead of aerender: aerender hangs when the project contains layers with
-// Animation Composer presets (the plugin waits for interaction in headless mode).
+// With $.global.SS_QUEUE_ONLY = true it only fills the queue and saves the project, for tools/render_queue_aerender.sh.
 // Output: library/mp4/<kind>/<slug>.mp4   (same scheme as render_gifs.sh)
 var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).parent.parent.fsName.split("\\").join("/");
 (function () {
@@ -11,7 +10,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     lf.open("r"); var names = lf.read().split("\n"); lf.close();
     function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
     var proj = app.project, rq = proj.renderQueue, queued = 0, skipped = 0, missing = [];
-    for (var i = rq.numItems; i >= 1; i--) rq.item(i).remove(); // clear queue
+    if (!$.global.SS_KEEP_QUEUE) for (var i = rq.numItems; i >= 1; i--) rq.item(i).remove(); // clear queue
     var comps = {};
     for (var k = 1; k <= proj.numItems; k++) if (proj.item(k) instanceof CompItem) comps[proj.item(k).name] = proj.item(k);
     for (var n = 0; n < names.length; n++) {
@@ -33,6 +32,9 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var ex = new File(ROOT + "research/_render_expected.txt"); ex.encoding = "UTF-8"; ex.open("w");
     for (var q = 1; q <= rq.numItems; q++) ex.writeln(rq.item(q).outputModule(1).file.fsName);
     ex.close();
-    if (queued) app.scheduleTask("app.project.renderQueue.render()", 200, false);
+    // SS_QUEUE_ONLY: keep the queue and save the project, then render it with aerender (tools/render_queue_aerender.sh),
+    // which is much faster than the in-app queue and does not stall.
+    if ($.global.SS_QUEUE_ONLY) proj.save();
+    else if (queued) app.scheduleTask("app.project.renderQueue.render()", 200, false);
     return "render: " + queued + " new · " + skipped + " already existed" + (missing.length ? " · no comp: " + missing.join(", ") : "");
 })();

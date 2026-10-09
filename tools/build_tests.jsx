@@ -1,4 +1,4 @@
-// Builds the test project: Superside icon, 70s tracking and Figma components.
+// Builds the test project: sample intro, 70s tracking and Figma components.
 // Run with: AfterFX.exe -s "$.evalFile(SS_ROOT + '/tools/build_tests.jsx')"
 #include "ss_motion_lib.jsx"
 
@@ -12,7 +12,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
 
     SSM.load(ROOT + "tokens/superside_motion_tokens.json");
     var PAL = SSM.readJSON(ROOT + "assets/figma_essentials/palette.json").colors;
-    var ICON = SSM.readJSON(ROOT + "assets/superside/ss_icon_shape.json");
+    var ICON = SSM.readJSON(ROOT + "assets/motion_dna/sample_shape.json");
     var TRK = SSM.readJSON(ROOT + "media/tracks.json");
     var SERIF = SSM.font("display"), SANS = SSM.font("ui"); // fallback: Instrument Serif / Inter Tight not installed
 
@@ -24,10 +24,10 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     // so CALIBRATION, AC Sections, 04_Text_Tracking, GIF Previews, etc. are not lost)
     if (!app.project.file) app.project.expressionEngine = "javascript-1.0";
     function findItem(name) { for (var i = 1; i <= app.project.numItems; i++) if (app.project.item(i).name === name) return app.project.item(i); return null; }
-    var OWN = ["01_SS_Icon_Intro", "02_Track_70s", "03_Figma_Chips"];
+    var OWN = ["01_SS_Icon_Intro", "01_Sample_Intro", "02_Track_70s", "03_Figma_Chips"];
     for (var o = 0; o < OWN.length; o++) { var old = findItem(OWN[o]); if (old) old.remove(); }
-    var folder = findItem("SS Motion Lab");
-    if (!(folder instanceof FolderItem)) folder = app.project.items.addFolder("SS Motion Lab");
+    var folder = findItem("Motion DNA Lab");
+    if (!(folder instanceof FolderItem)) folder = app.project.items.addFolder("Motion DNA Lab");
     function importOnce(file) {
         for (var i = 1; i <= app.project.numItems; i++) {
             var it = app.project.item(i);
@@ -45,7 +45,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         var L = comp.layers.addShape();
         L.name = name;
         var grp = L.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group");
-        grp.name = "S-mark";
+        grp.name = "Sample";
         if (groupScale) grp.property("ADBE Vector Transform Group").property("ADBE Vector Scale").setValue([groupScale, groupScale]);
         var vecs = grp.property("ADBE Vectors Group");
         for (var p = 0; p < ICON.paths.length; p++) {
@@ -100,14 +100,14 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     function tr(L, p) { return L.property("ADBE Transform Group").property(p); }
 
     // =========================================================
-    // 01 · Superside icon — line draw-on + Pop + exit
+    // 01 · Sample intro — line draw-on + Pop + exit
     // =========================================================
-    var c1 = app.project.items.addComp("01_SS_Icon_Intro", 1920, 1080, 1, 3.5, 30);
+    var c1 = app.project.items.addComp("01_Sample_Intro", 1920, 1080, 1, 3.5, 30);
     c1.parentFolder = folder;
     solid(c1, "BG Pine", PAL.pine);
-    var line = iconShape(c1, "S-mark line", null, PAL.spark, 8, 70);
-    var fill = iconShape(c1, "S-mark fill", PAL.spark, null, 0, 70);
-    var eyebrow = text(c1, "Eyebrow", "Superside motion lab", SANS, 34, PAL.spark, ParagraphJustification.CENTER_JUSTIFY);
+    var line = iconShape(c1, "Sample line", null, PAL.spark, 8, 70);
+    var fill = iconShape(c1, "Sample fill", PAL.spark, null, 0, 70);
+    var eyebrow = text(c1, "Eyebrow", "Motion DNA lab", SANS, 34, PAL.spark, ParagraphJustification.CENTER_JUSTIFY);
     tr(eyebrow, "ADBE Position").setValue([960, 900]);
     var trim = line.property("ADBE Root Vectors Group").addProperty("ADBE Vector Filter - Trim");
     var t = 0.2;
@@ -208,8 +208,8 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     lds.property("ADBE Vector Stroke Width").setValue(3);
     var ldt = leader.property("ADBE Root Vectors Group").addProperty("ADBE Vector Filter - Trim");
     SSM.animate(ldt.property("ADBE Vector Trim End"), 0.9, 0, 100, "Glide", "Settle");
-    // S-mark stuck to the wallpaper (background parallax test)
-    var mini = iconShape(c2, "S-mark on wallpaper", PAL.spark, null);
+    // Sample stuck to the wallpaper (background parallax test)
+    var mini = iconShape(c2, "Sample on wallpaper", PAL.spark, null);
     mini.parent = nulls.wallpaper.layer;
     tr(mini, "ADBE Position").setValue([50, 230]);
     SSM.animate(tr(mini, "ADBE Scale"), 0.6, [0, 0, 100], [12, 12, 100], "Arrive", "Pop");
@@ -270,7 +270,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var card2 = pill(c3, "Image frame 2", 640, 400, PAL.sea, null);
     tr(card2, "ADBE Position").setValue([1470, 740]);
     SSM.animate(tr(card2, "ADBE Position"), 0.4 + sec("Glide"), [2300, 740], [1470, 740], "Stage", "Land");
-    var foot = text(c3, "Footer", "Superside Essentials · AI fashion imagery at scale", SSM.font("ui_regular"), 20, PAL.grey);
+    var foot = text(c3, "Footer", "Motion DNA · tokens and components", SSM.font("ui_regular"), 20, PAL.grey);
     tr(foot, "ADBE Position").setValue([120, 1030]);
     log("03 ok");
 

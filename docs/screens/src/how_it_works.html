@@ -26,13 +26,13 @@ h1 { font-family: "Instrument Serif", serif; font-weight: 400; font-size: 72px; 
 .chip { border: 1.5px solid var(--sea); border-radius: 999px; padding: 9px 18px; font-size: 16px; color: #c9d3cf; }
 .chip b { color: var(--spark); font-weight: 600; }
 </style></head><body>
-<div class="kicker">SS Motion Library · How it works</div>
+<div class="kicker">Motion DNA · How it works</div>
 <h1>One library, two ways to use it</h1>
 
 <div class="lane">
   <div class="who"><b>Designers</b><span>inside After Effects</span></div>
-  <div class="step"><span class="n">1</span><h3>Browse</h3><p>Open the visualizer and filter by category (Motion, Text, Effects, Recipes) and energy.</p><code>library/index.html</code></div>
-  <div class="step"><span class="n">2</span><h3>Open the panel</h3><p>Run the panel in AE once; it stays docked like any other panel.</p><code>tools/ss_panel.jsx</code></div>
+  <div class="step"><span class="n">1</span><h3>Browse</h3><p>Browse by category (Moves, Text, Loops, Styles, Techniques) and energy, with live previews.</p><code>library/index.html</code></div>
+  <div class="step"><span class="n">2</span><h3>Tune</h3><p>Set duration, intensity, direction and easing in the panel's Controls.</p><code>Window › Motion DNA.jsx</code></div>
   <div class="step"><span class="n">3</span><h3>Select + apply</h3><p>Select layers, pick a preset, set in / out / both and stagger, press Apply.</p><code>Scale Pop · both · 3f</code></div>
   <div class="step"><span class="n">4</span><h3>Tweak</h3><p>Everything is native keyframes and expressions: edit, retime or delete freely.</p><code>no plugin required</code></div>
 </div>
@@ -44,7 +44,7 @@ h1 { font-family: "Instrument Serif", serif; font-weight: 400; font-size: 72px; 
   "Chars Rise","in")</code></div>
   <div class="step"><span class="n">3</span><h3>Run it in AE</h3><p>The bridge executes the job in the open AE and answers OK or the error line.</p><code>bash tools/bridge.sh
   tools/job.jsx</code></div>
-  <div class="step"><span class="n">4</span><h3>Render + review</h3><p>Render through AE's queue, check frames, iterate. Scenes and edits are JSON.</p><code>tools/render_comps.jsx</code></div>
+  <div class="step"><span class="n">4</span><h3>Render + review</h3><p>Check frames with render_frame, iterate, render with aerender. Scenes and edits are JSON.</p><code>MCP: motion-dna</code></div>
 </div>
 
 <div class="foot">

@@ -4,7 +4,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
 (function () {
     var ROOT = SS_ROOT + "/";
     var PAL = SSM.readJSON(ROOT + "assets/figma_essentials/palette.json").colors;
-    var ICON = SSM.readJSON(ROOT + "assets/superside/ss_icon_shape.json");
+    var ICON = SSM.readJSON(ROOT + "assets/motion_dna/sample_shape.json");
     function hex(h) { h = h.replace("#", ""); return [parseInt(h.substr(0, 2), 16) / 255, parseInt(h.substr(2, 2), 16) / 255, parseInt(h.substr(4, 2), 16) / 255]; }
     var proj = app.project;
     for (var i = proj.numItems; i >= 1; i--) if (proj.item(i) instanceof CompItem && proj.item(i).name === "SS_Presets_Showcase") proj.item(i).remove();

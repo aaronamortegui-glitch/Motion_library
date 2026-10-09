@@ -1,4 +1,4 @@
-# Contributing to SS Motion Library
+# Contributing to Motion DNA
 
 This guide is for people **and** for AI agents (Claude Code or others) working on the repo. Following it keeps the library consistent and makes sure every test leaves something reusable behind. Start with [`CLAUDE.md`](CLAUDE.md) for the non-negotiable rules.
 
@@ -27,20 +27,18 @@ Windows or macOS · After Effects 2025/2026 · Python 3 (`numpy`, `opencv-python
 4. **Test it** with a throwaway job (`tools/_test_x.jsx`, deleted afterwards): apply it in a temp comp, read values back with `valueAtTime`, remove the comp.
 5. **Run the library pipeline** (AE open):
    ```bash
-   bash tools/bridge.sh tools/gif_comps.jsx 900
-   bash tools/bridge.sh tools/render_queue.jsx 120
-   bash tools/wait_files.sh research/_render_expected.txt 2400
+   bash tools/bridge.sh tools/gif_comps.jsx 900          # one comp per preset, on the neutral sample arrow
+   bash tools/bridge.sh tools/render_queue_only.jsx 120  # queue the missing previews and save the project
+   bash tools/render_queue_aerender.sh                   # aerender renders the queue (fast, never stalls)
    SKIP_RENDER=1 bash tools/render_gifs.sh
+   bash tools/make_previews_stills.sh                    # posters, panel thumbnails, style stills
    bash tools/bridge.sh tools/export_library.jsx 120
    python tools/build_library_html.py
-   bash tools/make_panel_thumbs.sh
    python tools/readme_catalog.py
    ```
-   Add a poster frame for the visualizer:
-   ```bash
-   ffmpeg -ss <t> -i library/mp4/<kind>/<slug>.mp4 -frames:v 1 -vf scale=480:-1 library/posters/<kind>/<slug>.png
-   ```
-   Pick a frame where the motion reads, not an empty one.
+   If the poster of your preset catches an empty frame, adjust its time in `tools/make_previews_stills.sh`.
+   Never use a brand logo as the sample: the library is neutral. Every non-text preview uses the Spark arrow
+   (`assets/motion_dna/sample_shape.json`), so direction and rotation read at a glance.
 6. **Look at the GIF** before committing. If the thumbnail does not show the idea, fix the preset or the sample in `tools/gif_comps.jsx`.
 
 ## 2. Add effects from an open-source project
@@ -76,6 +74,7 @@ Windows or macOS · After Effects 2025/2026 · Python 3 (`numpy`, `opencv-python
    - real photos as the only identity references
    - `python tools/face_check.py --ref <photo> --out research/face_check_<case>.png <stills or clips>` before and after video
    - keep the sheet
+   - **face refinement pass on every clip with a person**: add a job to `media/faceswap/jobs.json` (one pass per person: `ref`, `detect` "the head of the man", `object` 0/1 when two people share the shot, a short head prompt that keeps hats and glasses) and run `python tools/faceswap_refine.py media/faceswap/jobs.json`. Check the before/after frames, then `bash tools/bridge.sh tools/footage_relink_release.jsx`, `python tools/faceswap_apply.py media/faceswap/jobs.json`, `bash tools/bridge.sh tools/footage_relink_restore.jsx` (originals go to `media/faceswap/preswap/`, git-ignored), and rebuild the edit
 4. **QA before calling it done**:
    - contact sheet
    - stills at the key moments (`comp.saveFrameToPng`)

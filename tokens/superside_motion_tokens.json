@@ -1,7 +1,7 @@
 {
  "version": "0.2-draft",
  "fps": 30,
- "notes": "Superside's own motion tokens. v0.2 calibrated against 6 real transitions sampled in AE (research/calibration_fit.json): entrances 12-17f, typical overshoot ~5%, exits with anticipation.",
+ "notes": "Motion DNA tokens. v0.2 calibrated against 6 real transitions sampled in AE (research/calibration_fit.json): entrances 12-17f, typical overshoot ~5%, exits with anticipation.",
  "durations": [
   {
    "name": "Tick",

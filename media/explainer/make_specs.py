@@ -73,7 +73,7 @@ feats = [["01", "Gallery by category", "Motion, Classics, Text, Effects,\rRecipe
 el4 = [T("A plugin you", "med", 110, [140, 110], 0.2, preset="Chars Rise"),
        T("drive by hand.", "ital", 124, [140, 220], 0.7, motion="Slam In"),
        M("media/explainer/panel_rec.mp4", [1290, 60], [556, 954], 0.4, "Flip In"),
-       P("Window › SS Motion.jsx · Windows & macOS", [140, 820], 3.6, motion="Fade Up", size=28, light=True)]
+       P("Window › Motion DNA.jsx · Windows & macOS", [140, 820], 3.6, motion="Fade Up", size=28, light=True)]
 for i, f in enumerate(feats):
     e = C(f[1], [140 + (i % 2) * 530, 420 + (i // 2) * 175], [500, 150], 1.6 + i * 0.35, "Stretch Slide", f[3], [
         {"text": f[0], "font": "ital", "size": 56, "at": [30, 18]}, {"text": f[1], "font": "semi", "size": 34, "at": [120, 26]},
@@ -138,10 +138,9 @@ S.append({"comp": "EX_S09", "bg": "pine", "elements": [
     M("media/explainer/reel_cypher.png", [1180, 430], [300, 169], 1.4, "Flip In X", radius=16),
     M("media/explainer/reel_boardroom.png", [1500, 430], [300, 169], 1.6, "Flip In X", radius=16),
 ] + [P(p, [x, 650], 3.3 + i * 0.12, size=28) for i, (p, x) in enumerate([["68 presets", 140], ["5 packs", 360], ["plugin + MCP", 540], ["open repo", 810]])] + [
-    M("media/explainer/superside_logo_cloud.png", [110, 880], [560, 201], 4.4, "Fade Up", radius=0),
     {"type": "rect", "at": [661, 905], "size": [2, 72], "fill": "muted", "t": 4.6, "motion": "Fade"},
-    T("SS Motion Library", "med", 30, [695, 912], 4.7, preset="Words Fade Up", color="cloud"),
-    T("by Aaron Amortegui & Gian Orsi · AI Native Studio", "reg", 22, [695, 952], 4.9, motion="Fade Up", color="muted"),
+    T("Motion DNA", "med", 30, [140, 912], 4.7, preset="Words Fade Up", color="cloud"),
+    T("by Aaron Amortegui & Gian Orsi", "reg", 22, [140, 952], 4.9, motion="Fade Up", color="muted"),
     T("github.com/aaronamortegui-glitch/Motion_library", "reg", 22, [1300, 930], 5.1, motion="Fade Up", color="muted"),
 ]})
 

@@ -1,6 +1,6 @@
-# Case study: *SS Motion Library · internal explainer* (68 s)
+# Case study: *Motion DNA · internal explainer* (68 s)
 
-The video that explains this repo to Superside: why AI-made motion looks generic, how our own curves and categories avoid that, the plugin, marker retiming, Claude driving the library through MCP, the techniques each test leaves behind, and refining by hand. **It is built with the library itself**: every element on screen is animated by an SS Motion preset. Final video: [`docs/examples/ss_motion_explainer.mp4`](../examples/ss_motion_explainer.mp4).
+The video that explains this repo to Superside: why AI-made motion looks generic, how our own curves and categories avoid that, the plugin, marker retiming, Claude driving the library through MCP, the techniques each test leaves behind, and refining by hand. **It is built with the library itself**: every element on screen is animated by an Motion DNA preset. Final video: [`docs/examples/ss_motion_explainer.mp4`](../examples/ss_motion_explainer.mp4).
 
 ## Storyboard (Figma)
 File *slack_video*, page **motion pluguin**: <https://www.figma.com/design/OGiHZakKWL9iUXUJ8rn7Ko/slack_video?node-id=70-2>. It follows the format of the earlier storyboards in that file: a header (specs, story, music) and, per scene, a 1920×1080 frame plus a notes card with the time, VO, on-screen text and **which preset animates each element**. Real screenshots fill the frames (uploaded with the Figma MCP `upload_assets`).
@@ -15,7 +15,7 @@ File *slack_video*, page **motion pluguin**: <https://www.figma.com/design/OGiHZ
 | S06 | Claude drives it | Claude drives the same library: it picks presets, applies packs, and checks its own work, frame by frame. |
 | S07 | Techniques | Every test leaves a technique behind: tracking, roto, kinetic type, speed ramps. Any style can use them. |
 | S08 | Refine by hand | And it's all native keyframes, so designers can refine every move by hand. |
-| S09 | Close | Motion that looks like Superside. Not like AI. SS Motion Library. |
+| S09 | Close | Motion that looks like Superside. Not like AI. Motion DNA. |
 
 ## How it is built
 | Step | Tool / file |

@@ -1,0 +1,1484 @@
+{
+ "fps": 24,
+ "prefix": "PR_",
+ "folder": "PROMO",
+ "scenes": [
+  {
+   "comp": "PR_S01",
+   "bg": "pine",
+   "dur": 5.61,
+   "elements": [
+    {
+     "type": "lines",
+     "count": 8,
+     "color": "spark",
+     "opacity": 18,
+     "t": 0
+    },
+    {
+     "type": "text",
+     "text": "Motion made",
+     "font": "bold",
+     "size": 230,
+     "at": [
+      100,
+      140
+     ],
+     "t": 0.4,
+     "preset": "Chars Ramp",
+     "until": 2.9
+    },
+    {
+     "type": "text",
+     "text": "with AI",
+     "font": "ital",
+     "size": 250,
+     "at": [
+      96,
+      380
+     ],
+     "t": 0.92,
+     "preset": "Chars Rise",
+     "color": "spark",
+     "until": 2.9
+    },
+    {
+     "type": "text",
+     "text": "all looks the same.",
+     "font": "semi",
+     "size": 96,
+     "at": [
+      110,
+      720
+     ],
+     "t": 1.32,
+     "preset": "Words Fade Up",
+     "until": 2.9
+    },
+    {
+     "type": "text",
+     "text": "Same curves.",
+     "font": "bold",
+     "size": 250,
+     "at": [
+      110,
+      390
+     ],
+     "t": 2.9,
+     "preset": "Chars Rise",
+     "until": 3.74
+    },
+    {
+     "type": "text",
+     "text": "Same moves.",
+     "font": "bold",
+     "size": 250,
+     "at": [
+      110,
+      390
+     ],
+     "t": 3.74,
+     "preset": "Chars Pop",
+     "until": 4.64
+    },
+    {
+     "type": "text",
+     "text": "Same template.",
+     "font": "ital",
+     "size": 250,
+     "at": [
+      100,
+      380
+     ],
+     "t": 4.64,
+     "preset": "Chars Ramp",
+     "color": "spark"
+    },
+    {
+     "type": "wipe",
+     "mode": "out",
+     "colors": [
+      "pine",
+      "spark"
+     ],
+     "dir": 1,
+     "duration": 0.5,
+     "gap": 0.1,
+     "ease": "Launch"
+    }
+   ]
+  },
+  {
+   "comp": "PR_S02",
+   "bg": "pine",
+   "dur": 3.98,
+   "elements": [
+    {
+     "type": "wipe",
+     "mode": "in",
+     "colors": [
+      "pine",
+      "spark"
+     ],
+     "dir": 1,
+     "t": 0,
+     "duration": 0.75,
+     "gap": 0.12,
+     "ease": "Land"
+    },
+    {
+     "type": "media",
+     "t": 0,
+     "motion": "cut",
+     "full": true,
+     "comp": "CY_WIDE",
+     "push": 1.06,
+     "skip": 0.6
+    },
+    {
+     "type": "rect",
+     "at": [
+      0,
+      640
+     ],
+     "size": [
+      1920,
+      440
+     ],
+     "t": 0,
+     "fill": "pine",
+     "motion": "cut",
+     "opacity": 50
+    },
+    {
+     "type": "text",
+     "text": "So we built",
+     "font": "semi",
+     "size": 70,
+     "at": [
+      96,
+      680
+     ],
+     "t": 0.1,
+     "preset": "Chars Rise",
+     "until": 2.53
+    },
+    {
+     "type": "text",
+     "text": "Superside timing.",
+     "font": "semi",
+     "size": 70,
+     "at": [
+      96,
+      680
+     ],
+     "t": 2.53,
+     "preset": "Chars Rise"
+    },
+    {
+     "type": "text",
+     "text": "our own.",
+     "font": "ital",
+     "size": 300,
+     "at": [
+      76,
+      760
+     ],
+     "t": 0.85,
+     "preset": "Chars Ramp",
+     "color": "spark"
+    },
+    {
+     "type": "wipe",
+     "mode": "out",
+     "colors": [
+      "spark",
+      "pine"
+     ],
+     "dir": -1,
+     "duration": 0.5,
+     "gap": 0.1,
+     "ease": "Launch"
+    }
+   ]
+  },
+  {
+   "comp": "PR_S03",
+   "bg": "pine",
+   "dur": 3.02,
+   "elements": [
+    {
+     "type": "wipe",
+     "mode": "in",
+     "colors": [
+      "spark",
+      "pine"
+     ],
+     "dir": -1,
+     "t": 0,
+     "duration": 0.75,
+     "gap": 0.12,
+     "ease": "Land"
+    },
+    {
+     "type": "lines",
+     "count": 6,
+     "color": "cloud",
+     "opacity": 10,
+     "t": 0
+    },
+    {
+     "type": "text",
+     "text": "68",
+     "font": "bold",
+     "size": 420,
+     "at": [
+      110,
+      200
+     ],
+     "t": 0.3,
+     "preset": "Count Up",
+     "color": "spark"
+    },
+    {
+     "type": "text",
+     "text": "presets",
+     "font": "ital",
+     "size": 96,
+     "at": [
+      130,
+      620
+     ],
+     "t": 0.51
+    },
+    {
+     "type": "text",
+     "text": "5",
+     "font": "bold",
+     "size": 420,
+     "at": [
+      1040,
+      200
+     ],
+     "t": 1.59,
+     "preset": "Count Up",
+     "color": "spark"
+    },
+    {
+     "type": "text",
+     "text": "style packs",
+     "font": "ital",
+     "size": 96,
+     "at": [
+      1060,
+      620
+     ],
+     "t": 1.89
+    },
+    {
+     "type": "pill",
+     "text": "Dynamic",
+     "at": [
+      130,
+      830
+     ],
+     "t": 1.79,
+     "motion": "Bounce In Up",
+     "size": 40
+    },
+    {
+     "type": "pill",
+     "text": "Elegant",
+     "at": [
+      430,
+      830
+     ],
+     "t": 1.89,
+     "motion": "Bounce In Up",
+     "size": 40
+    },
+    {
+     "type": "pill",
+     "text": "Modern",
+     "at": [
+      730,
+      830
+     ],
+     "t": 1.99,
+     "motion": "Bounce In Up",
+     "size": 40
+    },
+    {
+     "type": "pill",
+     "text": "Playful",
+     "at": [
+      1030,
+      830
+     ],
+     "t": 2.09,
+     "motion": "Bounce In Up",
+     "size": 40
+    },
+    {
+     "type": "pill",
+     "text": "Tech",
+     "at": [
+      1330,
+      830
+     ],
+     "t": 2.19,
+     "motion": "Bounce In Up",
+     "size": 40
+    },
+    {
+     "type": "wipe",
+     "mode": "out",
+     "colors": [
+      "cloud",
+      "spark"
+     ],
+     "dir": -1,
+     "duration": 0.5,
+     "gap": 0.1,
+     "ease": "Launch"
+    }
+   ]
+  },
+  {
+   "comp": "PR_S04",
+   "bg": "pine",
+   "dur": 6.54,
+   "elements": [
+    {
+     "type": "wipe",
+     "mode": "in",
+     "colors": [
+      "cloud",
+      "spark"
+     ],
+     "dir": -1,
+     "t": 0,
+     "duration": 0.75,
+     "gap": 0.12,
+     "ease": "Land"
+    },
+    {
+     "type": "text",
+     "text": "One click.",
+     "font": "bold",
+     "size": 300,
+     "at": [
+      100,
+      250
+     ],
+     "t": 0.15,
+     "preset": "Chars Pop",
+     "until": 2.57
+    },
+    {
+     "type": "text",
+     "text": "A whole video, one identity.",
+     "font": "ital",
+     "size": 72,
+     "at": [
+      114,
+      620
+     ],
+     "t": 0.89,
+     "preset": "Words Fade Up",
+     "color": "spark",
+     "until": 2.57
+    },
+    {
+     "type": "rect",
+     "at": [
+      790,
+      190
+     ],
+     "size": [
+      1060,
+      605
+     ],
+     "t": 2.57,
+     "fill": "sea",
+     "motion": "Surge Rise",
+     "radius": 34
+    },
+    {
+     "type": "media",
+     "t": 2.57,
+     "motion": "Surge Rise",
+     "file": "library/packs/dynamic.mp4",
+     "skip": 1.4,
+     "at": [
+      800,
+      200
+     ],
+     "size": [
+      1040,
+      585
+     ],
+     "radius": 28
+    },
+    {
+     "type": "text",
+     "text": "Dynamic.",
+     "font": "ital",
+     "size": 170,
+     "at": [
+      90,
+      400
+     ],
+     "t": 2.57,
+     "preset": "Chars Pop",
+     "color": "spark",
+     "until": 3.59
+    },
+    {
+     "type": "media",
+     "t": 3.59,
+     "motion": "Blur In",
+     "file": "library/packs/elegant.mp4",
+     "skip": 1.4,
+     "at": [
+      800,
+      200
+     ],
+     "size": [
+      1040,
+      585
+     ],
+     "radius": 28
+    },
+    {
+     "type": "text",
+     "text": "Elegant.",
+     "font": "ital",
+     "size": 170,
+     "at": [
+      90,
+      400
+     ],
+     "t": 3.59,
+     "preset": "Blur Words",
+     "until": 4.67
+    },
+    {
+     "type": "media",
+     "t": 4.67,
+     "motion": "Blur In",
+     "file": "library/packs/playful.mp4",
+     "skip": 1.4,
+     "at": [
+      800,
+      200
+     ],
+     "size": [
+      1040,
+      585
+     ],
+     "radius": 28
+    },
+    {
+     "type": "text",
+     "text": "Playful.",
+     "font": "ital",
+     "size": 170,
+     "at": [
+      90,
+      400
+     ],
+     "t": 4.67,
+     "preset": "Chars Pop",
+     "color": "spark"
+    },
+    {
+     "type": "rect",
+     "at": [
+      800,
+      200
+     ],
+     "size": [
+      1040,
+      585
+     ],
+     "t": 2.57,
+     "fill": null,
+     "stroke": "spark",
+     "strokeWidth": 3,
+     "radius": 28,
+     "motion": "Surge Rise"
+    },
+    {
+     "type": "wipe",
+     "mode": "out",
+     "colors": [
+      "pine",
+      "spark"
+     ],
+     "dir": 1,
+     "duration": 0.5,
+     "gap": 0.1,
+     "ease": "Launch"
+    }
+   ]
+  },
+  {
+   "comp": "PR_S05",
+   "bg": "pine",
+   "dur": 7.3,
+   "elements": [
+    {
+     "type": "wipe",
+     "mode": "in",
+     "colors": [
+      "pine",
+      "spark"
+     ],
+     "dir": 1,
+     "t": 0,
+     "duration": 0.75,
+     "gap": 0.12,
+     "ease": "Land"
+    },
+    {
+     "type": "lines",
+     "count": 7,
+     "color": "spark",
+     "opacity": 14,
+     "t": 0
+    },
+    {
+     "type": "text",
+     "text": "Right inside",
+     "font": "semi",
+     "size": 64,
+     "at": [
+      114,
+      110
+     ],
+     "t": 0.15,
+     "preset": "Chars Rise"
+    },
+    {
+     "type": "text",
+     "text": "After Effects.",
+     "font": "ital",
+     "size": 190,
+     "at": [
+      100,
+      190
+     ],
+     "t": 1.03,
+     "preset": "Chars Ramp",
+     "color": "spark"
+    },
+    {
+     "type": "media",
+     "t": 0.35,
+     "motion": "Ramp Slide",
+     "file": "media/explainer/panel_rec.mp4",
+     "at": [
+      1250,
+      50
+     ],
+     "size": [
+      570,
+      979
+     ],
+     "radius": 28
+    },
+    {
+     "type": "text",
+     "text": "Pick a move. Watch it live.",
+     "font": "med",
+     "size": 48,
+     "at": [
+      116,
+      470
+     ],
+     "t": 2.47,
+     "preset": "Words Fade Up"
+    },
+    {
+     "type": "text",
+     "text": "In.",
+     "font": "bold",
+     "size": 200,
+     "at": [
+      110,
+      590
+     ],
+     "t": 4.99,
+     "preset": "Chars Pop"
+    },
+    {
+     "type": "text",
+     "text": "Out.",
+     "font": "bold",
+     "size": 200,
+     "at": [
+      450,
+      590
+     ],
+     "t": 5.33,
+     "preset": "Chars Pop"
+    },
+    {
+     "type": "text",
+     "text": "Both.",
+     "font": "ital",
+     "size": 240,
+     "at": [
+      110,
+      800
+     ],
+     "t": 5.98,
+     "preset": "Chars Ramp",
+     "color": "spark"
+    },
+    {
+     "type": "wipe",
+     "mode": "out",
+     "colors": [
+      "spark",
+      "cloud"
+     ],
+     "dir": 1,
+     "duration": 0.5,
+     "gap": 0.1,
+     "ease": "Launch"
+    }
+   ]
+  },
+  {
+   "comp": "PR_S06",
+   "bg": "cloud",
+   "dur": 3.32,
+   "elements": [
+    {
+     "type": "wipe",
+     "mode": "in",
+     "colors": [
+      "spark",
+      "cloud"
+     ],
+     "dir": 1,
+     "t": 0,
+     "duration": 0.75,
+     "gap": 0.12,
+     "ease": "Land"
+    },
+    {
+     "type": "lines",
+     "count": 5,
+     "color": "sea",
+     "opacity": 10,
+     "t": 0
+    },
+    {
+     "type": "text",
+     "text": "Drag a marker.",
+     "font": "semi",
+     "size": 72,
+     "at": [
+      114,
+      110
+     ],
+     "t": 0.15,
+     "preset": "Chars Rise",
+     "color": "pine"
+    },
+    {
+     "type": "text",
+     "text": "The curve follows.",
+     "font": "ital",
+     "size": 190,
+     "at": [
+      100,
+      200
+     ],
+     "t": 1.17,
+     "preset": "Chars Ramp",
+     "color": "pine"
+    },
+    {
+     "type": "media",
+     "t": 0.3,
+     "motion": "Slide Land",
+     "file": "media/explainer/ae_markers_timeline.png",
+     "at": [
+      60,
+      600
+     ],
+     "size": [
+      1800,
+      270
+     ],
+     "radius": 20
+    },
+    {
+     "type": "marker",
+     "label": "SS out",
+     "color": "sea",
+     "from": [
+      1220,
+      500
+     ],
+     "at": [
+      1560,
+      500
+     ],
+     "t": 0.5700000000000003,
+     "duration": "Sweep",
+     "ease": "Whip"
+    },
+    {
+     "type": "wipe",
+     "mode": "out",
+     "colors": [
+      "cloud",
+      "pine"
+     ],
+     "dir": -1,
+     "duration": 0.5,
+     "gap": 0.1,
+     "ease": "Launch"
+    }
+   ]
+  },
+  {
+   "comp": "PR_S07",
+   "bg": "pine",
+   "dur": 7.54,
+   "elements": [
+    {
+     "type": "wipe",
+     "mode": "in",
+     "colors": [
+      "cloud",
+      "pine"
+     ],
+     "dir": -1,
+     "t": 0,
+     "duration": 0.75,
+     "gap": 0.12,
+     "ease": "Land"
+    },
+    {
+     "type": "lines",
+     "count": 6,
+     "color": "cloud",
+     "opacity": 9,
+     "t": 0
+    },
+    {
+     "type": "text",
+     "text": "Claude",
+     "font": "ital",
+     "size": 280,
+     "at": [
+      100,
+      60
+     ],
+     "t": 0.35,
+     "preset": "Chars Ramp",
+     "color": "spark"
+    },
+    {
+     "type": "text",
+     "text": "drives it too.",
+     "font": "semi",
+     "size": 72,
+     "at": [
+      114,
+      370
+     ],
+     "t": 0.83,
+     "preset": "Words Fade Up"
+    },
+    {
+     "type": "card",
+     "name": "chat",
+     "at": [
+      110,
+      520
+     ],
+     "size": [
+      900,
+      230
+     ],
+     "t": 1.79,
+     "motion": "Surge Rise",
+     "fill": "sea",
+     "radius": 28,
+     "items": [
+      {
+       "text": "Apply the Elegant pack to this comp\rand show me a frame.",
+       "font": "med",
+       "size": 46,
+       "at": [
+        44,
+        40
+       ],
+       "color": "cloud"
+      },
+      {
+       "text": "Claude Code  ·  ss-motion MCP",
+       "font": "reg",
+       "size": 26,
+       "at": [
+        44,
+        170
+       ],
+       "color": "muted"
+      }
+     ]
+    },
+    {
+     "type": "pill",
+     "text": "✓  reads the library",
+     "at": [
+      110,
+      800
+     ],
+     "t": 2.85,
+     "motion": "Stretch Slide",
+     "size": 34,
+     "light": true
+    },
+    {
+     "type": "pill",
+     "text": "✓  applies a pack",
+     "at": [
+      470,
+      800
+     ],
+     "t": 3.47,
+     "motion": "Stretch Slide",
+     "size": 34,
+     "light": true
+    },
+    {
+     "type": "pill",
+     "text": "✓  checks every frame",
+     "at": [
+      790,
+      800
+     ],
+     "t": 4.81,
+     "motion": "Scale Pop",
+     "size": 34,
+     "light": true
+    },
+    {
+     "type": "media",
+     "t": 4.81,
+     "motion": "Flip In",
+     "file": "media/explainer/tech_text_behind.png",
+     "at": [
+      1150,
+      90
+     ],
+     "size": [
+      660,
+      371
+     ],
+     "radius": 22
+    },
+    {
+     "type": "media",
+     "t": 6.03,
+     "motion": "Flip In",
+     "file": "media/explainer/tech_tracking.png",
+     "at": [
+      1210,
+      360
+     ],
+     "size": [
+      620,
+      349
+     ],
+     "radius": 22
+    },
+    {
+     "type": "media",
+     "t": 6.43,
+     "motion": "Flip In",
+     "file": "media/explainer/tech_hud.png",
+     "at": [
+      1150,
+      620
+     ],
+     "size": [
+      660,
+      371
+     ],
+     "radius": 22
+    },
+    {
+     "type": "wipe",
+     "mode": "out",
+     "colors": [
+      "pine",
+      "spark"
+     ],
+     "dir": 1,
+     "duration": 0.5,
+     "gap": 0.1,
+     "ease": "Launch"
+    }
+   ]
+  },
+  {
+   "comp": "PR_S08",
+   "bg": "pine",
+   "dur": 11.76,
+   "elements": [
+    {
+     "type": "wipe",
+     "mode": "in",
+     "colors": [
+      "pine",
+      "spark"
+     ],
+     "dir": 1,
+     "t": 0,
+     "duration": 0.75,
+     "gap": 0.12,
+     "ease": "Land"
+    },
+    {
+     "type": "media",
+     "t": 0,
+     "motion": "cut",
+     "full": true,
+     "comp": "CY_SNEAKERS",
+     "hide": [
+      "BRONX"
+     ],
+     "push": 1.08,
+     "skip": 0.4
+    },
+    {
+     "type": "rect",
+     "at": [
+      0,
+      0
+     ],
+     "size": [
+      1920,
+      470
+     ],
+     "t": 0,
+     "fill": "pine",
+     "motion": "cut",
+     "opacity": 45
+    },
+    {
+     "type": "text",
+     "text": "Every project leaves",
+     "font": "semi",
+     "size": 70,
+     "at": [
+      100,
+      110
+     ],
+     "t": 0.15,
+     "preset": "Chars Rise",
+     "until": 2.65
+    },
+    {
+     "type": "text",
+     "text": "a technique behind.",
+     "font": "ital",
+     "size": 190,
+     "at": [
+      90,
+      200
+     ],
+     "t": 1.39,
+     "preset": "Chars Ramp",
+     "color": "spark",
+     "until": 2.65
+    },
+    {
+     "type": "media",
+     "t": 2.65,
+     "motion": "cut",
+     "file": "renders/CYPHER_EDIT.mp4",
+     "full": true,
+     "skip": 16.9,
+     "push": 1.06
+    },
+    {
+     "type": "rect",
+     "at": [
+      0,
+      800
+     ],
+     "size": [
+      1920,
+      280
+     ],
+     "t": 2.65,
+     "fill": "pine",
+     "motion": "cut",
+     "opacity": 78,
+     "until": 4.209999999999994
+    },
+    {
+     "type": "text",
+     "text": "Tracking",
+     "font": "bold",
+     "size": 190,
+     "at": [
+      80,
+      840
+     ],
+     "t": 2.65,
+     "preset": "Chars Rise",
+     "color": "spark",
+     "until": 4.21
+    },
+    {
+     "type": "media",
+     "t": 4.21,
+     "motion": "cut",
+     "file": "renders/05_Text_Behind_70s.mp4",
+     "full": true,
+     "skip": 1.0,
+     "push": 1.06
+    },
+    {
+     "type": "rect",
+     "at": [
+      0,
+      800
+     ],
+     "size": [
+      1920,
+      280
+     ],
+     "t": 4.21,
+     "fill": "pine",
+     "motion": "cut",
+     "opacity": 78,
+     "until": 5.949999999999996
+    },
+    {
+     "type": "text",
+     "text": "Roto",
+     "font": "bold",
+     "size": 190,
+     "at": [
+      80,
+      840
+     ],
+     "t": 4.21,
+     "preset": "Chars Rise",
+     "color": "spark",
+     "until": 5.95
+    },
+    {
+     "type": "rect",
+     "at": [
+      0,
+      0
+     ],
+     "size": [
+      1920,
+      1080
+     ],
+     "t": 5.95,
+     "fill": "pine",
+     "motion": "cut",
+     "until": 7.809999999999995
+    },
+    {
+     "type": "lines",
+     "count": 6,
+     "color": "spark",
+     "opacity": 14,
+     "t": 5.95
+    },
+    {
+     "type": "text",
+     "text": "Kinetic",
+     "font": "bold",
+     "size": 330,
+     "at": [
+      100,
+      230
+     ],
+     "t": 5.95,
+     "preset": "Chars Pop",
+     "until": 7.81
+    },
+    {
+     "type": "text",
+     "text": "type.",
+     "font": "ital",
+     "size": 330,
+     "at": [
+      600,
+      560
+     ],
+     "t": 6.25,
+     "preset": "Chars Ramp",
+     "color": "spark",
+     "until": 7.81
+    },
+    {
+     "type": "media",
+     "t": 7.81,
+     "motion": "Speed Ramp",
+     "file": "media/cypher/clip03_aaron_sd.mp4",
+     "full": true
+    },
+    {
+     "type": "rect",
+     "at": [
+      0,
+      800
+     ],
+     "size": [
+      1920,
+      280
+     ],
+     "t": 7.81,
+     "fill": "pine",
+     "motion": "cut",
+     "opacity": 78
+    },
+    {
+     "type": "text",
+     "text": "Speed ramps",
+     "font": "bold",
+     "size": 190,
+     "at": [
+      80,
+      840
+     ],
+     "t": 7.81,
+     "preset": "Chars Rise",
+     "color": "spark"
+    },
+    {
+     "type": "wipe",
+     "mode": "out",
+     "colors": [
+      "spark",
+      "pine"
+     ],
+     "dir": -1,
+     "duration": 0.5,
+     "gap": 0.1,
+     "ease": "Launch"
+    }
+   ]
+  },
+  {
+   "comp": "PR_S09",
+   "bg": "cloud",
+   "dur": 4.96,
+   "elements": [
+    {
+     "type": "wipe",
+     "mode": "in",
+     "colors": [
+      "spark",
+      "pine"
+     ],
+     "dir": -1,
+     "t": 0,
+     "duration": 0.75,
+     "gap": 0.12,
+     "ease": "Land"
+    },
+    {
+     "type": "media",
+     "t": 0,
+     "motion": "Blur In",
+     "file": "media/explainer/ae_markers_full.png",
+     "at": [
+      700,
+      120
+     ],
+     "size": [
+      1300,
+      817
+     ],
+     "radius": 24,
+     "push": 1.06
+    },
+    {
+     "type": "rect",
+     "at": [
+      0,
+      0
+     ],
+     "size": [
+      820,
+      1080
+     ],
+     "t": 0,
+     "fill": "pine",
+     "motion": "Ramp Slide"
+    },
+    {
+     "type": "text",
+     "text": "All real",
+     "font": "semi",
+     "size": 72,
+     "at": [
+      84,
+      290
+     ],
+     "t": 0.15,
+     "preset": "Chars Rise",
+     "color": "cloud"
+    },
+    {
+     "type": "text",
+     "text": "keyframes.",
+     "font": "ital",
+     "size": 180,
+     "at": [
+      70,
+      380
+     ],
+     "t": 1.02,
+     "preset": "Chars Ramp",
+     "color": "spark"
+    },
+    {
+     "type": "text",
+     "text": "Designers keep\rthe final touch.",
+     "font": "med",
+     "size": 56,
+     "at": [
+      84,
+      700
+     ],
+     "t": 2.87,
+     "preset": "Words Fade Up",
+     "color": "cloud"
+    },
+    {
+     "type": "wipe",
+     "mode": "out",
+     "colors": [
+      "pine",
+      "cloud"
+     ],
+     "dir": 1,
+     "duration": 0.5,
+     "gap": 0.1,
+     "ease": "Launch"
+    }
+   ]
+  },
+  {
+   "comp": "PR_S10",
+   "bg": "pine",
+   "dur": 5.36,
+   "elements": [
+    {
+     "type": "wipe",
+     "mode": "in",
+     "colors": [
+      "pine",
+      "cloud"
+     ],
+     "dir": 1,
+     "t": 0,
+     "duration": 0.75,
+     "gap": 0.12,
+     "ease": "Land"
+    },
+    {
+     "type": "media",
+     "t": 0,
+     "motion": "cut",
+     "file": "media/whisky/clip01.mp4",
+     "full": true,
+     "push": 1.1
+    },
+    {
+     "type": "rect",
+     "at": [
+      0,
+      610
+     ],
+     "size": [
+      1920,
+      470
+     ],
+     "t": 0,
+     "fill": "pine",
+     "motion": "cut",
+     "opacity": 55
+    },
+    {
+     "type": "text",
+     "text": "Motion that looks like",
+     "font": "semi",
+     "size": 66,
+     "at": [
+      100,
+      650
+     ],
+     "t": 0.15,
+     "preset": "Chars Rise",
+     "until": 3.05
+    },
+    {
+     "type": "text",
+     "text": "Superside.",
+     "font": "ital",
+     "size": 300,
+     "at": [
+      80,
+      730
+     ],
+     "t": 1.35,
+     "preset": "Chars Ramp",
+     "color": "spark",
+     "until": 3.05
+    },
+    {
+     "type": "rect",
+     "at": [
+      0,
+      0
+     ],
+     "size": [
+      1920,
+      1080
+     ],
+     "t": 3.01,
+     "fill": "pine",
+     "motion": "cut"
+    },
+    {
+     "type": "lines",
+     "count": 7,
+     "color": "spark",
+     "opacity": 14,
+     "t": 3.05
+    },
+    {
+     "type": "text",
+     "text": "Not like AI.",
+     "font": "bold",
+     "size": 320,
+     "at": [
+      110,
+      360
+     ],
+     "t": 3.05,
+     "preset": "Chars Pop"
+    },
+    {
+     "type": "wipe",
+     "mode": "out",
+     "colors": [
+      "pine",
+      "spark"
+     ],
+     "dir": 1,
+     "duration": 0.5,
+     "gap": 0.1,
+     "ease": "Launch"
+    }
+   ]
+  },
+  {
+   "comp": "PR_S11",
+   "bg": "pine",
+   "dur": 8.05,
+   "elements": [
+    {
+     "type": "wipe",
+     "mode": "in",
+     "colors": [
+      "pine",
+      "spark"
+     ],
+     "dir": 1,
+     "t": 0,
+     "duration": 0.75,
+     "gap": 0.12,
+     "ease": "Land"
+    },
+    {
+     "type": "media",
+     "t": 0,
+     "motion": "cut",
+     "file": "media/whisky/clip04.mp4",
+     "full": true,
+     "push": 1.08
+    },
+    {
+     "type": "rect",
+     "at": [
+      0,
+      0
+     ],
+     "size": [
+      1920,
+      1080
+     ],
+     "t": 0,
+     "fill": "pine",
+     "motion": "cut",
+     "opacity": 80
+    },
+    {
+     "type": "lines",
+     "count": 6,
+     "color": "spark",
+     "opacity": 12,
+     "t": 0.3
+    },
+    {
+     "type": "text",
+     "text": "SS Motion",
+     "font": "ital",
+     "size": 320,
+     "at": [
+      110,
+      170
+     ],
+     "t": 0.3,
+     "preset": "Chars Ramp",
+     "color": "spark"
+    },
+    {
+     "type": "text",
+     "text": "Library",
+     "font": "bold",
+     "size": 170,
+     "at": [
+      124,
+      500
+     ],
+     "t": 1.25,
+     "preset": "Chars Rise"
+    },
+    {
+     "type": "pill",
+     "text": "68 presets  ·  5 style packs  ·  plugin  ·  MCP",
+     "at": [
+      130,
+      760
+     ],
+     "t": 1.8,
+     "motion": "Stretch Slide",
+     "size": 36
+    }
+   ]
+  }
+ ]
+}

@@ -48,7 +48,22 @@ var SSM = (function () {
         load: function (path) { T = readJSON(path); return T; },
         tokens: function () { return T; },
         frames: function (durName) { return find(T.durations, durName).frames; },
-        seconds: function (durName, fps) { return find(T.durations, durName).frames / (fps || T.fps); },
+        // SSM.speed scales every token duration (the panel's Duration control: 2 = twice as long)
+        speed: 1,
+        seconds: function (durName, fps) { return find(T.durations, durName).frames / (fps || T.fps) * (this.speed || 1); },
+        // Re-eases the segment between keys k and k+1 of prop with a token curve (keeps values and times)
+        easeSegment: function (prop, k, easeName) {
+            var e = find(T.easings, easeName);
+            if (!e || k < 1 || k >= prop.numKeys) return;
+            if (e.ae.out === "linear") { prop.setInterpolationTypeAtKey(k, prop.keyInInterpolationType(k), KeyframeInterpolationType.LINEAR); prop.setInterpolationTypeAtKey(k + 1, KeyframeInterpolationType.LINEAR, prop.keyOutInterpolationType(k + 1)); return; }
+            if (prop.keyOutInterpolationType(k) === KeyframeInterpolationType.HOLD) return;
+            prop.setInterpolationTypeAtKey(k, prop.keyInInterpolationType(k), KeyframeInterpolationType.BEZIER);
+            prop.setInterpolationTypeAtKey(k + 1, KeyframeInterpolationType.BEZIER, prop.keyOutInterpolationType(k + 1));
+            var v0 = prop.keyValue(k), v1 = prop.keyValue(k + 1), dur = Math.max(prop.keyTime(k + 1) - prop.keyTime(k), 0.001);
+            var avg = avgSpeed(v0, v1, dur, isSpatial(prop));
+            prop.setTemporalEaseAtKey(k, prop.keyInTemporalEase(k), eases(e.ae.out, avg));
+            prop.setTemporalEaseAtKey(k + 1, eases(e.ae["in"], avg), prop.keyOutTemporalEase(k + 1));
+        },
         ease: function (easeName) { return find(T.easings, easeName).ae; },
 
         // Animates prop from v0 to v1 starting at t0 (s); duration and easing come from tokens. Returns the end time.

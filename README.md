@@ -1,14 +1,14 @@
-# SS Motion Library
+# Motion DNA
 
-Superside's own motion library for After Effects. Designers apply it from a panel; **an LLM (Claude Code or any local model) can drive it on its own**: apply animations, test them, render and grow the catalog. Everything it creates is native keyframes and expressions, with no plugins required.
+Motion made with AI all looks the same: same curves, same moves, same templates. **Motion DNA** is a library of moves, techniques, scripts and styles for After Effects that gives your motion its own identity. Apply it by hand from the panel, or let **Claude drive it directly inside After Effects** (MCP): pick presets, apply styles, check frames and grow the catalog. Everything it creates is native keyframes and expressions, with no plugins required to render.
 
-![SS Motion Library visualizer: filters by category and energy](docs/screens/visualizer.gif)
+![Motion DNA visualizer: filters by category and energy](docs/screens/visualizer.gif)
 
 *`library/index.html`: every preset with a live thumbnail, its energy level and the one-line call to apply it.*
 
 ## What's inside
 
-> **Latest additions:** a gallery plugin with live previews and **marker-driven timing** (drag *SS in* / *SS out* to retime any preset), **style packs** (Dynamic, Elegant, Modern, Playful, Tech) that animate a whole comp in one click, 17 **Classics** adapted from animate.css 4.1.1 (MIT), speed-ramp curves (`Ramp`, `Surge`, `Whip`), and an **MCP server** so Claude can drive After Effects and the library directly. Every piece we make should leave something new in the library.
+> **Latest additions:** a gallery plugin with live previews and **marker-driven timing** (drag *SS in* / *SS out* to retime any preset), **styles** (Dynamic, Elegant, Modern, Playful, Tech) that animate a whole comp in one click, 17 **Classics** adapted from animate.css 4.1.1 (MIT), speed-ramp curves (`Ramp`, `Surge`, `Whip`), and an **MCP server** so Claude can drive After Effects and the library directly. Every piece we make should leave something new in the library.
 
 <!-- catalog:start -->
 **68 presets** in 5 categories, plus style packs. Every one is also listed in `library/INDEX.txt` (for LLMs) and `library/index.html` (for people).
@@ -96,9 +96,9 @@ Every preset has an **energy** level, so you can choose by the tone of the piece
 
 Real pieces animated only with library presets and tokens, with no hand-set keyframes:
 
-| A Figma slide, animated | The S-mark intro |
+| A Figma slide, animated | A draw-on intro |
 |---|---|
-| ![Figma slide](docs/examples/use-figma-slide.gif) | ![S-mark intro](docs/examples/use-icon-intro.gif) |
+| ![Figma slide](docs/examples/use-figma-slide.gif) | ![Draw-on intro](docs/examples/use-icon-intro.gif) |
 | The *Essentials* slide rebuilt in AE: title `Arrive` + `Land`, image cards `Stage` + `Land` with a stagger, chips scaling in one by one, the coral chip with `Pop` | Outline draws on (`Sweep` + `Cruise`), fill lands with `Pop`, tagline `Arrive` + `Land`, chained `Launch` exit |
 | **Motion presets side by side** | **Effects running as loops** |
 | ![Presets grid](docs/examples/use-presets-grid.gif) | ![FX loops](docs/examples/use-fx-loops.gif) |
@@ -111,7 +111,7 @@ Real pieces animated only with library presets and tokens, with no hand-set keyf
 
 ![How it works](docs/screens/how-it-works.png)
 
-All timing comes from the Superside motion tokens: **6 durations** and **10 easing curves**, including three speed-ramp curves (`Ramp`, `Surge`, `Whip`: slow → burst of speed → slow) (`tokens/superside_motion_tokens.json`). Presets never hard-code a speed: they ask for `Arrive` + `Land`, so the whole library stays consistent and can be retuned in one place.
+All timing comes from our motion tokens: **6 durations** and **10 easing curves**, including three speed-ramp curves (`Ramp`, `Surge`, `Whip`: slow → burst of speed → slow) (`tokens/superside_motion_tokens.json`). Presets never hard-code a speed: they ask for `Arrive` + `Land`, so the whole library stays consistent and can be retuned in one place.
 
 ![Durations and easing curves](docs/screens/tokens.png)
 
@@ -119,33 +119,31 @@ All timing comes from the Superside motion tokens: **6 durations** and **10 easi
 
 ### Designers (in After Effects)
 
-<img src="docs/screens/ae-panel.gif" width="320" align="right" alt="SS Motion panel in After Effects: gallery, live previews, In/Out/Both">
+<img src="docs/screens/ae-panel.gif" width="320" align="right" alt="Motion DNA panel in After Effects: gallery, live previews, In/Out/Both">
 
-1. Install the brand fonts from `assets/fonts/` (right-click › Install).
-2. **Install the panel once** (Window menu, dockable, every AE version on the machine):
-   ```bash
-   powershell -ExecutionPolicy Bypass -File tools/install_panel.ps1    # Windows
-   bash tools/install_panel.sh                                         # macOS
-   ```
-   Restart AE, open *Window › SS Motion.jsx* and dock it. It reads the library straight from this repo clone, so a `git pull` brings the new presets. Enable *Edit › Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
-3. **Browse the gallery** by category (Motion, Classics, Text, Effects, Recipes, Packs, Assets) with search and an energy filter. Clicking a thumbnail plays a **live preview**: the preset's real curve, sampled into `library/preview_curves.json` (ScriptUI cannot play GIFs, so the panel redraws the motion as vectors, ~90 KB for the whole library).
-4. **Select layers → In, Out or Both.** Stagger in frames for several layers.
-5. **Retime with markers:** with *Marker timing* on, each layer gets an `SS in` marker (where the entrance ends) and an `SS out` marker (where the exit starts). Drag them and the animation stretches or compresses with the same curve, no keyframe editing.
-6. **Packs:** pick a pack and press In/Both. Every layer gets the preset of its role (title, subtitle, body, shape, media, logo) with the pack's rhythm. Backgrounds, nulls and locked layers are left alone.
-7. **Assets:** drop local sound effects and overlays at the playhead.
+1. Install the fonts from `assets/fonts/` (right-click › Install).
+2. **Install the panel once:** double-click `INSTALL-Windows.cmd` (Windows) or `INSTALL-macOS.command` (macOS). It adds *Window › Motion DNA.jsx* (dockable) to every AE version on the machine; restart AE and dock it. It reads the library straight from this repo clone, so a `git pull` brings the new presets. Enable *Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
+3. **Browse by category:** Moves, Classics, Text, Loops, Recipes, Styles, Techniques, Assets and ★ Favorites, with search and an energy filter; the grid adapts to the panel width. Clicking a thumbnail plays a **live preview** of the preset's real curve on the neutral Spark arrow (sampled into `library/preview_curves.json`; ScriptUI cannot play GIFs, so the panel redraws the motion as vectors). ☆ adds it to your favorites.
+4. **Tune before applying (Controls):** *Duration* (0.5–2×), *Intensity* (how far it travels, 25–200 %), *Direction* (as designed or mirrored), *Easing* (keep the preset's curve or use any token curve), *Stagger* for several layers.
+5. **Select layers → In, Out or Both.** **Remove** takes Motion DNA's keyframes, expressions and markers off the selected layers; each property keeps its resting value.
+6. **Retime with markers:** with *Marker timing* on, each layer gets an `SS in` marker (where the entrance ends) and an `SS out` marker (where the exit starts). Drag them and the animation stretches or compresses with the same curve.
+7. **Styles:** pick one and press In/Both. Every layer gets the preset of its role (title, subtitle, body, shape, media, logo) with the style's rhythm. Backgrounds, nulls and locked layers are left alone.
+8. **Techniques:** guides for the script workflows (tracked labels, text behind people, roto breakdown, HUD, speed ramps, freeze + kinetic type, shape wipes, cutting on the voice, face refinement): what each does, how to run it, and what to ask Claude.
+9. **Claude:** the header shows whether Claude is connected. *Connect Claude* starts the bridge so the MCP server (`motion-dna`) can drive this After Effects.
+10. **Assets:** drop local sound effects and overlays at the playhead.
 
 <br clear="right">
 
 ### LLM agents (Claude Code or any MCP client)
 
-**MCP server (recommended).** The repo ships a dependency-free MCP server (`tools/mcp/ss_motion_mcp.py`, registered in `.mcp.json`). Open the repo in Claude Code, approve the `ss-motion` server, and Claude gets these tools:
+**MCP server (recommended).** The repo ships a dependency-free MCP server (`tools/mcp/ss_motion_mcp.py`, registered in `.mcp.json`). Open the repo in Claude Code, approve the `motion-dna` server, and Claude gets these tools:
 - **Browse (no AE needed):** `list_presets`, `list_packs`, `list_assets`.
 - **Inspect AE:** `ae_status`, `list_layers`.
-- **Act:** `apply_preset` (in/out/both, stagger, marker timing), `apply_pack`, `add_asset`, `show_in_panel`.
+- **Act:** `apply_preset` (in/out/both, stagger, marker timing, and the panel controls: `duration`, `intensity`, `direction`, `ease`), `remove_animation`, `apply_pack` (styles), `add_asset`, `show_in_panel`.
 - **Check:** `render_frame` (to look at the result), `render_comp`.
 - **Escape hatch:** `run_jsx`.
 
-It talks to AE through the file bridge, which starts by itself when the SS Motion panel loads (dock it once).
+It talks to AE through the file bridge, which starts by itself when the Motion DNA panel loads (dock it once).
 
 **Without MCP**, any LLM can do the same with plain files:
 1. **Read `library/INDEX.txt`**: one line per preset (`kind|name|channels|energy|use`) plus the calls, tokens, packs and tools.
@@ -184,6 +182,10 @@ Bigger pieces are data, not code: scenes (`tools/build_scene.jsx`) and edits (`t
 | `tools/build_explainer.jsx` | Slides/explainer scenes from a JSON storyboard (Figma coordinates), every element animated by a preset |
 | `tools/build_app_screen.jsx` | Browser-window recording of the visualizer, rebuilt from screenshots |
 | `tools/render_comps.jsx` | Renders comps through the open AE's render queue |
+| `tools/build_promo_all.jsx` + `media/promo/make_promo.py` | Promotional cut: full-screen footage, oversized type, shape wipes, scenes cut on the VO word times |
+| `tools/vo_words.py` | Word timestamps of a voiceover (openai-whisper) to cut scenes on the spoken word |
+| `tools/qa_frames.jsx` | QA stills of a comp at given times |
+| `tools/faceswap_refine.py` + `media/faceswap/jobs.json` | **Face refinement pass** for every clip with a real person (MiniMax H3 head inpainting, local GPU); `faceswap_apply.py`, `footage_relink_*.jsx`, `reload_footage.jsx` put the refined clips in place |
 | `tools/ss_assets.jsx` (`SSA`) + `tools/index_assets.py` | Local asset packs: index SFX/overlays by category and loudness, place them by name |
 
 ## Growing the library
@@ -233,7 +235,7 @@ The index measures each sound's loudness and flags the harsh ones (`loud`) and t
 | `tokens/` | Timing, curves and font roles |
 | `library/` | `INDEX.txt` (LLM), `library.json`, `recipes.json`, `index.html`, `gifs/`, `posters/` |
 | `tools/` | JSX library, panel, bridge, HUD, scene/edit builders, harvest station, AC driver, render pipelines |
-| `assets/` | Superside logos, S-mark shape for AE, palette and components from the *Essentials* Figma, brand fonts |
+| `assets/` | Neutral sample shape (`motion_dna/`), palette and components from the *Essentials* Figma, fonts |
 | `docs/` | `LEARNINGS.md`, case studies, screens and examples |
 | `ae/` | Test project |
 | `media/` | AI test footage, mattes, tracking data, music and VO for the showcases |
@@ -270,7 +272,15 @@ On macOS, the first `osascript` call asks for permission to control After Effect
 
 ## Tests and showcases
 
-### *SS Motion Library · internal explainer* (68 s)
+### *Motion DNA · promo* (67 s)
+
+The promotional cut of the explainer, in the style of our fashion use-case video: full-screen footage, oversized type, hard cuts on the spoken word, big Spark + Pine shape wipes, one continuous voice read and an upbeat pop bed. Every element is still animated by a library preset, and every face went through the MiniMax refinement pass. Video: [`docs/examples/ss_motion_promo.mp4`](docs/examples/ss_motion_promo.mp4) · step by step: [`docs/case-studies/ss-motion-promo.md`](docs/case-studies/ss-motion-promo.md).
+
+| The hook | One click, one identity | Techniques |
+|---|---|---|
+| ![Hook](docs/examples/promo-hook.gif) | ![Packs](docs/examples/promo-packs.gif) | ![Techniques](docs/examples/promo-techniques.gif) |
+
+### *Motion DNA · internal explainer* (68 s)
 
 How we built the library, why it exists (AI-made motion all looks the same) and how to use it, animated **with the library itself**. Storyboard in Figma ([slack_video › motion pluguin](https://www.figma.com/design/OGiHZakKWL9iUXUJ8rn7Ko/slack_video?node-id=70-2)), scenes built from JSON by `tools/build_explainer.jsx`. Video: [`docs/examples/ss_motion_explainer.mp4`](docs/examples/ss_motion_explainer.mp4) · step by step: [`docs/case-studies/ss-motion-explainer.md`](docs/case-studies/ss-motion-explainer.md).
 
@@ -316,6 +326,6 @@ bash tools/bridge.sh tools/build_edit.jsx      # the edit
 | ![Text behind](docs/examples/text-behind-subject.gif) |
 | Giant title between background and person, using an AI person matte |
 
-Test comps in `ae/motion_lab_v01.aep`: `01_SS_Icon_Intro` (S-mark draw-on), `02_Track_70s` (tracked points and callout), `03_Figma_Chips` (*Essentials* slide with tokens), `04_Text_Tracking_70s`, `05_Text_Behind_70s`, `HUD_TEST`, and the `WHISKY 1974` folder.
+Test comps in `ae/motion_lab_v01.aep`: `01_Sample_Intro` (sample draw-on), `02_Track_70s` (tracked points and callout), `03_Figma_Chips` (*Essentials* slide with tokens), `04_Text_Tracking_70s`, `05_Text_Behind_70s`, `HUD_TEST`, and the `WHISKY 1974` folder.
 
 People in `media/` and the showcases are project collaborators (Aaron Amortegui and Gian Orsi) who agreed to be used as test subjects. Prices, bottlings and roles are fictional.

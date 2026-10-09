@@ -757,11 +757,53 @@ var SSP = (function () {
             "else if (C>=0) u = C-(mo-lt);\n" +
             "valueAtTime(u+st);";
     }
+    // ---------- Tuning (the panel's Intensity / Direction / Easing controls; Duration is SSM.speed) ----------
+    // After a phase runs, its new keyframes are reshaped: every value is pulled toward (or pushed away from) the rest
+    // value by `intensity`, position/rotation offsets can be mirrored, and each new segment can be re-eased with
+    // any token curve. Opacity, text and markers are never scaled.
+    function tuned() { var t = SSP_STATE.tune; return t && (t.intensity !== 1 || t.flipX || t.flipY || t.ease); }
+    function retune(L, d, phase) {
+        if (!d) return;
+        var t = SSP_STATE.tune, all = walkKeys(L);
+        for (var i = 0; i < d.paths.length; i++) {
+            var rec = all[d.paths[i]]; if (!rec) continue;
+            var pr = rec.prop, mn = pr.matchName, ks = [];
+            for (var k = 1; k <= pr.numKeys; k++) { var kt = pr.keyTime(k); if (kt >= d.span[0] - 1e-4 && kt <= d.span[1] + 1e-4) ks.push(k); }
+            if (ks.length < 2) continue;
+            var scaleIt = !/Opacity|Text Document|Marker|Time Remap/.test(mn) && pr.propertyValueType !== PropertyValueType.NO_VALUE &&
+                          pr.propertyValueType !== PropertyValueType.CUSTOM_VALUE && pr.propertyValueType !== PropertyValueType.SHAPE;
+            if (scaleIt && (t.intensity !== 1 || t.flipX || t.flipY)) {
+                var rest = pr.keyValue(phase === "out" ? ks[0] : ks[ks.length - 1]);
+                var isPos = /Position/.test(mn) && !/Anchor/.test(mn), isRot = /Rotate|Rotation/.test(mn);
+                for (var j = 0; j < ks.length; j++) {
+                    var v = pr.keyValue(ks[j]), nv;
+                    if (v instanceof Array) {
+                        nv = [];
+                        for (var c = 0; c < v.length; c++) {
+                            var dlt = (v[c] - rest[c]) * t.intensity;
+                            if (isPos && ((c === 0 && t.flipX) || (c === 1 && t.flipY))) dlt = -dlt;
+                            nv.push(rest[c] + dlt);
+                        }
+                    } else {
+                        var dl = (v - rest) * t.intensity;
+                        if (isRot && t.flipX) dl = -dl;
+                        if (mn === "ADBE Position_0" && t.flipX) dl = -dl;
+                        if (mn === "ADBE Position_1" && t.flipY) dl = -dl;
+                        nv = rest + dl;
+                    }
+                    pr.setValueAtKey(ks[j], nv);
+                }
+            }
+            if (t.ease) for (var e = 0; e < ks.length - 1; e++) SSM.easeSegment(pr, ks[e], t.ease);
+        }
+    }
     function withMarkers(L, phase, runIn, runOut) {
-        if (!SSP_STATE.markerTiming) { if (runIn) runIn(); if (runOut) runOut(); return; }
+        if (!SSP_STATE.markerTiming && !tuned()) { if (runIn) runIn(); if (runOut) runOut(); return; }
         var st = L.startTime, k0 = walkKeys(L), dIn = null, dOut = null;
         if (runIn) { runIn(); var k1 = walkKeys(L); dIn = diffKeys(k0, k1); k0 = k1; }
         if (runOut) { runOut(); dOut = diffKeys(k0, walkKeys(L)); }
+        if (tuned()) { retune(L, dIn, "in"); retune(L, dOut, "out"); }
+        if (!SSP_STATE.markerTiming) return;
         if (!dIn && !dOut) return;
         var all = walkKeys(L), paths = {}, i;
         if (dIn) for (i = 0; i < dIn.paths.length; i++) paths[dIn.paths[i]] = 1;
@@ -781,7 +823,7 @@ var SSP = (function () {
         if (dIn) setMarker(L, "SS in", dIn.span[1]);
         if (dOut) setMarker(L, "SS out", dOut.span[0]);
     }
-    var SSP_STATE = { markerTiming: false };
+    var SSP_STATE = { markerTiming: false, tune: { intensity: 1, flipX: false, flipY: false, ease: null } };
 
     // ---------- Packs: one button gives a whole comp a look (library/packs.json) ----------
     var PACKS = (function () {
@@ -850,6 +892,42 @@ var SSP = (function () {
                 doIn ? function () { pr["in"](L, t0 === undefined ? L.inPoint : t0); } : null,
                 doOut ? function () { pr["out"](L, phase === "out" && t0 !== undefined ? t0 : L.outPoint - SSM.seconds("Arrive")); } : null);
             L.comment = "SS preset: " + name + " (" + pr.channels + ", " + pr.energy + ")";
+        },
+        // Tuning for the next apply() calls: { speed, intensity, flipX, flipY, ease } (ease = token name or null).
+        // SSP.tune() resets to defaults. Used by the panel and the MCP server.
+        tune: function (o) {
+            o = o || {};
+            SSM.speed = o.speed || 1;
+            SSP_STATE.tune = { intensity: o.intensity === undefined ? 1 : o.intensity, flipX: !!o.flipX, flipY: !!o.flipY, ease: o.ease || null };
+            return SSP_STATE.tune;
+        },
+        // Removes what Motion DNA added to a layer: keyframes and our expressions on its animated properties (the value
+        // at the rest time stays), the SS in / SS out markers, our text animators and SS-named effects.
+        remove: function (L) {
+            var rest = L.inPoint + (L.outPoint - L.inPoint) / 2, M = L.property("ADBE Marker"), i;
+            for (i = M.numKeys; i >= 1; i--) { var cm = M.keyValue(i).comment; if (cm === "SS in" || cm === "SS out") { if (cm === "SS in") rest = Math.max(rest, M.keyTime(i)); M.removeKey(i); } }
+            var ours = /SS (preset|FX|recipe)|Motion DNA/.test(L.comment || ""), n = 0;
+            (function walk(g) {
+                for (var j = g.numProperties; j >= 1; j--) {
+                    var pr = g.property(j);
+                    if (!pr || pr.matchName === "ADBE Marker") continue;
+                    if (pr.propertyType === PropertyType.PROPERTY) {
+                        if (pr.canSetExpression && pr.expression && (pr.expression.indexOf(TAG) === 0 || ours)) { pr.expression = ""; n++; }
+                        if (pr.numKeys > 0 && pr.matchName !== "ADBE Time Remapping") {
+                            var v = pr.valueAtTime(rest, true);
+                            while (pr.numKeys) pr.removeKey(1);
+                            try { pr.setValue(v); } catch (e) {}
+                            n++;
+                        }
+                    } else if (pr.numProperties) walk(pr);
+                }
+            })(L);
+            var an = L.property("ADBE Text Properties") && L.property("ADBE Text Properties").property("ADBE Text Animators");
+            if (an) for (i = an.numProperties; i >= 1; i--) if (/^SS /.test(an.property(i).name)) { an.property(i).remove(); n++; }
+            var fx = L.property("ADBE Effect Parade");
+            if (fx) for (i = fx.numProperties; i >= 1; i--) if (/^SS /.test(fx.property(i).name)) { fx.property(i).remove(); n++; }
+            if (ours) L.comment = "";
+            return n;
         },
         // marker-driven timing on/off (off by default so scripted builds stay plain keyframes)
         markerTiming: function (on) { if (on !== undefined) SSP_STATE.markerTiming = !!on; return SSP_STATE.markerTiming; },

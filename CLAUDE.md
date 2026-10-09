@@ -1,18 +1,19 @@
 # CLAUDE.md — read this first
 
-You are working in **SS Motion Library**, Superside's own motion library for After Effects, built to be driven by an LLM. Several people (and their Claude sessions) contribute to it, so follow the conventions below exactly; they exist so nothing we learned gets lost.
+You are working in **Motion DNA**, a motion library for After Effects (moves, techniques, scripts and styles that give AI-made motion its own identity), built to be driven by an LLM. Never put a brand logo in the library or its demos; colours and fonts come from the tokens. Several people (and their Claude sessions) contribute to it, so follow the conventions below exactly; they exist so nothing we learned gets lost.
 
 ## Before you start
 1. Read `CONTRIBUTING.md` (how to add presets, open-source effects, packs, case studies and learnings).
 2. Skim `docs/LEARNINGS.md`: every pitfall already solved (ExtendScript, rendering, Flora/AI video, likeness, tracking, audio, costs). Do not rediscover them.
-3. To pick or apply presets, read only `library/INDEX.txt`. The skill `.claude/skills/ss-motion-library/SKILL.md` explains the bridge and the API.
-4. **Prefer the MCP server** (`ss-motion`, registered in `.mcp.json`): `list_presets`, `apply_preset`, `apply_pack`, `add_asset`, `render_frame`, `run_jsx`… It drives the open After Effects through the file bridge (started by the SS Motion panel). Check your work with `render_frame` and look at the PNG.
+3. To pick or apply presets, read only `library/INDEX.txt`. The skill `.claude/skills/motion-dna/SKILL.md` explains the bridge and the API.
+4. **Prefer the MCP server** (`motion-dna`, registered in `.mcp.json`): `list_presets`, `apply_preset`, `apply_pack`, `add_asset`, `render_frame`, `run_jsx`… It drives the open After Effects through the file bridge (started by the Motion DNA panel). Check your work with `render_frame` and look at the PNG.
 
 ## Non-negotiable rules
 - **Everything in the repo is English**: code, comments, metadata, docs, commit messages. Chat with the user can be in their language.
 - **Animation Composer and other paid tools are behavioral references only.** Never decrypt, unpack or modify them, and never commit their files. Their asset packs are indexed locally (`library/ASSETS.local.txt`, git-ignored).
 - **Open-source sources only with permissive licenses** (MIT, BSD, Apache-2.0, CC0) and with the exact version and license recorded next to the data (see `library/css_presets.json`). If a project changed license, use the last permissive release and say so.
 - **Real people** appear only with their consent; check likeness with `tools/face_check.py` before spending on video. Brands, prices and names on screen are fictional.
+- **Every clip with a real person gets the face refinement pass** before it goes into an edit: `python tools/faceswap_refine.py media/faceswap/jobs.json` (MiniMax H3 head inpainting with the real photo; wardrobe, background and camera stay). Add a job per new clip, then run `face_check.py` on the result. Generated video drifts from the real face; this pass is not optional.
 - **Generation costs**: quote USD before generating with Flora (or similar) unless the user already approved the spend, and record real costs in `docs/LEARNINGS.md` §8.
 - **Commit or push only when the user asks.** End commit messages with the co-author line your harness gives you.
 - **Every user interface has an animated GIF in the repo** (`docs/screens/`, under ~500 KB) showing it in use. If you change the panel, the visualizer or any UI, re-record its GIF (see CONTRIBUTING §7) in the same commit.

@@ -1,0 +1,100 @@
+{
+ "name": "Motion DNA sample arrow",
+ "note": "Neutral sample shape for every preview (moves, loops, styles, tests): a Spark arrow, so direction and rotation read at a glance.",
+ "fill": "#D8FF85",
+ "paths": [
+  {
+   "v": [
+    [
+     -330,
+     -55
+    ],
+    [
+     60,
+     -55
+    ],
+    [
+     60,
+     -160
+    ],
+    [
+     330,
+     0
+    ],
+    [
+     60,
+     160
+    ],
+    [
+     60,
+     55
+    ],
+    [
+     -330,
+     55
+    ]
+   ],
+   "i": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "o": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "closed": true
+  }
+ ]
+}

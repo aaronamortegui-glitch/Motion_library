@@ -45,3 +45,21 @@ research/qa_ex/
 research/ui_rec/
 media/explainer/vo/raw_*.mp3
 media/explainer/ae_markers_full.png
+
+# face-swap refinement: real-person reference photos and work files stay local
+media/faceswap/refs/
+media/faceswap/work/
+media/faceswap/comfy.log
+media/faceswap/preswap/
+media/faceswap/out/
+media/faceswap/*.log
+research/aerender/
+research/promo_qa/
+media/promo/vo/chris_b*
+media/promo/vo/*_b*.wav
+research/ui_rec/
+research/vis_rec/
+research/_*
+media/promo/vo/*.wav
+media/promo/music_promo_cut.wav
+media/promo/vo/chris_a*
