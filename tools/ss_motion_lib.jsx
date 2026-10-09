@@ -54,6 +54,8 @@ var SSM = (function () {
         // Re-eases the segment between keys k and k+1 of prop with a token curve (keeps values and times)
         easeSegment: function (prop, k, easeName) {
             var e = find(T.easings, easeName);
+            // Pop / Recoil are 3-key moves, not 2-key curves: re-ease with their closest 2-key token
+            if (e && !e.ae.out) e = find(T.easings, easeName === "Recoil" ? "Launch" : "Land");
             if (!e || k < 1 || k >= prop.numKeys) return;
             if (e.ae.out === "linear") { prop.setInterpolationTypeAtKey(k, prop.keyInInterpolationType(k), KeyframeInterpolationType.LINEAR); prop.setInterpolationTypeAtKey(k + 1, KeyframeInterpolationType.LINEAR, prop.keyOutInterpolationType(k + 1)); return; }
             if (prop.keyOutInterpolationType(k) === KeyframeInterpolationType.HOLD) return;
@@ -128,7 +130,7 @@ var SSM = (function () {
         animateStops: function (prop, t0, v0, stops, fps) {
             var t = t0, v = v0, rate = fps || T.fps;
             for (var i = 0; i < stops.length; i++) {
-                var st = stops[i], t1 = t + st.frames / rate;
+                var st = stops[i], t1 = t + st.frames / rate * (this.speed || 1);   // Duration control scales every stop
                 this.animateRaw(prop, t, t1, v, st.v, find(T.easings, st.ease || "Cruise").ae);
                 t = t1; v = st.v;
             }

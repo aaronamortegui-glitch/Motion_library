@@ -639,7 +639,7 @@ var SSP = (function () {
         return e.property("ADBE Geometry2-0006");   // Skew
     }
     function playCss(L, def, t0, reverse) {
-        var dur = def.dur, R = L.sourceRectAtTime(REF(L), false), bw = R.width || 100, bh = R.height || 100;
+        var dur = def.dur * (SSM.speed || 1), R = L.sourceRectAtTime(REF(L), false), bw = R.width || 100, bh = R.height || 100;
         var stops = def.stops.slice(0);
         if (reverse) {   // mirror in time: p → 1 − p, each segment's bezier reversed
             var rv = [];
@@ -906,7 +906,7 @@ var SSP = (function () {
         remove: function (L) {
             var rest = L.inPoint + (L.outPoint - L.inPoint) / 2, M = L.property("ADBE Marker"), i;
             for (i = M.numKeys; i >= 1; i--) { var cm = M.keyValue(i).comment; if (cm === "SS in" || cm === "SS out") { if (cm === "SS in") rest = Math.max(rest, M.keyTime(i)); M.removeKey(i); } }
-            var ours = /SS (preset|FX|recipe)|Motion DNA/.test(L.comment || ""), n = 0;
+            var ours = /SS (preset|FX|recipe|text)|Motion DNA/.test(L.comment || ""), n = 0;
             (function walk(g) {
                 for (var j = g.numProperties; j >= 1; j--) {
                     var pr = g.property(j);
@@ -926,6 +926,7 @@ var SSP = (function () {
             if (an) for (i = an.numProperties; i >= 1; i--) if (/^SS /.test(an.property(i).name)) { an.property(i).remove(); n++; }
             var fx = L.property("ADBE Effect Parade");
             if (fx) for (i = fx.numProperties; i >= 1; i--) if (/^SS /.test(fx.property(i).name)) { fx.property(i).remove(); n++; }
+            if (ours && /Speed Ramp/.test(L.comment || "") && L.canSetTimeRemapEnabled && L.timeRemapEnabled) { L.timeRemapEnabled = false; n++; }   // our time remap
             if (ours) L.comment = "";
             return n;
         },

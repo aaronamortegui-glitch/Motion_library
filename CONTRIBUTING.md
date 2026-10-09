@@ -145,6 +145,7 @@ techniques they use. This is how the library learns new identities:
    learned to `docs/LEARNINGS.md`.
 
 ## Checklist before you push
+- [ ] `python tools/test_all.py` passes (AE open): engine, panel, MCP and the mosaics. A new preset must animate, respond to the controls and be removable.
 - [ ] Everything in English, no temporary jobs or candidates in the diff
 - [ ] New presets have metadata, a GIF, a poster and a panel thumb; `INDEX.txt`, visualizer and README catalog regenerated
 - [ ] Open-source data has source, version and license recorded

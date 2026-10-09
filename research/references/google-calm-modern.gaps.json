@@ -123,9 +123,7 @@
    "needs": []
   }
  ],
- "tones": [
-  "friendly"
- ],
+ "tones": [],
  "style": {
   "name": "Google",
   "slug": "google-calm-modern",

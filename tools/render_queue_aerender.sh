@@ -13,4 +13,4 @@ fi
 mkdir -p "$ROOT/research/aerender"
 "$AER" -project "$P" -mfr ON 100 -sound ON > "$ROOT/research/aerender/queue.log" 2>&1
 grep -c "Finished composition" "$ROOT/research/aerender/queue.log" | xargs echo "finished comps:"
-grep -i "error" "$ROOT/research/aerender/queue.log" | head -5
+grep -i "error" "$ROOT/research/aerender/queue.log" | head -5 || true   # no errors is success

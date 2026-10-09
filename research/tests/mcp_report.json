@@ -1,0 +1,163 @@
+[
+ {
+  "tool": "ae_status",
+  "ok": true,
+  "args": {},
+  "answer": "AE 26.5x89 · project: motion_lab_v01.aep · active: _MCP_TEST (1280x720, 4.00s, 2 layers, selected: 1) · panel: loaded"
+ },
+ {
+  "tool": "list_presets",
+  "ok": true,
+  "args": {
+   "kind": "motion",
+   "energy": "soft"
+  },
+  "answer": "motion|Fade|Fade|soft|Corporate, UI, supporting text\nmotion|Fade Up|Fade & Position|soft|Headlines, paragraphs, lists\nmotion|Blur In|Blur & Fade|soft|Photos, backgrounds, premium moments\nmotion|Zoom Out|Scale · Fade|soft|Quiet exits, scene changes (exit)"
+ },
+ {
+  "tool": "list_packs",
+  "ok": true,
+  "args": {},
+  "answer": "Dynamic (dynamic [4, 5], tones bold/playful/cinematic, curve per preset, transition Whip Pan, stagger 3f): Social, launches, hype: fast slams, whips and speed ramps. · title=Words Slam, subtitle=Scramble, body=Chars Pop, shape=Spin Pop, media=Whip Pan, logo=Ramp Zoom\nElegant (soft [1, 2], tones eleg"
+ },
+ {
+  "tool": "list_tags",
+  "ok": true,
+  "args": {
+   "role": "transition"
+  },
+  "answer": "motion|Squash Warp|roles enter/transition|targets shape/icon|channels scale/skew|dir in-place|energy 4-5|tones playful/bold\nmotion|Ramp Slide|roles enter/transition|targets media/ui/title|channels opacity/position|dir left|energy 3-4|tones cinematic/modern\nmotion|Whip Pan|roles transition/enter|targ"
+ },
+ {
+  "tool": "suggest_mix",
+  "ok": true,
+  "args": {
+   "role": "enter",
+   "target": "title",
+   "tones": [
+    "elegant"
+   ],
+   "energy": 2
+  },
+  "answer": "duration tokens for energy 2: Sweep, Arrive · curves for this feel: Settle, Cruise\nFade (motion, tones modern/corporate/elegant, energy 1-2) -> apply_preset(preset=\"Fade\", ease=\"Settle\")\nFade Up (motion, tones modern/corporate/elegant, energy 1-3) -> apply_preset(preset=\"Fade Up\", ease=\"Settle\")\nBlu"
+ },
+ {
+  "tool": "match_reference",
+  "ok": true,
+  "args": {
+   "profile_path": "library/references/google-calm-modern.json"
+  },
+  "answer": "# Reference match: Google — calm, modern product motion (example profile)\n\nEnergy 1–2 (calm to soft) · tones: modern, friendly, corporate · avoid: overshoot, anticipation, retro, Shake, Jitter\n\n## Presets that fit (15)\nChars Rise, Count Up, Fade, Fade Up, Flip In, Flip In X, Float, Line Draw, Pulse,"
+ },
+ {
+  "tool": "list_assets",
+  "ok": true,
+  "args": {
+   "type": "sfx",
+   "limit": 3
+  },
+  "answer": "sfx|cartoon|Balloon Blow 04|1.01|-26.0|-12.0|\nsfx|cartoon|Clean Decelerating Creak 01|0.91|-22.9|-3.4|\nsfx|cartoon|Creaking Rubber 05|0.79|-26.8|-0.4|\n… 154 more"
+ },
+ {
+  "tool": "run_jsx",
+  "ok": true,
+  "args": {
+   "code": "…"
+  },
+  "answer": "ok"
+ },
+ {
+  "tool": "list_layers",
+  "ok": true,
+  "args": {
+   "comp": "_MCP_TEST"
+  },
+  "answer": "_MCP_TEST\n1|Chip|shape|0.00-4.00|selected\n2|Title|text|0.00-4.00"
+ },
+ {
+  "tool": "apply_preset",
+  "ok": true,
+  "args": {
+   "preset": "Surge Rise",
+   "layers": [
+    "Chip"
+   ],
+   "comp": "_MCP_TEST",
+   "duration": 1.5,
+   "intensity": 0.7,
+   "direction": "mirror vertical",
+   "ease": "Settle"
+  },
+  "answer": "Surge Rise (motion, both) → Chip"
+ },
+ {
+  "tool": "apply_preset",
+  "ok": true,
+  "args": {
+   "preset": "Chars Ramp",
+   "layers": [
+    "Title"
+   ],
+   "comp": "_MCP_TEST"
+  },
+  "answer": "Chars Ramp (text, both) → Title"
+ },
+ {
+  "tool": "show_in_panel",
+  "ok": true,
+  "args": {
+   "kind": "motion",
+   "name": "Surge Rise"
+  },
+  "answer": "selected motion/Surge Rise"
+ },
+ {
+  "tool": "render_frame",
+  "ok": true,
+  "args": {
+   "comp": "_MCP_TEST",
+   "time_s": 0.5
+  },
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1791575179.png (open it to look at the frame)"
+ },
+ {
+  "tool": "remove_animation",
+  "ok": true,
+  "args": {
+   "layers": [
+    "Chip",
+    "Title"
+   ],
+   "comp": "_MCP_TEST"
+  },
+  "answer": "cleared 11 properties on Chip, Title"
+ },
+ {
+  "tool": "apply_pack",
+  "ok": true,
+  "args": {
+   "pack": "Calm Modern",
+   "comp": "_MCP_TEST"
+  },
+  "answer": "Chip → shape: Fade Up\nTitle → title: Chars Rise"
+ },
+ {
+  "tool": "add_asset",
+  "ok": true,
+  "args": {
+   "name": "Swoosh Transition 28",
+   "type": "sfx",
+   "comp": "_MCP_TEST",
+   "time_s": 0.2
+  },
+  "answer": "added SFX · Swoosh Transition 28 at 0.2"
+ },
+ {
+  "tool": "run_jsx",
+  "ok": true,
+  "args": {
+   "code": "…"
+  },
+  "answer": "removed"
+ }
+]

@@ -122,6 +122,18 @@ missing gets created, tagged and rendered, and the reference becomes a new style
 [`library/references/google-calm-modern.json`](library/references/google-calm-modern.json) → the *Calm Modern* style.
 Claude can also ask `suggest_mix` for a role, a target and a feel.
 
+## Tested, and what it looks like
+
+`python tools/test_all.py` (AE open) checks the whole system and renders the mosaics below: every preset animates and its
+controls change it (duration, intensity, mirror, easing) and **Remove** cleans it; every panel category, filter and hook
+works; every MCP tool answers as Claude calls it. Results in `research/tests/`.
+
+![Every preset with its energy range and tones](docs/examples/library-mosaic.gif)
+
+| The 6 styles on one layout | Mix by tags (calm·elegant / explosive·bold / playful) | One move, the panel's controls |
+|---|---|---|
+| ![Styles](docs/examples/test-styles.gif) | ![Mix](docs/examples/test-mix.gif) | ![Controls](docs/examples/test-controls.gif) |
+
 ## How it works
 
 ![How it works](docs/screens/how-it-works.png)
@@ -137,7 +149,7 @@ All timing comes from our motion tokens: **6 durations** and **10 easing curves*
 <img src="docs/screens/ae-panel.gif" width="320" align="right" alt="Motion DNA panel in After Effects: gallery, live previews, In/Out/Both">
 
 1. Install the fonts from `assets/fonts/` (right-click › Install).
-2. **Install everything once:** double-click `INSTALL-Windows.cmd` (Windows) or `INSTALL-macOS.command` (macOS), or run `python tools/setup.py` (Claude does the same when you ask it to install Motion DNA). It installs the panel, the fonts and the local asset previews and checks the library. It adds *Window › Motion DNA.jsx* (dockable) to every AE version on the machine; restart AE and dock it. It reads the library straight from this repo clone, so a `git pull` brings the new presets. Enable *Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
+2. **Install everything once:** double-click `INSTALL-Windows.cmd` (Windows) or `INSTALL-macOS.command` (macOS), or run `python tools/setup.py` (Claude does the same when you ask it to install Motion DNA). It installs the panel, the fonts and the local asset previews and checks the library. It adds *Window › Motion DNA.jsx* (dockable) to every AE version on the machine; restart AE and dock it. It reads the library straight from this repo clone. **To update**, run `python tools/setup.py --update` (or ask Claude to update Motion DNA): it pulls the new version, removes old or duplicate panel loaders and the old MCP name, and reinstalls; it never pulls over your local changes. `--uninstall` removes it. Enable *Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
 3. **Browse by category:** Moves, Classics, Text, Loops, Transitions, Recipes, Styles, Mix, Techniques, Assets and ★ Favorites, with search, an energy filter (1 calm → 5 explosive) and a tone filter (modern, elegant, playful…); the grid adapts to the panel width. Clicking a thumbnail plays a **live preview** of the preset's real curve on the neutral Spark arrow (sampled into `library/preview_curves.json`; ScriptUI cannot play GIFs, so the panel redraws the motion as vectors). ☆ adds it to your favorites.
 4. **Tune before applying (Controls):** *Duration* (0.5–2×), *Intensity* (how far it travels, 25–200 %), *Direction* (as designed or mirrored), *Easing* (keep the preset's curve or use any token curve), *Stagger* for several layers.
 5. **Select layers → In, Out or Both.** **Remove** takes Motion DNA's keyframes, expressions and markers off the selected layers; each property keeps its resting value.
@@ -199,7 +211,8 @@ Bigger pieces are data, not code: scenes (`tools/build_scene.jsx`) and edits (`t
 | `tools/build_app_screen.jsx` | Browser-window recording of the visualizer, rebuilt from screenshots |
 | `tools/render_comps.jsx` | Renders comps through the open AE's render queue |
 | `tools/build_promo_all.jsx` + `media/promo/make_promo.py` | Promotional cut: full-screen footage, oversized type, shape wipes, scenes cut on the VO word times |
-| `tools/setup.py` (+ `INSTALL-*.cmd/.command`) | One-step install: panel in every AE version, fonts, local asset previews, checks; `--mcp-user` registers the MCP server everywhere |
+| `tools/setup.py` (+ `INSTALL-*.cmd/.command`) | One-step install: cleans old versions, panel in every AE version, fonts, local asset previews, checks; `--update` pulls and reinstalls, `--uninstall` removes it, `--mcp-user` registers the MCP server everywhere |
+| `tools/test_all.py` (`test_library.jsx`, `test_panel.jsx`, `test_mcp.py`, `test_mosaics.jsx`, `make_library_mosaic.py`) | End-to-end tests and the sample mosaics: presets, controls, Remove, panel, MCP, styles, mix |
 | `tools/tag_library.py` → `library/tags.json` | Tags for every preset, curve and technique: roles, targets, channels, direction, energy range (1–5), tones |
 | `tools/match_reference.py` | Compares a reference profile (`library/references/<slug>.json`) with the library: what fits, how to build each move, the gaps to create, a proposed style |
 | `tools/vo_words.py` | Word timestamps of a voiceover (openai-whisper) to cut scenes on the spoken word |

@@ -2,14 +2,21 @@
 
 You are working in **Motion DNA**, a motion library for After Effects (moves, techniques, scripts and styles that give AI-made motion its own identity), built to be driven by an LLM. Never put a brand logo in the library or its demos; colours and fonts come from the tokens. Several people (and their Claude sessions) contribute to it, so follow the conventions below exactly; they exist so nothing we learned gets lost.
 
-## When someone asks you to install Motion DNA
+## When someone asks you to install or update Motion DNA
 Install everything, library included — the panel reads the library from the repo clone, so never copy it elsewhere:
-1. Clone the repo if it is not on the machine yet (`git clone https://github.com/aaronamortegui-glitch/Motion_library`), or `git pull` an existing clone.
-2. Run `python tools/setup.py` from the repo (add `--mcp-user` if they want Claude to drive AE from any folder). It installs the
-   panel in every AE version, the fonts, the local asset-pack index and previews, and checks the library and the tools.
+1. **New machine:** clone the repo (`git clone https://github.com/aaronamortegui-glitch/Motion_library`) and run
+   `python tools/setup.py`. **Existing clone ("update it"):** run `python tools/setup.py --update`; it pulls only if no
+   tracked file has local changes (otherwise it stops and lists them: ask the user, never discard them).
+   Add `--mcp-user` if they want Claude to drive AE from any folder.
+2. Both paths first remove what an older version left (the pre-rename "SS Motion.jsx" loader, loaders pointing to other
+   clones or paths, the old MCP name `ss-motion`, stale bridge jobs when AE is closed, previews of assets that are gone),
+   then install the panel in every AE version, the fonts, the local asset-pack index and previews, and check that every
+   loader points to this clone. If it warns that a loader in Program Files / Applications needs admin, tell the user to
+   delete that file (AE could load an old panel).
 3. Tell them the two steps only they can do: restart After Effects and open *Window › Motion DNA.jsx*, and tick
    *Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
 4. With AE open and the panel docked, confirm the connection with the MCP tool `ae_status` (the panel header shows "Claude connected").
+5. To remove it: `python tools/setup.py --uninstall` (loaders, MCP registration, fonts; the clone stays).
 
 ## Before you start
 1. Read `CONTRIBUTING.md` (how to add presets, open-source effects, packs, case studies and learnings).

@@ -34,7 +34,7 @@ Default curve for this feel: **Land**.
   - emphasized accelerate [0.3, 0, 0.8, 0.15]
 - techniques: 1
   - shape morph: a shape (button, chip) grows and changes radius into the next layout
-- new tones: friendly
+- new tones: —
 
 ## Proposed style
 ```json
