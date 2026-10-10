@@ -29,6 +29,10 @@ All repo content is English: write code, comments, messages, metadata and commit
   `library/references/<slug>.json` and through `match_reference`. Build what fits; **create what is missing** (presets,
   token curves, transitions, techniques), tag it in `tools/tag_library.py`, render the samples
   (`bash tools/rebuild_previews.sh`) and add a style. CONTRIBUTING §8 has the steps.
+- **Brand profiles** (`library/brands/<slug>/brand.json`): a custom style per brand that learns. Before animating for a
+  brand, read it (`get_brand` / `python tools/brand.py show <slug>`) and follow its rules; save every review note as a
+  rule (`add_brand_note` / `python tools/brand.py note <slug> "…" --cat … --why …`). Apply its style with `apply_brand`
+  or the panel's *Brands* category. CONTRIBUTING §10.
 
 ## Picking a preset
 Read ONLY `library/INDEX.txt` (one line per preset: `kind|name|channels|energy s/m/d|use`, tokens in the header).
@@ -81,7 +85,8 @@ Animation Composer's asset packs (≈300 SFX, light leaks, grain, film burns, VH
 - Roto/depth: add `"matte": "<people matte .mov>"` to a scene to get `behind` text between background and people; `contour` items read `tools/matte_contours.py` JSON (use `--split-x` when people touch); `faceScan` needs the plate layer named "Plate". Breakdown: `tools/build_breakdown.jsx` (scenes.json → `breakdown`). Full worked example: `docs/case-studies/the-1974-boardroom.md`.
 - Edits: shots may carry `"freeze": {"at", "dur", "title", "sub", "titleAt", "x", "y", "lineW"}`; place `vo` and `sfx` with `{"shot": i, "local": s}` so freezes shift them; music auto-ducks under VO (`duckDb`). VO: one ElevenLabs v3 file per line, trimmed + loudnorm; size freezes from measured line lengths.
 - Organic lines: use `Organic Draw` (draw and stay) or `Organic Stroke` (traveling) instead of `Line Draw`; for any property use `SSM.animateStops(prop, t0, v0, SSM.organicStops(v0, v1, frames, seed))`.
-- Layout rule: keep kickers/meters in empty corners and check a contact sheet at several frames; a push-in moves faces toward the top labels.
+- Layout rules (CONTRIBUTING §9, checked by `tools/check_layout.jsx`): no text on text, 40 px safe area, labels that do not fit sideways stack into up to 3 lines (`wrap`, `label` arrays, `labelSide`), ≥ 32 px, contrast or a `"card": true`, nothing on faces (anchor callouts on the torso; `tools/face_boxes.py` → `"faces"`), no cut inside a word, audio tails past cuts, key moments on the beat.
+- Techniques by script: people mattes `tools/video_matte.py` (InSPyReNet, local GPU), head/body tracks from a matte `tools/matte_points.py`, planar (2.5D) tracks `tools/planar_track.py` → `planar` items, HUD `rays` (halo) and `burst` (action lines), freeze `mono` + `split` (person in colour, name on both sides), `screen` (corner-pin a comp or clip onto a screen) and `pixels` (pixel art) in `build_explainer.jsx`.
 
 ## Typography
 Use `SSM.font("display" | "ui" | "ui_regular")`: returns Instrument Serif / Inter Tight when installed (files in `assets/fonts/`, OFL), otherwise Georgia / Arial. Never hard-code font names.

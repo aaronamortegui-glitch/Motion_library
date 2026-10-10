@@ -29,7 +29,10 @@ Install everything, library included — the panel reads the library from the re
    write it as `library/references/<slug>.json`, run `match_reference`, build what fits from existing presets, and
    **create everything that does not exist yet** — moves, curves, transitions, techniques — tag it, render its
    samples and add a style for it. The full procedure is CONTRIBUTING §8. The library grows with every reference.
-6. **Prefer the MCP server** (`motion-dna`, registered in `.mcp.json`): `list_presets`, `apply_preset`, `apply_pack`, `add_asset`, `render_frame`, `run_jsx`… It drives the open After Effects through the file bridge (started by the Motion DNA panel). Check your work with `render_frame` and look at the PNG.
+6. **Working for a brand or a project?** Read its profile first (`get_brand` / `python tools/brand.py show <slug>`),
+   follow its rules, and save **every review note** the user gives as a rule in it (`add_brand_note` /
+   `python tools/brand.py note`). Each brand learns on its own (CONTRIBUTING §10).
+7. **Prefer the MCP server** (`motion-dna`, registered in `.mcp.json`): `list_presets`, `apply_preset`, `apply_pack`, `add_asset`, `render_frame`, `run_jsx`… It drives the open After Effects through the file bridge (started by the Motion DNA panel). Check your work with `render_frame` and look at the PNG.
 
 ## Non-negotiable rules
 - **Everything in the repo is English**: code, comments, metadata, docs, commit messages. Chat with the user can be in their language.
@@ -52,6 +55,7 @@ Install everything, library included — the panel reads the library from the re
 | A new curve or duration | `tokens/superside_motion_tokens.json` (bezier + AE influence/speed) |
 | A test video / case study | `media/<case>/` (specs + final assets), `docs/case-studies/<case>.md` (from `_TEMPLATE.md`), GIFs in `docs/examples/`, a section at the end of `README.md` |
 | A reference analysis | `library/references/<slug>.json`, then CONTRIBUTING §8 (match, create the gaps, add a style) |
+| A review note while working for a brand | `library/brands/<slug>/brand.json` via `tools/brand.py note` or MCP `add_brand_note` (CONTRIBUTING §10) |
 | Tags for a new preset, curve or technique | `tools/tag_library.py` → `python tools/tag_library.py` (writes `library/tags.json`) |
 | Something you learned | `docs/LEARNINGS.md`, in the matching section, as *symptom → cause → fix* |
 | A reusable script | `tools/` with a header comment (what, usage) and an entry in the README tools table |

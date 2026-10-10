@@ -13,7 +13,7 @@ var SSHUD = (function () {
     var PAL = SSM.readJSON(SS_ROOT + "/assets/figma_essentials/palette.json").colors;
     var C = null;
     function hex(h) { h = h.replace("#", ""); return [parseInt(h.substr(0, 2), 16) / 255, parseInt(h.substr(2, 2), 16) / 255, parseInt(h.substr(4, 2), 16) / 255]; }
-    function col(name) { return hex(PAL[name] || name); }
+    function col(name) { return name instanceof Array ? name : hex(PAL[name] || name); }   // palette name, hex or [r, g, b]
     function tr(L, p) { return L.property("ADBE Transform Group").property(p); }
     // comp-space position of a tracked layer's anchor, as an expression
     function anchorExpr(anchor) { return 'var a = thisComp.layer("' + anchor + '"); a.toComp(a.transform.anchorPoint)'; }
@@ -48,10 +48,47 @@ var SSHUD = (function () {
         st.property("ADBE Vector Stroke Line Cap").setValue(2);
         return g;
     }
+    // Layout rule: a label never runs wider than `max` characters a line; it wraps into at most 3 stacked lines
+    // (3 short lines read better than one line that leaves the frame or crosses a face).
+    function wrap(lines, max) {
+        if (!max) return lines;
+        var out = [];
+        for (var i = 0; i < lines.length; i++) {
+            var ws = String(lines[i]).split(" "), cur = "";
+            for (var j = 0; j < ws.length; j++) {
+                if (cur && (cur + " " + ws[j]).length > max) { out.push(cur); cur = ws[j]; } else cur = cur ? cur + " " + ws[j] : ws[j];
+            }
+            if (cur) out.push(cur);
+        }
+        return out.slice(0, 3);
+    }
+    // Legibility rule: text over a bright or busy plate sits on a card (translucent pine + thin cloud border) that
+    // follows the text layers' live bounds, so it fits whatever the text animators do.
+    function card(name, layers, pad, t0, opacity) {
+        var K = C.layers.addShape(); K.name = name;
+        tr(K, "ADBE Position").setValue([0, 0]);
+        var g = K.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
+        var r = g.addProperty("ADBE Vector Shape - Rect");
+        var names = []; for (var i = 0; i < layers.length; i++) names.push('"' + layers[i].name + '"');
+        var bounds = "var n = [" + names.join(",") + "], x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;" +
+            " for (var i = 0; i < n.length; i++) { var L = thisComp.layer(n[i]), b = L.sourceRectAtTime(time, false);" +
+            " var a = L.toComp([b.left, b.top]), c = L.toComp([b.left + b.width, b.top + b.height]);" +
+            " x0 = Math.min(x0, a[0], c[0]); y0 = Math.min(y0, a[1], c[1]); x1 = Math.max(x1, a[0], c[0]); y1 = Math.max(y1, a[1], c[1]); }";
+        r.property("ADBE Vector Rect Size").expression = bounds + " [x1 - x0 + " + 2 * pad + ", y1 - y0 + " + 2 * pad + "];";
+        r.property("ADBE Vector Rect Position").expression = bounds + " [(x0 + x1) / 2, (y0 + y1) / 2];";
+        r.property("ADBE Vector Rect Roundness").setValue(10);
+        var f = g.addProperty("ADBE Vector Graphic - Fill"); f.property("ADBE Vector Fill Color").setValue(col("pine"));
+        f.property("ADBE Vector Fill Opacity").setValue(opacity || 78);
+        var st = g.addProperty("ADBE Vector Graphic - Stroke"); st.property("ADBE Vector Stroke Color").setValue(col("cloud"));
+        st.property("ADBE Vector Stroke Width").setValue(2);
+        for (var k = 0; k < layers.length; k++) if (layers[k].index > K.index) K.moveAfter(layers[k]);
+        SSP.apply(K, "Fade", "in", t0);
+        return K;
+    }
     function text(name, str, role, size, color, tracking, just) {
         var L = C.layers.addText(str); L.name = name;
         var tp = L.property("ADBE Text Properties").property("ADBE Text Document"), td = tp.value;
-        td.resetCharStyle(); td.font = SSM.font(role); td.fontSize = size; td.fillColor = col(color); td.applyFill = true;
+        td.resetCharStyle(); td.font = role.indexOf("-") > 0 ? role : SSM.font(role); td.fontSize = size; td.fillColor = col(color); td.applyFill = true;
         td.justification = just || ParagraphJustification.LEFT_JUSTIFY;
         if (tracking) td.tracking = tracking;
         tp.setValue(td);
@@ -74,25 +111,28 @@ var SSHUD = (function () {
             dg.addProperty("ADBE Vector Shape - Ellipse").property("ADBE Vector Ellipse Size").setValue([6, 6]);
             dg.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").setValue(col(color));
             tr(dot, "ADBE Position").expression = anchorExpr(o.anchor);
-            SSP.apply(dot, "Scale Pop", "in", t0);
+            SSP.apply(dot, o.instant ? "Fade" : "Scale Pop", "in", t0);
 
             var line = shape("HUD line · " + id);
             pathGroup(line, 'var a = thisComp.layer("' + o.anchor + '"); var p = a.toComp(a.transform.anchorPoint);' +
                 " var e = [" + dx * 0.55 + "," + dy + "], f = [" + dx + "," + dy + "];" +
                 " createPath([p, p + e, p + f], [], [], false);", color, 2.5);
-            SSP.apply(line, "Organic Draw", "in", t0 + SSM.seconds("Tick"));
+            SSP.apply(line, o.instant ? "Fade" : "Organic Draw", "in", o.instant ? t0 : t0 + SSM.seconds("Tick"));
 
             // text block anchored at the end of the line
             var tx = right ? 14 : -14, just = right ? ParagraphJustification.LEFT_JUSTIFY : ParagraphJustification.RIGHT_JUSTIFY;
             var title = text("HUD title · " + id, o.title, "ui", o.titleSize || 26, color, 160, just);
             tr(title, "ADBE Position").expression = anchorExpr(o.anchor) + " + [" + (dx + tx) + "," + (dy - 12) + "];";
-            var tIn = t0 + SSM.seconds("Glide");
-            SSP.applyText(title, "Tracking Settle", "in", tIn);
-            var body = text("HUD body · " + id, o.lines.join("\r"), "ui_regular", o.bodySize || 24, o.bodyColor || "cloud", 20, just);
-            tr(body, "ADBE Position").expression = anchorExpr(o.anchor) + " + [" + (dx + tx) + "," + (dy + 26) + "];";
-            SSP.applyText(body, "Words Fade Up", "in", tIn + SSM.seconds("Tick"));
+            // instant: everything readable from the first frame (short shots, labels that must be read at once)
+            var tIn = o.instant ? t0 : t0 + SSM.seconds("Glide");
+            if (o.instant) SSP.apply(title, "Fade", "in", t0); else SSP.applyText(title, "Tracking Settle", "in", tIn);
+            var ts = o.titleSize || 26, bs = o.bodySize || 24;
+            var body = text("HUD body · " + id, wrap(o.lines, o.wrap || 22).join("\r"), o.bodyFont || "ui_regular", bs, o.bodyColor || "cloud", 20, just);
+            tr(body, "ADBE Position").expression = anchorExpr(o.anchor) + " + [" + (dx + tx) + "," + Math.round(dy - 12 + ts * 0.45 + bs * 1.15) + "];";
+            if (o.instant) SSP.apply(body, "Fade", "in", t0); else SSP.applyText(body, "Words Fade Up", "in", tIn + SSM.seconds("Tick"));
             var layers = [dot, line, title, body];
             for (var i = 0; i < layers.length; i++) holo(layers[i], 0.8);
+            if (o.card) layers.push(card("HUD card · " + id, [title, body], 18, tIn - 0.05));
             return layers;
         },
 
@@ -115,13 +155,20 @@ var SSHUD = (function () {
             tr(S, "ADBE Opacity").setValue(60);
             S.inPoint = t0 + SSM.seconds("Arrive");
             var layers = [B, S];
+            var KL = null;
             if (o.label) {
-                var L = text("HUD bracket label · " + id, o.label, "ui", 18, color, 220);
-                tr(L, "ADBE Position").expression = anchorExpr(o.anchor) + " + [" + -w + "," + (-h - 16) + "]*thisComp.layer(\"" + o.anchor + "\").transform.scale[0]/100;";
+                // label lines (an array, or a string wrapped at o.wrap chars); side "top" (default), "bottom", "left" or "right"
+                var ls = o.labelSize || 18, lines = o.label instanceof Array ? o.label : wrap([o.label], o.wrap || 0);
+                var side = o.labelSide || "top", lj = (side === "left" || o.labelAlign === "right") ? ParagraphJustification.RIGHT_JUSTIFY : ParagraphJustification.LEFT_JUSTIFY;
+                var L = text("HUD bracket label · " + id, lines.join("\r"), o.labelFont || "ui", ls, color, o.labelTracking === undefined ? 220 : o.labelTracking, lj);
+                var off = side === "left" ? [-w - 24, -h + ls] : side === "right" ? [w + 24, -h + ls] : side === "bottom" ? [o.labelAlign === "right" ? w : -w, h + ls + 14] : [-w, -h - 16 - (lines.length - 1) * ls * 1.2];
+                tr(L, "ADBE Position").expression = anchorExpr(o.anchor) + " + [" + off[0] + "," + off[1] + "]*thisComp.layer(\"" + o.anchor + "\").transform.scale[0]/100 - [0, " + (o.labelLift || 0) + "];";   // labelLift: clear the object the bracket frames
                 SSP.applyText(L, "Tracking Settle", "in", t0 + SSM.seconds("Glide"));
                 layers.push(L);
+                if (o.card) KL = card("HUD card · " + id, [L], 16, t0 + SSM.seconds("Glide") - 0.05);
             }
             for (var j = 0; j < layers.length; j++) holo(layers[j], 1);
+            if (KL) layers.push(KL);
             return layers;
         },
 
@@ -156,14 +203,14 @@ var SSHUD = (function () {
 
         // Figma-style pill chip (Cloud/Coral/Spark) that sticks to a tracked point.
         chip: function (o) {
-            var fillName = o.color || "cloud", t0 = o.t0 || 0, h = 46, w = o.width || (o.text.length * 13 + 44);
+            var fillName = o.color || "cloud", t0 = o.t0 || 0, ts = o.textSize || 20, h = Math.round(ts * 2.3), w = o.width || (o.text.length * ts * 0.65 + ts * 2.2);
             var P = C.layers.addShape(); P.name = "HUD chip · " + o.text;
             var g = P.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
             var r = g.addProperty("ADBE Vector Shape - Rect"); r.property("ADBE Vector Rect Size").setValue([w, h]); r.property("ADBE Vector Rect Roundness").setValue(h / 2);
             g.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").setValue(col(fillName));
             tr(P, "ADBE Position").expression = o.anchor ? anchorExpr(o.anchor) + " + [" + o.offset[0] + "," + o.offset[1] + "];" : "[" + o.at[0] + "," + o.at[1] + "]";
-            var T = text("HUD chip text · " + o.text, o.text, "ui", 20, "pine", 80, ParagraphJustification.CENTER_JUSTIFY);
-            T.parent = P; tr(T, "ADBE Position").setValue([0, 7]);
+            var T = text("HUD chip text · " + o.text, o.text, "ui", ts, "pine", 80, ParagraphJustification.CENTER_JUSTIFY);
+            T.parent = P; tr(T, "ADBE Position").setValue([0, ts * 0.35]);
             SSP.apply(P, "Scale Pop", "in", t0);
             return [P, T];
         },
@@ -211,7 +258,85 @@ var SSHUD = (function () {
                 layers.push(L2);
             }
             for (var i = 0; i < layers.length; i++) holo(layers[i], 0.7);
+            if (o.glow) for (var gi = 0; gi < layers.length; gi++) {   // "lit" outline: a strong halo of light around the subject
+                var gg = layers[gi].property("ADBE Effect Parade").addProperty("ADBE Glo2"); gg.name = "SS Halo";
+                gg.property("ADBE Glo2-0002").setValue(10); gg.property("ADBE Glo2-0003").setValue(o.glow); gg.property("ADBE Glo2-0004").setValue(2.2);
+            }
+            if (o.t1) for (var oi = 0; oi < layers.length; oi++) layers[oi].outPoint = o.t1;
             return layers;
+        },
+
+        // God rays: thin beams of light fanning out from behind a tracked point (a holy, "the answer has arrived" moment).
+        // Put it between the plate and the people matte so the beams come from behind the person.
+        // o = { anchor, t0, t1, count, length, width, color, opacity, spin }
+        rays: function (o) {
+            var n = o.count || 22, len = o.length || 1500, wid = o.width || 7, t0 = o.t0 || 0;
+            var L = C.layers.addShape(); L.name = "HUD rays · " + (o.id || o.anchor);
+            var root = L.property("ADBE Root Vectors Group");
+            for (var i = 0; i < n; i++) {
+                var a = i * 2 * Math.PI / n, a2 = a + (wid + (i % 3) * 3) * Math.PI / 180, l = len * (0.7 + 0.3 * ((i * 7) % 5) / 4);
+                var g = root.addProperty("ADBE Vector Group").property("ADBE Vectors Group"), sh = new Shape();
+                sh.vertices = [[0, 0], [Math.cos(a) * l, Math.sin(a) * l], [Math.cos(a2) * l, Math.sin(a2) * l]]; sh.closed = true;
+                g.addProperty("ADBE Vector Shape - Group").property("ADBE Vector Shape").setValue(sh);
+            }
+            root.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").setValue(col(o.color || "cloud"));   // gradients are not scriptable: blur does the falloff
+            tr(L, "ADBE Position").expression = anchorExpr(o.anchor);
+            tr(L, "ADBE Rotate Z").expression = "time * " + (o.spin || 8) + ";";
+            L.blendingMode = BlendingMode.ADD;
+            var fx = L.property("ADBE Effect Parade"), b = fx.addProperty("ADBE Gaussian Blur 2"); b.property(1).setValue(o.blur || 18);
+            var gl = fx.addProperty("ADBE Glo2"); gl.property("ADBE Glo2-0003").setValue(40); gl.property("ADBE Glo2-0004").setValue(0.7);
+            var op = tr(L, "ADBE Opacity"), peak = o.opacity || 75;
+            SSM.animateRaw(op, t0, t0 + 0.5, 0, peak, SSM.ease("Land"));
+            SSM.animateRaw(tr(L, "ADBE Scale"), t0, t0 + 0.9, [20, 20, 100], [100, 100, 100], SSM.ease("Settle"));
+            L.inPoint = t0; if (o.t1) L.outPoint = o.t1;
+            return [L];
+        },
+
+        // Glow: a soft pool of light behind a tracked person (backlight, "the answer has arrived"), between plate and matte.
+        // o = { anchor, t0, t1, size: [w, h], color, opacity, pulse }
+        glow: function (o) {
+            // a radial Gradient Ramp on an oversized solid, added on top: soft to the edge (a blurred shape layer gets
+            // clipped to its bounds and shows a hard rectangle)
+            var t0 = o.t0 || 0, sz = o.size || [700, 900], D = Math.round(Math.max(sz[0], sz[1]) * 2.4);
+            var L = C.layers.addSolid([0, 0, 0], "HUD glow · " + (o.id || o.anchor), D, D, 1);
+            var rp = L.property("ADBE Effect Parade").addProperty("ADBE Ramp");
+            rp.property("ADBE Ramp-0001").setValue([D / 2, D / 2]); rp.property("ADBE Ramp-0002").setValue(col(o.color || "cloud"));
+            rp.property("ADBE Ramp-0003").setValue([D / 2 + D * 0.42, D / 2]); rp.property("ADBE Ramp-0004").setValue([0, 0, 0]);
+            rp.property("ADBE Ramp-0005").setValue(2);   // radial
+            tr(L, "ADBE Position").expression = anchorExpr(o.anchor) + (o.offset ? " + [" + o.offset[0] + "," + o.offset[1] + "]" : "");
+            L.blendingMode = BlendingMode.ADD;
+            var k = Math.min(sz[0], sz[1]) / Math.max(sz[0], sz[1]) * 100, sx = sz[0] < sz[1] ? k : 100, sy = sz[0] < sz[1] ? 100 : k;
+            SSM.animateRaw(tr(L, "ADBE Opacity"), t0, t0 + 0.7, 0, o.opacity || 70, SSM.ease("Land"));
+            SSM.animateRaw(tr(L, "ADBE Scale"), t0, t0 + 1.0, [sx * 0.6, sy * 0.6, 100], [sx, sy, 100], SSM.ease("Settle"));
+            if (o.pulse !== false) tr(L, "ADBE Scale").expression = "value * (1 + 0.03 * Math.sin(time * 2.2));";
+            L.inPoint = t0; if (o.t1) L.outPoint = o.t1;
+            return [L];
+        },
+
+        // Burst: radial action lines that shoot out from a tracked point when something great happens (manga emphasis).
+        // o = { anchor, t0, count, r0, r1, width, color, repeat, every }
+        burst: function (o) {
+            var n = o.count || 14, r0 = o.r0 || 110, r1 = o.r1 || 380, made = [];
+            for (var k = 0; k < (o.repeat || 1); k++) {
+                var t0 = (o.t0 || 0) + k * (o.every || 0.45), L = C.layers.addShape(); L.name = "HUD burst · " + (o.id || o.anchor) + " " + (k + 1);
+                var root = L.property("ADBE Root Vectors Group");
+                for (var i = 0; i < n; i++) {
+                    var a = (i + 0.5 * k) * 2 * Math.PI / n, rr = r1 * (0.8 + 0.2 * ((i * 5) % 3) / 2);
+                    var g = root.addProperty("ADBE Vector Group").property("ADBE Vectors Group"), sh = new Shape();
+                    sh.vertices = [[Math.cos(a) * r0, Math.sin(a) * r0], [Math.cos(a) * rr, Math.sin(a) * rr]]; sh.closed = false;
+                    g.addProperty("ADBE Vector Shape - Group").property("ADBE Vector Shape").setValue(sh);
+                }
+                var st = root.addProperty("ADBE Vector Graphic - Stroke");
+                st.property("ADBE Vector Stroke Color").setValue(col(o.color || "spark")); st.property("ADBE Vector Stroke Width").setValue(o.width || 7);
+                st.property("ADBE Vector Stroke Line Cap").setValue(2);
+                var tp = root.addProperty("ADBE Vector Filter - Trim");
+                SSM.animateRaw(tp.property("ADBE Vector Trim End"), t0, t0 + 0.22, 0, 100, SSM.ease("Launch"));
+                SSM.animateRaw(tp.property("ADBE Vector Trim Start"), t0 + 0.12, t0 + 0.42, 0, 100, SSM.ease("Land"));
+                tr(L, "ADBE Position").expression = anchorExpr(o.anchor) + (o.offset ? " + [" + o.offset[0] + "," + o.offset[1] + "]" : "");
+                L.inPoint = t0; L.outPoint = t0 + 0.5;
+                made.push(L);
+            }
+            return made;   // solid colour, no holo: action lines must read at a glance
         },
 
         // Face scan "slice": a band sweeps the face; inside it the plate is shifted sideways (a cut) and an

@@ -1,379 +1,209 @@
 # Motion DNA
 
-Motion made with AI all looks the same: same curves, same moves, same templates. **Motion DNA** is a library of moves, techniques, scripts and styles for After Effects that gives your motion its own identity. Apply it by hand from the panel, or let **Claude drive it directly inside After Effects** (MCP): pick presets, apply styles, check frames and grow the catalog. Everything it creates is native keyframes and expressions, with no plugins required to render.
+Motion made with AI all looks the same: same curves, same moves, same templates. **Motion DNA** gives it an identity.
+It is a library of moves, curves, techniques and styles for After Effects, built on measured references, that a
+designer applies from a panel or **Claude drives directly inside After Effects** (MCP). Every brand you animate keeps
+its own profile that learns from each review. Everything it makes is native keyframes and expressions: nothing extra to render.
 
-![Motion DNA visualizer: filters by category and energy](docs/screens/visualizer.gif)
+![Motion DNA promo: a 1985 infomercial parody made with the library](docs/examples/dna-promo.gif)
 
-*`library/index.html`: every preset with a live thumbnail, its energy level and the one-line call to apply it.*
-
-## What's inside
-
-> **Latest additions:** a gallery plugin with live previews and **marker-driven timing** (drag *SS in* / *SS out* to retime any preset), **styles** (Dynamic, Elegant, Modern, Playful, Tech) that animate a whole comp in one click, 17 **Classics** adapted from animate.css 4.1.1 (MIT), speed-ramp curves (`Ramp`, `Surge`, `Whip`), and an **MCP server** so Claude can drive After Effects and the library directly. New from the **Motion Style Map** (20 analysed reference films): curves `Coast`, `Nudge`, `Wind-up` and `Snap`, 11 presets measured on real work (Coast Rise, Wind-up Slide, Nudge Grow, Snap Scale, Iris Reveal, Wordmark Reveal, Push Through, Color Wipe, Chars Blur, Boil, On Twos) and the *Editorial*, *Storybook* and *Collage* styles. Every piece we make should leave something new in the library.
-
-<!-- catalog:start -->
-**79 presets** in 5 categories, plus style packs. Every one is also listed in `library/INDEX.txt` (for LLMs) and `library/index.html` (for people).
-
-### Motion (31)
-
-Entrances and exits for any layer. `SSP.apply(layer, name, "in" | "out" | "both")`
-
-|   |   |   |   |
-|---|---|---|---|
-| <img src="library/gifs/motion/fade.gif" width="200"><br>**Fade** · `soft`<br><sub>Corporate, UI, supporting text</sub> | <img src="library/gifs/motion/fade-up.gif" width="200"><br>**Fade Up** · `soft`<br><sub>Headlines, paragraphs, lists</sub> | <img src="library/gifs/motion/scale-pop.gif" width="200"><br>**Scale Pop** · `dynamic`<br><sub>Icons, chips, stickers, social</sub> | <img src="library/gifs/motion/blur-in.gif" width="200"><br>**Blur In** · `soft`<br><sub>Photos, backgrounds, premium moments</sub> |
-| <img src="library/gifs/motion/slide-land.gif" width="200"><br>**Slide Land** · `medium`<br><sub>Images and cards entering from off-screen</sub> | <img src="library/gifs/motion/rotate-settle.gif" width="200"><br>**Rotate Settle** · `medium`<br><sub>Logos, badges, pieces with personality</sub> | <img src="library/gifs/motion/squash-warp.gif" width="200"><br>**Squash Warp** · `dynamic`<br><sub>Social, hype, rhythmic transitions</sub> | <img src="library/gifs/motion/wipe-reveal.gif" width="200"><br>**Wipe Reveal** · `medium`<br><sub>Bars, lower thirds, underlines</sub> |
-| <img src="library/gifs/motion/organic-draw.gif" width="200"><br>**Organic Draw** · `medium`<br><sub>Hand-drawn feel: contours, underlines, sketch lines (shape layers only)</sub> | <img src="library/gifs/motion/organic-stroke.gif" width="200"><br>**Organic Stroke** · `dynamic`<br><sub>Traveling brush stroke: the start chases the end (accent lines, HUD links)</sub> | <img src="library/gifs/motion/line-draw.gif" width="200"><br>**Line Draw** · `medium`<br><sub>Lines, stroke icons, tracking HUD (shape layers only)</sub> | <img src="library/gifs/motion/slam-in.gif" width="200"><br>**Slam In** · `dynamic`<br><sub>Hero words, titles over footage, kinetic type</sub> |
-| <img src="library/gifs/motion/flip-in.gif" width="200"><br>**Flip In** · `medium`<br><sub>Cards, tiles, reveals, before/after</sub> | <img src="library/gifs/motion/spin-pop.gif" width="200"><br>**Spin Pop** · `dynamic`<br><sub>Badges, stickers, stamps, icons</sub> | <img src="library/gifs/motion/drop-bounce.gif" width="200"><br>**Drop Bounce** · `dynamic`<br><sub>Icons, products, emoji, playful drops</sub> | <img src="library/gifs/motion/stretch-slide.gif" width="200"><br>**Stretch Slide** · `dynamic`<br><sub>Cards, chips, pills, fast UI moves</sub> |
-| <img src="library/gifs/motion/ramp-slide.gif" width="200"><br>**Ramp Slide** · `dynamic`<br><sub>Transitions, product slides, bold entrances</sub> | <img src="library/gifs/motion/ramp-zoom.gif" width="200"><br>**Ramp Zoom** · `dynamic`<br><sub>Logo reveals, hero products, end cards</sub> | <img src="library/gifs/motion/ramp-spin.gif" width="200"><br>**Ramp Spin** · `dynamic`<br><sub>Icons, badges, logo spins</sub> | <img src="library/gifs/motion/whip-pan.gif" width="200"><br>**Whip Pan** · `dynamic`<br><sub>Swipe transitions, camera-style moves, carousels</sub> |
-| <img src="library/gifs/motion/surge-rise.gif" width="200"><br>**Surge Rise** · `medium`<br><sub>Headlines, cards, elegant entrances</sub> | <img src="library/gifs/motion/speed-ramp.gif" width="200"><br>**Speed Ramp** · `dynamic`<br><sub>Footage, product shots, action beats, transitions</sub> | <img src="library/gifs/motion/punch-zoom.gif" width="200"><br>**Punch Zoom** · `medium`<br><sub>Footage, precomps, freeze frames, cut emphasis</sub> | <img src="library/gifs/motion/coast-rise.gif" width="200"><br>**Coast Rise** · `soft`<br><sub>Product UI, editorial headlines, icons: fast start, clean stop</sub> |
-| <img src="library/gifs/motion/wind-up-slide.gif" width="200"><br>**Wind-up Slide** · `soft`<br><sub>Logo slides, premium reveals: a small pull-back, then a long glide</sub> | <img src="library/gifs/motion/nudge-grow.gif" width="200"><br>**Nudge Grow** · `soft`<br><sub>Bars, charts, columns, panels growing from their anchor (put the anchor at the base)</sub> | <img src="library/gifs/motion/snap-scale.gif" width="200"><br>**Snap Scale** · `medium`<br><sub>Editorial cuts on the action: shapes and type that jump in size and settle</sub> | <img src="library/gifs/motion/iris-reveal.gif" width="200"><br>**Iris Reveal** · `medium`<br><sub>Scene changes, photo reveals, opening a new section from a point</sub> |
-| <img src="library/gifs/motion/wordmark-reveal.gif" width="200"><br>**Wordmark Reveal** · `medium`<br><sub>Wordmarks sliding out from behind their logo mark, names after an icon</sub> | <img src="library/gifs/motion/push-through.gif" width="200"><br>**Push Through** · `medium`<br><sub>Fly-through transitions: the camera pushes into a word, a logo or a planet and through it</sub> | <img src="library/gifs/motion/color-wipe.gif" width="200"><br>**Color Wipe** · `medium`<br><sub>Section changes: a full-frame color solid sweeps in diagonally (put it on a solid)</sub> |   |
-
-### Classics (17)
-
-Effects adapted from animate.css 4.1.1 (MIT) into native keyframes: entrances, exits and attention moves. Same call as Motion.
-
-|   |   |   |   |
-|---|---|---|---|
-| <img src="library/gifs/motion/back-in-down.gif" width="200"><br>**Back In Down** · `dynamic`<br><sub>Cards, product shots, bold drops (enter)</sub> | <img src="library/gifs/motion/back-in-left.gif" width="200"><br>**Back In Left** · `dynamic`<br><sub>Slides, lower thirds, carousels (enter)</sub> | <img src="library/gifs/motion/bounce-in.gif" width="200"><br>**Bounce In** · `dynamic`<br><sub>Icons, badges, buttons, emoji (enter)</sub> | <img src="library/gifs/motion/bounce-in-up.gif" width="200"><br>**Bounce In Up** · `dynamic`<br><sub>Notifications, stickers, playful entrances (enter)</sub> |
-| <img src="library/gifs/motion/rubber-band.gif" width="200"><br>**Rubber Band** · `dynamic`<br><sub>CTAs, logos, a beat accent (attention)</sub> | <img src="library/gifs/motion/jello.gif" width="200"><br>**Jello** · `dynamic`<br><sub>Playful accents, stickers (attention)</sub> | <img src="library/gifs/motion/heart-beat.gif" width="200"><br>**Heart Beat** · `medium`<br><sub>Likes, prices, a pulse on the beat (attention)</sub> | <img src="library/gifs/motion/tada.gif" width="200"><br>**Tada** · `dynamic`<br><sub>Reveals, wins, offers (attention)</sub> |
-| <img src="library/gifs/motion/wobble.gif" width="200"><br>**Wobble** · `dynamic`<br><sub>Errors, jokes, quirky accents (attention)</sub> | <img src="library/gifs/motion/swing-hinge.gif" width="200"><br>**Swing Hinge** · `medium`<br><sub>Signs, tags, hanging elements (attention)</sub> | <img src="library/gifs/motion/flip-in-x.gif" width="200"><br>**Flip In X** · `medium`<br><sub>Cards, tiles, scoreboard flips (enter)</sub> | <img src="library/gifs/motion/light-speed-in.gif" width="200"><br>**Light Speed In** · `dynamic`<br><sub>Speed, sport, fast lower thirds (enter)</sub> |
-| <img src="library/gifs/motion/roll-in.gif" width="200"><br>**Roll In** · `dynamic`<br><sub>Wheels, coins, round icons (enter)</sub> | <img src="library/gifs/motion/zoom-in-down.gif" width="200"><br>**Zoom In Down** · `medium`<br><sub>Titles that drop in from above (enter)</sub> | <img src="library/gifs/motion/jack-in-the-box.gif" width="200"><br>**Jack In The Box** · `dynamic`<br><sub>Surprises, reveals, kids and playful brands (enter)</sub> | <img src="library/gifs/motion/back-out-up.gif" width="200"><br>**Back Out Up** · `dynamic`<br><sub>Exits upward, cards leaving (exit)</sub> |
-| <img src="library/gifs/motion/zoom-out.gif" width="200"><br>**Zoom Out** · `soft`<br><sub>Quiet exits, scene changes (exit)</sub> |   |   |   |
-
-### Text (11)
-
-Per character or per word, on text layers. `SSP.applyText(layer, name, "in" | "out" | "both")`
-
-|   |   |   |   |
-|---|---|---|---|
-| <img src="library/gifs/text/chars-rise.gif" width="200"><br>**Chars Rise** · `medium`<br><sub>Short headlines, names, kickers</sub> | <img src="library/gifs/text/words-fade-up.gif" width="200"><br>**Words Fade Up** · `soft`<br><sub>Phrases, captions, quotes</sub> | <img src="library/gifs/text/blur-words.gif" width="200"><br>**Blur Words** · `soft`<br><sub>Premium moments, calm intros</sub> | <img src="library/gifs/text/tracking-settle.gif" width="200"><br>**Tracking Settle** · `medium`<br><sub>All-caps titles, typographic logos</sub> |
-| <img src="library/gifs/text/chars-pop.gif" width="200"><br>**Chars Pop** · `dynamic`<br><sub>Social, hype, big numbers</sub> | <img src="library/gifs/text/typewriter.gif" width="200"><br>**Typewriter** · `medium`<br><sub>Captions, terminals, UI, quotes</sub> | <img src="library/gifs/text/scramble.gif" width="200"><br>**Scramble** · `dynamic`<br><sub>Tech, data, HUD labels, reveals</sub> | <img src="library/gifs/text/count-up.gif" width="200"><br>**Count Up** · `medium`<br><sub>Stats, KPIs, prices, counters</sub> |
-| <img src="library/gifs/text/chars-ramp.gif" width="200"><br>**Chars Ramp** · `medium`<br><sub>Titles that build tension, trailers, reveals</sub> | <img src="library/gifs/text/words-slam.gif" width="200"><br>**Words Slam** · `dynamic`<br><sub>Punchy statements, social hooks, VO beats</sub> | <img src="library/gifs/text/chars-blur.gif" width="200"><br>**Chars Blur** · `soft`<br><sub>Opening titles, premium intros: characters resolve from blur one after another</sub> |   |
-
-### Effects (11)
-
-Continuous loops driven by expressions. `SSP.applyFx(layer, name)`
-
-|   |   |   |   |
-|---|---|---|---|
-| <img src="library/gifs/fx/float.gif" width="200"><br>**Float** · `soft`<br><sub>Idle icons and cards, living backgrounds</sub> | <img src="library/gifs/fx/wiggle-rotate.gif" width="200"><br>**Wiggle Rotate** · `medium`<br><sub>Stickers, illustrations with personality</sub> | <img src="library/gifs/fx/pulse.gif" width="200"><br>**Pulse** · `medium`<br><sub>CTAs, buttons, attention grabbers</sub> | <img src="library/gifs/fx/jitter.gif" width="200"><br>**Jitter** · `dynamic`<br><sub>Social, glitch, high-energy pieces</sub> |
-| <img src="library/gifs/fx/breathe.gif" width="200"><br>**Breathe** · `soft`<br><sub>Ambient glows, background shapes, calm idle states</sub> | <img src="library/gifs/fx/swing.gif" width="200"><br>**Swing** · `soft`<br><sub>Hanging tags, badges, signs, pendulums</sub> | <img src="library/gifs/fx/orbit.gif" width="200"><br>**Orbit** · `soft`<br><sub>Dots and satellites around a logo, decorative loops</sub> | <img src="library/gifs/fx/shake.gif" width="200"><br>**Shake** · `dynamic`<br><sub>Impacts, bass hits, alarms, energetic footage</sub> |
-| <img src="library/gifs/fx/holo-flicker.gif" width="200"><br>**Holo Flicker** · `medium`<br><sub>HUD labels, tech overlays, holographic UI</sub> | <img src="library/gifs/fx/boil.gif" width="200"><br>**Boil** · `medium`<br><sub>Collage, cut-outs, paper and texture layers: a subtle hand-made boil</sub> | <img src="library/gifs/fx/on-twos.gif" width="200"><br>**On Twos** · `medium`<br><sub>Stop-motion feel: plays the layer's existing animation on 2s or 3s (apply after a motion preset)</sub> |   |
-
-### Recipes (9)
-
-Behavior measured from reference animations and rebuilt with our own keyframes. `SSP.applyRecipe(layer, id, "both")`
-
-|   |   |   |   |
-|---|---|---|---|
-| <img src="library/gifs/recipe/calibration-w3l.gif" width="200"><br>**W3L** · `dynamic`<br><sub>position & rotation & scale · loop</sub> | <img src="library/gifs/recipe/calibration-4lc.gif" width="200"><br>**4LC** · `dynamic`<br><sub>position & rotation · transition</sub> | <img src="library/gifs/recipe/calibration-d2t.gif" width="200"><br>**D2T** · `dynamic`<br><sub>position · loop</sub> | <img src="library/gifs/recipe/calibration-2jk.gif" width="200"><br>**2JK** · `medium`<br><sub>rotation · loop</sub> |
-| <img src="library/gifs/recipe/calibration-1df-unu.gif" width="200"><br>**1DF+UNU** · `dynamic`<br><sub>scale · loop</sub> | <img src="library/gifs/recipe/calibration-x9r.gif" width="200"><br>**X9R** · `medium`<br><sub>opacity & scale · transition</sub> | <img src="library/gifs/recipe/calibration-pe6.gif" width="200"><br>**PE6** · `medium`<br><sub>position · transition</sub> | <img src="library/gifs/recipe/calibration-4vw.gif" width="200"><br>**4VW** · `dynamic`<br><sub>position & scale · transition</sub> |
-| <img src="library/gifs/recipe/calibration-2jv.gif" width="200"><br>**2JV** · `dynamic`<br><sub>scale · transition</sub> |   |   |   |
-
-### Packs (9)
-
-One click gives a whole comp an identity: each layer gets the preset of its role (title, subtitle, body, shape, media, logo), staggered. `SSP.applyPack(comp, name)`
-
-|   |   |   |   |
-|---|---|---|---|
-| <img src="library/packs/dynamic.gif" width="260"><br>**Dynamic** · `dynamic`<br><sub>Social, launches, hype: fast slams, whips and speed ramps.</sub> | <img src="library/packs/elegant.gif" width="260"><br>**Elegant** · `soft`<br><sub>Premium, fashion, hospitality: slow blurs, soft rises, generous timing.</sub> | <img src="library/packs/modern.gif" width="260"><br>**Modern** · `medium`<br><sub>Corporate, SaaS, product: clean rises and slides on the brand curves.</sub> | <img src="library/packs/playful.gif" width="260"><br>**Playful** · `dynamic`<br><sub>Kids, food, consumer apps: bounces, wobbles and jack-in-the-box reveals.</sub> |
-| <img src="library/packs/tech.gif" width="260"><br>**Tech** · `medium`<br><sub>Data, AI, fintech, HUDs: decoding text, line draws and holographic flicker.</sub> | <img src="library/packs/calm-modern.gif" width="260"><br>**Calm Modern** · `soft`<br><sub>Product and brand pieces: small travel, word-by-word text, quiet exits, no bounce.</sub> | <img src="library/packs/editorial.gif" width="260"><br>**Editorial** · `medium`<br><sub>Brand systems, tech launches, type-led films: typing, snaps on the action, construction lines, clean ease-outs (Motion Style Map: Editorial).</sub> | <img src="library/packs/storybook.gif" width="260"><br>**Storybook** · `soft`<br><sub>Warm product launches and character explainers: line-by-line rises, soft 3% overshoots, circular reveals (Motion Style Map: Warm editorial, Character).</sub> |
-| <img src="library/packs/collage.gif" width="260"><br>**Collage** · `dynamic`<br><sub>Mixed media, cut-outs, archive and texture: whips through layers, hand-made boil on 3s, decoding type (Motion Style Map: Mixed media).</sub> |   |   |   |
-<!-- catalog:end -->
-
-### Pick by energy
-
-Every preset has an **energy** level, so you can choose by the tone of the piece:
-
-| Energy | Use it for | Examples |
-|---|---|---|
-| `soft` | Corporate, UI, premium, calm | Fade, Blur In, Words Fade Up, Float, Breathe, Swing, Orbit |
-| `medium` | Most brand work | Surge Rise, Chars Ramp, Slide Land, Flip In, Organic Draw, Punch Zoom, Chars Rise, Typewriter, Count Up, Pulse, Holo Flicker |
-| `dynamic` | Social, hype, launches | Ramp Slide, Ramp Zoom, Whip Pan, Speed Ramp, Scale Pop, Slam In, Spin Pop, Drop Bounce, Stretch Slide, Words Slam, Scramble, Chars Pop, Jitter, Shake |
-
-![Filtering the library by energy](docs/screens/visualizer-dynamic.png)
-
-*The visualizer filtered to `dynamic`. Filters can be linked: `index.html?kind=text&energy=soft`.*
-
-## The library in use
-
-Real pieces animated only with library presets and tokens, with no hand-set keyframes:
-
-| A Figma slide, animated | A draw-on intro |
-|---|---|
-| ![Figma slide](docs/examples/use-figma-slide.gif) | ![Draw-on intro](docs/examples/use-icon-intro.gif) |
-| The *Essentials* slide rebuilt in AE: title `Arrive` + `Land`, image cards `Stage` + `Land` with a stagger, chips scaling in one by one, the coral chip with `Pop` | Outline draws on (`Sweep` + `Cruise`), fill lands with `Pop`, tagline `Arrive` + `Land`, chained `Launch` exit |
-| **Motion presets side by side** | **Effects running as loops** |
-| ![Presets grid](docs/examples/use-presets-grid.gif) | ![FX loops](docs/examples/use-fx-loops.gif) |
-| Same element, different presets: compare timing and energy at a glance | `Float`, `Wiggle Rotate`, `Pulse`, `Jitter` on the same shape |
-| **Text and tracking on video** | **Holographic HUD on tracked points** |
-| ![Text tracking](docs/examples/text-tracking.gif) | ![HUD](docs/examples/hud-test.gif) |
-| `Chars Rise`, `Tracking Settle` and callouts pinned to points tracked with OpenCV | `SSHUD` brackets, callouts, meter and chip, all animated with library presets |
-
-## Tags, references and styles
-
-Everything in the library is tagged on independent axes, so moves, curves and timings can be recombined:
-**move** (role: enter · exit · emphasis · loop · transition; target: title · text · shape · icon · logo · ui · media ·
-footage · background; channels; direction), **feel** (energy 1 calm → 5 explosive; tones: modern, elegant, playful,
-bold, technical, organic, cinematic, corporate, retro, luxury… open), and **curve** (each token easing has a family,
-an energy range and tones). Styles carry the same tags plus their own curve and transition, and show a 2×2 preview
-(title · text · shapes · media) in the panel.
-
-A **reference** (a brand or video analysed into an energy range and tones, with the moves, curves and techniques it
-uses) is matched against the library with `tools/match_reference.py` or the MCP tool `match_reference`; what is
-missing gets created, tagged and rendered, and the reference becomes a new style. Example:
-[`library/references/google-calm-modern.json`](library/references/google-calm-modern.json) → the *Calm Modern* style.
-Claude can also ask `suggest_mix` for a role, a target and a feel.
-
-### Motion Style Map (research)
-20 reference films (brand films, launches, explainers, reels) measured frame by frame and by ear: cuts, % of time in
-motion, speed, color, fitted Bézier curves per move, and the music (BPM, pulse clarity, cuts on the beat vs chance, shot
-length in beats). Each film is placed on a map (measured energy × scored tone), tagged, and broken into **behaviors**
-(element × phase × curve) named with Motion DNA's own terms. Four families so far (Elegant, Playful reel, Character,
-Mixed media) with sub-styles; what the library was missing became the curves, presets and styles above.
-- Map: [`research/style_map/style_map.html`](research/style_map/style_map.html) · taxonomy: [`research/style_map/taxonomy.md`](research/style_map/taxonomy.md)
-- Behaviors and the mapping to presets/curves: [`research/ontology/`](research/ontology/) (`terminology.md`, `behaviors.json`, `dna_coverage.json`)
-- Family syntheses, music and cross-family patterns: [`research/styles/`](research/styles/)
-- Pipeline: `tools/style_research/` (`batch_auto.sh` → `research/batch/AGENT_BRIEF.md` → `integrate.py` → `build_map.py`; `map_to_dna.py` re-aligns the terms)
-
-## Tested, and what it looks like
-
-`python tools/test_all.py` (AE open) checks the whole system and renders the mosaics below: every preset animates and its
-controls change it (duration, intensity, mirror, easing) and **Remove** cleans it; every panel category, filter and hook
-works; every MCP tool answers as Claude calls it. Results in `research/tests/`.
-
-![Every preset with its energy range and tones](docs/examples/library-mosaic.gif)
-
-| The 6 styles on one layout | Mix by tags (calm·elegant / explosive·bold / playful) | One move, the panel's controls |
-|---|---|---|
-| ![Styles](docs/examples/test-styles.gif) | ![Mix](docs/examples/test-mix.gif) | ![Controls](docs/examples/test-controls.gif) |
+*From [the Motion DNA promo](#showcases): tracking, roto, a backlight glow and a freeze title, all built by Claude with the library.*
 
 ## How it works
 
-![How it works](docs/screens/how-it-works.png)
+```mermaid
+flowchart LR
+  subgraph K["Knowledge · lives in the repo"]
+    MSM["<b>Motion Style Map</b><br/>20 reference films measured<br/>research by Gian Orsi"]
+    REF["Reference profiles<br/>library/references"]
+    LIB["<b>Library</b><br/>79 presets · 14 curves · 9 styles · 11 techniques<br/>all tagged: role · energy 1–5 · tone"]
+    BR["<b>Brand profiles</b><br/>library/brands<br/>rules learned in every review"]
+    RU["Layout &amp; edit rules<br/>CONTRIBUTING §9 · LEARNINGS"]
+    MSM --> LIB
+    REF --> LIB
+  end
+  subgraph D["Who drives it"]
+    P["Designer<br/>Motion DNA panel"]
+    C["Claude / any LLM<br/>MCP server motion-dna"]
+  end
+  LIB --> P
+  LIB --> C
+  BR --> P
+  BR --> C
+  RU --> C
+  P --> AE["After Effects<br/>native keyframes"]
+  C -- "file bridge" --> AE
+  AE --> QA["Check<br/>check_layout · test_all · render_frame"]
+  QA -- "review notes" --> BR
+  QA -- "gaps → new moves" --> LIB
+```
 
-All timing comes from our motion tokens: **6 durations** and **10 easing curves**, including three speed-ramp curves (`Ramp`, `Surge`, `Whip`: slow → burst of speed → slow) (`tokens/superside_motion_tokens.json`). Presets never hard-code a speed: they ask for `Arrive` + `Land`, so the whole library stays consistent and can be retuned in one place.
+1. **The library** is the vocabulary: moves, token curves (`tokens/`), styles and script techniques, all tagged so they
+   can be recombined by feel.
+2. **Research feeds it**: reference films and brand analyses are measured and matched against the library; whatever is
+   missing is created, tagged and rendered (CONTRIBUTING §8).
+3. **Brand profiles remember**: each brand keeps its base style, curve, palette, fonts and the rules learned in its reviews.
+4. **Two ways to drive it**: the panel in After Effects, or Claude through the MCP server and a file bridge.
+5. **Every piece is checked and feeds back**: the layout QA and the tests catch problems; review notes become brand
+   rules, and new needs become new presets.
 
-![Durations and easing curves](docs/screens/tokens.png)
+## What's inside
 
-## How to use it
+| Moves | Classics | Text | Loops | Recipes | Styles | Techniques | Curves |
+|---|---|---|---|---|---|---|---|
+| 31 | 17 | 11 | 11 | 9 | 9 | 11 | 14 + 6 durations |
 
-### Designers (in After Effects)
+![Every preset with its energy range and tones](docs/examples/library-mosaic.gif)
 
-<img src="docs/screens/ae-panel.gif" width="320" align="right" alt="Motion DNA panel in After Effects: gallery, live previews, In/Out/Both">
+Full catalog with live thumbnails: **[docs/CATALOG.md](docs/CATALOG.md)** · filterable: `library/index.html` · for LLMs:
+`library/INDEX.txt` · tags: `library/tags.json`. All timing comes from the motion tokens: presets ask for `Arrive` +
+`Land`, never a raw speed, so the whole library retunes in one place.
 
-1. Install the fonts from `assets/fonts/` (right-click › Install).
-2. **Install everything once:** double-click `INSTALL-Windows.cmd` (Windows) or `INSTALL-macOS.command` (macOS), or run `python tools/setup.py` (Claude does the same when you ask it to install Motion DNA). It installs the panel, the fonts and the local asset previews and checks the library. It adds *Window › Motion DNA.jsx* (dockable) to every AE version on the machine; restart AE and dock it. It reads the library straight from this repo clone. **To update**, run `python tools/setup.py --update` (or ask Claude to update Motion DNA): it pulls the new version, removes old or duplicate panel loaders and the old MCP name, and reinstalls; it never pulls over your local changes. `--uninstall` removes it. Enable *Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
-3. **Browse by category:** Moves, Classics, Text, Loops, Transitions, Recipes, Styles, Mix, Techniques, Assets and ★ Favorites, with search, an energy filter (1 calm → 5 explosive) and a tone filter (modern, elegant, playful…); the grid adapts to the panel width. Clicking a thumbnail plays a **live preview** of the preset's real curve on the neutral Spark arrow (sampled into `library/preview_curves.json`; ScriptUI cannot play GIFs, so the panel redraws the motion as vectors). ☆ adds it to your favorites.
-4. **Tune before applying (Controls):** *Duration* (0.5–2×), *Intensity* (how far it travels, 25–200 %), *Direction* (as designed or mirrored), *Easing* (keep the preset's curve or use any token curve), *Stagger* for several layers.
-5. **Select layers → In, Out or Both.** **Remove** takes Motion DNA's keyframes, expressions and markers off the selected layers; each property keeps its resting value.
-6. **Retime with markers:** with *Marker timing* on, each layer gets an `SS in` marker (where the entrance ends) and an `SS out` marker (where the exit starts). Drag them and the animation stretches or compresses with the same curve.
-7. **Styles:** a grid of 2×2 previews (title · text · shapes · media) with their tags. Pick one and press In/Both: every layer gets the preset of its role (title, subtitle, body, shape, media, logo) with the style's own curve. Backgrounds, nulls and locked layers are left alone.
-8. **Mix:** choose an energy and a tone, press *Analyze*: every layer in the comp (or the selection) gets the move and the curve whose tags fit. *Apply mix*, or *Save as style…* to add it to `library/packs.json`.
-9. **Techniques:** a grid with a frame of each script workflow's result (tracked labels, text behind people, roto breakdown, HUD, speed ramps, freeze + kinetic type, shape wipes, cutting on the voice, face refinement): what each does, how to run it, and what to ask Claude.
-10. **Claude:** the header shows whether Claude is connected. *Connect Claude* starts the bridge so the MCP server (`motion-dna`) can drive this After Effects.
-11. **Assets:** a grid of local sound effects (waveforms) and overlays (frames); add one at the playhead.
+## Motion Style Map · research by Gian Orsi
+
+![Motion Style Map: reference films placed by measured energy and scored tone](docs/screens/style-map.png)
+
+Gian measured **20 reference films** (brand films, launches, explainers, reels) frame by frame and by ear: cuts, share of
+time in motion, speed, colour, fitted Bézier curves for every move, and the music (BPM, pulse clarity, cuts on the beat
+vs chance, shot length in beats). Each film sits on a map of **measured energy × scored tone**, and every film is broken
+into **209 behaviors** named in Motion DNA's own terms (146 map to a preset, 47 are camera, edit or acting craft, 16 were
+open gaps). What the library was missing became new pieces:
+
+- **Curves:** `Coast`, `Nudge`, `Wind-up`, `Snap`.
+- **Presets measured on real work:** Coast Rise, Wind-up Slide, Nudge Grow, Snap Scale, Iris Reveal, Wordmark Reveal,
+  Push Through, Color Wipe, Chars Blur, Boil, On Twos.
+- **Styles:** *Editorial*, *Storybook*, *Collage*.
+- **How music shapes the edit:** shot length in beats separates styles better than BPM; key moments (logo, reveal) land on
+  musical events; the logo pattern "mark first, wordmark slides out from behind it". The Motion DNA promo uses all three.
+
+Explore it: [the map](research/style_map/style_map.html) · [taxonomy](research/style_map/taxonomy.md) ·
+[behaviors and mapping](research/ontology/) · [family syntheses, music & edit, cross-family patterns](research/styles/) ·
+pipeline in `tools/style_research/`.
+
+## Brand profiles: styles that learn
+
+Every time you animate for a brand and give notes ("labels go into the negative space", "a soft glow, not rays",
+"never cut a phrase"), the note is saved as a **rule** in that brand's profile, with why, the project and who said it.
+The next piece for that brand, by Claude, another agent or a designer, starts with everything already learned. Brands
+are independent: each one refines its own style.
+
+```text
+library/brands/<brand>/brand.json   identity (colours, fonts, logo) · feel (energy, tones, base style, curve)
+                                    preferred / avoided presets · rules learned in reviews · projects
+library/brands/<brand>/thumb.png    its card in the panel
+```
+
+- **Panel:** *Brands* shows each brand's card and rules; *In / Out / Both* animates the comp in its style on its curve.
+- **Claude (MCP):** `get_brand` before animating, `add_brand_note` for every review note, `apply_brand`, `list_brands`.
+- **Terminal:** `python tools/brand.py new acme --name "Acme" --style Modern --curve Coast`,
+  `python tools/brand.py note acme "Logos never bounce" --cat motion --why "..."`, `python tools/brand.py show acme`.
+
+Example: [`library/brands/motion-dna`](library/brands/motion-dna/brand.json), the 22 rules learned while making our
+own promo. Schema: [`library/brands/_schema.md`](library/brands/_schema.md).
+
+## Rules that keep the work clean
+
+Lessons from real reviews, checked automatically on the built comps by `tools/check_layout.jsx`: no text on text or cards
+touching, nothing outside the safe area (labels stack into up to 3 lines instead), at least 32 px, contrast or a card,
+nothing on a face, no substituted fonts. Edit rules: never cut a phrase, trim AI shots to their action, music leads the
+key moments. All of them: [CONTRIBUTING §9](CONTRIBUTING.md#9-layout-and-edit-rules-every-video-every-comp).
+
+## Get started
+
+**Install** (Windows or macOS): double-click `INSTALL-Windows.cmd` / `INSTALL-macOS.command`, or run `python tools/setup.py`
+(Claude does it when you ask it to install Motion DNA). It installs the panel in every After Effects version, the fonts
+and the local asset previews, and checks everything. Then restart After Effects, open *Window › Motion DNA.jsx*, and tick
+*Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
+**Update:** `python tools/setup.py --update` (never pulls over local changes) · **remove:** `--uninstall`.
+
+<img src="docs/screens/ae-panel.gif" width="320" align="right" alt="Motion DNA panel in After Effects">
+
+**Designers.** Browse Moves, Classics, Text, Loops, Transitions, Recipes, Styles, Brands, Mix, Techniques and Assets,
+filter by energy (1 calm → 5 explosive) and tone, and watch a live preview on the Spark arrow. Tune *Duration*,
+*Intensity*, *Direction* and *Easing*, select layers and press **In / Out / Both**; **Remove** cleans it off. With
+*Marker timing*, drag the `SS in` / `SS out` markers to retime. Styles and Brands animate a whole comp role by role; Mix
+picks moves and curves by tags.
+
+**Claude (MCP).** Open the repo in Claude Code and approve the `motion-dna` server (`.mcp.json`). Claude gets:
+browse (`list_presets`, `list_packs`, `list_tags`, `suggest_mix`, `match_reference`, `list_assets`, `list_brands`,
+`get_brand`), act in After Effects (`apply_preset`, `apply_pack`, `apply_brand`, `add_asset`, `remove_animation`,
+`show_in_panel`), learn (`add_brand_note`), check (`ae_status`, `list_layers`, `render_frame`, `render_comp`) and
+`run_jsx`. Without MCP, any LLM reads `library/INDEX.txt` and runs `.jsx` jobs with `bash tools/bridge.sh`.
+Contributors and their agents: read [`CLAUDE.md`](CLAUDE.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 <br clear="right">
 
-### LLM agents (Claude Code or any MCP client)
+## Showcases
 
-**MCP server (recommended).** The repo ships a dependency-free MCP server (`tools/mcp/ss_motion_mcp.py`, registered in `.mcp.json`). Open the repo in Claude Code, approve the `motion-dna` server, and Claude gets these tools:
-- **Browse (no AE needed):** `list_presets`, `list_packs`, `list_assets`.
-- **Inspect AE:** `ae_status`, `list_layers`.
-- **Act:** `apply_preset` (in/out/both, stagger, marker timing, and the panel controls: `duration`, `intensity`, `direction`, `ease`), `remove_animation`, `apply_pack` (styles), `add_asset`, `show_in_panel`.
-- **Check:** `render_frame` (to look at the result), `render_comp`.
-- **Escape hatch:** `run_jsx`.
+### *Motion DNA · promo* (45 s, 1985 infomercial parody)
 
-It talks to AE through the file bridge, which starts by itself when the Motion DNA panel loads (dock it once).
+Two bored designers in 1985 complain that Claude makes the same animation every time; a salesman bursts in with Motion
+DNA. Characters, location and props were designed as sheets first and every shot was generated with them as references
+(Nano Banana 2.1 + Seedance 2.5, USD 15.50). The edit was built entirely by Claude with the library: 2D tracked callouts,
+a planar-tracked "1985" on the wall, roto (local InSPyReNet mattes), a backlight glow, action lines, a freeze with the
+person in colour, a retro app inside a curved CRT, words landing on the voice, music-led timing from the Style Map, and
+the layout QA at 0 warnings. Video: [`media/motion_dna_promo/motion_dna_promo.mp4`](media/motion_dna_promo/motion_dna_promo.mp4) ·
+story, shot list and costs: [`media/motion_dna_promo/story.md`](media/motion_dna_promo/story.md) · storyboard:
+[Figma Slides](https://www.figma.com/slides/z2BSXVNVFhjYOlbBI1ZUy6).
 
-**Without MCP**, any LLM can do the same with plain files:
-1. **Read `library/INDEX.txt`**: one line per preset (`kind|name|channels|energy|use`) plus the calls, tokens, packs and tools.
-2. **Write a job** in `tools/`:
-   ```js
-   #include "ss_presets.jsx"
-   (function () {
-       var L = app.project.activeItem.layer("Title");
-       SSP.markerTiming(true);                       // optional: SS in / SS out markers
-       SSP.applyText(L, "Chars Rise", "both");      // SSP.apply · applyText · applyFx · applyRecipe · applyPack
-       return "ok";
-   })();
-   ```
-3. **Run it:** `bash tools/bridge.sh tools/my_job.jsx` (answers `OK` or `ERROR` with the line number).
-4. **Render and review** with `tools/render_comps.jsx` + `tools/wait_files.sh`, or `comp.saveFrameToPng` for single frames.
-
-Bigger pieces are data, not code: scenes (`tools/build_scene.jsx`) and edits (`tools/build_edit.jsx`) are JSON. Contributors and their agents: read [`CLAUDE.md`](CLAUDE.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
-
-## Tools
-
-| Tool | What it does |
-|---|---|
-| `tools/ss_motion_lib.jsx` (`SSM`) | Token-driven keyframes: `animate`, `pop`, `recoil`, `animateBezier`, `animateStops`, `organicStops` (hand-drawn rhythm), `font(role)` |
-| `tools/ss_presets.jsx` (`SSP`) | The presets: `apply`, `applyFx`, `applyText`, `applyRecipe` |
-| `tools/ss_panel.jsx` + `tools/install_panel.ps1` | Gallery panel (Window menu, dockable): categories, live vector previews, In/Out/Both, marker timing, packs, assets |
-| `tools/mcp/ss_motion_mcp.py` (`.mcp.json`) | MCP server: Claude browses the library and drives AE (apply presets and packs, add assets, render frames) |
-| `tools/sample_previews.jsx` · `tools/make_panel_thumbs.sh` · `tools/pack_demos.jsx` | Panel previews (sampled curves), panel thumbnails, pack demo renders |
-| `tools/bridge.sh` + `tools/ss_bridge.jsx` | Runs `.jsx` jobs in the open AE from the terminal |
-| `tools/ss_hud.jsx` (`SSHUD`) | Holographic overlays on tracked points: bracket, callout, meter, chip, contour, face scan, floating panel |
-| `tools/track_points.py` | OpenCV point tracker → JSON for AE nulls (`--regions regions.json`) |
-| `tools/matte_contours.py` | Per-frame subject contours from an AI matte (`--subjects`, `--split-x`) |
-| `tools/build_scene.jsx` | Scene from JSON: plate, tracking, matte, text behind people, HUD |
-| `tools/build_edit.jsx` | Edit from JSON: cuts, **speed ramps** (`speed`), freeze frames with kinetic type, titles (`texts`), VO, music ducking, SFX, end card |
-| `tools/build_breakdown.jsx` | 2×2 roto breakdown (plate · matte · contours · composite) |
-| `tools/face_check.py` | Likeness QA: real photo next to every face found in AI stills or clips |
-| `tools/build_explainer.jsx` | Slides/explainer scenes from a JSON storyboard (Figma coordinates), every element animated by a preset |
-| `tools/build_app_screen.jsx` | Browser-window recording of the visualizer, rebuilt from screenshots |
-| `tools/render_comps.jsx` | Renders comps through the open AE's render queue |
-| `tools/build_promo_all.jsx` + `media/promo/make_promo.py` | Promotional cut: full-screen footage, oversized type, shape wipes, scenes cut on the VO word times |
-| `tools/setup.py` (+ `INSTALL-*.cmd/.command`) | One-step install: cleans old versions, panel in every AE version, fonts, local asset previews, checks; `--update` pulls and reinstalls, `--uninstall` removes it, `--mcp-user` registers the MCP server everywhere |
-| `tools/test_all.py` (`test_library.jsx`, `test_panel.jsx`, `test_mcp.py`, `test_mosaics.jsx`, `make_library_mosaic.py`) | End-to-end tests and the sample mosaics: presets, controls, Remove, panel, MCP, styles, mix |
-| `tools/tag_library.py` → `library/tags.json` | Tags for every preset, curve and technique: roles, targets, channels, direction, energy range (1–5), tones |
-| `tools/match_reference.py` | Compares a reference profile (`library/references/<slug>.json`) with the library: what fits, how to build each move, the gaps to create, a proposed style |
-| `tools/vo_words.py` | Word timestamps of a voiceover (openai-whisper) to cut scenes on the spoken word |
-| `tools/qa_frames.jsx` | QA stills of a comp at given times |
-| `tools/faceswap_refine.py` + `media/faceswap/jobs.json` | **Face refinement pass** for every clip with a real person (MiniMax H3 head inpainting, local GPU); `faceswap_apply.py`, `footage_relink_*.jsx`, `reload_footage.jsx` put the refined clips in place |
-| `tools/ss_assets.jsx` (`SSA`) + `tools/index_assets.py` | Local asset packs: index SFX/overlays by category and loudness, place them by name |
-| `tools/style_research/` | Motion Style Map pipeline: per-video energy, metrics, music/BPM sync (`audio.py`), contact sheets, curve fitting, catalog integration, the map, and `map_to_dna.py` (behaviors → Motion DNA presets and curves) |
-| `tools/record_panel.py` | Records the panel in use (SS_PANEL hook driven through the bridge, DPI-aware PrintWindow) → `docs/screens/ae-panel.gif` |
-
-## Growing the library
-
-New presets come from measuring reference animations, never from copying them. With Animation Composer as the reference:
-
-1. **AE:** *File › Scripts › Run Script File…* → `tools/ss_harvest_station.jsx`. Pick the section and press **Start**.
-2. **Animation Composer panel:** open the same folder.
-3. **Driver** (first time only: `python tools/ac_driver.py calibrate`, pressing F8 over three thumbnails; then `preview` to check):
-   ```bash
-   python tools/ac_driver.py run
-   ```
-   It double-clicks thumbnail after thumbnail, waits for the station to log each preset (curves, channels and name), scrolls, and stops on its own. ESC aborts.
-4. **Merge into the library** (name OCR → recipes → thumbnails → index):
-   ```bash
-   bash tools/expand_library.sh
-   ```
-
-Recipes store *what moves and how* (relative channels, frames, curve or frequency/amplitude), and `SSP.applyRecipe` reproduces them with our own keyframes. When a measured curve matches a token, the token is used.
-
-> Animation Composer is licensed software by Mister Horse. It has no scripting API and its presets are encrypted: **we never decrypt or modify it**, we only automate its UI and observe the result. Harvests (`research/harvest/`) are internal behavioral references; no presets or plugin renders are redistributed.
-
-## Asset packs (sound effects and overlays)
-
-The motion presets are ours and live in this repo. Sound effects and footage overlays come from the asset packs installed with Animation Composer (≈300 files on our machines: whooshes, UI blips, impacts, glitches, sparkles, light leaks, grain, film burns, VHS, glitch masks). Those files are licensed, so **they are never copied into the repo**: each machine indexes its own packs and the library places them by name.
-
-```bash
-python tools/index_assets.py      # → library/ASSETS.local.txt (git-ignored): category, length and loudness of every asset
-```
-```js
-#include "ss_assets.jsx"
-SSA.sfx(comp, "Swoosh Wood 01_Variant Main", 1.2, -9);       // name, time, gain dB [, max length]
-SSA.overlay(comp, "Light Leak B1 10", 0);                   // blend picked by family: leaks → Screen, grain → Overlay
-```
-
-The index measures each sound's loudness and flags the harsh ones (`loud`) and the long ones (`long`), so an LLM picks a soft blip for UI and trims a boom instead of guessing.
-
-## Credits
-
-- **Classics** adapt the keyframes of [animate.css](https://animate.style) **4.1.1** (MIT License, © 2020 Daniel Eden / Animate.css) into native After Effects keyframes (`library/css_presets.json`). Later animate.css releases use the Hippocratic License and are not used.
-- Fonts: Inter Tight and Instrument Serif (SIL Open Font License).
-
-## Structure
-
-| Folder | Contents |
-|---|---|
-| `tokens/` | Timing, curves and font roles |
-| `library/` | `INDEX.txt` (LLM), `library.json`, `recipes.json`, `index.html`, `gifs/`, `posters/` |
-| `tools/` | JSX library, panel, bridge, HUD, scene/edit builders, harvest station, AC driver, render pipelines |
-| `assets/` | Neutral sample shape (`motion_dna/`), palette and components from the *Essentials* Figma, fonts |
-| `docs/` | `LEARNINGS.md`, case studies, screens and examples |
-| `ae/` | Test project |
-| `media/` | AI test footage, mattes, tracking data, music and VO for the showcases |
-| `research/` | Calibration, harvests, preview catalog, Motion Style Map (`style_map/`, `ontology/`, `styles/`, `batch/`) |
-
-## Requirements
-
-**Windows or macOS** · After Effects 2025/2026 · Python 3 with `numpy`, `opencv-python`, `scipy`, `Pillow` · `ffmpeg` on the PATH · Git LFS · a bash shell (Git Bash on Windows; built in on macOS).
-The repo can be cloned anywhere: scripts compute the repo root (`SS_ROOT`) from their own location. Run the `.jsx` files from `tools/` (don't copy them into AE's *ScriptUI Panels* folder; the installers add a small loader instead).
-
-| | Windows | macOS |
+| Tested: styles on one layout | Mix by tags | One move, the panel's controls |
 |---|---|---|
-| Install the panel | `tools/install_panel.ps1` | `tools/install_panel.sh` |
-| Bridge / MCP start AE scripts with | `AfterFX.exe -s` | `osascript` → AE's `DoScriptFile` |
-| Overrides | `SS_AFTERFX`, `SS_AERENDER` | `SS_AE_APP` (e.g. `Adobe After Effects 2026`), `SS_AERENDER` |
-| Local asset packs | `%LOCALAPPDATA%\MisterHorse\ProductManager\AssetPacks` | `~/Library/Application Support/MisterHorse/ProductManager/AssetPacks` (override: `SS_ASSET_PACKS`) |
-| Animation Composer harvesting (`ac_driver.py`, label OCR) | yes | not available (Windows UI automation and OCR) |
+| ![Styles](docs/examples/test-styles.gif) | ![Mix](docs/examples/test-mix.gif) | ![Controls](docs/examples/test-controls.gif) |
 
-On macOS, the first `osascript` call asks for permission to control After Effects (System Settings › Privacy & Security › Automation): allow it for your terminal. The macOS path is written to mirror the tested Windows one but has not been run on a Mac yet; report anything that breaks.
+<details>
+<summary>Earlier showcases: the explainer, The 1974 Cypher, The 1974 Boardroom and the first tests</summary>
 
-## Notes
-
-- If a project contains Animation Composer layers, `aerender` hangs: render through `tools/render_comps.jsx` / `tools/render_queue.jsx` (the open AE's queue). AE shows "Not Responding" while a scripted render runs; that is expected.
-- Brand fonts (Inter Tight and Instrument Serif, OFL) are picked with `SSM.font("display" | "ui" | "ui_regular")`, falling back to Georgia/Arial.
-- Rebuilding a scene comp removes it from every comp that nests it; `build_scene.jsx` rebuilds the breakdown automatically, and `build_edit.jsx` should run after it.
-
-## Documentation
-
-- [`docs/LEARNINGS.md`](docs/LEARNINGS.md) — everything we learned: driving AE from an LLM, ExtendScript pitfalls, rendering, AI footage with Flora, tracking/roto/overlays, typography, audio, repo hygiene and costs.
-- [`docs/case-studies/the-1974-cypher.md`](docs/case-studies/the-1974-cypher.md) — speed ramps and likeness QA, step by step.
-- [`docs/case-studies/the-1974-boardroom.md`](docs/case-studies/the-1974-boardroom.md) — the Boardroom showcase, step by step, with prompts.
-
----
-
-## Tests and showcases
-
-### *Motion DNA · promo* (67 s)
-
-The promotional cut of the explainer, in the style of our fashion use-case video: full-screen footage, oversized type, hard cuts on the spoken word, big Spark + Pine shape wipes, one continuous voice read and an upbeat pop bed. Every element is still animated by a library preset, and every face went through the MiniMax refinement pass. Video: [`docs/examples/ss_motion_promo.mp4`](docs/examples/ss_motion_promo.mp4) · step by step: [`docs/case-studies/ss-motion-promo.md`](docs/case-studies/ss-motion-promo.md).
-
-| The hook | One click, one identity | Techniques |
-|---|---|---|
-| ![Hook](docs/examples/promo-hook.gif) | ![Packs](docs/examples/promo-packs.gif) | ![Techniques](docs/examples/promo-techniques.gif) |
-
-### *Motion DNA · internal explainer* (68 s)
-
-How we built the library, why it exists (AI-made motion all looks the same) and how to use it, animated **with the library itself**. Storyboard in Figma ([slack_video › motion pluguin](https://www.figma.com/design/OGiHZakKWL9iUXUJ8rn7Ko/slack_video?node-id=70-2)), scenes built from JSON by `tools/build_explainer.jsx`. Video: [`docs/examples/ss_motion_explainer.mp4`](docs/examples/ss_motion_explainer.mp4) · step by step: [`docs/case-studies/ss-motion-explainer.md`](docs/case-studies/ss-motion-explainer.md).
+**Motion DNA · internal explainer** (68 s): how the library was built and how to use it, animated with the library
+itself. [`docs/examples/ss_motion_explainer.mp4`](docs/examples/ss_motion_explainer.mp4) ·
+[step by step](docs/case-studies/ss-motion-explainer.md). The promotional cut (67 s):
+[`docs/examples/ss_motion_promo.mp4`](docs/examples/ss_motion_promo.mp4) · [step by step](docs/case-studies/ss-motion-promo.md).
 
 | Our own curves | The plugin | Claude drives it |
 |---|---|---|
 | ![Curves](docs/examples/explainer-curves.gif) | ![Plugin](docs/examples/explainer-plugin.gif) | ![Claude](docs/examples/explainer-claude.gif) |
 
-### *The 1974 Cypher* (32 s · speed-ramp test)
-
-The two collaborators as a 1970s Bronx crew, back to back. Orbital moves around the outfit details are speed-ramped on the beat with the new `Ramp` curve (slow-mo → burst → slow-mo, a rewind whip on the last beat), with tracked labels on every detail. It also tested likeness: real photos only as identity references, a face-check sheet before spending on video, and an A/B of Seedance 2.5 vs MiniMax H3 Max. Full video: [`docs/examples/cypher_1974.mp4`](docs/examples/cypher_1974.mp4) · step by step: [`docs/case-studies/the-1974-cypher.md`](docs/case-studies/the-1974-cypher.md).
+**The 1974 Cypher** (32 s, speed-ramp test): orbital moves speed-ramped on the beat with the `Ramp` curve, tracked labels
+on every detail, and a likeness QA. [`docs/examples/cypher_1974.mp4`](docs/examples/cypher_1974.mp4) ·
+[step by step](docs/case-studies/the-1974-cypher.md).
 
 | Ramp on the sneakers | Wide orbit + title | Tracked details |
 |---|---|---|
 | ![Sneakers](docs/examples/cypher-sneakers.gif) | ![Wide](docs/examples/cypher-wide.gif) | ![Details](docs/examples/cypher-details.gif) |
 
-### *The 1974 Boardroom* (45 s)
-
-A capability test built end to end by Claude with this repo, to show the team what the library can do: three consistent AI shots of the two project collaborators (Flora: Nano Banana Pro + Kling 3.0 Pro), OpenCV tracking, AI roto mattes (VEED), organic hand-drawn contours, face scans, titles behind the people, a holographic HUD built from library presets, **freeze frames with kinetic type**, a 70s announcer voiceover (ElevenLabs v3), a soul-funk score ducked under the VO, a roto breakdown, and the library app itself. Full video: [`docs/examples/whisky_1974_boardroom.mp4`](docs/examples/whisky_1974_boardroom.mp4).
+**The 1974 Boardroom** (45 s): consistent AI shots, OpenCV tracking, AI roto, organic contours, face scans, titles behind
+the people, a holographic HUD, freeze frames with kinetic type, a 70s announcer VO and a roto breakdown.
+[`docs/examples/whisky_1974_boardroom.mp4`](docs/examples/whisky_1974_boardroom.mp4) ·
+[step by step](docs/case-studies/the-1974-boardroom.md).
 
 | "Zero keyframes." | "Tracked." | "Rotoscoped." |
 |---|---|---|
 | ![Zero keyframes](docs/examples/reel-freeze-keyframes.gif) | ![Tracked](docs/examples/reel-freeze-tracked.gif) | ![Rotoscoped](docs/examples/reel-freeze-rotoscoped.gif) |
 
-| The library, in the office | Roto breakdown |
-|---|---|
-| ![Library app](docs/examples/reel-library-app.gif) | ![Breakdown](docs/examples/whisky-breakdown.gif) |
+| A Figma slide, animated | A draw-on intro | Text tracking on video | HUD on tracked points |
+|---|---|---|---|
+| ![Figma slide](docs/examples/use-figma-slide.gif) | ![Draw-on](docs/examples/use-icon-intro.gif) | ![Text tracking](docs/examples/text-tracking.gif) | ![HUD](docs/examples/hud-test.gif) |
 
-| Shot 1 · two-shot | Shot 2 · subject 01 | Shot 3 · subject 02 |
-|---|---|---|
-| ![Two-shot](docs/examples/whisky-two-shot.gif) | ![Aaron](docs/examples/whisky-aaron.gif) | ![Gian](docs/examples/whisky-gian.gif) |
+People in these earlier showcases are the project collaborators (Aaron Amortegui and Gian Orsi), who agreed to be test
+subjects; every clip went through the face refinement pass. Prices, bottlings and roles are fictional.
+</details>
 
-Everything is data-driven: `media/whisky/scenes.json` (shots, app screen, breakdown) and `media/whisky/edit.json` (cut, freezes, VO, music, SFX, end card):
+## Documentation
 
-```bash
-bash tools/bridge.sh tools/build_scene.jsx     # scenes + app screen + breakdown
-bash tools/bridge.sh tools/build_edit.jsx      # the edit
-```
+- [`docs/CATALOG.md`](docs/CATALOG.md): every preset and style with its thumbnail.
+- [`docs/TOOLS.md`](docs/TOOLS.md): every script, what it does and how to run it.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md): adding presets, open-source effects, styles, references, case studies; the layout and edit rules (§9).
+- [`docs/LEARNINGS.md`](docs/LEARNINGS.md): every pitfall already solved (driving AE from an LLM, ExtendScript, rendering, AI footage, tracking and roto, typography, audio, costs).
+- [`CLAUDE.md`](CLAUDE.md): the rules every Claude follows in this repo.
 
-### Earlier tests
+## Credits and requirements
 
-| Text behind the subject |
-|---|
-| ![Text behind](docs/examples/text-behind-subject.gif) |
-| Giant title between background and person, using an AI person matte |
+Built by **Aaron Amortegui** and **Gian Orsi** (Motion Style Map research), with Claude. Classics adapt
+[animate.css](https://animate.style) **4.1.1** (MIT, © 2020 Daniel Eden) into native keyframes; later releases changed
+license and are not used. Fonts: Inter Tight and Instrument Serif (SIL OFL). Animation Composer is used only as a
+behavioral reference: its presets are never decrypted, modified or redistributed, and its asset packs are indexed
+locally, never committed.
 
-Test comps in `ae/motion_lab_v01.aep`: `01_Sample_Intro` (sample draw-on), `02_Track_70s` (tracked points and callout), `03_Figma_Chips` (*Essentials* slide with tokens), `04_Text_Tracking_70s`, `05_Text_Behind_70s`, `HUD_TEST`, and the `WHISKY 1974` folder.
-
-People in `media/` and the showcases are project collaborators (Aaron Amortegui and Gian Orsi) who agreed to be used as test subjects. Prices, bottlings and roles are fictional.
+**Requirements:** Windows or macOS · After Effects 2025/2026 · Python 3 (`numpy`, `opencv-python`, `scipy`, `Pillow`) ·
+`ffmpeg` · Git LFS · a bash shell (Git Bash on Windows). Clone anywhere: scripts find the repo root on their own.
+Platform details and overrides (`SS_AFTERFX`, `SS_AE_APP`, `SS_AERENDER`, `SS_ASSET_PACKS`): [docs/TOOLS.md](docs/TOOLS.md)
+and [docs/LEARNINGS.md](docs/LEARNINGS.md).

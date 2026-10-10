@@ -1,4 +1,5 @@
-"""Writes the full preset catalog into README.md between <!-- catalog:start --> and <!-- catalog:end -->.
+"""Writes the full preset catalog into docs/CATALOG.md between <!-- catalog:start --> and <!-- catalog:end -->
+(the README stays short and links to it; image paths are relative to docs/).
 
 Source of truth: library/library.json (motion, text, fx) and library/recipes.json (recipes).
 Run after growing the library:  python tools/readme_catalog.py
@@ -7,7 +8,8 @@ import json
 import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-README = ROOT / "README.md"
+README = ROOT / "docs" / "CATALOG.md"   # the catalog page (README links to it)
+UP = "../"                              # image paths from docs/
 COLS = 4
 ENERGY = {"s": "soft", "m": "medium", "d": "dynamic"}
 SECTIONS = [
@@ -20,7 +22,7 @@ SECTIONS = [
 
 
 def cell(gif, title, energy, use):
-    return f"<img src=\"{gif}\" width=\"200\"><br>**{title}** · `{energy}`<br><sub>{use}</sub>"
+    return f"<img src=\"{UP}{gif}\" width=\"200\"><br>**{title}** · `{energy}`<br><sub>{use}</sub>"
 
 
 def table(cells):
@@ -56,14 +58,14 @@ def main():
                 cells = [cell("library/" + p["gif"], p["name"], p["energy"], p["use"]) for p in lib if p["kind"] == kind and p.get("family", "own") != "classic"]
         blocks.append(f"### {title} ({len(cells)})\n\n{blurb}\n\n{table(cells)}\n")
     packs = json.loads((ROOT / "library/packs.json").read_text(encoding="utf-8"))["packs"]
-    pc = [f"<img src=\"library/packs/{p['slug']}.gif\" width=\"260\"><br>**{p['name']}** · `{p['energy']}`<br><sub>{p['desc']}</sub>" for p in packs]
+    pc = [f"<img src=\"{UP}library/packs/{p['slug']}.gif\" width=\"260\"><br>**{p['name']}** · `{p['energy']}`<br><sub>{p['desc']}</sub>" for p in packs]
     blocks.append(f"### Packs ({len(packs)})\n\nOne click gives a whole comp an identity: each layer gets the preset of its role "
                   "(title, subtitle, body, shape, media, logo), staggered. `SSP.applyPack(comp, name)`\n\n" + table(pc) + "\n")
     body = "\n".join(blocks)
     s = README.read_text(encoding="utf-8")
     a, b = "<!-- catalog:start -->", "<!-- catalog:end -->"
     if a not in s or b not in s:
-        raise SystemExit("README.md is missing the catalog markers")
+        raise SystemExit("docs/CATALOG.md is missing the catalog markers")
     s = s[: s.index(a) + len(a)] + "\n" + body + s[s.index(b):]
     README.write_text(s, encoding="utf-8")
     print(f"catalog: {total} presets")

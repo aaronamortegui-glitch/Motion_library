@@ -17,12 +17,14 @@ if [ "$(uname -s)" = "Darwin" ]; then
   ae_running() { pgrep -f "$AE_APP.app/Contents/MacOS" >/dev/null 2>&1 || pgrep -x "After Effects" >/dev/null 2>&1; }
   ae_open() { open -a "$AE_APP" "$1"; }
   ae_script() { osascript -e "tell application \"$AE_APP\" to DoScriptFile \"$1\"" >/dev/null 2>&1; }
+  ae_poll() { osascript -e "tell application \"$AE_APP\" to DoScript \"if (\$.global.SS_BRIDGE_POLL) \$.global.SS_BRIDGE_POLL();\"" >/dev/null 2>&1; }
 else
   AFX="${SS_AFTERFX:-/c/Program Files/Adobe/Adobe After Effects 2026/Support Files/AfterFX.exe}"
   native() { cygpath -m "$1" 2>/dev/null || echo "$1"; }
   ae_running() { tasklist //FI "IMAGENAME eq AfterFX.exe" 2>/dev/null | grep -qi afterfx; }
   ae_open() { "$AFX" "$(cygpath -w "$1" 2>/dev/null || echo "$1")" >/dev/null 2>&1 & }
   ae_script() { "$AFX" -s "\$.evalFile(new File('$1'))" >/dev/null 2>&1; }
+  ae_poll() { "$AFX" -s "if (\$.global.SS_BRIDGE_POLL) \$.global.SS_BRIDGE_POLL();" >/dev/null 2>&1; }
 fi
 
 # AE closed (or crashed): the old marker is stale. Open AE normally first (on Windows, launching a closed AE with
@@ -41,6 +43,9 @@ printf '$.evalFile(new File("%s"));\n' "$(native "$(cd "$(dirname "$SRC")" && pw
 out="$ROOT/bridge/outbox/$name.txt"
 for ((i = 0; i < TIMEOUT * 2; i++)); do
   [ -f "$out" ] && break
+  # AE sometimes stops firing scheduled tasks (the bridge's poll) while scripts still run: after 15 s with the job
+  # untouched in the inbox, run one poll ourselves (it executes the job synchronously).
+  if (( i > 0 && i % 30 == 0 )) && [ -f "$ROOT/bridge/inbox/$name.jsx" ]; then ae_poll || true; fi
   sleep 0.5
 done
 [ -f "$out" ] || { echo "No response from AE in ${TIMEOUT}s (is AE open and the bridge active?)"; exit 1; }

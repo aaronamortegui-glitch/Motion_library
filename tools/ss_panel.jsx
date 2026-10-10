@@ -23,6 +23,16 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     try { var lib = SSM.readJSON(SS_ROOT + "/library/library.json").presets; for (var i = 0; i < lib.length; i++) META[lib[i].name] = lib[i]; } catch (e) {}
     try { CURVES = SSM.readJSON(SS_ROOT + "/library/preview_curves.json"); } catch (e) {}
     var TECH = []; try { TECH = SSM.readJSON(SS_ROOT + "/library/techniques.json").techniques; } catch (e) {}
+    // brand profiles: custom styles that learn from every review (library/brands/<slug>/brand.json, tools/brand.py)
+    var BRANDS = [];
+    try { var bdirs = Folder(SS_ROOT + "/library/brands").getFiles(function (f) { return f instanceof Folder; });
+          for (var bi = 0; bi < bdirs.length; bi++) { var bf = new File(bdirs[bi].fsName + "/brand.json"); if (bf.exists) BRANDS.push(SSM.readJSON(bf.fsName)); } } catch (e) {}
+    function brandOf(slug) { for (var i = 0; i < BRANDS.length; i++) if (BRANDS[i].slug === slug) return BRANDS[i]; return null; }
+    function brandRules(b, max) {
+        var out = [];
+        for (var i = 0; i < b.rules.length && (!max || i < max); i++) out.push("· [" + b.rules[i].category + "] " + b.rules[i].rule);
+        return out.join("\n");
+    }
     // tags (library/tags.json, tools/tag_library.py): roles, targets, energy range, tones — used for the Tone filter,
     // the Transitions category and the style grid
     var TAGS = { presets: [], tones: [] }, TAGOF = {};
@@ -78,7 +88,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     };
 
     // ---------- category + filters ----------
-    var CATS = ["Moves", "Classics", "Text", "Loops", "Transitions", "Recipes", "Styles", "Mix", "Techniques", "Assets", "★ Favorites"];
+    var CATS = ["Moves", "Classics", "Text", "Loops", "Transitions", "Recipes", "Styles", "Brands", "Mix", "Techniques", "Assets", "★ Favorites"];
     var fRow = win.add("group"); fRow.alignChildren = ["left", "center"]; fRow.alignment = ["fill", "top"];
     var cat = fRow.add("dropdownlist", undefined, CATS); cat.preferredSize.width = 120; cat.selection = 0;
     var search = fRow.add("edittext", undefined, ""); search.preferredSize.width = 140; search.helpTip = "Search by name, channel or use";
@@ -162,6 +172,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         CUR = { key: kind + "/" + name, kind: kind, name: name }; FRAME = 0; PREV_IMG = null;
         if (kind === "pack") setPreview("/library/packs/" + packSlug(name) + "_md.png");
         if (kind === "technique") setPreview("/library/techniques/" + techSlug(name) + "_md.png");
+        if (kind === "brand") setPreview("/library/brands/" + name + "/thumb.png");
         selName.text = name + (meta.energy ? "  ·  " + meta.energy : "");
         selInfo.text = (meta.channels || "") + "\n" + (meta.use || "");
         bFav.text = FAV[favKey()] ? "★" : "☆";
@@ -220,6 +231,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         if (!CUR) { alert("Pick a preset in the gallery first."); return; }
         if (CUR.kind === "technique") { alert(CUR.name + "\n\n" + techText(CUR.name)); return; }
         if (CUR.kind === "pack") { applyPack(phase); return; }
+        if (CUR.kind === "brand") { applyBrand(phase); return; }
         var ls = selectedLayers(); if (!ls) return;
         var st = (parseFloat(stag.text) || 0) * ls[0].containingComp.frameDuration;
         SSP.markerTiming(mk.value); SSP.tune(tuning());
@@ -323,6 +335,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
             if (!items.length) body.add("statictext", undefined, "No favorites yet: pick a preset and press ☆.");
             else grid(items);
         } else if (c === "Styles") styles();
+        else if (c === "Brands") brands();
         else if (c === "Mix") mix();
         else if (c === "Techniques") techniques();
         else if (c === "Assets") assets();
@@ -373,6 +386,53 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         SSP.markerTiming(false); SSP.tune();
         app.endUndoGroup();
         selInfo.text = res.length ? res.length + " layers animated with " + CUR.name : "No layers matched (backgrounds, nulls and locked layers are skipped).";
+    }
+
+    // ---------- brands: custom styles that learn from every review (library/brands) ----------
+    function brands() {
+        body.add("statictext", undefined, "Each brand keeps its own style and the rules learned in its reviews. Pick one to read\nits rules, then In / Out / Both animates the comp in its style. Claude reads them too.", { multiline: true }).preferredSize.height = 34;
+        if (!BRANDS.length) { body.add("statictext", undefined, "No brands yet. In a terminal: python tools/brand.py new <slug> --name \"Acme\"", { multiline: true }); return; }
+        scopeAll = body.add("checkbox", undefined, "Whole comp (otherwise only the selected layers)"); scopeAll.value = true;
+        var q = search.text.toLowerCase(), tn = tone.selection.index > 0 ? tone.selection.text : "", shown = [];
+        for (var i = 0; i < BRANDS.length; i++) {
+            var b = BRANDS[i], f = b.feel || {};
+            if (q && (b.name + " " + (f.tones || []).join(" ") + " " + brandRules(b)).toLowerCase().indexOf(q) < 0) continue;
+            if (tn && ("," + (f.tones || []).join(",") + ",").indexOf("," + tn + ",") < 0) continue;
+            if (!inRange(f.energy)) continue;
+            shown.push(b);
+        }
+        if (!shown.length) { body.add("statictext", undefined, "No brand matches the filters."); return; }
+        var COLS = Math.max(1, Math.floor((((win.size && win.size.width) || 380) - 24) / 236)), row = null;
+        for (var k = 0; k < shown.length; k++) (function (b, k) {
+            if (k % COLS === 0) { row = body.add("group"); row.spacing = 6; row.alignChildren = ["left", "top"]; }
+            var cell = row.add("group"); cell.orientation = "column"; cell.spacing = 1; cell.alignChildren = ["left", "top"];
+            var f = new File(SS_ROOT + "/library/brands/" + b.slug + "/thumb.png"), btn;
+            if (f.exists) btn = cell.add("iconbutton", undefined, ScriptUI.newImage(f), { style: "toolbutton" });
+            else { btn = cell.add("button", undefined, b.name); btn.preferredSize = [224, 126]; }
+            cell.add("statictext", [0, 0, 224, 16], b.name + " · " + b.feel.style + (b.feel.curve ? " on " + b.feel.curve : ""));
+            cell.add("statictext", [0, 0, 224, 30], (b.feel.tones || []).join(" · ") + "\n" + b.rules.length + " rules learned · " + (b.projects || []).length + " projects", { multiline: true });
+            var bRules = cell.add("button", undefined, "Rules…"); bRules.preferredSize = [80, 20];
+            bRules.onClick = function () { alert(b.name + " · " + b.rules.length + " rules\n\n" + brandRules(b)); };
+            btn.onClick = function () {
+                select("brand", b.slug, {}); selName.text = "Brand: " + b.name;
+                selInfo.text = b.feel.style + (b.feel.curve ? " on " + b.feel.curve : "") + " · " + b.rules.length + " rules\n" + brandRules(b, 3);
+            };
+        })(shown[k], k);
+    }
+    function applyBrand(phase) {
+        var b = brandOf(CUR.name), c = app.project.activeItem;
+        if (!b) return;
+        if (!(c instanceof CompItem)) { alert("Open a composition first."); return; }
+        var whole = !scopeAll || scopeAll.value, ls = whole ? null : c.selectedLayers;
+        if (!whole && (!ls || !ls.length)) { alert("Select layers, or tick 'Whole comp'."); return; }
+        var tu = tuning(); if (!tu.ease && b.feel.curve) tu.ease = b.feel.curve;   // the brand's curve unless Easing says otherwise
+        SSP.markerTiming(mk.value); SSP.tune(tu);
+        app.beginUndoGroup(NAME + " brand: " + b.name);
+        var res = [];
+        try { res = SSP.applyPack(c, b.feel.style, ls, phase); } catch (e) { alert(NAME + ": " + e.toString()); }
+        SSP.markerTiming(false); SSP.tune();
+        app.endUndoGroup();
+        selInfo.text = res.length ? res.length + " layers animated in the " + b.name + " style. Follow its rules for the rest (Rules…)." : "No layers matched.";
     }
 
     // ---------- mix: pick moves and curves by tags for the layers in the comp, apply them, save them as a style ----------
@@ -590,6 +650,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     $.global.SS_PANEL = {
         select: function (kind, name) {
             if (kind === "pack" || kind === "technique") { select(kind, name, {}); selName.text = (kind === "pack" ? "Style: " : "Technique: ") + name; return "selected " + kind + "/" + name; }
+            if (kind === "brand") { var bb = brandOf(name); if (!bb) return "unknown brand"; select("brand", name, {}); selName.text = "Brand: " + bb.name; selInfo.text = bb.feel.style + " · " + bb.rules.length + " rules\n" + brandRules(bb, 3); return "selected brand/" + name; }
             var meta = metaOf(kind, name);
             if (!meta) return "unknown preset";
             select(kind, name, meta); return "selected " + kind + "/" + name;

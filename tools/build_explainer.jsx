@@ -3,7 +3,9 @@
 // Spec: media/explainer/explainer.json → comps EX_S01…EX_S09 (folder "EXPLAINER"). Then build_edit.jsx sequences them.
 // Run: bash tools/bridge.sh tools/build_explainer_all.jsx 900  (scenes + edit)
 // Element types: text · pill · card (bg + texts) · media (png/mp4 with rounded corners) · rect · marker (a bar that
-// slides on a curve). Each element: at [x, y] (top-left, like Figma), t (seconds into the scene), motion / text
+// slides on a curve) · screen (media corner-pinned onto a screen in the plate) · pixels (pixel art from "X" rows, with
+// an optional jump or scroll loop). A scene may carry "push" (camera
+// push into a point, e.g. into that screen as a transition). Each element: at [x, y] (top-left, like Figma), t (seconds into the scene), motion / text
 // preset, optional fx loop, attention preset at a time.
 #include "ss_presets.jsx"
 var EXPLAINER_SPEC = (typeof EXPLAINER_SPEC !== "undefined" && EXPLAINER_SPEC) || "media/explainer/explainer.json";
@@ -186,7 +188,23 @@ var EXPLAINER_SPEC = (typeof EXPLAINER_SPEC !== "undefined" && EXPLAINER_SPEC) |
         var BG = C.layers.addSolid(col(S.bg), "BG", W, H, 1); BG.locked = true;
         for (var e = 0; e < S.elements.length; e++) {
             var E = S.elements[e], L = null, isText = false;
-            if (E.type === "text") { L = text(C, E.text, E.font || "med", E.size, E.color || (S.bg === "pine" ? "cloud" : "pine"), E.at, E.tracking); isText = true; }
+            if (E.type === "text") {
+                L = text(C, E.text, E.font || "med", E.size, E.color || (S.bg === "pine" ? "cloud" : "pine"), E.at, E.tracking); isText = true;
+                if (E.bold) {   // highlight key words in bold inside one text layer (AE 24+ character ranges)
+                    try {
+                        var btp = L.property("ADBE Text Properties").property("ADBE Text Document"), btd = btp.value;
+                        for (var bw = 0; bw < E.bold.length; bw++) {
+                            var bi = E.text.indexOf(E.bold[bw]);
+                            if (bi >= 0) btd.characterRange(bi, bi + E.bold[bw].length).font = FONT.bold;
+                        }
+                        btp.setValue(btd);
+                    } catch (xb) {}
+                }
+                if (E.shadow) {   // legibility over footage
+                    var ds = L.property("ADBE Effect Parade").addProperty("ADBE Drop Shadow");
+                    ds.property("ADBE Drop Shadow-0002").setValue(80); ds.property("ADBE Drop Shadow-0004").setValue(6); ds.property("ADBE Drop Shadow-0005").setValue(24);
+                }
+            }
             else if (E.type === "pill") L = place(C, pillComp(E, dur, S.bg === "pine" && !E.light), E.at);
             else if (E.type === "card") L = place(C, cardComp(E, dur), E.at);
             else if (E.type === "media") {
@@ -195,6 +213,39 @@ var EXPLAINER_SPEC = (typeof EXPLAINER_SPEC !== "undefined" && EXPLAINER_SPEC) |
                 if (E.t) L.startTime = E.t;   // footage cut in on a word starts playing from that moment
             }
             else if (E.type === "rect") { L = roundRect(C, E.size[0], E.size[1], E.radius || 0, E.fill, E.stroke, E.strokeWidth); tr(L, "ADBE Position").setValue([E.at[0] + E.size[0] / 2, E.at[1] + E.size[1] / 2]); if (E.opacity !== undefined) tr(L, "ADBE Opacity").setValue(E.opacity); }
+            else if (E.type === "screen") {
+                // screen replacement: media corner-pinned onto a screen in the plate. corners = [UL, UR, LL, LR] in comp px
+                var sc = mediaComp({ file: E.file, comp: E.comp, size: E.size || [1440, 1080], skip: E.skip, rate: E.rate }, dur);
+                L = C.layers.add(sc); L.name = "screen " + (E.comp || E.file.split("/").pop());
+                tr(L, "ADBE Anchor Point").setValue([0, 0]); tr(L, "ADBE Position").setValue([0, 0]);
+                if (E.bulge) {   // CRT glass bulges: lens distortion on the flat screen before it is pinned
+                    var oc = L.property("ADBE Effect Parade").addProperty("ADBE Optics Compensation");
+                    oc.property("ADBE Optics Compensation-0001").setValue(E.bulge);
+                }
+                var cp = L.property("ADBE Effect Parade").addProperty("ADBE Corner Pin");
+                cp.property(1).setValue(E.corners[0]); cp.property(2).setValue(E.corners[1]);
+                cp.property(3).setValue(E.corners[2]); cp.property(4).setValue(E.corners[3]);
+                if (E.opacity !== undefined) tr(L, "ADBE Opacity").setValue(E.opacity);
+                if (E.blend === "add") L.blendingMode = BlendingMode.ADD;        // the plate's glass reflections show through
+                if (E.blend === "screen") L.blendingMode = BlendingMode.SCREEN;
+                if (E.glow) { var sg = L.property("ADBE Effect Parade").addProperty("ADBE Glo2"); sg.property("ADBE Glo2-0003").setValue(E.glow); sg.property("ADBE Glo2-0004").setValue(0.6); }
+            }
+            else if (E.type === "pixels") {
+                // pixel art from rows of "X" / "." ({ rows, cell, at, color }); optional loop by expression:
+                // jump { every, height } (hops in place) · scroll { speed, span } (moves left and wraps around)
+                L = C.layers.addShape(); L.name = E.name || "pixels";
+                var pg = L.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group"), cs = E.cell || 12;
+                for (var ry = 0; ry < E.rows.length; ry++) for (var rx = 0; rx < E.rows[ry].length; rx++) {
+                    if (E.rows[ry].charAt(rx) !== "X") continue;
+                    var px = pg.addProperty("ADBE Vector Shape - Rect");
+                    px.property("ADBE Vector Rect Size").setValue([cs, cs]); px.property("ADBE Vector Rect Position").setValue([rx * cs + cs / 2, ry * cs + cs / 2]);
+                }
+                pg.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").setValue(col(E.color || "spark"));
+                tr(L, "ADBE Position").setValue(E.at);
+                if (E.jump) tr(L, "ADBE Position").expression = "var e = " + E.jump.every + ", p = ((time + " + (E.jump.offset || 0) + ") % e) / e;" +
+                    " value - [0, p < 0.45 ? " + E.jump.height + " * Math.sin(Math.PI * p / 0.45) : 0];";
+                if (E.scroll) tr(L, "ADBE Position").expression = "value - [(time * " + E.scroll.speed + ") % " + E.scroll.span + ", 0];";
+            }
             else if (E.type === "wipe") { wipe(C, E, dur); continue; }
             else if (E.type === "lines") { lines(C, E, dur); continue; }
             else if (E.type === "marker") {
@@ -210,6 +261,13 @@ var EXPLAINER_SPEC = (typeof EXPLAINER_SPEC !== "undefined" && EXPLAINER_SPEC) |
             }
             if (!L) continue;
             animate(L, E, dur, isText);
+        }
+        // camera push over the whole scene: { to: [x, y] (point that stays put), scale: end factor, t, dur, ease }
+        if (S.push) {
+            var P = S.push, cam = C.layers.addNull(dur); cam.name = "camera push";
+            tr(cam, "ADBE Anchor Point").setValue([50, 50]); tr(cam, "ADBE Position").setValue(P.to);
+            for (var q = 2; q <= C.numLayers; q++) { var Lq = C.layer(q); if (Lq !== cam && !Lq.locked && !Lq.parent) Lq.parent = cam; }
+            SSM.animateRaw(tr(cam, "ADBE Scale"), P.t || 0, (P.t || 0) + (P.dur || dur), [100, 100, 100], [100 * P.scale, 100 * P.scale, 100], SSM.ease(P.ease || "Cruise"));
         }
         // motion blur on everything that moves
         C.motionBlur = true;

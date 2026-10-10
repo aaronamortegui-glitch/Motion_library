@@ -180,17 +180,31 @@ def fonts(remove=False):
                 shutil.copy2(f, dst / f.name)   # overwrite: an update brings the new font files
         print(OK + f"{len(files)} fonts {'removed from' if remove else 'in'} {dst}")
         return True
+    import ctypes
     import winreg   # per-user install: no admin needed
     dst = pathlib.Path(os.environ["LOCALAPPDATA"]) / "Microsoft/Windows/Fonts"
     dst.mkdir(parents=True, exist_ok=True)
     key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows NT\CurrentVersion\Fonts")
+    existing = {}   # registry value name -> file, so one font file is never registered twice under two names
+    i = 0
+    while True:
+        try:
+            n, v, _ = winreg.EnumValue(key, i); existing[n] = str(v); i += 1
+        except OSError:
+            break
+    gdi = ctypes.windll.gdi32
+    loaded = 0
     for f in files:
-        target, value = dst / f.name, f.stem.replace("[wght]", "") + " (TrueType)"
+        target = dst / f.name
+        ours = f.stem.replace("[wght]", "") + " (TrueType)"
+        names = [n for n, v in existing.items() if pathlib.Path(v).name.lower() == f.name.lower()]
         if remove:
-            try:
-                winreg.DeleteValue(key, value)
-            except OSError:
-                pass
+            for n in names or [ours]:
+                try:
+                    winreg.DeleteValue(key, n)
+                except OSError:
+                    pass
+            gdi.RemoveFontResourceW(str(target))
             try:
                 target.unlink(missing_ok=True)
             except OSError:
@@ -200,10 +214,22 @@ def fonts(remove=False):
             shutil.copy2(f, target)
         except OSError:
             pass   # the font is in use (AE open): the registered copy stays until AE closes
-        winreg.SetValueEx(key, value, 0, winreg.REG_SZ, str(target))
+        # Duplicate registrations of the same file (e.g. "Inter Tight" by hand + "InterTight" by an older setup.py) made
+        # Windows skip the font at the next logon, and After Effects fell back to Times. Keep exactly one value per file.
+        keep = names[0] if names else ours
+        for n in names[1:]:
+            try:
+                winreg.DeleteValue(key, n)
+            except OSError:
+                pass
+        winreg.SetValueEx(key, keep, 0, winreg.REG_SZ, str(target))
+        loaded += 1 if gdi.AddFontResourceW(str(target)) > 0 else 0   # usable now, without logging off
     winreg.CloseKey(key)
-    print(OK + f"{len(files)} fonts {'removed' if remove else 'for this user (restart After Effects to see them)'}")
-    return True
+    if not remove:
+        ctypes.windll.user32.SendMessageTimeoutW(0xFFFF, 0x001D, 0, 0, 0x0002, 2000, None)   # WM_FONTCHANGE to every app
+    print((OK if remove or loaded == len(files) else WARN) +
+          (f"{len(files)} fonts removed" if remove else f"{loaded}/{len(files)} fonts installed and loaded for this user (restart After Effects to see them)"))
+    return remove or loaded == len(files)
 
 
 def assets():

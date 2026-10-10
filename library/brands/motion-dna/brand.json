@@ -1,0 +1,50 @@
+{
+ "name": "Motion DNA",
+ "slug": "motion-dna",
+ "created": "2026-10-10",
+ "by": "Aaron Amortegui (reviews) · Claude",
+ "identity": {
+  "colors": {"pine": "#0A211F", "spark": "#D8FF85", "cloud": "#F7F9F2", "sea": "#174A46"},
+  "fonts": {"title": "InterTight-Bold", "ui": "InterTight-SemiBold", "text": "InterTight-Regular", "accent": "InstrumentSerif-Italic"},
+  "logo": "assets/brand/motion_dna_mark.svg"
+ },
+ "feel": {"energy": [3, 4], "tones": ["playful", "retro", "bold"], "style": "Playful", "curve": "Snap", "transition": "Shape-wipe transitions"},
+ "presets": {
+  "prefer": {
+   "title": ["Chars Ramp", "Snap Scale"],
+   "text": ["Words Fade Up", "Typewriter"],
+   "hits": ["Snap Scale"],
+   "logo": ["Wordmark Reveal"],
+   "labels": ["callout (card)", "bracket (stacked label)"],
+   "transitions": ["Shape-wipe transitions", "Push Through (into a screen)"]
+  },
+  "avoid": ["god rays (read as too much)", "contour outlines around a person", "serif titles", "flat full-screen UI with no device around it"]
+ },
+ "rules": [
+  {"id": 1, "category": "layout", "rule": "Labels and cards go inward, into the negative space between the subjects (the empty wall, the floor), never pushed against the frame edges.", "why": "the edges felt wasted and the labels read as stuck on", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 2, "category": "layout", "rule": "Callout dots, line ends and text never sit on a face: anchor on the torso or an object and lead the line away from the face.", "why": "dots on faces looked like a mistake", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 3, "category": "layout", "rule": "A label sits beside or above what it names, never on top of it.", "why": "the CRT label covered the screen it pointed at", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 4, "category": "layout", "rule": "When a label does not fit sideways, stack it into up to 3 short lines instead of forcing one long line out of the frame.", "why": "tracked labels ran off the frame", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 5, "category": "layout", "rule": "No text on text and no card touching another card; title and subtitle keep a clear gap.", "why": "1985 and MARCUS overlapped; the two opening cards touched", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 6, "category": "layout", "rule": "A name stays close to its person: freeze titles hug the silhouette on both sides.", "why": "Rex and Valance drifted to the frame edges", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 7, "category": "layout", "rule": "On a short shot a label must be readable from its first frame (no slow entrance) and hold long enough to read.", "why": "the floppy label arrived too late to read", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 8, "category": "color", "rule": "White text never sits on a white or busy plate: use a card (translucent pine with a thin cloud border) or move the text to a dark, calm area.", "why": "white on white did not read", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 9, "category": "typography", "rule": "Titles and labels are sans (Inter Tight); the serif (Instrument Serif Italic) is only the accent line. Never let a font be substituted.", "why": "a font fallback made every title serif and lifeless", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 10, "category": "typography", "rule": "Highlight key words with bold weight inside the line, not with more words.", "why": "important words did not stand out", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 11, "category": "typography", "rule": "A spoken punchline lands word by word on the voice, big and bold (EVERY. / SINGLE. / TIME.), with a hit on each word.", "why": "the line was too small and did not follow the voice", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 12, "category": "typography", "rule": "Nothing smaller than 36 px on screen.", "why": "several texts could not be read", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 13, "category": "motion", "rule": "Logo: the mark lands first, then the wordmark slides out from behind it (Wordmark Reveal), on a musical downbeat.", "why": "cross-family logo pattern from the Motion Style Map", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Gian's Motion Style Map"}},
+  {"id": 14, "category": "motion", "rule": "Hits and punchlines use the Snap curve; fly-through transitions push into an object in the world (a screen) with Launch.", "why": "editorial snap and push-through from the Motion Style Map", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Gian's Motion Style Map"}},
+  {"id": 15, "category": "effects", "rule": "A heroic entrance gets a soft warm glow behind the person (backlight), not rays and not an outline around the silhouette.", "why": "rays and contour lines read as too much", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 16, "category": "effects", "rule": "A UI on a screen sits inside the glass: clean the plate's screen, add the CRT bulge, blend it with the glass reflection, and keep the device in frame.", "why": "a full-screen UI was not understood as a screen", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 17, "category": "effects", "rule": "Action lines are solid spark, short and punchy, when something great happens (raising the box).", "why": "thin holographic lines did not read", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 18, "category": "effects", "rule": "Freeze titles: the person stays in colour (matte cut-out), the world goes black and white and defocused.", "why": "the name frame needed the person to pop", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 19, "category": "edit", "rule": "Never cut a phrase: no cut inside a spoken word, and dialogue audio runs about 0.35 s past its cut.", "why": "lines were chopped at the cut", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 20, "category": "edit", "rule": "Trim every AI shot to its action: no character appears where they never were, and plates end one frame before a camera cut.", "why": "characters popped in at desks they never sat at", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Aaron (review)"}},
+  {"id": 21, "category": "audio", "rule": "Music leads the key moments: it enters with the salesman, drops on his freeze, the bridge starts on a beat and the logo lands on a downbeat.", "why": "music & edit findings of the Motion Style Map", "source": {"project": "motion_dna_promo", "date": "2026-10-10", "by": "Gian's Motion Style Map"}},
+  {"id": 22, "category": "process", "rule": "Characters, location and props start as sheets; every shot is generated with those sheets as references.", "why": "text-only shots drifted (faces, wardrobe)", "source": {"project": "motion_dna_promo", "date": "2026-10-09", "by": "Aaron (review)"}}
+ ],
+ "projects": [
+  {"name": "Motion DNA promo (1985 infomercial parody)", "path": "media/motion_dna_promo", "date": "2026-10-10"}
+ ]
+}

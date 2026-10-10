@@ -52,6 +52,10 @@ checks = [
     ("render_frame", {"comp": COMP, "time_s": 0.5}, lambda t: ".png" in t),
     ("remove_animation", {"layers": ["Chip", "Title"], "comp": COMP}, lambda t: "cleared" in t),
     ("apply_pack", {"pack": "Calm Modern", "comp": COMP}, lambda t: "→" in t or "->" in t),
+    ("list_brands", {}, lambda t: "motion-dna" in t),
+    ("get_brand", {"slug": "motion-dna"}, lambda t: "## Layout" in t and "Snap" in t),
+    ("remove_animation", {"layers": ["Chip", "Title"], "comp": COMP}, lambda t: "cleared" in t),
+    ("apply_brand", {"slug": "motion-dna", "comp": COMP}, lambda t: "Motion DNA: style Playful" in t),
     ("add_asset", {"name": "Swoosh Transition 28", "type": "sfx", "comp": COMP, "time_s": 0.2}, lambda t: "added" in t),
     ("run_jsx", {"code": f'for (var i = 1; i <= app.project.numItems; i++) if (app.project.item(i).name === "{COMP}") {{ app.project.item(i).remove(); break; }} return "removed";'}, lambda t: "removed" in t),
 ]

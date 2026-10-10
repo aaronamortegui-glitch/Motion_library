@@ -3,7 +3,7 @@
   "tool": "ae_status",
   "ok": true,
   "args": {},
-  "answer": "AE 26.3x87 · project: _preview_build.aep · active: none · panel: loaded"
+  "answer": "AE 26.5x89 · project: motion_lab_v01.aep · active: _MCP_TEST (1280x720, 4.00s, 2 layers, selected: 1) · panel: loaded · fonts ok"
  },
  {
   "tool": "list_presets",
@@ -56,7 +56,7 @@
    "type": "sfx",
    "limit": 3
   },
-  "answer": "No local asset index. Run: python tools/index_assets.py"
+  "answer": "sfx|cartoon|Balloon Blow 04|1.01|-26.0|-12.0|\nsfx|cartoon|Clean Decelerating Creak 01|0.91|-22.9|-3.4|\nsfx|cartoon|Creaking Rubber 05|0.79|-26.8|-0.4|\n… 154 more"
  },
  {
   "tool": "run_jsx",
@@ -118,7 +118,7 @@
    "comp": "_MCP_TEST",
    "time_s": 0.5
   },
-  "answer": "Saved C:\\Documentos\\Trabajos Clientes\\Superside\\R+D\\Motion Library Claude\\research\\mcp\\frame_1791577745.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1791665626.png (open it to look at the frame)"
  },
  {
   "tool": "remove_animation",
@@ -142,15 +142,50 @@
   "answer": "Chip → shape: Fade Up\nTitle → title: Chars Rise"
  },
  {
+  "tool": "list_brands",
+  "ok": true,
+  "args": {},
+  "answer": "motion-dna: Motion DNA · style Playful · curve Snap · tones playful/retro/bold · energy [3, 4] · 22 rules"
+ },
+ {
+  "tool": "get_brand",
+  "ok": true,
+  "args": {
+   "slug": "motion-dna"
+  },
+  "answer": "# Brand: Motion DNA (motion-dna)\nFeel: energy 3-4, tones playful, retro, bold; base style **Playful**, curve **Snap**, transition Shape-wipe transitions\nColours: pine #0A211F, spark #D8FF85, cloud #F7F9F2, sea #174A46\nFonts: title InterTight-Bold, ui InterTight-SemiBold, text InterTight-Regular, acc"
+ },
+ {
+  "tool": "remove_animation",
+  "ok": true,
+  "args": {
+   "layers": [
+    "Chip",
+    "Title"
+   ],
+   "comp": "_MCP_TEST"
+  },
+  "answer": "cleared 11 properties on Chip, Title"
+ },
+ {
+  "tool": "apply_brand",
+  "ok": true,
+  "args": {
+   "slug": "motion-dna",
+   "comp": "_MCP_TEST"
+  },
+  "answer": "Motion DNA: style Playful with curve Snap\nChip → shape: Bounce In + Swing\nTitle → title: Chars Pop\nFollow the brand's rules for everything else (get_brand)."
+ },
+ {
   "tool": "add_asset",
-  "ok": false,
+  "ok": true,
   "args": {
    "name": "Swoosh Transition 28",
    "type": "sfx",
    "comp": "_MCP_TEST",
    "time_s": 0.2
   },
-  "answer": "Error: ERROR line 31 in /c/Documentos/Trabajos%20Clientes/Superside/R+D/Motion%20Library%20Claude/tools/ss_assets.jsx\nError: Asset not found in local packs: Swoosh Transition 28 (see library/ASSETS.local.txt)"
+  "answer": "added SFX · Swoosh Transition 28 at 0.2"
  },
  {
   "tool": "run_jsx",

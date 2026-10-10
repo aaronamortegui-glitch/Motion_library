@@ -235,6 +235,11 @@ lines += [f"style|{s['name']}|{s.get('energy_range', ['?', '?'])[0]}-{s.get('ene
           + ",".join((s['roles'].get(r) or {}).get('text') or (s['roles'].get(r) or {}).get('motion') or '-' for r in ['title', 'subtitle', 'body', 'shape', 'media', 'logo']) for s in packs]
 lines += ["# techniques: name|energy range|tones|needs (library/techniques.json has what/how/ask)"]
 lines += [f"technique|{t['name']}|{t['tags'].get('energy', [1, 5])[0]}-{t['tags'].get('energy', [1, 5])[1]}|{'/'.join(t['tags'].get('tones', []))}|{'/'.join(t['tags'].get('needs', []))}" for t in techs]
+# brand profiles: custom styles that learn from every review (library/brands, tools/brand.py; MCP get_brand)
+lines += ["# brands: slug|name|style|curve|energy|tones|rules  (read one with get_brand before animating for it; save notes with add_brand_note)"]
+for bp in sorted((ROOT / "library/brands").glob("*/brand.json")):
+    b = json.loads(bp.read_text(encoding="utf-8")); f = b["feel"]
+    lines.append(f"brand|{b['slug']}|{b['name']}|{f['style']}|{f.get('curve') or '-'}|{f['energy'][0]}-{f['energy'][1]}|{'/'.join(f['tones'])}|{len(b['rules'])}")
 (ROOT / "library/INDEX.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 (ROOT / "library/index.html").write_text(HTML.replace("__DATA__", data), encoding="utf-8")
 print("library/index.html", len(lib["presets"]), "presets")

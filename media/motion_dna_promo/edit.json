@@ -1,0 +1,270 @@
+{
+ "comp": "DNA_EDIT",
+ "fps": 24,
+ "size": [
+  1920,
+  1080
+ ],
+ "music": "media/motion_dna_promo/audio/music_v4.wav",
+ "musicGainDb": -8,
+ "duckDb": -8,
+ "shots": [
+  {
+   "comp": "DNA_S01",
+   "dur": 3.0
+  },
+  {
+   "comp": "DNA_S02",
+   "dur": 3.0
+  },
+  {
+   "comp": "DNA_S03",
+   "dur": 5.708333333333333
+  },
+  {
+   "comp": "DNA_S04",
+   "dur": 3.7083333333333335,
+   "matte": "media/motion_dna_promo/shots/p04_matte.mov",
+   "plate": "media/motion_dna_promo/shots/p04.mp4",
+   "freeze": {
+    "at": 3.64,
+    "dur": 1.8,
+    "title": "Rex Valance.",
+    "titleAt": 0.12,
+    "mono": true,
+    "split": [
+     {
+      "text": "Rex",
+      "font": "InterTight-Bold",
+      "size": 250,
+      "color": "spark",
+      "at": [
+       600,
+       560
+      ],
+      "rot": -6
+     },
+     {
+      "text": "Valance.",
+      "font": "InstrumentSerif-Italic",
+      "size": 170,
+      "color": "cloud",
+      "at": [
+       1420,
+       650
+      ],
+      "rot": 3
+     }
+    ],
+    "sub": {
+     "text": "MOTION SALESMAN \u00b7 SINCE 1985",
+     "size": 40,
+     "at": [
+      960,
+      1010
+     ]
+    }
+   }
+  },
+  {
+   "comp": "DNA_S05",
+   "dur": 7.125
+  },
+  {
+   "comp": "DNA_S06",
+   "dur": 2.1666666666666665
+  },
+  {
+   "comp": "DNA_S07",
+   "dur": 2.7916666666666665
+  },
+  {
+   "comp": "DNA_S07B",
+   "dur": 2.6
+  },
+  {
+   "comp": "DNA_S08",
+   "dur": 4.5833
+  },
+  {
+   "comp": "DNA_S09",
+   "dur": 5.0833
+  },
+  {
+   "comp": "DNA_S10",
+   "dur": 3.6
+  }
+ ],
+ "vo": [
+  {
+   "file": "media/motion_dna_promo/audio/a01_v4.wav",
+   "shot": 0,
+   "local": 0,
+   "gainDb": 0
+  },
+  {
+   "file": "media/motion_dna_promo/audio/a03_v4.wav",
+   "shot": 2,
+   "local": 0,
+   "gainDb": 0
+  },
+  {
+   "file": "media/motion_dna_promo/audio/a04_v4.wav",
+   "shot": 3,
+   "local": 0,
+   "gainDb": 0
+  },
+  {
+   "file": "media/motion_dna_promo/audio/holy.wav",
+   "shot": 3,
+   "local": 0.2,
+   "gainDb": -3
+  },
+  {
+   "file": "media/motion_dna_promo/audio/a05_v4.wav",
+   "shot": 4,
+   "local": 0,
+   "gainDb": 0
+  },
+  {
+   "file": "media/motion_dna_promo/audio/a06_v4.wav",
+   "shot": 5,
+   "local": 0,
+   "gainDb": 0
+  },
+  {
+   "file": "media/motion_dna_promo/audio/a07_v4.wav",
+   "shot": 6,
+   "local": 0,
+   "gainDb": 0
+  }
+ ],
+ "sfx": [
+  {
+   "name": "Pop Plastic Micro 02",
+   "shot": 0,
+   "local": 0.3,
+   "gainDb": -10
+  },
+  {
+   "name": "Pop Plastic Micro 04",
+   "shot": 0,
+   "local": 0.7,
+   "gainDb": -10
+  },
+  {
+   "name": "Swoosh Wood 01_Variant Main",
+   "shot": 1,
+   "local": 0.0,
+   "gainDb": -8
+  },
+  {
+   "name": "Blip 01_Variant Minus 24",
+   "shot": 1,
+   "local": 0.9,
+   "gainDb": -12
+  },
+  {
+   "name": "Blip 01_Variant Minus 24",
+   "shot": 1,
+   "local": 2.2,
+   "gainDb": -12
+  },
+  {
+   "name": "Slide Box Low Short 02",
+   "shot": 2,
+   "local": 3.04,
+   "gainDb": -4
+  },
+  {
+   "name": "Slide Box Low Short 03",
+   "shot": 2,
+   "local": 3.8,
+   "gainDb": -4
+  },
+  {
+   "name": "Slide Box Low Short 02",
+   "shot": 2,
+   "local": 4.56,
+   "gainDb": -3
+  },
+  {
+   "name": "Bass Drop 02",
+   "shot": 3,
+   "local": 0.05,
+   "gainDb": -4
+  },
+  {
+   "name": "Pop Plastic Micro 03",
+   "shot": 4,
+   "local": 2.0,
+   "gainDb": -6
+  },
+  {
+   "name": "Pop Plastic Micro 05",
+   "shot": 4,
+   "local": 3.06,
+   "gainDb": -6
+  },
+  {
+   "name": "Pop Plastic Micro 07",
+   "shot": 4,
+   "local": 3.76,
+   "gainDb": -6
+  },
+  {
+   "name": "Fireworks Reverb 03",
+   "shot": 5,
+   "local": 0.1,
+   "gainDb": -10
+  },
+  {
+   "name": "Glitter 04_Variant Plus 6",
+   "shot": 5,
+   "local": 0.5,
+   "gainDb": -8
+  },
+  {
+   "name": "Mouse Click 01 A",
+   "shot": 6,
+   "local": 0.9,
+   "gainDb": -4
+  },
+  {
+   "name": "Blip 01_Variant Minus 15",
+   "shot": 6,
+   "local": 1.3,
+   "gainDb": -8
+  },
+  {
+   "name": "Digital Rattle 03",
+   "shot": 7,
+   "local": 0.1,
+   "gainDb": -12
+  },
+  {
+   "name": "Bass Approach 01",
+   "shot": 7,
+   "local": 1.0,
+   "gainDb": -8
+  },
+  {
+   "name": "Swoosh Wood 01_Variant Plus 6",
+   "shot": 8,
+   "local": 2.4,
+   "gainDb": -9
+  },
+  {
+   "name": "Swoosh Wood 01_Variant Minus 6",
+   "shot": 9,
+   "local": 0.0,
+   "gainDb": -6
+  },
+  {
+   "name": "Glitter 04_Variant Main",
+   "shot": 10,
+   "local": 0.1,
+   "gainDb": -9
+  }
+ ]
+}

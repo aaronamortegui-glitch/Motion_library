@@ -1,0 +1,221 @@
+{
+ "folder": "DNA PROMO",
+ "scenes": [
+  {
+   "comp": "DNAFX_P01",
+   "plate": "media/motion_dna_promo/shots/p01.mp4",
+   "tracks": "media/motion_dna_promo/shots/p01_tracks.json",
+   "grain": false,
+   "hud": [
+    {
+     "type": "planar",
+     "file": "media/motion_dna_promo/shots/p01_planar.json",
+     "quad": "wall",
+     "text": "1985",
+     "role": "InterTight-Bold",
+     "size": 150,
+     "color": "cloud",
+     "opacity": 80,
+     "t0": 0.1,
+     "preset": "Chars Rise"
+    },
+    {
+     "type": "callout",
+     "anchor": "TRK dana_body",
+     "offset": [
+      150,
+      -200
+     ],
+     "title": "DANA",
+     "lines": [
+      "Designer",
+      "Bored since 9:00"
+     ],
+     "titleSize": 44,
+     "bodySize": 34,
+     "t0": 0.3,
+     "card": true
+    },
+    {
+     "type": "callout",
+     "anchor": "TRK marcus_body",
+     "offset": [
+      -250,
+      -150
+     ],
+     "title": "MARCUS",
+     "lines": [
+      "Motion designer",
+      "Asleep"
+     ],
+     "titleSize": 44,
+     "bodySize": 34,
+     "t0": 0.7,
+     "card": true
+    }
+   ],
+   "faces": "media/motion_dna_promo/shots/p01_faces.json"
+  },
+  {
+   "comp": "DNAFX_P03",
+   "plate": "media/motion_dna_promo/shots/p03.mp4",
+   "tracks": "media/motion_dna_promo/shots/p03_tracks.json",
+   "grain": false,
+   "hud": [
+    {
+     "type": "bracket",
+     "anchor": "TRK crt",
+     "size": [
+      270,
+      230
+     ],
+     "label": [
+      "SAME FADE",
+      "SAME EASE",
+      "AGAIN"
+     ],
+     "labelSize": 34,
+     "labelTracking": 60,
+     "labelLift": 170,
+     "card": true,
+     "t0": 0.6,
+     "t1": 2.9
+    }
+   ],
+   "faces": "media/motion_dna_promo/shots/p03_faces.json"
+  },
+  {
+   "comp": "DNAFX_P04",
+   "plate": "media/motion_dna_promo/shots/p04.mp4",
+   "tracks": "media/motion_dna_promo/shots/p04_tracks.json",
+   "grain": false,
+   "hud": [
+    {
+     "type": "glow",
+     "anchor": "TRK body",
+     "t0": 0.2,
+     "size": [
+      620,
+      980
+     ],
+     "offset": [
+      0,
+      -60
+     ],
+     "color": [
+      1.0,
+      0.93,
+      0.72
+     ],
+     "opacity": 75
+    }
+   ],
+   "faces": "media/motion_dna_promo/shots/p04_faces.json",
+   "matte": "media/motion_dna_promo/shots/p04_matte.mov"
+  },
+  {
+   "comp": "DNAFX_P05",
+   "plate": "media/motion_dna_promo/shots/p05.mp4",
+   "tracks": "media/motion_dna_promo/shots/p05_tracks.json",
+   "grain": false,
+   "hud": [
+    {
+     "type": "bracket",
+     "anchor": "TRK box",
+     "size": [
+      300,
+      340
+     ],
+     "label": [
+      "v1.0",
+      "FREE",
+      "OPEN SOURCE"
+     ],
+     "labelSize": 34,
+     "labelSide": "bottom",
+     "labelAlign": "right",
+     "labelTracking": 60,
+     "card": true,
+     "t0": 4.4
+    }
+   ],
+   "faces": "media/motion_dna_promo/shots/p05_faces.json"
+  },
+  {
+   "comp": "DNAFX_P06",
+   "plate": "media/motion_dna_promo/shots/p06.mp4",
+   "tracks": "media/motion_dna_promo/shots/p06_tracks.json",
+   "grain": false,
+   "hud": [
+    {
+     "type": "behind",
+     "text": "YES!",
+     "role": "InterTight-Bold",
+     "size": 420,
+     "color": "spark",
+     "at": [
+      960,
+      450
+     ],
+     "t0": 0.1,
+     "preset": "Chars Pop",
+     "opacity": 100
+    },
+    {
+     "type": "contour",
+     "file": "media/motion_dna_promo/shots/p06_contours.json",
+     "key": "c0",
+     "t0": 0.15,
+     "width": 7
+    },
+    {
+     "type": "contour",
+     "file": "media/motion_dna_promo/shots/p06_contours.json",
+     "key": "c1",
+     "t0": 0.25,
+     "width": 7
+    },
+    {
+     "type": "burst",
+     "anchor": "TRK box",
+     "t0": 0.5,
+     "repeat": 3,
+     "every": 0.4,
+     "count": 16,
+     "r0": 110,
+     "r1": 520,
+     "width": 16
+    }
+   ],
+   "faces": "media/motion_dna_promo/shots/p06_faces.json",
+   "matte": "media/motion_dna_promo/shots/p06_matte.mov"
+  },
+  {
+   "comp": "DNAFX_P07",
+   "plate": "media/motion_dna_promo/shots/p07.mp4",
+   "tracks": "media/motion_dna_promo/shots/p07_tracks.json",
+   "grain": false,
+   "hud": [
+    {
+     "type": "callout",
+     "anchor": "TRK label",
+     "offset": [
+      -150,
+      -260
+     ],
+     "title": "MOTION_DNA.DSK",
+     "lines": [
+      "Moves \u00b7 curves \u00b7 styles"
+     ],
+     "titleSize": 42,
+     "bodySize": 34,
+     "wrap": 24,
+     "card": true,
+     "instant": true,
+     "t0": 0.0,
+     "t1": 2.3
+    }
+   ]
+  }
+ ]
+}

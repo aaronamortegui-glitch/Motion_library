@@ -5,6 +5,8 @@
 //   "music": "media/whisky/music.mp3", "musicGainDb": 0, "duckDb": -9,
 //   "shots": [ { "comp": "WHISKY_01", "in": 0, "dur": 5,
 //                "freeze": { "at": 3.6, "dur": 3.3, "title": "Zero emails.", "sub": "2 EXECUTIVES · 1 DECANTER", "titleAt": 2.6 } } ],
+//   freeze extras: "mono": true (background black and white; with shot "matte" + "plate" the person stays in colour),
+//   "split": [{ "text", "font", "size", "color", "at", "rot" }, ...] + "sub": { "text", "at" } (name on both sides of the person)
 //   "vo":  [ { "file": "media/whisky/vo/vo01.wav", "shot": 0, "local": 0.1, "gainDb": 0 } ],
 //   "sfx": [ { "name": "Data Beep 05", "shot": 0, "local": 0.4, "gainDb": -9 } ],
 //   shots may also carry "speed": [[0, 0, "Ramp", "Swoosh 2"], [2.5, 4.2, "Flat"], [3.2, 4.9]] (speed ramp; dur = last time)     // or { "t": absolute seconds }
@@ -49,7 +51,7 @@
     function text(E, str, role, size, color, at, just, tracking, t0, t1) {
         var T = E.layers.addText(str);
         var tp = T.property("ADBE Text Properties").property("ADBE Text Document"), td = tp.value;
-        td.resetCharStyle(); td.font = SSM.font(role); td.fontSize = size; td.fillColor = hex(PAL[color] || color); td.applyFill = true;
+        td.resetCharStyle(); td.font = role.indexOf("-") > 0 ? role : SSM.font(role); td.fontSize = size; td.fillColor = color instanceof Array ? color : hex(PAL[color] || color); td.applyFill = true;
         td.justification = just || ParagraphJustification.LEFT_JUSTIFY; if (tracking) td.tracking = tracking; tp.setValue(td);
         tr(T, "ADBE Position").setValue(at);
         T.inPoint = t0; T.outPoint = t1;
@@ -67,8 +69,8 @@
         SSM.animate(tr(T, "ADBE Opacity"), t1 - SSM.seconds("Blink"), 100, 0, "Blink", "Flat");
     }
     // big display word that slams in (scale overshoot + blur + slight tilt) and shrinks away
-    function heroWord(str, size, color, pos, t0, t1, fromScale, rot) {
-        var T = text(E, str, "display", size, color, pos, ParagraphJustification.CENTER_JUSTIFY, 0, t0, t1);
+    function heroWord(str, size, color, pos, t0, t1, fromScale, rot, font) {
+        var T = text(E, str, font || "display", size, color, pos, ParagraphJustification.CENTER_JUSTIFY, 0, t0, t1);
         var box = centerOn(T, pos, t0);
         var ds = T.property("ADBE Effect Parade").addProperty("ADBE Drop Shadow");
         ds.property("ADBE Drop Shadow-0001").setValue(hex(PAL.pine)); ds.property("ADBE Drop Shadow-0002").setValue(70);
@@ -165,6 +167,13 @@
             SSM.animate(fb.property("ADBE Box Blur2-0001"), f0, 0, 9, "Glide", "Land");
             SSM.animate(fb.property("ADBE Box Blur2-0001"), f1 - SSM.seconds("Glide"), 9, 0, "Glide", "Launch");
             dof.moveBefore(L);
+            if (fz.mono) {   // the world goes black and white, the cut-out person stays in colour
+                var mono = E.layers.addSolid([0, 0, 0], "Freeze mono " + (k + 1), W, H, 1);
+                mono.adjustmentLayer = true; mono.inPoint = f0; mono.outPoint = f1;
+                var ti = mono.property("ADBE Effect Parade").addProperty("ADBE Tint");
+                SSM.animate(ti.property("ADBE Tint-0003"), f0, 0, 100, "Blink", "Flat");
+                mono.moveBefore(L);
+            }
             // keep the people bright: a matte-cut copy of the frozen shot above the scrim
             if (shot.matte) {
                 var mItem = importFile(new File(SS_ROOT + "/" + shot.matte));
@@ -206,6 +215,23 @@
                 if (lead) leadWord(lead, [CX, CY + 40 - HB.h / 2 - 70], bIn, bOut);
                 autoSfx.push({ name: fz.beatSfx || "Swoosh Wood 01_Variant Main", t: Math.max(0, bIn - 0.05), gainDb: -9 });
             }
+            if (fz.split) {
+                // "flank" layout: the name split in two typefaces on either side of the person
+                // fz.split = [{ text, font, size, color, at: [x, y], rot, preset }], fz.sub = { text, at }
+                for (var sp = 0; sp < fz.split.length; sp++) {
+                    var SPk = fz.split[sp], spIn = tIn + sp * 0.18;
+                    var HW = heroWord(SPk.text, SPk.size || 260, SPk.color || "cloud", SPk.at, spIn, tOut, 140, SPk.rot || 0, SPk.font);
+                    SSP.applyText(HW.layer, SPk.preset || "Chars Rise", "in", spIn);
+                }
+                if (fz.sub) {
+                    var S2 = text(E, fz.sub.text, "ui", fz.sub.size || 40, fz.sub.color || "spark", fz.sub.at, ParagraphJustification.CENTER_JUSTIFY, 200, tIn + 0.4, tOut);
+                    centerOn(S2, fz.sub.at, tIn + 0.4);
+                    SSP.applyText(S2, "Tracking Settle", "in", tIn + 0.4);
+                    fadeOut(S2, tOut);
+                }
+                autoSfx.push({ name: fz.clickSfx || "Mechanical Keyboard Click 03", t: f0, gainDb: -8 });
+                autoSfx.push({ name: fz.titleSfx || "Medium Cinematic Boom 04", t: Math.max(0, tIn - 0.03), gainDb: -17, len: 1.8 });
+            } else {
             var tw = fz.title.split(" "), tHero = tw.pop(), tLead = tw.join(" ");
             var heroY = CY + (tLead ? 70 : 20);
             var TH = heroWord(tHero, fz.size || 290, "cloud", [CX, heroY], tIn, tOut, 128, 0);
@@ -239,6 +265,7 @@
             U.inPoint = tIn; U.outPoint = tOut;
             SSP.apply(U, "Organic Draw", "in", tIn + SSM.seconds("Tick"));
             fadeOut(U, tOut);
+            }
         }
     }
 

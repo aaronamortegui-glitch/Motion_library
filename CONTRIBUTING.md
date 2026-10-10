@@ -37,7 +37,7 @@ Windows or macOS · After Effects 2025/2026 · Python 3 (`numpy`, `opencv-python
    bash tools/make_previews_stills.sh                    # posters, panel thumbnails, style stills
    bash tools/bridge.sh tools/export_library.jsx 120
    python tools/build_library_html.py
-   python tools/readme_catalog.py
+   python tools/readme_catalog.py      # docs/CATALOG.md
    ```
    If the poster of your preset catches an empty frame, adjust its time in `tools/make_previews_stills.sh`.
    Never use a brand logo as the sample: the library is neutral. Every non-text preview uses the Spark arrow
@@ -92,7 +92,7 @@ shapes · media): `bash tools/rebuild_previews.sh` renders it (`tools/pack_demos
    - `docs/case-studies/<case>.md` from [`docs/case-studies/_TEMPLATE.md`](docs/case-studies/_TEMPLATE.md)
    - 2–3 GIFs under 2 MB in `docs/examples/`
    - a compressed MP4 (`crf 26`)
-   - a section at the **end** of `README.md` (the top is for the library itself)
+   - a short entry under *Showcases* in `README.md` (the newest first; older ones go inside the `<details>` block)
 6. **Promote what you built**: if the video needed a new move, title style or overlay, turn it into a preset (§1) or a tool. Add it to the README's *Latest additions*.
 
 ## 5. Record what you learned
@@ -140,15 +140,58 @@ techniques they use. This is how the library learns new identities:
 5. **Add the proposed style** (from the report) to `library/packs.json` with its tags, curve and transition, under a
    neutral name (no brand names, no logos).
 6. **Render the samples:** `bash tools/rebuild_previews.sh` (new presets, the style's 2×2 grid, stills, visualizer,
-   README catalog), then `python tools/tag_library.py`.
+   catalog in `docs/CATALOG.md`), then `python tools/tag_library.py`.
 7. **Commit** the profile, the new presets/curves/techniques, the style and the samples together, and add what you
    learned to `docs/LEARNINGS.md`.
+
+## 9. Layout and edit rules (every video, every comp)
+These came out of reviewing the Motion DNA promo; `tools/check_layout.jsx` checks rules 1-5 and 13 on the built comps
+(`bash tools/bridge.sh tools/check_layout.jsx`, report in `research/tests/layout_report.json`). Fix every warning.
+1. **No text on text.** Two text boxes never overlap on screen (titles, labels, HUD, a scene title over the HUD inside
+   its footage comp). Callout title and body are spaced from their sizes.
+2. **Nothing leaves the frame.** Keep text 40 px inside the edges. When a label does not fit sideways, **stack it into up
+   to 3 short lines** (`wrap` on callouts, a `label` array on brackets, `labelSide` "top" / "bottom" / "left" / "right")
+   instead of forcing one long line.
+3. **Readable size and time.** At least 32 px on screen (36+ preferred), and each line holds long enough to be read.
+4. **Contrast.** White on white does not work. Either place the text where the plate is dark and calm, or put it on a
+   **card** (`"card": true`: translucent pine, thin cloud border) or give it a shadow.
+5. **Never on a face.** HUD dots, line ends and text stay off faces: anchor callouts on the torso or an object and lead
+   the line away from the face (`tools/face_boxes.py` → `"faces"` in the scene spec lets the check catch it).
+6. **Never cut a phrase.** No cut inside a spoken word (`make_*.py` prints a warning); dialogue audio runs ~0.35 s past
+   its cut and fades (J/L cut) so breaths and room tone are not chopped.
+7. **Plates end one frame before a detected cut** (scene-detect times are the first frame of the next shot).
+8. **Music leads the key moments** (Motion Style Map, `research/styles/_music_and_edit.md`): beat grid with librosa,
+   reveals and the logo on a beat / downbeat; cut rate in beats from the style.
+9. **Highlight with weight, not more words:** `"bold": [words]` on a text element sets key words in bold.
+10. **Use the negative space.** Labels and cards go *inward*, into the empty wall or floor between the subjects, not
+    pushed against the frame edges; leader lines run away from faces.
+11. **A label sits beside or above what it names, never on it** (a bracket's label must not cover the screen it frames).
+12. **A name stays close to its person** (freeze titles hug the silhouette, they do not drift to the frame edges).
+13. **Fonts are never substituted** (`ae_status` and `check_layout.jsx` stop on it; restart AE). Titles are sans
+    (Inter Tight), the serif is for the italic accent line only.
+14. **Effects stay tasteful:** halos rotate slowly and stay thin (no line sticking out of the silhouette), bursts are
+    solid colour, one technique per beat.
+
+## 10. Work for a brand: its profile learns
+Every brand or project gets a profile in `library/brands/<slug>/brand.json` (schema: `library/brands/_schema.md`).
+1. **Before animating**, read it: `python tools/brand.py show <slug>` or the MCP tool `get_brand`. No profile yet?
+   `python tools/brand.py new <slug> --name "…" --style <style> --curve <token> --tones … --energy a,b`, fill its
+   identity (colours, fonts, logo) and run `python tools/brand.py thumb <slug>` for its panel card.
+2. **Follow its rules** together with §9. Its base style and curve are what `apply_brand` (MCP) and the panel's
+   *Brands* category apply.
+3. **Every review note becomes a rule**: `python tools/brand.py note <slug> "…" --cat layout --why "…" --project … --by …`
+   or `add_brand_note`. One instruction anyone can follow without the context, plus why. A note that is true for every
+   brand also goes into §9 (and `tools/check_layout.jsx` when it can be checked).
+4. Add the project to its `projects` list, and re-run `python tools/build_library_html.py` so `INDEX.txt` lists it.
+Brands are independent: never copy one brand's rules into another without being asked.
 
 ## Checklist before you push
 - [ ] `python tools/test_all.py` passes (AE open): engine, panel, MCP and the mosaics. A new preset must animate, respond to the controls and be removable.
 - [ ] Everything in English, no temporary jobs or candidates in the diff
-- [ ] New presets have metadata, a GIF, a poster and a panel thumb; `INDEX.txt`, visualizer and README catalog regenerated
+- [ ] New presets have metadata, a GIF, a poster and a panel thumb; `INDEX.txt`, visualizer and `docs/CATALOG.md` regenerated
 - [ ] Open-source data has source, version and license recorded
 - [ ] Case study: specs + rebuild script + doc + GIFs + README section
 - [ ] Any UI you touched has a fresh GIF in `docs/screens/`
+- [ ] Videos: `tools/check_layout.jsx` reports no warnings (or each one is explained)
+- [ ] Work for a brand: its review notes are saved in `library/brands/<slug>/brand.json`
 - [ ] LEARNINGS updated; costs recorded

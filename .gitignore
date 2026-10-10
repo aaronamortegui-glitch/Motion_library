@@ -69,3 +69,8 @@ library/assets_cache/
 /references/
 research/batch/*/_30fps.mp4
 research/batch/*/ov_*.png
+
+# Motion DNA promo: derived locally (tools/video_matte.py; make_dna_promo.py re-cuts the audio)
+media/motion_dna_promo/shots/*_matte.mov
+media/motion_dna_promo/audio/music*.wav
+media/motion_dna_promo/audio/a0*_v*.wav

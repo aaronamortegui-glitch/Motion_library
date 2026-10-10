@@ -144,6 +144,40 @@ def t_list_packs():
                      for p in packs)
 
 
+# ---------------------------------------------------------------- brand profiles (library/brands, tools/brand.py)
+sys.path.insert(0, str(ROOT / "tools"))
+import brand as _brand  # noqa: E402
+
+
+def t_list_brands():
+    bs = _brand.all_brands()
+    if not bs:
+        return "No brand profiles yet. Create one with add_brand_note after `python tools/brand.py new <slug> --name ...`."
+    return "\n".join(f"{b['slug']}: {b['name']} · style {b['feel']['style']} · curve {b['feel'].get('curve') or '-'} · tones "
+                     f"{'/'.join(b['feel']['tones'])} · energy {b['feel']['energy']} · {len(b['rules'])} rules" for b in bs)
+
+
+def t_get_brand(slug):
+    return _brand.digest(slug)
+
+
+def t_add_brand_note(slug, rule, category="layout", why="", project="", by=""):
+    r = _brand.note(slug, rule, category, why, project, by)
+    return f"saved rule {r['id']} ({r['category']}) in library/brands/{slug}/brand.json: {r['rule']}"
+
+
+def t_apply_brand(slug, comp=None, layers=None, phase="both", marker_timing=True, duration=1.0, intensity=1.0):
+    b = _brand.load(slug)
+    f = b["feel"]
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), names = {js(layers or [])}, ls = null;
+if (names.length) ls = findLayers(c, names);
+SSP.markerTiming({str(bool(marker_timing)).lower()}); {tune_js(duration, intensity, ease=f.get("curve"))}
+app.beginUndoGroup("Motion DNA brand (MCP): {b['name']}");
+var r; try {{ r = SSP.applyPack(c, {js(f['style'])}, ls, {js(phase)}); }} finally {{ SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); }}
+return "{b['name']}: style " + {js(f['style'])} + " with curve " + {js(f.get('curve') or 'of the style')} + "\\n" + (r.length ? r.join("\\n") : "No layers matched");""") + \
+        "\nFollow the brand's rules for everything else (get_brand)."
+
+
 def _tags():
     return json.loads((ROOT / "library" / "tags.json").read_text(encoding="utf-8"))
 
@@ -230,7 +264,9 @@ def t_ae_status():
     return run_jsx("""var a = app.project.activeItem;
 return "AE " + app.version + " · project: " + (app.project.file ? app.project.file.name : "unsaved") +
   " · active: " + (a instanceof CompItem ? a.name + " (" + a.width + "x" + a.height + ", " + a.duration.toFixed(2) + "s, " + a.numLayers + " layers, selected: " + a.selectedLayers.length + ")" : "none") +
-  " · panel: " + (typeof SS_PANEL !== "undefined" ? "loaded" : "not loaded");""", includes=())
+  " · panel: " + (typeof SS_PANEL !== "undefined" ? "loaded" : "not loaded") +
+  (function () { try { var m = app.fonts.missingOrSubstitutedFonts, n = []; for (var i = 0; i < m.length; i++) n.push(m[i].postScriptName);
+    return n.length ? " · WARNING fonts substituted (" + n.join(", ") + "): restart After Effects before building" : " · fonts ok"; } catch (e) { return ""; } })();""", includes=())
 
 
 def t_list_layers(comp=None):
@@ -360,6 +396,15 @@ TOOLS_DEF = [
      {"time_s": {"type": "number"}, "comp": {"type": "string"}}),
     ("render_comp", t_render_comp, "Render a comp to MP4 through AE's render queue (renders/mcp/<comp>.mp4). Blocks AE while rendering.",
      {"comp": {"type": "string"}, "wait_s": {"type": "number"}}),
+    ("list_brands", t_list_brands, "List brand profiles (library/brands): custom styles that learn from every review, each with its base style, curve, tones and how many rules it has learned.", {}),
+    ("get_brand", t_get_brand, "Read a brand profile before animating for that brand: identity (colours, fonts, logo), feel (energy, tones, base style, curve, transition), preferred and avoided presets, and every rule learned in its reviews, by category. Follow it.",
+     {"slug": {"type": "string"}}, ["slug"]),
+    ("add_brand_note", t_add_brand_note, "Save a review note as a rule in a brand profile, so the next piece for that brand starts with it. Write one instruction anyone can follow without context, plus why. category: layout | typography | motion | effects | color | audio | edit | process.",
+     {"slug": {"type": "string"}, "rule": {"type": "string"}, "category": {"type": "string"}, "why": {"type": "string"},
+      "project": {"type": "string"}, "by": {"type": "string"}}, ["slug", "rule"]),
+    ("apply_brand", t_apply_brand, "Animate a comp (or the named layers) in a brand's style: its base style, layer role by layer role, on the brand's own curve.",
+     {"slug": {"type": "string"}, "comp": {"type": "string"}, "layers": {"type": "array", "items": {"type": "string"}},
+      "phase": {"type": "string", "enum": ["in", "out", "both"]}, "marker_timing": {"type": "boolean"}, "duration": {"type": "number"}, "intensity": {"type": "number"}}, ["slug"]),
     ("run_jsx", t_run_jsx, "Advanced: run ExtendScript in AE with the library loaded (SSM, SSP, SSA available). The code is a function body: use `return` for the result.",
      {"code": {"type": "string"}, "timeout_s": {"type": "number"}}, ["code"]),
 ]
@@ -391,7 +436,9 @@ def handle(req):
                                 "video placed in an energy range and tones, e.g. calm + modern), run match_reference: build what fits from existing "
                                 "presets and CREATE what is missing (moves, curves, transitions, techniques), tag it, render its samples and add a style "
                                 "(CONTRIBUTING.md section 8). Apply with apply_preset (duration, intensity, direction, ease), apply_pack, add_asset; undo "
-                                "with remove_animation; check with render_frame. Read CLAUDE.md in the repo for the rules."}
+                                "with remove_animation; check with render_frame. Working for a brand or a project? Read it first with get_brand and "
+                                "save every review note with add_brand_note: each brand profile learns and keeps its own rules. "
+                                "Read CLAUDE.md in the repo for the rules."}
     if method == "tools/list":
         return {"tools": tool_list()}
     if method == "tools/call":

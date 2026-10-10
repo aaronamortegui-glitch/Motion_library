@@ -16,26 +16,31 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         return;
     }
 
+    // A job runs in its own function: $.evalFile evaluates in the caller's scope, so a job declaring `var out` (or any
+    // name) used to overwrite the poll's own variables and raise a modal error that froze every script until OK.
+    $.global.SS_BRIDGE_RUN = function (jobFile) { return $.evalFile(jobFile); };
     $.global.SS_BRIDGE_POLL = function () {
         var jobs = Folder(BASE + "inbox").getFiles("*.jsx");
         for (var i = 0; i < jobs.length; i++) {
-            var job = jobs[i];
-            var name = job.name.replace(/\.jsx$/, "");
-            var out = new File(BASE + "outbox/" + name + ".txt");
-            var result;
+            var job = jobs[i], name = job.name.replace(/\.jsx$/, ""), result;
             try {
-                var r = $.evalFile(job);
+                app.beginSuppressDialogs();   // a job's warnings never block AE behind a dialog
+                var r = $.global.SS_BRIDGE_RUN(job);
                 result = "OK\n" + (r === undefined ? "" : String(r));
             } catch (e) {
                 result = "ERROR line " + e.line + " in " + (e.fileName || job.name) + "\n" + e.toString();
             }
-            out.encoding = "UTF-8";
-            out.open("w"); out.write(result); out.close();
-            job.copy(BASE + "done/" + job.name);
-            job.remove();
+            try { app.endSuppressDialogs(false); } catch (e2) {}
+            try {
+                var res = new File(BASE + "outbox/" + name + ".txt");
+                res.encoding = "UTF-8"; res.open("w"); res.write(result); res.close();
+                job.copy(BASE + "done/" + job.name);
+                job.remove();
+            } catch (e3) {}
         }
     };
-    $.global.SS_BRIDGE_TASK = app.scheduleTask("$.global.SS_BRIDGE_POLL()", 1000, true);
+    // the scheduled string is guarded too: an error here would stop AE's scheduled tasks and show a dialog
+    $.global.SS_BRIDGE_TASK = app.scheduleTask("try { $.global.SS_BRIDGE_POLL(); } catch (e) {}", 1000, true);
     var hb = new File(BASE + "outbox/_bridge_started.txt");
     hb.open("w"); hb.write("AE " + app.version + " · " + new Date().toString()); hb.close();
     writeLn("Motion DNA bridge active: " + BASE + "inbox");

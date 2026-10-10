@@ -4,7 +4,10 @@
 //
 // Spec: { "scenes": [ { "comp": "WHISKY_01", "plate": "media/whisky/clip01.mp4", "tracks": "media/whisky/clip01_tracks.json",
 //                        "grain": true, "hud": [ {"type": "bracket", ...}, {"type": "callout", ...}, ... ] } ] }
-// HUD item types map 1:1 to SSHUD.bracket / callout / meter / chip, plus "title" (Chars Rise headline) and "kicker".
+// HUD item types map 1:1 to SSHUD.bracket / callout / meter / chip / contour / rays / burst, plus "title" (Chars Rise
+// headline), "kicker", "behind" (text between the background and the people; needs scene.matte) and "planar" (text pinned
+// to a surface with perspective: tools/planar_track.py JSON, { file, quad, text, role, size, color, t0, preset, opacity }).
+// "role" may be a PostScript font name (e.g. "InterTight-Bold"). Scenes may set "fps" when the plate has no tracks file.
 #include "ss_hud.jsx"
 
 (function () {
@@ -22,9 +25,9 @@
     function text(c, str, role, size, color, tracking) {
         var L = c.layers.addText(str);
         var tp = L.property("ADBE Text Properties").property("ADBE Text Document"), td = tp.value;
-        td.resetCharStyle(); td.font = SSM.font(role); td.fontSize = size; td.applyFill = true;
-        var h = (SSHUD.palette[color] || color).replace("#", "");
-        td.fillColor = [parseInt(h.substr(0, 2), 16) / 255, parseInt(h.substr(2, 2), 16) / 255, parseInt(h.substr(4, 2), 16) / 255];
+        td.resetCharStyle(); td.font = role.indexOf("-") > 0 ? role : SSM.font(role); td.fontSize = size; td.applyFill = true;
+        if (color instanceof Array) td.fillColor = color;
+        else { var h = (SSHUD.palette[color] || color).replace("#", ""); td.fillColor = [parseInt(h.substr(0, 2), 16) / 255, parseInt(h.substr(2, 2), 16) / 255, parseInt(h.substr(4, 2), 16) / 255]; }
         td.justification = ParagraphJustification.LEFT_JUSTIFY;
         if (tracking) td.tracking = tracking;
         tp.setValue(td);
@@ -52,6 +55,7 @@
         var TRK = SSM.readJSON(SS_ROOT + "/" + S.tracks);
         var c = proj.items.addComp(S.comp, TRK.size[0], TRK.size[1], 1, S.duration || plate.duration, TRK.fps);
         c.parentFolder = folder(SPEC.folder || "SS Scenes");
+        if (S.faces) c.comment = "faces:" + S.faces;   // read by tools/check_layout.jsx (no graphics on faces)
         c.layers.add(plate).name = "Plate";
         // tracking nulls: anchor at the center (100x100 null) so toComp(anchorPoint) == tracked point
         var fd = 1 / TRK.fps;
@@ -74,11 +78,40 @@
             else if (o.type === "contour") made_ = SSHUD.contour(o);
             else if (o.type === "faceScan") made_ = SSHUD.faceScan(o);
             else if (o.type === "panel") made_ = SSHUD.panel(o);
+            else if (o.type === "rays") made_ = SSHUD.rays(o);
+            else if (o.type === "burst") made_ = SSHUD.burst(o);
+            else if (o.type === "glow") made_ = SSHUD.glow(o);
+            else if (o.type === "planar") {
+                // a flat graphic glued to a tracked surface: precomp of the quad's size, corner-pinned frame by frame
+                var PD = SSM.readJSON(SS_ROOT + "/" + o.file), qs = PD.quads[o.quad], kx = c.width / PD.size[0], ky = c.height / PD.size[1];
+                var q0 = qs[0], qw = Math.round((q0[1][0] - q0[0][0]) * kx), qh = Math.round((q0[2][1] - q0[0][1]) * ky);
+                var pcName = c.name + " · planar " + o.quad, oldPc = findItem(pcName); if (oldPc) oldPc.remove();
+                var pc = proj.items.addComp(pcName, qw, qh, 1, c.duration, c.frameRate); pc.parentFolder = c.parentFolder;
+                var keep = c; SSHUD.init(pc); c = pc;
+                var PT = text(pc, o.text, o.role || "InterTight-Bold", o.size || Math.round(qh * 0.8), o.color || "cloud", o.tracking || 0);
+                var ptd = PT.property("ADBE Text Properties").property("ADBE Text Document"), ptv = ptd.value;
+                ptv.justification = ParagraphJustification.CENTER_JUSTIFY; ptd.setValue(ptv);
+                var pb = PT.sourceRectAtTime(0, false);
+                tr(PT, "ADBE Anchor Point").setValue([pb.left + pb.width / 2, pb.top + pb.height / 2]); tr(PT, "ADBE Position").setValue([qw / 2, qh / 2]);
+                SSP.applyText(PT, o.preset || "Chars Rise", "in", o.t0 || 0);
+                c = keep; SSHUD.init(c);
+                var PL = c.layers.add(pc); PL.name = "Planar · " + o.quad;
+                tr(PL, "ADBE Anchor Point").setValue([0, 0]); tr(PL, "ADBE Position").setValue([0, 0]);
+                var cp = PL.property("ADBE Effect Parade").addProperty("ADBE Corner Pin"), pts = [[], [], [], []], tms = [];
+                for (var qf = 0; qf < qs.length; qf++) {
+                    tms.push(qf / PD.fps);
+                    for (var qc = 0; qc < 4; qc++) pts[qc].push([qs[qf][qc][0] * kx, qs[qf][qc][1] * ky]);
+                }
+                for (var qc2 = 0; qc2 < 4; qc2++) cp.property(qc2 + 1).setValuesAtTimes(tms, pts[qc2]);
+                tr(PL, "ADBE Opacity").setValue(o.opacity || 90);
+                if (o.blend === "overlay") PL.blendingMode = BlendingMode.OVERLAY;
+                made_ = [PL];
+            }
             else if (o.type === "behind") {
                 // in-world text that sits between the background and the people (needs scene.matte)
                 var B = text(c, o.text, o.role || "display", o.size || 260, o.color || "cloud", o.tracking || 0);
                 var td = B.property("ADBE Text Properties").property("ADBE Text Document"), tv = td.value;
-                tv.justification = ParagraphJustification.CENTER_JUSTIFY; td.setValue(tv);
+                tv.justification = o.align === "left" ? ParagraphJustification.LEFT_JUSTIFY : ParagraphJustification.CENTER_JUSTIFY; td.setValue(tv);
                 if (o.anchor) tr(B, "ADBE Position").expression = 'var a = thisComp.layer("' + o.anchor + '"); a.toComp(a.transform.anchorPoint) + [' + o.offset[0] + "," + o.offset[1] + "]";
                 else tr(B, "ADBE Position").setValue(o.at);
                 tr(B, "ADBE Opacity").setValue(o.opacity || 92);
@@ -105,7 +138,7 @@
         }
         function pass(test) { for (var h = 0; h < S.hud.length; h++) if (test(S.hud[h].type)) runItem(S.hud[h]); }
         // Layer order (bottom → top): plate · behind texts · people matte · grain · contours · face scans · HUD
-        pass(function (t) { return t === "behind"; });
+        pass(function (t) { return t === "behind" || t === "rays" || t === "glow" || t === "planar"; });
         if (S.matte) {
             var mItem = importOnce(S.matte);
             mItem.mainSource.alphaMode = AlphaMode.STRAIGHT;
@@ -115,7 +148,7 @@
         if (S.grain !== false) grain(c);
         pass(function (t) { return t === "contour"; });
         pass(function (t) { return t === "faceScan"; });
-        pass(function (t) { return t !== "behind" && t !== "contour" && t !== "faceScan"; });
+        pass(function (t) { return t !== "behind" && t !== "rays" && t !== "glow" && t !== "planar" && t !== "contour" && t !== "faceScan"; });
         c.motionBlur = true;   // motion blur on every animated graphic layer (HUD, text, contours)
         for (var mb = 1; mb <= c.numLayers; mb++) {
             var LL = c.layer(mb);

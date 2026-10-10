@@ -29,6 +29,8 @@ SCRIPT = [
     (9.5, 'SS_PANEL.select("pack", "Editorial")'),
     (11.0, 'SS_PANEL.select("pack", "Storybook")'),
     (12.5, 'SS_PANEL.controls({ease: "Preset curve"})'),
+    (13.0, 'SS_PANEL.tab("Brands")'),
+    (13.5, 'SS_PANEL.select("brand", "motion-dna")'),
 ]
 
 ctypes.windll.user32.SetProcessDPIAware()   # otherwise the capture is cropped on scaled displays (LEARNINGS)

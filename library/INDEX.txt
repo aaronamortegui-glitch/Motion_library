@@ -7,7 +7,7 @@
 # mcp: .mcp.json motion-dna → tools/mcp/ss_motion_mcp.py (list_tags, suggest_mix, match_reference, list_presets, apply_preset[duration,intensity,direction,ease], remove_animation, apply_pack, add_asset, render_frame, run_jsx…)
 # assets (local, licensed, not in repo): python tools/index_assets.py -> library/ASSETS.local.txt (sfx/overlays by category + loudness) · include tools/ss_assets.jsx · SSA.sfx(comp,name,t,gainDb[,len]) · SSA.overlay(comp,name,t[,blend,opacity])
 # hud: SSHUD.bracket/callout/meter/chip/contour/faceScan on TRK nulls · include tools/ss_hud.jsx · scenes: tools/build_scene.jsx + JSON (matte, behind text) · breakdown: tools/build_breakdown.jsx · edits: tools/build_edit.jsx + JSON · read docs/LEARNINGS.md
-# tags (library/tags.json): roles enter/exit/emphasis/loop/transition · energy range 1 calm..5 explosive · tones bold, cinematic, corporate, elegant, friendly, luxury, modern, organic, playful, retro, technical · MCP list_tags / suggest_mix / match_reference
+# tags (library/tags.json): roles enter/exit/emphasis/loop/transition · energy range 1 calm..5 explosive · tones bold, cinematic, corporate, editorial, elegant, friendly, handmade, luxury, modern, organic, playful, retro, technical, warm · MCP list_tags / suggest_mix / match_reference
 # references: a brand or video analysed into energy + tones → library/references/<slug>.json → match_reference → build what fits, CREATE the gaps (CONTRIBUTING §8)
 # kind|name|channels|e|use|roles|energy|tones
 motion|Fade|Fade|s|Corporate, UI, supporting text|enter/exit|1-2|modern/corporate/elegant
@@ -33,14 +33,14 @@ motion|Whip Pan|Position + motion blur (Whip curve)|d|Swipe transitions, camera-
 motion|Surge Rise|Fade&Position (Surge curve)|m|Headlines, cards, elegant entrances|enter|2-3|elegant/cinematic/modern
 motion|Speed Ramp|Time Remap (footage / precomps)|d|Footage, product shots, action beats, transitions|transition/emphasis|3-5|cinematic/bold
 motion|Punch Zoom|Scale (camera)|m|Footage, precomps, freeze frames, cut emphasis|emphasis|3-4|cinematic/bold
-motion|Coast Rise|Fade&Position (Coast curve)|s|Product UI, editorial headlines, icons: fast start, clean stop
-motion|Wind-up Slide|Fade&Position (Wind-up curve)|s|Logo slides, premium reveals: a small pull-back, then a long glide
-motion|Nudge Grow|Scale Y (Nudge curve)|s|Bars, charts, columns, panels growing from their anchor (put the anchor at the base)
-motion|Snap Scale|Scale&Fade (Snap curve)|m|Editorial cuts on the action: shapes and type that jump in size and settle
-motion|Iris Reveal|Mask (circle expansion, Wind-up curve)|m|Scene changes, photo reveals, opening a new section from a point
-motion|Wordmark Reveal|Position&Linear Wipe (Surge curve)|m|Wordmarks sliding out from behind their logo mark, names after an icon
-motion|Push Through|Scale&Fade (Launch curve)|m|Fly-through transitions: the camera pushes into a word, a logo or a planet and through it
-motion|Color Wipe|Linear Wipe 45° (Surge curve)|m|Section changes: a full-frame color solid sweeps in diagonally (put it on a solid)
+motion|Coast Rise|Fade&Position (Coast curve)|s|Product UI, editorial headlines, icons: fast start, clean stop|enter/exit|2-3|modern/corporate/technical
+motion|Wind-up Slide|Fade&Position (Wind-up curve)|s|Logo slides, premium reveals: a small pull-back, then a long glide|enter/exit|1-3|elegant/cinematic/luxury
+motion|Nudge Grow|Scale Y (Nudge curve)|s|Bars, charts, columns, panels growing from their anchor (put the anchor at the base)|enter/exit|1-3|modern/corporate/friendly
+motion|Snap Scale|Scale&Fade (Snap curve)|m|Editorial cuts on the action: shapes and type that jump in size and settle|enter/exit/emphasis|2-4|technical/modern/bold
+motion|Iris Reveal|Mask (circle expansion, Wind-up curve)|m|Scene changes, photo reveals, opening a new section from a point|transition/enter|2-3|friendly/playful/modern
+motion|Wordmark Reveal|Position&Linear Wipe (Surge curve)|m|Wordmarks sliding out from behind their logo mark, names after an icon|enter/exit|2-3|modern/elegant/corporate
+motion|Push Through|Scale&Fade (Launch curve)|m|Fly-through transitions: the camera pushes into a word, a logo or a planet and through it|transition/exit|3-4|cinematic/bold
+motion|Color Wipe|Linear Wipe 45° (Surge curve)|m|Section changes: a full-frame color solid sweeps in diagonally (put it on a solid)|transition|3-4|playful/bold/modern
 motion|Back In Down|Position · Scale · Fade|d|Cards, product shots, bold drops (enter)|enter|4-5|playful/bold/retro
 motion|Back In Left|Position · Scale · Fade|d|Slides, lower thirds, carousels (enter)|enter|4-5|playful/bold
 motion|Bounce In|Scale · Fade|d|Icons, badges, buttons, emoji (enter)|enter|4-4|playful/retro
@@ -67,8 +67,8 @@ fx|Swing|Rotate|s|Hanging tags, badges, signs, pendulums|loop|1-2|playful/organi
 fx|Orbit|Position|s|Dots and satellites around a logo, decorative loops|loop|1-2|technical/playful
 fx|Shake|Position&Rotate|d|Impacts, bass hits, alarms, energetic footage|emphasis/loop|4-5|bold
 fx|Holo Flicker|Opacity · Glow&Scanlines|m|HUD labels, tech overlays, holographic UI|loop|3-3|technical/retro
-fx|Boil|Position&Rotate (stepped, on 3s)|m|Collage, cut-outs, paper and texture layers: a subtle hand-made boil
-fx|On Twos|Keyframed transform (stepped time)|m|Stop-motion feel: plays the layer's existing animation on 2s or 3s (apply after a motion preset)
+fx|Boil|Position&Rotate (stepped, on 3s)|m|Collage, cut-outs, paper and texture layers: a subtle hand-made boil|loop|3-4|organic/retro/handmade
+fx|On Twos|Keyframed transform (stepped time)|m|Stop-motion feel: plays the layer's existing animation on 2s or 3s (apply after a motion preset)|loop|2-4|retro/handmade/organic
 text|Chars Rise|Position&Fade (char)|m|Short headlines, names, kickers|enter/exit|2-3|modern/elegant
 text|Words Fade Up|Position&Fade (word)|s|Phrases, captions, quotes|enter/exit|1-2|corporate/modern/elegant
 text|Blur Words|Blur&Fade (word)|s|Premium moments, calm intros|enter/exit|1-2|elegant/cinematic/luxury
@@ -79,7 +79,7 @@ text|Scramble|Source Text (decode)|d|Tech, data, HUD labels, reveals|enter|4-4|t
 text|Count Up|Source Text (number)|m|Stats, KPIs, prices, counters|enter|2-3|corporate/technical/modern
 text|Chars Ramp|Position&Fade (char, Ramp curve)|m|Titles that build tension, trailers, reveals|enter|2-4|cinematic/elegant
 text|Words Slam|Scale, Blur&Rotate (word)|d|Punchy statements, social hooks, VO beats|enter|4-5|bold/cinematic
-text|Chars Blur|Blur&Fade (char)|s|Opening titles, premium intros: characters resolve from blur one after another
+text|Chars Blur|Blur&Fade (char)|s|Opening titles, premium intros: characters resolve from blur one after another|enter|1-2|elegant/cinematic/luxury
 recipe|calibration__W3L|position&rotation&scale (loop)|d|AC ref · CALIBRATION
 recipe|calibration__4LC|position&rotation|d|AC ref · CALIBRATION
 recipe|calibration__D2T|position (loop)|d|AC ref · CALIBRATION
@@ -111,3 +111,5 @@ technique|Marker timing|1-5||
 technique|Styles|1-5||
 technique|Cut on the voice|1-5||voiceover
 technique|Face refinement|1-5||footage/real people
+# brands: slug|name|style|curve|energy|tones|rules  (read one with get_brand before animating for it; save notes with add_brand_note)
+brand|motion-dna|Motion DNA|Playful|Snap|3-4|playful/retro/bold|22
