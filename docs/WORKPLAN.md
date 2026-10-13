@@ -11,7 +11,7 @@ Priority: the panel should look good, not perfect (it is not a public launch). S
 | 1.1 | Styles and Techniques out of the bottom bar | **Done.** Bar: Behaviors · Curves · Brands · Agent |
 | 1.2 | Styles and Techniques as a library inside the Agent, with previews, an explanation and ready orders; no Apply or controls on styles | **Done.** *Agent › Library*: preview, what it does, **Use in chat** / **Copy order** |
 | 1.3 | Technique thumbnails: a clean card with the title and what it does | **Done.** `tools/technique_cards.py` |
-| 1.4 | Curves: the search goes down | **Done.** Next to the library it filters. "Start at 1": still to confirm with Gian |
+| 1.4 | Curves: the search goes down, and the editor starts at (1, 0, 0, 1) | **Done.** The search sits next to the library it filters; the editor opens on the S curve (1, 0, 0, 1) |
 | 1.5 | A simple, clear way to connect Claude (and Figma) | **Done.** *Connect*: one button, three short steps, turns green by itself; Figma optional in three steps; commands only under "Having trouble?" |
 | 1.6 | GIFs of the panel for the README | **Done.** One per section (`docs/screens/cep-behaviors/curves/brands/agent.gif`) and the tour (`cep-panel.gif`), from `tools/record_cep_panel.py` |
 | 1.7 | Easy to find and stable after install | **Done.** *Window › Extensions › Motion DNA* (also *File › Scripts › Motion DNA*), no extra windows; a silent Startup script starts the Claude bridge with AE; the panel retries its start while AE is still loading |
@@ -55,4 +55,3 @@ Priority: the panel should look good, not perfect (it is not a public launch). S
 
 ## Decisions pending
 - Repo public or private (brands stay local either way).
-- Curves: what "start at 1" means.

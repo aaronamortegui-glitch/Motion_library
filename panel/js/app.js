@@ -314,7 +314,9 @@ async function applyBehavior() {
 // ---------- 2. Curves: a Flow-style editor (drag the handles, type the values) and the token library ----------
 const SVGNS = "http://www.w3.org/2000/svg";
 const sv = (tag, attrs = {}) => { const e = document.createElementNS(SVGNS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
-const CV = { bz: [0.18, 0.28, 0, 0.9], name: "Coast", easings: [] };
+// the editor starts on the S curve (1, 0, 0, 1): a full ease in and out, the usual starting point to shape from
+const S_CURVE = [1, 0, 0, 1];
+const CV = { bz: S_CURVE.slice(), name: "S curve", easings: [] };
 const R0 = -0.2, R1 = 1.2;   // both axes show -0.2..1.2: the 0..1 square stays square, with room for overshoot
 const X = (u) => u * 100, Y = (v) => 100 - v * 100;   // value → SVG units (the unit square is 0..100)
 const bzText = (bz) => bz.map((v) => (Math.round(v * 100) / 100).toFixed(2)).join(", ");
@@ -347,7 +349,7 @@ function curves() {
     h1.setAttribute("x1", 0); h1.setAttribute("y1", 100); h1.setAttribute("x2", X(b[0])); h1.setAttribute("y2", Y(b[1]));
     h2.setAttribute("x1", 100); h2.setAttribute("y1", 0); h2.setAttribute("x2", X(b[2])); h2.setAttribute("y2", Y(b[3]));
     p1.setAttribute("cx", X(b[0])); p1.setAttribute("cy", Y(b[1])); p2.setAttribute("cx", X(b[2])); p2.setAttribute("cy", Y(b[3]));
-    CV.name = curveName(b); nameEl.textContent = CV.name || "Custom curve";
+    CV.name = curveName(b) || (b.every((v, i) => v === S_CURVE[i]) ? "S curve" : ""); nameEl.textContent = CV.name || "Custom curve";
     if (document.activeElement !== vals) vals.value = bzText(b);
     del.disabled = !isUserCurve(CV.name);
     for (const c of lib.children) c.classList.toggle("sel", c.dataset.name === CV.name);
