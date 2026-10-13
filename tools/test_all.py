@@ -2,6 +2,7 @@
   1. engine   tools/test_library.jsx  every preset animates, the controls change it, Remove cleans it
   2. panel    tools/test_panel.jsx    every category, filter, selection hook and control
   3. MCP      tools/test_mcp.py       every MCP tool, as Claude calls it
+     previews tools/check_previews.py  every preset, recipe, style and technique has its preview (no broken cards)
   4. visuals  tools/test_mosaics.jsx  styles · mix · controls mosaics (rendered with aerender)
               tools/make_library_mosaic.py   all presets with their tags
 Outputs: research/tests/*.json and docs/examples/test-*.mp4/.gif + library-mosaic.mp4/.gif (samples for the README).
@@ -28,6 +29,7 @@ def main():
         "engine": step("Engine: every preset", [BASH, "tools/bridge.sh", "tools/test_library.jsx", "900"]),
         "panel": step("Panel: categories, filters, hooks", [BASH, "tools/bridge.sh", "tools/test_panel.jsx", "120"]),
         "mcp": step("MCP: every tool", [sys.executable, "tools/test_mcp.py"]),
+        "previews": step("Previews: every library item has its image", [sys.executable, "tools/check_previews.py"]),
     }
     if "--no-render" not in sys.argv:
         ok = step("Visuals: styles, mix and controls mosaics", [BASH, "tools/bridge.sh", "tools/test_mosaics.jsx", "600"])

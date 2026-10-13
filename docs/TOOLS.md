@@ -42,6 +42,7 @@ panel; reach for these when building a piece.
 | `tools/technique_cards.py` | The technique cards of *Agent › Library* (title + what it does) → `library/techniques/<slug>_card.png` |
 | `tools/brand.py` (+ MCP `list_brands`, `get_brand`, `add_brand_note`, `apply_brand`) | **Brand profiles**: a custom style per brand that learns a rule from every review; templates in `library/brands/`, client brands in `library/brands.local/` or their own folder; `export` / `import` share one and merge its rules |
 | `tools/check_layout.jsx` | **Layout QA** on built comps: text on text, cards touching, safe area, size, contrast, graphics on faces, substituted fonts (CONTRIBUTING §9) |
+| `tools/check_previews.py` | **Preview QA**: lists any preset, recipe, style or technique without its panel image (setup and `test_all.py` run it; the panel shows a placeholder instead of a broken image) |
 | `tools/face_boxes.py` | Face boxes per frame (OpenCV) so the layout QA can flag graphics on faces |
 | `tools/trace_mark.py` | Traces a flat-colour mark (a logo on a prop, a sketch) into a clean SVG + PNG |
 | `tools/collect_files.jsx` | **Collect Files** by script: a self-contained copy of one comp (Reduce Project, every footage file copied into `(Footage)/` and relinked, fonts, a report); the original project is never modified |

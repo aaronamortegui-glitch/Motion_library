@@ -84,6 +84,11 @@ def ae_running():
 
 def clean_old():
     print("1. Clean what an older version left")
+    sys.path.insert(0, str(ROOT / "tools"))
+    from check_previews import missing
+    miss = missing()
+    print((OK if not miss else WARN) + ("every preset, style and technique has its preview" if not miss else
+          f"{len(miss)} previews missing (the panel shows a placeholder): python tools/check_previews.py"))
     here = str(ROOT).replace("\\", "/").lower()
     found = 0
     for d, admin in panel_dirs():

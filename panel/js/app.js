@@ -14,6 +14,23 @@ const h = (tag, attrs = {}, ...kids) => {   // tiny element builder
   return e;
 };
 const kids = (...a) => a.flat().filter((x) => x != null && x !== false);   // append()/replaceChildren() print "null" otherwise
+// Previews never show the broken-image icon: an image tries each source in turn, then becomes a named placeholder;
+// a hover GIF replaces the still only once it has loaded. tools/check_previews.py lists what is missing.
+function safeImg(srcs, label, attrs = {}) {
+  const list = srcs.filter(Boolean); let i = 0;
+  const img = h("img", Object.assign({ alt: "" }, attrs, { src: list[0] || "" }));
+  img.addEventListener("error", () => {
+    if (list[++i]) { img.src = list[i]; return; }
+    img.replaceWith(h("span", { class: "noprev", title: "No preview yet (python tools/check_previews.py)" }, h("b", {}, String(label || "?").slice(0, 1)), "no preview"));
+  });
+  img.rest = img.src;
+  return img;
+}
+function hoverPlay(card, img, gif) {
+  let on = false;
+  card.addEventListener("mouseenter", () => { on = true; const t = new Image(); t.onload = () => { if (on && img.isConnected) img.src = t.src; }; t.src = gif + "?t=" + Date.now(); card.classList.add("playing"); });
+  card.addEventListener("mouseleave", () => { on = false; if (img.isConnected && img.src !== img.rest) img.src = img.rest; card.classList.remove("playing"); });
+}
 const store = {   // per-user conveniences (section, filters, favorites); the panel works without it
   get(k, d) { try { const v = localStorage.getItem("mdna." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem("mdna." + k, JSON.stringify(v)); } catch (e) {} },
@@ -277,13 +294,10 @@ function behaviors() {
     count.textContent = items.length ? `${items.length}` : (S.cat === "★ Favorites" ? "No favorites yet: pick a preset and press ☆." : "None match");
     count.title = items.length ? `${items.length} ${S.cat === "★ Favorites" ? "favorites" : "presets"}` : "";
     grid.replaceChildren(...items.map((it) => {
-      const img = h("img", { src: it.thumb, alt: "", loading: "lazy" });
+      const img = safeImg([it.thumb], it.name, { loading: "lazy" });
       const c = h("button", { class: "card" + (S.sel && S.sel.favKey === it.favKey ? " sel" : ""), title: `${it.name} · ${it.energy || ""}\n${it.use || ""}` },
         h("span", { class: "thumb" }, img), h("span", { class: "label" }, (S.favs.has(it.favKey) ? "★ " : "") + it.name));
-      // hover plays the preset's real motion (its GIF, from the start) right on the thumbnail
-      c.onmouseenter = () => { img.src = it.img + "?t=" + Date.now(); c.classList.add("playing"); };
-      c.onmouseleave = () => { img.src = it.thumb; c.classList.remove("playing"); };
-      img.onerror = () => { if (img.src.indexOf(it.thumb) < 0) img.src = it.thumb; };   // no GIF: keep the still
+      hoverPlay(c, img, it.img);   // hover plays the preset's real motion (its GIF, from the start) right on the thumbnail
       c.onclick = () => { S.sel = it; for (const x of grid.children) x.classList.remove("sel"); c.classList.add("sel"); showPreview("behaviors", it); };
       return c;
     }));

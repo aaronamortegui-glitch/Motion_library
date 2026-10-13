@@ -114,10 +114,11 @@ const RULE_ASK = "When I give you a review note or a correction, apply it, then 
   "effects, color, audio, edit, process. Do not save rules yourself: the panel asks me where to keep them.";
 
 async function contextBlock() {
-  const lines = [`[Motion DNA panel · Agent. Motion DNA (library, tools, rules): ${S.root}; follow its CLAUDE.md. Report briefly what you did; ask before any paid generation.]`];
+  const lines = [`[Motion DNA panel · Agent. Motion DNA (library, tools, rules): ${S.root}; follow its CLAUDE.md. Report briefly what you did; ask before any paid generation. Never save the After Effects project unless I ask. Before you call a build done, run check_layout and fix its warnings (or say why one stays).]`];
   if (!PJ && scope().kind === "brand") lines.push(`You are in the folder of the brand ${scope().name} (${scope().dir}): this conversation is for everything about that brand.`);
   if (PJ) {
     lines.push(`Project: ${PJ.p.name}, folder ${PJ.dir} (your working folder: put what you make in its subfolders, never in the Motion DNA repo).`);
+    if (PJ.p.aep) lines.push(`This project's After Effects file: ${PJ.p.aep}. If the open After Effects project is another file, ask before building there.`);
     const pr = (PJ.p.rules || []).slice(-12).map((r) => `- ${r.rule}`);
     if (pr.length) lines.push("Project rules:\n" + pr.join("\n"));
   }
@@ -126,7 +127,8 @@ async function contextBlock() {
     const c = parse(await call("mdna_context"));
     if (AG.ctx.comp && c.comp) lines.push(`Open comp: "${c.comp.name}" ${c.comp.width}x${c.comp.height} @ ${c.comp.fps} fps, ${c.comp.duration} s, ${c.comp.layers} layers.`);
     if (AG.ctx.comp && c.project) lines.push(`After Effects project: ${c.project}`);
-    if (AG.ctx.selection && c.selected && c.selected.length) lines.push(`Selected layers: ${c.selected.join(", ")}.`);
+    if (AG.ctx.selection) lines.push(c.selected && c.selected.length ? `Selected layers (${c.selected.length}): ${c.selected.join(", ")}.`
+      : "No layers are selected: an order about \"the selected layers\" means every layer of the open comp.");
   }
   lines.push(EXISTING_ASK, RULE_ASK);
   return lines.join("\n");
@@ -152,7 +154,7 @@ function scopeText() {
   const sc = scope(), b = activeBrand();
   if (sc.kind === "project") return `Working in: video "${sc.name}"` + (b ? ` · brand ${b.name}` : "");
   if (sc.kind === "brand") return `Working in: brand ${sc.name} (its folder and conversation)`;
-  return "Working in: the Motion DNA folder · activate a brand or open a project to give it its own conversation";
+  return "Working in: Motion DNA · no brand or project yet";
 }
 function claudeProjectDir(cwd) {   // where Claude Code keeps the conversations of a folder (~/.claude/projects/<cwd with - >)
   const path = nodeReq()("path"), os = nodeReq()("os");
@@ -392,7 +394,7 @@ function agent() {
 function chatView() {
   const wrap = h("div", { class: "stack" });
   const logEl = h("div", { class: "agent-log" });
-  const input = h("textarea", { class: "field agent-input", rows: 3, placeholder: "Give the agent an order… (Ctrl+Enter to send)" });
+  const input = h("textarea", { class: "field agent-input", rows: 6, placeholder: "Tell the agent what to do, e.g. \"Animate the selected layers in the brand's style\".\nCtrl+Enter sends." });
   if (AG.pending) { input.value = AG.pending; AG.pending = null; setTimeout(() => input.focus()); }
   const send = h("button", { class: "solid apply", onclick: () => go() }, "Send");
   const stop = h("button", { class: "solid remove", onclick: stopAgent }, "Stop");
@@ -400,9 +402,9 @@ function chatView() {
   input.addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); go(); } });
   const chip = (key, label) => h("button", { class: "chip" + (AG.ctx[key] ? " on" : ""), title: `Send the ${label.toLowerCase()} with the order`,
     onclick: (e) => { AG.ctx[key] = !AG.ctx[key]; store.set("agentCtx", AG.ctx); e.currentTarget.classList.toggle("on", AG.ctx[key]); } }, label);
-  const templates = h("div", { class: "chips" }, ...TEMPLATES.map(([label, text]) => h("button", { class: "chip ghost", title: text, onclick: () => { input.value = text; input.focus(); } }, label)));
-  const newBtn = h("button", { class: "btn", title: "Start a new conversation (this one stays in the project's list)", onclick: () => {
-    if (AG.proc) return; setSession(null); AG.log = []; saveLog(); agent.draw(); } }, "New conversation");
+  const templates = h("div", { class: "chips" }, h("span", { class: "dim" }, "Try:"), ...TEMPLATES.map(([label, text]) => h("button", { class: "chip ghost", title: text, onclick: () => { input.value = text; input.focus(); } }, label)));
+  const newBtn = h("button", { class: "btn ghost", title: "Start a new conversation (this one stays in the project's list)", onclick: () => {
+    if (AG.proc) return; setSession(null); AG.log = []; saveLog(); agent.draw(); } }, "+ New conversation");
   const ruleCard = (m) => {
     const b = activeBrand();
     const btn = (where, label, tip, off) => h("button", { class: "chip" + (m.state === where ? " on" : ""), title: tip, disabled: !!off, onclick: () => keepRule(m, where) }, label);
@@ -417,7 +419,10 @@ function chatView() {
           h("button", { class: "chip ghost", onclick: () => { m.state = "dismissed"; saveLog(); agent.draw(); } }, "Dismiss")));
   };
   agent.draw = () => {
-    logEl.replaceChildren(...(AG.log.length ? AG.log : [{ role: "hint", text: "Orders run with the repo's rules (CLAUDE.md), the library, the brand and the project. Try a template below, or pick a style or technique in Library." }]).map((m) =>
+    logEl.hidden = !AG.log.length && !AG.proc;   // no empty box: the conversation appears with the first order
+    templates.hidden = AG.log.length > 0;
+    wrap.classList.toggle("talking", AG.log.length > 0);   // during a conversation the log gets the room, the field shrinks
+    logEl.replaceChildren(...AG.log.map((m) =>
       m.role === "rule" ? ruleCard(m) : h("div", { class: "msg " + m.role }, m.role === "step" ? "▸ " + m.text : m.text)));
     if (AG.proc) logEl.append(h("div", { class: "msg working" }, h("i", { class: "spin" }), "Working…"));
     logEl.scrollTop = logEl.scrollHeight;
@@ -427,12 +432,14 @@ function chatView() {
   if (AG.logged === false) wrap.append(h("div", { class: "conn" }, h("b", {}, "Connect Claude to start"),
     h("span", { class: "dim" }, "One sign-in with your Claude account, once per computer."),
     h("button", { class: "solid apply big", onclick: () => agent.showSetup() }, "Connect Claude")));
-  wrap.append(logEl,
-    h("div", { class: "chips" }, h("span", { class: "dim" }, "Context:"), chip("brand", "Brand"), chip("comp", "Comp"), chip("selection", "Selection")),
-    input, h("div", { class: "crow" }, send, stop), templates,
-    h("div", { class: "crow" }, newBtn,
-      h("button", { class: "btn", title: "Continue this conversation in the Claude app (Code tab)", disabled: scope().kind === "repo" && !sid, onclick: () => openInClaudeApp(sessionNow()) }, sid ? "Open in Claude app" : "Start in Claude app"),
-      h("button", { class: "btn", title: "Copy the command to continue it in a terminal", disabled: !sid, onclick: () => { navigator.clipboard.writeText(resumeCommand(sessionNow())); toast("Command copied: paste it in a terminal."); } }, "Copy resume command")));
+  wrap.classList.add("chat");
+  wrap.append(logEl, input,
+    h("div", { class: "send-row" }, h("div", { class: "chips", title: "What the agent gets with your order (the repo's rules and the library always go)" },
+      h("span", { class: "dim" }, "With:"), chip("brand", "Brand"), chip("comp", "Comp"), chip("selection", "Selection")), send, stop),
+    templates,
+    h("div", { class: "crow foot" }, newBtn,
+      h("button", { class: "btn ghost", title: "Continue this conversation in the Claude app (Code tab)", disabled: scope().kind === "repo" && !sid, onclick: () => openInClaudeApp(sessionNow()) }, sid ? "Open in Claude app" : "Start in Claude app"),
+      h("button", { class: "btn ghost icon", title: "Copy the command that continues this same conversation in a terminal (claude --resume …)", disabled: !sid, onclick: () => { navigator.clipboard.writeText(resumeCommand(sessionNow())); toast("Command copied: paste it in a terminal to continue this conversation there."); } }, ">_")));
   agent.draw();
   return wrap;
 }
@@ -443,7 +450,7 @@ function libItems() {
   if (AG.libKind === "styles") return S.packs.filter((pk) => !q || (pk.name + " " + pk.desc + " " + (pk.tones || []).join(" ")).toLowerCase().includes(q)).map((pk) => ({
     key: "style/" + pk.name, name: pk.name, sub: `${pk.energy}${pk.energy_range ? " " + pk.energy_range.join("–") : ""}`, desc: pk.desc,
     thumb: asset(`library/packs/${pk.slug}_md.png`), img: asset(`library/packs/${pk.slug}.gif`),
-    order: `Animate the open comp (or the selected layers) in the ${pk.name} style (${pk.desc.replace(/\.$/, "")}). Layers that already move keep their animation and get the style's curve and timing; the others get the move of their role. Then render a frame and tell me what you did.` }));
+    order: `Animate the selected layers (every layer of the open comp if none are selected) in the ${pk.name} style (${pk.desc.replace(/\.$/, "")}). Layers that already move keep their animation and get the style's curve and timing; the others get the move of their role. Then render a frame and tell me what you did.` }));
   return S.techniques.filter((t) => !q || (t.name + " " + t.what).toLowerCase().includes(q)).map((t) => {
     const s = slug(t.name);
     return { key: "technique/" + t.name, name: t.name, sub: "technique", desc: t.what, how: t.how,
@@ -457,7 +464,7 @@ function libraryView() {
   const show = (it) => {
     AG.libSel = it.key;
     detail.hidden = false;
-    detail.replaceChildren(...kids(h("img", { src: it.img, alt: "", onerror: (e) => { e.target.src = it.thumb; } }),
+    detail.replaceChildren(...kids(safeImg([it.img, it.thumb, it.fallback], it.name),
       h("b", {}, it.name), h("p", {}, it.desc), it.how ? h("p", { class: "dim" }, "Under the hood: " + it.how) : null,
       h("div", { class: "order" }, it.order),
       h("div", { class: "crow" },
@@ -468,10 +475,10 @@ function libraryView() {
   const draw = () => {
     const items = libItems();
     grid.replaceChildren(...items.map((it) => {
-      const img = h("img", { src: it.thumb, alt: "", loading: "lazy", onerror: (e) => { if (it.fallback && e.target.src !== it.fallback) e.target.src = it.fallback; } });
+      const img = safeImg([it.thumb, it.fallback], it.name, { loading: "lazy" });
       const c = h("button", { class: "card" + (AG.libSel === it.key ? " sel" : ""), title: it.desc }, h("span", { class: "thumb" }, img), AG.libKind === "styles" ? h("span", { class: "label" }, it.name) : null, h("span", { class: "label dim" }, it.sub));
       c.dataset.key = it.key;
-      if (AG.libKind === "styles") { c.onmouseenter = () => { img.src = it.img + "?t=" + Date.now(); }; c.onmouseleave = () => { img.src = it.thumb; }; }
+      if (AG.libKind === "styles") hoverPlay(c, img, it.img);
       c.onclick = () => show(it);
       return c;
     }));

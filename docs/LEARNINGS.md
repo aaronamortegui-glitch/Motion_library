@@ -134,6 +134,18 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **Old panel code after F5** → CEP caches the page's scripts → load CSS/JS with a `?v=Date.now()` query.
 - **Claude Code not found from AE** on Windows → the Store build of the desktop app keeps it under
   `%LOCALAPPDATA%\Packages\Claude_*\LocalCache\Roaming\Claude\claude-code\<version>\…\claude.exe` → search there too.
+- **A text preset over a move wiped the move; Replace wiped the layer's own rotation** (use-case tests UC01, UC02) →
+  replacing removed every keyframe of the layer, not only the channels the new preset animates → `SSP.replaceWith`
+  snapshots the keys, applies the new preset, and puts back every property it left untouched (text animators stay when
+  the new preset is a move). Results now say *replaced* (the layer's own animation) or *redone* (an earlier Motion DNA move).
+- **`apply_brand` ignored the brand's own timing** (a 700 ms car with overshoot for a brand that says 900 ms, no bounce;
+  UC09) → the style's defaults won → after the style, `SSP.brandTiming` retimes the layers each `motion.timing` entry
+  names (by word in the layer name, else by role) on the entry's own curve. Overshoot rules still need a look at a frame.
+- **Retiming left marker timing on the old spans** (expressions kept `var A=…, B=…`) → `restyle` only moved keys →
+  it now rewrites our marker expressions and moves the SS in / SS out markers by the same factor.
+- **The agent saved the AE project unasked and skipped the layout check** (UC08, UC09) → nothing in its context said
+  otherwise → the panel's context now says never to save unless asked, names the project's own .aep, says what "the
+  selected layers" means when none are selected, and asks for `check_layout` (now an MCP tool) before calling a build done.
 - **Remote debugging lands on another extension** → several `.debug` files used the same port → give ours its own.
 
 ## 2. Animation Composer as a behavioral reference
@@ -232,6 +244,7 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - `pack_demos.jsx` / `queue_previews_and_styles.jsx` call `app.project.save()`: save the open project to `renders/_preview_build.aep` first, or they overwrite whatever project is open.
 - Motion Style Map: reference videos stay out of git (`references/`, size and third-party rights); measure 60 fps sources on a 30 fps copy (per-frame thresholds depend on fps); continuous transitions don't count as cuts in the energy metric.
 - Subagents can't write `.md` files in this environment: have them return the analysis text and write it from the lead session (never work around the block).
+- **A library item without its preview showed a broken image in the panel** (a style added without its demo) → the panel trusted that every file existed → every panel image now goes through `safeImg` (tries each source, then a named placeholder) and hover GIFs swap in only once loaded; `python tools/check_previews.py` (run by setup and `test_all.py`) lists what is missing.
 
 ## 8. Costs observed (Flora, USD)
 | Item | Cost |
