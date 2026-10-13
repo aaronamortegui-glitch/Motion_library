@@ -77,10 +77,19 @@ move, tune *Duration · Intensity · Direction · Easing* and press the button, 
 ### Shape the curve
 <img src="docs/screens/cep-curves.gif" width="300" align="right" alt="The curve editor">
 
-**Curves**: drag the handles or type `x1, y1, x2, y2`, or pick one of the library's curves (and the active brand's own
+**Curves**: the editor starts on the S curve `(1, 0, 0, 1)`; drag the handles or type `x1, y1, x2, y2`, or pick one of the library's curves (and the active brand's own
 curves, first). **Apply to keyframes** eases the selected keyframes; with none selected, every keyframe of the selected
 layers, keeping their values. **Read keys** loads a curve from your animation, **Save curve** adds yours to the library
 or to the brand.
+
+<br clear="right">
+
+### Styles and techniques, ready to ask for
+<img src="docs/screens/cep-library.gif" width="300" align="right" alt="The Agent library">
+
+*Agent › Library* shows the **Styles** (a whole comp, role by role) and the **Techniques** (tracked labels, text behind
+people, roto, speed ramps, HUD…) with a preview, what each one does and a ready order: **Use in chat** sends it to the
+agent, **Copy order** takes it to Claude Code. Layers that already move keep their animation.
 
 <br clear="right">
 
@@ -113,15 +122,6 @@ blindly. Client brands never go in this repo (only templates do); conversations 
 
 <br clear="right">
 
-### Styles and techniques, ready to ask for
-<img src="docs/screens/cep-library.gif" width="300" align="right" alt="The Agent library">
-
-*Agent › Library* shows the **Styles** (a whole comp, role by role) and the **Techniques** (tracked labels, text behind
-people, roto, speed ramps, HUD…) with a preview, what each one does and a ready order: **Use in chat** sends it to the
-agent, **Copy order** takes it to Claude Code. Layers that already move keep their animation.
-
-<br clear="right">
-
 ### One conversation per brand and per video
 <img src="docs/screens/cep-workspace.gif" width="300" align="right" alt="Brand conversation and projects">
 
@@ -139,6 +139,39 @@ After Effects (`apply_preset`, `apply_pack`, `apply_brand` with `existing` = mod
 `remove_animation`), learn (`add_brand_note`) and check its work (`ae_status`, `list_layers`, `render_frame`). Without
 MCP, any LLM reads `library/INDEX.txt` and runs `.jsx` jobs with `bash tools/bridge.sh`. Contributors: read
 [`CLAUDE.md`](CLAUDE.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+## The library
+
+| Moves | Classics | Text | Loops | Recipes | Styles | Techniques | Curves |
+|---|---|---|---|---|---|---|---|
+| 32 | 17 | 11 | 11 | 9 | 9 | 11 | 14 + 6 durations |
+
+![Every preset with its energy range and tones](docs/examples/library-mosaic.gif)
+
+Full catalog with live thumbnails: **[docs/CATALOG.md](docs/CATALOG.md)** · filterable: `library/index.html` · for LLMs:
+`library/INDEX.txt` · tags: `library/tags.json`. All timing comes from the motion tokens: presets ask for `Arrive` +
+`Land`, never a raw speed, so the whole library retunes in one place.
+
+### Built on research: the Motion Style Map, by Gian Orsi
+
+![Motion Style Map: reference films placed by measured energy and scored tone](docs/screens/style-map.png)
+
+Gian measured **20 reference films** (brand films, launches, explainers, reels) frame by frame and by ear: cuts, share of
+time in motion, speed, colour, fitted Bézier curves for every move, and the music (BPM, pulse clarity, cuts on the beat
+vs chance, shot length in beats). Each film sits on a map of **measured energy × scored tone**, and every film is broken
+into **209 behaviors** named in Motion DNA's own terms (146 map to a preset, 47 are camera, edit or acting craft, 16 were
+open gaps). What the library was missing became new pieces:
+
+- **Curves:** `Coast`, `Nudge`, `Wind-up`, `Snap`.
+- **Presets measured on real work:** Coast Rise, Wind-up Slide, Nudge Grow, Snap Scale, Iris Reveal, Wordmark Reveal,
+  Push Through, Color Wipe, Chars Blur, Boil, On Twos.
+- **Styles:** *Editorial*, *Storybook*, *Collage*.
+- **How music shapes the edit:** shot length in beats separates styles better than BPM; key moments (logo, reveal) land on
+  musical events; the logo pattern "mark first, wordmark slides out from behind it".
+
+Explore it: [the map](research/style_map/style_map.html) · [taxonomy](research/style_map/taxonomy.md) ·
+[behaviors and mapping](research/ontology/) · [family syntheses, music & edit, cross-family patterns](research/styles/) ·
+pipeline in `tools/style_research/`.
 
 ## How it works
 
@@ -169,76 +202,17 @@ recombined by feel. **Research feeds it**: reference films and brand analyses ar
 missing is created and tagged (CONTRIBUTING §8). **Brands remember**, and **every piece is checked**: the layout QA and
 the tests catch problems, review notes become rules, new needs become new moves.
 
-## What's inside
+## Made with it
 
-| Moves | Classics | Text | Loops | Recipes | Styles | Techniques | Curves |
-|---|---|---|---|---|---|---|---|
-| 32 | 17 | 11 | 11 | 9 | 9 | 11 | 14 + 6 durations |
-
-![Every preset with its energy range and tones](docs/examples/library-mosaic.gif)
-
-Full catalog with live thumbnails: **[docs/CATALOG.md](docs/CATALOG.md)** · filterable: `library/index.html` · for LLMs:
-`library/INDEX.txt` · tags: `library/tags.json`. All timing comes from the motion tokens: presets ask for `Arrive` +
-`Land`, never a raw speed, so the whole library retunes in one place.
-
-## Motion Style Map · research by Gian Orsi
-
-![Motion Style Map: reference films placed by measured energy and scored tone](docs/screens/style-map.png)
-
-Gian measured **20 reference films** (brand films, launches, explainers, reels) frame by frame and by ear: cuts, share of
-time in motion, speed, colour, fitted Bézier curves for every move, and the music (BPM, pulse clarity, cuts on the beat
-vs chance, shot length in beats). Each film sits on a map of **measured energy × scored tone**, and every film is broken
-into **209 behaviors** named in Motion DNA's own terms (146 map to a preset, 47 are camera, edit or acting craft, 16 were
-open gaps). What the library was missing became new pieces:
-
-- **Curves:** `Coast`, `Nudge`, `Wind-up`, `Snap`.
-- **Presets measured on real work:** Coast Rise, Wind-up Slide, Nudge Grow, Snap Scale, Iris Reveal, Wordmark Reveal,
-  Push Through, Color Wipe, Chars Blur, Boil, On Twos.
-- **Styles:** *Editorial*, *Storybook*, *Collage*.
-- **How music shapes the edit:** shot length in beats separates styles better than BPM; key moments (logo, reveal) land on
-  musical events; the logo pattern "mark first, wordmark slides out from behind it". The Motion DNA promo uses all three.
-
-Explore it: [the map](research/style_map/style_map.html) · [taxonomy](research/style_map/taxonomy.md) ·
-[behaviors and mapping](research/ontology/) · [family syntheses, music & edit, cross-family patterns](research/styles/) ·
-pipeline in `tools/style_research/`.
-
-## Rules that keep the work clean
-
-Lessons from real reviews, checked automatically on the built comps by `tools/check_layout.jsx`: no text on text or cards
-touching, nothing outside the safe area (labels stack into up to 3 lines instead), at least 32 px, contrast or a card,
-nothing on a face, no substituted fonts. Edit rules: never cut a phrase, trim AI shots to their action, music leads the
-key moments. All of them: [CONTRIBUTING §9](CONTRIBUTING.md#9-layout-and-edit-rules-every-video-every-comp).
-
-## Showcases
-
-### *Motion DNA · promo* (45 s, 1985 infomercial parody)
-
-![Motion DNA promo: a 1985 infomercial parody made with the library](docs/examples/dna-promo.gif)
-
-Two bored designers in 1985 complain that Claude makes the same animation every time; a salesman bursts in with Motion
-DNA. Characters, location and props were designed as sheets first and every shot was generated with them as references
-(Nano Banana 2.1 + Seedance 2.5, USD 15.50). The edit was built entirely by Claude with the library: 2D tracked callouts,
-a planar-tracked "1985" on the wall, roto (local InSPyReNet mattes), a backlight glow, action lines, a freeze with the
-person in colour, a retro app inside a curved CRT, words landing on the voice, music-led timing from the Style Map, and
-the layout QA at 0 warnings. Video: [`media/motion_dna_promo/motion_dna_promo.mp4`](media/motion_dna_promo/motion_dna_promo.mp4) ·
-story, shot list and costs: [`media/motion_dna_promo/story.md`](media/motion_dna_promo/story.md) · storyboard:
-[Figma Slides](https://www.figma.com/slides/z2BSXVNVFhjYOlbBI1ZUy6).
+Renders from the test suite (`python tools/test_all.py`): the same layout in every style, moves mixed by tags, and one
+move through the panel's controls.
 
 | Tested: styles on one layout | Mix by tags | One move, the panel's controls |
 |---|---|---|
 | ![Styles](docs/examples/test-styles.gif) | ![Mix](docs/examples/test-mix.gif) | ![Controls](docs/examples/test-controls.gif) |
 
 <details>
-<summary>Earlier showcases: the explainer, The 1974 Cypher, The 1974 Boardroom and the first tests</summary>
-
-**Motion DNA · internal explainer** (68 s): how the library was built and how to use it, animated with the library
-itself. [`docs/examples/ss_motion_explainer.mp4`](docs/examples/ss_motion_explainer.mp4) ·
-[step by step](docs/case-studies/ss-motion-explainer.md). The promotional cut (67 s):
-[`docs/examples/ss_motion_promo.mp4`](docs/examples/ss_motion_promo.mp4) · [step by step](docs/case-studies/ss-motion-promo.md).
-
-| Our own curves | The plugin | Claude drives it |
-|---|---|---|
-| ![Curves](docs/examples/explainer-curves.gif) | ![Plugin](docs/examples/explainer-plugin.gif) | ![Claude](docs/examples/explainer-claude.gif) |
+<summary>Earlier technique tests: The 1974 Cypher, The 1974 Boardroom and the first experiments</summary>
 
 **The 1974 Cypher** (32 s, speed-ramp test): orbital moves speed-ramped on the beat with the `Ramp` curve, tracked labels
 on every detail, and a likeness QA. [`docs/examples/cypher_1974.mp4`](docs/examples/cypher_1974.mp4) ·
@@ -265,13 +239,20 @@ People in these earlier showcases are the project collaborators (Aaron Amortegui
 subjects; every clip went through the face refinement pass. Prices, bottlings and roles are fictional.
 </details>
 
-## Documentation
+## For contributors
 
 - [`docs/CATALOG.md`](docs/CATALOG.md): every preset and style with its thumbnail.
 - [`docs/TOOLS.md`](docs/TOOLS.md): every script, what it does and how to run it.
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): adding presets, open-source effects, styles, references, case studies; the layout and edit rules (§9).
 - [`docs/LEARNINGS.md`](docs/LEARNINGS.md): every pitfall already solved (driving AE from an LLM, ExtendScript, rendering, AI footage, tracking and roto, typography, audio, costs).
 - [`CLAUDE.md`](CLAUDE.md): the rules every Claude follows in this repo.
+
+### Rules that keep the work clean
+
+Lessons from real reviews, checked automatically on the built comps by `tools/check_layout.jsx`: no text on text or cards
+touching, nothing outside the safe area (labels stack into up to 3 lines instead), at least 32 px, contrast or a card,
+nothing on a face, no substituted fonts. Edit rules: never cut a phrase, trim AI shots to their action, music leads the
+key moments. All of them: [CONTRIBUTING §9](CONTRIBUTING.md#9-layout-and-edit-rules-every-video-every-comp).
 
 ## Credits and requirements
 
