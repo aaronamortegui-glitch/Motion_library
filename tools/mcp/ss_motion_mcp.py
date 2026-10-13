@@ -168,14 +168,16 @@ def t_add_brand_note(slug, rule, category="layout", why="", project="", by=""):
 
 def t_apply_brand(slug, comp=None, layers=None, phase="both", marker_timing=True, duration=1.0, intensity=1.0, existing="modify"):
     b = _brand.load(slug)
-    f = b["feel"]
+    f, mo = b["feel"], b.get("motion") or {}
     return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), names = {js(layers or [])}, ls = null;
 if (names.length) ls = findLayers(c, names);
 SSP.markerTiming({str(bool(marker_timing)).lower()}); {tune_js(duration, intensity, ease=f.get("curve"))}
 app.beginUndoGroup("Motion DNA brand (MCP): {b['name']}");
-var r; try {{ r = SSP.applyPack(c, {js(f['style'])}, ls, {js(phase)}, {js(existing)}); }} finally {{ SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); }}
-return "{b['name']}: style " + {js(f['style'])} + " with curve " + {js(f.get('curve') or 'of the style')} + "\\n" + (r.length ? r.join("\\n") : "No layers matched");""") + \
-        "\nFollow the brand's rules for everything else (get_brand)."
+var r, tm = []; try {{ r = SSP.applyPack(c, {js(f['style'])}, ls, {js(phase)}, {js(existing)});
+  tm = SSP.brandTiming(c, ls, {js(mo.get('timing') or [])}, {js(mo.get('curves') or [])}); }} finally {{ SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); }}
+return "{b['name']}: style " + {js(f['style'])} + " with curve " + {js(f.get('curve') or 'of the style')} + "\\n" + (r.length ? r.join("\\n") : "No layers matched") +
+  (tm.length ? "\\nBrand timing:\\n" + tm.join("\\n") : "");""") + \
+        "\nThe brand's own timing is applied where its entries name a layer or role. Check its motion rules (get_brand) on a rendered frame, then run check_layout."
 
 
 def _tags():
@@ -362,6 +364,14 @@ app.scheduleTask("app.project.renderQueue.render()", 200, false); return f.fsNam
     return f"Render queued; still writing {target} (AE shows 'Not Responding' while it renders)"
 
 
+def t_check_layout(comps=None):
+    names = comps or []
+    return run_jsx(COMP_JS + f"""var names = {js(names)};
+if (!names.length) {{ var c = findComp(null); names = [c.name]; }}
+$.global.QA_COMPS = names; QA_COMPS = names;
+return String($.evalFile(new File(SS_ROOT + "/tools/check_layout.jsx")));""", timeout=300)
+
+
 def t_run_jsx(code, timeout_s=180):
     return run_jsx(code, timeout=timeout_s)
 
@@ -408,6 +418,8 @@ TOOLS_DEF = [
     ("apply_brand", t_apply_brand, "Animate a comp (or the named layers) in a brand's style: its base style, layer role by layer role, on the brand's own curve.",
      {"slug": {"type": "string"}, "comp": {"type": "string"}, "layers": {"type": "array", "items": {"type": "string"}},
       "phase": {"type": "string", "enum": ["in", "out", "both"]}, "marker_timing": {"type": "boolean"}, "duration": {"type": "number"}, "intensity": {"type": "number"}, "existing": {"type": "string", "enum": ["modify", "replace"]}}, ["slug"]),
+    ("check_layout", t_check_layout, "Layout QA on built comps (default: the active comp), before you report a build as done: text overlapping text, text outside the 40 px safe area, text under 32 px, low contrast, graphics on faces, substituted fonts. Fix every warning or say why it stays.",
+     {"comps": {"type": "array", "items": {"type": "string"}}}),
     ("run_jsx", t_run_jsx, "Advanced: run ExtendScript in AE with the library loaded (SSM, SSP, SSA available). The code is a function body: use `return` for the result.",
      {"code": {"type": "string"}, "timeout_s": {"type": "number"}}, ["code"]),
 ]
@@ -439,7 +451,7 @@ def handle(req):
                                 "video placed in an energy range and tones, e.g. calm + modern), run match_reference: build what fits from existing "
                                 "presets and CREATE what is missing (moves, curves, transitions, techniques), tag it, render its samples and add a style "
                                 "(CONTRIBUTING.md section 8). Apply with apply_preset (duration, intensity, direction, ease), apply_pack, add_asset; undo "
-                                "with remove_animation; check with render_frame. Working for a brand or a project? Read it first with get_brand and "
+                                "with remove_animation; check with render_frame and, before calling a build done, check_layout. Never save the AE project unless asked. Working for a brand or a project? Read it first with get_brand and "
                                 "save every review note with add_brand_note: each brand profile learns and keeps its own rules. "
                                 "Read CLAUDE.md in the repo for the rules."}
     if method == "tools/list":

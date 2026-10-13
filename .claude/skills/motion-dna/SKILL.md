@@ -38,8 +38,8 @@ All repo content is English: write code, comments, messages, metadata and commit
 ## Existing animation: modify it, or generate it
 When the layers already move, keep their animation unless the user says replace: `apply_preset` / `apply_pack` /
 `apply_brand` take `existing` = `modify` (default: keyframe values stay, timing scaled by `duration`, every segment
-re-eased with the preset's or style's curve) or `replace`. Layers with no animation get the preset generated. In ExtendScript:
-`SSP.animationOf(L)`, `SSP.restyle(L, {factor | frames, ease | bz})`, `SSP.smartApply(L, name, existing, generateFn)`.
+re-eased with the preset's or style's curve) or `replace` (channel by channel: properties the new preset does not animate keep their keys). Layers with no animation get the preset generated. In ExtendScript:
+`SSP.animationOf(L)`, `SSP.restyle(L, {factor | frames, ease | bz})`, `SSP.smartApply(L, name, existing, generateFn)`, `SSP.replaceWith(L, generateFn, isText)`, `SSP.brandTiming(comp, layers, timing, curves)`.
 
 ## Picking a preset
 Read ONLY `library/INDEX.txt` (one line per preset: `kind|name|channels|energy s/m/d|use`, tokens in the header).
@@ -80,7 +80,7 @@ Animation Composer's asset packs (≈300 SFX, light leaks, grain, film burns, VH
 3. In AE: `#include "ss_assets.jsx"` → `SSA.sfx(comp, name, t, gainDb, len)` and `SSA.overlay(comp, name, t, blend, opacity)` (blend defaults by family: light leaks/burns screen, grain/film overlay).
 
 ## MCP, markers, packs and classics
-- If the `motion-dna` MCP server is available, use it: `list_presets` / `list_packs` / `list_assets` to choose, `apply_preset` (phase in|out|both, `marker_timing`) / `apply_pack` / `add_asset` to act, `render_frame` to look at the result.
+- If the `motion-dna` MCP server is available, use it: `list_presets` / `list_packs` / `list_assets` to choose, `apply_preset` (phase in|out|both, `marker_timing`) / `apply_pack` / `add_asset` to act, `render_frame` to look at the result, `check_layout` before calling a build done (overlaps, safe area, size, contrast). Never save the AE project unless asked.
 - Marker timing: `SSP.markerTiming(true)` before applying adds layer markers `SS in` / `SS out`; moving them retimes the animation (expression remap, the curve is kept). Off by default for scripted builds.
 - Packs: `SSP.applyPack(comp, "Dynamic"|"Elegant"|"Modern"|"Playful"|"Tech", layers?, phase?)` classifies layers by role (title/subtitle/body by font size, shape, media, logo by name) and applies the role's preset.
 - Classics (`family: "classic"` in INDEX): animate.css 4.1.1 (MIT) effects as native keyframes; same `SSP.apply` call. Attention moves (Rubber Band, Tada, Heart Beat…) play at the `in` time.

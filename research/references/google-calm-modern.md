@@ -2,8 +2,8 @@
 
 Energy 1–2 (calm to soft) · tones: modern, friendly, corporate · avoid: overshoot, anticipation, retro, Shake, Jitter
 
-## Presets that fit (20)
-Chars Rise, Coast Rise, Count Up, Fade, Fade Up, Flip In, Flip In X, Float, Iris Reveal, Line Draw, Nudge Grow, Pulse, Rotate Settle, Slide Land, Snap Scale, Surge Rise, Wipe Reveal, Wordmark Reveal, Words Fade Up, Zoom Out
+## Presets that fit (21)
+Chars Rise, Coast Rise, Count Up, Fade, Fade Up, Flip In, Flip In X, Float, Glide In, Iris Reveal, Line Draw, Nudge Grow, Pulse, Rotate Settle, Slide Land, Snap Scale, Surge Rise, Wipe Reveal, Wordmark Reveal, Words Fade Up, Zoom Out
 
 Default curve for this feel: **Land**.
 

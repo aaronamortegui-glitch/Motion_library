@@ -1047,7 +1047,9 @@ var SSP = (function () {
         },
         // Removes what Motion DNA added to a layer: keyframes and our expressions on its animated properties (the value
         // at the rest time stays), the SS in / SS out markers, our text animators and SS-named effects.
-        remove: function (L) {
+        // keep (optional): {animators: true} keeps our text animators, {fx: true} our SS effects (see replaceWith)
+        remove: function (L, keep) {
+            keep = keep || {};
             // removing a text animator or an effect deselects every layer in AE: keep the user's selection
             var keepSel = [], cs = L.containingComp.selectedLayers, s0;
             for (s0 = 0; s0 < cs.length; s0++) keepSel.push(cs[s0]);
@@ -1070,9 +1072,9 @@ var SSP = (function () {
                 }
             })(L);
             var an = L.property("ADBE Text Properties") && L.property("ADBE Text Properties").property("ADBE Text Animators");
-            if (an) for (i = an.numProperties; i >= 1; i--) if (/^SS /.test(an.property(i).name)) { an.property(i).remove(); n++; }
+            if (an && !keep.animators) for (i = an.numProperties; i >= 1; i--) if (/^SS /.test(an.property(i).name)) { an.property(i).remove(); n++; }
             var fx = L.property("ADBE Effect Parade");
-            if (fx) for (i = fx.numProperties; i >= 1; i--) if (/^SS /.test(fx.property(i).name)) { fx.property(i).remove(); n++; }
+            if (fx && !keep.fx) for (i = fx.numProperties; i >= 1; i--) if (/^SS /.test(fx.property(i).name)) { fx.property(i).remove(); n++; }
             if (ours && /Speed Ramp/.test(L.comment || "") && L.canSetTimeRemapEnabled && L.timeRemapEnabled) { L.timeRemapEnabled = false; n++; }   // our time remap
             if (ours) L.comment = "";
             for (s0 = 0; s0 < keepSel.length; s0++) { try { keepSel[s0].selected = true; } catch (eS) {} }
@@ -1148,6 +1150,17 @@ var SSP = (function () {
                     n++;
                 }
             }
+            if (Math.abs(f - 1) > 0.001) {   // marker timing follows: the expressions' spans and the SS in / SS out markers
+                var st = L.startTime, map = function (a) { return a < 0 ? a : t0 + (st + a - t0) * f - st; };
+                for (i = 0; i < ps.length; i++) {
+                    var ex = ps[i].canSetExpression ? ps[i].expression || "" : "";
+                    var m = ex.indexOf(TAG) === 0 && /var A=([-\d.e]+), B=([-\d.e]+), C=([-\d.e]+), D=([-\d.e]+);/.exec(ex);
+                    if (m) ps[i].expression = markerExpr(map(+m[1]), map(+m[2]), map(+m[3]), map(+m[4]));
+                }
+                var M = L.property("ADBE Marker"), mk = [];
+                for (k = M.numKeys; k >= 1; k--) { var mc = M.keyValue(k).comment; if (mc === "SS in" || mc === "SS out") { mk.push({ t: M.keyTime(k), v: M.keyValue(k) }); M.removeKey(k); } }
+                for (k = 0; k < mk.length; k++) M.setValueAtTime(t0 + (mk[k].t - t0) * f, mk[k].v);
+            }
             return n;
         },
         // The curve a preset gives an existing animation: the Easing control if one is chosen, else one by its energy
@@ -1158,9 +1171,61 @@ var SSP = (function () {
             if (e === "medium") return "Land";
             return "Coast";
         },
+        // Every keyframed property of a layer with its keys (values, times, interpolation, eases, spatial tangents)
+        snapshot: function (L) {
+            var out = [];
+            (function walk(g) {
+                for (var j = 1; j <= g.numProperties; j++) {
+                    var p = g.property(j);
+                    if (!p) continue;
+                    if (p.propertyType === PropertyType.PROPERTY) {
+                        if (!p.numKeys || p.matchName === "ADBE Marker" || p.matchName === "ADBE Time Remapping") continue;
+                        var ks = [];
+                        for (var k = 1; k <= p.numKeys; k++) ks.push({ t: p.keyTime(k), v: p.keyValue(k), ii: p.keyInInterpolationType(k), oi: p.keyOutInterpolationType(k),
+                            ie: p.keyInTemporalEase(k), oe: p.keyOutTemporalEase(k), it: p.isSpatial ? p.keyInSpatialTangent(k) : null, ot: p.isSpatial ? p.keyOutSpatialTangent(k) : null });
+                        out.push({ p: p, keys: ks });
+                    } else if (p.numProperties) walk(p);
+                }
+            })(L);
+            return out;
+        },
+        // Puts back the snapshot's keys on the properties that have no keys and no expression now. Returns how many.
+        restore: function (snap) {
+            var n = 0;
+            for (var i = 0; i < snap.length; i++) {
+                try {
+                    var p = snap[i].p, ks = snap[i].keys, k;
+                    if (p.numKeys || (p.canSetExpression && p.expression)) continue;
+                    for (k = 0; k < ks.length; k++) {
+                        var x = p.addKey(ks[k].t);
+                        p.setValueAtKey(x, ks[k].v);
+                        if (ks[k].it) { try { p.setSpatialTangentsAtKey(x, ks[k].it, ks[k].ot); } catch (e1) {} }
+                    }
+                    for (k = 0; k < ks.length; k++) {
+                        p.setInterpolationTypeAtKey(k + 1, ks[k].ii, ks[k].oi);
+                        try { p.setTemporalEaseAtKey(k + 1, ks[k].ie, ks[k].oe); } catch (e2) {}
+                    }
+                    n++;
+                } catch (e) {}   // a property that went away with a removed effect or animator
+            }
+            return n;
+        },
+        // Replaces a layer's animation with what generate() builds, channel by channel: whatever the new animation does
+        // not touch keeps its keys (a text preset over a move keeps the move; Replace on a position move keeps the layer's
+        // own rotation). Our text animators stay unless the new preset is a text preset; loops stay unless keepFx is false.
+        // Returns the number of properties kept.
+        replaceWith: function (L, generate, isText, keepFx) {
+            var snap = this.snapshot(L), was = (L.comment || "").replace(/\s*\|?\s*re-eased like [^|]*/g, "");
+            this.remove(L, { animators: !isText, fx: keepFx !== false });
+            generate();
+            var kept = this.restore(snap);
+            if (kept && /SS (preset|text|recipe)/.test(was) && (L.comment || "").indexOf(was) < 0) L.comment = L.comment + " | " + was;
+            return kept;
+        },
         // existing: "modify" (default) keeps an animation the layer already has and gives it the preset's feel (curve,
         // and the Duration control as a timing factor); "replace" removes it first. Motion DNA's own earlier animation
-        // is always replaced. A layer with no animation gets the preset generated. Returns modified|replaced|generated.
+        // is always redone. Replacing goes channel by channel (replaceWith). A layer with no animation gets the preset
+        // generated. Returns modified | replaced | redone | generated.
         smartApply: function (L, name, existing, generate) {
             var a = this.animationOf(L);
             if (a.props && !a.ours && existing !== "replace") {
@@ -1168,9 +1233,39 @@ var SSP = (function () {
                 L.comment = (L.comment ? L.comment + " | " : "") + "re-eased like " + name;   // not "Motion DNA": the next apply must still see it as the layer's own
                 return "modified";
             }
-            if (a.props) this.remove(L);
-            generate();
-            return a.props ? "replaced" : "generated";
+            if (!a.props) { generate(); return "generated"; }
+            this.replaceWith(L, generate, !!TX[name]);
+            return a.ours ? "redone" : "replaced";
+        },
+        // A brand's timing (brand.json motion.timing): each entry ("Title in", 20 frames, on "Vela Glide") retimes the
+        // animated layers it names, word by word in the layer name ("Car reveal" → "Car side"), else by role ("Title" →
+        // title layers), keeping their keyframe values. curves: the brand's own curves ({name, bezier}). Returns lines.
+        brandTiming: function (comp, layers, timing, curves) {
+            var bz = {}, out = [], ls = [], i, j, k;
+            if (!timing || !timing.length) return out;
+            for (i = 0; i < (curves || []).length; i++) bz[curves[i].name] = curves[i].bezier;
+            var ROLE = { title: /title|headline|heading/, subtitle: /subtitle|subhead/, body: /body|copy|label|value|stat|caption/,
+                shape: /card|shape|box|button|panel/, logo: /logo/, media: /car|product|photo|image|media|hero|footage|video|packshot/ };
+            var words = function (s) {
+                var w = String(s).toLowerCase().split(/[^a-z0-9]+/), r = [];
+                for (var x = 0; x < w.length; x++) if (w[x].length > 2 && !/^(in|out|the|and|reveal|entrance|exit|move|moves)$/.test(w[x])) r.push(w[x].replace(/s$/, ""));
+                return r;
+            };
+            if (layers && layers.length) for (i = 0; i < layers.length; i++) ls.push(layers[i]);
+            else for (i = 1; i <= comp.numLayers; i++) ls.push(comp.layer(i));
+            for (i = 0; i < ls.length; i++) {
+                var L = ls[i];
+                if (!this.animatedProps(L).length) continue;
+                var nw = words(L.name), role = this.roleOf(L), hit = null;
+                for (j = 0; j < timing.length && !hit; j++) { var ew = words(timing[j].element); for (k = 0; k < ew.length; k++) if (("," + nw.join(",") + ",").indexOf("," + ew[k] + ",") >= 0) { hit = timing[j]; break; } }
+                for (j = 0; j < timing.length && !hit; j++) if (role && ROLE[role] && ROLE[role].test(String(timing[j].element).toLowerCase())) hit = timing[j];
+                if (!hit) continue;
+                var fr = hit.unit === "ms" ? Math.max(1, Math.round(hit.value / 1000 / comp.frameDuration)) : Math.round(hit.value);
+                var cb = hit.curve && bz[hit.curve];
+                this.restyle(L, { frames: fr, bz: cb || null, ease: cb ? null : (SSP_STATE.tune.ease || "Coast") });
+                out.push(L.name + " → " + fr + " f" + (hit.curve ? " on " + hit.curve : "") + " (" + hit.element + ")");
+            }
+            return out;
         },
         // marker-driven timing on/off (off by default so scripted builds stay plain keyframes)
         markerTiming: function (on) { if (on !== undefined) SSP_STATE.markerTiming = !!on; return SSP_STATE.markerTiming; },
@@ -1214,11 +1309,13 @@ var SSP = (function () {
                         applied.push(L.name + " → " + role + ": kept its animation, re-eased on " + ce);
                         n++; continue;
                     }
-                    if (had.props) this.remove(L);
-                    if (r.text && L instanceof TextLayer) this.applyText(L, r.text, phase || pk.phase || "both", t0);
-                    else if (r.motion) this.apply(L, r.motion, phase || pk.phase || "both", t0);
-                    if (r.fx) this.applyFx(L, r.fx);
-                    applied.push(L.name + " → " + role + ": " + (r.text && L instanceof TextLayer ? r.text : r.motion || "") + (r.fx ? " + " + r.fx : ""));
+                    var isTx = !!(r.text && L instanceof TextLayer), gen = (function (self, L, r, t0, isTx) { return function () {
+                        if (isTx) self.applyText(L, r.text, phase || pk.phase || "both", t0);
+                        else if (r.motion) self.apply(L, r.motion, phase || pk.phase || "both", t0);
+                        if (r.fx) self.applyFx(L, r.fx);
+                    }; })(this, L, r, t0, isTx);
+                    if (had.props) this.replaceWith(L, gen, isTx, !r.fx); else gen();
+                    applied.push(L.name + " → " + role + ": " + (isTx ? r.text : r.motion || "") + (r.fx ? " + " + r.fx : "") + (had.ours ? " (redone)" : had.props ? " (replaced)" : ""));
                     n++;
                 }
             }

@@ -50,6 +50,7 @@ checks = [
     ("apply_preset", {"preset": "Chars Ramp", "layers": ["Title"], "comp": COMP}, lambda t: "Title" in t),
     ("show_in_panel", {"kind": "motion", "name": "Surge Rise"}, lambda t: len(t) > 0),
     ("render_frame", {"comp": COMP, "time_s": 0.5}, lambda t: ".png" in t),
+    ("check_layout", {"comps": [COMP]}, lambda t: t.startswith("layout QA")),
     ("remove_animation", {"layers": ["Chip", "Title"], "comp": COMP}, lambda t: "cleared" in t),
     ("apply_pack", {"pack": "Calm Modern", "comp": COMP}, lambda t: "→" in t or "->" in t),
     ("list_brands", {}, lambda t: "motion-dna" in t),

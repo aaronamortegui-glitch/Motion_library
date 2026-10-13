@@ -68,7 +68,7 @@ green is ready, a click opens Connect. When Figma asks for permission again, the
 move, tune *Duration · Intensity · Direction · Easing* and press the button, which says what it will do:
 - **Create** when the layers have no keyframes;
 - **Modify** when they already move: your keyframes and values stay, they get the preset's timing and curve;
-- **Replace** to delete them and create the preset instead.
+- **Replace** to swap their animation for the preset, channel by channel: what the preset does not animate (a rotation, a text animator under a move) stays.
 
 **Remove** cleans off what Motion DNA added. With *Marker timing*, drag the `SS in` / `SS out` markers to retime.
 
@@ -136,7 +136,7 @@ from the panel, the Claude app or a terminal (*Copy terminal command*); the pane
 Open the repo (or a brand or project folder) in Claude Code and approve the `motion-dna` server. Claude can browse the
 library (`list_presets`, `list_packs`, `list_tags`, `suggest_mix`, `match_reference`, `list_brands`, `get_brand`), act in
 After Effects (`apply_preset`, `apply_pack`, `apply_brand` with `existing` = modify | replace, `add_asset`,
-`remove_animation`), learn (`add_brand_note`) and check its work (`ae_status`, `list_layers`, `render_frame`). Without
+`remove_animation`), learn (`add_brand_note`) and check its work (`ae_status`, `list_layers`, `render_frame`, `check_layout`). Without
 MCP, any LLM reads `library/INDEX.txt` and runs `.jsx` jobs with `bash tools/bridge.sh`. Contributors: read
 [`CLAUDE.md`](CLAUDE.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 

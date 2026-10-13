@@ -117,10 +117,28 @@ def new(slug, name, style="Modern", curve=None, tones=(), energy=(2, 3), by="", 
          "feel": {"energy": list(energy), "tones": list(tones), "style": style, "curve": curve, "transition": None},
          "presets": {"prefer": {}, "avoid": []}, "motion": {"curves": [], "timing": []},
          "rules": [], "removed": [], "projects": []}
-    save(b, folder or LOCAL / slug)
+    d = pathlib.Path(folder or LOCAL / slug)
+    save(b, d)
     if folder:
         register(folder)
+    claude_folder(d, b)
     return b
+
+
+def claude_folder(d, b):
+    """The brand folder is also a Claude Code folder (same files the panel writes): CLAUDE.md and .mcp.json."""
+    root = ROOT.as_posix()
+    if not (d / "CLAUDE.md").exists():
+        (d / "CLAUDE.md").write_text(
+            f"# {b['name']} · a Motion DNA brand\n\nEverything about this brand happens in this folder and its conversation.\n\n"
+            f"- **brand.json** (here): the brand's rules, curves and timing. Read it with `get_brand` (slug `{b['slug']}`) before animating; "
+            f"save every review note with `add_brand_note`.\n- **projects/**: one folder per video for this brand, each with its own conversation.\n"
+            f"- Motion DNA (library, tools, rules) lives in `{root}`: read its CLAUDE.md. The `motion-dna` MCP server is in .mcp.json.\n\n"
+            f"To share this brand, the panel's Brands › {b['name']} › Download to share writes one file (`{b['slug']}.motiondna-brand.json`); "
+            f"the other person imports it. Never put this brand in the Motion DNA repo.\n", encoding="utf-8")
+    if not (d / ".mcp.json").exists():
+        mcp = {"mcpServers": {"motion-dna": {"command": "python", "args": [root + "/tools/mcp/ss_motion_mcp.py"]}}}
+        (d / ".mcp.json").write_text(json.dumps(mcp, indent=1) + "\n", encoding="utf-8")
 
 
 def note(slug, rule, cat="layout", why="", project="", by=""):
@@ -295,8 +313,9 @@ def main():
         print(f"exported {export(a.slug, a.file, a.by)}")
     elif a.cmd == "import":
         b, n, d = import_(a.file, a.by, a.dir)
-        print(f"{b['name']} in {d}: {n['new']} new rules, {n['updated']} updated, {n['removed']} removed, "
-              f"{n['curves']} curves, {n['timing']} timings")
+        pl = lambda k, w: f"{n[k]} {w}" + ("" if n[k] == 1 else "s")
+        print(f"{b['name']} in {d}: {pl('new', 'new rule')}, {n['updated']} updated, {n['removed']} removed, "
+              f"{pl('curves', 'curve')}, {pl('timing', 'timing')}")
     elif a.cmd == "thumb":
         print(thumb(a.slug))
 

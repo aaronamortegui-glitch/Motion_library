@@ -83,6 +83,7 @@
         try {
             SSP.tune();
             var L = layerFor(kind, name); L.inPoint = 0; L.outPoint = D;
+            if (kind === "fx" && name === "On Twos") SSP.apply(L, "Glide In", "in", 0);   // it steps an animation the layer already has
             apply(kind, name, L, kind === "fx" ? "in" : "both");
             var r = animated(L);
             row.keys = r.keys; row.expr = r.expr; row.moves = r.moves;

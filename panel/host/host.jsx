@@ -64,7 +64,7 @@ function mdna_layers() {
 function mdna_apply(s) {
     var a = mdna_parse(s), ls = mdna_layers();
     if (!ls) return "ERR Select one or more layers in a composition.";
-    var st = (a.stagger || 0) * ls[0].containingComp.frameDuration, cnt = { generated: 0, modified: 0, replaced: 0 };
+    var st = (a.stagger || 0) * ls[0].containingComp.frameDuration, cnt = { generated: 0, modified: 0, replaced: 0, redone: 0 };
     SSP.markerTiming(!!a.markers); SSP.tune(a.tune || {});
     app.beginUndoGroup("Motion DNA: " + a.name + " (" + a.phase + ")");
     try {
@@ -84,7 +84,8 @@ function mdna_apply(s) {
     var parts = [];
     if (cnt.generated) parts.push(cnt.generated + " animated");
     if (cnt.modified) parts.push(cnt.modified + " kept their animation, re-timed and re-eased");
-    if (cnt.replaced) parts.push(cnt.replaced + " replaced");
+    if (cnt.replaced) parts.push(cnt.replaced + " replaced (channels it does not use kept)");
+    if (cnt.redone) parts.push(cnt.redone + " redone (earlier Motion DNA moves updated, other channels kept)");
     return "OK " + a.name + ": " + parts.join(" · ");
 }
 // The selected layers and whether they already move (the panel says what Apply will do)
@@ -108,8 +109,14 @@ function mdna_apply_style(s) {
     try { res = SSP.applyPack(c, a.name, ls, a.phase, a.existing || "modify"); } catch (e) { SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); return "ERR " + e.toString(); }
     SSP.markerTiming(false); SSP.tune();
     app.endUndoGroup();
-    var kept = 0; for (var i = 0; i < res.length; i++) if (res[i].indexOf("kept its animation") >= 0) kept++;
-    return res.length ? "OK " + a.name + ": " + (res.length - kept) + " layers animated" + (kept ? " · " + kept + " kept their animation, re-eased" : "") : "ERR No layers matched (backgrounds, nulls and locked layers are skipped).";
+    var kept = 0, redone = 0, repl = 0;
+    for (var i = 0; i < res.length; i++) { if (res[i].indexOf("kept its animation") >= 0) kept++; else if (/\(redone\)$/.test(res[i])) redone++; else if (/\(replaced\)$/.test(res[i])) repl++; }
+    var fresh = res.length - kept - redone - repl, parts = [];
+    if (fresh) parts.push(fresh + " animated");
+    if (kept) parts.push(kept + " kept their animation, re-eased");
+    if (redone) parts.push(redone + " redone (earlier Motion DNA moves updated, other channels kept)");
+    if (repl) parts.push(repl + " replaced");
+    return res.length ? "OK " + a.name + ": " + parts.join(" · ") : "ERR No layers matched (backgrounds, nulls and locked layers are skipped).";
 }
 
 // Removes what Motion DNA added to the selected layers
@@ -378,7 +385,14 @@ function mdna_apply_brand(s) {   // s = {slug, phase, whole, tune, markers}: the
     if (!b.feel || !b.feel.style) return "ERR " + b.name + " has no base style yet (Overview > Feel).";
     var tu = a.tune || {}; if (!tu.ease && b.feel.curve) tu.ease = b.feel.curve;
     var r = mdna_apply_style(mdna_json({ name: b.feel.style, phase: a.phase, whole: a.whole, tune: tu, markers: a.markers, existing: a.existing }));
-    return r.indexOf("OK") === 0 ? r.replace("OK " + b.feel.style + ":", "OK " + b.name + " style:") : r;
+    if (r.indexOf("OK") !== 0) return r;
+    var c = app.project.activeItem, tm = [];   // then the brand's own timing, so the style's defaults never win over it
+    if (b.motion && b.motion.timing && b.motion.timing.length) {
+        app.beginUndoGroup("Motion DNA: " + b.name + " timing");
+        try { tm = SSP.brandTiming(c, a.whole ? null : c.selectedLayers, b.motion.timing, b.motion.curves); } catch (e) {}
+        app.endUndoGroup();
+    }
+    return r.replace("OK " + b.feel.style + ":", "OK " + b.name + " style:") + (tm.length ? " · " + tm.length + " on the brand's timing" : "");
 }
 // Re-eases every keyframe pair of the comp (or of the selected layers) with one curve: "apply the brand to everything"
 function mdna_reease(s) {   // s = {bz, name, selectedOnly}
