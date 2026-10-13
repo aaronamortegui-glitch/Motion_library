@@ -36,7 +36,7 @@ Priority: the panel should look good, not perfect (it is not a public launch). S
 ## Library and content
 | # | From the meeting | Status |
 |---|---|---|
-| 4.1 | 80 moves (79 today) | Pending: needs a new preset rendered in AE |
+| 4.1 | 80 moves (79 at the meeting) | **Done.** Glide In (a long glide that settles, no bounce, on Coast): 80 presets |
 | 4.2 | References library: a video from the internet becomes a preview the agent can recall | Later |
 | 4.3 | Flora from the Agent | Later |
 | 4.4 | A car to show the techniques (clients: cars, eyewear, fashion) | **Started.** Car test case: 4K stills, transparent cutouts, three Figma frames, the Vela test brand and a test project. Still to do: a short car clip for roto and tracking |

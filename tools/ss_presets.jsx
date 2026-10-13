@@ -346,6 +346,21 @@ var SSP = (function () {
                 return SSM.animate(T(L, "ADBE Position"), t, p, add(p, [0, -90]), "Glide", "Launch");
             }
         },
+        "Glide In": {
+            channels: "Fade, Position & Scale (Coast curve)", energy: "soft", use: "Products, cars, premium heroes: a long glide in that settles, no bounce", family: "own",
+            "in": function (L, t) {
+                var p = pos(L), sc = T(L, "ADBE Scale").value;
+                SSM.animate(T(L, "ADBE Opacity"), t, 0, opa(L), "Glide", "Flat");
+                SSM.animate(T(L, "ADBE Scale"), t, [sc[0] * 0.96, sc[1] * 0.96, sc[2]], sc, "Stage", "Coast");
+                return SSM.animate(T(L, "ADBE Position"), t, add(p, [-260, 0]), p, "Stage", "Coast");
+            },
+            "out": function (L, t) {
+                var p = pos(L), sc = T(L, "ADBE Scale").value;
+                SSM.animate(T(L, "ADBE Opacity"), t + SSM.seconds("Tick"), opa(L), 0, "Glide", "Flat");
+                SSM.animate(T(L, "ADBE Scale"), t, sc, [sc[0] * 0.96, sc[1] * 0.96, sc[2]], "Arrive", "Launch");
+                return SSM.animate(T(L, "ADBE Position"), t, p, add(p, [260, 0]), "Arrive", "Launch");
+            }
+        },
         "Wind-up Slide": {
             channels: "Fade & Position (Wind-up curve)", energy: "soft", use: "Logo slides, premium reveals: a small pull-back, then a long glide", family: "stylemap",
             "in": function (L, t) {

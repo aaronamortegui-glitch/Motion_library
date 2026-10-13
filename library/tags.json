@@ -10,6 +10,7 @@
  },
  "tones": [
   "bold",
+  "calm",
   "cinematic",
   "corporate",
   "editorial",
@@ -650,6 +651,36 @@
     "modern",
     "corporate",
     "technical"
+   ]
+  },
+  {
+   "name": "Glide In",
+   "kind": "motion",
+   "family": "own",
+   "roles": [
+    "enter",
+    "exit"
+   ],
+   "targets": [
+    "media",
+    "logo",
+    "title"
+   ],
+   "channels": [
+    "opacity",
+    "position",
+    "scale"
+   ],
+   "direction": "right",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "luxury",
+    "calm",
+    "elegant",
+    "modern"
    ]
   },
   {

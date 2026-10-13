@@ -31,4 +31,4 @@ downbeat (Motion Style Map, research/styles/_music_and_edit.md).
 
 **Counts:** ~150 spoken words in ~67 s. If it must stay at 60 s, cut scene 4 to two beats and tighten scene 10's line.
 **Open decisions:** length (60 vs ~67 s) · scene 8 with Dana directing · the TV-broadcast frame with channel flips ·
-who voices the end card (Rex or a new announcer) · "80 moves" (79 today: add one or say "80+").
+who voices the end card (Rex or a new announcer) · "80 moves" (true: Glide In made it 80).

@@ -47,6 +47,7 @@ P = {
     "Punch Zoom": (["emphasis"], ["footage", "media"], "in-place", [3, 4], ["cinematic", "bold"]),
     # --- Motion Style Map set (measured on 20 references, research/styles) ---
     "Coast Rise": (["enter", "exit"], ["title", "text", "ui", "icon"], "up", [2, 3], ["modern", "corporate", "technical"]),
+    "Glide In": (["enter", "exit"], ["media", "logo", "title"], "right", [1, 2], ["luxury", "calm", "elegant", "modern"]),
     "Wind-up Slide": (["enter", "exit"], ["logo", "title", "media"], "right", [1, 3], ["elegant", "cinematic", "luxury"]),
     "Nudge Grow": (["enter", "exit"], ["ui", "shape"], "up", [1, 3], ["modern", "corporate", "friendly"]),
     "Snap Scale": (["enter", "exit", "emphasis"], ["shape", "title", "icon", "ui"], "in-place", [2, 4], ["technical", "modern", "bold"]),

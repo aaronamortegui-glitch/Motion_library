@@ -22,6 +22,7 @@ GIF__motion__Surge Rise
 GIF__motion__Speed Ramp
 GIF__motion__Punch Zoom
 GIF__motion__Coast Rise
+GIF__motion__Glide In
 GIF__motion__Wind-up Slide
 GIF__motion__Nudge Grow
 GIF__motion__Snap Scale

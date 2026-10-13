@@ -1,4 +1,4 @@
-# Motion DNA · 79 presets · tokens v0.2-draft · energy s=soft m=medium d=dynamic
+# Motion DNA · 80 presets · tokens v0.2-draft · energy s=soft m=medium d=dynamic
 # calls: motion SSP.apply(L,N,in|out|both) · fx SSP.applyFx(L,N) · text SSP.applyText(L,N,in|out|both) · recipe SSP.applyRecipe(L,ID,both) · include tools/ss_presets.jsx
 # dur(f@30): Tick4 Blink6 Glide9 Arrive14 Sweep21 Stage33
 # ease(bezier): Flat 0,0,1,1; Land 0.12,0.9,0.28,1; Launch 0.55,0,0.9,0.6; Settle 0.3,0,0.1,1; Cruise 0.5,0,0.15,1; Pop 0.34,1.45,0.64,1; Recoil 0.6,0,0.75,-0.4; Ramp 0.87,0,0.13,1; Surge 0.7,0,0.3,1; Whip 0.75,0,0.05,1; Coast 0.18,0.28,0.0,0.9; Nudge 0.22,0.38,0.05,1.08; Wind-up 0.53,-0.25,0.28,0.89; Snap 0.0,1.17,0.0,0.91
@@ -34,6 +34,7 @@ motion|Surge Rise|Fade&Position (Surge curve)|m|Headlines, cards, elegant entran
 motion|Speed Ramp|Time Remap (footage / precomps)|d|Footage, product shots, action beats, transitions|transition/emphasis|3-5|cinematic/bold
 motion|Punch Zoom|Scale (camera)|m|Footage, precomps, freeze frames, cut emphasis|emphasis|3-4|cinematic/bold
 motion|Coast Rise|Fade&Position (Coast curve)|s|Product UI, editorial headlines, icons: fast start, clean stop|enter/exit|2-3|modern/corporate/technical
+motion|Glide In|Fade, Position&Scale (Coast curve)|s|Products, cars, premium heroes: a long glide in that settles, no bounce
 motion|Wind-up Slide|Fade&Position (Wind-up curve)|s|Logo slides, premium reveals: a small pull-back, then a long glide|enter/exit|1-3|elegant/cinematic/luxury
 motion|Nudge Grow|Scale Y (Nudge curve)|s|Bars, charts, columns, panels growing from their anchor (put the anchor at the base)|enter/exit|1-3|modern/corporate/friendly
 motion|Snap Scale|Scale&Fade (Snap curve)|m|Editorial cuts on the action: shapes and type that jump in size and settle|enter/exit/emphasis|2-4|technical/modern/bold
