@@ -9,7 +9,8 @@ Install / update:
   1. Cleans what an older version left: the pre-rename panel loader ("SS Motion.jsx"), loaders of other clones or old
      paths, loose copies of the panel script, the old MCP name (ss-motion), stale bridge jobs, previews of assets that
      no longer exist.
-  2. Installs the After Effects panel (Window > Motion DNA.jsx) in every AE version found. The panel reads the library
+  2. Installs File > Scripts > Motion DNA (opens the panel) and a Startup script (starts the Claude bridge when AE
+     opens) in every AE version found, and removes the old Window > Motion DNA.jsx entry. The panel reads the library
      straight from THIS clone, so the whole library comes with it. Loading the panel also starts the Claude bridge.
   3. Installs the fonts in assets/fonts (OFL) for the current user, and links the CEP panel (panel/, Window >
      Extensions > Motion DNA) into the user's CEP extensions folder so it also runs from this clone.
@@ -43,16 +44,23 @@ def head():
     return r.stdout.strip() if r.returncode == 0 else "?"
 
 
-def panel_dirs():
-    """(folder, needs admin) for every 'ScriptUI Panels' folder of every After Effects version on this machine."""
-    out = []
+def scripts_dirs():
+    """The per-user Scripts folder of every After Effects version on this machine: File > Scripts > Motion DNA.jsx (opens
+    the panel) and Startup/Motion DNA.jsx (starts the Claude bridge when AE opens) live there."""
     if MAC:
         base = pathlib.Path.home() / "Library/Preferences/Adobe/After Effects"
-        out += [(d / "Scripts/ScriptUI Panels", False) for d in base.glob("*") if d.is_dir() and d.name[:1].isdigit()]
+        return [d / "Scripts" for d in base.glob("*") if d.is_dir() and d.name[:1].isdigit()]
+    base = pathlib.Path(os.environ.get("APPDATA", "")) / "Adobe/After Effects"
+    return [d / "Scripts" for d in base.glob("*") if d.is_dir() and re.match(r"^\d+(\.\d+)?$", d.name)]
+
+
+def panel_dirs():
+    """(folder, needs admin) for every 'ScriptUI Panels' folder: where older versions put Window > Motion DNA.jsx, a
+    dockable entry that opened a second, empty window. Only cleaned now, never installed into."""
+    out = [(d / "ScriptUI Panels", False) for d in scripts_dirs()]
+    if MAC:
         out += [(d / "Scripts/ScriptUI Panels", True) for d in pathlib.Path("/Applications").glob("Adobe After Effects 20*")]
     else:
-        base = pathlib.Path(os.environ.get("APPDATA", "")) / "Adobe/After Effects"
-        out += [(d / "Scripts/ScriptUI Panels", False) for d in base.glob("*") if d.is_dir() and re.match(r"^\d+(\.\d+)?$", d.name)]
         out += [(d / "Support Files/Scripts/ScriptUI Panels", True) for d in pathlib.Path("C:/Program Files/Adobe").glob("Adobe After Effects*")]
     return out
 
@@ -90,14 +98,17 @@ def clean_old():
             if not ours:
                 continue
             root = (loader_root(f) or "").replace("\\", "/").lower()
-            if name == LOADER and root == here:
-                continue   # already the current install
-            found += 1
+            found += 1   # the Window-menu entry is gone for good: it opened a second window next to the panel
             try:
                 f.unlink()
                 print(OK + f"removed {f}" + (f" (pointed to {root})" if root and root != here else ""))
             except OSError:
                 print(WARN + f"cannot remove {f} (needs admin). Delete it by hand, or AE may load an old panel.")
+    for d in scripts_dirs():   # File > Scripts and Startup loaders of another clone or path
+        for f in (d / LOADER, d / "Startup" / LOADER):
+            root = (loader_root(f) or "").replace("\\", "/").lower() if f.exists() else ""
+            if f.exists() and root and root != here:
+                f.unlink(); found += 1; print(OK + f"removed {f} (pointed to {root})")
     if not found:
         print("      no old panel loaders")
     # the MCP server's old name
@@ -155,7 +166,7 @@ def update():
 
 
 def panel():
-    print("2. After Effects panel")
+    print("2. After Effects entry points (File > Scripts > Motion DNA, Startup bridge)")
     r = run(["bash", str(ROOT / "tools/install_panel.sh")]) if MAC else \
         run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(ROOT / "tools/install_panel.ps1")])
     for line in (r.stdout + r.stderr).splitlines():
@@ -188,35 +199,112 @@ def cep_debug_versions():
     return on
 
 
-def cep(remove=False):
-    """Links panel/ into the CEP extensions folder (junction on Windows, symlink on macOS) and writes panel/.root."""
-    link = cep_dir() / CEP_ID
+SIGNER_URL = "https://raw.githubusercontent.com/Adobe-CEP/CEP-Resources/master/ZXPSignCMD/4.1.3/" + \
+    ("macOS/ZXPSignCmd" if MAC else "x64/ZXPSignCmd.exe")   # Adobe's official signing tool (CEP-Resources)
+CACHE = ROOT / "tools/.cache"   # git-ignored: the signer, this machine's self-signed certificate, the built .zxp
+
+
+def remove_ext(path):
+    """Removes the installed panel: a link (junction / symlink) only loses the link, never the files it points to."""
+    if not (path.exists() or path.is_symlink()):
+        return
+    if path.is_symlink():
+        os.unlink(path)
+    elif os.path.isjunction(path):
+        os.rmdir(path)
+    else:
+        shutil.rmtree(path)
+
+
+def signer():
+    exe = CACHE / ("ZXPSignCmd" if MAC else "ZXPSignCmd.exe")
+    if not exe.exists():
+        import urllib.request
+        CACHE.mkdir(parents=True, exist_ok=True)
+        print(f"      downloading Adobe's ZXPSignCmd (once) from {SIGNER_URL}")
+        urllib.request.urlretrieve(SIGNER_URL, exe)
+        if MAC:
+            exe.chmod(0o755)
+    return exe
+
+
+def sign_panel():
+    """Builds a signed .zxp of panel/ with a self-signed certificate made on this machine. Returns the .zxp path."""
+    import secrets
+    exe = signer()
+    cert, pw_file = CACHE / "motiondna_selfsigned.p12", CACHE / "motiondna_selfsigned.txt"
+    if not cert.exists():
+        pw_file.write_text(secrets.token_urlsafe(18), encoding="utf-8")
+        r = run([str(exe), "-selfSignedCert", "US", "NA", "Motion DNA", "Motion DNA panel",
+                 pw_file.read_text(encoding="utf-8").strip(), str(cert), "-validityDays", "3650"])
+        if not cert.exists():
+            raise RuntimeError("could not create the certificate: " + (r.stdout + r.stderr).strip())
+    stage = CACHE / "zxp" / CEP_ID
+    if stage.exists():
+        shutil.rmtree(stage)
+    shutil.copytree(ROOT / "panel", stage, ignore=shutil.ignore_patterns(".debug", ".DS_Store", "__MACOSX"))
+    (stage / ".root").write_text(str(ROOT).replace("\\", "/"), encoding="utf-8")   # the panel reads the library from this clone
+    zxp = CACHE / "MotionDNA.zxp"
+    zxp.unlink(missing_ok=True)
+    r = run([str(exe), "-sign", str(stage), str(zxp), str(cert), pw_file.read_text(encoding="utf-8").strip()])
+    v = run([str(exe), "-verify", str(zxp)])
+    if not zxp.exists() or v.returncode != 0:
+        raise RuntimeError("signing failed: " + (r.stdout + r.stderr + v.stdout + v.stderr).strip())
+    return zxp
+
+
+def cep(remove=False, dev=False):
+    """Installs the CEP panel (Window > Extensions > Motion DNA) in the user's CEP extensions folder.
+    Default: a signed copy (self-signed .zxp made on this machine, unpacked there), which After Effects loads without
+    developer mode; --update signs it again. --dev: a link to panel/ instead (edits show with F5), which needs Adobe's
+    developer mode: setup asks, and only the person at the terminal can say yes (never Claude or a script)."""
+    target = cep_dir() / CEP_ID
     if remove:
-        if link.exists() or link.is_symlink():
-            try:
-                (os.rmdir if not MAC else os.unlink)(link); print(OK + f"removed {link}")
-            except OSError as e:
-                print(WARN + f"cannot remove {link}: {e}")
-        return True
-    print("3b. CEP panel (Window > Extensions > Motion DNA)")
-    (ROOT / "panel/.root").write_text(str(ROOT).replace("\\", "/"), encoding="utf-8")
-    link.parent.mkdir(parents=True, exist_ok=True)
-    if link.exists() or link.is_symlink():
         try:
-            same = link.resolve() == (ROOT / "panel").resolve()
+            remove_ext(target); print(OK + f"removed {target}")
+        except OSError as e:
+            print(WARN + f"cannot remove {target}: {e}")
+        return True
+    print("3b. CEP panel (Window > Extensions > Motion DNA)" + (" · developer link" if dev else " · signed"))
+    (ROOT / "panel/.root").write_text(str(ROOT).replace("\\", "/"), encoding="utf-8")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if not dev:
+        try:
+            zxp = sign_panel()
+        except Exception as e:   # no network, blocked download...: fall back to the developer link
+            print(WARN + f"could not sign the panel ({e}); installing the developer link instead")
+            return cep(dev=True)
+        import zipfile
+        remove_ext(target)
+        with zipfile.ZipFile(zxp) as z:
+            z.extractall(target)
+        print(OK + f"signed panel installed in {target} (no developer mode needed; restart After Effects)")
+        return True
+    linked = False
+    if target.exists() or target.is_symlink():
+        try:
+            linked = (target.is_symlink() or os.path.isjunction(target)) and target.resolve() == (ROOT / "panel").resolve()
         except OSError:
-            same = False
-        if not same:
-            (os.rmdir if not MAC else os.unlink)(link)
-    if not link.exists():
-        r = run(["ln", "-s", str(ROOT / "panel"), str(link)]) if MAC else run(["cmd", "/c", "mklink", "/J", str(link), str(ROOT / "panel")])
+            linked = False
+        if not linked:
+            remove_ext(target)
+    if not linked:
+        r = run(["ln", "-s", str(ROOT / "panel"), str(target)]) if MAC else run(["cmd", "/c", "mklink", "/J", str(target), str(ROOT / "panel")])
         if r.returncode != 0:
-            print(WARN + f"could not link {link}: {(r.stdout + r.stderr).strip()}"); return False
-    print(OK + f"linked {link} -> {ROOT / 'panel'}")
+            print(WARN + f"could not link {target}: {(r.stdout + r.stderr).strip()}"); return False
+    print(OK + f"linked {target} -> {ROOT / 'panel'}")
     if not cep_debug_versions():
-        cmd = "defaults write com.adobe.CSXS.12 PlayerDebugMode 1" if MAC else r'reg add "HKCU\Software\Adobe\CSXS.12" /v PlayerDebugMode /t REG_SZ /d 1 /f'
-        print(WARN + "unsigned panels need Adobe's developer mode, once (you run this, then restart After Effects):")
-        print("        " + cmd)
+        cmd = ["defaults", "write", "com.adobe.CSXS.12", "PlayerDebugMode", "1"] if MAC else \
+              ["reg", "add", r"HKCU\Software\Adobe\CSXS.12", "/v", "PlayerDebugMode", "/t", "REG_SZ", "/d", "1", "/f"]
+        print(WARN + "the developer link needs Adobe's developer mode (it lets After Effects load unsigned panels).")
+        ans = ""
+        if sys.stdin.isatty():   # only a person at the terminal can say yes; Claude and scripts never set it
+            ans = input("        Turn it on now for this user? [y/N] ").strip().lower()
+        if ans in ("y", "yes", "s", "si", "sí"):
+            r = run(cmd)
+            print((OK + "developer mode on (restart After Effects)") if r.returncode == 0 else (WARN + (r.stdout + r.stderr).strip()))
+        else:
+            print("        Left off. To turn it on yourself: " + " ".join(f'"{c}"' if " " in c else c for c in cmd))
     return True
 
 
@@ -317,9 +405,12 @@ def checks():
         ok = shutil.which(tool) is not None
         print((OK if ok else WARN) + f"{tool} ({why})" + ("" if ok else " not found: install it for the full pipeline"))
     here = str(ROOT).replace("\\", "/").lower()
-    live = [d / LOADER for d, _ in panel_dirs() if (d / LOADER).exists()]
+    live = [f for d in scripts_dirs() for f in (d / LOADER, d / "Startup" / LOADER) if f.exists()]
     wrong = [f for f in live if (loader_root(f) or "").replace("\\", "/").lower() != here]
-    print((OK if live and not wrong else WARN) + f"panel loaders pointing to this clone: {len(live) - len(wrong)}/{len(live)}")
+    print((OK if live and not wrong else WARN) + f"File > Scripts and Startup loaders pointing to this clone: {len(live) - len(wrong)}/{len(live)}")
+    legacy = [d / LOADER for d, _ in panel_dirs() if (d / LOADER).exists()]
+    if legacy:
+        print(WARN + "an old Window > Motion DNA.jsx is still there (needs admin to remove): " + ", ".join(map(str, legacy)))
     print(OK + f"version {head()}")
     return good and not wrong
 
@@ -339,7 +430,7 @@ def mcp_user(remove=False):
 
 def uninstall():
     print(f"Motion DNA uninstall · {ROOT}\n")
-    for d, _ in panel_dirs():
+    for d in [x for x, _ in panel_dirs()] + scripts_dirs() + [x / "Startup" for x in scripts_dirs()]:
         for name in OLD_LOADERS + [LOADER]:
             f = d / name
             if f.exists() and ("SS_ROOT" in f.read_text(encoding="utf-8", errors="replace")):
@@ -364,14 +455,15 @@ def main():
         if not ok:
             print("\nUpdate stopped: nothing was changed."); sys.exit(1)
         results.append(ok)
-    results += [clean_old(), panel(), fonts(), cep(), assets(), checks()]
+    results += [clean_old(), panel(), fonts(), cep(dev="--dev" in sys.argv), assets(), checks()]
     if "--mcp-user" in sys.argv:
         results.append(mcp_user())
     print("\nLast steps in After Effects (only you can do these):")
-    print("  - Restart After Effects (it loads panels at start), then open Window > Motion DNA.jsx and dock it.")
+    print("  - Restart After Effects, then open Window > Extensions > Motion DNA and dock it: it comes back every time")
+    print("    After Effects starts (File > Scripts > Motion DNA opens it too).")
     pref = "Settings" if MAC else "Edit > Preferences"
     print(f"  - {pref} > Scripting & Expressions > tick 'Allow Scripts to Write Files and Access Network' (once).")
-    print("  - Claude: open this folder in Claude Code; the panel header shows 'Claude connected' once the bridge runs.")
+    print("  - Claude: in the panel, Agent > Connect Claude (one sign-in). The MCP dot in its header turns green.")
     print("\nDone." if all(results) else "\nDone, with warnings above.")
 
 

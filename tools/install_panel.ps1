@@ -1,46 +1,51 @@
-# Installs the Motion DNA panel in After Effects: Window > Motion DNA.jsx (dockable). Loading the panel also starts the
-# Claude bridge, so the MCP server in .mcp.json can drive AE (dock the panel once and it reloads with AE).
-# It copies a tiny loader that points to THIS repo clone, so the panel always shows the current library.
-# Usage (from the repo):  powershell -ExecutionPolicy Bypass -File tools/install_panel.ps1
-# Then restart After Effects. Also enable: Edit > Preferences > Scripting & Expressions >
-# "Allow Scripts to Write Files and Access Network" (needed to read the library files).
+# Installs Motion DNA's entry points in every After Effects version on this machine (Windows; macOS: install_panel.sh).
+# The panel itself is the CEP extension (Window > Extensions > Motion DNA), installed by tools/setup.py. This adds:
+#   Scripts\Motion DNA.jsx            File > Scripts > Motion DNA: opens the panel (or the classic one if the HTML panel
+#                                     is missing) and starts the Claude bridge. Not a dockable panel, so no extra window.
+#   Scripts\Startup\Motion DNA.jsx    starts the Claude bridge when After Effects opens, so the MCP server can drive AE
+#                                     even before the panel is shown. Silent: no window, no dialog.
+# and removes the old Window > Motion DNA.jsx (ScriptUI Panels), which opened a second, empty window.
+# Both files are tiny loaders that point to THIS clone. Usage (from the repo):
+#   powershell -ExecutionPolicy Bypass -File tools/install_panel.ps1      then restart After Effects.
 $ErrorActionPreference = "Stop"
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path -replace "\\", "/"
-$loader = @"
-// Motion DNA panel loader (installed by tools/install_panel.ps1). Repo: $repo
-// Re-run the installer if you move the repo.
+$launcher = @"
+// Motion DNA (installed by tools/install_panel.ps1): File > Scripts > Motion DNA opens the panel. Repo: $repo
 var SS_ROOT = "$repo";
-var SS_PANEL_HOST = this;
 (function () {
-    var f = new File(SS_ROOT + "/tools/ss_panel.jsx");
-    if (!f.exists) { alert("Motion DNA: panel not found at " + f.fsName + "\nRe-run tools/install_panel.ps1 from the repo."); return; }
+    var f = new File(SS_ROOT + "/tools/mdna_launcher.jsx");
+    if (!f.exists) { alert("Motion DNA: not found at " + f.fsName + "\nRun python tools/setup.py from the Motion DNA folder."); return; }
     $.evalFile(f);
-    // start the Claude bridge too (tools/ss_bridge.jsx), so the MCP server (tools/mcp/ss_motion_mcp.py) can drive AE
-    var b = new File(SS_ROOT + "/tools/ss_bridge.jsx");
-    if (b.exists && !$.global.SS_BRIDGE_TASK) { try { $.evalFile(b); } catch (e) {} }
+})();
+"@
+$startup = @"
+// Motion DNA (installed by tools/install_panel.ps1): starts the Claude bridge when After Effects opens. Repo: $repo
+var SS_ROOT = "$repo";
+(function () {
+    try {
+        `$.global.SS_ROOT = SS_ROOT;
+        var b = new File("$repo/tools/ss_bridge.jsx");
+        if (b.exists && !`$.global.SS_BRIDGE_TASK) `$.evalFile(b);
+    } catch (e) {}
 })();
 "@
 
-$targets = @()
-# per-user Scripts folders (no admin needed), one per installed AE version
-Get-ChildItem "$env:APPDATA\Adobe\After Effects" -Directory -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -match '^\d+(\.\d+)?$' } |
-    ForEach-Object { $targets += Join-Path $_.FullName "Scripts\ScriptUI Panels" }
-# application Scripts folders (need admin; skipped if not allowed)
-Get-ChildItem "C:\Program Files\Adobe" -Directory -Filter "Adobe After Effects*" -ErrorAction SilentlyContinue |
-    ForEach-Object { $targets += Join-Path $_.FullName "Support Files\Scripts\ScriptUI Panels" }
-
 $ok = 0
-foreach ($t in $targets) {
-    try {
-        New-Item -ItemType Directory -Force -Path $t | Out-Null
-        $old = Join-Path $t "SS Motion.jsx"; if (Test-Path $old) { Remove-Item $old -Force }   # pre-rename loader
-        Set-Content -Path (Join-Path $t "Motion DNA.jsx") -Value $loader -Encoding UTF8
-        Write-Output "installed: $t\Motion DNA.jsx"
-        $ok++
-    } catch {
-        Write-Output "skipped (no permission): $t"
+Get-ChildItem "$env:APPDATA\Adobe\After Effects" -Directory -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -match '^\d+(\.\d+)?$' } | ForEach-Object {
+        $scripts = Join-Path $_.FullName "Scripts"
+        try {
+            New-Item -ItemType Directory -Force -Path (Join-Path $scripts "Startup") | Out-Null
+            Set-Content -Path (Join-Path $scripts "Motion DNA.jsx") -Value $launcher -Encoding UTF8
+            Set-Content -Path (Join-Path $scripts "Startup\Motion DNA.jsx") -Value $startup -Encoding UTF8
+            foreach ($old in @("ScriptUI Panels\Motion DNA.jsx", "ScriptUI Panels\SS Motion.jsx")) {   # the old dockable entries
+                $p = Join-Path $scripts $old; if (Test-Path $p) { Remove-Item $p -Force }
+            }
+            Write-Output "installed: $scripts\Motion DNA.jsx (+ Startup)"
+            $ok++
+        } catch {
+            Write-Output "skipped: $scripts ($($_.Exception.Message))"
+        }
     }
-}
-if ($ok -eq 0) { Write-Output "Nothing installed. Run PowerShell as administrator or copy the loader manually."; exit 1 }
-Write-Output "Restart After Effects, then open Window > Motion DNA.jsx and dock it."
+if ($ok -eq 0) { Write-Output "Nothing installed: open After Effects once (it creates its Scripts folder), then run setup again."; exit 1 }
+Write-Output "Restart After Effects: the panel is Window > Extensions > Motion DNA (also File > Scripts > Motion DNA)."
