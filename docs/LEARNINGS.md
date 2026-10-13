@@ -35,6 +35,7 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 ### Rendering
 - `aerender` **hangs** when the project contains layers with Animation Composer presets (the plugin waits for UI). Use the open AE's render queue: `tools/render_comps.jsx` / `tools/render_queue.jsx`.
 - **Prefer `aerender` now that the project has no AC layers**, one process per comp in parallel: `aerender -project <abs .aep> -comp CYPHER_EDIT -OMtemplate "H.264 - Match Render Settings - 15 Mbps" -output <abs .mp4> -mfr ON 100`. The 32 s Cypher edit took **50 s** this way, while the in-app queue sat 40 min at half the file. Paths must be absolute (`cygpath -aw`). It renders the *saved* project, so save after a build.
+- **Test File objects against null, never with `!`.** In a bridge job `!app.project.file` was true and `"x" + app.project.file` threw ("Object of type File found where a Number... is needed") although the project was saved. Use `=== null` and `.fsName`. Collect Files has no scripting API: `tools/collect_files.jsx` saves a copy, reduces it, copies and relinks the footage, then reopens the original.
 - **A job's variables can break the bridge.** `$.evalFile` runs a file in the caller's scope: a job that declared `var out` overwrote the poll's own `out`, the poll failed ("Function out.open is undefined") and AE showed a modal dialog that froze every script until someone clicked OK. Fixed in `ss_bridge.jsx`: jobs run inside their own function (`SS_BRIDGE_RUN`), the poll runs under `app.beginSuppressDialogs()` with every step in try/catch, and the scheduled string is guarded. `bridge.sh` also forces a poll through `AfterFX -s` when a job sits untouched for 15 s (AE sometimes stops firing scheduled tasks while `-s` still works).
 - **Fonts can silently fall back to Times after an AE restart.** The fonts were installed and registered, but the new AE session resolved InterTight-* and InstrumentSerif-* to `times.ttf` (`app.fonts.missingOrSubstitutedFonts`), so the whole render came out in a serif. `ae_status` (MCP) and `tools/check_layout.jsx` now report substituted fonts and stop; fix by restarting After Effects, then rebuild.
 - **The bridge stops when another scheduled task throws.** A ScriptUI palette opened from a job with `#targetengine` scheduled `"SS_PANEL_TICK()"`; that string runs in the main engine, where the function does not exist, and the error stopped the bridge's polling task too (jobs piled up in `bridge/inbox`, AE idle). Guard scheduled strings (`if (typeof F === "function") F();`), close test palettes, and restart the bridge (`app.cancelTask` + `ss_bridge.jsx`). If AE does not even run `AfterFX.exe -s`, a modal error dialog is open: ask the user to dismiss it.
@@ -71,8 +72,57 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   repaints to a timer; in the end the panel moved to CEP (HTML), which also gives mouse-wheel scrolling.
 - **"Cannot run a script while a modal dialog is waiting"** popping repeatedly → a repeating `app.scheduleTask` fires
   while a dialog is open → chain one-shot tasks (each tick schedules the next) and restart them on panel use.
-- **CEP extension does not load** (log: *Signature verification failed*) → unsigned → `PlayerDebugMode=1` for the
-  CSXS version (CSXS.12 for AE 2026), then restart AE. Manifest changes (e.g. `--enable-nodejs`) also need a restart.
+- **CEP extension does not load** (log: *Signature verification failed*) → unsigned → sign it: `tools/setup.py` makes a
+  self-signed certificate with Adobe's ZXPSignCmd, signs `panel/` into a `.zxp` and unzips it into the user's CEP
+  extensions folder; AE 2026 loads it with no developer mode (no UPIA needed; the 2024 UPIA known issue is about
+  symlinks inside the package, and ours has none). Only `--dev` (a link to the clone) needs `PlayerDebugMode=1`, which
+  the person sets, never Claude. Manifest changes (e.g. `--enable-nodejs`) need an AE restart.
+- **"null" printed in the panel** → DOM `append()` / `replaceChildren()` turn a `null` child into the text "null" (our
+  `h()` builder filters them, the DOM does not) → pass children through `kids(...)`.
+- **The Agent answered "Failed to authenticate: OAuth session expired"** as if it were a normal reply (exit 0, result
+  success) → `claude auth status` can still say logged in → the panel watches for that text and opens *Connect*.
+- **Headless runs from another folder:** the repo's `.mcp.json` and CLAUDE.md follow the cwd → pass `--mcp-config` as
+  inline JSON with the absolute server path, `--add-dir <repo>` and `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1`;
+  drop `ANTHROPIC_API_KEY` from the child env (in `-p` it wins over the subscription). Sessions live per cwd in
+  `~/.claude/projects/<cwd with - >/<id>.jsonl`, resume with `--resume <id>` from the panel, `claude --resume <id>` in a
+  terminal or `claude --desktop --resume <id>` in the Claude app; two writers on one session interleave, so warn.
+- **"Connect Figma" opened a list of 71 servers** → `claude "/mcp"` shows every connector of the account, and the
+  account already had Figma (`claude.ai Figma`, tools `mcp__claude_ai_Figma__*`); a second `figma` server added by hand
+  only asked for authentication again → the panel counts any Figma server as Figma (`claude.ai Figma`,
+  `plugin:figma:figma`, `figma`) and Safe orders run with `--strict-mcp-config` (only Motion DNA: faster, no other
+  account tools).
+- **Connecting Figma with the least friction:** linking to claude.ai › Settings › Connectors opened the Claude app, not
+  Figma. `claude mcp login "<server>"` opens Figma's own permission page, but refuses without a terminal ("stdin isn't
+  a terminal", even with `--no-browser`) → the panel opens a small minimized window running it (it closes by itself),
+  the user presses Allow, and the panel polls `claude mcp list` until Figma is connected. Figma's access expires now
+  and then: the same button reconnects it. In the panel the agent may not call `add_brand_note`: the user picks where a rule goes.
+- **A conversation per brand that the Claude app also shows:** sessions are per folder, so a brand gets its own folder
+  (with `CLAUDE.md` + `.mcp.json`) and the panel runs there; `claude --desktop --resume <id>` (2.1.285+) opens it in the
+  app's sidebar. A conversation started with `-p` is not listed by the app on its own, so "Start in Claude app" sends a
+  first message that names it ("Motion DNA · Brand: Vela …"), then opens it. The user's words go first in each message
+  and the panel context after, so the app titles conversations by what was asked.
+- **Our panel cannot sit at the top of the Window menu like Animation Composer**: AC is a native (C++) plugin; CEP
+  panels always go under *Window › Extensions*.
+- **"Several Motion DNA windows when AE opens"** → a launcher in *ScriptUI Panels* is itself a dockable panel: it opened
+  the CEP panel plus an extra window, and AE reopened the old docked one every start → the launcher is a plain script
+  (*File › Scripts › Motion DNA*, no window) and setup removes every `ScriptUI Panels/Motion DNA.jsx`.
+- **Per-user Startup scripts run** (`%APPDATA%/Adobe/After Effects/<ver>/Scripts/Startup`): the bridge starts with AE,
+  before any panel. Keep them silent: an uncaught error there opens a modal dialog that blocks AE (and every MCP call)
+  until someone clicks it; ours is wrapped in try/catch.
+- **`tools/test_mcp.py` works on the open project** (it added an SFX and animated the active comp of a client project)
+  → run it on a scratch project, or close the project without saving afterwards.
+- **"Apply" must respect animation that is already there:** applying a preset on top of hand-made keyframes mixed both →
+  every entry point (panel, MCP, Agent) goes through `SSP.smartApply`: own animation is retimed and re-eased with its
+  values kept (`SSP.restyle` rebuilds the keys, keeping spatial tangents and holds), Motion DNA's earlier animation is
+  redone, and a layer with none gets the preset. A "re-eased" note on the layer must not say "Motion DNA", or the next
+  apply would treat the user's keyframes as ours and replace them.
+- **A docked panel can open before After Effects' scripting answers** (the panel stayed on "Loading" and never booted)
+  → the boot retries for a minute. If the panel was not docked when AE closed, nothing starts the bridge until the user
+  opens the panel (since then, a Startup script starts the bridge with AE).
+- **`total_cost_usd` is cumulative per conversation** (and an estimate; with a subscription it is not billed) → the
+  per-order cost is the difference from the last total.
+- **An MCP server keeps the code it started with**: after editing `tools/brand.py`, the running server still read the
+  old paths ("No such file … library/brands/vela") → restart the session (or Claude Code) to load server changes.
 - **Engine "undefined" in host functions** → `$.evalFile` runs in the caller's scope → publish to `$.global` after loading.
 - **Old panel code after F5** → CEP caches the page's scripts → load CSS/JS with a `?v=Date.now()` query.
 - **Claude Code not found from AE** on Windows → the Store build of the desktop app keeps it under
@@ -187,6 +237,8 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 | ElevenLabs Multilingual v2, full 56 s read in one take | 0.121 |
 | Nano Banana 2.1 colorize a reference photo | 0.035 |
 | Nano Banana 2.1 still (2K) | 0.053 |
+| Nano Banana 2.1 still (4K, comes back 5504x3072 JPEG) | 0.079 |
+| Production components: 28 sheets (locations, characters, props) + 4 car test stills, 4K | 2.528 (2 more failed upstream, not charged) |
 | MiniMax H3 Max, 5–6 s 768p | 0.48–0.58 |
 | Seedance 2.5, 5 s 1080p | 6.05 (estimate said 2.48) |
 | Seedance 2.5 r2v, 15 s 720p, 6 reference images | 7.325 (quote said 7.45) |

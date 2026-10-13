@@ -173,7 +173,10 @@ These came out of reviewing the Motion DNA promo; `tools/check_layout.jsx` check
     solid colour, one technique per beat.
 
 ## 10. Work for a brand: its profile learns
-Every brand or project gets a profile in `library/brands/<slug>/brand.json` (schema: `library/brands/_schema.md`).
+Every brand or project gets a profile (schema: `library/brands/_schema.md`). **Client brands never go in the repo**: they
+live in `library/brands.local/<slug>/` (git-ignored) or in a folder the user chose; only templates (Motion DNA) are in
+`library/brands/`, and `.gitignore` keeps every other folder there out. Share a brand with `python tools/brand.py export`
+/ `import` (or the panel's Export / Import): rules carry a `uid`, so new, edited and removed rules merge.
 1. **Before animating**, read it: `python tools/brand.py show <slug>` or the MCP tool `get_brand`. No profile yet?
    `python tools/brand.py new <slug> --name "…" --style <style> --curve <token> --tones … --energy a,b`, fill its
    identity (colours, fonts, logo) and run `python tools/brand.py thumb <slug>` for its panel card.
@@ -181,7 +184,8 @@ Every brand or project gets a profile in `library/brands/<slug>/brand.json` (sch
    *Brands* category apply.
 3. **Every review note becomes a rule**: `python tools/brand.py note <slug> "…" --cat layout --why "…" --project … --by …`
    or `add_brand_note`. One instruction anyone can follow without the context, plus why. A note that is true for every
-   brand also goes into §9 (and `tools/check_layout.jsx` when it can be checked).
+   brand also goes into §9 (and `tools/check_layout.jsx` when it can be checked). In the panel's Agent, review notes come
+   back as proposals (`RULE: category | rule | why`) and the user picks brand, project or general.
 4. Add the project to its `projects` list, and re-run `python tools/build_library_html.py` so `INDEX.txt` lists it.
 Brands are independent: never copy one brand's rules into another without being asked.
 
@@ -193,5 +197,5 @@ Brands are independent: never copy one brand's rules into another without being 
 - [ ] Case study: specs + rebuild script + doc + GIFs + README section
 - [ ] Any UI you touched has a fresh GIF in `docs/screens/`
 - [ ] Videos: `tools/check_layout.jsx` reports no warnings (or each one is explained)
-- [ ] Work for a brand: its review notes are saved in `library/brands/<slug>/brand.json`
+- [ ] Work for a brand: its review notes are saved in its profile, and no client brand is in the diff
 - [ ] LEARNINGS updated; costs recorded

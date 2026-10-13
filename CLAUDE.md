@@ -14,10 +14,11 @@ Install everything, library included — the panel reads the library from the re
    loader points to this clone. If it warns that a loader in Program Files / Applications needs admin, tell the user to
    delete that file (AE could load an old panel).
 3. Tell them the steps only they can do: tick *Preferences › Scripting & Expressions › Allow Scripts to Write Files and
-   Access Network*; set Adobe's developer mode once so the unsigned CEP panel loads (setup.py prints the command; never
-   set it yourself); restart After Effects and open *Window › Extensions › Motion DNA* (the old ScriptUI panel,
-   *Window › Motion DNA.jsx*, stays as a fallback). For the panel's Agent section: *Agent › Setup* (sign Claude Code in,
-   connect Figma).
+   Access Network*; restart After Effects and open *Window › Extensions › Motion DNA* (also *File › Scripts › Motion
+   DNA*) and dock it: it reopens with After Effects, and a silent Startup script starts the bridge when AE opens. setup.py installs the panel **signed** (self-signed .zxp made on the
+   machine), so no developer mode is needed. `--dev` installs a link to the clone instead and asks the person at the
+   terminal before turning on Adobe's developer mode: never answer that prompt or set it yourself. For the Agent:
+   *Agent › Connect* (one sign-in for Claude; Figma comes from their Claude account connectors).
 4. With AE open and the panel docked, confirm the connection with the MCP tool `ae_status` (the panel header's MCP dot is green).
 5. To remove it: `python tools/setup.py --uninstall` (loaders, MCP registration, fonts; the clone stays).
 
@@ -58,7 +59,7 @@ Install everything, library included — the panel reads the library from the re
 | A new curve or duration | `tokens/superside_motion_tokens.json` (bezier + AE influence/speed) |
 | A test video / case study | `media/<case>/` (specs + final assets), `docs/case-studies/<case>.md` (from `_TEMPLATE.md`), GIFs in `docs/examples/`, a section at the end of `README.md` |
 | A reference analysis | `library/references/<slug>.json`, then CONTRIBUTING §8 (match, create the gaps, add a style) |
-| A review note while working for a brand | `library/brands/<slug>/brand.json` via `tools/brand.py note` or MCP `add_brand_note` (CONTRIBUTING §10) |
+| A review note while working for a brand | the brand's own folder (`library/brands.local/<slug>/` or the folder it was created in, never the repo) via `tools/brand.py note` or MCP `add_brand_note` (CONTRIBUTING §10) |
 | Tags for a new preset, curve or technique | `tools/tag_library.py` → `python tools/tag_library.py` (writes `library/tags.json`) |
 | Something you learned | `docs/LEARNINGS.md`, in the matching section, as *symptom → cause → fix* |
 | A reusable script | `tools/` with a header comment (what, usage) and an entry in the README tools table |

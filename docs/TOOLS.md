@@ -8,7 +8,7 @@ panel; reach for these when building a piece.
 | `tools/ss_motion_lib.jsx` (`SSM`) | Token-driven keyframes: `animate`, `pop`, `recoil`, `animateBezier`, `animateStops`, `organicStops` (hand-drawn rhythm), `font(role)` |
 | `tools/ss_presets.jsx` (`SSP`) | The presets: `apply`, `applyFx`, `applyText`, `applyRecipe` |
 | `panel/` (CEP extension) + `tools/setup.py` | The panel (Window > Extensions > Motion DNA): Behaviors, Curves (editor + library, save into the tokens), Styles, Brands (workspace per client: curves, timing benchmarks, rules, active brand), Techniques, Agent (runs Claude Code in the background with the Motion DNA MCP and Figma). `panel/host/host.jsx` is the After Effects side |
-| `tools/ss_panel.jsx` + `tools/install_panel.ps1` | Previous ScriptUI panel (Window > Motion DNA.jsx), kept as a fallback |
+| `tools/ss_panel.jsx` | Previous ScriptUI panel, kept as a fallback (File › Scripts › Motion DNA opens it when the HTML panel is missing) |
 | `tools/build_figma_slides.jsx` | Rebuilds Figma slides as native AE layers from a JSON spec (live text, shapes, arcs, groups as precomps, exported PNGs) |
 | `tools/mcp/ss_motion_mcp.py` (`.mcp.json`) | MCP server: Claude browses the library and drives AE (apply presets and packs, add assets, render frames) |
 | `tools/sample_previews.jsx` · `tools/make_panel_thumbs.sh` · `tools/pack_demos.jsx` | Panel previews (sampled curves), panel thumbnails, pack demo renders |
@@ -36,11 +36,15 @@ panel; reach for these when building a piece.
 | `tools/faceswap_refine.py` + `media/faceswap/jobs.json` | **Face refinement pass** for every clip with a real person (MiniMax H3 head inpainting, local GPU); `faceswap_apply.py`, `footage_relink_*.jsx`, `reload_footage.jsx` put the refined clips in place |
 | `tools/ss_assets.jsx` (`SSA`) + `tools/index_assets.py` | Local asset packs: index SFX/overlays by category and loudness, place them by name |
 | `tools/style_research/` | Motion Style Map pipeline: per-video energy, metrics, music/BPM sync (`audio.py`), contact sheets, curve fitting, catalog integration, the map, and `map_to_dna.py` (behaviors → Motion DNA presets and curves) |
-| `tools/record_panel.py` | Records the panel in use (SS_PANEL hook driven through the bridge, DPI-aware PrintWindow) → `docs/screens/ae-panel.gif` |
-| `tools/brand.py` (+ MCP `list_brands`, `get_brand`, `add_brand_note`, `apply_brand`) | **Brand profiles**: a custom style per brand that learns a rule from every review (`library/brands/<slug>/brand.json`) |
+| `tools/record_panel.py` | Records the old ScriptUI panel in use (SS_PANEL hook driven through the bridge, DPI-aware PrintWindow) → `docs/screens/ae-panel.gif` |
+| `tools/record_cep_panel.py` | Records the CEP panel in a headless browser (Playwright, preview mode) → `docs/screens/cep-*.gif` (one per section + the tour) |
+| `tools/mdna_launcher.jsx` + `tools/install_panel.ps1` / `.sh` | File › Scripts › Motion DNA (opens the panel) and the Startup script that starts the Claude bridge when AE opens |
+| `tools/technique_cards.py` | The technique cards of *Agent › Library* (title + what it does) → `library/techniques/<slug>_card.png` |
+| `tools/brand.py` (+ MCP `list_brands`, `get_brand`, `add_brand_note`, `apply_brand`) | **Brand profiles**: a custom style per brand that learns a rule from every review; templates in `library/brands/`, client brands in `library/brands.local/` or their own folder; `export` / `import` share one and merge its rules |
 | `tools/check_layout.jsx` | **Layout QA** on built comps: text on text, cards touching, safe area, size, contrast, graphics on faces, substituted fonts (CONTRIBUTING §9) |
 | `tools/face_boxes.py` | Face boxes per frame (OpenCV) so the layout QA can flag graphics on faces |
 | `tools/trace_mark.py` | Traces a flat-colour mark (a logo on a prop, a sketch) into a clean SVG + PNG |
+| `tools/collect_files.jsx` | **Collect Files** by script: a self-contained copy of one comp (Reduce Project, every footage file copied into `(Footage)/` and relinked, fonts, a report); the original project is never modified |
 | `tools/build_dna_promo.jsx` + `media/motion_dna_promo/make_dna_promo.py` | The Motion DNA promo: technique plates (`build_scene`), shots and graphics (`build_explainer`), the edit (`build_edit`), music-led timing |
 
 Data-driven builders: scenes (`build_scene.jsx`: plate, tracking, matte, HUD, `planar`, `rays`, `glow`, `burst`),

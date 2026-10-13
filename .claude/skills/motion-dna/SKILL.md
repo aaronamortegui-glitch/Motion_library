@@ -29,10 +29,17 @@ All repo content is English: write code, comments, messages, metadata and commit
   `library/references/<slug>.json` and through `match_reference`. Build what fits; **create what is missing** (presets,
   token curves, transitions, techniques), tag it in `tools/tag_library.py`, render the samples
   (`bash tools/rebuild_previews.sh`) and add a style. CONTRIBUTING §8 has the steps.
-- **Brand profiles** (`library/brands/<slug>/brand.json`): a custom style per brand that learns. Before animating for a
+- **Brand profiles** (templates in `library/brands/`, client brands in `library/brands.local/` or their own folder, never
+  in the repo): a custom style per brand that learns. Before animating for a
   brand, read it (`get_brand` / `python tools/brand.py show <slug>`) and follow its rules; save every review note as a
   rule (`add_brand_note` / `python tools/brand.py note <slug> "…" --cat … --why …`). Apply its style with `apply_brand`
   or the panel's *Brands* category. CONTRIBUTING §10.
+
+## Existing animation: modify it, or generate it
+When the layers already move, keep their animation unless the user says replace: `apply_preset` / `apply_pack` /
+`apply_brand` take `existing` = `modify` (default: keyframe values stay, timing scaled by `duration`, every segment
+re-eased with the preset's or style's curve) or `replace`. Layers with no animation get the preset generated. In ExtendScript:
+`SSP.animationOf(L)`, `SSP.restyle(L, {factor | frames, ease | bz})`, `SSP.smartApply(L, name, existing, generateFn)`.
 
 ## Picking a preset
 Read ONLY `library/INDEX.txt` (one line per preset: `kind|name|channels|energy s/m/d|use`, tokens in the header).
