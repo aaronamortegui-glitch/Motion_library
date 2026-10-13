@@ -58,25 +58,42 @@ function mdna_layers() {
     return c.selectedLayers.length ? c.selectedLayers : null;
 }
 
-// Applies a preset to the selected layers. a = {kind, name, phase, tune:{speed,intensity,flipX,flipY,ease}, stagger, markers}
+// Applies a preset to the selected layers. a = {kind, name, phase, tune:{speed,intensity,flipX,flipY,ease}, stagger, markers,
+// existing: "modify"|"replace"}. A layer that already moves keeps its animation and gets the preset's feel (modify), or
+// loses it first (replace); a layer with no animation gets the preset generated. Loops (fx) always add on top.
 function mdna_apply(s) {
     var a = mdna_parse(s), ls = mdna_layers();
     if (!ls) return "ERR Select one or more layers in a composition.";
-    var st = (a.stagger || 0) * ls[0].containingComp.frameDuration;
+    var st = (a.stagger || 0) * ls[0].containingComp.frameDuration, cnt = { generated: 0, modified: 0, replaced: 0 };
     SSP.markerTiming(!!a.markers); SSP.tune(a.tune || {});
     app.beginUndoGroup("Motion DNA: " + a.name + " (" + a.phase + ")");
     try {
         for (var i = 0; i < ls.length; i++) {
             var L = ls[i], t0 = (a.phase === "out" ? L.outPoint - SSM.seconds("Arrive") : L.inPoint) + i * st;
-            if (a.kind === "text") SSP.applyText(L, a.name, a.phase, t0);
-            else if (a.kind === "fx") SSP.applyFx(L, a.name);
-            else if (a.kind === "recipe") SSP.applyRecipe(L, a.name, a.phase);
-            else SSP.apply(L, a.name, a.phase, t0);
+            if (a.kind === "fx") { SSP.applyFx(L, a.name); cnt.generated++; continue; }
+            var gen = (function (L, t0) { return function () {
+                if (a.kind === "text") SSP.applyText(L, a.name, a.phase, t0);
+                else if (a.kind === "recipe") SSP.applyRecipe(L, a.name, a.phase);
+                else SSP.apply(L, a.name, a.phase, t0);
+            }; })(L, t0);
+            cnt[SSP.smartApply(L, a.name, a.existing || "modify", gen)]++;
         }
     } catch (e) { SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); return "ERR " + e.toString(); }
     SSP.markerTiming(false); SSP.tune();
     app.endUndoGroup();
-    return "OK " + a.name + " on " + ls.length + " layer" + (ls.length > 1 ? "s" : "");
+    var parts = [];
+    if (cnt.generated) parts.push(cnt.generated + " animated");
+    if (cnt.modified) parts.push(cnt.modified + " kept their animation, re-timed and re-eased");
+    if (cnt.replaced) parts.push(cnt.replaced + " replaced");
+    return "OK " + a.name + ": " + parts.join(" · ");
+}
+// The selected layers and whether they already move (the panel says what Apply will do)
+function mdna_sel_info() {
+    var ls = mdna_layers(), out = { layers: 0, own: 0, ours: 0 };
+    if (!ls) return mdna_json(out);
+    out.layers = ls.length;
+    for (var i = 0; i < ls.length; i++) { var x = SSP.animationOf(ls[i]); if (x.props) { if (x.ours) out.ours++; else out.own++; } }
+    return mdna_json(out);
 }
 
 // Applies a style (pack) to the comp or the selected layers. a = {name, phase, whole, tune, markers}
@@ -88,10 +105,11 @@ function mdna_apply_style(s) {
     SSP.markerTiming(!!a.markers); SSP.tune(a.tune || {});
     app.beginUndoGroup("Motion DNA style: " + a.name);
     var res = [];
-    try { res = SSP.applyPack(c, a.name, ls, a.phase); } catch (e) { SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); return "ERR " + e.toString(); }
+    try { res = SSP.applyPack(c, a.name, ls, a.phase, a.existing || "modify"); } catch (e) { SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); return "ERR " + e.toString(); }
     SSP.markerTiming(false); SSP.tune();
     app.endUndoGroup();
-    return res.length ? "OK " + res.length + " layers animated with " + a.name : "ERR No layers matched (backgrounds, nulls and locked layers are skipped).";
+    var kept = 0; for (var i = 0; i < res.length; i++) if (res[i].indexOf("kept its animation") >= 0) kept++;
+    return res.length ? "OK " + a.name + ": " + (res.length - kept) + " layers animated" + (kept ? " · " + kept + " kept their animation, re-eased" : "") : "ERR No layers matched (backgrounds, nulls and locked layers are skipped).";
 }
 
 // Removes what Motion DNA added to the selected layers
@@ -139,9 +157,28 @@ function mdna_ease_bezier(p, k, bz) {
     p.setTemporalEaseAtKey(k, p.keyInTemporalEase(k), o);
     p.setTemporalEaseAtKey(k + 1, n, p.keyOutTemporalEase(k + 1));
 }
+// Keyframes not selected: works on the selected layers instead. A layer that moves gets all its segments re-eased (and
+// retimed when frames is given); a layer that does not move gets a Fade Up made on this curve.
+function mdna_layers_fallback(bz, name, frames) {
+    var ls = mdna_layers();
+    if (!ls) return "ERR Select keyframes, or layers.";
+    var re = 0, gen = 0;
+    app.beginUndoGroup("Motion DNA: " + (name || "curve") + " on layers");
+    try {
+        for (var i = 0; i < ls.length; i++) {
+            var L = ls[i], x = SSP.animationOf(L);
+            if (!x.props) { SSP.apply(L, "Fade Up", "in", L.inPoint); gen++; }
+            else re++;
+            SSP.restyle(L, { bz: bz, frames: frames || 0 });
+        }
+    } catch (e) { app.endUndoGroup(); return "ERR " + e.toString(); }
+    app.endUndoGroup();
+    return "OK " + (name || "Curve") + (frames ? " at " + frames + " f" : "") + ": " + (re ? re + " layer" + (re > 1 ? "s" : "") + " re-eased (values kept)" : "") +
+        (re && gen ? " · " : "") + (gen ? gen + " had no animation: Fade Up made on this curve" : "");
+}
 function mdna_apply_curve(s) {   // s = {bz:[x1,y1,x2,y2], name}
     var a = mdna_parse(s), pairs = mdna_pairs();
-    if (!pairs.length) return "ERR Select two or more keyframes next to each other (on one or more properties).";
+    if (!pairs.length) return mdna_layers_fallback(a.bz, a.name, 0);
     app.beginUndoGroup("Motion DNA: curve " + (a.name || "custom"));
     try { for (var i = 0; i < pairs.length; i++) mdna_ease_bezier(pairs[i][0], pairs[i][1], a.bz); } catch (e) { app.endUndoGroup(); return "ERR " + e.toString(); }
     app.endUndoGroup();
@@ -219,39 +256,129 @@ function mdna_delete_curve(nm) {
 }
 
 // ---------- brands ----------
-// Brands live in the repo (library/brands/<slug>/brand.json). Older local-only ones (library/brands.local, same
-// format, git-ignored) still load and save where they are.
+// Only TEMPLATES live in the repo (library/brands/<slug>). Your brands live on this machine: in the plugin folder
+// (library/brands.local/<slug>, git-ignored) or in any folder you choose, listed in library/brands.local/_registry.json.
+// Same files and rules as tools/brand.py. A brand travels as one exported file (<slug>.motiondna-brand.json).
+function mdna_local_dir() { return $.global.SS_ROOT + "/library/brands.local"; }
+function mdna_registry() {
+    var f = new File(mdna_local_dir() + "/_registry.json");
+    if (!f.exists) return [];
+    try { return mdna_parse(mdna_read_text(f.fsName)).external || []; } catch (e) { return []; }
+}
+function mdna_register(dir) {
+    dir = String(dir).split("\\").join("/");
+    var ext = mdna_registry();
+    for (var i = 0; i < ext.length; i++) if (ext[i] === dir) return;
+    ext.push(dir); new Folder(mdna_local_dir()).create();
+    mdna_write_text(mdna_local_dir() + "/_registry.json", mdna_json({ external: ext }) + "\n");
+}
 function mdna_brand_dir(slug, local) { return $.global.SS_ROOT + "/library/brands" + (local ? ".local" : "") + "/" + slug; }
-function mdna_brands() {   // [{local, b}] where b is the brand.json as written
-    var out = [], kinds = [false, true];
-    for (var k = 0; k < 2; k++) {
-        try {
-            var dirs = Folder($.global.SS_ROOT + "/library/brands" + (kinds[k] ? ".local" : "")).getFiles(function (f) { return f instanceof Folder; });
-            for (var i = 0; i < dirs.length; i++) { var f = new File(dirs[i].fsName + "/brand.json"); if (f.exists) out.push('{"local":' + kinds[k] + ',"b":' + mdna_read_text(f.fsName) + "}"); }
-        } catch (e) {}
-    }
+function mdna_brands() {   // [{where: local|external|template, dir, local, b}]; your copy of a slug hides the template
+    var out = [], seen = {}, add = function (dir, where) {
+        var f = new File(dir + "/brand.json"); if (!f.exists) return;
+        var txt = mdna_read_text(f.fsName), slug = "";
+        try { slug = mdna_parse(txt).slug; } catch (e) { return; }
+        if (seen[slug]) return; seen[slug] = 1;
+        out.push('{"where":' + mdna_json(where) + ',"local":' + (where !== "template") + ',"dir":' + mdna_json(String(dir).split("\\").join("/")) + ',"b":' + txt + "}");
+    };
+    var i, dirs;
+    try { dirs = Folder(mdna_local_dir()).getFiles(function (f) { return f instanceof Folder; }); for (i = 0; i < dirs.length; i++) add(dirs[i].fsName, "local"); } catch (e) {}
+    var ext = mdna_registry(); for (i = 0; i < ext.length; i++) add(ext[i], "external");
+    try { dirs = Folder($.global.SS_ROOT + "/library/brands").getFiles(function (f) { return f instanceof Folder; }); for (i = 0; i < dirs.length; i++) add(dirs[i].fsName, "template"); } catch (e) {}
     return "[" + out.join(",") + "]";
 }
-function mdna_brand_read(slug) {   // local copy first
-    var f = new File(mdna_brand_dir(slug, true) + "/brand.json");
-    if (!f.exists) f = new File(mdna_brand_dir(slug, false) + "/brand.json");
-    return f.exists ? mdna_parse(mdna_read_text(f.fsName)) : null;
+function mdna_brand_find(slug) {   // the folder of a brand, the way mdna_brands resolves it
+    var all = mdna_parse(mdna_brands());
+    for (var i = 0; i < all.length; i++) if (all[i].b.slug === slug) return all[i].dir;
+    return null;
 }
-function mdna_brand_save(s) {   // s = {slug, local, text}: the panel sends the whole brand.json, already formatted
+function mdna_brand_read(slug) {
+    var d = mdna_brand_find(slug), f = d ? new File(d + "/brand.json") : null;
+    return f && f.exists ? mdna_parse(mdna_read_text(f.fsName)) : null;
+}
+function mdna_brand_save(s) {   // s = {dir, text} (or the older {slug, local, text}): the panel sends the whole brand.json
     try {
-        var a = mdna_parse(s), dir = new Folder(mdna_brand_dir(a.slug, a.local === true));
+        var a = mdna_parse(s), dir = new Folder(a.dir || mdna_brand_dir(a.slug, a.local === true));
         if (!dir.exists && !dir.create()) return "ERR cannot create " + dir.fsName;
         mdna_write_text(dir.fsName + "/brand.json", a.text);
-        return "OK saved";
+        if (a.external) mdna_register(dir.fsName);
+        return "OK " + dir.fsName.split("\\").join("/");
     } catch (e) { return "ERR " + e.toString(); }
 }
+// dialogs: the panel has no file dialogs of its own
+function mdna_pick_folder(title) { var f = Folder.selectDialog(title || "Choose a folder"); return f ? f.fsName.split("\\").join("/") : ""; }
+function mdna_pick_open(title) { var f = File.openDialog(title || "Open", "Motion DNA brand:*.json"); return f ? f.fsName.split("\\").join("/") : ""; }
+function mdna_pick_save(name) { var f = new File(Folder.desktop.fsName + "/" + name).saveDlg("Save the brand file", "Motion DNA brand:*.json"); return f ? f.fsName.split("\\").join("/") : ""; }
+function mdna_read_file(path) { var f = new File(path); return f.exists ? mdna_read_text(f.fsName) : "ERR missing " + path; }
+function mdna_write_file(s) { try { var a = mdna_parse(s); mdna_write_text(a.path, a.text); return "OK " + a.path; } catch (e) { return "ERR " + e.toString(); } }
+var MDNA_B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+function mdna_b64_file(path) {   // a binary file (the brand's thumb.png) as base64, for the exported brand file
+    var f = new File(path); if (!f.exists) return "";
+    f.encoding = "BINARY"; f.open("r"); var s = f.read(); f.close();
+    var out = [], i, a, b, c;
+    for (i = 0; i < s.length; i += 3) {
+        a = s.charCodeAt(i) & 255; b = i + 1 < s.length ? s.charCodeAt(i + 1) & 255 : -1; c = i + 2 < s.length ? s.charCodeAt(i + 2) & 255 : -1;
+        out.push(MDNA_B64.charAt(a >> 2) + MDNA_B64.charAt(((a & 3) << 4) | (b < 0 ? 0 : b >> 4)) +
+                 (b < 0 ? "=" : MDNA_B64.charAt(((b & 15) << 2) | (c < 0 ? 0 : c >> 6))) + (c < 0 ? "=" : MDNA_B64.charAt(c & 63)));
+    }
+    return out.join("");
+}
+function mdna_b64_write(s) {   // s = {path, b64}: writes a base64 payload as a binary file
+    try {
+        var a = mdna_parse(s), d = a.b64.replace(/[^A-Za-z0-9+\/]/g, ""), out = [], i, n = [0, 0, 0, 0], k;
+        for (i = 0; i < d.length; i += 4) {
+            for (k = 0; k < 4; k++) n[k] = i + k < d.length ? MDNA_B64.indexOf(d.charAt(i + k)) : -1;
+            out.push(String.fromCharCode((n[0] << 2) | (n[1] >> 4)));
+            if (n[2] >= 0) out.push(String.fromCharCode(((n[1] & 15) << 4) | (n[2] >> 2)));
+            if (n[3] >= 0) out.push(String.fromCharCode(((n[2] & 3) << 6) | n[3]));
+        }
+        var f = new File(a.path); f.encoding = "BINARY"; f.open("w"); f.write(out.join("")); f.close();
+        return "OK";
+    } catch (e) { return "ERR " + e.toString(); }
+}
+
+// ---------- projects: a folder per piece, with its brand and its Claude conversation ----------
+// <folder>/motion-dna.project.json  {name, created, brand, folders, sessions:[{id, title, started}], session, rules, aep}
+// <folder>/CLAUDE.md and .mcp.json   so Claude Code opened in this folder (desktop, terminal or the panel's Agent)
+//                                    knows the library, the tools and the brand, and has the motion-dna MCP server
+var MDNA_PROJECT = "motion-dna.project.json";
+function mdna_project_find(start) {   // walks up from the open .aep (or a given folder) to the project file
+    var f = start ? new Folder(start) : (app.project.file ? app.project.file.parent : null);
+    for (var i = 0; f && i < 6; i++, f = f.parent) {
+        var p = new File(f.fsName + "/" + MDNA_PROJECT);
+        if (p.exists) return '{"dir":' + mdna_json(f.fsName.split("\\").join("/")) + ',"p":' + mdna_read_text(p.fsName) + "}";
+    }
+    return "null";
+}
+function mdna_project_save(s) {   // s = {dir, text}
+    try { var a = mdna_parse(s); mdna_write_text(a.dir + "/" + MDNA_PROJECT, a.text); return "OK"; } catch (e) { return "ERR " + e.toString(); }
+}
+function mdna_project_new(s) {   // s = {parent, name, slug, brand, folders:[...], saveAep, text, claude, mcp}
+    try {
+        var a = mdna_parse(s), dir = new Folder(a.parent + "/" + a.slug);
+        if (new File(dir.fsName + "/" + MDNA_PROJECT).exists) return "ERR There is already a Motion DNA project in " + dir.fsName;
+        if (!dir.exists && !dir.create()) return "ERR cannot create " + dir.fsName;
+        for (var i = 0; i < a.folders.length; i++) new Folder(dir.fsName + "/" + a.folders[i]).create();
+        mdna_write_text(dir.fsName + "/" + MDNA_PROJECT, a.text);
+        mdna_write_text(dir.fsName + "/CLAUDE.md", a.claude);
+        mdna_write_text(dir.fsName + "/.mcp.json", a.mcp);
+        var aep = "";
+        if (a.saveAep) {
+            var sub = a.folders.length > 4 ? a.folders[4] : "";   // 05_ae
+            var file = new File(dir.fsName + (sub ? "/" + sub : "") + "/" + a.slug + ".aep");
+            if (!file.exists) { app.project.save(file); aep = file.fsName.split("\\").join("/"); }
+        }
+        return mdna_json({ dir: dir.fsName.split("\\").join("/"), aep: aep });
+    } catch (e) { return "ERR " + e.toString(); }
+}
+
 function mdna_apply_brand(s) {   // s = {slug, phase, whole, tune, markers}: the brand's style on the brand's curve
     var a = mdna_parse(s), b = mdna_brand_read(a.slug);
     if (!b) return "ERR brand not found: " + a.slug;
     if (!b.feel || !b.feel.style) return "ERR " + b.name + " has no base style yet (Overview > Feel).";
     var tu = a.tune || {}; if (!tu.ease && b.feel.curve) tu.ease = b.feel.curve;
-    var r = mdna_apply_style(mdna_json({ name: b.feel.style, phase: a.phase, whole: a.whole, tune: tu, markers: a.markers }));
-    return r.indexOf("OK") === 0 ? r.replace(/with .*$/, "in the " + b.name + " style.") : r;
+    var r = mdna_apply_style(mdna_json({ name: b.feel.style, phase: a.phase, whole: a.whole, tune: tu, markers: a.markers, existing: a.existing }));
+    return r.indexOf("OK") === 0 ? r.replace("OK " + b.feel.style + ":", "OK " + b.name + " style:") : r;
 }
 // Re-eases every keyframe pair of the comp (or of the selected layers) with one curve: "apply the brand to everything"
 function mdna_reease(s) {   // s = {bz, name, selectedOnly}
@@ -284,7 +411,7 @@ function mdna_reease(s) {   // s = {bz, name, selectedOnly}
 // Retimes the selected keyframe pairs to a duration (frames) and eases them: a brand benchmark applied
 function mdna_apply_timing(s) {   // s = {frames, bz, name}
     var a = mdna_parse(s), pairs = mdna_pairs(), c = app.project.activeItem, n = 0;
-    if (!pairs.length) return "ERR Select two or more keyframes next to each other.";
+    if (!pairs.length) return mdna_layers_fallback(a.bz || [0.18, 0.28, 0, 0.9], a.name, a.frames);
     var dur = a.frames * c.frameDuration;
     app.beginUndoGroup("Motion DNA: timing " + (a.name || ""));
     try {
@@ -322,10 +449,17 @@ function mdna_context() {
     var c = app.project.activeItem, f = app.project.file, out = { project: f ? f.fsName : "", comp: null, selected: [] };
     if (c instanceof CompItem) {
         out.comp = { name: c.name, width: c.width, height: c.height, fps: Math.round(1 / c.frameDuration * 100) / 100, duration: Math.round(c.duration * 100) / 100, layers: c.numLayers };
-        for (var i = 0; i < c.selectedLayers.length && i < 40; i++) out.selected.push(c.selectedLayers[i].index + " " + c.selectedLayers[i].name);
+        for (var i = 0; i < c.selectedLayers.length && i < 40; i++) {
+            var L = c.selectedLayers[i], x = SSP.animationOf(L);
+            out.selected.push(L.index + " " + L.name + (x.props ? " (already animated: " + x.props + " properties" + (x.ours ? ", by Motion DNA" : "") + ")" : " (no animation)"));
+        }
     }
     return mdna_json(out);
 }
 
-// Opens a file with the system (the visualizer)
-function mdna_open(path) { var f = new File(path); if (f.exists) { f.execute(); return "OK"; } return "ERR missing " + path; }
+// Opens a file or a folder with the system (the visualizer, a project folder)
+function mdna_open(path) {
+    var d = new Folder(path); if (d.exists) { d.execute(); return "OK"; }
+    var f = new File(path); if (f.exists) { f.execute(); return "OK"; }
+    return "ERR missing " + path;
+}

@@ -41,10 +41,17 @@ function browserStandIn(src) {
   if (fn === "mdna_status") return JSON.stringify({ bridge: true, minutes: 3 });
   if (fn === "mdna_apply") return "OK (browser preview: nothing applied)";
   if (fn === "mdna_remove") return "OK (browser preview: nothing removed)";
-  if (fn === "mdna_brands") return JSON.stringify(window.__demoBrands || []);
+  if (fn === "mdna_brands") {   // the repo's templates, so the Brands section can be designed in a browser
+    if (!window.__demoBrands) {
+      window.__demoBrands = [];
+      try { const x = new XMLHttpRequest(); x.open("GET", "../library/brands/motion-dna/brand.json", false); x.send(); window.__demoBrands.push({ where: "template", dir: "", b: JSON.parse(x.responseText) }); } catch (e) {}
+    }
+    return JSON.stringify(window.__demoBrands);
+  }
   if (fn === "mdna_comp_info") return JSON.stringify({ fps: 30, project: "C:/projects/demo.aep" });
   if (fn === "mdna_capture") return JSON.stringify({ frames: 18, bz: [0.18, 0.28, 0, 0.9], layer: "Title", prop: "Position", stagger: 3, fps: 30 });
-  if (fn === "mdna_brand_save") { const a = JSON.parse(JSON.parse(src.slice(src.indexOf("(") + 1, -1))); const b = JSON.parse(a.text); const L = (window.__demoBrands = window.__demoBrands || []); const i = L.findIndex((x) => x.b.slug === b.slug); if (i >= 0) L[i].b = b; else L.push({ local: true, b }); return "OK saved"; }
+  if (fn === "mdna_brand_save") { const a = JSON.parse(JSON.parse(src.slice(src.indexOf("(") + 1, -1))); const b = JSON.parse(a.text); const L = (window.__demoBrands = window.__demoBrands || []); const i = L.findIndex((x) => x.b.slug === b.slug); if (i >= 0) L[i].b = b; else L.push({ where: "local", b }); return "OK saved"; }
   if (fn === "mdna_read_curve") return "[0.25,0.1,0.25,1]";
+  if (fn === "mdna_sel_info") return JSON.stringify(window.__demoSel || { layers: 1, own: 1, ours: 0 });
   return "OK";
 }

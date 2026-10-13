@@ -78,6 +78,17 @@ media/motion_dna_promo/audio/a0*_v*.wav
 # CEP panel: repo path written by tools/setup.py
 panel/.root
 
-# client brand profiles: local until cleared to share (then move the folder into library/brands/)
+# brand profiles: only templates live in the repo (add a `!` line per template); client brands stay on each machine
+# (library/brands.local/ or a folder of your choice) and travel as exported files (python tools/brand.py export)
 library/brands.local/
+library/brands/*
+!library/brands/_schema.md
+!library/brands/motion-dna/
+*.motiondna-brand.json
 panel/.debug
+tools/.cache/
+
+# production components: the 4K originals live in Flora and Figma (runs.json lists them); only sheets are committed
+media/motion_dna_components/4k/
+media/motion_dna_components/figma/
+media/motion_dna_components/_check_*.jpg

@@ -1,5 +1,6 @@
 // Motion DNA panel (CEP) — UI. Reads the library straight from the repo (library/*.json, thumbnails, GIFs) and asks
-// After Effects (host/host.jsx) only to apply or remove. Sections: Behaviors · Curves · Styles · Brands · Techniques.
+// After Effects (host/host.jsx) only to apply or remove. Sections: Behaviors · Curves · Brands · Agent (agent.js), whose
+// Library holds the Styles and Techniques: guides the Agent applies to whole comps.
 "use strict";
 
 const $ = (sel, el = document) => el.querySelector(sel);
@@ -12,6 +13,7 @@ const h = (tag, attrs = {}, ...kids) => {   // tiny element builder
   for (const kid of kids.flat()) if (kid != null) e.append(kid.nodeType ? kid : document.createTextNode(kid));
   return e;
 };
+const kids = (...a) => a.flat().filter((x) => x != null && x !== false);   // append()/replaceChildren() print "null" otherwise
 const store = {   // per-user conveniences (section, filters, favorites); the panel works without it
   get(k, d) { try { const v = localStorage.getItem("mdna." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem("mdna." + k, JSON.stringify(v)); } catch (e) {} },
@@ -19,7 +21,7 @@ const store = {   // per-user conveniences (section, filters, favorites); the pa
 
 const S = {
   root: "", url: "", lib: [], recipes: [], tags: { presets: [], tones: [] }, tagOf: {}, packs: [], techniques: [],
-  sec: store.get("section", "behaviors"), cat: store.get("cat", "Moves"), sel: null, phase: "in",
+  sec: ({ styles: "agent", techniques: "agent" })[store.get("section", "behaviors")] || store.get("section", "behaviors"), cat: store.get("cat", "Moves"), sel: null, phase: "in",
   favs: new Set(store.get("favs", [])), filters: {},
 };
 // search / energy / tone belong to each section: a filter set in Behaviors must not hide brands or curves
@@ -41,10 +43,17 @@ function toast(msg, err) {
 async function boot() {
   let info;
   if (IN_AE) {
-    // re-read the host script on every load, so an updated host.jsx applies without restarting After Effects
-    await evalHost(`try { $.evalFile(new File(${JSON.stringify(extensionPath() + "/host/host.jsx")})); "ok" } catch (e) { "ERR " + e }`);
-    info = parse(await call("mdna_boot", extensionPath()));
-    if (info.error) { $("#boot").textContent = info.error; return; }
+    // re-read the host script on every load, so an updated host.jsx applies without restarting After Effects. A panel
+    // docked in the workspace opens while After Effects is still starting, before its scripting answers: retry for a
+    // minute instead of staying blank until someone presses F5.
+    for (let tries = 0; ; tries++) {
+      await evalHost(`try { $.evalFile(new File(${JSON.stringify(extensionPath() + "/host/host.jsx")})); "ok" } catch (e) { "ERR " + e }`);
+      info = parse(await call("mdna_boot", extensionPath()));
+      if (!info.error) break;
+      if (tries >= 40 || /Repo not found/.test(info.error)) { $("#boot").textContent = "Motion DNA could not start: " + info.error + " (F5 retries)"; return; }
+      $("#boot").textContent = "Waiting for After Effects…";
+      await new Promise((r) => setTimeout(r, 1500));
+    }
     S.root = info.root; S.url = fileUrl(info.root) + "/";
     const f = new FontFace("Inter Tight", `url("${S.url}assets/fonts/InterTight%5Bwght%5D.ttf")`, { weight: "100 900" });
     f.load().then((ff) => document.fonts.add(ff)).catch(() => {});
@@ -62,7 +71,7 @@ async function boot() {
     energy: ENERGY_WORD[r.energy] || r.energy, use: "Measured reference · " + (r.section || "") }));
   await loadCurves();
   $("#boot").remove();
-  header(); tabs(); renderAll(); status(); setInterval(status, 4000);
+  header(); tabs(); renderAll(); status(); setInterval(() => { status(); selHint(); }, 4000);
 }
 
 // ---------- header ----------
@@ -86,10 +95,10 @@ function tabs() {
 }
 function showSection() {
   for (const b of document.querySelectorAll("#tabs button")) b.classList.toggle("on", b.dataset.sec === S.sec);
-  for (const s of document.querySelectorAll("#main > .section")) s.hidden = s.id !== "sec-" + S.sec;   // only the five sections, not the stacks inside them
+  for (const s of document.querySelectorAll("#main > .section")) s.hidden = s.id !== "sec-" + S.sec;   // only the four sections, not the stacks inside them
   $("#main").scrollTop = 0;
 }
-function renderAll() { behaviors(); curves(); styles(); brands(); techniques(); if (typeof agent === "function") agent(); }
+function renderAll() { behaviors(); curves(); brands(); if (typeof agent === "function") agent(); }
 
 // ---------- shared: filters, preview, controls, apply row ----------
 function inRange(r) { return !S.energy || !r || (r[0] <= S.energy && S.energy <= r[1]); }
@@ -147,7 +156,7 @@ function toggleFav() {
   showPreview(S.sec, S.sel); if (S.cat === "★ Favorites") behaviors.refresh();
 }
 
-const CTL = { speed: 1, intensity: 1, dir: 0, ease: 0, stagger: 4, markers: true, open: store.get("controlsOpen", false) };
+const CTL = { speed: 1, intensity: 1, dir: 0, ease: 0, stagger: 4, markers: true, open: store.get("controlsOpen", false), existing: store.get("existing", "modify") };
 function controlsCard() {
   const d = h("details", { class: "controls", open: CTL.open, ontoggle: () => store.set("controlsOpen", (CTL.open = d.open)) });
   const sum = h("span", { class: "sum" });
@@ -193,10 +202,43 @@ function tuning() {
 function actionsRow(onApply) {
   const radios = ["in", "out", "both"].map((p) => h("label", { title: { in: "Animate the entrance", out: "Animate the exit (ends at the layer's out point)", both: "Entrance and exit" }[p] },
     h("input", { type: "radio", name: "phase-" + Math.random(), value: p, checked: S.phase === p, onchange: () => { S.phase = p; syncPhase(); } }), p[0].toUpperCase() + p.slice(1)));
-  return h("div", { class: "actions" }, h("div", { class: "phases" }, radios),
+  // only when a selected layer already has keyframes: keep them (Modify) or start over (Replace)
+  const ex = h("div", { class: "seg small existing", title: "A selected layer already has keyframes" }, ...[["modify", "Modify"], ["replace", "Replace"]].map(([k, l]) =>
+    h("button", { class: CTL.existing === k ? "on" : "", "data-existing": k, title: k === "modify" ? "Keep its keyframes and values; give them this timing and curve" : "Delete its keyframes and create this animation",
+      onclick: () => { CTL.existing = k; store.set("existing", k); for (const b of document.querySelectorAll(".existing button")) b.classList.toggle("on", b.dataset.existing === k); selHint(); } }, l)));
+  const exRow = h("div", { class: "crow existing-row", hidden: true }, h("span", { style: "flex:none" }, "The layer already has keyframes:"), ex);
+  const hint = h("span", { class: "dim sel-hint" }, "Select the layers to animate.");
+  setTimeout(selHint, 0);
+  return h("div", { class: "stack", style: "gap:6px" }, exRow, hint,
+    h("div", { class: "actions" }, h("div", { class: "phases" }, radios),
     h("div", { class: "buttons" },
-      h("button", { class: "solid apply", title: "Apply to the selected layers", onclick: onApply }, "Apply"),
-      h("button", { class: "solid remove", title: "Remove Motion DNA animation from the selected layers", onclick: removeAnim }, "Remove")));
+      h("button", { class: "solid apply apply-main", title: "Apply to the selected layers", onclick: onApply }, "Apply"),
+      h("button", { class: "solid remove", title: "Remove Motion DNA animation from the selected layers", onclick: removeAnim }, "Remove"))));
+}
+// What Apply will do with the current selection (refreshed with the header status): no keyframes → Create; keyframes →
+// the Modify / Replace choice shows and the button says which; a mix → both, in words.
+async function selHint() {
+  const els = document.querySelectorAll(".sel-hint"); if (!els.length) return;
+  const i = parse(await call("mdna_sel_info"));
+  const n = i.layers || 0, own = i.own || 0, ours = i.ours || 0, fresh = n - own - ours, mod = CTL.existing === "modify";
+  let t, label = "Apply";
+  if (!n) t = "Select the layers to animate.";
+  else if (!own) {
+    label = "Create";
+    t = (n === 1 ? "The layer has" : `The ${n} layers have`) + " no keyframes: Apply creates the animation." + (ours ? ` (${ours} with an earlier Motion DNA move: redone.)` : "");
+  } else {
+    label = mod ? "Modify" : "Replace";
+    const who = own === n ? (n === 1 ? "Its" : "Their") : `${own} layer${own > 1 ? "s have" : " has"} keyframes:`;
+    t = mod ? `${who} keyframes stay; Apply changes their timing and curve (values kept).` : `${who} keyframes are deleted and the animation is created again.`;
+    if (own !== n) t = mod ? `${who} they stay; Apply changes their timing and curve (values kept).` : `${who} they are deleted and the animation is created again.`;
+    if (fresh || ours) { label = "Apply"; t += ` ${fresh + ours} without keyframes: created.`; }
+  }
+  for (const r of document.querySelectorAll(".existing-row")) {
+    r.hidden = !own;
+    const lab = r.querySelector("span"); if (lab) lab.textContent = own > 1 ? `${own} layers already have keyframes:` : "The layer already has keyframes:";
+  }
+  for (const b of document.querySelectorAll(".apply-main")) b.textContent = label;
+  for (const e of els) e.textContent = t;
 }
 function syncPhase() { for (const r of document.querySelectorAll(".phases input")) r.checked = r.value === S.phase; }
 async function removeAnim() {
@@ -266,7 +308,7 @@ function behaviors() {
 }
 async function applyBehavior() {
   if (!S.sel || !S.sel.kind) return toast("Pick a preset in the gallery first.", true);
-  report(await call("mdna_apply", { kind: S.sel.kind, name: S.sel.name, phase: S.phase, tune: tuning(), stagger: CTL.stagger, markers: CTL.markers }));
+  report(await call("mdna_apply", { kind: S.sel.kind, name: S.sel.name, phase: S.phase, tune: tuning(), stagger: CTL.stagger, markers: CTL.markers, existing: CTL.existing })); selHint();
 }
 
 // ---------- 2. Curves: a Flow-style editor (drag the handles, type the values) and the token library ----------
@@ -366,10 +408,12 @@ function curves() {
   };
   curves.refresh = () => { library(); draw(); };
   const search = h("input", { class: "field", type: "search", placeholder: "Search curves", value: S.q, oninput: (e) => { S.q = e.target.value.toLowerCase(); library(); draw(); } });
-  sec.append(search, h("div", { class: "editor-wrap" }, svg),
+  sec.append(h("div", { class: "editor-wrap" }, svg),
     h("div", { class: "crow" }, nameEl, vals),
     h("div", { class: "crow" }, applyBtn, readBtn, revBtn),
-    h("div", { class: "crow" }, saveBtn, del, h("button", { class: "btn tobrand", title: "Save this curve to the active brand", onclick: () => toBrand() }, "Save to brand")), form, libCount, lib);
+    h("span", { class: "dim" }, "No keyframes selected? It re-eases every keyframe of the selected layers (values kept), and gives a layer with no animation a Fade Up on this curve."),
+    h("div", { class: "crow" }, saveBtn, del, h("button", { class: "btn tobrand", title: "Save this curve to the active brand", onclick: () => toBrand() }, "Save to brand")), form,
+    h("div", { class: "lib-head" }, libCount, search), lib);
   const toBrand = async () => {
     const b = activeBrand(); if (!b) return toast("Activate a brand first (Brands > open one > Activate).", true);
     BR.view = "kit"; BR.slug = b.slug; BR.tab = "motion"; S.sec = "brands"; store.set("section", "brands"); showSection(); brands.render();
@@ -378,56 +422,41 @@ function curves() {
   library(); draw();
 }
 
-// ---------- 3. Styles ----------
-function styles() {
-  const sec = $("#sec-styles"); sec.replaceChildren();
-  const grid = h("div", { class: "grid", style: "grid-template-columns:repeat(auto-fill,minmax(180px,1fr))" });
-  let whole = true;
-  const refresh = () => {
-    const shown = S.packs.filter((pk) => {
-      const tones = pk.tones || [];
-      if (S.q && !(pk.name + " " + pk.desc + " " + tones.join(" ")).toLowerCase().includes(S.q)) return false;
-      if (S.tone && !tones.includes(S.tone)) return false;
-      return inRange(pk.energy_range);
-    });
-    grid.replaceChildren(...shown.map((pk) => {
-      const it = { name: pk.name, title: "Style: " + pk.name, kind: "pack", energy: pk.energy, use: pk.desc, favKey: "pack/" + pk.name,
-        img: asset(`library/packs/${pk.slug}.gif`), thumb: asset(`library/packs/${pk.slug}_md.png`) };
-      const c = h("button", { class: "card" + (S.sel && S.sel.favKey === it.favKey ? " sel" : ""), title: pk.desc },
-        h("span", { class: "thumb" }, h("img", { src: it.thumb, alt: "", loading: "lazy" })),
-        h("span", { class: "label" }, `${pk.name} · ${pk.energy}${pk.energy_range ? " " + pk.energy_range.join("–") : ""}`));
-      c.onclick = () => { S.sel = it; for (const x of grid.children) x.classList.remove("sel"); c.classList.add("sel"); showPreview("styles", it); };
-      return c;
-    }));
-  };
-  const scope = h("label", {}, h("input", { type: "checkbox", checked: true, onchange: (e) => (whole = e.target.checked) }), " Whole comp (otherwise only the selected layers)");
-  const apply = async () => {
-    if (!S.sel || S.sel.kind !== "pack") return toast("Pick a style first.", true);
-    report(await call("mdna_apply_style", { name: S.sel.name, phase: S.phase, whole, tune: tuning(), markers: CTL.markers }));
-  };
-  sec.append(filtersBar(false, refresh), previewCard("styles"), controlsCard(), actionsRow(apply),
-    h("div", { class: "note", style: "padding:0" }, "Each style animates a whole comp (or the selected layers): every layer gets the preset of its role, with the style's own curve."), scope, grid);
-  refresh();
-}
-
-// ---------- 4. Brands: a workspace per client ----------
+// ---------- 3. Brands: a workspace per client ----------
 // A brand keeps its motion spec (curves, timing benchmarks in frames / ms / %), the rules learned in reviews and its
 // projects. One brand can be active per After Effects project: a chip in the header opens its kit from any section,
-// the Curves library shows its curves first, and Apply uses its style and curve. Brands are saved in the repo
-// (library/brands/<slug>/brand.json, schema in library/brands/_schema.md). The repo is public: keep client names
-// anonymised unless it is private. Older local-only brands (library/brands.local) still load.
-let BRANDS = [];   // [{local, b}]
-const BR = { view: "list", slug: null, tab: "overview", fps: 30, project: "" };
+// the Curves library shows its curves first, and Apply uses its style and curve.
+// Where they live: only TEMPLATES are in the repo (library/brands/<slug>, e.g. Motion DNA). Your brands stay on this
+// computer, in the plugin folder (library/brands.local) or in a folder you choose; to share one, Export it to a file
+// and Import it on the other computer: the rules merge (new, edited and removed rules travel) and the ones that came in
+// show as new. Same files and merge as tools/brand.py (schema: library/brands/_schema.md).
+let BRANDS = [];   // [{where: "local"|"external"|"template", dir, b}]
+const BR = { view: "list", slug: null, tab: "overview", fps: 30, project: "", where: "plugin", folder: "" };
 const brandOf = (slug) => BRANDS.find((x) => x.b.slug === slug);
 const activeMap = () => store.get("activeBrands", {});
 function activeSlug() { const m = activeMap(); return m[BR.project || "(unsaved)"] || null; }
-function setActive(slug) { const m = activeMap(); const k = BR.project || "(unsaved)"; if (slug) m[k] = slug; else delete m[k]; store.set("activeBrands", m); brandChip(); if (curves.refresh) curves.refresh(); }
+function setActive(slug) { const m = activeMap(); const k = BR.project || "(unsaved)"; if (slug) m[k] = slug; else delete m[k]; store.set("activeBrands", m); brandChip(); if (curves.refresh) curves.refresh(); if (typeof onBrandChange === "function") onBrandChange(slug); }
 function activeBrand() { const x = brandOf(activeSlug()); return x ? x.b : null; }
-function ensureMotion(b) { b.motion = b.motion || {}; b.motion.curves = b.motion.curves || []; b.motion.timing = b.motion.timing || []; return b; }
+function ensureMotion(b) { b.motion = b.motion || {}; b.motion.curves = b.motion.curves || []; b.motion.timing = b.motion.timing || []; b.rules = b.rules || []; b.removed = b.removed || []; return b; }
 const today = () => new Date().toISOString().slice(0, 10);
 const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const WHERE = { template: "template", local: "this computer", external: "own folder" };
+function whoAmI() { try { return nodeReq() ? (process.env.USERNAME || process.env.USER || "") : ""; } catch (e) { return ""; } }
+
+// rule ids that travel: a uid per rule (older rules get one from their text, the same way tools/brand.py does it)
+async function sha8(text) {
+  const t = text.trim().toLowerCase();
+  try { if (nodeReq()) return nodeReq()("crypto").createHash("sha1").update(t, "utf8").digest("hex").slice(0, 8); } catch (e) {}
+  const buf = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(t));
+  return [...new Uint8Array(buf)].map((x) => x.toString(16).padStart(2, "0")).join("").slice(0, 8);
+}
+async function ensureUids(b) { for (const r of b.rules || []) if (!r.uid) r.uid = await sha8(r.rule); }
+const newUid = () => Math.random().toString(16).slice(2, 10).padEnd(8, "0");
+
 async function saveBrand(x) {
-  const r = await call("mdna_brand_save", { slug: x.b.slug, local: x.local, text: JSON.stringify(x.b, null, 1) + "\n" });
+  await ensureUids(x.b);
+  const clean = Object.assign({}, x.b); for (const k of Object.keys(clean)) if (k.startsWith("_")) delete clean[k];
+  const r = await call("mdna_brand_save", { dir: x.dir, external: x.where === "external", text: JSON.stringify(clean, null, 1) + "\n" });
   if (String(r).startsWith("ERR")) report(r);
   else { brandChip(); if (curves.refresh) curves.refresh(); }   // the Curves library shows the active brand's curves
   return r;
@@ -455,8 +484,8 @@ async function loadBrands() {
   const info = parse(await call("mdna_comp_info"));
   BR.fps = info.fps || BR.fps; BR.project = info.project || "";
   const r = parse(await call("mdna_brands"));
-  BRANDS = Array.isArray(r) ? r.filter((x) => x && x.b && x.b.slug) : [];
-  for (const x of BRANDS) ensureMotion(x.b);
+  BRANDS = Array.isArray(r) ? r.filter((x) => x && x.b && x.b.slug).map((x) => Object.assign({ where: x.local ? "local" : "template" }, x)) : [];
+  for (const x of BRANDS) { ensureMotion(x.b); await ensureUids(x.b); }   // uids from the text as loaded, the way tools/brand.py derives them
   brandChip();
 }
 function brandChip() {
@@ -475,28 +504,35 @@ function brands() {
   render();
   loadBrands().then(render);
 }
+function brandCard(x, act) {
+  const b = x.b, m = b.motion || {}, fresh = (b.inbox || []).length;
+  const thumb = x.dir && IN_AE ? fileUrl(x.dir) + "/thumb.png" : "";
+  const c = h("button", { class: "card" + (b.slug === act ? " sel" : ""), title: `Open ${b.name} · ${WHERE[x.where] || x.where}${x.dir ? "\n" + x.dir : ""}` },
+    h("span", { class: "thumb" }, h("img", { src: thumb, alt: "", loading: "lazy", onerror: (e) => e.target.replaceWith(h("span", { class: "initial" }, b.name.slice(0, 1))) })),
+    h("span", { class: "label" }, b.name, x.where === "template" ? h("em", { class: "badge" }, "template") : null,
+      b.slug === act ? h("em", { class: "badge on" }, "active") : null, fresh ? h("em", { class: "badge new" }, `${fresh} new`) : null),
+    h("span", { class: "label dim" }, `${(m.curves || []).length} curves · ${(m.timing || []).length} timings · ${(b.rules || []).length} rules`));
+  c.onclick = () => { BR.view = "kit"; BR.slug = b.slug; BR.tab = fresh ? "rules" : "overview"; brands.render(); $("#main").scrollTop = 0; };
+  return c;
+}
 function brandList() {
-  const wrap = h("div", { class: "stack" });
-  const grid = h("div", { class: "grid", style: "grid-template-columns:repeat(auto-fill,minmax(180px,1fr))" });
-  const act = activeSlug();
+  const wrap = h("div", { class: "stack" }), act = activeSlug();
   const shown = BRANDS.filter((x) => {
     const b = x.b, f = b.feel || {};
     if (S.q && !(b.name + " " + (f.tones || []).join(" ") + " " + (b.rules || []).map((r) => r.rule).join(" ")).toLowerCase().includes(S.q)) return false;
     if (S.tone && !(f.tones || []).includes(S.tone)) return false;
     return inRange(f.energy);
   });
-  grid.replaceChildren(...shown.map((x) => {
-    const b = x.b, m = b.motion || {};
-    const c = h("button", { class: "card" + (b.slug === act ? " sel" : ""), title: `Open ${b.name}` },
-      h("span", { class: "thumb" }, h("img", { src: asset(`library/brands${x.local ? ".local" : ""}/${b.slug}/thumb.png`), alt: "", loading: "lazy", onerror: (e) => e.target.replaceWith(h("span", { class: "initial" }, b.name.slice(0, 1))) })),
-      h("span", { class: "label" }, b.name, x.local ? h("em", { class: "badge" }, "local") : null, b.slug === act ? h("em", { class: "badge on" }, "active") : null),
-      h("span", { class: "label dim" }, `${(m.curves || []).length} curves · ${(m.timing || []).length} timings · ${(b.rules || []).length} rules`));
-    c.onclick = () => { BR.view = "kit"; BR.slug = b.slug; BR.tab = "overview"; brands.render(); $("#main").scrollTop = 0; };
-    return c;
-  }));
-  const bar = filtersBar(false, () => brands.render());
-  wrap.append(bar, h("div", { class: "crow" }, h("button", { class: "solid apply", onclick: () => { BR.view = "new"; brands.render(); } }, "+ New brand")),
-    BRANDS.length ? grid : h("div", { class: "note" }, "No brands yet. Create one for each client: its curves, timing and rules stay with it, in the repo."));
+  const mine = shown.filter((x) => x.where !== "template"), tpl = shown.filter((x) => x.where === "template");
+  const grid = (list) => h("div", { class: "grid", style: "grid-template-columns:repeat(auto-fill,minmax(180px,1fr))" }, ...list.map((x) => brandCard(x, act)));
+  wrap.append(...kids(filtersBar(false, () => brands.render()),
+    h("div", { class: "crow" },
+      h("button", { class: "solid apply", onclick: () => { BR.view = "new"; brands.render(); } }, "+ New brand"),
+      h("button", { class: "btn", title: "Load a brand someone shared with you (a .motiondna-brand.json file). If you already have it, its rules merge.", onclick: importBrand }, "Import brand file")),
+    h("div", { class: "subhead" }, "Your brands ", h("span", { class: "dim" }, "· on this computer")),
+    mine.length ? grid(mine) : h("div", { class: "note", style: "padding:0" }, "None yet. Create one per client: its curves, timing and rules stay with it, on your computer. Share it with Export."),
+    tpl.length ? h("div", { class: "subhead" }, "Templates ", h("span", { class: "dim" }, "· in the repo, a starting point")) : null,
+    tpl.length ? grid(tpl) : null));
   return wrap;
 }
 function newBrandForm() {
@@ -504,34 +540,107 @@ function newBrandForm() {
   const style = h("select", { class: "field" }, [h("option", { value: "" }, "Base style (optional)"), ...S.packs.map((pk) => h("option", { value: pk.name }, pk.name))]);
   const curve = h("select", { class: "field" }, [h("option", { value: "" }, "Main curve (optional)"), ...CV.easings.map((e) => h("option", { value: e.name }, e.name))]);
   const tones = h("input", { class: "field", placeholder: "Tones, comma separated (e.g. calm, modern)" });
+  const from = h("select", { class: "field", title: "Start from a template: its curves, timing and rules are copied" },
+    [h("option", { value: "" }, "Start empty"), ...BRANDS.map((x) => h("option", { value: x.b.slug }, "Start from " + x.b.name))]);
+  const whereTxt = h("span", { class: "dim" });
+  const drawWhere = () => { whereTxt.textContent = BR.where === "folder" ? (BR.folder ? BR.folder + "/<brand>" : "pick a folder…") : "library/brands.local (this computer, never in git)"; };
+  const whereSeg = h("div", { class: "seg" }, ...[["plugin", "Plugin folder"], ["folder", "Choose folder…"]].map(([k, l]) => h("button", { class: BR.where === k ? "on" : "",
+    onclick: async (e) => {
+      if (k === "folder") { const f = await call("mdna_pick_folder", "Where should this brand live?"); if (!f || String(f).startsWith("ERR")) return; BR.folder = f; }
+      BR.where = k; for (const b of whereSeg.children) b.classList.toggle("on", b === e.currentTarget); drawWhere();
+    } }, l)));
+  drawWhere();
   const create = async () => {
     const nm = name.value.trim(); if (!nm) return name.focus();
     const slug = slugify(nm); if (brandOf(slug)) return toast(`"${nm}" already exists.`, true);
-    const b = { name: nm, slug, created: today(), by: "panel", identity: { colors: {}, fonts: {} },
+    if (BR.where === "folder" && !BR.folder) return toast("Pick the folder first.", true);
+    const base = from.value ? JSON.parse(JSON.stringify(brandOf(from.value).b)) : null;
+    const b = { name: nm, slug, created: today(), by: whoAmI() || "panel", identity: { colors: {}, fonts: {} },
       feel: { energy: [2, 3], tones: tones.value.split(",").map((s) => s.trim()).filter(Boolean), style: style.value, curve: curve.value },
-      presets: { prefer: {}, avoid: [] }, motion: { curves: [], timing: [] }, rules: [], projects: [] };
-    const x = { local: false, b };
-    if (String(await saveBrand(x)).startsWith("OK")) { BRANDS.push(x); BR.view = "kit"; BR.slug = slug; BR.tab = "motion"; brands.render(); toast(`${nm} created in library/brands/${slug}.`); }
+      presets: { prefer: {}, avoid: [] }, motion: { curves: [], timing: [] }, rules: [], removed: [], projects: [] };
+    if (base) { b.motion = base.motion || b.motion; b.rules = (base.rules || []).map((r) => Object.assign({}, r)); b.presets = base.presets || b.presets;
+      b.feel = Object.assign({}, base.feel, { tones: b.feel.tones.length ? b.feel.tones : (base.feel || {}).tones, style: style.value || (base.feel || {}).style, curve: curve.value || (base.feel || {}).curve }); b.from = base.slug; }
+    const dir = BR.where === "folder" ? BR.folder + "/" + slug : S.root + "/library/brands.local/" + slug;
+    const x = { where: BR.where === "folder" ? "external" : "local", dir, b: ensureMotion(b) };
+    if (String(await saveBrand(x)).startsWith("OK")) {
+      if (typeof ensureClaudeFolder === "function") await ensureClaudeFolder(dir, "brand", nm, slug);
+      BRANDS.push(x); BR.view = "kit"; BR.slug = slug; BR.tab = "overview"; brands.render(); toast(`${nm} created in ${dir}.`);
+    }
   };
-  return h("div", { class: "stack" }, backBar("New brand"), h("div", { class: "saveform" }, name, style, curve, tones,
+  return h("div", { class: "stack" }, backBar("New brand"), h("div", { class: "saveform" }, name, from, style, curve, tones,
+    h("div", { class: "subhead", style: "margin:2px 0 0" }, "Where it lives"), whereSeg, whereTxt,
     h("div", { class: "row" }, h("button", { class: "solid apply", onclick: create }, "Create"), h("button", { class: "btn", onclick: () => { BR.view = "list"; brands.render(); } }, "Cancel"))),
-    h("div", { class: "note", style: "padding:0" }, "Saved in the repo (library/brands). It reaches the team when it is committed and pushed. The repo is public: use an anonymised name for clients under NDA."));
+    h("div", { class: "note", style: "padding:0" }, "Brands stay on your computer, never in the repo. To work on the same brand with someone, use Export and send them the file: when they import it, new and edited rules merge into theirs."));
 }
 function backBar(title, extra) {
-  return h("div", { class: "kit-top" }, h("button", { class: "icon back", title: "All brands", onclick: () => { BR.view = "list"; brands.render(); } }, "\u2039"), h("span", { class: "kit-title" }, title), extra || null);
+  return h("div", { class: "kit-top" }, h("button", { class: "icon back", title: "All brands", onclick: () => { BR.view = "list"; brands.render(); } }, "‹"), h("span", { class: "kit-title" }, title), ...[].concat(extra || []));
+}
+
+// export / import: one file per brand; importing an existing brand merges it (same rules as tools/brand.py merge)
+async function exportBrand(x) {
+  await ensureUids(x.b);
+  const out = Object.assign({}, x.b); delete out.inbox; delete out.claude; for (const k of Object.keys(out)) if (k.startsWith("_")) delete out[k];
+  out.exported = today(); out.exported_by = whoAmI();
+  const png = x.dir ? await call("mdna_b64_file", x.dir + "/thumb.png") : ""; if (png && !String(png).startsWith("ERR")) out.thumb_png = png;
+  const path = await call("mdna_pick_save", x.b.slug + ".motiondna-brand.json"); if (!path) return;
+  report(await call("mdna_write_file", { path: /\.json$/i.test(path) ? path : path + ".json", text: JSON.stringify(out, null, 1) + "\n" }));
+}
+async function mergeBrand(mine, theirs) {
+  await ensureUids(mine); await ensureUids(theirs);
+  const rules = new Map((mine.rules || []).map((r) => [r.uid, r])), removed = new Map((mine.removed || []).map((x) => [x.uid, x]));
+  for (const x of theirs.removed || []) if (!removed.has(x.uid) || (x.date || "") > (removed.get(x.uid).date || "")) removed.set(x.uid, x);
+  const n = { new: 0, updated: 0, removed: 0, curves: 0, timing: 0 }, inbox = [];
+  const stamp = (r) => r.updated || (r.source || {}).date || "";
+  for (const r0 of theirs.rules || []) {
+    const r = Object.assign({}, r0), u = r.uid;
+    if (removed.has(u) && (removed.get(u).date || "") >= stamp(r)) continue;
+    if (!rules.has(u)) { r.id = Math.max(0, ...[...rules.values()].map((x) => x.id || 0)) + 1; rules.set(u, r); inbox.push(u); n.new++; }
+    else if (stamp(r) > stamp(rules.get(u)) && (r.rule !== rules.get(u).rule || r.why !== rules.get(u).why)) { r.id = rules.get(u).id; rules.set(u, r); inbox.push(u); n.updated++; }
+  }
+  for (const [u, x] of removed) if (rules.has(u) && (x.date || "") >= stamp(rules.get(u))) { rules.delete(u); n.removed++; }
+  mine.rules = [...rules.values()].sort((a, b) => (a.id || 0) - (b.id || 0)); mine.removed = [...removed.values()];
+  ensureMotion(mine);
+  for (const [key, nm] of [["curves", "name"], ["timing", "element"]]) {
+    const have = new Set(mine.motion[key].map((c) => c[nm]));
+    for (const c of ((theirs.motion || {})[key] || [])) if (!have.has(c[nm])) { mine.motion[key].push(c); n[key]++; }
+  }
+  mine.inbox = [...new Set((mine.inbox || []).concat(inbox))];
+  (mine.shared = mine.shared || []).push({ date: today(), by: whoAmI(), from: theirs.exported_by || "" });
+  return n;
+}
+async function importBrand() {
+  const path = await call("mdna_pick_open", "Import a Motion DNA brand"); if (!path) return;
+  let theirs; try { theirs = JSON.parse(await call("mdna_read_file", path)); } catch (e) { return toast("That file is not a Motion DNA brand.", true); }
+  if (!theirs || !theirs.slug || !theirs.name) return toast("That file is not a Motion DNA brand.", true);
+  const png = theirs.thumb_png; delete theirs.thumb_png;
+  let x = brandOf(theirs.slug), n;
+  if (x) n = await mergeBrand(ensureMotion(x.b), theirs);
+  else {
+    delete theirs.exported; delete theirs.claude; const from = theirs.exported_by; delete theirs.exported_by; await ensureUids(theirs);
+    theirs.inbox = (theirs.rules || []).map((r) => r.uid); (theirs.shared = theirs.shared || []).push({ date: today(), by: whoAmI(), from: from || "" });
+    x = { where: "local", dir: S.root + "/library/brands.local/" + theirs.slug, b: ensureMotion(theirs) }; BRANDS.push(x);
+    n = { new: theirs.rules.length, updated: 0, removed: 0, curves: 0, timing: 0 };
+  }
+  if (!String(await saveBrand(x)).startsWith("OK")) return;
+  if (png) await call("mdna_b64_write", { path: x.dir + "/thumb.png", b64: png });
+  if (typeof ensureClaudeFolder === "function") await ensureClaudeFolder(x.dir, "brand", x.b.name, x.b.slug);
+  BR.view = "kit"; BR.slug = x.b.slug; BR.tab = "rules"; brands.render();
+  toast(`${x.b.name}: ${n.new} new rules, ${n.updated} edited, ${n.removed} removed` + (n.curves + n.timing ? `, ${n.curves} curves, ${n.timing} timings` : "") + ".");
 }
 
 function brandKit(x) {
   const b = x.b, isActive = activeSlug() === b.slug;
   const colors = Object.values((b.identity || {}).colors || {});
   const activeBtn = h("button", { class: "btn" + (isActive ? " on" : ""), title: "Make this the brand of the current After Effects project",
-    onclick: () => { setActive(isActive ? null : b.slug); brands.render(); } }, isActive ? "\u2713 Active" : "Activate");
-  const top = backBar(b.name, activeBtn);
-  const strip = h("div", { class: "swatches" }, ...colors.map((c) => h("i", { style: `background:${c}`, title: c })), x.local ? h("em", { class: "badge" }, "local") : null);
-  const tabsEl = h("div", { class: "seg" }, ...["overview", "motion", "rules", "projects"].map((k) =>
-    h("button", { class: BR.tab === k ? "on" : "", onclick: () => { BR.tab = k; brands.render(); } }, k[0].toUpperCase() + k.slice(1))));
-  const body = BR.tab === "motion" ? kitMotion(x) : BR.tab === "rules" ? kitRules(x) : BR.tab === "projects" ? kitProjects(x) : kitOverview(x);
-  return h("div", { class: "stack" }, top, strip, tabsEl, body);
+    onclick: () => { setActive(isActive ? null : b.slug); brands.render(); } }, isActive ? "✓ Active" : "Activate");
+  const top = backBar(b.name, [activeBtn]);
+  const strip = h("div", { class: "swatches" }, ...colors.map((c) => h("i", { style: `background:${c}`, title: c })),
+    h("em", { class: "badge", title: x.dir || "" }, WHERE[x.where] || x.where));
+  const fresh = (b.inbox || []).length;
+  const tabsEl = h("div", { class: "seg" }, ...["overview", "motion", "rules", "claude"].map((k) =>
+    h("button", { class: BR.tab === k ? "on" : "", onclick: () => { BR.tab = k; brands.render(); } }, k[0].toUpperCase() + k.slice(1) + (k === "rules" && fresh ? ` · ${fresh} new` : ""))));
+  const body = BR.tab === "motion" ? kitMotion(x) : BR.tab === "rules" ? kitRules(x) : BR.tab === "claude" ? kitClaude(x) : kitOverview(x);
+  return h("div", { class: "stack" }, top, strip, x.where === "template" ? h("div", { class: "note", style: "padding:0" }, "A template from the repo: edits reach the team only when someone commits them. For a client, create a new brand and start from this one.") : null, tabsEl, body);
 }
 
 function kitOverview(x) {
@@ -541,9 +650,10 @@ function kitOverview(x) {
   const curve = h("select", { class: "field", onchange: async (e) => { f.curve = e.target.value; b.feel = f; await saveBrand(x); } },
     [h("option", { value: "" }, "—"), ...CV.easings.map((e) => h("option", { value: e.name, selected: e.name === f.curve }, e.name))]);
   let whole = true;
-  const apply = async () => report(await call("mdna_apply_brand", { slug: b.slug, phase: S.phase, whole, tune: tuning(), markers: CTL.markers }));
+  const apply = async () => report(await call("mdna_apply_brand", { slug: b.slug, phase: S.phase, whole, tune: tuning(), markers: CTL.markers, existing: CTL.existing }));
   const prefer = Object.entries(pr.prefer || {}).map(([role, list]) => h("div", { class: "kv" }, h("span", {}, role), h("span", {}, list.join(", "))));
-  return h("div", { class: "stack" },
+  return h("div", { class: "stack" }, ...kids(whereCard(x), shareCard(x),
+    h("div", { class: "subhead" }, "Feel"),
     h("div", { class: "card-box" },
       h("div", { class: "ctl wide" }, h("label", {}, "Style"), style),
       h("div", { class: "ctl wide" }, h("label", {}, "Curve"), curve),
@@ -555,7 +665,43 @@ function kitOverview(x) {
     h("label", {}, h("input", { type: "checkbox", checked: true, onchange: (e) => (whole = e.target.checked) }), " Whole comp (otherwise only the selected layers)"),
     prefer.length || (pr.avoid || []).length ? h("div", { class: "subhead" }, "Presets") : null,
     prefer.length ? h("div", { class: "card-box" }, ...prefer) : null,
-    (pr.avoid || []).length ? h("div", { class: "card-box avoid" }, h("div", { class: "kv" }, h("span", {}, "Avoid"), h("span", {}, pr.avoid.join(", ")))) : null);
+    (pr.avoid || []).length ? h("div", { class: "card-box avoid" }, h("div", { class: "kv" }, h("span", {}, "Avoid"), h("span", {}, pr.avoid.join(", ")))) : null));
+}
+// where the brand's files are, in plain words
+function whereCard(x) {
+  const tpl = x.where === "template";
+  const row = (f, what) => h("div", { class: "kv" }, h("span", {}, f), h("span", {}, what));
+  return h("div", { class: "card-box" },
+    h("div", { class: "kit-top" }, h("b", { class: "kit-title", style: "font-size:13px" }, "Where it lives"),
+      x.dir ? h("button", { class: "btn", onclick: () => call("mdna_open", x.dir) }, "Open folder") : null),
+    h("span", { class: "dim", style: "word-break:break-all" }, x.dir || "(browser preview)"),
+    row("brand.json", "rules, curves, timing, style"), row("thumb.png", "its card in the panel"),
+    tpl ? null : row("CLAUDE.md", "what Claude reads when it works in this folder"),
+    tpl ? null : row("projects/", "one folder per video, each with its conversation"),
+    h("span", { class: "dim" }, tpl ? "A template in the Motion DNA repo." : "On this computer only: never in the repo."));
+}
+// sharing: one file out, one file in
+function shareCard(x) {
+  return h("div", { class: "card-box" },
+    h("b", {}, "Share this brand"),
+    h("span", {}, `Download one file (${x.b.slug}.motiondna-brand.json) and send it. The other person opens Brands › Import brand file: they get the rules, curves and timing; if they already have the brand, new and edited rules merge into theirs.`),
+    h("div", { class: "crow" },
+      h("button", { class: "solid apply", onclick: () => exportBrand(x) }, "Download to share"),
+      h("button", { class: "btn", onclick: importBrand }, "Import an update")),
+    h("span", { class: "dim" }, "Conversations stay on each computer; the brand file carries what was learned."));
+}
+// the brand's own conversation (its workspace): controllable from the Claude app
+function kitClaude(x) {
+  if (x.where === "template") return h("div", { class: "note", style: "padding:0" }, "Templates have no conversation of their own. Create a brand from it (New brand › Start from…) to work on a client.");
+  if (activeSlug() !== x.b.slug) return h("div", { class: "stack" },
+    h("span", {}, `Activate ${x.b.name} to work with Claude in its folder: everything about this brand goes into one conversation, which you can also open in the Claude app.`),
+    h("button", { class: "solid apply", onclick: () => { setActive(x.b.slug); brands.render(); } }, `Activate ${x.b.name}`));
+  if (typeof ensureClaudeFolder === "function") ensureClaudeFolder(x.dir, "brand", x.b.name, x.b.slug);
+  return h("div", { class: "stack" },
+    h("div", { class: "note", style: "padding:0" }, "Everything about this brand in one conversation: here (Agent) or in the Claude app. Each video of the brand gets its own (Agent › Project)."),
+    typeof conversationCard === "function" ? conversationCard() : null,
+    h("button", { class: "btn", onclick: () => { S.sec = "agent"; store.set("section", "agent"); AG.tab = "chat"; store.set("agentTab", "chat"); showSection(); agent.render(); } }, "Go to the chat"),
+    h("div", { class: "subhead" }, "Videos of this brand"), kitProjects(x));
 }
 
 function kitMotion(x) {
@@ -639,24 +785,53 @@ function curveNameIn(bz, b) {
   const tk = CV.easings.find(near); return tk ? tk.name : "";
 }
 
-function kitRules(x) {
-  const b = x.b, CATS_R = ["layout", "typography", "motion", "effects", "color", "audio", "edit", "process"];
-  let cat = "";
-  const list = h("div", { class: "rules" });
-  const draw = () => list.replaceChildren(...(b.rules || []).filter((r) => (!cat || r.category === cat) && (!S.q || (r.rule + " " + (r.why || "")).toLowerCase().includes(S.q)))
-    .map((r) => h("div", { class: "rule" }, h("span", { class: "tag" }, r.category), " ", r.rule, r.why ? h("div", { class: "why" }, r.why) : null)));
-  const filt = h("select", { class: "field", onchange: (e) => { cat = e.target.value; draw(); } }, [h("option", { value: "" }, "All categories"), ...CATS_R.map((c) => h("option", { value: c }, c))]);
-  const rc = h("select", { class: "field" }, CATS_R.map((c) => h("option", { value: c, selected: c === "motion" }, c)));
-  const rule = h("input", { class: "field", placeholder: "The rule: one instruction anyone can follow" }), why = h("input", { class: "field", placeholder: "Why (what went wrong, who asked)" });
-  const form = h("div", { class: "saveform", hidden: true }, rc, rule, why, h("div", { class: "row" },
-    h("button", { class: "solid apply", onclick: async () => {
-      if (!rule.value.trim()) return rule.focus();
-      b.rules = b.rules || [];
-      b.rules.push({ id: (b.rules.reduce((m, r) => Math.max(m, r.id || 0), 0) + 1), category: rc.value, rule: rule.value.trim(), why: why.value.trim(), source: { project: BR.project.split(/[\\/]/).pop() || "", date: today(), by: "panel" } });
-      await saveBrand(x); brands.render();
-    } }, "Save rule"), h("button", { class: "btn", onclick: () => (form.hidden = true) }, "Cancel")));
+const RULE_CATS = ["layout", "typography", "motion", "effects", "color", "audio", "edit", "process"];
+// a rule form: new (r = null) or editing r. onSave(rule fields) saves; the same form serves brands and projects
+function ruleForm(r, onSave, onCancel) {
+  const rc = h("select", { class: "field" }, RULE_CATS.map((c) => h("option", { value: c, selected: c === ((r && r.category) || "motion") }, c)));
+  const rule = h("textarea", { class: "field agent-input", rows: 2, placeholder: "The rule: one instruction anyone can follow" }); rule.value = r ? r.rule : "";
+  const why = h("input", { class: "field", placeholder: "Why (what went wrong, who asked)", value: r ? r.why || "" : "" });
+  return h("div", { class: "saveform" }, rc, rule, why, h("div", { class: "row" },
+    h("button", { class: "solid apply", onclick: () => { if (!rule.value.trim()) return rule.focus(); onSave({ category: rc.value, rule: rule.value.trim(), why: why.value.trim() }); } }, r ? "Save changes" : "Save rule"),
+    h("button", { class: "btn", onclick: onCancel }, "Cancel")));
+}
+// the rules list: filter by category, add, edit, remove (a removal is kept, so it travels when the brand is shared)
+function rulesEditor(owner, save, opts = {}) {
+  const b = owner; b.rules = b.rules || []; b.removed = b.removed || [];
+  let cat = "", editing = null, adding = false;
+  const wrap = h("div", { class: "stack" });
+  const draw = () => {
+    const inbox = new Set(b.inbox || []);
+    const list = b.rules.filter((r) => (!cat || r.category === cat) && (!S.q || (r.rule + " " + (r.why || "")).toLowerCase().includes(S.q)));
+    const filt = h("select", { class: "field", onchange: (e) => { cat = e.target.value; draw(); } }, [h("option", { value: "" }, `All categories · ${b.rules.length}`), ...RULE_CATS.map((c) => h("option", { value: c, selected: c === cat }, c))]);
+    const rows = list.map((r) => editing === r ? ruleForm(r, async (f) => {
+      Object.assign(r, f, { updated: today() }); r.source = Object.assign({}, r.source, { edited_by: whoAmI() || "panel" }); editing = null; await save(); draw();
+    }, () => { editing = null; draw(); }) : h("div", { class: "rule" + (inbox.has(r.uid) ? " fresh" : "") },
+      h("div", { class: "rule-top" }, h("span", { class: "tag" }, r.category), inbox.has(r.uid) ? h("em", { class: "badge new" }, "new") : null, h("span", { class: "grow" }),
+        h("button", { class: "btn ghost small", title: "Edit this rule", onclick: () => { editing = r; adding = false; draw(); } }, "Edit"),
+        h("button", { class: "btn ghost small", title: "Remove this rule", onclick: async () => {
+          if (!confirm(`Remove this rule?\n\n${r.rule}`)) return;
+          b.rules.splice(b.rules.indexOf(r), 1);
+          if (r.uid) b.removed.push({ uid: r.uid, rule: r.rule, date: today(), by: whoAmI() || "panel" });
+          await save(); draw();
+        } }, "✕")),
+      h("div", { class: "rule-text" }, r.rule), r.why ? h("div", { class: "why" }, r.why) : null,
+      h("div", { class: "why" }, [r.source && r.source.project, r.source && r.source.date, r.source && r.source.by].filter(Boolean).join(" · "))));
+    const form = adding ? ruleForm(null, async (f) => {
+      b.rules.push(Object.assign({ id: b.rules.reduce((m, r) => Math.max(m, r.id || 0), 0) + 1, uid: newUid() }, f,
+        { updated: today(), source: { project: opts.project ? opts.project() : "", date: today(), by: whoAmI() || "panel" } }));
+      adding = false; await save(); draw();
+    }, () => { adding = false; draw(); }) : null;
+    wrap.replaceChildren(...kids(h("div", { class: "crow" }, filt, h("button", { class: "btn", onclick: () => { adding = !adding; editing = null; draw(); } }, "+ Add rule")), form,
+      inbox.size ? h("div", { class: "crow" }, h("span", { class: "dim" }, `${inbox.size} rule${inbox.size > 1 ? "s" : ""} came in from a shared copy.`),
+        h("button", { class: "btn", style: "flex:none", onclick: async () => { b.inbox = []; await save(); draw(); } }, "Mark as read")) : null,
+      list.length ? h("div", { class: "rules" }, ...rows) : h("div", { class: "note", style: "padding:0" }, opts.empty || "No rules yet. Review notes become rules: from the Agent, or + Add rule.")));
+  };
   draw();
-  return h("div", { class: "stack" }, h("div", { class: "crow" }, filt, h("button", { class: "btn", onclick: () => { form.hidden = !form.hidden; rule.focus(); } }, "+ Add rule")), form, list);
+  return wrap;
+}
+function kitRules(x) {
+  return rulesEditor(x.b, () => saveBrand(x), { project: () => (BR.project.split(/[\\/]/).pop() || "").replace(/\.aep$/i, "") });
 }
 function kitProjects(x) {
   const b = x.b; b.projects = b.projects || [];
@@ -668,35 +843,6 @@ function kitProjects(x) {
   };
   return h("div", { class: "stack" }, h("button", { class: "btn", onclick: add }, "+ Add this project"),
     ...b.projects.map((p) => h("div", { class: "row-item" }, h("div", { class: "row-text" }, h("b", {}, p.name), h("span", {}, `${p.date || ""} · ${p.path || ""}`)))));
-}
-
-// ---------- 5. Techniques ----------
-function techniques() {
-  const sec = $("#sec-techniques"); sec.replaceChildren();
-  const grid = h("div", { class: "grid", style: "grid-template-columns:repeat(auto-fill,minmax(180px,1fr))" });
-  const TT = {}; for (const t of S.tags.techniques || []) TT[t.name] = t;
-  const refresh = () => {
-    grid.replaceChildren(...S.techniques.filter((t) => {
-      const tg = TT[t.name] || { energy: [1, 5], tones: [] };
-      if (S.q && !(t.name + " " + t.what + " " + tg.tones.join(" ")).toLowerCase().includes(S.q)) return false;
-      if (S.tone && tg.tones.length && !tg.tones.includes(S.tone)) return false;
-      return inRange(tg.energy);
-    }).map((t) => {
-      const s = slug(t.name), it = { name: t.name, title: "Technique: " + t.name, use: t.what + "\nHow: " + t.how + "\nWith Claude: “" + t.ask + "”",
-        favKey: "technique/" + t.name, img: asset(`library/techniques/${s}_md.png`) };
-      const c = h("button", { class: "card", title: t.what }, h("span", { class: "thumb" }, h("img", { src: asset(`library/techniques/${s}_md.png`), alt: "", loading: "lazy" })), h("span", { class: "label" }, t.name));
-      c.onclick = () => {
-        S.sel = it; for (const x of grid.children) x.classList.remove("sel"); c.classList.add("sel");
-        detail.replaceChildren(h("div", { class: "rules-head" }, t.name), h("p", {}, t.what), h("p", {}, h("b", {}, "How: "), t.how),
-          h("p", {}, h("b", {}, "With Claude: "), "“" + t.ask + "”"));
-        detail.hidden = false;
-      };
-      return c;
-    }));
-  };
-  const detail = h("div", { class: "detail", hidden: true });
-  sec.append(filtersBar(false, refresh), detail, grid);
-  refresh();
 }
 
 // F5 / Ctrl+R reloads the panel (after an update)
