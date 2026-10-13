@@ -1033,6 +1033,9 @@ var SSP = (function () {
         // Removes what Motion DNA added to a layer: keyframes and our expressions on its animated properties (the value
         // at the rest time stays), the SS in / SS out markers, our text animators and SS-named effects.
         remove: function (L) {
+            // removing a text animator or an effect deselects every layer in AE: keep the user's selection
+            var keepSel = [], cs = L.containingComp.selectedLayers, s0;
+            for (s0 = 0; s0 < cs.length; s0++) keepSel.push(cs[s0]);
             var rest = L.inPoint + (L.outPoint - L.inPoint) / 2, M = L.property("ADBE Marker"), i;
             for (i = M.numKeys; i >= 1; i--) { var cm = M.keyValue(i).comment; if (cm === "SS in" || cm === "SS out") { if (cm === "SS in") rest = Math.max(rest, M.keyTime(i)); M.removeKey(i); } }
             var ours = /SS (preset|FX|recipe|text)|Motion DNA/.test(L.comment || ""), n = 0;
@@ -1057,7 +1060,102 @@ var SSP = (function () {
             if (fx) for (i = fx.numProperties; i >= 1; i--) if (/^SS /.test(fx.property(i).name)) { fx.property(i).remove(); n++; }
             if (ours && /Speed Ramp/.test(L.comment || "") && L.canSetTimeRemapEnabled && L.timeRemapEnabled) { L.timeRemapEnabled = false; n++; }   // our time remap
             if (ours) L.comment = "";
+            for (s0 = 0; s0 < keepSel.length; s0++) { try { keepSel[s0].selected = true; } catch (eS) {} }
             return n;
+        },
+        // ---- existing animation: modify it, or generate it when there is none (panel, MCP and Agent all use these) ----
+        // The keyframed properties of a layer (two keys or more), skipping markers and time remap.
+        animatedProps: function (L) {
+            var out = [];
+            (function walk(g) {
+                for (var j = 1; j <= g.numProperties; j++) {
+                    var p = g.property(j);
+                    if (!p) continue;
+                    if (p.propertyType === PropertyType.PROPERTY) {
+                        if (p.numKeys >= 2 && p.matchName !== "ADBE Marker" && p.matchName !== "ADBE Time Remapping") out.push(p);
+                    } else if (p.numProperties) walk(p);
+                }
+            })(L);
+            return out;
+        },
+        // {props, ours}: how many properties move, and whether that animation was made by Motion DNA
+        animationOf: function (L) {
+            var n = this.animatedProps(L).length;
+            return { props: n, ours: n > 0 && /SS (preset|FX|recipe|text)|Motion DNA/.test(L.comment || "") };
+        },
+        // Re-eases one segment with a cubic-bezier [x1, y1, x2, y2] (same conversion as the panel's curve editor)
+        easeBezier: function (p, k, bz) {
+            if (p.keyOutInterpolationType(k) === KeyframeInterpolationType.HOLD) return;
+            if (bz[0] === 0 && bz[1] === 0 && bz[2] === 1 && bz[3] === 1) {
+                p.setInterpolationTypeAtKey(k, p.keyInInterpolationType(k), KeyframeInterpolationType.LINEAR);
+                p.setInterpolationTypeAtKey(k + 1, KeyframeInterpolationType.LINEAR, p.keyOutInterpolationType(k + 1));
+                return;
+            }
+            var v0 = p.keyValue(k), v1 = p.keyValue(k + 1), dur = Math.max(p.keyTime(k + 1) - p.keyTime(k), 0.001), n = p.keyOutTemporalEase(k).length, avg = [], i, d = 0;
+            if (!(v0 instanceof Array)) avg = [Math.abs(v1 - v0) / dur];
+            else if (n === 1) { for (i = 0; i < v0.length; i++) d += Math.pow(v1[i] - v0[i], 2); avg = [Math.sqrt(d) / dur]; }
+            else for (i = 0; i < n; i++) avg.push(Math.abs(v1[i] - v0[i]) / dur);
+            var x1 = Math.max(bz[0], 0.001), x2 = Math.min(bz[2], 0.999), o = [], m = [];
+            var oI = Math.max(0.1, Math.min(100, x1 * 100)), iI = Math.max(0.1, Math.min(100, (1 - x2) * 100));
+            for (i = 0; i < avg.length; i++) { o.push(new KeyframeEase(Math.max(0, bz[1] / x1 * avg[i]), oI)); m.push(new KeyframeEase(Math.max(0, (1 - bz[3]) / (1 - x2) * avg[i]), iI)); }
+            p.setInterpolationTypeAtKey(k, p.keyInInterpolationType(k), KeyframeInterpolationType.BEZIER);
+            p.setInterpolationTypeAtKey(k + 1, KeyframeInterpolationType.BEZIER, p.keyOutInterpolationType(k + 1));
+            p.setTemporalEaseAtKey(k, p.keyInTemporalEase(k), o);
+            p.setTemporalEaseAtKey(k + 1, m, p.keyOutTemporalEase(k + 1));
+        },
+        // Modifies a layer's existing animation, keeping its keyframe values: o.factor scales its timing around its
+        // first key (1 = keep), o.frames sets the duration of its first move instead, and every segment is re-eased with
+        // o.bz (cubic-bezier) or o.ease (token curve). Hold keys stay holds. Returns the number of segments re-eased.
+        restyle: function (L, o) {
+            var ps = this.animatedProps(L), t0 = 1e9, first = null, i, k;
+            if (!ps.length) return 0;
+            for (i = 0; i < ps.length; i++) if (ps[i].keyTime(1) < t0) { t0 = ps[i].keyTime(1); first = ps[i]; }
+            var f = o.factor || 1;
+            if (o.frames) f = o.frames * L.containingComp.frameDuration / Math.max(first.keyTime(2) - first.keyTime(1), 0.001);
+            var n = 0;
+            for (i = 0; i < ps.length; i++) {
+                var p = ps[i];
+                if (Math.abs(f - 1) > 0.001) {
+                    var keys = [], spatial = p.isSpatial;
+                    for (k = 1; k <= p.numKeys; k++) keys.push({ t: p.keyTime(k), v: p.keyValue(k), ii: p.keyInInterpolationType(k), oi: p.keyOutInterpolationType(k),
+                        it: spatial ? p.keyInSpatialTangent(k) : null, ot: spatial ? p.keyOutSpatialTangent(k) : null });
+                    for (k = p.numKeys; k >= 1; k--) p.removeKey(k);
+                    for (k = 0; k < keys.length; k++) {
+                        var idx = p.addKey(t0 + (keys[k].t - t0) * f);
+                        p.setValueAtKey(idx, keys[k].v);
+                        if (spatial) { try { p.setSpatialTangentsAtKey(idx, keys[k].it, keys[k].ot); } catch (e1) {} }
+                        p.setInterpolationTypeAtKey(idx, keys[k].ii, keys[k].oi);
+                    }
+                }
+                for (k = 1; k < p.numKeys; k++) {
+                    if (p.keyOutInterpolationType(k) === KeyframeInterpolationType.HOLD) continue;
+                    if (o.bz) this.easeBezier(p, k, o.bz); else SSM.easeSegment(p, k, o.ease || "Coast");
+                    n++;
+                }
+            }
+            return n;
+        },
+        // The curve a preset gives an existing animation: the Easing control if one is chosen, else one by its energy
+        easeFor: function (name) {
+            if (SSP_STATE.tune && SSP_STATE.tune.ease) return SSP_STATE.tune.ease;
+            var pr = P[name] || TX[name] || FX[name], e = pr ? pr.energy : "";
+            if (e === "dynamic") return "Surge";
+            if (e === "medium") return "Land";
+            return "Coast";
+        },
+        // existing: "modify" (default) keeps an animation the layer already has and gives it the preset's feel (curve,
+        // and the Duration control as a timing factor); "replace" removes it first. Motion DNA's own earlier animation
+        // is always replaced. A layer with no animation gets the preset generated. Returns modified|replaced|generated.
+        smartApply: function (L, name, existing, generate) {
+            var a = this.animationOf(L);
+            if (a.props && !a.ours && existing !== "replace") {
+                this.restyle(L, { factor: SSM.speed || 1, ease: this.easeFor(name) });
+                L.comment = (L.comment ? L.comment + " | " : "") + "re-eased like " + name;   // not "Motion DNA": the next apply must still see it as the layer's own
+                return "modified";
+            }
+            if (a.props) this.remove(L);
+            generate();
+            return a.props ? "replaced" : "generated";
         },
         // marker-driven timing on/off (off by default so scripted builds stay plain keyframes)
         markerTiming: function (on) { if (on !== undefined) SSP_STATE.markerTiming = !!on; return SSP_STATE.markerTiming; },
@@ -1073,7 +1171,8 @@ var SSP = (function () {
         },
         // Applies a pack (library/packs.json) to the given layers (default: every layer of the comp): each layer gets
         // the preset of its role (title, subtitle, body, shape, media, logo), staggered in stacking order.
-        applyPack: function (comp, packName, layers, phase) {
+        // existing ("modify" | "replace", optional): what to do with layers that already move (see smartApply)
+        applyPack: function (comp, packName, layers, phase, existing) {
             var pk = null;
             for (var i = 0; i < PACKS.packs.length; i++) if (PACKS.packs[i].name === packName) pk = PACKS.packs[i];
             if (!pk) throw new Error("Pack not found: " + packName);
@@ -1093,6 +1192,14 @@ var SSP = (function () {
                     var r = pk.roles[role];
                     if (!r) continue;
                     var t0 = L.inPoint + (pk.delay || 0) + n * st;
+                    var had = existing ? this.animationOf(L) : { props: 0, ours: false };
+                    if (had.props && !had.ours && existing !== "replace") {   // keep the layer's own animation, give it the style's feel
+                        var ce = SSP_STATE.tune.ease || "Coast";
+                        this.restyle(L, { factor: SSM.speed || 1, ease: ce });
+                        applied.push(L.name + " → " + role + ": kept its animation, re-eased on " + ce);
+                        n++; continue;
+                    }
+                    if (had.props) this.remove(L);
                     if (r.text && L instanceof TextLayer) this.applyText(L, r.text, phase || pk.phase || "both", t0);
                     else if (r.motion) this.apply(L, r.motion, phase || pk.phase || "both", t0);
                     if (r.fx) this.applyFx(L, r.fx);

@@ -154,7 +154,7 @@ def t_list_brands():
     if not bs:
         return "No brand profiles yet. Create one with add_brand_note after `python tools/brand.py new <slug> --name ...`."
     return "\n".join(f"{b['slug']}: {b['name']} · style {b['feel']['style']} · curve {b['feel'].get('curve') or '-'} · tones "
-                     f"{'/'.join(b['feel']['tones'])} · energy {b['feel']['energy']} · {len(b['rules'])} rules" for b in bs)
+                     f"{'/'.join(b['feel']['tones'])} · energy {b['feel']['energy']} · {len(b['rules'])} rules · {b['_where']}" for b in bs)
 
 
 def t_get_brand(slug):
@@ -163,17 +163,17 @@ def t_get_brand(slug):
 
 def t_add_brand_note(slug, rule, category="layout", why="", project="", by=""):
     r = _brand.note(slug, rule, category, why, project, by)
-    return f"saved rule {r['id']} ({r['category']}) in library/brands/{slug}/brand.json: {r['rule']}"
+    return f"saved rule {r['id']} ({r['category']}) in {_brand.path(slug).as_posix()}: {r['rule']}"
 
 
-def t_apply_brand(slug, comp=None, layers=None, phase="both", marker_timing=True, duration=1.0, intensity=1.0):
+def t_apply_brand(slug, comp=None, layers=None, phase="both", marker_timing=True, duration=1.0, intensity=1.0, existing="modify"):
     b = _brand.load(slug)
     f = b["feel"]
     return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), names = {js(layers or [])}, ls = null;
 if (names.length) ls = findLayers(c, names);
 SSP.markerTiming({str(bool(marker_timing)).lower()}); {tune_js(duration, intensity, ease=f.get("curve"))}
 app.beginUndoGroup("Motion DNA brand (MCP): {b['name']}");
-var r; try {{ r = SSP.applyPack(c, {js(f['style'])}, ls, {js(phase)}); }} finally {{ SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); }}
+var r; try {{ r = SSP.applyPack(c, {js(f['style'])}, ls, {js(phase)}, {js(existing)}); }} finally {{ SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); }}
 return "{b['name']}: style " + {js(f['style'])} + " with curve " + {js(f.get('curve') or 'of the style')} + "\\n" + (r.length ? r.join("\\n") : "No layers matched");""") + \
         "\nFollow the brand's rules for everything else (get_brand)."
 
@@ -287,14 +287,17 @@ def tune_js(duration=1.0, intensity=1.0, direction="as designed", ease=None):
 
 
 def t_apply_preset(preset, layers=None, comp=None, phase="both", stagger_frames=4, marker_timing=True,
-                   duration=1.0, intensity=1.0, direction="as designed", ease=None):
+                   duration=1.0, intensity=1.0, direction="as designed", ease=None, existing="modify"):
     kind = kind_of(preset)
     call = {"text": f"SSP.applyText(L, {js(preset)}, {js(phase)}, t0)", "fx": f"SSP.applyFx(L, {js(preset)})",
             "recipe": f"SSP.applyRecipe(L, {js(preset)}, {js(phase)})"}.get(kind, f"SSP.apply(L, {js(preset)}, {js(phase)}, t0)")
     return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), ls = findLayers(c, {js(layers or [])}), st = {float(stagger_frames)} * c.frameDuration, done = [];
 SSP.markerTiming({str(bool(marker_timing)).lower()}); {tune_js(duration, intensity, direction, ease)}
 app.beginUndoGroup("Motion DNA (MCP): {preset}");
-try {{ for (var i = 0; i < ls.length; i++) {{ var L = ls[i], t0 = ({js(phase)} === "out" ? L.outPoint - SSM.seconds("Arrive") : L.inPoint) + i * st; {call}; done.push(L.name); }} }}
+try {{ for (var i = 0; i < ls.length; i++) {{ var L = ls[i], t0 = ({js(phase)} === "out" ? L.outPoint - SSM.seconds("Arrive") : L.inPoint) + i * st;
+  if ({js(kind)} === "fx") {{ {call}; done.push(L.name); continue; }}
+  var how = SSP.smartApply(L, {js(preset)}, {js(existing)}, (function (L, t0) {{ return function () {{ {call}; }}; }})(L, t0));
+  done.push(L.name + (how === "generated" ? "" : " (" + how + ")")); }} }}
 finally {{ SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); }}
 return "{preset} ({kind}, {phase}) → " + done.join(", ");""")
 
@@ -306,12 +309,12 @@ try {{ for (var i = 0; i < ls.length; i++) {{ n += SSP.remove(ls[i]); done.push(
 return "cleared " + n + " properties on " + done.join(", ");""")
 
 
-def t_apply_pack(pack, comp=None, layers=None, phase="both", marker_timing=True, duration=1.0, intensity=1.0):
+def t_apply_pack(pack, comp=None, layers=None, phase="both", marker_timing=True, duration=1.0, intensity=1.0, existing="modify"):
     return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), names = {js(layers or [])}, ls = null;
 if (names.length) ls = findLayers(c, names);
 SSP.markerTiming({str(bool(marker_timing)).lower()}); {tune_js(duration, intensity)}
 app.beginUndoGroup("Motion DNA style (MCP): {pack}");
-var r; try {{ r = SSP.applyPack(c, {js(pack)}, ls, {js(phase)}); }} finally {{ SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); }}
+var r; try {{ r = SSP.applyPack(c, {js(pack)}, ls, {js(phase)}, {js(existing)}); }} finally {{ SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); }}
 return r.length ? r.join("\\n") : "No layers matched";""")
 
 
@@ -326,7 +329,7 @@ def t_show_in_panel(kind, name):
 
 
 def t_render_frame(time_s=None, comp=None):
-    out = (ROOT / "research" / "mcp" / f"frame_{int(time.time())}.png")
+    out = (ROOT / "research" / "mcp" / f"frame_{int(time.time() * 1000)}.png")
     out.parent.mkdir(parents=True, exist_ok=True)
     t = "c.time" if time_s is None else str(float(time_s))
     run_jsx(COMP_JS + f"""var c = findComp({js(comp)}); c.saveFrameToPng({t}, new File({js(out.as_posix())})); return "ok";""", includes=())
@@ -378,15 +381,15 @@ TOOLS_DEF = [
     ("list_assets", t_list_assets, "List locally installed SFX and overlays (licensed, never in the repo) with category, seconds, loudness and flags.",
      {"type": {"type": "string", "description": "sfx | overlay"}, "category": {"type": "string"}, "query": {"type": "string"}, "limit": {"type": "integer"}}),
     ("list_layers", t_list_layers, "List the layers of a comp (default: the active comp) with type, timing and selection.", {"comp": {"type": "string"}}),
-    ("apply_preset", t_apply_preset, "Apply a preset to layers (by name, or the selected layers) of a comp (default: active). phase in|out|both. With marker_timing the layer gets 'SS in'/'SS out' markers: dragging them retimes the animation. Tuning (same as the panel's Controls): duration multiplier (0.5-2), intensity (0.25-2, scales the travel), direction (as designed | mirror horizontal | mirror vertical | mirror both), ease (token: Land, Settle, Launch, Cruise, Surge, Ramp, Whip, Flat).",
+    ("apply_preset", t_apply_preset, "Apply a preset to layers (by name, or the selected layers) of a comp (default: active). A layer that already moves keeps its animation (existing=modify, default: its keyframe values stay, it gets the preset's curve and the duration factor) or loses it (existing=replace); a layer with no animation gets the preset generated. phase in|out|both. With marker_timing the layer gets 'SS in'/'SS out' markers: dragging them retimes the animation. Tuning (same as the panel's Controls): duration multiplier (0.5-2), intensity (0.25-2, scales the travel), direction (as designed | mirror horizontal | mirror vertical | mirror both), ease (token: Land, Settle, Launch, Cruise, Surge, Ramp, Whip, Flat).",
      {"preset": {"type": "string"}, "layers": {"type": "array", "items": {"type": "string"}}, "comp": {"type": "string"},
       "phase": {"type": "string", "enum": ["in", "out", "both"]}, "stagger_frames": {"type": "number"}, "marker_timing": {"type": "boolean"},
-      "duration": {"type": "number"}, "intensity": {"type": "number"}, "direction": {"type": "string"}, "ease": {"type": "string"}}, ["preset"]),
+      "duration": {"type": "number"}, "intensity": {"type": "number"}, "direction": {"type": "string"}, "ease": {"type": "string"}, "existing": {"type": "string", "enum": ["modify", "replace"]}}, ["preset"]),
     ("remove_animation", t_remove_animation, "Remove what Motion DNA added to layers (keyframes, our expressions, SS in/out markers, SS text animators and effects); each property keeps its resting value.",
      {"layers": {"type": "array", "items": {"type": "string"}}, "comp": {"type": "string"}}),
     ("apply_pack", t_apply_pack, "Apply a style pack to a whole comp (or the named layers): titles, text, shapes, media and logo each get the pack's preset, staggered.",
      {"pack": {"type": "string"}, "comp": {"type": "string"}, "layers": {"type": "array", "items": {"type": "string"}},
-      "phase": {"type": "string", "enum": ["in", "out", "both"]}, "marker_timing": {"type": "boolean"}, "duration": {"type": "number"}, "intensity": {"type": "number"}}, ["pack"]),
+      "phase": {"type": "string", "enum": ["in", "out", "both"]}, "marker_timing": {"type": "boolean"}, "duration": {"type": "number"}, "intensity": {"type": "number"}, "existing": {"type": "string", "enum": ["modify", "replace"]}}, ["pack"]),
     ("add_asset", t_add_asset, "Place a local SFX or overlay (by exact name from list_assets) in a comp at a time (default: playhead).",
      {"name": {"type": "string"}, "type": {"type": "string", "enum": ["sfx", "overlay"]}, "time_s": {"type": "number"}, "gain_db": {"type": "number"},
       "opacity": {"type": "number"}, "comp": {"type": "string"}}, ["name"]),
@@ -404,7 +407,7 @@ TOOLS_DEF = [
       "project": {"type": "string"}, "by": {"type": "string"}}, ["slug", "rule"]),
     ("apply_brand", t_apply_brand, "Animate a comp (or the named layers) in a brand's style: its base style, layer role by layer role, on the brand's own curve.",
      {"slug": {"type": "string"}, "comp": {"type": "string"}, "layers": {"type": "array", "items": {"type": "string"}},
-      "phase": {"type": "string", "enum": ["in", "out", "both"]}, "marker_timing": {"type": "boolean"}, "duration": {"type": "number"}, "intensity": {"type": "number"}}, ["slug"]),
+      "phase": {"type": "string", "enum": ["in", "out", "both"]}, "marker_timing": {"type": "boolean"}, "duration": {"type": "number"}, "intensity": {"type": "number"}, "existing": {"type": "string", "enum": ["modify", "replace"]}}, ["slug"]),
     ("run_jsx", t_run_jsx, "Advanced: run ExtendScript in AE with the library loaded (SSM, SSP, SSA available). The code is a function body: use `return` for the result.",
      {"code": {"type": "string"}, "timeout_s": {"type": "number"}}, ["code"]),
 ]

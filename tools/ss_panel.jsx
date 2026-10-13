@@ -1180,6 +1180,8 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
 
     // hook for scripts and the MCP server: SS_PANEL.select("motion", "Scale Pop"); SS_PANEL.frame(); SS_PANEL.tab("Styles")
     $.global.SS_PANEL = {
+        // closes the floating window the tests open (a docked panel is left alone)
+        close: function () { if (!(win instanceof Panel)) { try { win.close(); } catch (e) {} } return "closed"; },
         select: function (kind, name) {
             ensureClock();
             if (kind === "pack" || kind === "technique") { select(kind, name, {}); selName.text = (kind === "pack" ? "Style: " : "Technique: ") + name; return "selected " + kind + "/" + name; }

@@ -3,7 +3,7 @@
   "tool": "ae_status",
   "ok": true,
   "args": {},
-  "answer": "AE 26.5x89 · project: motion_lab_v01.aep · active: _MCP_TEST (1280x720, 4.00s, 2 layers, selected: 1) · panel: loaded · fonts ok"
+  "answer": "AE 26.5x89 · project: vela-one-launch.aep · active: ZZ final test (1920x1080, 5.00s, 3 layers, selected: 3) · panel: loaded (Window > Extensions > Motion DNA) · fonts ok"
  },
  {
   "tool": "list_presets",
@@ -118,7 +118,7 @@
    "comp": "_MCP_TEST",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1791665626.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1791931420349.png (open it to look at the frame)"
  },
  {
   "tool": "remove_animation",
@@ -145,7 +145,7 @@
   "tool": "list_brands",
   "ok": true,
   "args": {},
-  "answer": "motion-dna: Motion DNA · style Playful · curve Snap · tones playful/retro/bold · energy [3, 4] · 22 rules"
+  "answer": "vela: Vela · style Elegant · curve Coast · tones premium/calm/modern · energy [1, 3] · 2 rules · local\nmotion-dna: Motion DNA · style Playful · curve Snap · tones playful/retro/bold · energy [3, 4] · 22 rules · template"
  },
  {
   "tool": "get_brand",

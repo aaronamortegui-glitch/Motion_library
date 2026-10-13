@@ -19,5 +19,6 @@
     t("select technique", function () { return SS_PANEL.select("technique", "Tracked labels"); });
     t("select brand", function () { return SS_PANEL.select("brand", "motion-dna"); });
     t("controls", function () { return SS_PANEL.controls({ speed: 1.5, intensity: 0.8, direction: 1, ease: "Whip" }); });
+    t("close the test window", function () { return SS_PANEL.close(); });   // it must not stay open next to the real panel
     return (bad ? bad + " FAILED\n" : "all panel checks passed\n") + out.join("\n");
 })();
