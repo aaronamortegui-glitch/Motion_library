@@ -11,7 +11,8 @@ Install / update:
      no longer exist.
   2. Installs the After Effects panel (Window > Motion DNA.jsx) in every AE version found. The panel reads the library
      straight from THIS clone, so the whole library comes with it. Loading the panel also starts the Claude bridge.
-  3. Installs the fonts in assets/fonts (OFL) for the current user.
+  3. Installs the fonts in assets/fonts (OFL) for the current user, and links the CEP panel (panel/, Window >
+     Extensions > Motion DNA) into the user's CEP extensions folder so it also runs from this clone.
   4. If Animation Composer asset packs are installed, indexes them and builds their previews (local only, never in git).
   5. Checks the library files and the tools Claude uses, and prints the steps only the user can do in After Effects.
 """
@@ -163,6 +164,62 @@ def panel():
     return r.returncode == 0
 
 
+CEP_ID = "com.motiondna.panel"
+
+
+def cep_dir():
+    if MAC:
+        return pathlib.Path.home() / "Library/Application Support/Adobe/CEP/extensions"
+    return pathlib.Path(os.environ.get("APPDATA", "")) / "Adobe/CEP/extensions"
+
+
+def cep_debug_versions():
+    """CSXS versions with PlayerDebugMode=1 (unsigned extensions only load with it)."""
+    on = []
+    for v in range(9, 14):
+        if MAC:
+            r = run(["defaults", "read", f"com.adobe.CSXS.{v}", "PlayerDebugMode"])
+            if r.stdout.strip() == "1":
+                on.append(v)
+        else:
+            r = run(["reg", "query", rf"HKCU\Software\Adobe\CSXS.{v}", "/v", "PlayerDebugMode"])
+            if r.returncode == 0 and re.search(r"PlayerDebugMode\s+REG_SZ\s+1", r.stdout):
+                on.append(v)
+    return on
+
+
+def cep(remove=False):
+    """Links panel/ into the CEP extensions folder (junction on Windows, symlink on macOS) and writes panel/.root."""
+    link = cep_dir() / CEP_ID
+    if remove:
+        if link.exists() or link.is_symlink():
+            try:
+                (os.rmdir if not MAC else os.unlink)(link); print(OK + f"removed {link}")
+            except OSError as e:
+                print(WARN + f"cannot remove {link}: {e}")
+        return True
+    print("3b. CEP panel (Window > Extensions > Motion DNA)")
+    (ROOT / "panel/.root").write_text(str(ROOT).replace("\\", "/"), encoding="utf-8")
+    link.parent.mkdir(parents=True, exist_ok=True)
+    if link.exists() or link.is_symlink():
+        try:
+            same = link.resolve() == (ROOT / "panel").resolve()
+        except OSError:
+            same = False
+        if not same:
+            (os.rmdir if not MAC else os.unlink)(link)
+    if not link.exists():
+        r = run(["ln", "-s", str(ROOT / "panel"), str(link)]) if MAC else run(["cmd", "/c", "mklink", "/J", str(link), str(ROOT / "panel")])
+        if r.returncode != 0:
+            print(WARN + f"could not link {link}: {(r.stdout + r.stderr).strip()}"); return False
+    print(OK + f"linked {link} -> {ROOT / 'panel'}")
+    if not cep_debug_versions():
+        cmd = "defaults write com.adobe.CSXS.12 PlayerDebugMode 1" if MAC else r'reg add "HKCU\Software\Adobe\CSXS.12" /v PlayerDebugMode /t REG_SZ /d 1 /f'
+        print(WARN + "unsigned panels need Adobe's developer mode, once (you run this, then restart After Effects):")
+        print("        " + cmd)
+    return True
+
+
 def font_files():
     return [f for f in (ROOT / "assets/fonts").iterdir() if f.suffix.lower() in (".ttf", ".otf")]
 
@@ -292,6 +349,7 @@ def uninstall():
                     print(WARN + f"cannot remove {f} (needs admin)")
     mcp_user(remove=True)
     fonts(remove=True)
+    cep(remove=True)
     print("\nThe repo folder itself is untouched; delete it by hand if you want. Restart After Effects.")
 
 
@@ -306,7 +364,7 @@ def main():
         if not ok:
             print("\nUpdate stopped: nothing was changed."); sys.exit(1)
         results.append(ok)
-    results += [clean_old(), panel(), fonts(), assets(), checks()]
+    results += [clean_old(), panel(), fonts(), cep(), assets(), checks()]
     if "--mcp-user" in sys.argv:
         results.append(mcp_user())
     print("\nLast steps in After Effects (only you can do these):")

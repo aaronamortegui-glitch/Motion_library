@@ -7,7 +7,9 @@ panel; reach for these when building a piece.
 |---|---|
 | `tools/ss_motion_lib.jsx` (`SSM`) | Token-driven keyframes: `animate`, `pop`, `recoil`, `animateBezier`, `animateStops`, `organicStops` (hand-drawn rhythm), `font(role)` |
 | `tools/ss_presets.jsx` (`SSP`) | The presets: `apply`, `applyFx`, `applyText`, `applyRecipe` |
-| `tools/ss_panel.jsx` + `tools/install_panel.ps1` | Gallery panel (Window menu, dockable): categories, live vector previews, In/Out/Both, marker timing, packs, assets |
+| `panel/` (CEP extension) + `tools/setup.py` | The panel (Window > Extensions > Motion DNA): Behaviors, Curves (editor + library, save into the tokens), Styles, Brands (workspace per client: curves, timing benchmarks, rules, active brand), Techniques, Agent (runs Claude Code in the background with the Motion DNA MCP and Figma). `panel/host/host.jsx` is the After Effects side |
+| `tools/ss_panel.jsx` + `tools/install_panel.ps1` | Previous ScriptUI panel (Window > Motion DNA.jsx), kept as a fallback |
+| `tools/build_figma_slides.jsx` | Rebuilds Figma slides as native AE layers from a JSON spec (live text, shapes, arcs, groups as precomps, exported PNGs) |
 | `tools/mcp/ss_motion_mcp.py` (`.mcp.json`) | MCP server: Claude browses the library and drives AE (apply presets and packs, add assets, render frames) |
 | `tools/sample_previews.jsx` · `tools/make_panel_thumbs.sh` · `tools/pack_demos.jsx` | Panel previews (sampled curves), panel thumbnails, pack demo renders |
 | `tools/bridge.sh` + `tools/ss_bridge.jsx` | Runs `.jsx` jobs in the open AE from the terminal |

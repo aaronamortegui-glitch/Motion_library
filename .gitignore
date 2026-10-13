@@ -74,3 +74,10 @@ research/batch/*/ov_*.png
 media/motion_dna_promo/shots/*_matte.mov
 media/motion_dna_promo/audio/music*.wav
 media/motion_dna_promo/audio/a0*_v*.wav
+
+# CEP panel: repo path written by tools/setup.py
+panel/.root
+
+# client brand profiles: local until cleared to share (then move the folder into library/brands/)
+library/brands.local/
+panel/.debug

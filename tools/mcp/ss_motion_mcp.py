@@ -264,7 +264,7 @@ def t_ae_status():
     return run_jsx("""var a = app.project.activeItem;
 return "AE " + app.version + " · project: " + (app.project.file ? app.project.file.name : "unsaved") +
   " · active: " + (a instanceof CompItem ? a.name + " (" + a.width + "x" + a.height + ", " + a.duration.toFixed(2) + "s, " + a.numLayers + " layers, selected: " + a.selectedLayers.length + ")" : "none") +
-  " · panel: " + (typeof SS_PANEL !== "undefined" ? "loaded" : "not loaded") +
+  " · panel: " + ($.global.MDNA_CEP ? "loaded (Window > Extensions > Motion DNA)" : (typeof SS_PANEL !== "undefined" ? "loaded (legacy Window > Motion DNA.jsx)" : "not loaded")) +
   (function () { try { var m = app.fonts.missingOrSubstitutedFonts, n = []; for (var i = 0; i < m.length; i++) n.push(m[i].postScriptName);
     return n.length ? " · WARNING fonts substituted (" + n.join(", ") + "): restart After Effects before building" : " · fonts ok"; } catch (e) { return ""; } })();""", includes=())
 
@@ -322,7 +322,7 @@ def t_add_asset(name, type="sfx", time_s=None, gain_db=-9, opacity=70, comp=None
 
 
 def t_show_in_panel(kind, name):
-    return run_jsx(f"""if (typeof SS_PANEL === "undefined") return "Motion DNA panel is not open (Window > Motion DNA.jsx)"; return SS_PANEL.select({js(kind)}, {js(name)});""", includes=())
+    return run_jsx(f"""if (typeof SS_PANEL === "undefined") return $.global.MDNA_CEP ? "The Motion DNA panel (Window > Extensions > Motion DNA) cannot be driven from a script yet: tell the user which preset to pick." : "Motion DNA panel is not open (Window > Extensions > Motion DNA)"; return SS_PANEL.select({js(kind)}, {js(name)});""", includes=())
 
 
 def t_render_frame(time_s=None, comp=None):

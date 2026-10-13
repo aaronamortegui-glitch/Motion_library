@@ -65,6 +65,20 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **MCP over stdio on Windows:** force UTF-8 on stdin/stdout (`sys.stdout.reconfigure(encoding="utf-8")`); a reader that dies on a non-cp1252 character (`→`) breaks the pipe and looks like a server crash.
 - **License drift in open-source sources:** animate.css moved from MIT to the Hippocratic License after 4.1.1; pin the last permissive version and record it next to the data.
 
+### Panels: ScriptUI and CEP
+- **ScriptUI panel crashes AE 2026** (access violation in `dvaui.dll` `UI_DispatchDrawToChild`) → custom-drawn controls
+  repainted with `hide()/show()` inside a mouse event, or a control removed by its own click handler → defer rebuilds and
+  repaints to a timer; in the end the panel moved to CEP (HTML), which also gives mouse-wheel scrolling.
+- **"Cannot run a script while a modal dialog is waiting"** popping repeatedly → a repeating `app.scheduleTask` fires
+  while a dialog is open → chain one-shot tasks (each tick schedules the next) and restart them on panel use.
+- **CEP extension does not load** (log: *Signature verification failed*) → unsigned → `PlayerDebugMode=1` for the
+  CSXS version (CSXS.12 for AE 2026), then restart AE. Manifest changes (e.g. `--enable-nodejs`) also need a restart.
+- **Engine "undefined" in host functions** → `$.evalFile` runs in the caller's scope → publish to `$.global` after loading.
+- **Old panel code after F5** → CEP caches the page's scripts → load CSS/JS with a `?v=Date.now()` query.
+- **Claude Code not found from AE** on Windows → the Store build of the desktop app keeps it under
+  `%LOCALAPPDATA%\Packages\Claude_*\LocalCache\Roaming\Claude\claude-code\<version>\…\claude.exe` → search there too.
+- **Remote debugging lands on another extension** → several `.debug` files used the same port → give ours its own.
+
 ## 2. Animation Composer as a behavioral reference
 - Presets are encrypted (`.mhcitem`/`.mhitemdata`). We never decrypt or modify the plugin, and we never enable CEP debug modes.
 - Architecture (observed in AE): a preset creates **no keyframes**. Properties get the expression `getAnimationComposerPresetValue()`, driven by pseudo-effects `MHAC PrCtrl <CODE> <ver>` (`AC IN`, `AC OUT`, `AC FX`) whose parameters are the recipe (offset, angle, bounces, scale; FX = frequency/range/time offset), plus `TR In`/`TR Out` markers.

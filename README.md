@@ -89,11 +89,16 @@ are independent: each one refines its own style.
 
 ```text
 library/brands/<brand>/brand.json   identity (colours, fonts, logo) · feel (energy, tones, base style, curve)
-                                    preferred / avoided presets · rules learned in reviews · projects
+                                    motion spec: the brand's own curves (bezier) and timing benchmarks
+                                    (frames, ms or %) · preferred / avoided presets · rules · projects
 library/brands/<brand>/thumb.png    its card in the panel
 ```
 
-- **Panel:** *Brands* shows each brand's card and rules; *In / Out / Both* animates the comp in its style on its curve.
+- **Panel:** *Brands* is a workspace per client: **+ New brand**, then a kit with *Overview* (style, curve, apply),
+  *Motion* (brand curves with Apply/Edit, timing benchmarks shown in frames at the comp's frame rate with Apply that
+  retimes and eases the selected keyframes, **Capture from selection**, and **Apply to everything** to re-ease a whole
+  comp), *Rules* and *Projects*. **Activate** makes it the brand of the current After Effects project: a chip in the
+  header opens it from any section and its curves come first in *Curves*.
 - **Claude (MCP):** `get_brand` before animating, `add_brand_note` for every review note, `apply_brand`, `list_brands`.
 - **Terminal:** `python tools/brand.py new acme --name "Acme" --style Modern --curve Coast`,
   `python tools/brand.py note acme "Logos never bounce" --cat motion --why "..."`, `python tools/brand.py show acme`.
@@ -111,18 +116,33 @@ key moments. All of them: [CONTRIBUTING §9](CONTRIBUTING.md#9-layout-and-edit-r
 ## Get started
 
 **Install** (Windows or macOS): double-click `INSTALL-Windows.cmd` / `INSTALL-macOS.command`, or run `python tools/setup.py`
-(Claude does it when you ask it to install Motion DNA). It installs the panel in every After Effects version, the fonts
-and the local asset previews, and checks everything. Then restart After Effects, open *Window › Motion DNA.jsx*, and tick
+(Claude does it when you ask it to install Motion DNA). It installs the panel, the fonts and the local asset previews,
+and checks everything. Then restart After Effects, open *Window › Extensions › Motion DNA*, and tick
 *Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
+
+The panel is a **CEP extension** (`panel/`, HTML): `setup.py` links it into the CEP extensions folder so it runs from
+this clone. Until it is signed as a `.zxp`, After Effects only loads it with Adobe's developer mode, set once by you
+(Windows: `reg add "HKCU\Software\Adobe\CSXS.12" /v PlayerDebugMode /t REG_SZ /d 1 /f`, macOS:
+`defaults write com.adobe.CSXS.12 PlayerDebugMode 1`), then restart After Effects. **F5** in the panel reloads it after
+an update. The previous ScriptUI panel (*Window › Motion DNA.jsx*, `tools/ss_panel.jsx`) is still installed as a fallback.
 **Update:** `python tools/setup.py --update` (never pulls over local changes) · **remove:** `--uninstall`.
 
 <img src="docs/screens/ae-panel.gif" width="320" align="right" alt="Motion DNA panel in After Effects">
 
-**Designers.** Browse Moves, Classics, Text, Loops, Transitions, Recipes, Styles, Brands, Mix, Techniques and Assets,
-filter by energy (1 calm → 5 explosive) and tone, and watch a live preview on the Spark arrow. Tune *Duration*,
-*Intensity*, *Direction* and *Easing*, select layers and press **In / Out / Both**; **Remove** cleans it off. With
-*Marker timing*, drag the `SS in` / `SS out` markers to retime. Styles and Brands animate a whole comp role by role; Mix
-picks moves and curves by tags.
+**Designers.** The header shows the connections (**MCP** · **Claude** · **Figma**); the bottom bar has six sections:
+- **Behaviors:** choose a type (Moves, Classics, Text, Loops, Transitions, Recipes, Favorites), pick a preset in the
+  gallery (hover a thumbnail to see it move, energy tabs from Calm to Explosive), tune *Duration*, *Intensity*,
+  *Direction* and *Easing* in *Controls*, choose **In / Out / Both** and **Apply**; **Remove** cleans it off. With
+  *Marker timing*, drag the `SS in` / `SS out` markers to retime.
+- **Curves:** a square curve editor (drag the handles or type `x1, y1, x2, y2`), the token library, **Apply to keyframes**
+  (every selected pair, linear stays linear), **Read keys**, **Reverse**, and **Save curve** into
+  `tokens/superside_motion_tokens.json` (only curves saved from the panel can be deleted).
+- **Styles** animate a whole comp role by role; **Brands** (above); **Techniques** explain the scripted workflows.
+- **Agent:** type an order and Claude does it in After Effects for you (e.g. *take these Figma frames, import their
+  assets and animate them in the Warm editorial style*). The panel runs Claude Code in the background, in this repo,
+  with the context of the open comp, the selection and the active brand; steps and the answer stream back, **Stop**
+  cancels. *Safe* mode uses only the Motion DNA tools; *Full* adds Figma and the repo's files and scripts (never git
+  commit or push). One-time setup in *Agent › Setup*: sign Claude Code in, and connect Figma's MCP server.
 
 **Claude (MCP).** Open the repo in Claude Code and approve the `motion-dna` server (`.mcp.json`). Claude gets:
 browse (`list_presets`, `list_packs`, `list_tags`, `suggest_mix`, `match_reference`, `list_assets`, `list_brands`,

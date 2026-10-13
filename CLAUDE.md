@@ -13,9 +13,12 @@ Install everything, library included — the panel reads the library from the re
    then install the panel in every AE version, the fonts, the local asset-pack index and previews, and check that every
    loader points to this clone. If it warns that a loader in Program Files / Applications needs admin, tell the user to
    delete that file (AE could load an old panel).
-3. Tell them the two steps only they can do: restart After Effects and open *Window › Motion DNA.jsx*, and tick
-   *Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
-4. With AE open and the panel docked, confirm the connection with the MCP tool `ae_status` (the panel header shows "Claude connected").
+3. Tell them the steps only they can do: tick *Preferences › Scripting & Expressions › Allow Scripts to Write Files and
+   Access Network*; set Adobe's developer mode once so the unsigned CEP panel loads (setup.py prints the command; never
+   set it yourself); restart After Effects and open *Window › Extensions › Motion DNA* (the old ScriptUI panel,
+   *Window › Motion DNA.jsx*, stays as a fallback). For the panel's Agent section: *Agent › Setup* (sign Claude Code in,
+   connect Figma).
+4. With AE open and the panel docked, confirm the connection with the MCP tool `ae_status` (the panel header's MCP dot is green).
 5. To remove it: `python tools/setup.py --uninstall` (loaders, MCP registration, fonts; the clone stays).
 
 ## Before you start

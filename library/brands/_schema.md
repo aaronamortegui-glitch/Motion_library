@@ -26,6 +26,16 @@ tools `list_brands`, `get_brand`, `add_brand_note`, `apply_brand`; the panel sho
   "prefer": {"title": ["Chars Blur"], "logo": ["Wordmark Reveal"]},   // by role or use
   "avoid": ["Jello", "anything that bounces"]
  },
+ "motion": {                     // the client's motion spec (panel: Brands > brand > Motion)
+  "curves": [                    // the brand's own easing curves, as cubic-bezier, with when to use them
+   {"name": "Acme Glide", "bezier": [0.3, 0.15, 0.1, 1], "use": "hero entrances", "source": {"date": "YYYY-MM-DD", "by": "panel"}}
+  ],
+  "timing": [                    // speed benchmarks per element: unit "frames", "ms" or "%" (% needs "of": base frames or text)
+   {"element": "Title in", "value": 18, "unit": "frames", "curve": "Acme Glide", "stagger": 3, "note": "…", "source": {…}},
+   {"element": "Transition", "value": 400, "unit": "ms"},
+   {"element": "Logo hold", "value": 25, "unit": "%", "of": "72"}
+  ]
+ },
  "rules": [                      // learned in reviews; never delete one without the brand owner, edit it instead
   {"id": 1, "category": "layout", "rule": "…what to do…", "why": "…what went wrong / why…",
    "source": {"project": "…", "date": "YYYY-MM-DD", "by": "who said it"}}
@@ -35,6 +45,14 @@ tools `list_brands`, `get_brand`, `add_brand_note`, `apply_brand`; the panel sho
 ```
 
 Categories: `layout`, `typography`, `motion`, `effects`, `color`, `audio`, `edit`, `process`.
+
+**Timing units:** the panel shows every benchmark in frames at the comp's frame rate (`ms` converts; `%` converts
+when `of` is a number of frames, otherwise it is shown but not applied). Apply retimes the selected keyframe pairs to
+that duration and eases them with the row's curve (a brand curve first, then the token library).
+
+**Where brands live:** in the repo, so the whole team and Claude read the same spec. The repo is public: name clients
+generically (e.g. "Fintech A") unless it is made private. Brands made before this rule may sit in
+`library/brands.local/` (git-ignored, same format); the panel still loads them.
 
 **How a rule is written:** one instruction a person or an agent can follow without the context ("Labels go into the
 negative space, never against the frame edges"), plus *why* in a few words. If a rule is general (true for every brand),
