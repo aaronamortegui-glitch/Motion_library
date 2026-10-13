@@ -625,7 +625,9 @@ async function importBrand() {
   if (png) await call("mdna_b64_write", { path: x.dir + "/thumb.png", b64: png });
   if (typeof ensureClaudeFolder === "function") await ensureClaudeFolder(x.dir, "brand", x.b.name, x.b.slug);
   BR.view = "kit"; BR.slug = x.b.slug; BR.tab = "rules"; brands.render();
-  toast(`${x.b.name}: ${n.new} new rules, ${n.updated} edited, ${n.removed} removed` + (n.curves + n.timing ? `, ${n.curves} curves, ${n.timing} timings` : "") + ".");
+  const pl = (k, one, many) => `${k} ${k === 1 ? one : many}`;
+  toast(`${x.b.name}: ` + [pl(n.new, "new rule", "new rules"), n.updated ? pl(n.updated, "rule edited", "rules edited") : "", n.removed ? pl(n.removed, "rule removed", "rules removed") : "",
+    n.curves ? pl(n.curves, "curve", "curves") : "", n.timing ? pl(n.timing, "timing", "timings") : ""].filter(Boolean).join(", ") + ".");
 }
 
 function brandKit(x) {

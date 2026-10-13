@@ -1,57 +1,179 @@
 # Motion DNA
 
 Motion made with AI all looks the same: same curves, same moves, same templates. **Motion DNA** gives it an identity.
-It is a library of moves, curves, techniques and styles for After Effects, built on measured references, that a
-designer applies from a panel or **Claude drives directly inside After Effects** (MCP). Every brand you animate keeps
-its own profile that learns from each review. Everything it makes is native keyframes and expressions: nothing extra to render.
+It is a motion library for After Effects (80 moves, 14 curves, 9 styles, 11 techniques, built on measured references)
+with a panel for designers and an AI agent that works inside After Effects. You direct; it accelerates. Every brand you
+animate keeps a profile that **learns from each review**, and everything it makes is native keyframes.
 
-![Motion DNA promo: a 1985 infomercial parody made with the library](docs/examples/dna-promo.gif)
+<img src="docs/screens/cep-panel.gif" width="280" align="right" alt="The Motion DNA panel in After Effects">
 
-*From [the Motion DNA promo](#showcases): tracking, roto, a backlight glow and a freeze title, all built by Claude with the library.*
+**What you get**
+- **Your motion, not the default.** Pick moves and curves by feel (energy 1 calm → 5 explosive, tone), hover to see
+  them move, apply them to the selected layers. Already animated? Keep your keyframes and change only their timing and
+  curve.
+- **Brands that learn.** Each review note becomes a rule of that brand; the next order, the next video and the next
+  person start from everything it learned. Share a brand with one file.
+- **An agent that knows the library.** Ask in plain words ("animate these Figma frames in the Editorial style"); it uses
+  the library, the brand and your selection, and shows what each order cost.
+- **Claude where you prefer.** The same conversation continues in the panel, the Claude app or a terminal: one per brand
+  and one per video.
+- **Connect in one click.** Claude and Figma each have one button that turns green by itself.
+
+<br clear="right">
+
+## Get started
+
+1. **Install** (Windows or macOS): double-click `INSTALL-Windows.cmd` / `INSTALL-macOS.command`, or run
+   `python tools/setup.py` (or ask Claude to install Motion DNA). The panel is signed on your machine: no Adobe
+   developer mode, no admin rights.
+2. **Open After Effects** › **Window › Extensions › Motion DNA** (also *File › Scripts › Motion DNA*) and dock it once:
+   it comes back every time. The link with Claude starts with After Effects by itself.
+3. **Agent › Connect:** *Connect Claude* (sign in once) and, if you use Figma, *Connect Figma* (press Allow).
+4. Once, in After Effects: *Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
+
+Update with `python tools/setup.py --update` (never over your local changes) · remove with `--uninstall`.
+
+<details>
+<summary>Install details: signing, developer mode, the classic panel, where things live</summary>
+
+- `setup.py` signs the panel (`panel/`, a CEP extension) on your machine with a self-signed certificate made with
+  Adobe's ZXPSignCmd (downloaded once into `tools/.cache/`) and installs the signed copy, so After Effects loads it with
+  no developer mode; `--update` signs it again.
+- It also installs *File › Scripts › Motion DNA* (opens the panel) and a silent Startup script (starts the Claude bridge
+  when After Effects opens), and removes entries older versions left. Fonts (Inter Tight, Instrument Serif, OFL) and the
+  local asset-pack previews come with it.
+- Developers: `python tools/setup.py --dev` runs the panel straight from the clone (edits show with **F5**); that needs
+  Adobe's developer mode, and setup asks before turning it on (only you can say yes).
+- The previous ScriptUI panel (`tools/ss_panel.jsx`) opens instead when the HTML panel is missing.
+- Brands: templates in `library/brands/` (Motion DNA, the 22 rules learned making our promo); yours in
+  `library/brands.local/` or a folder you choose. Terminal: `python tools/brand.py new | note | show | export | import`.
+  Schema: [`library/brands/_schema.md`](library/brands/_schema.md).
+</details>
+
+## Use it
+
+### Connect Claude and Figma
+<img src="docs/screens/cep-connect.gif" width="300" align="right" alt="Connect Claude and Figma">
+
+*Agent › Connect* has one button each. **Connect Claude** opens the sign-in (your Claude account) and turns green by
+itself. **Connect Figma** opens Figma's own permission page: press Allow. The header shows **MCP · Claude · Figma**:
+green is ready, a click opens Connect. When Figma asks for permission again, the same button reconnects it.
+
+<br clear="right">
+
+### Animate the selected layers: create, or modify what is there
+<img src="docs/screens/cep-create-modify.gif" width="300" align="right" alt="Create, Modify or Replace">
+
+**Behaviors**: choose a type (Moves, Classics, Text, Loops, Transitions, Recipes, Favorites), hover a preset to see it
+move, tune *Duration · Intensity · Direction · Easing* and press the button, which says what it will do:
+- **Create** when the layers have no keyframes;
+- **Modify** when they already move: your keyframes and values stay, they get the preset's timing and curve;
+- **Replace** to delete them and create the preset instead.
+
+**Remove** cleans off what Motion DNA added. With *Marker timing*, drag the `SS in` / `SS out` markers to retime.
+
+<br clear="right">
+
+### Shape the curve
+<img src="docs/screens/cep-curves.gif" width="300" align="right" alt="The curve editor">
+
+**Curves**: drag the handles or type `x1, y1, x2, y2`, or pick one of the library's curves (and the active brand's own
+curves, first). **Apply to keyframes** eases the selected keyframes; with none selected, every keyframe of the selected
+layers, keeping their values. **Read keys** loads a curve from your animation, **Save curve** adds yours to the library
+or to the brand.
+
+<br clear="right">
+
+### A brand learns from every review
+<img src="docs/screens/cep-brand-learns.gif" width="300" align="right" alt="A review note becomes a brand rule">
+
+Tell the agent what to fix ("the car bounces, make it glide"): it fixes it and proposes the note as a **rule**. One
+click keeps it in the **brand**, the **project** (only this video) or the **general** rules. *Brands › Rules* lists them:
+add, edit or remove any. From then on, every order for that brand follows them, and so does Claude Code (`get_brand`).
+
+```mermaid
+flowchart LR
+    N["Review note"] --> A["Agent fixes it,<br/>proposes a rule"]
+    A -->|"one click"| R["Brand<br/>rules · curves · timing"]
+    R --> C["Next order, next video:<br/>read first"]
+    C --> N
+    R -->|"Download to share"| F["one file"]
+    F -->|"Import brand file"| T["Teammate's copy:<br/>rules merge"]
+```
+
+<br clear="right">
+
+### Share a brand, and know where it lives
+<img src="docs/screens/cep-brand-share.gif" width="300" align="right" alt="Where the brand lives and how to share it">
+
+*Brands › brand › Overview* says **where it lives** (its folder, with *Open folder*) and what each file is. **Download
+to share** writes one file (`<brand>.motiondna-brand.json`); the other person presses **Import brand file**. If they
+already have the brand, new, edited and removed rules merge into theirs and show as *new*: nothing is overwritten
+blindly. Client brands never go in this repo (only templates do); conversations stay on each computer.
+
+<br clear="right">
+
+### Styles and techniques, ready to ask for
+<img src="docs/screens/cep-library.gif" width="300" align="right" alt="The Agent library">
+
+*Agent › Library* shows the **Styles** (a whole comp, role by role) and the **Techniques** (tracked labels, text behind
+people, roto, speed ramps, HUD…) with a preview, what each one does and a ready order: **Use in chat** sends it to the
+agent, **Copy order** takes it to Claude Code. Layers that already move keep their animation.
+
+<br clear="right">
+
+### One conversation per brand and per video
+<img src="docs/screens/cep-workspace.gif" width="300" align="right" alt="Brand conversation and projects">
+
+A brand has its own folder and its own Claude conversation for everything about it (*Brands › Claude › Start in Claude
+app* puts it in the Claude app's sidebar). Each video is a **project** inside the brand folder (*Agent › Project*:
+brief, references, footage, audio, AE, renders, exports), with its own conversation and rules. Continue any of them
+from the panel, the Claude app or a terminal (*Copy terminal command*); the panel warns if it is open somewhere else.
+
+<br clear="right">
+
+### Claude Code and other agents
+Open the repo (or a brand or project folder) in Claude Code and approve the `motion-dna` server. Claude can browse the
+library (`list_presets`, `list_packs`, `list_tags`, `suggest_mix`, `match_reference`, `list_brands`, `get_brand`), act in
+After Effects (`apply_preset`, `apply_pack`, `apply_brand` with `existing` = modify | replace, `add_asset`,
+`remove_animation`), learn (`add_brand_note`) and check its work (`ae_status`, `list_layers`, `render_frame`). Without
+MCP, any LLM reads `library/INDEX.txt` and runs `.jsx` jobs with `bash tools/bridge.sh`. Contributors: read
+[`CLAUDE.md`](CLAUDE.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## How it works
 
 ```mermaid
 flowchart LR
-  subgraph K["Knowledge · lives in the repo"]
+  subgraph K["Knowledge"]
     MSM["<b>Motion Style Map</b><br/>20 reference films measured<br/>research by Gian Orsi"]
-    REF["Reference profiles<br/>library/references"]
-    LIB["<b>Library</b><br/>79 presets · 14 curves · 9 styles · 11 techniques<br/>all tagged: role · energy 1–5 · tone"]
-    BR["<b>Brand profiles</b><br/>library/brands<br/>rules learned in every review"]
-    RU["Layout &amp; edit rules<br/>CONTRIBUTING §9 · LEARNINGS"]
+    LIB["<b>Library</b><br/>80 moves · 14 curves · 9 styles · 11 techniques<br/>tagged: role · energy 1–5 · tone"]
+    BR["<b>Brands</b><br/>rules learned in every review<br/>on your computer, shared as a file"]
     MSM --> LIB
-    REF --> LIB
   end
   subgraph D["Who drives it"]
-    P["Designer<br/>Motion DNA panel"]
-    C["Claude / any LLM<br/>MCP server motion-dna"]
+    P["Designer<br/>the panel"]
+    C["Agent / Claude Code<br/>MCP server motion-dna"]
   end
   LIB --> P
   LIB --> C
   BR --> P
   BR --> C
-  RU --> C
   P --> AE["After Effects<br/>native keyframes"]
-  C -- "file bridge" --> AE
-  AE --> QA["Check<br/>check_layout · test_all · render_frame"]
-  QA -- "review notes" --> BR
-  QA -- "gaps → new moves" --> LIB
+  C -- "bridge" --> AE
+  AE -- "review notes" --> BR
+  AE -- "gaps → new moves" --> LIB
 ```
 
-1. **The library** is the vocabulary: moves, token curves (`tokens/`), styles and script techniques, all tagged so they
-   can be recombined by feel.
-2. **Research feeds it**: reference films and brand analyses are measured and matched against the library; whatever is
-   missing is created, tagged and rendered (CONTRIBUTING §8).
-3. **Brand profiles remember**: each brand keeps its base style, curve, palette, fonts and the rules learned in its reviews.
-4. **Two ways to drive it**: the panel in After Effects, or Claude through the MCP server and a file bridge.
-5. **Every piece is checked and feeds back**: the layout QA and the tests catch problems; review notes become brand
-   rules, and new needs become new presets.
+The **library** is the vocabulary: moves, token curves (`tokens/`), styles and techniques, all tagged so they can be
+recombined by feel. **Research feeds it**: reference films and brand analyses are measured and matched; whatever is
+missing is created and tagged (CONTRIBUTING §8). **Brands remember**, and **every piece is checked**: the layout QA and
+the tests catch problems, review notes become rules, new needs become new moves.
 
 ## What's inside
 
 | Moves | Classics | Text | Loops | Recipes | Styles | Techniques | Curves |
 |---|---|---|---|---|---|---|---|
-| 31 | 17 | 11 | 11 | 9 | 9 | 11 | 14 + 6 durations |
+| 32 | 17 | 11 | 11 | 9 | 9 | 11 | 14 + 6 durations |
 
 ![Every preset with its energy range and tones](docs/examples/library-mosaic.gif)
 
@@ -80,66 +202,6 @@ Explore it: [the map](research/style_map/style_map.html) · [taxonomy](research/
 [behaviors and mapping](research/ontology/) · [family syntheses, music & edit, cross-family patterns](research/styles/) ·
 pipeline in `tools/style_research/`.
 
-## Brand profiles: styles that learn
-
-Every time you animate for a brand and give notes ("labels go into the negative space", "a soft glow, not rays",
-"never cut a phrase"), the note is saved as a **rule** in that brand's profile, with why, the project and who said it.
-The next piece for that brand, by Claude, another agent or a designer, starts with everything already learned. Brands
-are independent: each one refines its own style.
-
-**How a brand learns**
-
-```mermaid
-flowchart LR
-    N["Review note<br/>'the car never bounces'"] --> A["Agent applies it<br/>and proposes a rule"]
-    A -->|"you pick: brand ·<br/>project · general"| R["brand.json<br/>rules · curves · timing"]
-    R --> C["Next order, next video<br/>Claude reads the brand first"]
-    C --> N
-    R -->|"Download to share<br/>(one file)"| F["vela.motiondna-brand.json"]
-    F -->|"Import brand file"| T["A teammate's copy:<br/>new, edited and removed<br/>rules merge, shown as new"]
-```
-
-1. **Create** a brand (empty or from a template) in its own folder, never in the repo. It gets its own `CLAUDE.md`
-   and its own Claude conversation for everything about that brand; each video of the brand is a project inside it.
-2. **Work and review.** Every note you give the agent comes back as a rule proposal; one click keeps it in the brand,
-   the project or the general rules. Rules can be edited or removed at any time (*Brands › Rules*).
-3. **Capture what works**: curves and timing benchmarks from your own keyframes (*Capture from selection*).
-4. **Share**: *Download to share* writes one file; the other person imports it and the rules merge (each rule has an
-   id, so an edit or a removal travels too). What the brand learned travels; the conversations stay on each computer.
-
-```text
-<brand folder>/brand.json   identity (colours, fonts, logo) · feel (energy, tones, base style, curve)
-                            motion spec: the brand's own curves (bezier) and timing benchmarks
-                            (frames, ms or %) · preferred / avoided presets · rules · projects
-<brand folder>/thumb.png    its card in the panel
-```
-
-**Client brands never go in the repo.** Only templates live in `library/brands/` (e.g. Motion DNA). Your brands stay on
-your computer, in the plugin folder (`library/brands.local/`, git-ignored) or in any folder you choose. To work on the
-same brand with someone, **Export** it to one file and they **Import** it: new, edited and removed rules merge into
-their copy (nothing is overwritten blindly) and the ones that came in show as *new*.
-
-**One conversation per brand, and one per video.** A brand has its own folder (with `CLAUDE.md`, so Claude knows the
-brand there) and its own Claude Code conversation for everything about it; each video of the brand is a project inside
-`<brand>/projects/` with its own. Both are the same conversation in the panel's Agent and in the Claude app (**Start /
-Open in Claude app** puts it in the app's sidebar) or a terminal. Conversations stay on each computer; what a brand
-learned travels in its file.
-
-- **Panel:** *Brands* is a workspace per client: **+ New brand** (start empty or from a template, in the plugin folder
-  or a folder you choose), **Import brand file**, then a kit whose *Overview* says **where it lives** (its folder and
-  what each file is) and how to **share it** (**Download to share** writes the one file to send), then style, curve, apply,
-  *Motion* (brand curves with Apply/Edit, timing benchmarks shown in frames at the comp's frame rate with Apply that
-  retimes and eases the selected keyframes, **Capture from selection**, and **Apply to everything** to re-ease a whole
-  comp), *Rules* (add, edit, remove) and *Claude* (the brand's conversation and its videos). **Activate** makes it the brand of the current After Effects project: a chip in the
-  header opens it from any section and its curves come first in *Curves*.
-- **Claude (MCP):** `get_brand` before animating, `add_brand_note` for every review note, `apply_brand`, `list_brands`.
-- **Terminal:** `python tools/brand.py new acme --name "Acme" --style Modern --curve Coast`,
-  `python tools/brand.py note acme "Logos never bounce" --cat motion --why "..."`, `python tools/brand.py show acme`,
-  `python tools/brand.py export acme` / `import acme.motiondna-brand.json`.
-
-Example: [`library/brands/motion-dna`](library/brands/motion-dna/brand.json), the 22 rules learned while making our
-own promo. Schema: [`library/brands/_schema.md`](library/brands/_schema.md).
-
 ## Rules that keep the work clean
 
 Lessons from real reviews, checked automatically on the built comps by `tools/check_layout.jsx`: no text on text or cards
@@ -147,71 +209,11 @@ touching, nothing outside the safe area (labels stack into up to 3 lines instead
 nothing on a face, no substituted fonts. Edit rules: never cut a phrase, trim AI shots to their action, music leads the
 key moments. All of them: [CONTRIBUTING §9](CONTRIBUTING.md#9-layout-and-edit-rules-every-video-every-comp).
 
-## Get started
-
-**Install** (Windows or macOS): double-click `INSTALL-Windows.cmd` / `INSTALL-macOS.command`, or run `python tools/setup.py`
-(Claude does it when you ask it to install Motion DNA). It installs the panel, the fonts and the local asset previews,
-and checks everything. Then restart After Effects, open **Window › Extensions › Motion DNA** (also *File › Scripts ›
-Motion DNA*) and dock it once: it comes back every time After Effects opens, and the Claude bridge starts with After
-Effects by itself (a silent Startup script). Tick
-*Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
-
-The panel is a **CEP extension** (`panel/`, HTML). `setup.py` signs it on your machine (a self-signed certificate made
-with Adobe's ZXPSignCmd, downloaded once into `tools/.cache/`) and installs the signed copy, so After Effects loads it
-with **no developer mode**; `--update` signs it again. Developers can run `python tools/setup.py --dev` instead: the
-panel then runs straight from the clone (edits show with **F5**), which needs Adobe's developer mode; setup asks before
-turning it on, and only you can say yes. The previous ScriptUI panel (`tools/ss_panel.jsx`, opened by *File › Scripts › Motion DNA* when the HTML panel is missing)
-is still installed as a fallback.
-**Update:** `python tools/setup.py --update` (never pulls over local changes) · **remove:** `--uninstall`.
-
-<img src="docs/screens/cep-panel.gif" width="320" align="right" alt="Motion DNA panel: Behaviors, Curves, Brands, Agent">
-
-| Behaviors | Curves | Brands | Agent |
-|---|---|---|---|
-| ![Behaviors](docs/screens/cep-behaviors.gif) | ![Curves](docs/screens/cep-curves.gif) | ![Brands](docs/screens/cep-brands.gif) | ![Agent](docs/screens/cep-agent.gif) |
-
-**Designers.** The header shows the connections (**MCP** · **Claude** · **Figma**); the bottom bar has four sections:
-- **Behaviors:** choose a type (Moves, Classics, Text, Loops, Transitions, Recipes, Favorites), pick a preset in the
-  gallery (hover a thumbnail to see it move, energy tabs from Calm to Explosive), tune *Duration*, *Intensity*,
-  *Direction* and *Easing* in *Controls*, choose **In / Out / Both** and **Apply**; **Remove** cleans it off. The button
-  says what it will do: **Create** when the selected layers have no keyframes; when a layer already has keyframes,
-  *The layer already has keyframes: **Modify** | **Replace*** appears: Modify (the default) keeps its values and gives
-  them the preset's curve and the *Duration* factor, Replace deletes them and creates the preset. With
-  *Marker timing*, drag the `SS in` / `SS out` markers to retime.
-- **Curves:** a square curve editor (drag the handles or type `x1, y1, x2, y2`), the token library, **Apply to keyframes**
-  (every selected pair, linear stays linear; with no keyframes selected, every keyframe of the selected layers, and a
-  Fade Up on this curve for a layer with no animation), **Read keys**, **Reverse**, and **Save curve** into
-  `tokens/superside_motion_tokens.json` (only curves saved from the panel can be deleted).
-- **Brands** (above).
-- **Agent:** type an order and Claude does it in After Effects for you (e.g. *take these Figma frames, import their
-  assets and animate them in the Editorial style*). The panel runs Claude Code in the background with the context of
-  the open comp, the selection, the active brand and the project; steps, the answer and an estimate of what the order
-  cost stream back, **Stop** cancels. *Safe* mode uses only the Motion DNA tools; *Full* adds Figma and files and
-  scripts (never git commit or push). Three tabs:
-  - **Chat.** Review notes come back as rule proposals: keep each one in the brand, the project or the general rules
-    (CONTRIBUTING §9) with one click, or dismiss it.
-  - **Library:** the **Styles** and **Techniques**, each with a preview, what it does and a ready order: **Use in chat**
-    or **Copy order** (for Claude Code). They are guides the agent applies to comps.
-  - **Project:** a folder per piece (brief, references, footage, audio, AE, renders, exports) with its brand, its own
-    rules, a `CLAUDE.md` and `.mcp.json` (so Claude Code opened in that folder knows Motion DNA) and **one
-    conversation** that you continue from the panel, the Claude app (**Open in Claude app**) or a terminal
-    (**Copy resume command**); a conversation started elsewhere in that folder can be picked as the project's.
-  One-time setup in *Agent › Connect*: **Connect Claude** (one sign-in) and, optionally, **Connect Figma** (one click:
-  Figma's permission page opens in the browser, press Allow; it turns green by itself). *Safe* orders load only the
-  Motion DNA server.
-
-**Claude (MCP).** Open the repo in Claude Code and approve the `motion-dna` server (`.mcp.json`). Claude gets:
-browse (`list_presets`, `list_packs`, `list_tags`, `suggest_mix`, `match_reference`, `list_assets`, `list_brands`,
-`get_brand`), act in After Effects (`apply_preset`, `apply_pack`, `apply_brand`, `add_asset`, `remove_animation`,
-`show_in_panel`), learn (`add_brand_note`), check (`ae_status`, `list_layers`, `render_frame`, `render_comp`) and
-`run_jsx`. Without MCP, any LLM reads `library/INDEX.txt` and runs `.jsx` jobs with `bash tools/bridge.sh`.
-Contributors and their agents: read [`CLAUDE.md`](CLAUDE.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
-
-<br clear="right">
-
 ## Showcases
 
 ### *Motion DNA · promo* (45 s, 1985 infomercial parody)
+
+![Motion DNA promo: a 1985 infomercial parody made with the library](docs/examples/dna-promo.gif)
 
 Two bored designers in 1985 complain that Claude makes the same animation every time; a salesman bursts in with Motion
 DNA. Characters, location and props were designed as sheets first and every shot was generated with them as references

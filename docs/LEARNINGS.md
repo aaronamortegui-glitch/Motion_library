@@ -119,6 +119,13 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **A docked panel can open before After Effects' scripting answers** (the panel stayed on "Loading" and never booted)
   → the boot retries for a minute. If the panel was not docked when AE closed, nothing starts the bridge until the user
   opens the panel (since then, a Startup script starts the bridge with AE).
+- **Recording the panel's Agent outside After Effects:** the Agent needs Node (only inside AE) → `tools/record_cep_panel.py`
+  sets `window.__previewAgent` and small stand-ins for `fs`, `child_process` and Claude's answers, plus a fictional demo
+  brand, so every GIF tells one story the same way on any machine. Recording found two real issues: the Connect card
+  closed itself right after Claude connected (now it stays, green, with Figma next) and the header wrapped with a brand
+  chip.
+- **`expand_library.sh` re-renders a few existing previews** when their MP4s are missing locally → after adding one
+  preset, restore the unrelated GIFs, posters and thumbs it touched (`git checkout`) so the commit only carries the new one.
 - **`total_cost_usd` is cumulative per conversation** (and an estimate; with a subscription it is not billed) → the
   per-order cost is the difference from the last total.
 - **An MCP server keeps the code it started with**: after editing `tools/brand.py`, the running server still read the

@@ -52,6 +52,13 @@ function browserStandIn(src) {
   if (fn === "mdna_capture") return JSON.stringify({ frames: 18, bz: [0.18, 0.28, 0, 0.9], layer: "Title", prop: "Position", stagger: 3, fps: 30 });
   if (fn === "mdna_brand_save") { const a = JSON.parse(JSON.parse(src.slice(src.indexOf("(") + 1, -1))); const b = JSON.parse(a.text); const L = (window.__demoBrands = window.__demoBrands || []); const i = L.findIndex((x) => x.b.slug === b.slug); if (i >= 0) L[i].b = b; else L.push({ where: "local", b }); return "OK saved"; }
   if (fn === "mdna_read_curve") return "[0.25,0.1,0.25,1]";
+  // dialogs and files, for recording the share / import flow in a browser
+  if (fn === "mdna_pick_save") return "C:/Users/you/Desktop/" + JSON.parse(src.slice(src.indexOf("(") + 1, -1));
+  if (fn === "mdna_pick_open") return "C:/Users/you/Downloads/brand.motiondna-brand.json";
+  if (fn === "mdna_pick_folder") return "D:/Clients";
+  if (fn === "mdna_read_file") return window.__demoImport ? JSON.stringify(window.__demoImport) : "ERR missing";
+  if (fn === "mdna_b64_file") return "";
+  if (fn === "mdna_write_file") return "OK saved";
   if (fn === "mdna_sel_info") return JSON.stringify(window.__demoSel || { layers: 1, own: 1, ours: 0 });
   return "OK";
 }

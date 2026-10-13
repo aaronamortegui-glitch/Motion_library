@@ -359,7 +359,7 @@ function agent() {
   const sec = $("#sec-agent");
   const render = () => {
     sec.replaceChildren();
-    if (!IN_AE || !nodeReq()) {
+    if ((!IN_AE || !nodeReq()) && !window.__previewAgent) {   // __previewAgent: the GIF recorder, with Node stand-ins
       sec.append(h("div", { class: "card-box" }, h("b", {}, "Agent"), h("span", { class: "dim" },
         IN_AE ? "Node.js is not enabled in this panel yet: close and reopen the panel (Window > Extensions > Motion DNA)." : "The Agent runs inside After Effects (it starts Claude Code on this computer). The Library below works everywhere.")));
       sec.append(libraryView());
@@ -625,7 +625,7 @@ function showSetup(setup) {
     : step(false, "Connect Claude", [
         h("ol", { class: "steps" }, h("li", {}, "Press Connect Claude: a window and your browser open."), h("li", {}, "Sign in with your Claude account."),
           h("li", {}, "If it shows a code, paste it in the window. Done: this turns green by itself.")),
-        h("button", { class: "solid apply big", onclick: () => { openTerminal("auth login"); toast("Sign in in your browser…"); waitForSignIn(() => { redraw(); if (agent.render) agent.render(); }); } }, "Connect Claude")]);
+        h("button", { class: "solid apply big", onclick: () => { openTerminal("auth login"); toast("Sign in in your browser…"); waitForSignIn(() => { if (agent.render) agent.render(); if (agent.showSetup) agent.showSetup(); }); } }, "Connect Claude")]);   // stays open: green, and Figma next
 
   // 2. Figma (optional)
   const fig = AG.figma;
