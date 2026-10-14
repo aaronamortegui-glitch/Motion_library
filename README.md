@@ -19,8 +19,34 @@ animate keeps a profile that **learns from each review**, and everything it make
   the library, the brand and your selection, and shows what each order cost.
 - **Claude where you prefer.** The same conversation continues in the panel, the Claude app or a terminal: one per brand
   and one per video.
+- **A kit Claude builds for you.** 159 semi-finished pieces (transitions, titles and callouts, shapes, organic
+  backgrounds, looks, text animations, 3D moves and behaviours) that size themselves to your text, take the brand's
+  colours and move on the same token curves. Pick one in *Agent › Library › Kit* or ask for it by name.
 
 <br clear="right">
+
+## What's new
+
+- **The kit: 159 pieces, all on the token curves** ([see them](#the-kit-everything-claude-can-build-by-category), every
+  one with a preview in [docs/CATALOG.md](docs/CATALOG.md)): 46 transitions (34 from solids and masks, 12 clip to clip),
+  27 self-sizing elements, 39 animated shapes, 10 backgrounds, 11 finishing looks, 10 text animations, 7 3D moves and
+  9 behaviours. Rebuilt by behavior from what Animation Composer ships, compared side by side and kept only when they
+  looked as good or better ([the map](docs/animation-composer-map.md)).
+- **Organic motion:** a plexus `network` (points joined by lines that fade with distance), breathing `blobs`, a `mesh`
+  gradient and frosted `glass` backgrounds, a smoky `glass_card`, and `liquid` and `ink` transitions with living edges.
+- **Behaviours:** the algorithm apart from what it draws. `bubbles`, `voronoi`, `flow`, `flock`, `spring`, `rope`,
+  `grow` and the hand-drawn `line_boil`, each drawn into a shape, a background, a text matte, an element's box or a
+  transition (`add_behavior`). Every one carries its review verdict: where it works, where it was dropped and why.
+- **In the panel:** *Agent › Library* has a **Kit** tab next to Styles and Techniques, with a preview and a ready order
+  for each piece.
+- **Our logo, built stroke by stroke:** the helix mark, cleaned into vectors and split into its pieces, assembles
+  itself (strands, then rungs, then the arrow, with granular edges), then MOTION / DNA rise below it. The new
+  *Stroke build* technique works for any filled logo; the logo manual is in Figma.
+- **Keyframe tools** like Animation Composer's helpers: ease every key with a token, copy an ease, reverse, mirror an
+  entrance into an exit, stagger, randomize, sequence, distribute, loop, bake, and a 9-point anchor mover (`keyframes`,
+  `anchor_point`).
+- **Outside resources, license checked:** 166 scripts, expression libraries, VFX, sound effects and music tracks
+  (`list_resources`); `python tools/fetch_free_assets.py` downloads the CC0 packs Claude can drop in (`add_asset`).
 
 ## Get started
 
@@ -219,7 +245,36 @@ the panel (*Agent › Library › Kit*, with a ready order), in `docs/CATALOG.md
 **Our logo** (the helix mark and its MOTION / DNA lockups) lives in `assets/brand/` and in the Figma file [Motion DNA — Logo & Library](https://www.figma.com/design/oFm28esz50v8d5Cxn54ytA), with its manual (lockups, colours, clear space, misuse, how it moves) and the library overview. Every Motion DNA demo closes on it: `add_element(kind="end_card")` builds the mark piece by piece (the *Stroke build* technique), then MOTION / DNA rise under it.
 
 Example: *"Open on a `mesh` background, a `glass_card` with the title, `Ink Drop` into the plexus (`network`) scene, and
-finish with `grain`."* Samples: `docs/examples/`.
+finish with `grain`."*
+
+**Transitions** (`solid_transition`): colour layers and masks over a cut, one controller (Progress, Direction, Stagger,
+Ease In / Out, Color 1–3; one colour gives tonal shades), or clip to clip.
+
+![Every transition look](docs/examples/kit_transitions.jpg)
+
+**Elements** (`add_element`): they measure their text and grow with it; Reveal, Padding, Radius, Gap and colours live on
+one controller.
+
+![Every element](docs/examples/kit_elements.jpg)
+
+**Shapes** (`add_shape`): primitives, lines that draw on and travel off, and families (impacts, pops, fireworks,
+glitter, swooshes, confetti, rings).
+
+![Every shape](docs/examples/kit_shapes.jpg)
+
+**Backgrounds and looks** (`add_look`): looping procedural backgrounds in brand colours, and finishing layers.
+
+![Backgrounds and looks](docs/examples/kit_backgrounds_looks.jpg)
+
+**Text, moves and behaviours** (`animate_text`, `add_captions`, `move`, `add_behavior`).
+
+![Text animations, moves and behaviours](docs/examples/kit_text_moves_behaviours.jpg)
+
+**The logo close** (`add_element(kind="end_card")`, technique *Stroke build*): each piece of the mark is drawn by its own
+stroke under its own outline, the edges dissolve into grain and settle, the arrow lands, and MOTION / DNA rise below.
+Only for Motion DNA's own videos.
+
+![The Motion DNA logo building itself](docs/examples/logo_end_card.jpg)
 
 ### Built on research: the Motion Style Map, by Gian Orsi
 
