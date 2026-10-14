@@ -121,12 +121,12 @@ var SSHUD = (function () {
 
             // text block anchored at the end of the line
             var tx = right ? 14 : -14, just = right ? ParagraphJustification.LEFT_JUSTIFY : ParagraphJustification.RIGHT_JUSTIFY;
-            var title = text("HUD title · " + id, o.title, "ui", o.titleSize || 26, color, 160, just);
+            var title = text("HUD title · " + id, o.title, "ui", o.titleSize || 32, color, 160, just);
             tr(title, "ADBE Position").expression = anchorExpr(o.anchor) + " + [" + (dx + tx) + "," + (dy - 12) + "];";
             // instant: everything readable from the first frame (short shots, labels that must be read at once)
             var tIn = o.instant ? t0 : t0 + SSM.seconds("Glide");
             if (o.instant) SSP.apply(title, "Fade", "in", t0); else SSP.applyText(title, "Tracking Settle", "in", tIn);
-            var ts = o.titleSize || 26, bs = o.bodySize || 24;
+            var ts = o.titleSize || 32, bs = o.bodySize || 32;   // CONTRIBUTING §9: nothing under 32 px on screen
             var body = text("HUD body · " + id, wrap(o.lines, o.wrap || 22).join("\r"), o.bodyFont || "ui_regular", bs, o.bodyColor || "cloud", 20, just);
             tr(body, "ADBE Position").expression = anchorExpr(o.anchor) + " + [" + (dx + tx) + "," + Math.round(dy - 12 + ts * 0.45 + bs * 1.15) + "];";
             if (o.instant) SSP.apply(body, "Fade", "in", t0); else SSP.applyText(body, "Words Fade Up", "in", tIn + SSM.seconds("Tick"));
@@ -158,7 +158,7 @@ var SSHUD = (function () {
             var KL = null;
             if (o.label) {
                 // label lines (an array, or a string wrapped at o.wrap chars); side "top" (default), "bottom", "left" or "right"
-                var ls = o.labelSize || 18, lines = o.label instanceof Array ? o.label : wrap([o.label], o.wrap || 0);
+                var ls = o.labelSize || 32, lines = o.label instanceof Array ? o.label : wrap([o.label], o.wrap || 0);
                 var side = o.labelSide || "top", lj = (side === "left" || o.labelAlign === "right") ? ParagraphJustification.RIGHT_JUSTIFY : ParagraphJustification.LEFT_JUSTIFY;
                 var L = text("HUD bracket label · " + id, lines.join("\r"), o.labelFont || "ui", ls, color, o.labelTracking === undefined ? 220 : o.labelTracking, lj);
                 var off = side === "left" ? [-w - 24, -h + ls] : side === "right" ? [w + 24, -h + ls] : side === "bottom" ? [o.labelAlign === "right" ? w : -w, h + ls + 14] : [-w, -h - 16 - (lines.length - 1) * ls * 1.2];
@@ -188,10 +188,10 @@ var SSHUD = (function () {
             tr(fill, "ADBE Anchor Point").setValue([-W / 2, 0]);
             tr(fill, "ADBE Position").setValue([o.at[0], o.at[1] + 30]);
             SSM.animate(tr(fill, "ADBE Scale"), t0 + SSM.seconds("Glide"), [0, 100, 100], [o.value, 100, 100], "Stage", "Settle");
-            var lab = text("HUD meter label · " + id, o.label, "ui", 20, color, 200);
+            var lab = text("HUD meter label · " + id, o.label, "ui", 32, color, 200);
             tr(lab, "ADBE Position").setValue([o.at[0], o.at[1]]);
             SSP.applyText(lab, "Tracking Settle", "in", t0);
-            var num = text("HUD meter value · " + id, "0%", "ui", 20, "cloud", 60, ParagraphJustification.RIGHT_JUSTIFY);
+            var num = text("HUD meter value · " + id, "0%", "ui", 32, "cloud", 60, ParagraphJustification.RIGHT_JUSTIFY);
             tr(num, "ADBE Position").setValue([o.at[0] + W, o.at[1]]);
             num.property("ADBE Text Properties").property("ADBE Text Document").expression =
                 'var s = thisComp.layer("HUD meter fill · ' + id + '").transform.scale[0]; Math.round(s) + "%";';
@@ -203,7 +203,7 @@ var SSHUD = (function () {
 
         // Figma-style pill chip (Cloud/Coral/Spark) that sticks to a tracked point.
         chip: function (o) {
-            var fillName = o.color || "cloud", t0 = o.t0 || 0, ts = o.textSize || 20, h = Math.round(ts * 2.3), w = o.width || (o.text.length * ts * 0.65 + ts * 2.2);
+            var fillName = o.color || "cloud", t0 = o.t0 || 0, ts = o.textSize || 32, h = Math.round(ts * 2.3), w = o.width || (o.text.length * ts * 0.65 + ts * 2.2);
             var P = C.layers.addShape(); P.name = "HUD chip · " + o.text;
             var g = P.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
             var r = g.addProperty("ADBE Vector Shape - Rect"); r.property("ADBE Vector Rect Size").setValue([w, h]); r.property("ADBE Vector Rect Roundness").setValue(h / 2);

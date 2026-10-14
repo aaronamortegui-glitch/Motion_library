@@ -169,6 +169,10 @@ These came out of reviewing the Motion DNA promo; `tools/check_layout.jsx` check
 12. **A name stays close to its person** (freeze titles hug the silhouette, they do not drift to the frame edges).
 13. **Fonts are never substituted** (`ae_status` and `check_layout.jsx` stop on it; restart AE). Titles are sans
     (Inter Tight), the serif is for the italic accent line only.
+15. **Text never touches the product or the subject.** When a title would run into the object, break it into two lines
+    and play with the sizes (a small lead line over a big key line: "Bakes like" 64 px / "a pro." 132 px) instead of
+    shrinking everything or letting it overlap. Callouts on a moving shot point *inward*, so the camera move cannot
+    push them out of frame. (Found in the use-case tests, UC12 and UC17.)
 14. **Effects stay tasteful:** halos rotate slowly and stay thin (no line sticking out of the silhouette), bursts are
     solid colour, one technique per beat.
 

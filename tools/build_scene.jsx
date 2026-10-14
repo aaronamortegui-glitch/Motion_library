@@ -52,7 +52,8 @@
         if (S.prebuild) $.evalFile(new File(SS_ROOT + "/" + S.prebuild));   // builds comps this scene uses (e.g. APP_SCREEN)
         var old = findItem(S.comp); if (old) old.remove();
         var plate = importOnce(S.plate);
-        var TRK = SSM.readJSON(SS_ROOT + "/" + S.tracks);
+        var TRK = S.tracks ? SSM.readJSON(SS_ROOT + "/" + S.tracks)   // no tracks file: the plate gives size and rate
+            : { size: [plate.width, plate.height], fps: S.fps || plate.frameRate || 24, tracks: {} };
         var c = proj.items.addComp(S.comp, TRK.size[0], TRK.size[1], 1, S.duration || plate.duration, TRK.fps);
         c.parentFolder = folder(SPEC.folder || "SS Scenes");
         if (S.faces) c.comment = "faces:" + S.faces;   // read by tools/check_layout.jsx (no graphics on faces)
@@ -120,7 +121,7 @@
             }
             else if (o.type === "title" || o.type === "kicker") {
                 var isTitle = o.type === "title";
-                var T = text(c, o.text, isTitle ? "display" : "ui", o.size || (isTitle ? 96 : 26), o.color || (isTitle ? "cloud" : "spark"), isTitle ? 0 : 200);
+                var T = text(c, o.text, isTitle ? "display" : "ui", o.size || (isTitle ? 96 : 32), o.color || (isTitle ? "cloud" : "spark"), isTitle ? 0 : 200);
                 tr(T, "ADBE Position").setValue(o.at);
                 SSP.applyText(T, isTitle ? "Chars Rise" : "Tracking Settle", "in", o.t0 || 0);
                 SSHUD.holo(T, 0.5);

@@ -170,7 +170,7 @@ def digest(slug):
         out.append(f"Logo: {i['logo']}")
     pr = b.get("presets", {})
     if pr.get("prefer"):
-        out.append("Prefer: " + "; ".join(f"{k}: {', '.join(v)}" for k, v in pr["prefer"].items()))
+        out.append("Prefer: " + "; ".join(f"{k}: {', '.join([v] if isinstance(v, str) else v)}" for k, v in pr["prefer"].items()))
     if pr.get("avoid"):
         out.append("Avoid: " + ", ".join(pr["avoid"]))
     mo = b.get("motion") or {}

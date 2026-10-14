@@ -44,6 +44,7 @@
                     var has = p.numKeys > 0 || (p.canSetExpression && p.expression);
                     if (p.numKeys > 0) keys += p.numKeys;
                     if (p.canSetExpression && p.expression) expr++;
+                    if (p.canSetExpression && /random\(|wiggle\(/.test(p.expression)) moves = true;   // a random flicker may skip every sampled frame
                     if (has && !moves && p.propertyValueType !== PropertyValueType.NO_VALUE && p.propertyValueType !== PropertyValueType.CUSTOM_VALUE) {
                         try {   // sample every frame (random flickers only show on some frames)
                             var a = String(p.valueAtTime(0.1, false));

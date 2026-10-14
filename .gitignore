@@ -92,3 +92,6 @@ tools/.cache/
 media/motion_dna_components/4k/
 media/motion_dna_components/figma/
 media/motion_dna_components/_check_*.jpg
+
+# temporary jobs and one-off test scripts (CLAUDE.md: never commit them)
+tools/_*

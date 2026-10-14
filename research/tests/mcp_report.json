@@ -3,7 +3,7 @@
   "tool": "ae_status",
   "ok": true,
   "args": {},
-  "answer": "AE 26.5x89 · project: use-cases.aep · active: UC09 Cars · Figma specs (1920x1080, 5.00s, 12 layers, selected: 0) · panel: not loaded · fonts ok"
+  "answer": "AE 26.5x89 · project: use-cases.aep · active: UC20 Eyewear · Oku v3 (1920x1080, 4.00s, 8 layers, selected: 3) · panel: loaded (Window > Extensions > Motion DNA) · fonts ok"
  },
  {
   "tool": "list_presets",
@@ -109,7 +109,7 @@
    "kind": "motion",
    "name": "Surge Rise"
   },
-  "answer": "Motion DNA panel is not open (Window > Extensions > Motion DNA)"
+  "answer": "selected motion/Surge Rise"
  },
  {
   "tool": "render_frame",
@@ -118,7 +118,7 @@
    "comp": "_MCP_TEST",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1791937340319.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1791940791940.png (open it to look at the frame)"
  },
  {
   "tool": "check_layout",
@@ -167,7 +167,7 @@
   "tool": "list_brands",
   "ok": true,
   "args": {},
-  "answer": "vela: Vela · style Elegant · curve Coast · tones premium/calm/modern · energy [1, 3] · 2 rules · local\nlume: Lumé · style Elegant · curve Coast · tones luxury/calm/elegant · energy [1, 2] · 2 rules · external\nmotion-dna: Motion DNA · style Playful · curve Snap · tones playful/retro/bold · energy [3,"
+  "answer": "vela: Vela · style Elegant · curve Coast · tones premium/calm/modern · energy [1, 3] · 2 rules · local\nlume: Lumé · style Elegant · curve Coast · tones luxury/calm/elegant · energy [1, 2] · 2 rules · external\noku: Oku Optics · style Calm Modern · curve Coast · tones calm/premium/eyewear · energy [1,"
  },
  {
   "tool": "get_brand",

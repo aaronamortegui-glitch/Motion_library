@@ -1318,6 +1318,11 @@ var SSP = (function () {
                 for (var d = 0; d < ls.length; d++) {
                     var L = ls[d], role = roleOf(L, comp, maxText);
                     if (role !== order[o]) continue;
+                    if (L.parent) {   // a button's label rides its button: it moves with it and fades with it (opacity is not inherited)
+                        var op = L.property("ADBE Transform Group").property("ADBE Opacity");
+                        if (!op.numKeys && !op.expression) op.expression = "parent.transform.opacity * value / 100;   // SS rides its parent";
+                        continue;
+                    }
                     var r = pk.roles[role];
                     if (!r) continue;
                     var t0 = L.inPoint + (pk.delay || 0) + n * st;

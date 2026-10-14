@@ -43,6 +43,10 @@
             if (!isText && !isDot && !isCard) continue;
             var r = L.sourceRectAtTime(t, false), s = tr(L, "ADBE Scale").valueAtTime(t, false), p = tr(L, "ADBE Position").valueAtTime(t, false), a = tr(L, "ADBE Anchor Point").valueAtTime(t, false);
             if (r.width < 2 || r.height < 2) continue;
+            if (L.parent) {   // a parented layer (a chip's text): its position is in the parent's space
+                var P = L.parent, pp = tr(P, "ADBE Position").valueAtTime(t, false), pa = tr(P, "ADBE Anchor Point").valueAtTime(t, false), ps = tr(P, "ADBE Scale").valueAtTime(t, false);
+                p = [pp[0] + (p[0] - pa[0]) * ps[0] / 100, pp[1] + (p[1] - pa[1]) * ps[1] / 100]; s = [s[0] * ps[0] / 100, s[1] * ps[1] / 100];
+            }
             var x0 = p[0] + (r.left - a[0]) * s[0] / 100, y0 = p[1] + (r.top - a[1]) * s[1] / 100;
             var box = [x0, y0, x0 + r.width * s[0] / 100, y0 + r.height * s[1] / 100];
             var behind = false;   // text under the people matte (roto) is covered by them, not placed on their faces
@@ -51,7 +55,8 @@
             if (isText) {
                 var td = L.property("ADBE Text Properties").property("ADBE Text Document").valueAtTime(t, false);
                 item.size = td.fontSize * s[1] / 100; item.fill = td.fillColor;
-                item.helped = L.property("ADBE Effect Parade").property("ADBE Drop Shadow") !== null;   // shadow counts as help
+                var dsh = L.property("ADBE Effect Parade").property("ADBE Drop Shadow");   // a real shadow (60 %+ opacity) counts as help, a faint one does not
+                item.helped = dsh !== null && dsh.property("ADBE Drop Shadow-0002").valueAtTime(t, false) >= 153;
                 for (var k = 1; k <= comp.numLayers; k++) if (comp.layer(k).name.indexOf("HUD card") === 0 && comp.layer(k).enabled) item.helped = true;
                 for (var sh = L.index + 1; sh <= comp.numLayers && !item.helped; sh++) {   // a shape card under the text is its plate
                     var Sh = comp.layer(sh);
@@ -62,7 +67,7 @@
                 }
                 item.str = String(td.text).replace(/\r/g, " / ").substr(0, 40);
                 // contrast is judged once the text has finished coming in (its last key before the exit), not mid-fade
-                var ks = SSP.animatedProps(L); item.settle = 0;
+                var ks = SSP.animatedProps(L).concat(L.parent ? SSP.animatedProps(L.parent) : []); item.settle = 0;   // a chip's text moves with its parent
                 for (var q = 0; q < ks.length; q++) for (var kk = 1; kk <= ks[q].numKeys; kk++) { var kt = ks[q].keyTime(kk); if (kt < L.outPoint - 1) item.settle = Math.max(item.settle, kt); }
             }
             out.push(item);
@@ -109,8 +114,8 @@
             }
             for (var a1 = 0; a1 < texts.length; a1++) {
                 var A = texts[a1], b = A.box;
-                if (A.size < MIN) add("size", C.name, t, A.str + " is " + Math.round(A.size) + " px (min " + MIN + ")");
-                if (b[0] < SAFE || b[1] < SAFE || b[2] > C.width - SAFE || b[3] > C.height - SAFE) add("frame", C.name, t, A.str + " leaves the safe area");
+                if (t >= (A.settle || 0) && A.size < MIN) add("size", C.name, t, A.str + " is " + Math.round(A.size) + " px (min " + MIN + ")");
+                if (t >= (A.settle || 0) && (b[0] < SAFE || b[1] < SAFE || b[2] > C.width - SAFE || b[3] > C.height - SAFE)) add("frame", C.name, t, A.str + " leaves the safe area");
                 for (var b1 = a1 + 1; b1 < texts.length; b1++) {
                     var B = texts[b1], ov = inter(A.box, B.box);
                     if (ov > 0.08 * Math.min(area(A.box), area(B.box))) add("overlap", C.name, t, A.str + "  ×  " + B.str);
