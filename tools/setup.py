@@ -450,6 +450,9 @@ def uninstall():
 
 
 def main():
+    for s in (sys.stdout, sys.stderr):   # a Windows console (cp1252) must not crash on a tool's output
+        try: s.reconfigure(encoding="utf-8", errors="replace")
+        except Exception: pass
     if "--uninstall" in sys.argv:
         return uninstall()
     upd = "--update" in sys.argv

@@ -536,10 +536,10 @@ function projectView() {
       toast(`${PJ.p.name} is the current project` + (PJ.p.aep ? "" : ". Save your After Effects project inside its folder so it opens with it next time."));
       agent.render();
     };
-    wrap.append(h("div", { class: "note", style: "padding:0" }, "A project is a folder for one piece: footage, audio, the After Effects file, renders, and one Claude conversation that you can continue from here, the Claude app or a terminal. Its brand and its own rules go with it."),
+    wrap.append(h("div", { class: "note", style: "padding:0" }, "One folder per piece: footage, AE file, renders and its own Claude conversation."),
       h("div", { class: "saveform" }, h("b", {}, "New project"), name, h("div", { class: "crow" }, pick, parentTxt), brandSel,
         h("div", { class: "subhead", style: "margin:0" }, "Folders"), h("div", { class: "folders" }, ...checks.map((c) => h("label", {}, c, c.value))),
-        h("label", {}, saveAep, " Save the open After Effects project in it (05_ae)"),
+        h("label", {}, saveAep, " Save the open AE project in it"),
         h("div", { class: "row" }, h("button", { class: "solid apply", onclick: create }, "Create project"))),
       h("button", { class: "btn", onclick: openExisting }, "Open an existing project folder…"));
     return wrap;

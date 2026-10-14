@@ -66,6 +66,8 @@ async function boot() {
     for (let tries = 0; ; tries++) {
       await evalHost(`try { $.evalFile(new File(${JSON.stringify(extensionPath() + "/host/host.jsx")})); "ok" } catch (e) { "ERR " + e }`);
       info = parse(await call("mdna_boot", extensionPath()));
+      // the After Effects side comes from the clone too (the installed host.jsx is the copy made at install time)
+      if (info.root && window.__base) await evalHost(`$.evalFile(new File(${JSON.stringify(info.root + "/panel/host/host.jsx")}))`);
       if (!info.error) break;
       if (tries >= 40 || /Repo not found/.test(info.error)) { $("#boot").textContent = "Motion DNA could not start: " + info.error + " (F5 retries)"; return; }
       $("#boot").textContent = "Waiting for After Effects…";
@@ -555,11 +557,11 @@ function newBrandForm() {
   const name = h("input", { class: "field", placeholder: "Client or brand name" });
   const style = h("select", { class: "field" }, [h("option", { value: "" }, "Base style (optional)"), ...S.packs.map((pk) => h("option", { value: pk.name }, pk.name))]);
   const curve = h("select", { class: "field" }, [h("option", { value: "" }, "Main curve (optional)"), ...CV.easings.map((e) => h("option", { value: e.name }, e.name))]);
-  const tones = h("input", { class: "field", placeholder: "Tones, comma separated (e.g. calm, modern)" });
+  const tones = h("input", { class: "field", placeholder: "Tones (e.g. calm, modern)" });
   const from = h("select", { class: "field", title: "Start from a template: its curves, timing and rules are copied" },
     [h("option", { value: "" }, "Start empty"), ...BRANDS.map((x) => h("option", { value: x.b.slug }, "Start from " + x.b.name))]);
   const whereTxt = h("span", { class: "dim" });
-  const drawWhere = () => { whereTxt.textContent = BR.where === "folder" ? (BR.folder ? BR.folder + "/<brand>" : "pick a folder…") : "library/brands.local (this computer, never in git)"; };
+  const drawWhere = () => { whereTxt.textContent = BR.where === "folder" ? (BR.folder ? BR.folder + "/<brand>" : "pick a folder…") : "On this computer (never in git)"; };
   const whereSeg = h("div", { class: "seg" }, ...[["plugin", "Plugin folder"], ["folder", "Choose folder…"]].map(([k, l]) => h("button", { class: BR.where === k ? "on" : "",
     onclick: async (e) => {
       if (k === "folder") { const f = await call("mdna_pick_folder", "Where should this brand live?"); if (!f || String(f).startsWith("ERR")) return; BR.folder = f; }
@@ -586,7 +588,7 @@ function newBrandForm() {
   return h("div", { class: "stack" }, backBar("New brand"), h("div", { class: "saveform" }, name, from, style, curve, tones,
     h("div", { class: "subhead", style: "margin:2px 0 0" }, "Where it lives"), whereSeg, whereTxt,
     h("div", { class: "row" }, h("button", { class: "solid apply", onclick: create }, "Create"), h("button", { class: "btn", onclick: () => { BR.view = "list"; brands.render(); } }, "Cancel"))),
-    h("div", { class: "note", style: "padding:0" }, "Brands stay on your computer, never in the repo. To work on the same brand with someone, use Export and send them the file: when they import it, new and edited rules merge into theirs."));
+    h("div", { class: "note", style: "padding:0" }, "Stays on your computer. To share it: Download, then the other person imports it (rules merge)."));
 }
 function backBar(title, extra) {
   return h("div", { class: "kit-top" }, h("button", { class: "icon back", title: "All brands", onclick: () => { BR.view = "list"; brands.render(); } }, "‹"), h("span", { class: "kit-title" }, title), ...[].concat(extra || []));

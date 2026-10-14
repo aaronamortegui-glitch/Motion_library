@@ -335,3 +335,20 @@ select.field.big { height: 30px; font-weight: 600; border-color: rgba(216, 255, 
 .chat .send-row .chips { flex: 1; min-width: 0; }
 .chat .send-row .solid { flex: 0 0 auto; min-width: 96px; }
 .chat .foot .btn { font-size: 11px; color: var(--text-dim); }
+
+/* Narrow docks (a panel squeezed beside the timeline): nothing overflows, rows wrap instead of clipping */
+.top .title { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.existing-row { flex-wrap: wrap; row-gap: 4px; }
+.existing-row > span { white-space: normal; }
+.kit-top { flex-wrap: wrap; row-gap: 6px; }
+.crow { flex-wrap: wrap; }
+.crow > * { min-width: 64px; }
+@media (max-width: 320px) {
+  .status button { font-size: 0; gap: 0; padding: 0 7px; }   /* dots only: each one's tooltip names it */
+  .etabs { flex-wrap: wrap; }
+  .etabs button { flex: 1 0 30%; }
+  .kit-title { flex: 1 0 100%; }
+  .top { gap: 5px; padding-left: 8px; padding-right: 8px; }
+  .chat .send-row { flex-wrap: wrap; }
+  .chat .send-row .solid { flex: 1 1 100%; }
+}

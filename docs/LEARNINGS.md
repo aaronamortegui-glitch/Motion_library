@@ -146,6 +146,14 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **The agent saved the AE project unasked and skipped the layout check** (UC08, UC09) → nothing in its context said
   otherwise → the panel's context now says never to save unless asked, names the project's own .aep, says what "the
   selected layers" means when none are selected, and asks for `check_layout` (now an MCP tool) before calling a build done.
+- **The panel in After Effects kept showing old screens after a push** → the signed install is a copy of `panel/` made
+  when setup ran, so its scripts never changed → the installed `index.html` is now a shell that loads the styles,
+  scripts and `host.jsx` from the clone named in `.root`; only changes to `index.html` or the manifest need
+  `python tools/setup.py --update`. Close and reopen the panel to see code changes.
+- **`setup.py` crashed printing a tool's output** (`UnicodeEncodeError … cp1252`) → a Windows console encoding → it
+  reconfigures stdout/stderr to UTF-8 with replacement.
+- **Panel rows clipped in a narrow dock** (header status, Modify/Replace row, Agent footer) → fixed-width flex rows →
+  rows wrap, the header status shows dots only under 320 px, and the send row stacks.
 - **Remote debugging lands on another extension** → several `.debug` files used the same port → give ours its own.
 
 ## 2. Animation Composer as a behavioral reference

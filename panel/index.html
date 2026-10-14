@@ -6,7 +6,18 @@
   <title>Motion DNA</title>
   <script>   // load the stylesheet and scripts fresh every time (F5 after an update must not run cached code)
     window.__v = Date.now();
-    document.write('<link rel="stylesheet" href="css/panel.css?v=' + window.__v + '">');
+    // The installed (signed) panel is only a shell: its styles and scripts come from the Motion DNA clone it points to
+    // (.root, written by setup.py), so a git pull shows up in the panel without reinstalling it.
+    window.__base = "";
+    try {
+      var here = decodeURI(location.pathname).replace(/^\/([A-Za-z]:)/, "$1").replace(/\/[^\/]*$/, "");
+      var r = window.cep && window.cep.fs.readFile(here + "/.root");
+      if (r && r.err === 0) {
+        var root = r.data.replace(/^\s+|\s+$/g, "").replace(/\\/g, "/");
+        if (window.cep.fs.stat(root + "/panel/js/app.js").err === 0) window.__base = "file:///" + encodeURI(root.replace(/^\//, "")).replace(/#/g, "%23") + "/panel/";
+      }
+    } catch (e) {}
+    document.write('<link rel="stylesheet" href="' + window.__base + 'css/panel.css?v=' + window.__v + '">');
   </script>
 </head>
 <body>
@@ -50,9 +61,9 @@
 
   <div class="toast" id="toast" hidden></div>
   <script>
-    document.write('<script src="js/host.js?v=' + window.__v + '"><\/script>');
-    document.write('<script src="js/app.js?v=' + window.__v + '"><\/script>');
-    document.write('<script src="js/agent.js?v=' + window.__v + '"><\/script>');
+    document.write('<script src="' + window.__base + 'js/host.js?v=' + window.__v + '"><\/script>');
+    document.write('<script src="' + window.__base + 'js/app.js?v=' + window.__v + '"><\/script>');
+    document.write('<script src="' + window.__base + 'js/agent.js?v=' + window.__v + '"><\/script>');
   </script>
 </body>
 </html>
