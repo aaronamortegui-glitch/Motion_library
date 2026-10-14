@@ -175,8 +175,12 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   can miss every sampled frame → a random/wiggle expression counts as motion.
 - **The engine in After Effects was an older copy** → `$.global.SSP` is loaded once per session → a job that needs the
   latest engine runs `$.evalFile(tools/ss_presets.jsx)` first.
-- **The office views for the video disagreed** (windows, doors, desks) → each angle was generated on its own → build
-  every angle from one master frame as the reference image (UC locations, USD 0.632 for 8 variants).
+- **The office views for the video disagreed** (windows, doors, desks), and even views generated *from* the master
+  moved the screens and swapped the desk props → a generator re-imagines details → close-ups of a set are **crops of the
+  master upscaled locally** (`tools/upscale_crop.py`, free, every object identical); a floor plan is **drawn** from the
+  master; only an angle the master cannot show (the reverse) is generated, with the master and the close-ups as
+  references, then mirrored and cleaned of anything that stands behind the camera. Check each view object by object
+  against the master before using it.
 - **Remote debugging lands on another extension** → several `.debug` files used the same port → give ours its own.
 
 ## 2. Animation Composer as a behavioral reference
@@ -281,6 +285,7 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 | Item | Cost |
 |---|---|
 | Office views regenerated from office_wide (Nano Banana 2.1 image-to-image, 4K, 8 variants) | 0.632 |
+| Office reverse angle: 2 variants with the master + close-ups as references, then 2 clean-up edits (Nano Banana 2.1, 4K) | 0.316 |
 | Nano Banana Pro still (2K) | 0.18 |
 | Kling 3.0 Pro, 5 s 1080p | 0.706 |
 | VEED background removal (5 s) | 0.135 |

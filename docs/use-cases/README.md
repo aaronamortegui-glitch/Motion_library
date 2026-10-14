@@ -306,8 +306,14 @@ and a water cooler that the wide shot does not have; one had a white open door; 
 close-ups and the floor plan (Nano Banana 2.1 image-to-image, 2 variants each, USD 0.632). For each view we kept the
 more coherent variant: same walnut walls, same closed door in the middle of the back wall, same furniture.
 
-**The rule for any set:** pick one master frame and build every other angle from it, as a reference. Never generate
-angles independently.
+**Second pass:** even views generated from the master moved the screens and swapped the desk props. So the desk
+close-ups are now crops of the master upscaled on the local GPU (`tools/upscale_crop.py`, free), and the floor plan is
+drawn from it. Only the reverse angle is generated: the master and both close-ups were the references, the result was
+mirrored so each desk's props sit on the right side, and the side desks were edited out, since they stand behind the
+camera in that view (USD 0.316 more).
+
+**The rule for any set:** pick one master frame. Crop it for close-ups, draw the plan from it, and generate only the
+angles it cannot show, with it as the reference. Then check every view, object by object, against the master.
 
 ## Panel reviews
 - **F15:** a style without its preview showed a broken image.

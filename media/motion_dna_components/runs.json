@@ -11,10 +11,10 @@
  },
  "runs": {
   "locations/office_wide": "run_m17ftbtc70r6jqva2rm269xysd8g6scd",
-  "locations/office_reverse": "run_m173fe0was34vqmgvjnnts5ff58g85av",
-  "locations/office_floorplan": "run_m17558v572nxpx3ysbj5nma2718g987f",
-  "locations/office_dana_desk": "run_m176e7y2aahhmsz74a3g454mwh8g87sf",
-  "locations/office_marcus_desk": "run_m172bjq1yqfxqze47mbmn632458g8f64",
+  "locations/office_reverse": "run_m173m7mq2h40zz7jrsevzbzkvs8g9v91 (edit of run_m1709zjzxqgz16j6wxm352rje58g9man, mirrored)",
+  "locations/office_floorplan": "drawn from office_wide (top view, not generated)",
+  "locations/office_dana_desk": "crop of office_wide (tools/upscale_crop.py --box 1100 1380 3300 2608)",
+  "locations/office_marcus_desk": "crop of office_wide (tools/upscale_crop.py --box 2650 1380 4850 2608)",
   "locations/office_door": "run_m176006zx24x38r0kzwymy64rx8g7tyj",
   "locations/conference_wide": "run_m1707jcs1smyvf8gf3f3ke0nen8g7acy",
   "locations/conference_reverse": "run_m176nj3vy4hxx1vwnegc3tdsgh8g65kd",
@@ -42,6 +42,6 @@
   "props/car": "run_m178g0336xnk53eafpdbm13bws8g6zkt"
  },
  "notes": [
-  "2026-10-13: office_reverse, office_dana_desk, office_marcus_desk and office_floorplan regenerated with office_wide as the reference image so the set stays coherent (same door, walls, furniture); only the final images are kept."
+  "2026-10-13: the office set is built from one master frame, office_wide. The desk close-ups are crops of it upscaled on the local GPU (tools/upscale_crop.py, 4x-ClearRealityV1), so every object, screen and desk is the same; the floor plan is drawn from it; the reverse angle is generated with the master and both close-ups as references, mirrored, and the side desks that sit behind the camera edited out. Only the final images are kept."
  ]
 }
