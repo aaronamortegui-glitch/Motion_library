@@ -17,7 +17,6 @@ animate keeps a profile that **learns from each review**, and everything it make
   the library, the brand and your selection, and shows what each order cost.
 - **Claude where you prefer.** The same conversation continues in the panel, the Claude app or a terminal: one per brand
   and one per video.
-- **Connect in one click.** Claude and Figma each have one button that turns green by itself.
 
 <br clear="right">
 
@@ -177,32 +176,16 @@ pipeline in `tools/style_research/`.
 
 ## How it works
 
-```mermaid
-flowchart LR
-  subgraph K["Knowledge"]
-    MSM["<b>Motion Style Map</b><br/>20 reference films measured<br/>research by Gian Orsi"]
-    LIB["<b>Library</b><br/>80 moves · 14 curves · 9 styles · 11 techniques<br/>tagged: role · energy 1–5 · tone"]
-    BR["<b>Brands</b><br/>rules learned in every review<br/>on your computer, shared as a file"]
-    MSM --> LIB
-  end
-  subgraph D["Who drives it"]
-    P["Designer<br/>the panel"]
-    C["Agent / Claude Code<br/>MCP server motion-dna"]
-  end
-  LIB --> P
-  LIB --> C
-  BR --> P
-  BR --> C
-  P --> AE["After Effects<br/>native keyframes"]
-  C -- "bridge" --> AE
-  AE -- "review notes" --> BR
-  AE -- "gaps → new moves" --> LIB
-```
+| | What it is | Where |
+|---|---|---|
+| **Research** | 20 reference films measured frame by frame (Motion Style Map, by Gian Orsi) and brand analyses | `research/`, `library/references/` |
+| **Library** | 80 moves, 14 curves, 9 styles, 11 techniques, tagged by role, energy 1–5 and tone | `library/`, `tokens/`, `tools/ss_presets.jsx` |
+| **Brands** | Rules, curves and timing learned in every review; on your computer, shared as a file | `library/brands.local/` or your folder |
+| **Who drives it** | A designer in the panel, or Claude through the MCP server `motion-dna` | `panel/`, `tools/mcp/` |
+| **Output** | Native After Effects keyframes, checked by the layout QA and the tests | `tools/check_layout.jsx`, `tools/test_all.py` |
 
-The **library** is the vocabulary: moves, token curves (`tokens/`), styles and techniques, all tagged so they can be
-recombined by feel. **Research feeds it**: reference films and brand analyses are measured and matched; whatever is
-missing is created and tagged (CONTRIBUTING §8). **Brands remember**, and **every piece is checked**: the layout QA and
-the tests catch problems, review notes become rules, new needs become new moves.
+It is a loop: whatever a reference needs and the library lacks becomes a new move, curve or style (CONTRIBUTING §8),
+and every review note becomes a brand rule.
 
 ## Made with it
 
