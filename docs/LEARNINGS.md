@@ -286,6 +286,7 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 |---|---|
 | Office views regenerated from office_wide (Nano Banana 2.1 image-to-image, 4K, 8 variants) | 0.632 |
 | Office reverse angle: 2 variants with the master + close-ups as references, then 2 clean-up edits (Nano Banana 2.1, 4K) | 0.316 |
+| README banner, 80s software-box poster: 3 variants at 21:9 with the props box as reference (Nano Banana 2.1, 4K) | 0.237 |
 | Nano Banana Pro still (2K) | 0.18 |
 | Kling 3.0 Pro, 5 s 1080p | 0.706 |
 | VEED background removal (5 s) | 0.135 |

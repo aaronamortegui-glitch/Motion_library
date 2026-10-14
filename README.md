@@ -1,3 +1,5 @@
+<img src="docs/screens/motion-dna-banner.jpg" alt="Motion DNA: your brand's motion, remembered. 80 moves, 9 styles, for After Effects" width="100%">
+
 # Motion DNA
 
 Motion made with AI all looks the same: same curves, same moves, same templates. **Motion DNA** gives it an identity.
