@@ -141,6 +141,27 @@ Open the repo (or a brand or project folder) in Claude Code and approve the `mot
 The order of work and recipes that worked: [User guide › For Claude](docs/USER_GUIDE.md#for-claude). Without MCP, any
 LLM reads `library/INDEX.txt` and runs `.jsx` jobs with `bash tools/bridge.sh`.
 
+## Tested on real work
+
+Every tool was run on a small, realistic piece from five industries, with fictional brands. Each case says which part of
+Motion DNA it tests, shows the result, and leaves a tip. What broke and how it was fixed:
+[docs/use-cases](docs/use-cases/README.md). The manual built from it: [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
+
+| Case | Tests | Result | Tip |
+|---|---|---|---|
+| **UC01** · Fashion | Behaviors › Moves · Create | <img src="docs/use-cases/img/uc01.jpg" width="360" alt="UC01"> | Select the layers in reading order: the stagger follows it. |
+| **UC02** · Eyewear | Behaviors › Modify / Replace | <img src="docs/use-cases/img/uc02.jpg" width="360" alt="UC02"> | A client file that already moves: Modify keeps its poses. |
+| **UC03** · Beauty | Behaviors › Text | <img src="docs/use-cases/img/uc03.jpg" width="360" alt="UC03"> | Put text where the texture is calm, or on a card. |
+| **UC04** · Kitchen | Behaviors › Loops and Transitions | <img src="docs/use-cases/img/uc04.jpg" width="360" alt="UC04"> | Select both layers and press Transition: the cut is one move. |
+| **UC05** · Cars | Curves | <img src="docs/use-cases/img/uc05.jpg" width="360" alt="UC05"> | "Smoother, more premium" = same keys, S curve or Coast. |
+| **UC06** · Beauty | Brands | <img src="docs/use-cases/img/uc06.jpg" width="360" alt="UC06"> | Write rules anyone could follow; share the brand as one file. |
+| **UC06b** · Beauty | Agent › Chat: a review note becomes a rule | <img src="docs/use-cases/img/uc06b.jpg" width="360" alt="UC06b"> | Keep each rule where it belongs: brand, project or general. |
+| **UC07** · Fashion | Agent › Library › Styles | <img src="docs/use-cases/img/uc07.jpg" width="360" alt="UC07"> | No layers selected means the whole comp. |
+| **UC08** · Fashion | Agent › Library › Techniques (text behind) | <img src="docs/use-cases/img/uc08.jpg" width="360" alt="UC08"> | Cut-outs with `matte` / `text_behind`; watch the contrast. |
+| **UC09** · Cars | Agent (Full): Figma → After Effects, brand timing | <img src="docs/use-cases/img/uc09.jpg" width="360" alt="UC09"> | Put numbers in the brand's timing: `apply_brand` follows them. |
+| **UC10** · All | Agent › Project | <img src="docs/use-cases/img/uc10.jpg" width="360" alt="UC10"> | Keep the `.aep` in the project's `05_ae`. |
+| **UC11** · All | Claude Code (MCP) + layout QA | <img src="docs/use-cases/img/uc11.jpg" width="360" alt="UC11"> | Before calling it done: `render_frame`, then `check_layout`. |
+
 ## The library
 
 | Moves | Classics | Text | Loops | Recipes | Styles | Techniques | Curves |

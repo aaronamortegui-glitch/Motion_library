@@ -99,11 +99,17 @@ every key of those layers.
   **Fix:** they do now.
 - **F6:** the import printed "1 new rules".
   **Fix:** plurals are correct.
+
+![UC06b](img/uc06b.jpg)
+*The same flow in the panel (Vela demo): the note, the rule it proposes, the rule kept in the brand.*
+
 - **UC06b, Agent:** a review note on the piece came back as two `RULE:` lines. The panel asked
   where to keep them instead of saving them on its own. 53 s, about USD 0.45.
 
 ## UC07 · Fashion · A style from the Agent's Library
 **Brief:** Library › Styles › Editorial › *Use in chat*.
+
+![UC07](img/uc07.jpg)
 
 - **Worked:** 37 s, about USD 0.36.
 - **F7:** the order said "the open comp (or the selected layers)", which is ambiguous.
@@ -128,6 +134,8 @@ every key of those layers.
 ## UC09 · Cars · Figma frame → After Effects (Agent, Full mode)
 **Brief:** take the Figma frame *02 Specs* and rebuild it as editable layers, animated in Vela's style.
 
+![UC09](img/uc09.jpg)
+
 - **Worked:** native layers (a solid, the car cut-out, text in the brand fonts, rounded shape cards) placed as in Figma.
   191 s, 42 turns, about USD 1.99.
 - **F12:** `apply_brand` used the style's default timing (a 700 ms car with overshoot), but Vela says 900 ms and no bounce.
@@ -143,6 +151,9 @@ every key of those layers.
   *Open in Claude app* continued that same conversation in the Claude app.
 - **Worked:** the cost of each order is logged to `<project>/claude/usage.csv`.
 
+![UC10](img/uc10.jpg)
+*Agent › Project and the brand's own conversation, as in the panel.*
+
 ## UC11 · MCP directly, plus layout QA
 - **Worked:** `python tools/test_mcp.py` calls every tool the way Claude does: 23 of 23 passed.
 - **`check_layout` on all nine comps:**
@@ -151,6 +162,8 @@ every key of those layers.
     card under the text as its plate.
   - One warning is real and stays: "COAT" in UC08, tan on cream, 1.6:1. That is a design choice the review should
     catch: use a darker tone or a shadow.
+
+![UC11](img/uc11.jpg)
 
 ## Panel reviews
 - **F15:** a style without its preview showed a broken image.
