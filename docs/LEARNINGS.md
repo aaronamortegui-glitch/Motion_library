@@ -350,4 +350,19 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 | Seedance 2.5 r2v, 15 s 720p, 6 reference images | 7.325 (quote said 7.45) |
 | Seedance 2.5 r2v, 15 s 720p, 9 reference images + 1–2 voice references (`audio_urls`) | 7.325 (quote 7.45); 12 s = 5.861 (quote 5.96); 8 s = 3.922 (quote 3.97) |
 | Nano Banana 2.1 is2i still, 2K 16:9 (teaser storyboard fixes and new close-ups) | 0.053 each (22 charged; failed runs are free) |
+| ElevenLabs v3 voice line on Flora (`t2a-elevenlabs-tts-v3`) | 0.121 each; ElevenLabs Music 0.36 |
+| fal `fal-ai/elevenlabs/tts/eleven-v3` (list price 0.10 / 1k characters) | ≈ 0.01 per short line (9 lines ≈ 0.04) |
+| fal `elevenlabs/music/v2.5` (0.60 / min), 102 s teaser track | ≈ 1.02 |
+| fal `fal-ai/kling-video/v2.5-turbo/pro/image-to-video`, 5 s 1080p (1928x1072) | 0.35 list price (3 clips ≈ 1.05) |
+
+- **fal Seedance rejects our fictional characters** (`content_policy_violation` on `bytedance/seedance-2.5/reference-to-video`
+  with the character sheets as references; the likeness filter does not know they are generated) → animate each shot from
+  its approved still with Kling image-to-video on fal (one clip per shot, no dialogue) and lay the ElevenLabs VO over it.
+  The look stays consistent because every still already came from the sheets. fal downloads: use `curl` (Python's
+  urllib hit an SSL certificate error on Windows).
+
+- **Flora accepts a batch, then runs fail with `BILLING_WORKSPACE_MEMBER_USAGE_LIMIT_EXCEEDED`** (the create call returns
+  `ok: true` with a run id for every item; a few seconds later most runs are `failed`, one or two may still complete and
+  bill) → poll every batch before assuming outputs exist, stop launching once one run reports the limit, and ask the
+  workspace admin to raise it; failed runs are not charged.
 | *The 1974 Boardroom* v3 total (3 stills, 3 clips, 3 mattes, 3 music tracks, 6 VO lines) | ≈ 5.24 |
