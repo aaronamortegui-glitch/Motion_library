@@ -1037,6 +1037,25 @@ var SSP = (function () {
                 doOut ? function () { pr["out"](L, phase === "out" && t0 !== undefined ? t0 : L.outPoint - SSM.seconds("Arrive")); } : null);
             L.comment = "SS preset: " + name + " (" + pr.channels + ", " + pr.energy + ")";
         },
+        // A transition between two layers: A (outgoing) plays the preset's exit and B (incoming) its entrance, both
+        // starting at the cut, so they read as one move (Whip Pan: A leaves left as B arrives from the right). The cut is
+        // `at` (seconds), else the comp's playhead when both layers are visible there, else B's in point. The keys are
+        // added to what the layers already have (A keeps its entrance). Returns the cut time.
+        applyTransition: function (comp, A, B, name, at) {
+            if (!P[name]) throw new Error("Preset not found: " + name);
+            if (!P[name]["out"] || !P[name]["in"]) throw new Error(name + " has no exit and entrance to pair");
+            var t = at;
+            if (t === undefined || t === null) t = (comp.time >= Math.max(A.inPoint, B.inPoint) && comp.time < Math.min(A.outPoint, B.outPoint)) ? comp.time : B.inPoint;
+            var self = this;
+            var pair = [[A, "out"], [B, "in"]];
+            for (var i = 0; i < pair.length; i++) {
+                var L = pair[i][0], ph = pair[i][1];
+                var was = L.comment || "";   // the transition's keys go next to the layer's own (its entrance stays)
+                self.apply(L, name, ph, t);
+                L.comment = "SS preset: " + name + " (transition " + (ph === "out" ? "to " + B.name : "from " + A.name) + ")" + (/SS (preset|text|recipe)/.test(was) ? " | " + was : "");
+            }
+            return t;
+        },
         // Tuning for the next apply() calls: { speed, intensity, flipX, flipY, ease } (ease = token name or null).
         // SSP.tune() resets to defaults. Used by the panel and the MCP server.
         tune: function (o) {

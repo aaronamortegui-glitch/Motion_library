@@ -1,5 +1,5 @@
 {
- "note": "Techniques shown in the Motion DNA panel (Techniques). Each one is a script workflow, not a single preset: what it does, how to run it by hand, and what to ask Claude (MCP server motion-dna).",
+ "note": "Techniques shown in the Motion DNA panel (Techniques). Each one is a script workflow, not a single preset: what it does, how to run it by hand, and what to ask Claude (MCP server motion-dna). \"tool\": the MCP tool that runs it, when there is one.",
  "techniques": [
   {
    "name": "Tracked labels",
@@ -13,14 +13,16 @@
    "what": "Big type that sits behind the subject, cut by an AI matte.",
    "how": "Get a person matte (VEED background removal or rembg), then a scene JSON with \"matte\" and \"behind\" text (tools/build_scene.jsx).",
    "ask": "Put a giant 1974 behind the man in this shot.",
-   "image": "techniques/text-behind-people.png"
+   "image": "techniques/text-behind-people.png",
+   "tool": "text_behind (matte for the cut-out alone)"
   },
   {
    "name": "Roto breakdown",
    "what": "A 2×2 grid that shows plate, matte, contours and the final composite.",
    "how": "python tools/matte_contours.py, then tools/build_breakdown.jsx.",
    "ask": "Make a roto breakdown of shot 2.",
-   "image": "techniques/roto-breakdown.png"
+   "image": "techniques/roto-breakdown.png",
+   "tool": "matte, then run_jsx with tools/build_breakdown.jsx"
   },
   {
    "name": "HUD overlays",
@@ -34,7 +36,8 @@
    "what": "Slow-mo → burst → slow-mo on footage, on the Ramp, Surge or Whip curve, with frame blending.",
    "how": "Moves > Speed Ramp on a footage layer or precomp, or \"speed\" segments in an edit JSON (tools/build_edit.jsx).",
    "ask": "Speed-ramp this shot on the beat at 2 s with the Ramp curve and a whoosh.",
-   "image": "techniques/speed-ramps.png"
+   "image": "techniques/speed-ramps.png",
+   "tool": "apply_preset with Speed Ramp"
   },
   {
    "name": "Freeze frame + kinetic type",
@@ -48,21 +51,24 @@
    "what": "Two-colour bars that travel through a cut in one continuous move.",
    "how": "\"wipe\" elements (mode out at the end of a scene, mode in at the start of the next, same colours and direction) in a promo spec (tools/build_explainer.jsx).",
    "ask": "Join these two scenes with a Spark and Pine wipe from left to right.",
-   "image": "techniques/shape-wipe-transitions.png"
+   "image": "techniques/shape-wipe-transitions.png",
+   "tool": "apply_transition"
   },
   {
    "name": "Marker timing",
    "what": "Drag the SS in / SS out layer markers to retime an animation; the curve keeps its shape.",
    "how": "Tick Marker timing in Controls before applying (or SSP.markerTiming(true) in a script).",
    "ask": "Apply Surge Rise with marker timing to the title.",
-   "image": "techniques/marker-timing.png"
+   "image": "techniques/marker-timing.png",
+   "tool": "apply_preset with marker_timing"
   },
   {
    "name": "Styles",
    "what": "One click gives a whole comp a look: each layer gets the preset for its role (title, text, shape, media, logo).",
    "how": "Styles category, pick one, then In / Out / Both (SSP.applyPack).",
    "ask": "Apply the Elegant style to this comp and show me a frame.",
-   "image": "techniques/styles.png"
+   "image": "techniques/styles.png",
+   "tool": "apply_pack / apply_brand"
   },
   {
    "name": "Cut on the voice",

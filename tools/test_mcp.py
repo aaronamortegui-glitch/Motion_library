@@ -51,6 +51,7 @@ checks = [
     ("show_in_panel", {"kind": "motion", "name": "Surge Rise"}, lambda t: len(t) > 0),
     ("render_frame", {"comp": COMP, "time_s": 0.5}, lambda t: ".png" in t),
     ("check_layout", {"comps": [COMP]}, lambda t: t.startswith("layout QA")),
+    ("apply_transition", {"preset": "Whip Pan", "outgoing": "Chip", "incoming": "Title", "comp": COMP, "at_s": 1.0}, lambda t: "leaves as" in t),
     ("remove_animation", {"layers": ["Chip", "Title"], "comp": COMP}, lambda t: "cleared" in t),
     ("apply_pack", {"pack": "Calm Modern", "comp": COMP}, lambda t: "→" in t or "->" in t),
     ("list_brands", {}, lambda t: "motion-dna" in t),

@@ -364,6 +364,66 @@ app.scheduleTask("app.project.renderQueue.render()", 200, false); return f.fsNam
     return f"Render queued; still writing {target} (AE shows 'Not Responding' while it renders)"
 
 
+def t_apply_transition(preset, outgoing, incoming, comp=None, at_s=None, duration=1.0, intensity=1.0):
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), A = findLayers(c, [{js(outgoing)}])[0], B = findLayers(c, [{js(incoming)}])[0];
+{tune_js(duration, intensity)}
+app.beginUndoGroup("Motion DNA transition (MCP): {preset}");
+var t; try {{ t = SSP.applyTransition(c, A, B, {js(preset)}, {js(at_s)}); }} finally {{ SSP.tune(); app.endUndoGroup(); }}
+return A.name + " leaves as " + B.name + " arrives: " + {js(preset)} + " at " + t.toFixed(2) + " s";""")
+
+
+def t_matte(source, out=None, size="1920x1080", fps=24, import_to_comp=None):
+    """Cuts the subject out of a still or a video with tools/video_matte.py in ComfyUI's Python (local GPU, no cost)."""
+    src = pathlib.Path(source)
+    if not src.exists():
+        return f"not found: {source}"
+    still = src.suffix.lower() in (".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff")
+    dst = pathlib.Path(out) if out else src.with_name(src.stem + ("_cutout.png" if still else "_matte.mov"))
+    py = pathlib.Path(os.environ.get("SS_COMFY_PORTABLE", r"D:\ComfyUI_windows_portable_nvidia\ComfyUI_windows_portable")) / "python_embeded" / "python.exe"
+    if not py.exists():
+        return f"ComfyUI's Python not found at {py}: set SS_COMFY_PORTABLE to the ComfyUI portable folder"
+    args = [str(py), str(ROOT / "tools" / "video_matte.py"), str(src), str(dst)] + ([] if still else ["--size", size, "--fps", str(fps)])
+    r = subprocess.run(args, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800)
+    if r.returncode != 0 or not dst.exists():
+        return "matte failed: " + (r.stderr or r.stdout)[-800:]
+    msg = f"matte: {dst.as_posix()}"
+    if import_to_comp:
+        msg += "\n" + run_jsx(COMP_JS + f"""var c = findComp({js(import_to_comp)}), it = app.project.importFile(new ImportOptions(new File({js(dst.as_posix())})));
+var L = c.layers.add(it); L.name = {js(src.stem + (" cutout" if still else " matte"))};
+var s = Math.min(c.width / it.width, c.height / it.height) * 100; L.property("ADBE Transform Group").property("ADBE Scale").setValue([s, s, 100]);
+return "imported as layer " + L.index + " (" + L.name + ") in " + c.name;""")
+    return msg
+
+
+def t_text_behind(subject, text, comp=None):
+    """Text behind a person or product: mattes the subject's footage, then puts the cut-out above the text, parented to
+    the subject so it follows its moves (still or video)."""
+    info = run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), S = findLayers(c, [{js(subject)}])[0];
+if (!(S.source instanceof FootageItem) || !S.source.file) throw new Error(S.name + " is not footage from a file");
+return S.source.file.fsName.split("\\\\").join("/") + "|" + S.source.width + "x" + S.source.height + "|" + (S.source.frameRate || 24);""")
+    if "|" not in info:
+        return info
+    path, size, fps = info.strip().split("|")[:3]
+    still = pathlib.Path(path).suffix.lower() in (".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff")
+    out = pathlib.Path(path).with_name(pathlib.Path(path).stem + ("_cutout.png" if still else "_matte.mov"))
+    if not out.exists():
+        r = t_matte(path, str(out), size=size, fps=float(fps))
+        if not r.startswith("matte:"):
+            return r
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), S = findLayers(c, [{js(subject)}])[0], T = findLayers(c, [{js(text)}])[0];
+app.beginUndoGroup("Motion DNA: text behind " + S.name);
+try {{
+  if (T.index > S.index) T.moveBefore(S);   // the text sits above the subject...
+  var it = app.project.importFile(new ImportOptions(new File({js(out.as_posix())}))), K = c.layers.add(it);
+  K.name = S.name + " cut-out"; K.moveBefore(T);   // ...and the cut-out above the text
+  K.parent = S; var tg = K.property("ADBE Transform Group");
+  tg.property("ADBE Anchor Point").setValue([it.width / 2, it.height / 2]); tg.property("ADBE Position").setValue([S.source.width / 2, S.source.height / 2]);
+  tg.property("ADBE Scale").setValue([S.source.width / it.width * 100, S.source.height / it.height * 100]); tg.property("ADBE Rotate Z").setValue(0);
+  K.startTime = S.startTime; K.inPoint = S.inPoint; K.outPoint = S.outPoint;
+}} finally {{ app.endUndoGroup(); }}
+return T.name + " is behind " + S.name + ": cut-out layer " + K.index + " (" + K.name + "), parented to the subject. Check a frame where they overlap.";""")
+
+
 def t_check_layout(comps=None):
     names = comps or []
     return run_jsx(COMP_JS + f"""var names = {js(names)};
@@ -418,6 +478,13 @@ TOOLS_DEF = [
     ("apply_brand", t_apply_brand, "Animate a comp (or the named layers) in a brand's style: its base style, layer role by layer role, on the brand's own curve.",
      {"slug": {"type": "string"}, "comp": {"type": "string"}, "layers": {"type": "array", "items": {"type": "string"}},
       "phase": {"type": "string", "enum": ["in", "out", "both"]}, "marker_timing": {"type": "boolean"}, "duration": {"type": "number"}, "intensity": {"type": "number"}, "existing": {"type": "string", "enum": ["modify", "replace"]}}, ["slug"]),
+    ("apply_transition", t_apply_transition, "A transition between two layers: the outgoing layer plays the preset's exit while the incoming one plays its entrance, from the same cut, so they read as one move (e.g. Whip Pan: one leaves left as the other arrives from the right). Use a preset tagged 'transition' (list_tags role=transition). at_s: the cut (default: the playhead when both are visible, else the incoming layer's in point). The keys add to what the layers already have.",
+     {"preset": {"type": "string"}, "outgoing": {"type": "string"}, "incoming": {"type": "string"}, "comp": {"type": "string"}, "at_s": {"type": "number"},
+      "duration": {"type": "number"}, "intensity": {"type": "number"}}, ["preset", "outgoing", "incoming"]),
+    ("matte", t_matte, "Cut the subject (person, product, car) out of a still or a video on this computer's GPU (InSPyReNet, no cost): a still gives a PNG with alpha (<name>_cutout.png), a video a ProRes 4444 .mov with alpha (<name>_matte.mov). import_to_comp: a comp name to add it to as a layer, fitted to the frame. Use it for text behind a subject, product cutouts, and contour strokes.",
+     {"source": {"type": "string"}, "out": {"type": "string"}, "size": {"type": "string"}, "fps": {"type": "number"}, "import_to_comp": {"type": "string"}}, ["source"]),
+    ("text_behind", t_text_behind, "Technique 'Text behind people': puts a text layer behind the person or product of a footage layer (still or video). It mattes the subject on this computer's GPU (matte), adds the cut-out above the text, parented to the subject so it follows its moves. Animate the text as usual; render a frame to check.",
+     {"subject": {"type": "string"}, "text": {"type": "string"}, "comp": {"type": "string"}}, ["subject", "text"]),
     ("check_layout", t_check_layout, "Layout QA on built comps (default: the active comp), before you report a build as done: text overlapping text, text outside the 40 px safe area, text under 32 px, low contrast, graphics on faces, substituted fonts. Fix every warning or say why it stays.",
      {"comps": {"type": "array", "items": {"type": "string"}}}),
     ("run_jsx", t_run_jsx, "Advanced: run ExtendScript in AE with the library loaded (SSM, SSP, SSA available). The code is a function body: use `return` for the result.",

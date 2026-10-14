@@ -16,7 +16,7 @@ panel; reach for these when building a piece.
 | `tools/ss_hud.jsx` (`SSHUD`) | Holographic overlays on tracked points: bracket, callout, meter, chip, contour, face scan, floating panel |
 | `tools/track_points.py` | OpenCV point tracker → JSON for AE nulls (`--regions regions.json`) |
 | `tools/matte_contours.py` | Per-frame subject contours from an AI matte (`--subjects`, `--split-x`) |
-| `tools/video_matte.py` | Local people matte (InSPyReNet, MIT, GPU via ComfyUI's Python) → ProRes 4444 alpha, no cost |
+| `tools/video_matte.py` | Local subject matte (InSPyReNet, MIT, GPU via ComfyUI's Python): a video → ProRes 4444 alpha, a still → PNG with alpha, no cost. MCP `matte` and `text_behind` run it |
 | `tools/matte_points.py` | Head and body track points from a matte (for people KLT cannot hold: walk-ins, jumps) |
 | `tools/planar_track.py` | Planar (2.5D) track: a quad glued to a wall / floor / screen with perspective → `planar` items in `build_scene.jsx` |
 | `tools/build_scene.jsx` | Scene from JSON: plate, tracking, matte, text behind people, HUD |

@@ -3,7 +3,7 @@
   "tool": "ae_status",
   "ok": true,
   "args": {},
-  "answer": "AE 26.5x89 · project: use-cases.aep · active: UC09 Cars · Figma specs (1920x1080, 5.00s, 12 layers, selected: 0) · panel: loaded (Window > Extensions > Motion DNA) · fonts ok"
+  "answer": "AE 26.5x89 · project: use-cases.aep · active: UC09 Cars · Figma specs (1920x1080, 5.00s, 12 layers, selected: 0) · panel: not loaded · fonts ok"
  },
  {
   "tool": "list_presets",
@@ -109,7 +109,7 @@
    "kind": "motion",
    "name": "Surge Rise"
   },
-  "answer": "selected motion/Surge Rise"
+  "answer": "Motion DNA panel is not open (Window > Extensions > Motion DNA)"
  },
  {
   "tool": "render_frame",
@@ -118,7 +118,7 @@
    "comp": "_MCP_TEST",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1791935224790.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1791937340319.png (open it to look at the frame)"
  },
  {
   "tool": "check_layout",
@@ -129,6 +129,18 @@
    ]
   },
   "answer": "layout QA: 1 comps, 0 warnings ()"
+ },
+ {
+  "tool": "apply_transition",
+  "ok": true,
+  "args": {
+   "preset": "Whip Pan",
+   "outgoing": "Chip",
+   "incoming": "Title",
+   "comp": "_MCP_TEST",
+   "at_s": 1.0
+  },
+  "answer": "Chip leaves as Title arrives: Whip Pan at 1.00 s"
  },
  {
   "tool": "remove_animation",

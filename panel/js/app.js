@@ -223,7 +223,7 @@ function actionsRow(onApply) {
     h("input", { type: "radio", name: "phase-" + Math.random(), value: p, checked: S.phase === p, onchange: () => { S.phase = p; syncPhase(); } }), p[0].toUpperCase() + p.slice(1)));
   // only when a selected layer already has keyframes: keep them (Modify) or start over (Replace)
   const ex = h("div", { class: "seg small existing", title: "A selected layer already has keyframes" }, ...[["modify", "Modify"], ["replace", "Replace"]].map(([k, l]) =>
-    h("button", { class: CTL.existing === k ? "on" : "", "data-existing": k, title: k === "modify" ? "Keep its keyframes and values; give them this timing and curve" : "Delete its keyframes and create this animation",
+    h("button", { class: CTL.existing === k ? "on" : "", "data-existing": k, title: k === "modify" ? "Keep its keyframes and values; give them this timing and curve" : "Swap its animation for this one on the channels the preset uses; the others stay",
       onclick: () => { CTL.existing = k; store.set("existing", k); for (const b of document.querySelectorAll(".existing button")) b.classList.toggle("on", b.dataset.existing === k); selHint(); } }, l)));
   const exRow = h("div", { class: "crow existing-row", hidden: true }, h("span", { style: "flex:none" }, "The layer already has keyframes:"), ex);
   const hint = h("span", { class: "dim sel-hint" }, "Select the layers to animate.");
@@ -236,9 +236,10 @@ function actionsRow(onApply) {
 }
 // What Apply will do with the current selection (refreshed with the header status): no keyframes → Create; keyframes →
 // the Modify / Replace choice shows and the button says which; a mix → both, in words.
+let SELINFO = {};
 async function selHint() {
   const els = document.querySelectorAll(".sel-hint"); if (!els.length) return;
-  const i = parse(await call("mdna_sel_info"));
+  const i = parse(await call("mdna_sel_info")); SELINFO = i;
   const n = i.layers || 0, own = i.own || 0, ours = i.ours || 0, fresh = n - own - ours, mod = CTL.existing === "modify";
   let t, label = "Apply";
   if (!n) t = "Select the layers to animate.";
@@ -248,13 +249,17 @@ async function selHint() {
   } else {
     label = mod ? "Modify" : "Replace";
     const who = own === n ? (n === 1 ? "Its" : "Their") : `${own} layer${own > 1 ? "s have" : " has"} keyframes:`;
-    t = mod ? `${who} keyframes stay; Apply changes their timing and curve (values kept).` : `${who} keyframes are deleted and the animation is created again.`;
-    if (own !== n) t = mod ? `${who} they stay; Apply changes their timing and curve (values kept).` : `${who} they are deleted and the animation is created again.`;
+    t = mod ? `${who} keyframes stay; Apply changes their timing and curve (values kept).` : `${who} animation is swapped for the preset on the channels it uses; the rest stays.`;
+    if (own !== n) t = mod ? `${who} they stay; Apply changes their timing and curve (values kept).` : `${who} swapped for the preset on the channels it uses; the rest stays.`;
     if (fresh || ours) { label = "Apply"; t += ` ${fresh + ours} without keyframes: created.`; }
   }
   for (const r of document.querySelectorAll(".existing-row")) {
     r.hidden = !own;
     const lab = r.querySelector("span"); if (lab) lab.textContent = own > 1 ? `${own} layers already have keyframes:` : "The layer already has keyframes:";
+  }
+  if (transitionMode()) {   // two layers in Transitions: one linked move, the first selected leaves as the second arrives
+    label = "Transition"; t = `${i.names[0]} leaves as ${i.names[1]} arrives, at the playhead (select the outgoing layer first).`;
+    for (const r of document.querySelectorAll(".existing-row")) r.hidden = true;
   }
   for (const b of document.querySelectorAll(".apply-main")) b.textContent = label;
   for (const e of els) e.textContent = t;
@@ -322,8 +327,10 @@ function behaviors() {
     step(3, "Adjust the controls, choose In / Out / Both, then Apply"), controlsCard(), actionsRow(applyBehavior));
   refresh();
 }
+function transitionMode() { return S.sec === "behaviors" && S.cat === "Transitions" && SELINFO.layers === 2 && S.sel && S.sel.kind === "motion"; }
 async function applyBehavior() {
   if (!S.sel || !S.sel.kind) return toast("Pick a preset in the gallery first.", true);
+  if (transitionMode()) { report(await call("mdna_transition", { name: S.sel.name, tune: tuning() })); return selHint(); }
   report(await call("mdna_apply", { kind: S.sel.kind, name: S.sel.name, phase: S.phase, tune: tuning(), stagger: CTL.stagger, markers: CTL.markers, existing: CTL.existing })); selHint();
 }
 

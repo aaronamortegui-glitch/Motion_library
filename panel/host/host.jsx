@@ -90,11 +90,24 @@ function mdna_apply(s) {
 }
 // The selected layers and whether they already move (the panel says what Apply will do)
 function mdna_sel_info() {
-    var ls = mdna_layers(), out = { layers: 0, own: 0, ours: 0 };
+    var ls = mdna_layers(), out = { layers: 0, own: 0, ours: 0, names: [] };
     if (!ls) return mdna_json(out);
     out.layers = ls.length;
+    for (var n = 0; n < ls.length && n < 2; n++) out.names.push(ls[n].name);   // selection order: the first is the outgoing layer
     for (var i = 0; i < ls.length; i++) { var x = SSP.animationOf(ls[i]); if (x.props) { if (x.ours) out.ours++; else out.own++; } }
     return mdna_json(out);
+}
+
+// A transition between the two selected layers: the first selected leaves, the second arrives. a = {name, tune}
+function mdna_transition(s) {
+    var a = mdna_parse(s), ls = mdna_layers();
+    if (!ls || ls.length !== 2) return "ERR Select exactly two layers: first the one that leaves, then the one that arrives.";
+    SSP.tune(a.tune || {});
+    app.beginUndoGroup("Motion DNA transition: " + a.name);
+    var t;
+    try { t = SSP.applyTransition(ls[0].containingComp, ls[0], ls[1], a.name); } catch (e) { SSP.tune(); app.endUndoGroup(); return "ERR " + e.toString(); }
+    SSP.tune(); app.endUndoGroup();
+    return "OK " + a.name + ": " + ls[0].name + " → " + ls[1].name + " at " + t.toFixed(2) + " s";
 }
 
 // Applies a style (pack) to the comp or the selected layers. a = {name, phase, whole, tune, markers}

@@ -455,7 +455,7 @@ function libItems() {
     const s = slug(t.name);
     return { key: "technique/" + t.name, name: t.name, sub: "technique", desc: t.what, how: t.how,
       thumb: asset(`library/techniques/${s}_card.png`), fallback: asset(`library/techniques/${s}_md.png`), img: asset(`library/techniques/${s}_md.png`),
-      order: `${t.ask} Use the Motion DNA technique "${t.name}". If the layers already have animation, build on it instead of replacing it.` };
+      order: `${t.ask} Use the Motion DNA technique "${t.name}"${t.tool ? ` (MCP tool: ${t.tool})` : ""}. If the layers already have animation, build on it instead of replacing it.` };
   });
 }
 function libraryView() {

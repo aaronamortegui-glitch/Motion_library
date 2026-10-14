@@ -135,8 +135,8 @@ from the panel, the Claude app or a terminal (*Copy terminal command*); the pane
 ### Claude Code and other agents
 Open the repo (or a brand or project folder) in Claude Code and approve the `motion-dna` server. Claude can browse the
 library (`list_presets`, `list_packs`, `list_tags`, `suggest_mix`, `match_reference`, `list_brands`, `get_brand`), act in
-After Effects (`apply_preset`, `apply_pack`, `apply_brand` with `existing` = modify | replace, `add_asset`,
-`remove_animation`), learn (`add_brand_note`) and check its work (`ae_status`, `list_layers`, `render_frame`, `check_layout`). Without
+After Effects (`apply_preset`, `apply_pack`, `apply_brand` with `existing` = modify | replace, `apply_transition`,
+`add_asset`, `remove_animation`), run techniques (`matte`: a cut-out on the local GPU; `text_behind`), learn (`add_brand_note`) and check its work (`ae_status`, `list_layers`, `render_frame`, `check_layout`). Without
 MCP, any LLM reads `library/INDEX.txt` and runs `.jsx` jobs with `bash tools/bridge.sh`. Contributors: read
 [`CLAUDE.md`](CLAUDE.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 

@@ -154,6 +154,12 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   reconfigures stdout/stderr to UTF-8 with replacement.
 - **Panel rows clipped in a narrow dock** (header status, Modify/Replace row, Agent footer) → fixed-width flex rows →
   rows wrap, the header status shows dots only under 320 px, and the send row stacks.
+- **The Agent improvised "text behind people" for 34 turns ($1.24) and fell back to GrabCut** (UC08) → techniques had no
+  tools and Full mode cannot run ComfyUI's Python → MCP `matte` (still or video, local GPU) and `text_behind` (matte the
+  subject, cut-out above the text, parented to the subject); techniques.json names each technique's tool.
+- **Transitions animated each layer on its own** (UC04) → no notion of an outgoing and an incoming layer →
+  `SSP.applyTransition` / MCP `apply_transition` / the panel's Transition button with two layers selected: the first
+  leaves as the second arrives, from the same cut, keys added to what they already have.
 - **Remote debugging lands on another extension** → several `.debug` files used the same port → give ours its own.
 
 ## 2. Animation Composer as a behavioral reference
