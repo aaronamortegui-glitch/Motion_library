@@ -22,7 +22,7 @@ Brands: Maison Nord (fashion), Oku Optics (eyewear), Lumé (beauty), Orto (kitch
 | UC08 | Fashion | Agent: text behind a person | Works, slow | F8, F9, F10, F11 |
 | UC09 | Cars | Agent: Figma frame → After Effects | OK | F12, F13, F14 |
 | UC10 | All | Projects and conversations | OK | — |
-| UC11 | All | MCP directly + layout QA | OK | QA false positives fixed |
+| UC11 | All | MCP directly (27/27, every tool) + layout QA | OK | QA false positives fixed |
 | UC12 | Cars | Technique: tracked labels + HUD | OK | F18, F19 |
 | UC13 | Cars | Technique: speed ramp | OK | — |
 | UC14 | Eyewear | The 9 styles on one layout | OK | F21, F22 |
@@ -164,7 +164,10 @@ every key of those layers.
 *Agent › Project and the brand's own conversation, as in the panel.*
 
 ## UC11 · MCP directly, plus layout QA
-- **Worked:** `python tools/test_mcp.py` calls every tool the way Claude does: 23 of 23 passed.
+- **Worked:** `python tools/test_mcp.py` calls every tool the way Claude does: 27 of 27 calls passed, and no tool is
+  left untested. `matte` and `text_behind` run on a product photo fixture (`research/tests/fixtures/`), and
+  `add_brand_note` writes to a temporary brand. The test removes the brand, its registry entry and the imported files.
+  `matte` and `text_behind` are reported as SKIP, not FAIL, on a machine without the local GPU matte.
 - **`check_layout` on all nine comps:**
   - At first it raised four contrast warnings at 0 s. Three of them were false: it measured text that was still
     fading in, and text sitting on a shape card. It now judges contrast once the text has settled, and counts a shape

@@ -160,7 +160,7 @@ Motion DNA it tests, shows the result, and leaves a tip. What broke and how it w
 | **UC08** · Fashion | Agent › Library › Techniques (text behind) | <img src="docs/use-cases/img/uc08.jpg" width="360" alt="UC08"> | Cut-outs with `matte` / `text_behind`; watch the contrast. |
 | **UC09** · Cars | Agent (Full): Figma → After Effects, brand timing | <img src="docs/use-cases/img/uc09.jpg" width="360" alt="UC09"> | Put numbers in the brand's timing: `apply_brand` follows them. |
 | **UC10** · All | Agent › Project | <img src="docs/use-cases/img/uc10.jpg" width="360" alt="UC10"> | Keep the `.aep` in the project's `05_ae`. |
-| **UC11** · All | Claude Code (MCP) + layout QA | <img src="docs/use-cases/img/uc11.jpg" width="360" alt="UC11"> | Before calling it done: `render_frame`, then `check_layout`. |
+| **UC11** · All | Claude Code (MCP: every tool, 27/27) + layout QA | <img src="docs/use-cases/img/uc11.jpg" width="360" alt="UC11"> | Before calling it done: `render_frame`, then `check_layout`. |
 | **UC12** · Cars | Technique: tracked labels + HUD | <img src="docs/use-cases/img/uc12.jpg" width="360" alt="UC12"> | On a moving shot, point callouts inward and give them a card on light plates. |
 | **UC13** · Cars | Technique: speed ramp | <img src="docs/use-cases/img/uc13.jpg" width="360" alt="UC13"> | Give the ramp a plate 2.5× longer than the rushed part. |
 | **UC14** · Eyewear | All 9 styles on one layout | <img src="docs/use-cases/img/uc14.jpg" width="360" alt="UC14"> | Parent a button's label to the button: styles move them together. |

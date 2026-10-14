@@ -118,7 +118,7 @@
    "comp": "_MCP_TEST",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1791940791940.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1791941537769.png (open it to look at the frame)"
  },
  {
   "tool": "check_layout",
@@ -208,6 +208,44 @@
    "time_s": 0.2
   },
   "answer": "added SFX · Swoosh Transition 28 at 0.2"
+ },
+ {
+  "tool": "add_brand_note",
+  "ok": true,
+  "args": {
+   "slug": "mcp-test",
+   "rule": "Product shots glide in, never pop",
+   "category": "motion",
+   "why": "test"
+  },
+  "answer": "saved rule 1 (motion) in D:/motion category ai library/research/_mcp_test/20261013-213211/brand/brand.json: Product shots glide in, never pop"
+ },
+ {
+  "tool": "matte",
+  "ok": true,
+  "args": {
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261013-213211\\product_car_side.jpg",
+   "out": "D:\\motion category ai library\\research\\_mcp_test\\20261013-213211\\product_cutout.png"
+  },
+  "answer": "matte: D:/motion category ai library/research/_mcp_test/20261013-213211/product_cutout.png"
+ },
+ {
+  "tool": "run_jsx",
+  "ok": true,
+  "args": {
+   "code": "…"
+  },
+  "answer": "photo ok"
+ },
+ {
+  "tool": "text_behind",
+  "ok": true,
+  "args": {
+   "subject": "Product",
+   "text": "Title",
+   "comp": "_MCP_TEST"
+  },
+  "answer": "Title is behind Product: cut-out layer 1 (Product cut-out), parented to the subject. Check a frame where they overlap."
  },
  {
   "tool": "run_jsx",

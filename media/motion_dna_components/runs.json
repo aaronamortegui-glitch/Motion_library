@@ -42,6 +42,6 @@
   "props/car": "run_m178g0336xnk53eafpdbm13bws8g6zkt"
  },
  "notes": [
-  "2026-10-13: office_reverse, office_dana_desk, office_marcus_desk and office_floorplan regenerated with office_wide as the reference image so the set stays coherent (same door, walls, furniture); the first versions are in 4k/locations/v1_replaced/."
+  "2026-10-13: office_reverse, office_dana_desk, office_marcus_desk and office_floorplan regenerated with office_wide as the reference image so the set stays coherent (same door, walls, furniture); only the final images are kept."
  ]
 }
