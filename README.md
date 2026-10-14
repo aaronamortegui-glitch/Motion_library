@@ -165,6 +165,7 @@ Open the repo (or a brand or project folder) in Claude Code and approve the `mot
 | Browse | `list_presets` · `list_packs` · `list_tags` · `suggest_mix` · `match_reference` · `list_brands` · `get_brand` · `list_assets` · `list_resources` (outside scripts, VFX, SFX and music, license checked) |
 | Act in After Effects | `apply_preset` · `apply_pack` · `apply_brand` (`existing` = modify / replace) · `apply_transition` · `add_asset` · `remove_animation` |
 | Build what AC packs ship (by behavior, on our tokens) | `solid_transition` (46 named looks: solid/mask wipes, iris, fan, dots, liquid, ink, bubbles, shatter, flash, glitch, twirl, slices…) · `add_element` (27 self-sizing kinds: titles, callouts, counters, timers, social, quotes, lists, chat, rating, cinematic, glass card, our logo end card…) · `add_shape` (39 animated shapes, lines, impacts, fireworks, glitter…) · `move` (3D flip, hinge, orbit, fly…) · `animate_text` (per char/word/line, decode, mask, typewriter) · `add_captions` · `add_look` (backgrounds incl. plexus, blobs, mesh and frosted glass, tones, grain, letterbox, particles, long shadow, glitch) · `add_behavior` (9 behaviours by family, each drawn into shapes, backgrounds, text mattes, element boxes or transitions: bubbles, blob, voronoi, grow, flow, flock, spring, rope, and the hand-drawn `line_boil`) · `list_kit` |
+| Deliver | `resize_comp` (social resizes 9:16 · 1:1 · 4:5 or any WxH: every keyframe kept, content reframed inside the title-safe area, then the layout QA on each) · `render_comp` |
 | Edit keyframes | `keyframes` (reverse, mirror_out, stagger, shift, to_playhead, sequence, distribute, loop, bake, stretch, copy_to) · `anchor_point` |
 | Run techniques | `matte` (a cut-out on the local GPU) · `text_behind` |
 | Learn and check | `add_brand_note` · `ae_status` · `list_layers` · `render_frame` · `check_layout` |
@@ -224,8 +225,9 @@ Full catalog with live thumbnails, kit included: **[docs/CATALOG.md](docs/CATALO
 
 Besides presets, styles and techniques, Claude builds these pieces on the open comp through the MCP server. They are
 semi-finished like Animation Composer's: they size themselves to the text, take brand colours and fonts, and every
-movement uses the token curves (acceleration and deceleration, overshoot when the energy asks for it). Browse them in
-the panel (*Agent › Library › Kit*, with a ready order), in `docs/CATALOG.md` or `library/index.html`, and ask for them by name in the chat. The full list with energy and tones is `library/kit.json`
+movement uses the token curves (acceleration and deceleration, overshoot when the energy asks for it). They come in
+48 families (`library/kit_groups.json`): the panel (*Agent › Library › Kit*, with a ready order), `docs/CATALOG.md` and
+`library/index.html` show one card per family with its variants as chips, and you ask for any variant by name in the chat. The full list with energy and tones is `library/kit.json`
 (`list_kit`); transition looks are in `library/transitions.json`.
 
 | Category | Ask for… | Tool |
@@ -312,6 +314,16 @@ and every review note becomes a brand rule.
 
 ## Made with it
 
+**Claude alone vs Claude + Motion DNA** (24 s): the same six deck slides animated twice. Alone, an LLM keys everything
+linearly, fades it all in at once, holds still and cuts. With Motion DNA every slide enters on token curves, stays alive
+(a slow camera push, floating heroes) and leaves before the cut, with staggered pieces, kit elements and a different kit
+transition per cut. [`docs/examples/claude-vs-motion-dna.mp4`](docs/examples/claude-vs-motion-dna.mp4) ·
+[step by step](docs/case-studies/claude-vs-motion-dna.md).
+
+| Title | Numbers | Timeline |
+|---|---|---|
+| ![Title slide, alone vs with Motion DNA](docs/examples/claude-vs-motion-dna-1.gif) | ![Numbers slide](docs/examples/claude-vs-motion-dna-2.gif) | ![Timeline slide](docs/examples/claude-vs-motion-dna-3.gif) |
+
 Renders from the test suite (`python tools/test_all.py`): the same layout in every style, moves mixed by tags, and one
 move through the panel's controls.
 
@@ -349,9 +361,15 @@ subjects; every clip went through the face refinement pass. Prices, bottlings an
 
 ## For contributors
 
-- [`docs/CATALOG.md`](docs/CATALOG.md): every preset and style with its thumbnail.
+**Feeding the plugin** (a new kit piece, technique, preset, style or resource) follows one route, the same for people and
+for Claude: decide what it is → build it on the tokens → compare it with the reference → register it → expose it to
+Claude (MCP) → preview it → publish it (README, catalog, visualizer; the panel reads the files by itself) → pass the gate
+(`python tools/check_previews.py`, `python tools/test_mcp.py`) → update Figma *motion-adn* → commit.
+The full protocol: [CONTRIBUTING §11](CONTRIBUTING.md#11-feed-the-plugin-the-route-for-every-new-piece).
+
+- [`docs/CATALOG.md`](docs/CATALOG.md): every preset, style and kit piece with its thumbnail.
 - [`docs/TOOLS.md`](docs/TOOLS.md): every script, what it does and how to run it.
-- [`CONTRIBUTING.md`](CONTRIBUTING.md): adding presets, open-source effects, styles, references, case studies; the layout and edit rules (§9).
+- [`CONTRIBUTING.md`](CONTRIBUTING.md): adding presets, open-source effects, styles, references, case studies, kit pieces and techniques (§11); the layout and edit rules (§9).
 - [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) and [`docs/use-cases/`](docs/use-cases/README.md): the manual and the tests behind it.
 - [`docs/LEARNINGS.md`](docs/LEARNINGS.md): every pitfall already solved (driving AE from an LLM, ExtendScript, rendering, AI footage, tracking and roto, typography, audio, costs).
 - [`CLAUDE.md`](CLAUDE.md): the rules every Claude follows in this repo.

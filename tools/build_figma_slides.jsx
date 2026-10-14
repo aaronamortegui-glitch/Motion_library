@@ -10,7 +10,7 @@
 var FIGMA_SLIDES = (function () {
     var proj = app.project, FPS = 30, W = 1920, H = 1080, PFX = "FS_", folder = null, ASSET_DIR = "";
     var FONT = { "Inter Tight|Regular": "InterTight-Regular", "Inter Tight|Medium": "InterTight-Medium", "Inter Tight|SemiBold": "InterTight-SemiBold",
-                 "Inter Tight|Bold": "InterTight-Bold", "Instrument Serif|Italic": "InstrumentSerif-Italic", "Instrument Serif|Regular": "InstrumentSerif-Regular" };
+                 "Inter Tight|Bold": "InterTight-Bold", "Inter Tight|ExtraBold": "InterTight-ExtraBold", "Instrument Serif|Italic": "InstrumentSerif-Italic", "Instrument Serif|Regular": "InstrumentSerif-Regular" };
     // groups that only wrap other layers: their children go straight into the parent
     var FLAT = { "hero-object": 1, "text": 1, "header": 1, "texture": 1, "title-words": 1, "headline-words": 1, "type": 1, "fx-back": 1, "fx-front": 1 };
     var R;
@@ -206,9 +206,9 @@ var FIGMA_SLIDES = (function () {
             for (var f = 1; f <= proj.numItems; f++) if (proj.item(f) instanceof FolderItem && proj.item(f).name === (opt.folder || "FIGMA SLIDES")) folder = proj.item(f);
             if (!folder) folder = proj.items.addFolder(opt.folder || "FIGMA SLIDES");
             for (var s = 0; s < spec.slides.length; s++) {
-                var S = spec.slides[s], dur = S.dur + (opt.tail || 0), comp = precomp(PFX + "S" + S.slide, W, H, dur);
+                var S = spec.slides[s], dur = S.dur + (opt.tail || 0), sw = S.w || W, sh = S.h || H, comp = precomp(PFX + "S" + S.slide, sw, sh, dur);
                 comp.bgColor = hex(S.bg);
-                var bg = comp.layers.addSolid(hex(S.bg), "bg", W, H, 1, dur); bg.locked = false;
+                var bg = comp.layers.addSolid(hex(S.bg), "bg", sw, sh, 1, dur); bg.locked = false;
                 var bc = hex(S.bg), ctx = { slide: S.slide, ink: slideInk(S), dur: dur, dark: (bc[0] * 0.3 + bc[1] * 0.59 + bc[2] * 0.11) < 0.5 };
                 for (var k = 0; k < S.u.length; k++) buildUnit(comp, S.u[k], 0, 0, ctx);
                 R.comps[S.slide] = comp;

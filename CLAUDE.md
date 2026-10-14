@@ -27,17 +27,18 @@ Install everything, library included — the panel reads the library from the re
 2. Skim `docs/LEARNINGS.md`: every pitfall already solved (ExtendScript, rendering, Flora/AI video, likeness, tracking, audio, costs). Do not rediscover them.
 3. `docs/USER_GUIDE.md` › *For Claude* has the order of work and recipes that worked; `docs/use-cases/` has the tests.
    To pick or apply presets, read only `library/INDEX.txt`. The skill `.claude/skills/motion-dna/SKILL.md` explains the bridge and the API.
-4. **Choose by tags.** Every preset, curve, technique and style is tagged in `library/tags.json` / `library/packs.json`:
+4. **Feeding the plugin** (a new preset, kit piece, technique, style or resource) follows one route: CONTRIBUTING §11, and `python tools/check_previews.py` is its gate.
+5. **Choose by tags.** Every preset, curve, technique and style is tagged in `library/tags.json` / `library/packs.json`:
    roles, targets, channels, direction, an energy range (1 calm · 2 soft · 3 medium · 4 dynamic · 5 explosive) and
    tones. Use `list_tags` / `suggest_mix` to combine a move, a token curve and a duration for the feel you need.
-5. **When you get a reference analysis** (a brand or video placed in an energy range and tones, e.g. "calm, modern"):
+6. **When you get a reference analysis** (a brand or video placed in an energy range and tones, e.g. "calm, modern"):
    write it as `library/references/<slug>.json`, run `match_reference`, build what fits from existing presets, and
    **create everything that does not exist yet** — moves, curves, transitions, techniques — tag it, render its
    samples and add a style for it. The full procedure is CONTRIBUTING §8. The library grows with every reference.
-6. **Working for a brand or a project?** Read its profile first (`get_brand` / `python tools/brand.py show <slug>`),
+7. **Working for a brand or a project?** Read its profile first (`get_brand` / `python tools/brand.py show <slug>`),
    follow its rules, and save **every review note** the user gives as a rule in it (`add_brand_note` /
    `python tools/brand.py note`). Each brand learns on its own (CONTRIBUTING §10).
-7. **Prefer the MCP server** (`motion-dna`, registered in `.mcp.json`): `list_presets`, `apply_preset`, `apply_pack`, `add_asset`, `render_frame`, `run_jsx`… It drives the open After Effects through the file bridge (started by the Motion DNA panel). Check your work with `render_frame` and look at the PNG.
+8. **Prefer the MCP server** (`motion-dna`, registered in `.mcp.json`): `list_presets`, `apply_preset`, `apply_pack`, `add_asset`, `render_frame`, `run_jsx`… It drives the open After Effects through the file bridge (started by the Motion DNA panel). Check your work with `render_frame` and look at the PNG.
 
 ## Non-negotiable rules
 - **Everything in the repo is English**: code, comments, metadata, docs, commit messages. Chat with the user can be in their language.
@@ -54,6 +55,9 @@ Install everything, library included — the panel reads the library from the re
 | You made… | Put it in… |
 |---|---|
 | A preset (our own) | `tools/ss_presets.jsx` (motion `P`, text `TX`, loops `FX`) + run the library pipeline |
+| A kit piece (transition, element, shape, background, look, text animation, move, behaviour) | its builder `tools/ss_<family>.jsx` + `library/kit.json` or `library/transitions.json` + the MCP tool + `tools/kit_gifs.py` preview — the full route is CONTRIBUTING §11 |
+| A technique | `tools/` scripts + `library/techniques.json` + `TECH` in `tools/tag_library.py` + its card (CONTRIBUTING §11) |
+| Our logo or its use | `assets/brand/` (`tools/logo_to_shape.py`, `tools/logo_parts.py`); manual in Figma *motion-adn › 01 · Foundations › logo*; it only closes Motion DNA's own videos |
 | An effect translated from an open-source project | `library/css_presets.json` (or a new data file of the same shape) with source, version and license |
 | A style pack | `library/packs.json` + a demo (`tools/pack_demos.jsx` → `library/packs/<slug>.gif/.png/_sm.png`) |
 | A new MCP tool | `tools/mcp/ss_motion_mcp.py` (`TOOLS_DEF`), documented in README |

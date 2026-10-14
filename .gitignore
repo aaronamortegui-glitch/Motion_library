@@ -104,3 +104,6 @@ research/ac_catalog/
 
 # kit preview list (rebuilt by tools/kit_gifs.py)
 research/kit_gif_comps.txt
+
+# Flora archive: every generated video/audio is kept locally (see media/flora_archive/INDEX.md); only the index is versioned
+media/flora_archive/*/

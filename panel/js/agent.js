@@ -447,16 +447,14 @@ function chatView() {
 // ---------- Library: Styles, Techniques and the Kit, as guides the agent applies ----------
 function libItems() {
   const q = AG.libQ;
-  if (AG.libKind === "kit") return (S.kit || []).filter((k) => !q || (k.name + " " + k.group + " " + k.use).toLowerCase().includes(q)).map((k) => {
-    const base = `library/gifs/kit-${k.kind}/${slug(k.name)}`;
-    return { key: "kit/" + k.kind + "/" + k.name, name: k.name, sub: k.group, desc: k.use, how: "MCP " + k.call,
-      thumb: asset(base + "_md.png"), img: asset(base + ".gif"),
-      order: `Add the ${k.name} (${k.group.toLowerCase()}) from the Motion DNA kit to the open comp at the playhead (${k.call}), in the brand's colours if a brand is set. Then render a frame and tell me what you did.` };
+  if (AG.libKind === "kit") return (S.kitFamilies || []).filter((f) => !q || (f.name + " " + f.category + " " + f.desc + " " + f.members.map((m) => m.name + " " + m.use).join(" ")).toLowerCase().includes(q)).map((f) => {
+    const variants = f.members.map((k) => {
+      const base = `library/gifs/kit-${k.kind}/${slug(k.name)}`;
+      return { name: k.name, desc: k.use, how: "MCP " + k.call, thumb: asset(base + "_md.png"), img: asset(base + ".gif"),
+        order: `Add the ${k.name} (${f.name.toLowerCase()}, ${k.group.toLowerCase()}) from the Motion DNA kit to the open comp at the playhead (${k.call}), in the brand's colours if a brand is set. Then render a frame and tell me what you did.` };
+    });
+    return Object.assign({}, variants[0], { key: "kit/" + f.name, name: f.name, sub: f.category + " · " + (variants.length > 1 ? variants.length + " variants" : "1 piece"), family: f.desc, variants });
   });
-  if (AG.libKind === "styles") return S.packs.filter((pk) => !q || (pk.name + " " + pk.desc + " " + (pk.tones || []).join(" ")).toLowerCase().includes(q)).map((pk) => ({
-    key: "style/" + pk.name, name: pk.name, sub: `${pk.energy}${pk.energy_range ? " " + pk.energy_range.join("–") : ""}`, desc: pk.desc,
-    thumb: asset(`library/packs/${pk.slug}_md.png`), img: asset(`library/packs/${pk.slug}.gif`),
-    order: `Animate the selected layers (every layer of the open comp if none are selected) in the ${pk.name} style (${pk.desc.replace(/\.$/, "")}). Layers that already move keep their animation and get the style's curve and timing; the others get the move of their role. Then render a frame and tell me what you did.` }));
   return S.techniques.filter((t) => !q || (t.name + " " + t.what).toLowerCase().includes(q)).map((t) => {
     const s = slug(t.name);
     return { key: "technique/" + t.name, name: t.name, sub: "technique", desc: t.what, how: t.how,
@@ -467,15 +465,20 @@ function libItems() {
 function libraryView() {
   const wrap = h("div", { class: "stack" });
   const detail = h("div", { class: "lib-detail", hidden: true }), grid = h("div", { class: "lib-grid" });
-  const show = (it) => {
+  const show = (it, vi) => {
     AG.libSel = it.key;
     detail.hidden = false;
-    detail.replaceChildren(...kids(safeImg([it.img, it.thumb, it.fallback], it.name),
-      h("b", {}, it.name), h("p", {}, it.desc), it.how ? h("p", { class: "dim" }, "Under the hood: " + it.how) : null,
-      h("div", { class: "order" }, it.order),
+    // a kit family: the chosen variant plays at its own size (small, never stretched), the others are text chips
+    const v = it.variants ? it.variants[Math.min(vi || 0, it.variants.length - 1)] : it;
+    const chips = it.variants && it.variants.length > 1 ? h("div", { class: "lib-variants" }, ...it.variants.map((x, i) =>
+      h("button", { class: "chip" + (x === v ? " on" : ""), title: x.desc, onclick: () => show(it, i) }, x.name))) : null;
+    detail.replaceChildren(...kids(safeImg([v.img, v.thumb, v.fallback], v.name, it.variants ? { class: "small" } : {}),
+      h("b", {}, it.variants ? it.name + (it.variants.length > 1 ? " · " + v.name : "") : it.name), it.family ? h("p", { class: "dim" }, it.family) : null, chips,
+      h("p", {}, v.desc), v.how ? h("p", { class: "dim" }, "Under the hood: " + v.how) : null,
+      h("div", { class: "order" }, v.order),
       h("div", { class: "crow" },
-        h("button", { class: "solid apply", title: "Put this order in the chat (edit it, then send)", onclick: () => { AG.pending = it.order; AG.tab = "chat"; store.set("agentTab", "chat"); agent.render(); } }, "Use in chat"),
-        h("button", { class: "btn", title: "Copy the order (for Claude Code or the Claude app)", onclick: () => { navigator.clipboard.writeText(it.order); toast("Order copied."); } }, "Copy order"))));
+        h("button", { class: "solid apply", title: "Put this order in the chat (edit it, then send)", onclick: () => { AG.pending = v.order; AG.tab = "chat"; store.set("agentTab", "chat"); agent.render(); } }, "Use in chat"),
+        h("button", { class: "btn", title: "Copy the order (for Claude Code or the Claude app)", onclick: () => { navigator.clipboard.writeText(v.order); toast("Order copied."); } }, "Copy order"))));
     for (const c of grid.children) c.classList.toggle("sel", c.dataset.key === it.key);
   };
   const draw = () => {

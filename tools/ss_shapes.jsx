@@ -240,15 +240,24 @@ var SSS = (function () {
                 }
             }
             return "custom"; },
-        glitter: function (v, st, o) {   // sparkles that twinkle (keep twinkling after the reveal)
-            var n = o.count || 9;
+        glitter: function (v, st, o) {   // sparkles: four-point stars with concave sides, one hero and a few small ones; each pops in
+            // with a twist, twinkles, and fades out on its own clock (no endless spin, no thin crosses)
+            var n = o.count || 7;
             for (var i = 0; i < n; i++) {
                 var g = v.addProperty("ADBE Vector Group"), gv = g.property("ADBE Vectors Group");
-                star(gv, 4, 10 + rnd(i, 5) * 8, 2.2, "star"); paint(gv, "fill", (i % 3 === 0) ? 2 : 1);
-                var gt = g.property("ADBE Vector Transform Group");
-                gt.property("ADBE Vector Position").setValue([(rnd(i, 6) - 0.5) * 150, (rnd(i, 7) - 0.5) * 100]);
-                gt.property("ADBE Vector Scale").expression = stag(rnd(i, 8) * 0.4, 0.35, "Pop") + 'var tw = 0.55 + 0.45 * Math.abs(Math.sin((time + ' + (rnd(i, 9) * 3).toFixed(2) + ') * 3.2)); var s = e * 100 * tw * gone; [s, s];';
-                gt.property("ADBE Vector Rotation").expression = 'time * ' + Math.round(20 + rnd(i, 10) * 40) + ';';
+                var R = i === 0 ? 34 : (i < 3 ? 20 + rnd(i, 5) * 6 : 9 + rnd(i, 5) * 6), k = R * 0.58, sh = new Shape();
+                sh.vertices = [[0, -R], [R, 0], [0, R], [-R, 0]];
+                sh.inTangents = [[0, k], [-k, 0], [0, -k], [k, 0]]; sh.outTangents = [[0, k], [-k, 0], [0, -k], [k, 0]]; sh.closed = true;
+                gv.addProperty("ADBE Vector Shape - Group").property("ADBE Vector Shape").setValue(sh);
+                paint(gv, "fill", i === 0 || i % 3 === 0 ? 1 : 2);
+                var gt = g.property("ADBE Vector Transform Group"), a = rnd(i, 6) * Math.PI * 2, d = i === 0 ? 0 : 40 + rnd(i, 7) * 70;
+                gt.property("ADBE Vector Position").setValue([Math.cos(a) * d * 1.3, Math.sin(a) * d * 0.9]);
+                var delay = i === 0 ? 0 : 0.08 + rnd(i, 8) * 0.5, life = 0.9 + rnd(i, 9) * 0.8;
+                gt.property("ADBE Vector Scale").expression = stag(delay, 0.32, "Pop") +
+                    'var age = time - t0 - ' + delay.toFixed(3) + ', q = Math.min(Math.max((age - ' + life.toFixed(2) + ') / 0.35, 0), 1);\n' +
+                    'var tw = 0.82 + 0.18 * Math.sin((time + ' + (rnd(i, 10) * 3).toFixed(2) + ') * 7);\n' +
+                    'var s = (age <= 0 ? 0 : e) * tw * (1 - q * q) * 100 * gone; [s, s];';
+                gt.property("ADBE Vector Rotation").expression = stag(delay, 0.32, "Settle") + '(1 - e) * -50;';
             }
             return "custom"; },
         swoosh:  function (v, st, o) {   // three curved strokes echo one another along the curve, tapered, drawn part travelling
@@ -279,6 +288,9 @@ var SSS = (function () {
         T.property("ADBE Position").setValue(o.position || [comp.width / 2, comp.height / 2]);
 
         var g = group(root(L), kind), v = vectors(g), chan = B[kind](v, o.style, o);
+        if (kind === "glitter" && o.glow === true) {   // optional soft glow (off by default: Glow lifts the brand colour towards white)
+            try { var gl = L.property("ADBE Effect Parade").addProperty("ADBE Glo2"); gl.property(2).setValue(70); gl.property(3).setValue(22); gl.property(4).setValue(0.35); } catch (eG) {}
+        }
         var style = o.style || (chan === "area" ? "fill" : "outline");
         if (chan === "area" && style === "outline") chan = "line";
         var anim = o.anim;   // explicit ifs: chained ternaries with comparisons misbehave in ExtendScript (LEARNINGS)

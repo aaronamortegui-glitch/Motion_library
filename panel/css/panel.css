@@ -299,6 +299,9 @@ select.field.big { height: 30px; font-weight: 600; border-color: rgba(216, 255, 
 .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .lib-detail { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
 .lib-detail img { width: 100%; border-radius: 4px; background: var(--pine); aspect-ratio: 16 / 9; object-fit: cover; }
+.lib-detail img.small { width: auto; max-width: min(240px, 100%); align-self: center; }   /* kit previews are 240 px: never upscale them */
+.lib-variants { display: flex; flex-wrap: wrap; gap: 4px; }
+.lib-variants .chip { font-size: 10px; padding: 0 8px; }
 .lib-detail p { margin: 0; }
 .lib-detail .order { background: #151716; border: 1px dashed var(--line); border-radius: 4px; padding: 6px 8px; color: var(--text); user-select: text; }
 .msg.rule { background: rgba(216, 255, 133, .07); border: 1px solid rgba(216, 255, 133, .45); display: flex; flex-direction: column; gap: 6px; }

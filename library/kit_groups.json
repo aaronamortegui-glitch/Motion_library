@@ -1,0 +1,977 @@
+{
+ "note": "Families of the kit: the panel, the visualizer and the catalog show one card per family and list its variants as text. Every kit piece belongs to exactly one family (tools/check_previews.py checks it). The first member is the family's preview.",
+ "groups": [
+  {
+   "category": "Solid transitions",
+   "name": "Wipes",
+   "desc": "Colour layers sweep across the cut.",
+   "members": [
+    {
+     "kind": "transition",
+     "name": "Clean Wipe"
+    },
+    {
+     "kind": "transition",
+     "name": "Diagonal Wipe"
+    },
+    {
+     "kind": "transition",
+     "name": "Vertical Drop"
+    },
+    {
+     "kind": "transition",
+     "name": "Soft Wipe"
+    },
+    {
+     "kind": "transition",
+     "name": "Gradient Wipe"
+    }
+   ]
+  },
+  {
+   "category": "Solid transitions",
+   "name": "Bands",
+   "desc": "Bars, blinds, stacks and interleaved strips.",
+   "members": [
+    {
+     "kind": "transition",
+     "name": "Slanted Bars"
+    },
+    {
+     "kind": "transition",
+     "name": "Bar Cascade"
+    },
+    {
+     "kind": "transition",
+     "name": "Venetian Blinds"
+    },
+    {
+     "kind": "transition",
+     "name": "Shutter"
+    },
+    {
+     "kind": "transition",
+     "name": "Color Stack"
+    },
+    {
+     "kind": "transition",
+     "name": "Stack Rise"
+    },
+    {
+     "kind": "transition",
+     "name": "Zipper"
+    },
+    {
+     "kind": "transition",
+     "name": "Comb"
+    }
+   ]
+  },
+  {
+   "category": "Solid transitions",
+   "name": "Splits",
+   "desc": "The frame opens from the middle.",
+   "members": [
+    {
+     "kind": "transition",
+     "name": "Center Split"
+    },
+    {
+     "kind": "transition",
+     "name": "Horizon Split"
+    }
+   ]
+  },
+  {
+   "category": "Solid transitions",
+   "name": "Iris and shapes",
+   "desc": "Circles, rings and diamonds grow from a point.",
+   "members": [
+    {
+     "kind": "transition",
+     "name": "Iris Pop"
+    },
+    {
+     "kind": "transition",
+     "name": "Ring Burst"
+    },
+    {
+     "kind": "transition",
+     "name": "Corner Burst"
+    },
+    {
+     "kind": "transition",
+     "name": "Rainbow Rise"
+    },
+    {
+     "kind": "transition",
+     "name": "Diamond Reveal"
+    }
+   ]
+  },
+  {
+   "category": "Solid transitions",
+   "name": "Grids and dots",
+   "desc": "Cells and dots fill the frame in an order.",
+   "members": [
+    {
+     "kind": "transition",
+     "name": "Pixel Grid"
+    },
+    {
+     "kind": "transition",
+     "name": "Grid Scatter"
+    },
+    {
+     "kind": "transition",
+     "name": "Grid Bloom"
+    },
+    {
+     "kind": "transition",
+     "name": "Dot Matrix"
+    }
+   ]
+  },
+  {
+   "category": "Solid transitions",
+   "name": "Fans",
+   "desc": "Pie slices sweep round a corner or the centre.",
+   "members": [
+    {
+     "kind": "transition",
+     "name": "Fan Sweep"
+    },
+    {
+     "kind": "transition",
+     "name": "Corner Fan"
+    }
+   ]
+  },
+  {
+   "category": "Solid transitions",
+   "name": "Liquid and ink",
+   "desc": "Living wavy edges and ink blooms.",
+   "members": [
+    {
+     "kind": "transition",
+     "name": "Liquid Wipe"
+    },
+    {
+     "kind": "transition",
+     "name": "Liquid Rise"
+    },
+    {
+     "kind": "transition",
+     "name": "Ink Drop"
+    },
+    {
+     "kind": "transition",
+     "name": "Ink Corner"
+    }
+   ]
+  },
+  {
+   "category": "Solid transitions",
+   "name": "Bubbles",
+   "desc": "Bubbles that melt into each other cover the cut.",
+   "members": [
+    {
+     "kind": "transition",
+     "name": "Bubble Wipe"
+    },
+    {
+     "kind": "transition",
+     "name": "Bubble Rise"
+    }
+   ]
+  },
+  {
+   "category": "Solid transitions",
+   "name": "Shards",
+   "desc": "Voronoi shards break and sweep away.",
+   "members": [
+    {
+     "kind": "transition",
+     "name": "Shatter"
+    },
+    {
+     "kind": "transition",
+     "name": "Shard Sweep"
+    }
+   ]
+  },
+  {
+   "category": "Clip transitions",
+   "name": "Zoom and spin",
+   "desc": "Shot to shot through a zoom, a spin, a roll or a twirl.",
+   "members": [
+    {
+     "kind": "transition",
+     "name": "Zoom Through"
+    },
+    {
+     "kind": "transition",
+     "name": "Spin Through"
+    },
+    {
+     "kind": "transition",
+     "name": "Camera Roll"
+    },
+    {
+     "kind": "transition",
+     "name": "Twirl Zoom"
+    }
+   ]
+  },
+  {
+   "category": "Clip transitions",
+   "name": "Slides",
+   "desc": "Push and whip from one shot to the next.",
+   "members": [
+    {
+     "kind": "transition",
+     "name": "Whip Slide"
+    },
+    {
+     "kind": "transition",
+     "name": "Vertical Whip"
+    },
+    {
+     "kind": "transition",
+     "name": "Stretch Slide"
+    }
+   ]
+  },
+  {
+   "category": "Clip transitions",
+   "name": "Flash and dip",
+   "desc": "A flash or a dip to a colour between shots.",
+   "members": [
+    {
+     "kind": "transition",
+     "name": "Flash Cut"
+    },
+    {
+     "kind": "transition",
+     "name": "Dip to Black"
+    }
+   ]
+  },
+  {
+   "category": "Clip transitions",
+   "name": "Shake, slices and glitch",
+   "desc": "Camera shake, sliced frames and an RGB glitch.",
+   "members": [
+    {
+     "kind": "transition",
+     "name": "Camera Shake"
+    },
+    {
+     "kind": "transition",
+     "name": "Slice Cut"
+    },
+    {
+     "kind": "transition",
+     "name": "Glitch Cut"
+    }
+   ]
+  },
+  {
+   "category": "Elements",
+   "name": "Titles",
+   "desc": "Titles that size themselves: plain, scaled, cinematic, kinetic, on tiles.",
+   "members": [
+    {
+     "kind": "element",
+     "name": "title"
+    },
+    {
+     "kind": "element",
+     "name": "scale_title"
+    },
+    {
+     "kind": "element",
+     "name": "cinematic"
+    },
+    {
+     "kind": "element",
+     "name": "kinetic"
+    },
+    {
+     "kind": "element",
+     "name": "tiles"
+    }
+   ]
+  },
+  {
+   "category": "Elements",
+   "name": "Labels and tags",
+   "desc": "Chips, handles, stickers, price tags and buttons.",
+   "members": [
+    {
+     "kind": "element",
+     "name": "label"
+    },
+    {
+     "kind": "element",
+     "name": "handle"
+    },
+    {
+     "kind": "element",
+     "name": "sticker"
+    },
+    {
+     "kind": "element",
+     "name": "price_tag"
+    },
+    {
+     "kind": "element",
+     "name": "button"
+    }
+   ]
+  },
+  {
+   "category": "Elements",
+   "name": "Callouts and chat",
+   "desc": "Pointers, speech bubbles and chat messages.",
+   "members": [
+    {
+     "kind": "element",
+     "name": "callout"
+    },
+    {
+     "kind": "element",
+     "name": "bubble"
+    },
+    {
+     "kind": "element",
+     "name": "chat"
+    }
+   ]
+  },
+  {
+   "category": "Elements",
+   "name": "Data",
+   "desc": "Counters, timers, progress bars, rings and ratings.",
+   "members": [
+    {
+     "kind": "element",
+     "name": "counter"
+    },
+    {
+     "kind": "element",
+     "name": "timer"
+    },
+    {
+     "kind": "element",
+     "name": "progress"
+    },
+    {
+     "kind": "element",
+     "name": "ring"
+    },
+    {
+     "kind": "element",
+     "name": "rating"
+    }
+   ]
+  },
+  {
+   "category": "Elements",
+   "name": "Text blocks",
+   "desc": "Lower thirds, quotes, text boxes and lists.",
+   "members": [
+    {
+     "kind": "element",
+     "name": "lower_third"
+    },
+    {
+     "kind": "element",
+     "name": "quote"
+    },
+    {
+     "kind": "element",
+     "name": "text_box"
+    },
+    {
+     "kind": "element",
+     "name": "list"
+    }
+   ]
+  },
+  {
+   "category": "Elements",
+   "name": "Marks on text",
+   "desc": "Underline or highlight an existing text layer.",
+   "members": [
+    {
+     "kind": "element",
+     "name": "underline"
+    },
+    {
+     "kind": "element",
+     "name": "highlight"
+    }
+   ]
+  },
+  {
+   "category": "Elements",
+   "name": "Media slot",
+   "desc": "A rounded slot that fits an image or a clip.",
+   "members": [
+    {
+     "kind": "element",
+     "name": "media"
+    }
+   ]
+  },
+  {
+   "category": "Elements",
+   "name": "Glass card",
+   "desc": "A smoky frosted card over a moving background.",
+   "members": [
+    {
+     "kind": "element",
+     "name": "glass_card"
+    }
+   ]
+  },
+  {
+   "category": "Elements",
+   "name": "Logo close",
+   "desc": "Our logo built stroke by stroke (Motion DNA videos only).",
+   "members": [
+    {
+     "kind": "element",
+     "name": "end_card"
+    }
+   ]
+  },
+  {
+   "category": "Shapes",
+   "name": "Primitives",
+   "desc": "Circles, polygons, stars, badges, hearts, checks.",
+   "members": [
+    {
+     "kind": "shape",
+     "name": "circle"
+    },
+    {
+     "kind": "shape",
+     "name": "ring"
+    },
+    {
+     "kind": "shape",
+     "name": "square"
+    },
+    {
+     "kind": "shape",
+     "name": "frame"
+    },
+    {
+     "kind": "shape",
+     "name": "triangle"
+    },
+    {
+     "kind": "shape",
+     "name": "diamond"
+    },
+    {
+     "kind": "shape",
+     "name": "pentagon"
+    },
+    {
+     "kind": "shape",
+     "name": "hexagon"
+    },
+    {
+     "kind": "shape",
+     "name": "star"
+    },
+    {
+     "kind": "shape",
+     "name": "sparkle"
+    },
+    {
+     "kind": "shape",
+     "name": "badge"
+    },
+    {
+     "kind": "shape",
+     "name": "heart"
+    },
+    {
+     "kind": "shape",
+     "name": "shield"
+    },
+    {
+     "kind": "shape",
+     "name": "cross"
+    },
+    {
+     "kind": "shape",
+     "name": "plus"
+    },
+    {
+     "kind": "shape",
+     "name": "check"
+    }
+   ]
+  },
+  {
+   "category": "Shapes",
+   "name": "Lines and arrows",
+   "desc": "Lines that draw on and travel off: waves, arrows, brackets, spirals, brush strokes.",
+   "members": [
+    {
+     "kind": "shape",
+     "name": "line"
+    },
+    {
+     "kind": "shape",
+     "name": "wave"
+    },
+    {
+     "kind": "shape",
+     "name": "zigzag"
+    },
+    {
+     "kind": "shape",
+     "name": "arrow"
+    },
+    {
+     "kind": "shape",
+     "name": "curved_arrow"
+    },
+    {
+     "kind": "shape",
+     "name": "chevrons"
+    },
+    {
+     "kind": "shape",
+     "name": "brackets"
+    },
+    {
+     "kind": "shape",
+     "name": "spiral"
+    },
+    {
+     "kind": "shape",
+     "name": "infinity"
+    },
+    {
+     "kind": "shape",
+     "name": "brush"
+    },
+    {
+     "kind": "shape",
+     "name": "speed_lines"
+    }
+   ]
+  },
+  {
+   "category": "Shapes",
+   "name": "Bursts",
+   "desc": "Impacts, shockwave rings, pops, fireworks, confetti and swooshes.",
+   "members": [
+    {
+     "kind": "shape",
+     "name": "burst"
+    },
+    {
+     "kind": "shape",
+     "name": "impact"
+    },
+    {
+     "kind": "shape",
+     "name": "rings"
+    },
+    {
+     "kind": "shape",
+     "name": "pops"
+    },
+    {
+     "kind": "shape",
+     "name": "fireworks"
+    },
+    {
+     "kind": "shape",
+     "name": "confetti"
+    },
+    {
+     "kind": "shape",
+     "name": "swoosh"
+    }
+   ]
+  },
+  {
+   "category": "Shapes",
+   "name": "Sparkles",
+   "desc": "Four-point sparkles that pop, twinkle and fade.",
+   "members": [
+    {
+     "kind": "shape",
+     "name": "glitter"
+    }
+   ]
+  },
+  {
+   "category": "Shapes",
+   "name": "Rows and loaders",
+   "desc": "Rows of shapes, dot rows and a loader.",
+   "members": [
+    {
+     "kind": "shape",
+     "name": "shape_row"
+    },
+    {
+     "kind": "shape",
+     "name": "dots"
+    },
+    {
+     "kind": "shape",
+     "name": "loader"
+    }
+   ]
+  },
+  {
+   "category": "Shapes",
+   "name": "Blob",
+   "desc": "A liquid blob that keeps breathing.",
+   "members": [
+    {
+     "kind": "shape",
+     "name": "blob"
+    }
+   ]
+  },
+  {
+   "category": "Backgrounds",
+   "name": "Patterns",
+   "desc": "Stripes, dots, grids and topographic lines.",
+   "members": [
+    {
+     "kind": "background",
+     "name": "stripes"
+    },
+    {
+     "kind": "background",
+     "name": "dots"
+    },
+    {
+     "kind": "background",
+     "name": "grid"
+    },
+    {
+     "kind": "background",
+     "name": "topo"
+    }
+   ]
+  },
+  {
+   "category": "Backgrounds",
+   "name": "Gradients",
+   "desc": "Moving gradients: four-colour, liquid and mesh.",
+   "members": [
+    {
+     "kind": "background",
+     "name": "gradient"
+    },
+    {
+     "kind": "background",
+     "name": "liquid"
+    },
+    {
+     "kind": "background",
+     "name": "mesh"
+    }
+   ]
+  },
+  {
+   "category": "Backgrounds",
+   "name": "Organic",
+   "desc": "A plexus network, breathing blobs and frosted glass.",
+   "members": [
+    {
+     "kind": "background",
+     "name": "network"
+    },
+    {
+     "kind": "background",
+     "name": "blobs"
+    },
+    {
+     "kind": "background",
+     "name": "glass"
+    }
+   ]
+  },
+  {
+   "category": "Looks",
+   "name": "Colour",
+   "desc": "Tritone and duotone grades.",
+   "members": [
+    {
+     "kind": "look",
+     "name": "tritone"
+    },
+    {
+     "kind": "look",
+     "name": "duotone"
+    }
+   ]
+  },
+  {
+   "category": "Looks",
+   "name": "Frames",
+   "desc": "Vignette and letterbox.",
+   "members": [
+    {
+     "kind": "look",
+     "name": "vignette"
+    },
+    {
+     "kind": "look",
+     "name": "letterbox"
+    }
+   ]
+  },
+  {
+   "category": "Looks",
+   "name": "Texture",
+   "desc": "Grain and scanlines.",
+   "members": [
+    {
+     "kind": "look",
+     "name": "grain"
+    },
+    {
+     "kind": "look",
+     "name": "scanlines"
+    }
+   ]
+  },
+  {
+   "category": "Looks",
+   "name": "Particles",
+   "desc": "Dust, embers and snow.",
+   "members": [
+    {
+     "kind": "look",
+     "name": "dust"
+    },
+    {
+     "kind": "look",
+     "name": "embers"
+    },
+    {
+     "kind": "look",
+     "name": "snow"
+    }
+   ]
+  },
+  {
+   "category": "Looks",
+   "name": "Long shadow",
+   "desc": "A long flat shadow behind a layer.",
+   "members": [
+    {
+     "kind": "look",
+     "name": "long_shadow"
+    }
+   ]
+  },
+  {
+   "category": "Looks",
+   "name": "Glitch",
+   "desc": "An RGB glitch burst on a layer.",
+   "members": [
+    {
+     "kind": "look",
+     "name": "glitch"
+    }
+   ]
+  },
+  {
+   "category": "Text engine",
+   "name": "Reveals",
+   "desc": "Per character, word or line: rise, mask, tracking, skew.",
+   "members": [
+    {
+     "kind": "text",
+     "name": "Chars Pop Rise"
+    },
+    {
+     "kind": "text",
+     "name": "Lines Mask Rise"
+    },
+    {
+     "kind": "text",
+     "name": "Words Tracking Blur"
+    },
+    {
+     "kind": "text",
+     "name": "Chars Skew Slide"
+    }
+   ]
+  },
+  {
+   "category": "Text engine",
+   "name": "Playful",
+   "desc": "3D flips, wiggly scale and colour pops.",
+   "members": [
+    {
+     "kind": "text",
+     "name": "Chars 3D Flip"
+    },
+    {
+     "kind": "text",
+     "name": "Chars Wiggly Scale"
+    },
+    {
+     "kind": "text",
+     "name": "Words Colour Pop"
+    }
+   ]
+  },
+  {
+   "category": "Text engine",
+   "name": "Typing",
+   "desc": "Decode and a typewriter with its cursor.",
+   "members": [
+    {
+     "kind": "text",
+     "name": "Words Decode"
+    },
+    {
+     "kind": "text",
+     "name": "Typewriter Cursor"
+    }
+   ]
+  },
+  {
+   "category": "Text engine",
+   "name": "Captions",
+   "desc": "Word-timed captions: highlight, karaoke, build, pop.",
+   "members": [
+    {
+     "kind": "text",
+     "name": "Captions"
+    }
+   ]
+  },
+  {
+   "category": "Moves",
+   "name": "Flips and hinges",
+   "desc": "3D entrances that turn in.",
+   "members": [
+    {
+     "kind": "move",
+     "name": "flip"
+    },
+    {
+     "kind": "move",
+     "name": "hinge"
+    },
+    {
+     "kind": "move",
+     "name": "tumble"
+    }
+   ]
+  },
+  {
+   "category": "Moves",
+   "name": "Fly and orbit",
+   "desc": "Travel in from depth or around a pivot.",
+   "members": [
+    {
+     "kind": "move",
+     "name": "fly"
+    },
+    {
+     "kind": "move",
+     "name": "orbit"
+    }
+   ]
+  },
+  {
+   "category": "Moves",
+   "name": "Grow and squash",
+   "desc": "Grow from an edge, squash and stretch.",
+   "members": [
+    {
+     "kind": "move",
+     "name": "grow_edge"
+    },
+    {
+     "kind": "move",
+     "name": "squash"
+    }
+   ]
+  },
+  {
+   "category": "Behaviours",
+   "name": "Fill",
+   "desc": "Bubbles, blob, voronoi cells and growth fill an area.",
+   "members": [
+    {
+     "kind": "behavior",
+     "name": "bubbles"
+    },
+    {
+     "kind": "behavior",
+     "name": "blob"
+    },
+    {
+     "kind": "behavior",
+     "name": "voronoi"
+    },
+    {
+     "kind": "behavior",
+     "name": "grow"
+    }
+   ]
+  },
+  {
+   "category": "Behaviours",
+   "name": "Swarm",
+   "desc": "Flow fields and flocks move in a loop.",
+   "members": [
+    {
+     "kind": "behavior",
+     "name": "flow"
+    },
+    {
+     "kind": "behavior",
+     "name": "flock"
+    }
+   ]
+  },
+  {
+   "category": "Behaviours",
+   "name": "Physics",
+   "desc": "Springs and ropes react to the curve.",
+   "members": [
+    {
+     "kind": "behavior",
+     "name": "spring"
+    },
+    {
+     "kind": "behavior",
+     "name": "rope"
+    }
+   ]
+  },
+  {
+   "category": "Behaviours",
+   "name": "Modifier",
+   "desc": "Line boil: any layer drawn on 3s.",
+   "members": [
+    {
+     "kind": "behavior",
+     "name": "line_boil"
+    }
+   ]
+  }
+ ]
+}

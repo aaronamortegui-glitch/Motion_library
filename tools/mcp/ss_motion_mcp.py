@@ -740,6 +740,24 @@ $.global.QA_COMPS = names; QA_COMPS = names;
 return String($.evalFile(new File(SS_ROOT + "/tools/check_layout.jsx")));""", timeout=300)
 
 
+def t_resize_comp(comp=None, sizes=None, mode=None, safe=None, suffix=None, check=True):
+    """Social resizes (tools/ss_resize.jsx): duplicates the comp per size, keeps every keyframe, reframes on rig nulls, then
+    runs the layout QA on each new comp."""
+    o = {k: v for k, v in dict(mode=mode, safe=safe, suffix=suffix).items() if v is not None}
+    res = run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), r;
+app.beginUndoGroup("Motion DNA: social resizes");
+try {{ r = SSRZ.resize(c, {js(sizes or [])}, {js(o)}); }} finally {{ app.endUndoGroup(); }}
+var lines = [], names = [];
+for (var i = 0; i < r.length; i++) {{ lines.push(SSRZ.describe(r[i])); names.push(r[i].name); }}
+return names.join("|") + "\\n" + c.name + " (" + c.width + "x" + c.height + ") -> " + r.length + " resize(s), every keyframe kept:\\n" + lines.join("\\n");""",
+                  includes=("ss_presets.jsx", "ss_resize.jsx"))
+    names, _, text = res.partition("\n")
+    text += "\nAdjust a framing by moving or scaling its 'SS resize · content' / 'SS resize · bg' nulls (shy guide layers)."
+    if check:
+        text += "\n" + t_check_layout(names.split("|"))
+    return text + "\nLook at each size with render_frame(comp=...)."
+
+
 def t_run_jsx(code, timeout_s=180):
     return run_jsx(code, timeout=timeout_s)
 
@@ -854,6 +872,9 @@ TOOLS_DEF = [
      {"subject": {"type": "string"}, "text": {"type": "string"}, "comp": {"type": "string"}}, ["subject", "text"]),
     ("check_layout", t_check_layout, "Layout QA on built comps (default: the active comp), before you report a build as done: text overlapping text, text outside the 40 px safe area, text under 32 px, low contrast, graphics on faces, substituted fonts. Fix every warning or say why it stays.",
      {"comps": {"type": "array", "items": {"type": "string"}}}),
+    ("resize_comp", t_resize_comp, "Social resizes of a comp (default: the active one): duplicates it once per size — 9:16 (1080x1920), 1:1 (1080x1080) and 4:5 (1080x1350) by default; also 16:9, 4:3, 2:3 or any WxH such as 1200x628 — keeping every keyframe and expression (nothing is re-keyed), and reframes it inside the size's title-safe area (9:16 stays clear of the Reels/TikTok/Shorts interface). Full-frame backgrounds (plates, solids, footage, adjustment layers) cover the new frame. mode reflow (default): layers that rest on or next to each other move as a group, each group keeps its own size where it fits (never above the source size) and is placed round the frame centre, so a 16:9 title stays legible in 9:16; mode fit: the whole layout scales as one block, and a text that would still rest outside the safe area gets its own fit null. Every placement is a null ('SS resize · content', 'SS resize · bg', 'SS fit · <layer>': shy guide layers) to adjust by hand. New comps are named '<comp> · 9x16' etc. Runs check_layout on each (check=false skips it); then look at each with render_frame. Layers inside precomps are not reframed. safe = title-safe insets [top, right, bottom, left] as fractions to override the default.",
+     {"comp": {"type": "string"}, "sizes": {"type": "array", "items": {"type": "string"}, "description": "9:16 | 1:1 | 4:5 | 16:9 | 4:3 | 2:3 | WxH; default 9:16, 1:1, 4:5"},
+      "mode": {"type": "string", "enum": ["reflow", "fit"]}, "safe": {"type": "array", "items": {"type": "number"}}, "suffix": {"type": "string"}, "check": {"type": "boolean"}}),
     ("run_jsx", t_run_jsx, "Advanced: run ExtendScript in AE with the library loaded (SSM, SSP, SSA available). The code is a function body: use `return` for the result.",
      {"code": {"type": "string"}, "timeout_s": {"type": "number"}}, ["code"]),
 ]

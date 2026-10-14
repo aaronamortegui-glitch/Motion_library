@@ -173,7 +173,7 @@ def main():
         js("[...document.querySelectorAll('#sec-agent .seg button')].find(b => b.textContent === 'Techniques').click()", hold=3)
         js("document.querySelectorAll('#sec-agent .lib-grid .card')[1].click(); document.querySelector('#main').scrollTop = 0", hold=8)
         js("[...document.querySelectorAll('#sec-agent .seg button')].find(b => b.textContent === 'Kit').click(); document.querySelector('#main').scrollTop = 0", hold=6)
-        js("[...document.querySelectorAll('#sec-agent .lib-grid .card')].find(c => c.dataset.key === 'kit/transition/Liquid Wipe').click(); document.querySelector('#main').scrollTop = 0", hold=8)
+        js("[...document.querySelectorAll('#sec-agent .lib-grid .card')].find(c => c.dataset.key === 'kit/Liquid and ink').click(); document.querySelector('#main').scrollTop = 0", hold=8)
         js("[...document.querySelectorAll('#sec-agent button')].find(b => b.textContent === 'Use in chat').click()", wait=500, hold=10)
         section("library")
 

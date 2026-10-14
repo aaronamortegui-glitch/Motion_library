@@ -4,7 +4,7 @@ This guide is for people **and** for AI agents (Claude Code or others) working o
 
 ## The loop we follow
 Every piece of work should end with three things in the repo:
-1. **Something new in the library**: a preset, a curve, a pack, a tool.
+1. **Something new in the library**: a preset, a curve, a pack, a kit piece, a technique, a tool (the route: §11).
 2. **Evidence**: a GIF or video and the specs that rebuild it.
 3. **What we learned**: lines in `docs/LEARNINGS.md`.
 
@@ -193,10 +193,81 @@ live in `library/brands.local/<slug>/` (git-ignored) or in a folder the user cho
 4. Add the project to its `projects` list, and re-run `python tools/build_library_html.py` so `INDEX.txt` lists it.
 Brands are independent: never copy one brand's rules into another without being asked.
 
+## 11. Feed the plugin: the route for every new piece
+
+Everything the plugin knows comes from the files below; the panel, the MCP server, the catalog and Claude all read the
+same ones. A new piece is only "in the plugin" when it went through this route, so nothing lives in one place and is
+missing from another. It works the same for a person and for Claude.
+
+**Where new pieces come from:** an idea or a request, a reference analysed into a feel (§8), a review note while working
+for a brand (§10: that stays in the brand, unless it is useful for everyone), or a gap found while making a video.
+
+### Step 0 · Decide what it is
+
+| It is… | It becomes… | Lives in |
+|---|---|---|
+| A move for any layer (enter, exit, loop) | a **preset** (§1) | `tools/ss_presets.jsx` + `library/library.json` |
+| A curve or a duration | a **token** | `tokens/superside_motion_tokens.json` + `CURVES` in `tools/tag_library.py` |
+| A whole-comp identity (a role per layer) | a **style** (§3) | `library/packs.json` |
+| A semi-finished piece Claude builds on a comp: a transition, an element (title, callout, counter…), a shape, a background, a look, a text animation, a 3D move, a behaviour | a **kit piece** | `tools/ss_<family>.jsx` + `library/kit.json` (or `library/transitions.json`) |
+| A workflow with scripts (tracking, roto, text behind, stroke build…) | a **technique** | `tools/` + `library/techniques.json` |
+| Something from outside (script, VFX, SFX, music, texture) | a **resource** | `library/resources.json` (license checked) |
+
+### Step 1 · Check it does not exist
+`list_kit`, `list_presets`, `library/INDEX.txt` or `docs/CATALOG.md`. If something close exists, extend it (a new option or
+look) instead of adding a twin.
+
+### Step 2 · Build it on the tokens
+- Kit pieces go in the builder of their family: `ss_transitions.jsx` (SST), `ss_elements.jsx` (SSE), `ss_shapes.jsx`
+  (SSS), `ss_looks.jsx` (SSL), `ss_text.jsx` (SSTX), `ss_moves.jsx` (SSMV), `ss_behaviors.jsx` (SSB).
+- Timing and curves by **name** (`Sweep`, `Land`, `Surge`…, `SSM.animate`), never a raw speed; acceleration and
+  deceleration on every move, overshoot only when the energy asks for it.
+- Colours from the controller (Box / Accent / Text or Color 1–3) so a brand restyles it; fonts through the fallback list
+  (brand font first, never a hard-coded face).
+- One controller per piece, everything named for what it is, removable.
+
+### Step 3 · Compare before you keep it
+Render an 8-frame strip next to the reference (Animation Composer preview, the reference video…), scratchpad only.
+If it looks cheap or mechanical, improve it or drop it: fewer good pieces beat many weak ones. Record what you dropped
+and why (`docs/animation-composer-map.md` or the behaviour's `avoid`).
+
+### Step 4 · Register it
+- **Kit piece:** an entry in `library/kit.json`: `kind`, `name`, `energy` [min, max] on 1–5, `tones` (from `library/tags.json`),
+  `use` (one sentence: what it is for), `call` (the exact MCP call). Behaviours add `family`, `targets`, `avoid` and `pairs`.
+  A transition look goes in `library/transitions.json` instead (`type`, `options`, `dur`, `curves`, `energy`, `tones`, `use`).
+  Then put it in **one family** in `library/kit_groups.json` (an existing one when it is a variant; a new family only for a
+  new idea): the panel, the visualizer and the catalog show one card per family and its variants as text, so the library
+  stays light and nothing looks like a duplicate.
+- **Technique:** an entry in `library/techniques.json` (`what`, `how`, `ask`, `image`) and its tags in `TECH`
+  (`tools/tag_library.py`, then run it); card images with `python tools/technique_cards.py`.
+
+### Step 5 · Expose it to Claude
+Add it to the MCP tool that builds it (`tools/mcp/ss_motion_mcp.py`: the enum and the description in `TOOLS_DEF`) and a call
+in `tools/test_mcp.py`. A new tool goes in `TOOLS_DEF` and the README tools table.
+
+### Step 6 · Preview it
+`NAMES="<name>" python tools/kit_gifs.py all` builds its preview comp through the same MCP call, renders it and writes
+`library/gifs/kit-<kind>/<slug>.gif` and `_md.png`. Look at the GIF: it is what people pick from.
+
+### Step 7 · Publish it
+- `README.md`: its name in the kit table (and in *What's new* when it matters).
+- `python tools/readme_catalog.py` (docs/CATALOG.md) and `python tools/build_library_html.py` (visualizer + `INDEX.txt`).
+- The panel (*Agent › Library › Kit*) reads `kit.json` and `transitions.json` by itself: nothing to add there.
+- Learned something on the way? `docs/LEARNINGS.md`, as symptom → cause → fix.
+
+### Step 8 · Pass the gate, then commit
+- `python tools/check_previews.py`: every piece has its preview, its tags and its README line.
+- `python tools/test_mcp.py` (AE open): every call passes.
+- Interface changed? A fresh GIF (§7) and the Figma file **motion-adn** updated: *00 · Read me* (what's new),
+  *02 · Components*, *03 · Screens*, *04 · Motion map*; the logo lives in *01 · Foundations › logo*.
+- Commit (and push) only when asked, as one commit per coherent piece of work.
+
+---
+
 ## Checklist before you push
 - [ ] `python tools/test_all.py` passes (AE open): engine, panel, MCP and the mosaics. A new preset must animate, respond to the controls and be removable.
 - [ ] Everything in English, no temporary jobs or candidates in the diff
-- [ ] `python tools/check_previews.py` passes: every preset, style and technique has its preview (a style without its demo shows a placeholder in the panel)
+- [ ] `python tools/check_previews.py` passes: every preset, style, technique and kit piece has its preview, its tags and its README line (§11)
 - [ ] New presets have metadata, a GIF, a poster and a panel thumb; `INDEX.txt`, visualizer and `docs/CATALOG.md` regenerated
 - [ ] Open-source data has source, version and license recorded
 - [ ] Case study: specs + rebuild script + doc + GIFs + README section

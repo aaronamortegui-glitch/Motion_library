@@ -41,7 +41,11 @@ KIT += [{"group": GROUP[x["kind"]], "kind": x["kind"], "name": x["name"], "energ
          "gif": f"gifs/kit-{x['kind']}/{kslug(x['name'])}.gif"} for x in kit]
 for k in KIT:
     k["has"] = (ROOT / "library" / k["gif"]).exists()
-data = json.dumps({"presets": lib["presets"], "tokens": tok, "tones": tags["tones"], "packs": packs, "techniques": techs, "kit": KIT}, ensure_ascii=False)
+FAM = json.loads((ROOT / "library/kit_groups.json").read_text(encoding="utf-8"))["groups"]
+BYK = {(("transition" if k["kind"] == "transition" else k["kind"]), k["name"]): k for k in KIT}
+FAMILIES = [{"category": g["category"], "name": g["name"], "desc": g["desc"],
+             "members": [BYK[(m["kind"], m["name"])] for m in g["members"] if (m["kind"], m["name"]) in BYK]} for g in FAM]
+data = json.dumps({"presets": lib["presets"], "tokens": tok, "tones": tags["tones"], "packs": packs, "techniques": techs, "kit": KIT, "families": FAMILIES}, ensure_ascii=False)
 
 HTML = r"""<!doctype html>
 <html lang="en">
@@ -85,6 +89,9 @@ p.lead{max-width:760px;color:var(--muted);font-size:18px;margin:0}
 .meta{color:var(--muted);font-size:12.5px}
 .tones{display:flex;flex-wrap:wrap;gap:4px}
 .tone{font-size:11px;border:1px solid rgba(216,255,133,.35);color:var(--spark);border-radius:999px;padding:1px 8px}
+.vchip{background:transparent;font:inherit;font-size:11px;cursor:pointer}.vchip.on{background:var(--spark);color:var(--pine)}
+:root[data-theme="light"] .tone{color:#2F6B2A;border-color:rgba(47,107,42,.35)}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .tone{color:#2F6B2A;border-color:rgba(47,107,42,.35)}}
 code{font-family:ui-monospace,Consolas,monospace;font-size:10.5px}
 .call{margin-top:auto;display:flex;gap:8px;align-items:center;background:var(--surface);border-radius:10px;padding:8px 10px}
 .call code{flex:1;white-space:normal;word-break:break-word;line-height:1.35}
@@ -126,7 +133,7 @@ footer{margin-top:64px;color:var(--muted);font-size:13px}
   <p class="meta">Script workflows that leave a technique in every project. Each one says what it needs and what to ask Claude.</p>
   <div class="grid" id="techs"></div>
   <h2>The kit</h2>
-  <p class="meta">Pieces Claude builds on the open comp through the MCP server, on the same token curves: transitions, elements, shapes, backgrounds, looks, text, moves and behaviours. Ask for them by name; the call is on each card.</p>
+  <p class="meta">Pieces Claude builds on the open comp through the MCP server, on the same token curves, in families: one card per family, its variants as chips (hover a card to play it, click a chip to see that variant). Ask for any variant by name; the call is on each card.</p>
   <div class="bar" role="toolbar" aria-label="Kit groups" id="kitgroups"></div>
   <div class="grid" id="kit"></div>
 
@@ -147,7 +154,7 @@ const grid = document.getElementById("grid");
 function card(p){
   const el = document.createElement("article");
   el.className = "card";
-  el.innerHTML = `<img width="240" height="135" decoding="async" src="${POSTER ? p.gif.replace("gifs/", "posters/").replace(".gif", ".png") : p.gif}" alt="Preview of ${p.name}">
+  el.innerHTML = `<img width="240" height="135" decoding="async" loading="lazy" src="${p.gif.replace("gifs/", "posters/").replace(".gif", ".png")}" alt="Preview of ${p.name}">
   <div class="body">
     <div class="row"><span class="name">${p.name}</span><span class="badge e-${p.energy}">${p.energy}${p.range ? " " + p.range[0] + "–" + p.range[1] : ""}</span></div>
     <div class="tones">${tonesHTML(p.tones)}</div>
@@ -155,6 +162,8 @@ function card(p){
     <div class="meta">${p.use}</div>
     <div class="call"><code>${p.call}</code><button class="copy">Copy</button></div>
   </div>`;
+  const im = el.querySelector("img"), poster = im.src;   // a still until hovered: 80 GIFs at once made the page slow
+  if (!POSTER) { el.onmouseenter = () => { im.src = p.gif; }; el.onmouseleave = () => { im.src = poster; }; }
   el.querySelector(".copy").onclick = e => {
     try { navigator.clipboard.writeText(p.call); e.target.textContent = "Copied"; setTimeout(()=>e.target.textContent="Copy",1200); } catch(_){}
   };
@@ -175,12 +184,15 @@ function render(){
 function renderStyles(){
   const el = document.getElementById("styles");
   el.innerHTML = DATA.packs.filter(s => !state.tone || (s.tones || []).includes(state.tone)).map(s => `<article class="card">
-    <img width="240" height="135" decoding="async" src="${POSTER ? "packs/" + s.slug + ".png" : "packs/" + s.slug + ".gif"}" alt="Style ${s.name}">
+    <img width="240" height="135" decoding="async" loading="lazy" src="packs/${s.slug}_md.png" data-gif="packs/${s.slug}.gif" alt="Style ${s.name}">
     <div class="body"><div class="row"><span class="name">${s.name}</span><span class="badge e-${s.energy}">${s.energy}${s.energy_range ? " " + s.energy_range[0] + "–" + s.energy_range[1] : ""}</span></div>
     <div class="tones">${tonesHTML(s.tones)}</div><div class="meta">${s.desc}</div>
     <div class="meta">${s.curve ? "curve " + s.curve + " · " : ""}transition ${s.transition || "-"}${s.source && s.source.startsWith("reference:") ? " · from " + s.source.slice(10) : ""}</div>
     <div class="call"><code>SSP.applyPack(comp, "${s.name}")</code></div></div></article>`).join("");
+  hoverGifs(el);
 }
+function hoverGifs(root){ if (POSTER) return; root.querySelectorAll("img[data-gif]").forEach(im => { const c = im.closest(".card"), still = im.src;
+  c.onmouseenter = () => { im.src = im.dataset.gif; }; c.onmouseleave = () => { im.src = still; }; }); }
 function renderTechs(){
   const el = document.getElementById("techs");
   el.innerHTML = DATA.techniques.filter(t => !state.tone || !(t.tags.tones || []).length || t.tags.tones.includes(state.tone)).map(t => `<article class="card">
@@ -190,19 +202,28 @@ function renderTechs(){
     ${(t.tags.needs || []).length ? `<div class="meta">needs ${t.tags.needs.join(", ")}</div>` : ""}
     <div class="call"><code>Ask Claude: ${t.ask}</code></div></div></article>`).join("");
 }
-const KG = [...new Set(DATA.kit.map(k => k.group))];
+const KG = [...new Set(DATA.families.map(f => f.category))];
 state.kg = QS.get("kit") || "all";
+function still(g) { return g.replace(".gif", "_md.png"); }
 function renderKit(){
   const el = document.getElementById("kit"), q = state.q.toLowerCase();
-  document.getElementById("kitgroups").innerHTML = ["all", ...KG].map(g => `<button class="chip" data-kg="${g}" aria-pressed="${state.kg === g}">${g === "all" ? "All (" + DATA.kit.length + ")" : g + " (" + DATA.kit.filter(k => k.group === g).length + ")"}</button>`).join("");
+  document.getElementById("kitgroups").innerHTML = ["all", ...KG].map(g => `<button class="chip" data-kg="${g}" aria-pressed="${state.kg === g}">${g === "all" ? "All (" + DATA.families.length + " families · " + DATA.kit.length + " pieces)" : g + " (" + DATA.families.filter(f => f.category === g).length + ")"}</button>`).join("");
   document.querySelectorAll("[data-kg]").forEach(b => b.onclick = () => { state.kg = b.dataset.kg; renderKit(); });
-  const list = DATA.kit.filter(k => (state.kg === "all" || k.group === state.kg) && (!state.tone || (k.tones || []).includes(state.tone)) &&
-    (!q || (k.name + " " + k.use + " " + k.group + " " + (k.tones || []).join(" ")).toLowerCase().includes(q)));
-  el.innerHTML = list.map(k => `<article class="card">
-    ${k.has ? `<img width="240" height="135" decoding="async" src="${POSTER ? k.gif.replace(".gif", "_md.png") : k.gif}" alt="Preview of ${k.name}">` : ""}
-    <div class="body"><div class="row"><span class="name">${k.name}</span><span class="badge e-medium">${k.energy[0]}–${k.energy[1]}</span></div>
-    <div class="tones">${tonesHTML(k.tones)}</div><div class="meta">${k.group}</div><div class="meta">${k.use}</div>
-    <div class="call"><code>${k.call}</code></div></div></article>`).join("") || '<div class="empty">No piece matches the filter.</div>';
+  const list = DATA.families.filter(f => (state.kg === "all" || f.category === state.kg) &&
+    (!state.tone || f.members.some(k => (k.tones || []).includes(state.tone))) &&
+    (!q || (f.name + " " + f.desc + " " + f.category + " " + f.members.map(k => k.name + " " + k.use).join(" ")).toLowerCase().includes(q)));
+  el.innerHTML = list.map((f, i) => { const k = f.members[0], lo = Math.min(...f.members.map(m => m.energy[0])), hi = Math.max(...f.members.map(m => m.energy[1]));
+    return `<article class="card" data-f="${i}">
+    ${k.has ? `<img width="240" height="135" decoding="async" loading="lazy" src="${still(k.gif)}" data-gif="${k.gif}" alt="Preview of ${f.name}">` : ""}
+    <div class="body"><div class="row"><span class="name">${f.name}</span><span class="badge e-medium">${lo}–${hi}</span></div>
+    <div class="meta">${f.category} · ${f.members.length > 1 ? f.members.length + " variants" : "1 piece"}</div><div class="meta">${f.desc}</div>
+    ${f.members.length > 1 ? `<div class="tones">${f.members.map((m, j) => `<button class="tone vchip" data-v="${j}" title="${m.use.replace(/"/g, "&quot;")}">${m.name}</button>`).join("")}</div>` : ""}
+    <div class="call"><code>${k.call}</code></div></div></article>`; }).join("") || '<div class="empty">No family matches the filter.</div>';
+  el.querySelectorAll(".card").forEach(c => { const f = list[+c.dataset.f], img = c.querySelector("img"), code = c.querySelector("code");
+    if (!img) return;
+    c.onmouseenter = () => { img.src = img.dataset.gif; }; c.onmouseleave = () => { img.src = still(img.dataset.gif); };
+    c.querySelectorAll(".vchip").forEach(b => b.onclick = () => { const m = f.members[+b.dataset.v]; img.dataset.gif = m.gif; img.src = m.gif; code.textContent = m.call;
+      c.querySelectorAll(".vchip").forEach(x => x.classList.toggle("on", x === b)); }); });
 }
 document.getElementById("tones").innerHTML = DATA.tones.map(t => `<button class="chip" data-tone="${t}" aria-pressed="${state.tone === t}">${t}</button>`).join("");
 document.querySelectorAll("[data-tone]").forEach(b => b.onclick = () => {

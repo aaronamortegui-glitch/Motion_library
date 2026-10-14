@@ -3,7 +3,7 @@
   "tool": "ae_status",
   "ok": true,
   "args": {},
-  "answer": "AE 26.5x89 · project: use-cases.aep · active: MDNA Kit Demo (1920x1080, 24.00s, 18 layers, selected: 1) · panel: not loaded · WARNING fonts substituted (InterTight-SemiBold, InterTight-Regular, InstrumentSerif-Regular, InstrumentSerif-Italic, InterTight-Bold, InterTight-Black): restart After Effects"
+  "answer": "AE 26.5x89 · project: unsaved · active: R4 Vintage spot (1920x1080, 24.00s, 9 layers, selected: 6) · panel: loaded (Window > Extensions > Motion DNA) · fonts ok"
  },
  {
   "tool": "list_presets",
@@ -92,6 +92,36 @@
   "answer": "_MCP_TEST\n1|Chip|shape|0.00-4.00|selected\n2|Title|text|0.00-4.00"
  },
  {
+  "tool": "resize_comp",
+  "ok": true,
+  "args": {
+   "comp": "_MCP_TEST"
+  },
+  "answer": "_MCP_TEST (1280x720) -> 3 resize(s), every keyframe kept:\n_MCP_TEST · 9x16 (1080x1920, reflow): title safe [86,230 - 994,1536], 2 layer(s) in 1 group(s): Chip +1 x2.67; 0 background(s) cover-fitted x2.67\n_MCP_TEST · 1x1 (1080x1080, reflow): title safe [108,108 - 972,972], 2 layer(s) in 1 group(s): C"
+ },
+ {
+  "tool": "resize_comp",
+  "ok": true,
+  "args": {
+   "comp": "_MCP_TEST",
+   "sizes": [
+    "1200x628"
+   ],
+   "mode": "fit",
+   "check": false
+  },
+  "answer": "_MCP_TEST (1280x720) -> 1 resize(s), every keyframe kept:\n_MCP_TEST · 1200x628 (1200x628, fit): title safe [120,63 - 1080,565], 2 layer(s) scaled x0.94; 0 background(s) cover-fitted x0.94\nAdjust a framing by moving or scaling its 'SS resize · content' / 'SS resize · bg' nulls (shy guide layers).\nLoo"
+ },
+ {
+  "tool": "render_frame",
+  "ok": true,
+  "args": {
+   "comp": "_MCP_TEST · 9x16",
+   "time_s": 0.5
+  },
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1792013300266.png (open it to look at the frame)"
+ },
+ {
   "tool": "apply_preset",
   "ok": true,
   "args": {
@@ -126,7 +156,7 @@
    "kind": "motion",
    "name": "Surge Rise"
   },
-  "answer": "Motion DNA panel is not open (Window > Extensions > Motion DNA)"
+  "answer": "The Motion DNA panel (Window > Extensions > Motion DNA) cannot be driven from a script yet: tell the user which preset to pick."
  },
  {
   "tool": "render_frame",
@@ -135,7 +165,7 @@
    "comp": "_MCP_TEST",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1791993762529.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1792013304142.png (open it to look at the frame)"
  },
  {
   "tool": "check_layout",
@@ -145,7 +175,7 @@
     "_MCP_TEST"
    ]
   },
-  "answer": "layout QA: STOP · 6 fonts are substituted (InterTight-SemiBold, InterTight-Regular, InstrumentSerif-Regular, InstrumentSerif-Italic, InterTight-Bold, InterTight-Black). Restart After Effects, then rebuild."
+  "answer": "layout QA: 1 comps, 0 warnings ()"
  },
  {
   "tool": "apply_transition",
@@ -698,16 +728,16 @@
    "category": "motion",
    "why": "test"
   },
-  "answer": "saved rule 1 (motion) in D:/motion category ai library/research/_mcp_test/20261014-120233/brand/brand.json: Product shots glide in, never pop"
+  "answer": "saved rule 1 (motion) in D:/motion category ai library/research/_mcp_test/20261014-172812/brand/brand.json: Product shots glide in, never pop"
  },
  {
   "tool": "matte",
   "ok": true,
   "args": {
-   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261014-120233\\product_car_side.jpg",
-   "out": "D:\\motion category ai library\\research\\_mcp_test\\20261014-120233\\product_cutout.png"
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261014-172812\\product_car_side.jpg",
+   "out": "D:\\motion category ai library\\research\\_mcp_test\\20261014-172812\\product_cutout.png"
   },
-  "answer": "matte: D:/motion category ai library/research/_mcp_test/20261014-120233/product_cutout.png"
+  "answer": "matte: D:/motion category ai library/research/_mcp_test/20261014-172812/product_cutout.png"
  },
  {
   "tool": "run_jsx",

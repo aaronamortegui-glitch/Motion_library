@@ -857,7 +857,7 @@
     "luxury",
     "playful"
    ],
-   "use": "Twinkling sparkles (loop).",
+   "use": "Sparkles: four-point stars with concave sides, one hero and a few small ones, each popping in with a twist, twinkling and fading on its own clock (optional glow).",
    "call": "add_shape(kind=\"glitter\", …)"
   },
   {

@@ -201,7 +201,7 @@ kit|Shapes|dots|2-3|modern/friendly|add_shape(kind="dots", …)|Row of dots popp
 kit|Shapes|pops|4-5|playful|add_shape(kind="pops", …)|Particles burst from the centre, spin and shrink away.
 kit|Shapes|shape_row|3-4|playful/friendly|add_shape(kind="shape_row", …)|Row of small shapes popping.
 kit|Shapes|fireworks|4-5|playful/bold|add_shape(kind="fireworks", …)|Staggered bursts at a few spots.
-kit|Shapes|glitter|3-4|luxury/playful|add_shape(kind="glitter", …)|Twinkling sparkles (loop).
+kit|Shapes|glitter|3-4|luxury/playful|add_shape(kind="glitter", …)|Sparkles: four-point stars with concave sides, one hero and a few small ones, each popping in with a twist, twinkling and fading on its own clock (optional glow).
 kit|Shapes|swoosh|4-5|bold/playful|add_shape(kind="swoosh", …)|Three curved strokes echoing along a curve.
 kit|Shapes|confetti|4-5|playful/bold|add_shape(kind="confetti", …)|Confetti burst with gravity.
 kit|Moves|flip|3-4|modern/bold|move(move="flip", layers=[…])|Card turn on the anchor (3D).

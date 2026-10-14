@@ -79,11 +79,12 @@ async function boot() {
   } else {
     S.url = new URL("../", location.href).href;
   }
-  const [lib, tags, rec, packs, tech, kit, trs] = await Promise.all([
+  const [lib, tags, rec, packs, tech, kit, trs, fam] = await Promise.all([
     readJSON(asset("library/library.json")), readJSON(asset("library/tags.json")).catch(() => ({ presets: [], tones: [] })),
     readJSON(asset("library/recipes.json")).catch(() => ({ recipes: [] })), readJSON(asset("library/packs.json")).catch(() => ({ packs: [] })),
     readJSON(asset("library/techniques.json")).catch(() => ({ techniques: [] })),
     readJSON(asset("library/kit.json")).catch(() => ({ items: [] })), readJSON(asset("library/transitions.json")).catch(() => ({ transitions: [] })),
+    readJSON(asset("library/kit_groups.json")).catch(() => ({ groups: [] })),
   ]);
   S.lib = lib.presets; S.tags = tags; S.packs = packs.packs; S.techniques = tech.techniques;
   // the kit Claude builds through MCP (transitions, elements, shapes, backgrounds, looks, text, moves, behaviours)
@@ -91,6 +92,10 @@ async function boot() {
   const GROUP = { element: "Elements", shape: "Shapes", background: "Backgrounds", look: "Looks", text: "Text engine", move: "Moves", behavior: "Behaviours" };
   S.kit = trs.transitions.map((x) => ({ kind: "transition", group: CLIP.includes(x.type) ? "Clip transitions" : "Solid transitions", name: x.name, energy: x.energy, use: x.use, call: `solid_transition(look="${x.name}")` }))
     .concat(kit.items.map((x) => ({ kind: x.kind, group: GROUP[x.kind] || x.kind, name: x.name, energy: x.energy, use: x.use, call: x.call })));
+  // one card per family (library/kit_groups.json); its variants are listed as text in the detail
+  const byKey = {}; for (const k of S.kit) byKey[k.kind + "/" + k.name] = k;
+  S.kitFamilies = (fam.groups || []).map((g) => ({ category: g.category, name: g.name, desc: g.desc,
+    members: g.members.map((m) => byKey[m.kind + "/" + m.name]).filter(Boolean) })).filter((g) => g.members.length);
   for (const t of tags.presets || []) S.tagOf[t.name] = t;
   S.recipes = rec.recipes.map((r) => ({ name: r.id, slug: slug(r.id), kind: "recipe", channels: (r.channels || []).join(" & "),
     energy: ENERGY_WORD[r.energy] || r.energy, use: "Measured reference · " + (r.section || "") }));

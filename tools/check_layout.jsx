@@ -11,6 +11,20 @@
     var names = (typeof QA_COMPS !== "undefined" && QA_COMPS) || null;
     function findItem(n) { for (var i = 1; i <= proj.numItems; i++) if (proj.item(i).name === n) return proj.item(i); return null; }
     function tr(L, p) { return L.property("ADBE Transform Group").property(p); }
+    function affine(L, t) {   // 2D layer-to-comp transform at t, parents included: [a, b, c, d, e, f]
+        var a = tr(L, "ADBE Anchor Point").valueAtTime(t, false), sc = tr(L, "ADBE Scale").valueAtTime(t, false), p = tr(L, "ADBE Position").valueAtTime(t, false);
+        var rz = 0; try { rz = tr(L, "ADBE Rotate Z").valueAtTime(t, false) * Math.PI / 180; } catch (e) {}
+        var cs = Math.cos(rz), sn = Math.sin(rz), m = [cs * sc[0] / 100, sn * sc[0] / 100, -sn * sc[1] / 100, cs * sc[1] / 100, 0, 0];
+        m[4] = p[0] - (m[0] * a[0] + m[2] * a[1]); m[5] = p[1] - (m[1] * a[0] + m[3] * a[1]);
+        if (!L.parent) return m;
+        var P = affine(L.parent, t);
+        return [P[0] * m[0] + P[2] * m[1], P[1] * m[0] + P[3] * m[1], P[0] * m[2] + P[2] * m[3], P[1] * m[2] + P[3] * m[3], P[0] * m[4] + P[2] * m[5] + P[4], P[1] * m[4] + P[3] * m[5] + P[5]];
+    }
+    function rectBox(m, r) {   // comp-space bounds of a source rect under an affine
+        var xs = [], ys = [], cn = [[r.left, r.top], [r.left + r.width, r.top], [r.left, r.top + r.height], [r.left + r.width, r.top + r.height]];
+        for (var i = 0; i < 4; i++) { xs.push(m[0] * cn[i][0] + m[2] * cn[i][1] + m[4]); ys.push(m[1] * cn[i][0] + m[3] * cn[i][1] + m[5]); }
+        return [Math.min.apply(null, xs), Math.min.apply(null, ys), Math.max.apply(null, xs), Math.max.apply(null, ys)];
+    }
     var comps = [];
     if (names) { for (var n = 0; n < names.length; n++) { var it = findItem(names[n]); if (it instanceof CompItem) comps.push(it); } }
     else for (var i = 1; i <= proj.numItems; i++) if (proj.item(i) instanceof CompItem && /^DNA_S\d/.test(proj.item(i).name)) comps.push(proj.item(i));
@@ -41,14 +55,11 @@
             }
             var isText = L instanceof TextLayer, isDot = L.name.indexOf("HUD dot") === 0, isCard = L.name.indexOf("HUD card") === 0;
             if (!isText && !isDot && !isCard) continue;
-            var r = L.sourceRectAtTime(t, false), s = tr(L, "ADBE Scale").valueAtTime(t, false), p = tr(L, "ADBE Position").valueAtTime(t, false), a = tr(L, "ADBE Anchor Point").valueAtTime(t, false);
+            var r = L.sourceRectAtTime(t, false);
             if (r.width < 2 || r.height < 2) continue;
-            if (L.parent) {   // a parented layer (a chip's text): its position is in the parent's space
-                var P = L.parent, pp = tr(P, "ADBE Position").valueAtTime(t, false), pa = tr(P, "ADBE Anchor Point").valueAtTime(t, false), ps = tr(P, "ADBE Scale").valueAtTime(t, false);
-                p = [pp[0] + (p[0] - pa[0]) * ps[0] / 100, pp[1] + (p[1] - pa[1]) * ps[1] / 100]; s = [s[0] * ps[0] / 100, s[1] * ps[1] / 100];
-            }
-            var x0 = p[0] + (r.left - a[0]) * s[0] / 100, y0 = p[1] + (r.top - a[1]) * s[1] / 100;
-            var box = [x0, y0, x0 + r.width * s[0] / 100, y0 + r.height * s[1] / 100];
+            // the whole parent chain counts (a chip's text under its chip, both under a resize rig from resize_comp)
+            var m = affine(L, t), box = rectBox(m, r);
+            var s = [Math.sqrt(m[0] * m[0] + m[1] * m[1]) * 100, Math.sqrt(m[2] * m[2] + m[3] * m[3]) * 100];
             var behind = false;   // text under the people matte (roto) is covered by them, not placed on their faces
             for (var mm = 1; mm < L.index; mm++) if (comp.layer(mm).name.indexOf("Matte") === 0) behind = true;
             var item = { name: L.name, comp: comp.name, box: box, text: isText, card: isCard, id: L.name.split(" · ").slice(1).join(" · "), root: path.length ? path[0] : comp, owner: comp, t: t, behind: behind };
@@ -61,9 +72,8 @@
                 for (var sh = L.index + 1; sh <= comp.numLayers && !item.helped; sh++) {   // a shape card under the text is its plate
                     var Sh = comp.layer(sh);
                     if (!(Sh instanceof ShapeLayer) || !Sh.enabled || t < Sh.inPoint || t >= Sh.outPoint) continue;
-                    var sr = Sh.sourceRectAtTime(t, false), ss = tr(Sh, "ADBE Scale").valueAtTime(t, false), sp = tr(Sh, "ADBE Position").valueAtTime(t, false), sa = tr(Sh, "ADBE Anchor Point").valueAtTime(t, false);
-                    var sx = sp[0] + (sr.left - sa[0]) * ss[0] / 100, sy = sp[1] + (sr.top - sa[1]) * ss[1] / 100;
-                    if (sx <= box[0] && sy <= box[1] && sx + sr.width * ss[0] / 100 >= box[2] && sy + sr.height * ss[1] / 100 >= box[3]) item.helped = true;
+                    var sb = rectBox(affine(Sh, t), Sh.sourceRectAtTime(t, false));
+                    if (sb[0] <= box[0] && sb[1] <= box[1] && sb[2] >= box[2] && sb[3] >= box[3]) item.helped = true;
                 }
                 item.str = String(td.text).replace(/\r/g, " / ").substr(0, 40);
                 // contrast is judged once the text has finished coming in (its last key before the exit), not mid-fade
