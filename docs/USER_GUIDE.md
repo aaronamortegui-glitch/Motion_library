@@ -13,6 +13,7 @@ beauty, kitchen and cars.
 [Curves](#curves-change-the-feel) ·
 [Brands](#brands-a-style-that-learns) ·
 [Agent](#agent-ask-claude) ·
+[Techniques](#techniques-workflows-beyond-one-preset) ·
 [Projects](#projects-one-folder-and-one-conversation-per-piece) ·
 [For Claude](#for-claude) ·
 [Tips by industry](#tips-by-industry) ·
@@ -72,6 +73,9 @@ The four tabs at the bottom:
 >   letters (UC01).
 > - **Marker timing:** with it on, the layer gets *SS in / SS out* markers. Drag them to retime without touching keys.
 > - **Loops** (Float, Pulse…) add on top of any move. Put them on the product, not on the text.
+> - **Text never touches the product or the person.** If a title would, break it into two lines and play with sizes
+>   (a small lead line over a big key line) instead of shrinking it or letting it overlap (CONTRIBUTING §9, rule 15).
+> - **Parent a button's label to the button.** Styles then move and fade them together.
 
 ## Curves: change the feel
 1. Select keyframes, or select layers to change every key on them.
@@ -119,6 +123,10 @@ each layer named in the brand's timing, on the brand's own curve.
 >   Overshoot rules still need a look at a frame.
 > - **Client brands never go in the repo.** Only templates live in `library/brands/`.
 
+**Watch a brand learn** (UC20): Oku Optics started on the wrong style. Note 1 (“calm and premium, no slams”) became a
+rule and moved it to Calm Modern on Coast; note 2 (“the glasses glide in from the right, 900 ms, never pop”) became a
+rule plus a curve and a timing entry, which `apply_brand` now applies by itself. The next piece starts from there.
+
 ## Agent: ask Claude
 - **Safe** mode uses only the Motion DNA tools: apply, layers and frames.
 - **Full** mode adds Figma, files and scripts. It never commits or pushes.
@@ -160,6 +168,20 @@ the tests:
 >   anything.
 > - **The `>_` button** copies the command that continues the same conversation in a terminal. *Open in Claude app*
 >   continues it in the Claude app.
+
+## Techniques: workflows beyond one preset
+Each one was tested end to end (use cases UC12–UC19). The Agent knows the tool for each; by hand:
+
+| Technique | How | Tip |
+|---|---|---|
+| **Tracked labels + HUD** | `python tools/track_points.py clip.mp4 tracks.json --regions regions.json`, then a scene spec for `tools/build_scene.jsx` (callout, chip, bracket, kicker) | Point callouts inward so the camera move cannot push them out; `"card": true` on light plates |
+| **Speed ramp** | Behaviors › Moves › Speed Ramp on a footage layer | The ramp eats about 2.5× its length of footage: use a long enough plate |
+| **Text behind a person or product** | MCP `text_behind` (still or video), or `matte` + a `behind` item in a scene spec | Pick a tone that contrasts with the wall, not the brand colour by default |
+| **Roto breakdown** | `matte` → `tools/matte_contours.py` → `tools/build_breakdown.jsx` | Contours in ink on light plates, in spark on dark ones |
+| **Freeze frame + kinetic type** | an edit spec for `tools/build_edit.jsx` with `freeze` (`mono`, matte, plate) and a `split` title | Split the title around the person, in the empty space; break the subtitle into lines |
+| **Shape wipe** | a full-frame solid with Color Wipe in and out around the cut | Start the next scene under the wipe, a few frames before it opens |
+| **Marker timing** | apply with *Marker timing*, then drag `SS in` / `SS out` | The fastest way to answer “land it a second later” |
+| **Cut on the voice** | `python tools/vo_words.py vo.mp3 words.json`, cuts two frames before each phrase | Whisper can mishear brand names: check them before you cut on them |
 
 ## Projects: one folder and one conversation per piece
 Agent › Project › **New project**:
@@ -215,6 +237,7 @@ Recipes that worked in the tests:
 | **Eyewear** | Modify on the client's product move; Scale Pop for a single hero; a short Float loop on the frame. | Thin type over a light grey: keep it 32 px or more. |
 | **Beauty** | Serif headline with Blur Words or Chars Rise; claim and price later, softer; Calm Modern or Elegant. | Text over texture: put it where the texture is calm, or on a card. |
 | **Kitchen** | Whip Pan out of the lifestyle shot, Push Through into the product, Float on the product. | Use **Transition** with both layers selected, so the cut is one move. |
+| **Sets (any)** | Build every angle of a set from one master frame as the reference image | Generated independently, the views disagree (windows, doors, furniture) |
 | **Cars** | A full studio or road photo, a slow push-in, a spec card on empty space; S curve or the brand's glide. | Don't paste a cut-out car on a road photo: it floats. No overshoot on premium brands. |
 
 ## Troubleshooting

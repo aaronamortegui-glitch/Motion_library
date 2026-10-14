@@ -1,6 +1,6 @@
 # Use cases: every tool, tested on real-looking work
 
-We ran each Motion DNA tool on a small, realistic piece from five industries, with fictional brands and generated
+We ran each Motion DNA tool, technique and style on a small, realistic piece from five industries, with fictional brands and generated
 assets. The aim was to find what breaks or confuses a designer. Every finding below was fixed and re-tested. The
 [User guide](../USER_GUIDE.md) turns these results into instructions and tips.
 
@@ -23,6 +23,15 @@ Brands: Maison Nord (fashion), Oku Optics (eyewear), Lumé (beauty), Orto (kitch
 | UC09 | Cars | Agent: Figma frame → After Effects | OK | F12, F13, F14 |
 | UC10 | All | Projects and conversations | OK | — |
 | UC11 | All | MCP directly + layout QA | OK | QA false positives fixed |
+| UC12 | Cars | Technique: tracked labels + HUD | OK | F18, F19 |
+| UC13 | Cars | Technique: speed ramp | OK | — |
+| UC14 | Eyewear | The 9 styles on one layout | OK | F21, F22 |
+| UC15 | Fashion | Techniques: text behind (video), contour, roto breakdown | OK | F23 |
+| UC16 | Fashion | Technique: freeze frame + kinetic type | OK | — |
+| UC17 | Kitchen | Technique: shape wipe | OK | F20 |
+| UC18 | Beauty | Technique: marker timing | OK | — |
+| UC19 | Cars | Technique: cut on the voice | OK | — |
+| UC20 | Eyewear | A brand that learns: v1 → v2 → v3 | OK | F24 |
 | — | Panel | Reviews by Aaron and Gian | — | F15, F16, F17 |
 
 Agent costs are Claude Code's own estimates. With a subscription they are not billed per order.
@@ -164,6 +173,138 @@ every key of those layers.
     catch: use a darker tone or a shadow.
 
 ![UC11](img/uc11.jpg)
+
+## UC12 · Cars · Tracked labels and HUD
+**Brief:** a design-details shot of the Vela One: a slow handheld move on the wheel and the light bar, with callouts
+that stick to them. The plate is a camera move made from a 4K still, at no generation cost.
+**Steps:** `tools/track_points.py` on three regions (wheel, light bar, air intake), with confidence 0.93–1.0. Then a
+scene spec for `tools/build_scene.jsx`: two callouts, a chip, a bracket and a kicker.
+
+![UC12](img/uc12.jpg)
+
+- **Worked:** the labels follow the camera for the whole move.
+- **F18:** the wheel callout pointed outward, and the camera move pushed it out of frame.
+  **Fix:** callouts on a moving shot point *inward* (rule 15 in CONTRIBUTING §9).
+- **F19:** the HUD defaults were 18–26 px, below our own 32 px rule, and light text sat on white paint.
+  `check_layout` caught both.
+  **Fix:** the HUD defaults are now 32 px, and callouts use `"card": true` on light plates.
+
+## UC13 · Cars · Speed ramp
+**Brief:** the road shot rushes in, then lands in slow motion for the claim.
+**Steps:** Behaviors › Moves › Speed Ramp on the footage layer, or MCP `apply_preset`.
+
+![UC13](img/uc13.jpg)
+
+- **Worked:** time remap from 0 to 1.46 s of footage in the first second, 5.48 s by 2 s, then about 0.13× to the end.
+- **Tip:** the ramp spends most of the clip in its first two seconds. Give it a plate at least 2.5 times longer than
+  the rushed part.
+
+## UC14 · Eyewear · The 9 styles on one real layout
+**Brief:** the Oku Optics web hero (brand, eyebrow, a two-line serif title, price and a button), once per style.
+**Steps:** Agent › Library › Styles, or MCP `apply_pack`, on nine copies.
+
+![UC14](img/uc14.jpg)
+*At 0.4 s each style moves differently: whips, blurs, decoding text, a jack-in-the-box. By 3.5 s all nine land on the
+same layout.*
+
+- **F22:** the button's label was animated apart from its pill.
+  **Fix:** a style now skips layers that have a parent. Parent the label to its button and it rides with it. The label
+  also fades with the button: After Effects does not pass opacity from parent to child, so an expression links it.
+- **F21:** Playful left the button rocking. That is its Swing loop, not a bug.
+  **Tip:** on a call to action, remove the loop or pick a calmer style.
+
+## UC15 · Fashion · Text behind a person in video, contour, roto breakdown
+**Brief:** "COAT" behind the model while the camera moves, a contour drawn around her, and a 2×2 breakdown of how the
+shot was made.
+**Steps:**
+1. MCP `matte` (video → ProRes 4444 with alpha, local GPU).
+2. `tools/matte_contours.py`.
+3. A scene spec with `matte`, a `behind` text and a `contour`.
+4. `tools/build_breakdown.jsx`.
+
+![UC15](img/uc15.jpg)
+
+- **Worked:** she stays in front of the word for the whole move, with 0 layout warnings.
+- **F23:** `build_scene.jsx` failed on a scene with no tracking file, although its header says `fps` is enough.
+  **Fix:** without a tracking file, the plate gives the size and frame rate.
+- **Design fixes:**
+  - The kicker ran into her legs, so it is now two lines (rule 15).
+  - A light contour vanished on the cream wall, so it is now ink.
+  - COAT is dark brown this time, not UC08's tan.
+
+## UC16 · Fashion · Freeze frame and kinetic type
+**Brief:** the shot freezes, the background drains to pine while the model stays in colour, and a title lands.
+**Steps:** an edit spec for `tools/build_edit.jsx` with a `freeze` (`mono`, the matte and the plate) and a `split`
+title.
+
+![UC16](img/uc16.jpg)
+
+- **Worked:** freeze, colour drain, kinetic title, and back to motion.
+- **Design fixes:** it took three passes, each caught by eye or by `check_layout`:
+  1. The default centred title sat on her body.
+  2. Split around her ("Made to" in the italic serif, "last." large), it crossed the frozen COAT.
+  3. Moved down into the empty space, the subtitle left the frame, so it now breaks into two lines.
+
+## UC17 · Kitchen · Shape wipe
+**Brief:** a sage wipe carries the kitchen scene into the product shot.
+**Steps:** a full-frame solid with Color Wipe in and out around the cut, then the new scene's title.
+
+![UC17](img/uc17.jpg)
+
+- **Worked:** the diagonal sweep covers the cut and reveals the mixer.
+- **F20:** the one-line title ran into the mixer. `check_layout` cannot see products, only faces.
+  **Fix:** a new rule (rule 15 in CONTRIBUTING §9): break the title and play with sizes ("Bakes like" at 64 px over
+  "a pro." at 132 px).
+
+## UC18 · Beauty · Marker timing
+**Brief:** the client wants the headline to land a second later.
+**Steps:** apply with *Marker timing*, then drag the `SS in` marker 1 s later. No keyframe is touched.
+
+![UC18](img/uc18.jpg)
+
+- **Worked:** at 0.7 s the retimed headline has not started yet; at 1.7 s it has landed.
+
+## UC19 · Cars · Cut on the voice
+**Brief:** four shots for a four-line voiceover, each cut where its phrase starts.
+**Steps:** a free local voice (Windows speech), `tools/vo_words.py` (Whisper) for the word times, and cuts two frames
+before each phrase.
+
+![UC19](img/uc19.jpg)
+
+- **Worked:** cuts at 0, 2.18, 5.40 and 9.30 s.
+- **Tip:** Whisper heard "Vila" for Vela. Check brand names in the transcript before you cut on them.
+- **Found and fixed in `check_layout`:** it counted any drop shadow as help, even a faint one. Now only a shadow of
+  60 % opacity or more counts.
+- **What it then caught, now fixed:** white text on the white studio, text touching the car, and a card over the
+  wheel. Each shot now places its text in its own empty area, in the ink that reads there.
+
+## UC20 · Eyewear · A brand that learns
+**Brief:** start Oku Optics with the wrong guess (Dynamic), then give two review notes and watch the brand adapt.
+
+![UC20](img/uc20.jpg)
+
+1. **v1:** `apply_brand oku` with no rules. It feels like a sneaker drop: whips and a spinning button.
+2. **Note 1 → rule 1 (motion):** "Eyewear moves calm and premium: soft rises, word-by-word text, no slams, spins or
+   whips." The feel becomes Calm Modern on Coast. **v2:** soft rises and words fading up.
+3. **Note 2 → rule 2 (motion):** "The glasses glide in from the right and settle in 900 ms on Oku Glide: never pop,
+   never bounce." The brand gets its own curve (Oku Glide) and a timing entry. **v3:** `apply_brand` retimes the glasses
+   and the title on Oku Glide by itself. Following the rule, the agent swaps the rise for Glide In, mirrored so it
+   comes from the right.
+
+The brand file now holds both rules, the curve and the timing, so the next piece for Oku starts from v3.
+- **F24:** `brand.py show` printed a single preferred preset letter by letter.
+  **Fix:** a single name is accepted.
+
+## Locations for the video: one set, not twelve
+The office views for the video were generated separately and did not agree with each other. Some had a window, a plant
+and a water cooler that the wide shot does not have; one had a white open door; another had the desks side by side.
+
+**Fix:** we took `office_wide` as the reference image and regenerated four views from it: the reverse angle, both desk
+close-ups and the floor plan (Nano Banana 2.1 image-to-image, 2 variants each, USD 0.632). For each view we kept the
+more coherent variant: same walnut walls, same closed door in the middle of the back wall, same furniture.
+
+**The rule for any set:** pick one master frame and build every other angle from it, as a reference. Never generate
+angles independently.
 
 ## Panel reviews
 - **F15:** a style without its preview showed a broken image.

@@ -160,6 +160,23 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **Transitions animated each layer on its own** (UC04) → no notion of an outgoing and an incoming layer →
   `SSP.applyTransition` / MCP `apply_transition` / the panel's Transition button with two layers selected: the first
   leaves as the second arrives, from the same cut, keys added to what they already have.
+- **HUD labels came out at 18–26 px and white on white** (UC12) → the SSHUD defaults predated the 32 px rule → defaults
+  are 32 px; use `"card": true` on light plates. **Callouts drifted out of frame on a moving shot** → they pointed
+  outward → point them inward.
+- **A style animated a button's label apart from its pill** (UC14) → every text layer got its own role → layers with a
+  parent ride it (a style skips them) and fade with it through an opacity expression (opacity is not inherited).
+- **`build_scene.jsx` failed with “) does not have a value”** on a scene without tracks → `SSM.readJSON` of a missing file
+  evals "()" → no tracks file: the plate gives size and rate.
+- **`check_layout` judged text mid-animation and missed parents** (UC11–UC19) → it measured at the first visible frame
+  and ignored the parent's transform; a faint shadow counted as help → it waits for the text to settle (its last key
+  before the exit, its parent's too), maps parented boxes, counts a shape card under the text as its plate, and only a
+  60 %+ shadow as help. It still cannot see products: rule 15 in CONTRIBUTING §9 covers that by eye.
+- **A random flicker failed the engine test now and then** → 4 % per frame with a seed that depends on the layer index
+  can miss every sampled frame → a random/wiggle expression counts as motion.
+- **The engine in After Effects was an older copy** → `$.global.SSP` is loaded once per session → a job that needs the
+  latest engine runs `$.evalFile(tools/ss_presets.jsx)` first.
+- **The office views for the video disagreed** (windows, doors, desks) → each angle was generated on its own → build
+  every angle from one master frame as the reference image (UC locations, USD 0.632 for 8 variants).
 - **Remote debugging lands on another extension** → several `.debug` files used the same port → give ours its own.
 
 ## 2. Animation Composer as a behavioral reference
@@ -263,6 +280,7 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 ## 8. Costs observed (Flora, USD)
 | Item | Cost |
 |---|---|
+| Office views regenerated from office_wide (Nano Banana 2.1 image-to-image, 4K, 8 variants) | 0.632 |
 | Nano Banana Pro still (2K) | 0.18 |
 | Kling 3.0 Pro, 5 s 1080p | 0.706 |
 | VEED background removal (5 s) | 0.135 |

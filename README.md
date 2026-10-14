@@ -143,7 +143,7 @@ LLM reads `library/INDEX.txt` and runs `.jsx` jobs with `bash tools/bridge.sh`.
 
 ## Tested on real work
 
-Every tool was run on a small, realistic piece from five industries, with fictional brands. Each case says which part of
+Every tool, technique and style was run on a small, realistic piece from five industries, with fictional brands. Each case says which part of
 Motion DNA it tests, shows the result, and leaves a tip. What broke and how it was fixed:
 [docs/use-cases](docs/use-cases/README.md). The manual built from it: [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
 
@@ -161,6 +161,15 @@ Motion DNA it tests, shows the result, and leaves a tip. What broke and how it w
 | **UC09** · Cars | Agent (Full): Figma → After Effects, brand timing | <img src="docs/use-cases/img/uc09.jpg" width="360" alt="UC09"> | Put numbers in the brand's timing: `apply_brand` follows them. |
 | **UC10** · All | Agent › Project | <img src="docs/use-cases/img/uc10.jpg" width="360" alt="UC10"> | Keep the `.aep` in the project's `05_ae`. |
 | **UC11** · All | Claude Code (MCP) + layout QA | <img src="docs/use-cases/img/uc11.jpg" width="360" alt="UC11"> | Before calling it done: `render_frame`, then `check_layout`. |
+| **UC12** · Cars | Technique: tracked labels + HUD | <img src="docs/use-cases/img/uc12.jpg" width="360" alt="UC12"> | On a moving shot, point callouts inward and give them a card on light plates. |
+| **UC13** · Cars | Technique: speed ramp | <img src="docs/use-cases/img/uc13.jpg" width="360" alt="UC13"> | Give the ramp a plate 2.5× longer than the rushed part. |
+| **UC14** · Eyewear | All 9 styles on one layout | <img src="docs/use-cases/img/uc14.jpg" width="360" alt="UC14"> | Parent a button's label to the button: styles move them together. |
+| **UC15** · Fashion | Techniques: text behind (video), contour, roto breakdown | <img src="docs/use-cases/img/uc15.jpg" width="360" alt="UC15"> | `matte` the plate, then `behind` + `contour` in one scene spec. |
+| **UC16** · Fashion | Technique: freeze frame + kinetic type | <img src="docs/use-cases/img/uc16.jpg" width="360" alt="UC16"> | Split the title around the person, in the empty space. |
+| **UC17** · Kitchen | Technique: shape wipe | <img src="docs/use-cases/img/uc17.jpg" width="360" alt="UC17"> | A title that would touch the product breaks into two lines and two sizes. |
+| **UC18** · Beauty | Technique: marker timing | <img src="docs/use-cases/img/uc18.jpg" width="360" alt="UC18"> | Drag `SS in` to retime without touching a key. |
+| **UC19** · Cars | Technique: cut on the voice | <img src="docs/use-cases/img/uc19.jpg" width="360" alt="UC19"> | Cut two frames before each phrase; check brand names in the transcript. |
+| **UC20** · Eyewear | Brands: a style that learns (v1 → v3) | <img src="docs/use-cases/img/uc20.jpg" width="360" alt="UC20"> | Each review note becomes a rule; numbers go in the brand's timing. |
 
 ## The library
 
