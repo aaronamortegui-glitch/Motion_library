@@ -1,0 +1,140 @@
+{
+ "03": {
+  "clip": "A2_office_rex",
+  "in": 0,
+  "out": 5.33,
+  "dur": 5.33
+ },
+ "04a": {
+  "clip": "A2_office_rex",
+  "in": 5.33,
+  "out": 6.29,
+  "dur": 0.96
+ },
+ "04b": {
+  "clip": "A2_office_rex",
+  "in": 6.29,
+  "out": 7.375,
+  "dur": 1.08
+ },
+ "04c": {
+  "clip": "A2_office_rex",
+  "in": 7.375,
+  "out": 8.458,
+  "dur": 1.08
+ },
+ "05a": {
+  "clip": "A2_office_rex",
+  "in": 8.458,
+  "out": 10.375,
+  "dur": 1.92
+ },
+ "05b": {
+  "clip": "A2_office_rex",
+  "in": 10.375,
+  "out": 11.833,
+  "dur": 1.46
+ },
+ "05c": {
+  "clip": "A2_office_rex",
+  "in": 11.833,
+  "out": 15.09,
+  "dur": 3.26
+ },
+ "06a": {
+  "clip": "B_office_binder",
+  "in": 0,
+  "out": 2.208,
+  "dur": 2.21
+ },
+ "06b": {
+  "clip": "B_office_binder",
+  "in": 2.208,
+  "out": 3.375,
+  "dur": 1.17
+ },
+ "06c": {
+  "clip": "B_office_binder",
+  "in": 3.375,
+  "out": 4.833,
+  "dur": 1.46
+ },
+ "06d": {
+  "clip": "B_office_binder",
+  "in": 4.833,
+  "out": 6.375,
+  "dur": 1.54
+ },
+ "06e": {
+  "clip": "B_office_binder",
+  "in": 6.375,
+  "out": 12.0,
+  "dur": 5.62
+ },
+ "07a": {
+  "clip": "C_conference",
+  "in": 0,
+  "out": 1.625,
+  "dur": 1.62
+ },
+ "07b": {
+  "clip": "C_conference",
+  "in": 1.625,
+  "out": 2.958,
+  "dur": 1.33
+ },
+ "08a": {
+  "clip": "C_conference",
+  "in": 2.958,
+  "out": 5.167,
+  "dur": 2.21
+ },
+ "08b": {
+  "clip": "C_conference",
+  "in": 5.167,
+  "out": 8.458,
+  "dur": 3.29
+ },
+ "09a": {
+  "clip": "C_conference",
+  "in": 8.458,
+  "out": 10.25,
+  "dur": 1.79
+ },
+ "09b": {
+  "clip": "C_conference",
+  "in": 10.25,
+  "out": 11.6,
+  "dur": 1.35
+ },
+ "09c": {
+  "clip": "C_conference",
+  "in": 11.6,
+  "out": 13.208,
+  "dur": 1.61
+ },
+ "09g": {
+  "clip": "C_conference",
+  "in": 13.208,
+  "out": 15.0,
+  "dur": 1.79
+ },
+ "11b": {
+  "clip": "D_box",
+  "in": 0.333,
+  "out": 2.0,
+  "dur": 1.67
+ },
+ "11c": {
+  "clip": "D_box",
+  "in": 2.0,
+  "out": 5.208,
+  "dur": 3.21
+ },
+ "11d": {
+  "clip": "D_box",
+  "in": 5.208,
+  "out": 8.08,
+  "dur": 2.87
+ }
+}

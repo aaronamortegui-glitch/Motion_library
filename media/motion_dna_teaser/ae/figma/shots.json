@@ -1,0 +1,848 @@
+{
+ "05d": [
+  {
+   "n": "plate",
+   "k": "img",
+   "file": "PHOTO:plate",
+   "b": [
+    -40,
+    -40,
+    2000,
+    1160
+   ],
+   "bl": 40
+  },
+  {
+   "n": "dim",
+   "k": "r",
+   "b": [
+    0,
+    0,
+    1920,
+    1080
+   ],
+   "f": {
+    "c": "#092018",
+    "o": 0.5
+   }
+  },
+  {
+   "n": "panel Behaviors · pick and apply",
+   "k": "panel",
+   "b": [
+    300,
+    48,
+    480,
+    984
+   ],
+   "scale": 1.2,
+   "r": 14
+  },
+  {
+   "n": "super",
+   "k": "r",
+   "b": [
+    1000,
+    419,
+    566,
+    242
+   ],
+   "c": [
+    {
+     "n": "super-pick-one-",
+     "k": "t",
+     "s": "Pick one.",
+     "b": [
+      1000,
+      419,
+      484,
+      195
+     ],
+     "g": {
+      "f": "Instrument Serif|Italic",
+      "z": 150,
+      "c": "#ecf0e8"
+     }
+    },
+    {
+     "n": "super-80-moves-tagged-by-energ",
+     "k": "t",
+     "s": "80 moves, tagged by energy and tone",
+     "b": [
+      1000,
+      620,
+      566,
+      41
+     ],
+     "g": {
+      "f": "Inter Tight|Medium",
+      "z": 34,
+      "c": "#96aba1"
+     }
+    }
+   ]
+  },
+  {
+   "n": "cursor",
+   "k": "img",
+   "file": "icons/cursor_state_default_64.png",
+   "b": [
+    480,
+    210,
+    64,
+    64
+   ]
+  }
+ ],
+ "05e": [
+  {
+   "n": "plate",
+   "k": "img",
+   "file": "PHOTO:plate",
+   "b": [
+    -40,
+    -40,
+    2000,
+    1160
+   ],
+   "bl": 40
+  },
+  {
+   "n": "dim",
+   "k": "r",
+   "b": [
+    0,
+    0,
+    1920,
+    1080
+   ],
+   "f": {
+    "c": "#092018",
+    "o": 0.5
+   }
+  },
+  {
+   "n": "panel Behaviors · pick and apply",
+   "k": "panel",
+   "b": [
+    300,
+    48,
+    480,
+    984
+   ],
+   "scale": 1.2,
+   "r": 14
+  },
+  {
+   "n": "super",
+   "k": "r",
+   "b": [
+    1000,
+    419,
+    428,
+    242
+   ],
+   "c": [
+    {
+     "n": "super-apply-",
+     "k": "t",
+     "s": "Apply.",
+     "b": [
+      1000,
+      419,
+      336,
+      195
+     ],
+     "g": {
+      "f": "Instrument Serif|Italic",
+      "z": 150,
+      "c": "#ecf0e8"
+     }
+    },
+    {
+     "n": "super-real-keyframes-on-your-l",
+     "k": "t",
+     "s": "Real keyframes on your layer",
+     "b": [
+      1000,
+      620,
+      428,
+      41
+     ],
+     "g": {
+      "f": "Inter Tight|Medium",
+      "z": 34,
+      "c": "#96aba1"
+     }
+    }
+   ]
+  },
+  {
+   "n": "cursor",
+   "k": "img",
+   "file": "icons/cursor_state_click_64.png",
+   "b": [
+    516,
+    394,
+    64,
+    64
+   ]
+  }
+ ],
+ "05f": [
+  {
+   "n": "plate",
+   "k": "img",
+   "file": "PHOTO:plate",
+   "b": [
+    -40,
+    -40,
+    2000,
+    1160
+   ],
+   "bl": 40
+  },
+  {
+   "n": "dim",
+   "k": "r",
+   "b": [
+    0,
+    0,
+    1920,
+    1080
+   ],
+   "f": {
+    "c": "#092018",
+    "o": 0.5
+   }
+  },
+  {
+   "n": "panel Curves · S curve editor",
+   "k": "panel",
+   "b": [
+    300,
+    48,
+    480,
+    984
+   ],
+   "scale": 1.2,
+   "r": 14
+  },
+  {
+   "n": "super",
+   "k": "r",
+   "b": [
+    1000,
+    393,
+    617,
+    294
+   ],
+   "c": [
+    {
+     "n": "super-80-moves",
+     "k": "t",
+     "s": "80 MOVES",
+     "b": [
+      1000,
+      393,
+      617,
+      145
+     ],
+     "g": {
+      "f": "Inter Tight|Bold",
+      "z": 120,
+      "c": "#d8ff85",
+      "ls": 2.4
+     }
+    },
+    {
+     "n": "super--yours-",
+     "k": "t",
+     "s": "+ yours.",
+     "b": [
+      1000,
+      544,
+      321,
+      143
+     ],
+     "g": {
+      "f": "Instrument Serif|Italic",
+      "z": 110,
+      "c": "#ecf0e8"
+     }
+    }
+   ]
+  },
+  {
+   "n": "cursor",
+   "k": "img",
+   "file": "icons/cursor_state_click_64.png",
+   "b": [
+    716,
+    137,
+    64,
+    64
+   ]
+  }
+ ],
+ "06f": [
+  {
+   "n": "plate",
+   "k": "img",
+   "file": "PHOTO:plate",
+   "b": [
+    -40,
+    -40,
+    2000,
+    1160
+   ],
+   "bl": 40
+  },
+  {
+   "n": "dim",
+   "k": "r",
+   "b": [
+    0,
+    0,
+    1920,
+    1080
+   ],
+   "f": {
+    "c": "#092018",
+    "o": 0.5
+   }
+  },
+  {
+   "n": "panel Brands · list",
+   "k": "panel",
+   "b": [
+    120,
+    48,
+    480,
+    984
+   ],
+   "scale": 1.2,
+   "r": 14
+  },
+  {
+   "n": "panel Agent · chat (a conversation)",
+   "k": "panel",
+   "b": [
+    648,
+    48,
+    480,
+    984
+   ],
+   "scale": 1.2,
+   "r": 14
+  },
+  {
+   "n": "super",
+   "k": "r",
+   "b": [
+    1218,
+    424,
+    545,
+    233
+   ],
+   "c": [
+    {
+     "n": "super-your-curves-",
+     "k": "t",
+     "s": "Your curves.",
+     "b": [
+      1218,
+      424,
+      421,
+      125
+     ],
+     "g": {
+      "f": "Instrument Serif|Italic",
+      "z": 96,
+      "c": "#ecf0e8"
+     }
+    },
+    {
+     "n": "super-your-rules-",
+     "k": "t",
+     "s": "YOUR RULES.",
+     "b": [
+      1218,
+      555,
+      545,
+      102
+     ],
+     "g": {
+      "f": "Inter Tight|Bold",
+      "z": 84,
+      "c": "#d8ff85",
+      "ls": 1.68
+     }
+    }
+   ]
+  },
+  {
+   "n": "cursor",
+   "k": "img",
+   "file": "icons/cursor_state_click_64.png",
+   "b": [
+    804,
+    535,
+    64,
+    64
+   ]
+  }
+ ],
+ "07d": [
+  {
+   "n": "plate",
+   "k": "img",
+   "file": "PHOTO:plate",
+   "b": [
+    -40,
+    -40,
+    2000,
+    1160
+   ],
+   "bl": 40
+  },
+  {
+   "n": "dim",
+   "k": "r",
+   "b": [
+    0,
+    0,
+    1920,
+    1080
+   ],
+   "f": {
+    "c": "#092018",
+    "o": 0.5
+   }
+  },
+  {
+   "n": "panel Teaser · chat 1 · animate the storyboard",
+   "k": "panel",
+   "b": [
+    300,
+    48,
+    480,
+    984
+   ],
+   "scale": 1.2,
+   "r": 14
+  },
+  {
+   "n": "super",
+   "k": "r",
+   "b": [
+    1000,
+    389,
+    462,
+    303
+   ],
+   "c": [
+    {
+     "n": "super--animate-this",
+     "k": "t",
+     "s": "“Animate this",
+     "b": [
+      1000,
+      389,
+      462,
+      125
+     ],
+     "g": {
+      "f": "Instrument Serif|Italic",
+      "z": 96,
+      "c": "#ecf0e8"
+     }
+    },
+    {
+     "n": "super-storyboard-",
+     "k": "t",
+     "s": "storyboard.”",
+     "b": [
+      1000,
+      520,
+      422,
+      125
+     ],
+     "g": {
+      "f": "Instrument Serif|Italic",
+      "z": 96,
+      "c": "#ecf0e8"
+     }
+    },
+    {
+     "n": "super-figma-after-effects",
+     "k": "t",
+     "s": "FIGMA → AFTER EFFECTS",
+     "b": [
+      1000,
+      651,
+      408,
+      41
+     ],
+     "g": {
+      "f": "Inter Tight|Bold",
+      "z": 34,
+      "c": "#d8ff85"
+     }
+    }
+   ]
+  },
+  {
+   "n": "cursor",
+   "k": "img",
+   "file": "icons/cursor_state_click_64.png",
+   "b": [
+    718,
+    872,
+    64,
+    64
+   ]
+  }
+ ],
+ "07f": [
+  {
+   "n": "plate",
+   "k": "img",
+   "file": "PHOTO:plate",
+   "b": [
+    -40,
+    -40,
+    2000,
+    1160
+   ],
+   "bl": 40
+  },
+  {
+   "n": "dim",
+   "k": "r",
+   "b": [
+    0,
+    0,
+    1920,
+    1080
+   ],
+   "f": {
+    "c": "#092018",
+    "o": 0.5
+   }
+  },
+  {
+   "n": "panel Teaser · chat 2 · add sounds",
+   "k": "panel",
+   "b": [
+    300,
+    48,
+    480,
+    984
+   ],
+   "scale": 1.2,
+   "r": 14
+  },
+  {
+   "n": "super",
+   "k": "r",
+   "b": [
+    1000,
+    389,
+    488,
+    303
+   ],
+   "c": [
+    {
+     "n": "super--add-a-sound",
+     "k": "t",
+     "s": "“Add a sound",
+     "b": [
+      1000,
+      389,
+      446,
+      125
+     ],
+     "g": {
+      "f": "Instrument Serif|Italic",
+      "z": 96,
+      "c": "#ecf0e8"
+     }
+    },
+    {
+     "n": "super-to-every-click-",
+     "k": "t",
+     "s": "to every click.”",
+     "b": [
+      1000,
+      520,
+      488,
+      125
+     ],
+     "g": {
+      "f": "Instrument Serif|Italic",
+      "z": 96,
+      "c": "#ecf0e8"
+     }
+    },
+    {
+     "n": "super-sound-effects-cc0-packs",
+     "k": "t",
+     "s": "SOUND EFFECTS · CC0 PACKS",
+     "b": [
+      1000,
+      651,
+      480,
+      41
+     ],
+     "g": {
+      "f": "Inter Tight|Bold",
+      "z": 34,
+      "c": "#d8ff85"
+     }
+    }
+   ]
+  },
+  {
+   "n": "cursor",
+   "k": "img",
+   "file": "icons/cursor_state_click_64.png",
+   "b": [
+    1450,
+    820,
+    64,
+    64
+   ]
+  },
+  {
+   "n": "cursor",
+   "k": "img",
+   "file": "icons/cursor_state_click_64.png",
+   "b": [
+    1640,
+    760,
+    64,
+    64
+   ]
+  }
+ ],
+ "07g": [
+  {
+   "n": "plate",
+   "k": "img",
+   "file": "PHOTO:plate",
+   "b": [
+    -40,
+    -40,
+    2000,
+    1160
+   ],
+   "bl": 40
+  },
+  {
+   "n": "dim",
+   "k": "r",
+   "b": [
+    0,
+    0,
+    1920,
+    1080
+   ],
+   "f": {
+    "c": "#092018",
+    "o": 0.5
+   }
+  },
+  {
+   "n": "panel Teaser · chat 3 · social resizes",
+   "k": "panel",
+   "b": [
+    300,
+    48,
+    480,
+    984
+   ],
+   "scale": 1.2,
+   "r": 14
+  },
+  {
+   "n": "super",
+   "k": "r",
+   "b": [
+    1000,
+    389,
+    483,
+    303
+   ],
+   "c": [
+    {
+     "n": "super--make-the",
+     "k": "t",
+     "s": "“Make the",
+     "b": [
+      1000,
+      389,
+      337,
+      125
+     ],
+     "g": {
+      "f": "Instrument Serif|Italic",
+      "z": 96,
+      "c": "#ecf0e8"
+     }
+    },
+    {
+     "n": "super-social-resizes-",
+     "k": "t",
+     "s": "social resizes.”",
+     "b": [
+      1000,
+      520,
+      483,
+      125
+     ],
+     "g": {
+      "f": "Instrument Serif|Italic",
+      "z": 96,
+      "c": "#ecf0e8"
+     }
+    },
+    {
+     "n": "super-9-16-1-1-4-5",
+     "k": "t",
+     "s": "9:16 · 1:1 · 4:5",
+     "b": [
+      1000,
+      651,
+      206,
+      41
+     ],
+     "g": {
+      "f": "Inter Tight|Bold",
+      "z": 34,
+      "c": "#d8ff85"
+     }
+    }
+   ]
+  },
+  {
+   "n": "cursor",
+   "k": "img",
+   "file": "icons/cursor_state_default_64.png",
+   "b": [
+    718,
+    872,
+    64,
+    64
+   ]
+  }
+ ],
+ "09d": [
+  {
+   "n": "plate",
+   "k": "img",
+   "file": "PHOTO:plate",
+   "b": [
+    -40,
+    -40,
+    2000,
+    1160
+   ],
+   "bl": 40
+  },
+  {
+   "n": "dim",
+   "k": "r",
+   "b": [
+    0,
+    0,
+    1920,
+    1080
+   ],
+   "f": {
+    "c": "#092018",
+    "o": 0.5
+   }
+  },
+  {
+   "n": "panel Agent · library (kit)",
+   "k": "panel",
+   "b": [
+    120,
+    48,
+    480,
+    984
+   ],
+   "scale": 1.2,
+   "r": 14
+  },
+  {
+   "n": "panel Curves · S curve editor",
+   "k": "panel",
+   "b": [
+    648,
+    48,
+    480,
+    984
+   ],
+   "scale": 1.2,
+   "r": 14
+  },
+  {
+   "n": "super",
+   "k": "r",
+   "b": [
+    1218,
+    431,
+    617,
+    218
+   ],
+   "c": [
+    {
+     "n": "super-you-direct-",
+     "k": "t",
+     "s": "You direct.",
+     "b": [
+      1218,
+      431,
+      366,
+      125
+     ],
+     "g": {
+      "f": "Instrument Serif|Italic",
+      "z": 96,
+      "c": "#ecf0e8"
+     }
+    },
+    {
+     "n": "super-it-accelerates-",
+     "k": "t",
+     "s": "IT ACCELERATES.",
+     "b": [
+      1218,
+      562,
+      617,
+      87
+     ],
+     "g": {
+      "f": "Inter Tight|Bold",
+      "z": 72,
+      "c": "#d8ff85",
+      "ls": 1.44
+     }
+    }
+   ]
+  },
+  {
+   "n": "cursor",
+   "k": "img",
+   "file": "icons/cursor_state_click_64.png",
+   "b": [
+    1060,
+    422,
+    64,
+    64
+   ]
+  }
+ ]
+}

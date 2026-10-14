@@ -1,0 +1,36 @@
+{
+ "model": "r2v-seedance-2-5",
+ "resolution": "720p",
+ "quote_usd": 32.28,
+ "runs": {
+  "A1_office_dana": "run_m179vacpdexwgjaamqdqf1rqkd8g9m7x",
+  "A2_office_rex": "run_m17azc9gaeq7xg788ktd6exq0h8g9yt1",
+  "B_office_binder": "run_m17cbdm3s5dxjba4mdyxrxeb4d8g83nk",
+  "C_conference": "run_m1773fwx6em1b1bcp684dme8td8g9s0h",
+  "D_box": "run_m17en5stjhrappbz6b8w9rs0en8g9h7m"
+ },
+ "results": {
+  "A1_office_dana": {
+   "status": "failed",
+   "error": "BILLING_WORKSPACE_MEMBER_USAGE_LIMIT_EXCEEDED",
+   "usd": 0
+  },
+  "A2_office_rex": {
+   "file": "A2_office_rex.mp4",
+   "usd": 7.325
+  },
+  "B_office_binder": {
+   "file": "B_office_binder.mp4",
+   "usd": 5.861
+  },
+  "C_conference": {
+   "file": "C_conference.mp4",
+   "usd": 7.325
+  },
+  "D_box": {
+   "file": "D_box.mp4",
+   "usd": 3.922
+  }
+ },
+ "total_usd": 24.433
+}
