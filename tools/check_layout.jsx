@@ -53,7 +53,17 @@
                 item.size = td.fontSize * s[1] / 100; item.fill = td.fillColor;
                 item.helped = L.property("ADBE Effect Parade").property("ADBE Drop Shadow") !== null;   // shadow counts as help
                 for (var k = 1; k <= comp.numLayers; k++) if (comp.layer(k).name.indexOf("HUD card") === 0 && comp.layer(k).enabled) item.helped = true;
+                for (var sh = L.index + 1; sh <= comp.numLayers && !item.helped; sh++) {   // a shape card under the text is its plate
+                    var Sh = comp.layer(sh);
+                    if (!(Sh instanceof ShapeLayer) || !Sh.enabled || t < Sh.inPoint || t >= Sh.outPoint) continue;
+                    var sr = Sh.sourceRectAtTime(t, false), ss = tr(Sh, "ADBE Scale").valueAtTime(t, false), sp = tr(Sh, "ADBE Position").valueAtTime(t, false), sa = tr(Sh, "ADBE Anchor Point").valueAtTime(t, false);
+                    var sx = sp[0] + (sr.left - sa[0]) * ss[0] / 100, sy = sp[1] + (sr.top - sa[1]) * ss[1] / 100;
+                    if (sx <= box[0] && sy <= box[1] && sx + sr.width * ss[0] / 100 >= box[2] && sy + sr.height * ss[1] / 100 >= box[3]) item.helped = true;
+                }
                 item.str = String(td.text).replace(/\r/g, " / ").substr(0, 40);
+                // contrast is judged once the text has finished coming in (its last key before the exit), not mid-fade
+                var ks = SSP.animatedProps(L); item.settle = 0;
+                for (var q = 0; q < ks.length; q++) for (var kk = 1; kk <= ks[q].numKeys; kk++) { var kt = ks[q].keyTime(kk); if (kt < L.outPoint - 1) item.settle = Math.max(item.settle, kt); }
             }
             out.push(item);
         }
@@ -106,7 +116,7 @@
                     if (ov > 0.08 * Math.min(area(A.box), area(B.box))) add("overlap", C.name, t, A.str + "  ×  " + B.str);
                 }
                 var mk = A.comp + "/" + A.name;
-                if (!A.helped && A.owner === C && !measured[mk]) {   // contrast once per text, where the text and its plate share a comp
+                if (!A.helped && A.owner === C && !measured[mk] && t >= (A.settle || 0)) {   // contrast once per text, where the text and its plate share a comp
                     measured[mk] = 1;
                     var bg = plateColor(C, A.box, t);
                     if (bg && contrast(A.fill, bg) < 3) add("contrast", C.name, t, A.str + " contrast " + (Math.round(contrast(A.fill, bg) * 10) / 10) + ":1 (put it on a card or move it)");

@@ -52,6 +52,10 @@ Update with `python tools/setup.py --update` (never over your local changes) · 
 
 ## Use it
 
+> **Manual:** [docs/USER_GUIDE.md](docs/USER_GUIDE.md) explains every part step by step, with tips by industry and a
+> section for Claude. [docs/use-cases](docs/use-cases/README.md) has the tests behind it: each tool on a real-looking
+> piece (fashion, eyewear, beauty, kitchen, cars), what broke, and how it was fixed.
+
 ### Connect Claude and Figma
 <img src="docs/screens/cep-connect.gif" width="300" align="right" alt="Connect Claude and Figma">
 
@@ -244,6 +248,7 @@ subjects; every clip went through the face refinement pass. Prices, bottlings an
 - [`docs/CATALOG.md`](docs/CATALOG.md): every preset and style with its thumbnail.
 - [`docs/TOOLS.md`](docs/TOOLS.md): every script, what it does and how to run it.
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): adding presets, open-source effects, styles, references, case studies; the layout and edit rules (§9).
+- [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) and [`docs/use-cases/`](docs/use-cases/README.md): the manual and the tests behind it.
 - [`docs/LEARNINGS.md`](docs/LEARNINGS.md): every pitfall already solved (driving AE from an LLM, ExtendScript, rendering, AI footage, tracking and roto, typography, audio, costs).
 - [`CLAUDE.md`](CLAUDE.md): the rules every Claude follows in this repo.
 

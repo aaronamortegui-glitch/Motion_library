@@ -25,7 +25,8 @@ Install everything, library included — the panel reads the library from the re
 ## Before you start
 1. Read `CONTRIBUTING.md` (how to add presets, open-source effects, packs, case studies and learnings).
 2. Skim `docs/LEARNINGS.md`: every pitfall already solved (ExtendScript, rendering, Flora/AI video, likeness, tracking, audio, costs). Do not rediscover them.
-3. To pick or apply presets, read only `library/INDEX.txt`. The skill `.claude/skills/motion-dna/SKILL.md` explains the bridge and the API.
+3. `docs/USER_GUIDE.md` › *For Claude* has the order of work and recipes that worked; `docs/use-cases/` has the tests.
+   To pick or apply presets, read only `library/INDEX.txt`. The skill `.claude/skills/motion-dna/SKILL.md` explains the bridge and the API.
 4. **Choose by tags.** Every preset, curve, technique and style is tagged in `library/tags.json` / `library/packs.json`:
    roles, targets, channels, direction, an energy range (1 calm · 2 soft · 3 medium · 4 dynamic · 5 explosive) and
    tones. Use `list_tags` / `suggest_mix` to combine a move, a token curve and a duration for the feel you need.
