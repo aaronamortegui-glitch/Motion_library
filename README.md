@@ -1,4 +1,4 @@
-<img src="docs/screens/motion-dna-banner.jpg" alt="Motion DNA: your brand's motion, remembered. 80 moves, 9 styles, for After Effects" width="100%">
+<img src="docs/screens/motion-dna-banner.jpg" alt="Motion DNA: the motion library to boost your skills. New, for After Effects" width="100%">
 
 # Motion DNA
 
