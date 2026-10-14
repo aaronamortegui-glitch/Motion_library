@@ -1,6 +1,6 @@
 {
  "version": "0.1",
- "note": "A pack gives a whole comp one identity. SSP.applyPack(comp, name[, layers, phase]) classifies each layer (title/subtitle/body by font size, shape, media, logo by name) and applies the role's preset, staggered. Full-frame backgrounds, nulls, adjustment, guide, locked and audio-only layers are left alone. Each style is tagged (tones, energy_range) like the presets, so an LLM can pick or build one from a reference; 'curve' re-eases every move of the style with that token easing, 'transition' is the preset used between scenes.",
+ "note": "A pack gives a whole comp one identity. SSP.applyPack(comp, name[, layers, phase]) classifies each layer (title/subtitle/body by font size, shape, media, logo by name) and applies the role's preset, staggered. Full-frame backgrounds, nulls, adjustment, guide, locked and audio-only layers are left alone. Each style is tagged (tones, energy_range) like the presets, so an LLM can pick or build one from a reference; 'curve' re-eases every move of the style with that token easing, 'transition' is the preset used between scenes. modifiers: behaviours applied to every shape and text layer after the presets (line_boil = hand-drawn tremble; tools/ss_behaviors.jsx).",
  "packs": [
   {
    "name": "Dynamic",
@@ -360,7 +360,10 @@
    ],
    "curve": "Cruise",
    "transition": "Whip Pan",
-   "source": "reference:motion-style-map"
+   "source": "reference:motion-style-map",
+   "modifiers": [
+    "line_boil"
+   ]
   }
  ]
 }

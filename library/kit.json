@@ -1,0 +1,1755 @@
+{
+ "version": "2026-10-14",
+ "note": "Building blocks beyond presets (behavior modelled on Animation Composer's packs, rebuilt from scratch), tagged like the library: energy 1 calm .. 5 explosive and tones. MCP list_kit. Transitions live in library/transitions.json. Reviewed side by side with AC previews (2026-10-14): smoke_puff, the generated light leak and the cinematic sweep were retired; lines now draw on, hold and travel off; rings are a shockwave; pops are particles; transitions use tonal palettes, a slight swing and motion blur. Behaviours (kind behavior, tools/ss_behaviors.jsx) are algorithms apart from what they draw, grouped by family (fill, swarm, physics, modifier); targets lists where each passed the side-by-side check (2026-10-14: bubbles on boxes, spring as a text mask and flock as a background were dropped as weak). Behaviour entries also carry their review verdicts as data: avoid = {target: why it failed}, pairs = what it combines well with. add_behavior refuses an avoided target with the reason and suggests the pairs; record new review verdicts here.",
+ "items": [
+  {
+   "kind": "element",
+   "name": "label",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "corporate",
+    "friendly"
+   ],
+   "use": "Chip that hugs its text, grows from the left.",
+   "call": "add_element(kind=\"label\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "lower_third",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "corporate",
+    "editorial",
+    "modern"
+   ],
+   "use": "Name and role on a box with an accent bar.",
+   "call": "add_element(kind=\"lower_third\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "title",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "elegant",
+    "editorial",
+    "luxury"
+   ],
+   "use": "Display title with an accent rule and subtitle.",
+   "call": "add_element(kind=\"title\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "underline",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "editorial",
+    "modern"
+   ],
+   "use": "Accent line under an existing text layer.",
+   "call": "add_element(kind=\"underline\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "highlight",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "playful",
+    "editorial",
+    "friendly"
+   ],
+   "use": "Marker highlight behind an existing text layer.",
+   "call": "add_element(kind=\"highlight\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "callout",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "technical",
+    "modern"
+   ],
+   "use": "Dot and leader line to a label (product features).",
+   "call": "add_element(kind=\"callout\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "counter",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "corporate",
+    "technical"
+   ],
+   "use": "Number counting to a value with prefix/suffix (KPIs, prices).",
+   "call": "add_element(kind=\"counter\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "timer",
+   "energy": [
+    2,
+    4
+   ],
+   "tones": [
+    "technical",
+    "bold"
+   ],
+   "use": "mm:ss.cc running or counting down.",
+   "call": "add_element(kind=\"timer\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "price_tag",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "bold",
+    "playful"
+   ],
+   "use": "Big price over a small label.",
+   "call": "add_element(kind=\"price_tag\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "handle",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "friendly",
+    "modern"
+   ],
+   "use": "@handle pill (generic, no network logos).",
+   "call": "add_element(kind=\"handle\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "bubble",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "friendly",
+    "playful"
+   ],
+   "use": "Speech bubble with a tail.",
+   "call": "add_element(kind=\"bubble\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "sticker",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "Outlined word that pops in tilted (reactions).",
+   "call": "add_element(kind=\"sticker\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "quote",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "elegant",
+    "editorial",
+    "warm"
+   ],
+   "use": "Quote card: big quote mark, paragraph, author.",
+   "call": "add_element(kind=\"quote\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "list",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "corporate",
+    "friendly"
+   ],
+   "use": "Bullet list, lines staggered.",
+   "call": "add_element(kind=\"list\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "progress",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "technical",
+    "corporate"
+   ],
+   "use": "Bar filling to a value with a counting %.",
+   "call": "add_element(kind=\"progress\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "button",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "friendly",
+    "playful"
+   ],
+   "use": "Button that a cursor clicks; swaps label and colours.",
+   "call": "add_element(kind=\"button\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "kinetic",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "playful"
+   ],
+   "use": "Lines fitted to one width sliding in from alternate sides.",
+   "call": "add_element(kind=\"kinetic\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "tiles",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "bold",
+    "retro"
+   ],
+   "use": "Each letter on a tile flipping in (3D).",
+   "call": "add_element(kind=\"tiles\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "text_box",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "corporate",
+    "editorial"
+   ],
+   "use": "Title over a paragraph on a box.",
+   "call": "add_element(kind=\"text_box\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "media",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "corporate"
+   ],
+   "use": "Framed image slot with a title; fits a layer into it.",
+   "call": "add_element(kind=\"media\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "scale_title",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "bold",
+    "modern"
+   ],
+   "use": "Title pushes in (mode push) or drops in (mode drop).",
+   "call": "add_element(kind=\"scale_title\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "cinematic",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "cinematic",
+    "luxury",
+    "elegant"
+   ],
+   "use": "Title styles: neon, blur, kerning.",
+   "call": "add_element(kind=\"cinematic\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "chat",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "friendly",
+    "playful"
+   ],
+   "use": "Chat bubble: typing dots, then the message.",
+   "call": "add_element(kind=\"chat\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "rating",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "friendly",
+    "corporate"
+   ],
+   "use": "Five stars, the value ones fill and pop.",
+   "call": "add_element(kind=\"rating\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "ring",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "technical",
+    "modern"
+   ],
+   "use": "Progress ring drawing to a value with a counting %.",
+   "call": "add_element(kind=\"ring\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "circle",
+   "energy": [
+    2,
+    4
+   ],
+   "tones": [
+    "playful",
+    "modern"
+   ],
+   "use": "Filled circle (pop).",
+   "call": "add_shape(kind=\"circle\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "ring",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "technical"
+   ],
+   "use": "Ring drawing on.",
+   "call": "add_shape(kind=\"ring\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "square",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern"
+   ],
+   "use": "Square (pop).",
+   "call": "add_shape(kind=\"square\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "frame",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "editorial"
+   ],
+   "use": "Rectangle outline drawing on.",
+   "call": "add_shape(kind=\"frame\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "triangle",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "bold",
+    "playful"
+   ],
+   "use": "Triangle (pop).",
+   "call": "add_shape(kind=\"triangle\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "diamond",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "bold",
+    "luxury"
+   ],
+   "use": "Diamond (pop).",
+   "call": "add_shape(kind=\"diamond\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "pentagon",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "technical"
+   ],
+   "use": "Pentagon.",
+   "call": "add_shape(kind=\"pentagon\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "hexagon",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "technical"
+   ],
+   "use": "Hexagon.",
+   "call": "add_shape(kind=\"hexagon\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "star",
+   "energy": [
+    3,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "Star (pop).",
+   "call": "add_shape(kind=\"star\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "sparkle",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "luxury"
+   ],
+   "use": "Four-point sparkle.",
+   "call": "add_shape(kind=\"sparkle\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "badge",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "bold",
+    "retro"
+   ],
+   "use": "Scalloped seal badge.",
+   "call": "add_shape(kind=\"badge\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "heart",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "warm",
+    "friendly"
+   ],
+   "use": "Heart.",
+   "call": "add_shape(kind=\"heart\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "shield",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "corporate",
+    "technical"
+   ],
+   "use": "Shield / crest.",
+   "call": "add_shape(kind=\"shield\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "cross",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "bold",
+    "playful"
+   ],
+   "use": "X mark drawing on.",
+   "call": "add_shape(kind=\"cross\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "plus",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "technical"
+   ],
+   "use": "Plus drawing on.",
+   "call": "add_shape(kind=\"plus\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "check",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "friendly",
+    "corporate"
+   ],
+   "use": "Check mark drawing on.",
+   "call": "add_shape(kind=\"check\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "line",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "modern",
+    "editorial"
+   ],
+   "use": "Straight line drawing on.",
+   "call": "add_shape(kind=\"line\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "wave",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "playful",
+    "organic"
+   ],
+   "use": "Sine wave drawing on.",
+   "call": "add_shape(kind=\"wave\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "zigzag",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "retro"
+   ],
+   "use": "Zigzag drawing on.",
+   "call": "add_shape(kind=\"zigzag\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "arrow",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "technical"
+   ],
+   "use": "Arrow drawing on.",
+   "call": "add_shape(kind=\"arrow\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "curved_arrow",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "handmade",
+    "friendly"
+   ],
+   "use": "Curved arrow drawing on.",
+   "call": "add_shape(kind=\"curved_arrow\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "chevrons",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "bold",
+    "technical"
+   ],
+   "use": "Chevrons >>> drawing on.",
+   "call": "add_shape(kind=\"chevrons\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "brackets",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "technical",
+    "modern"
+   ],
+   "use": "Four corner brackets (focus frame).",
+   "call": "add_shape(kind=\"brackets\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "spiral",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "organic"
+   ],
+   "use": "Spiral drawing on.",
+   "call": "add_shape(kind=\"spiral\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "infinity",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern"
+   ],
+   "use": "Infinity loop drawing on.",
+   "call": "add_shape(kind=\"infinity\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "brush",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "handmade",
+    "organic"
+   ],
+   "use": "Tapered brush stroke.",
+   "call": "add_shape(kind=\"brush\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "speed_lines",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "playful"
+   ],
+   "use": "Horizontal speed lines.",
+   "call": "add_shape(kind=\"speed_lines\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "burst",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "playful"
+   ],
+   "use": "Rays fly out and vanish.",
+   "call": "add_shape(kind=\"burst\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "impact",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "playful"
+   ],
+   "use": "Impact rays over a spread (360/180/90/45°), mirror.",
+   "call": "add_shape(kind=\"impact\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "rings",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "technical",
+    "playful"
+   ],
+   "use": "Shockwave: rings expand, thin out and fade.",
+   "call": "add_shape(kind=\"rings\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "loader",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "technical",
+    "modern"
+   ],
+   "use": "Arc that keeps turning.",
+   "call": "add_shape(kind=\"loader\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "dots",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "friendly"
+   ],
+   "use": "Row of dots popping.",
+   "call": "add_shape(kind=\"dots\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "pops",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful"
+   ],
+   "use": "Particles burst from the centre, spin and shrink away.",
+   "call": "add_shape(kind=\"pops\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "shape_row",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "friendly"
+   ],
+   "use": "Row of small shapes popping.",
+   "call": "add_shape(kind=\"shape_row\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "fireworks",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "Staggered bursts at a few spots.",
+   "call": "add_shape(kind=\"fireworks\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "glitter",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "luxury",
+    "playful"
+   ],
+   "use": "Twinkling sparkles (loop).",
+   "call": "add_shape(kind=\"glitter\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "swoosh",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "playful"
+   ],
+   "use": "Three curved strokes echoing along a curve.",
+   "call": "add_shape(kind=\"swoosh\", …)"
+  },
+  {
+   "kind": "shape",
+   "name": "confetti",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "Confetti burst with gravity.",
+   "call": "add_shape(kind=\"confetti\", …)"
+  },
+  {
+   "kind": "move",
+   "name": "flip",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "modern",
+    "bold"
+   ],
+   "use": "Card turn on the anchor (3D).",
+   "call": "move(move=\"flip\", layers=[…])"
+  },
+  {
+   "kind": "move",
+   "name": "hinge",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "modern",
+    "editorial"
+   ],
+   "use": "Door swing on an edge (3D).",
+   "call": "move(move=\"hinge\", layers=[…])"
+  },
+  {
+   "kind": "move",
+   "name": "orbit",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "cinematic",
+    "modern"
+   ],
+   "use": "Swings in round a distant pivot (carousel).",
+   "call": "move(move=\"orbit\", layers=[…])"
+  },
+  {
+   "kind": "move",
+   "name": "fly",
+   "energy": [
+    3,
+    5
+   ],
+   "tones": [
+    "cinematic",
+    "bold"
+   ],
+   "use": "Z fly-in from far or near.",
+   "call": "move(move=\"fly\", layers=[…])"
+  },
+  {
+   "kind": "move",
+   "name": "tumble",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "playful"
+   ],
+   "use": "Fly-in while turning on two axes.",
+   "call": "move(move=\"tumble\", layers=[…])"
+  },
+  {
+   "kind": "move",
+   "name": "grow_edge",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "corporate"
+   ],
+   "use": "Grows from an edge, one axis or uniform.",
+   "call": "move(move=\"grow_edge\", layers=[…])"
+  },
+  {
+   "kind": "move",
+   "name": "squash",
+   "energy": [
+    3,
+    5
+   ],
+   "tones": [
+    "playful"
+   ],
+   "use": "One-axis bounce (squash and stretch).",
+   "call": "move(move=\"squash\", layers=[…])"
+  },
+  {
+   "kind": "text",
+   "name": "Chars Pop Rise",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "Letters rise with overshoot.",
+   "call": "animate_text(unit=\"chars\", channels=[\"fade\",\"rise\"], ease=\"Pop\")"
+  },
+  {
+   "kind": "text",
+   "name": "Words Decode",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "technical"
+   ],
+   "use": "Words scramble in, flickering.",
+   "call": "animate_text(unit=\"words\", channels=[\"decode\",\"fade\"], mode=\"flicker\")"
+  },
+  {
+   "kind": "text",
+   "name": "Lines Mask Rise",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "editorial",
+    "elegant",
+    "cinematic"
+   ],
+   "use": "Lines slide up from behind a mask.",
+   "call": "animate_text(unit=\"lines\", channels=[\"rise\"], mask=true)"
+  },
+  {
+   "kind": "text",
+   "name": "Chars 3D Flip",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "modern",
+    "bold"
+   ],
+   "use": "Letters flip in on X from the centre.",
+   "call": "animate_text(unit=\"chars\", channels=[\"rotate3d\",\"fade\"], order=\"center\", ease=\"Nudge\")"
+  },
+  {
+   "kind": "text",
+   "name": "Chars Wiggly Scale",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful"
+   ],
+   "use": "Letters pop with a wobble, random order.",
+   "call": "animate_text(unit=\"chars\", channels=[\"scale\"], mode=\"wiggly\", order=\"random\")"
+  },
+  {
+   "kind": "text",
+   "name": "Words Tracking Blur",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "elegant",
+    "luxury",
+    "cinematic"
+   ],
+   "use": "Words settle from wide spacing and blur.",
+   "call": "animate_text(unit=\"words\", channels=[\"tracking\",\"blur\",\"fade\"])"
+  },
+  {
+   "kind": "text",
+   "name": "Chars Skew Slide",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "bold",
+    "modern"
+   ],
+   "use": "Letters whip in skewed.",
+   "call": "animate_text(unit=\"chars\", channels=[\"skew\",\"slide\",\"fade\"], ease=\"Whip\")"
+  },
+  {
+   "kind": "text",
+   "name": "Words Colour Pop",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "Words pop through the accent colour.",
+   "call": "animate_text(unit=\"words\", channels=[\"color\",\"scale\"], ease=\"Pop\")"
+  },
+  {
+   "kind": "text",
+   "name": "Typewriter Cursor",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "technical",
+    "retro"
+   ],
+   "use": "Types with a blinking cursor.",
+   "call": "animate_text(typewriter=true, cps=18)"
+  },
+  {
+   "kind": "text",
+   "name": "Captions",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "friendly",
+    "modern"
+   ],
+   "use": "Word-timed captions (highlight, karaoke, build, pop, word).",
+   "call": "add_captions(words_path=…, style=\"highlight\")"
+  },
+  {
+   "kind": "look",
+   "name": "tritone",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "cinematic",
+    "editorial"
+   ],
+   "use": "Three-colour tone over everything.",
+   "call": "add_look(kind=\"tritone\", …)"
+  },
+  {
+   "kind": "look",
+   "name": "duotone",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "editorial",
+    "retro"
+   ],
+   "use": "Two-colour tone.",
+   "call": "add_look(kind=\"duotone\", …)"
+  },
+  {
+   "kind": "look",
+   "name": "vignette",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "cinematic",
+    "warm"
+   ],
+   "use": "Dark edges.",
+   "call": "add_look(kind=\"vignette\", …)"
+  },
+  {
+   "kind": "look",
+   "name": "grain",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "retro",
+    "cinematic",
+    "handmade"
+   ],
+   "use": "Film grain.",
+   "call": "add_look(kind=\"grain\", …)"
+  },
+  {
+   "kind": "look",
+   "name": "scanlines",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "retro",
+    "technical"
+   ],
+   "use": "Moving scanlines.",
+   "call": "add_look(kind=\"scanlines\", …)"
+  },
+  {
+   "kind": "look",
+   "name": "letterbox",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "cinematic"
+   ],
+   "use": "Cinema bars (animate in with t).",
+   "call": "add_look(kind=\"letterbox\", …)"
+  },
+  {
+   "kind": "look",
+   "name": "dust",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "cinematic",
+    "organic"
+   ],
+   "use": "Floating dust.",
+   "call": "add_look(kind=\"dust\", …)"
+  },
+  {
+   "kind": "look",
+   "name": "embers",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "warm",
+    "cinematic"
+   ],
+   "use": "Rising embers.",
+   "call": "add_look(kind=\"embers\", …)"
+  },
+  {
+   "kind": "look",
+   "name": "snow",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "warm",
+    "friendly"
+   ],
+   "use": "Falling snow.",
+   "call": "add_look(kind=\"snow\", …)"
+  },
+  {
+   "kind": "look",
+   "name": "long_shadow",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "retro",
+    "bold"
+   ],
+   "use": "Flat long shadow on a layer.",
+   "call": "add_look(kind=\"long_shadow\", …)"
+  },
+  {
+   "kind": "look",
+   "name": "glitch",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "technical",
+    "bold"
+   ],
+   "use": "RGB split + jumps burst on a layer.",
+   "call": "add_look(kind=\"glitch\", …)"
+  },
+  {
+   "kind": "background",
+   "name": "stripes",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "playful",
+    "retro"
+   ],
+   "use": "Diagonal stripes drifting (loop).",
+   "call": "add_look(kind=\"stripes\", …)"
+  },
+  {
+   "kind": "background",
+   "name": "dots",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "modern",
+    "friendly"
+   ],
+   "use": "Dot grid drifting.",
+   "call": "add_look(kind=\"dots\", …)"
+  },
+  {
+   "kind": "background",
+   "name": "grid",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "technical",
+    "modern"
+   ],
+   "use": "Line grid drifting.",
+   "call": "add_look(kind=\"grid\", …)"
+  },
+  {
+   "kind": "background",
+   "name": "gradient",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "modern",
+    "elegant",
+    "luxury"
+   ],
+   "use": "Four-colour gradient drifting.",
+   "call": "add_look(kind=\"gradient\", …)"
+  },
+  {
+   "kind": "background",
+   "name": "liquid",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "organic",
+    "elegant",
+    "warm"
+   ],
+   "use": "Liquid gradient flowing.",
+   "call": "add_look(kind=\"liquid\", …)"
+  },
+  {
+   "kind": "background",
+   "name": "topo",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "technical",
+    "organic"
+   ],
+   "use": "Topographic contour lines.",
+   "call": "add_look(kind=\"topo\", …)"
+  },
+  {
+   "kind": "background",
+   "name": "network",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "technical",
+    "modern"
+   ],
+   "use": "Plexus: drifting points joined by lines that fade with distance.",
+   "call": "add_look(kind=\"network\", …)"
+  },
+  {
+   "kind": "background",
+   "name": "blobs",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "organic",
+    "playful",
+    "friendly"
+   ],
+   "use": "Liquid shapes in brand colours breathing and drifting.",
+   "call": "add_look(kind=\"blobs\", …)"
+  },
+  {
+   "kind": "background",
+   "name": "mesh",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "modern",
+    "elegant",
+    "luxury"
+   ],
+   "use": "Mesh gradient: big colour fields drifting under a heavy blur.",
+   "call": "add_look(kind=\"mesh\", …)"
+  },
+  {
+   "kind": "background",
+   "name": "glass",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "modern",
+    "luxury",
+    "technical"
+   ],
+   "use": "Mesh gradient behind floating frosted-glass panes.",
+   "call": "add_look(kind=\"glass\", …)"
+  },
+  {
+   "kind": "element",
+   "name": "glass_card",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "modern",
+    "luxury"
+   ],
+   "use": "Smoky frosted card that blurs what is behind it, title and line.",
+   "call": "add_element(kind=\"glass_card\", text=…, sub=…)"
+  },
+  {
+   "kind": "element",
+   "name": "end_card",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "elegant",
+    "technical"
+   ],
+   "use": "Logo close: the mark builds piece by piece (stroke build with grain), then the wordmark rises behind line masks. Stacked (as on the box) or horizontal. Closes every Motion DNA demo.",
+   "call": "add_element(kind=\"end_card\", text=\"Motion DNA\", sub=tagline, style=\"horizontal\"?)"
+  },
+  {
+   "kind": "shape",
+   "name": "blob",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "organic",
+    "playful"
+   ],
+   "use": "Liquid blob that keeps breathing.",
+   "call": "add_shape(kind=\"blob\", …)"
+  },
+  {
+   "kind": "behavior",
+   "name": "bubbles",
+   "family": "fill",
+   "targets": [
+    "shape",
+    "background",
+    "mask",
+    "transition"
+   ],
+   "energy": [
+    2,
+    4
+   ],
+   "tones": [
+    "playful",
+    "organic",
+    "friendly"
+   ],
+   "use": "Liquid bubbles that bloom from the origin and melt into each other (metaballs: blur + alpha threshold); as a background they rise like a lava lamp.",
+   "call": "add_behavior(behavior=\"bubbles\", target=\"shape\", …)",
+   "avoid": {
+    "box": "the text lands before the bubbles form a box (2026-10-14 review)",
+    "layer": "not a modifier: it draws its own shapes"
+   },
+   "pairs": [
+    "Bubble Wipe / Bubble Rise between scenes",
+    "blobs or mesh backgrounds",
+    "Storybook and Playful styles",
+    "Settle or Surge curves, Stage duration"
+   ]
+  },
+  {
+   "kind": "behavior",
+   "name": "blob",
+   "family": "fill",
+   "targets": [
+    "shape",
+    "background",
+    "mask",
+    "transition"
+   ],
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "organic",
+    "elegant",
+    "playful"
+   ],
+   "use": "One liquid blob growing from the origin with a breathing edge (shared by the ink transition, the blob shape and the blobs background).",
+   "call": "add_behavior(behavior=\"blob\", target=\"shape\", …)",
+   "avoid": {
+    "box": "a single blob cannot hold a text box's shape",
+    "layer": "not a modifier"
+   },
+   "pairs": [
+    "Ink Drop / Ink Corner",
+    "glass_card over a blobs background",
+    "Settle curve"
+   ]
+  },
+  {
+   "kind": "behavior",
+   "name": "voronoi",
+   "family": "fill",
+   "targets": [
+    "background",
+    "transition",
+    "mask",
+    "box"
+   ],
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "modern",
+    "technical",
+    "bold"
+   ],
+   "use": "Voronoi cells: the region shatters into drifting cells that pop in from the origin (shards, stained glass, cells).",
+   "call": "add_behavior(behavior=\"voronoi\", target=\"background\", …)",
+   "avoid": {
+    "shape": "without a frame or text to fill, loose cells read as broken glass",
+    "layer": "not a modifier"
+   },
+   "pairs": [
+    "Shatter / Shard Sweep",
+    "Tech and Editorial styles",
+    "network background in the next scene",
+    "Surge or Launch curves"
+   ]
+  },
+  {
+   "kind": "behavior",
+   "name": "grow",
+   "family": "fill",
+   "targets": [
+    "shape",
+    "background"
+   ],
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "organic",
+    "handmade",
+    "calm",
+    "elegant"
+   ],
+   "use": "Organic growth: branches grow from the origin, wander and split like vines or roots, tapering each generation, buds at the tips.",
+   "call": "add_behavior(behavior=\"grow\", target=\"shape\", …)",
+   "avoid": {
+    "transition": "branches never cover the frame: corners stay open",
+    "mask": "thin strokes cannot reveal type",
+    "box": "a tree has no box shape",
+    "layer": "not a modifier"
+   },
+   "pairs": [
+    "line_boil on the same layer (hand-drawn vines)",
+    "Storybook style",
+    "Settle or Cruise curves, Stage duration"
+   ]
+  },
+  {
+   "kind": "behavior",
+   "name": "flow",
+   "family": "swarm",
+   "targets": [
+    "background",
+    "shape"
+   ],
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "calm",
+    "organic",
+    "elegant",
+    "technical"
+   ],
+   "use": "Noise flow field: streamlines that follow a slowly turning noise field, like wind or water currents.",
+   "call": "add_behavior(behavior=\"flow\", target=\"background\", …)",
+   "avoid": {
+    "transition": "streamlines never cover the frame",
+    "mask": "thin strokes cannot reveal type",
+    "box": "no box shape",
+    "layer": "not a modifier"
+   },
+   "pairs": [
+    "calm intros under a title",
+    "mesh or gradient base colours",
+    "Calm Modern and Elegant styles"
+   ]
+  },
+  {
+   "kind": "behavior",
+   "name": "flock",
+   "family": "swarm",
+   "targets": [
+    "shape"
+   ],
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "organic",
+    "calm",
+    "cinematic"
+   ],
+   "use": "A flock or school crossing a region: a leader wanders on noise, members trail with their own lag and orbit, turned to their heading.",
+   "call": "add_behavior(behavior=\"flock\", target=\"shape\", …)",
+   "avoid": {
+    "background": "a small cluster in an empty frame (2026-10-14 review)",
+    "transition": "never covers the frame",
+    "mask": "too sparse to reveal type",
+    "box": "no box shape",
+    "layer": "not a modifier"
+   },
+   "pairs": [
+    "a flock crossing behind a title",
+    "Cruise curve, Stage duration",
+    "cinematic scenes with space to cross"
+   ]
+  },
+  {
+   "kind": "behavior",
+   "name": "spring",
+   "family": "physics",
+   "targets": [
+    "box",
+    "shape"
+   ],
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "friendly",
+    "bold"
+   ],
+   "use": "Jelly box: a rounded rectangle on the token curve whose edges lag and wobble like damped springs driven by the curve's speed, then settle.",
+   "call": "add_behavior(behavior=\"spring\", target=\"box\", …)",
+   "avoid": {
+    "mask": "the jelly box contains the text, so nothing reads (2026-10-14 review)",
+    "transition": "a box does not cover a frame with life",
+    "background": "one box is not a background",
+    "layer": "not a modifier"
+   },
+   "pairs": [
+    "label, button, price_tag and bubble elements",
+    "Pop or Nudge curves (Settle barely wobbles)",
+    "Playful and Dynamic styles"
+   ]
+  },
+  {
+   "kind": "behavior",
+   "name": "rope",
+   "family": "physics",
+   "targets": [
+    "shape"
+   ],
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "playful",
+    "handmade"
+   ],
+   "use": "Verlet rope: pinned at one end, the other carried into place on the token curve; it pays out, sags, swings and settles (an underline under a layer).",
+   "call": "add_behavior(behavior=\"rope\", target=\"shape\", …)",
+   "avoid": {
+    "transition": "a line never covers the frame",
+    "mask": "a line cannot reveal type",
+    "box": "no box shape",
+    "background": "one rope is not a background",
+    "layer": "not a modifier"
+   },
+   "pairs": [
+    "layer = a title: a rope underline that swings into place",
+    "line_boil on the rope layer",
+    "Surge curve"
+   ]
+  },
+  {
+   "kind": "behavior",
+   "name": "line_boil",
+   "family": "modifier",
+   "targets": [
+    "layer"
+   ],
+   "energy": [
+    2,
+    4
+   ],
+   "tones": [
+    "handmade",
+    "retro",
+    "playful",
+    "organic"
+   ],
+   "use": "Hand-drawn line boil on any existing layer: outlines tremble as if redrawn on 3s (three drawings cycling). Shapes get Wiggle Paths, everything else a fine Turbulent Displace. The Collage style applies it.",
+   "call": "add_behavior(behavior=\"line_boil\", target=\"layer\", …)",
+   "avoid": {
+    "shape": "a modifier: apply it to existing layers (target layer)",
+    "background": "a modifier: apply it to the background's layer instead",
+    "transition": "boiling pieces flicker over the cut",
+    "mask": "a modifier",
+    "box": "apply it to the element's box layer with target layer"
+   },
+   "pairs": [
+    "Collage style (applies it)",
+    "Storybook style",
+    "outlined shapes, drawn lines, grow, rope",
+    "the Boil preset (jitters the whole layer) for extra texture"
+   ]
+  }
+ ]
+}

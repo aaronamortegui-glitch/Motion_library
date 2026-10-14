@@ -5,8 +5,8 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
 (function () {
     var ROOT = SS_ROOT + "/";
     var TEMPLATE = "H.264 - Match Render Settings - 15 Mbps";
-    var lf = new File(ROOT + "research/gif_comps.txt"); lf.encoding = "UTF-8";
-    if (!lf.exists) return "Missing research/gif_comps.txt";
+    var lf = new File($.global.SS_GIF_LIST || (ROOT + "research/gif_comps.txt")); lf.encoding = "UTF-8";   // SS_GIF_LIST: another list (tools/kit_gifs.py)
+    if (!lf.exists) return "Missing " + lf.fsName;
     lf.open("r"); var names = lf.read().split("\n"); lf.close();
     function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
     var proj = app.project, rq = proj.renderQueue, queued = 0, skipped = 0, missing = [];

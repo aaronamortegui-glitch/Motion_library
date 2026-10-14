@@ -8,7 +8,7 @@ answer for Claude Code), with a fictional demo brand (Vela), so the GIFs are the
   cep-curves.gif         Curves: drag a handle, pick a curve from the library
   cep-brand-learns.gif   a review note in the chat → a rule proposal → one click → the brand's rules
   cep-brand-share.gif    where the brand lives, Download to share, Import an update (rules merge, shown as new)
-  cep-library.gif        Agent > Library: a style or a technique, its order, Use in chat
+  cep-library.gif        Agent > Library: a style, a technique and a kit piece, its order, Use in chat
   cep-workspace.gif      the brand's own conversation (Start in Claude app) and a new project for a video
   cep-panel.gif          the tour: all of the above
 Needs Playwright (pip install playwright) and Chrome or Edge.
@@ -167,11 +167,13 @@ def main():
         js("[...document.querySelectorAll('#sec-brands button')].find(b => b.textContent === 'Import an update').click()", wait=900, hold=14)
         section("brand-share")
 
-        # 6 · Library: a style and a technique, with their orders
+        # 6 · Library: a style, a technique and a kit piece, with their orders
         js(go.format("agent") + tab.format("library") + "document.querySelector('#main').scrollTop = 0", wait=500, hold=4)
         js("document.querySelectorAll('#sec-agent .lib-grid .card')[1].click(); document.querySelector('#main').scrollTop = 0", hold=8)
         js("[...document.querySelectorAll('#sec-agent .seg button')].find(b => b.textContent === 'Techniques').click()", hold=3)
         js("document.querySelectorAll('#sec-agent .lib-grid .card')[1].click(); document.querySelector('#main').scrollTop = 0", hold=8)
+        js("[...document.querySelectorAll('#sec-agent .seg button')].find(b => b.textContent === 'Kit').click(); document.querySelector('#main').scrollTop = 0", hold=6)
+        js("[...document.querySelectorAll('#sec-agent .lib-grid .card')].find(c => c.dataset.key === 'kit/transition/Liquid Wipe').click(); document.querySelector('#main').scrollTop = 0", hold=8)
         js("[...document.querySelectorAll('#sec-agent button')].find(b => b.textContent === 'Use in chat').click()", wait=500, hold=10)
         section("library")
 

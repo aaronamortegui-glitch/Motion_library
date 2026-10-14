@@ -1,0 +1,3817 @@
+{
+ "version": "2026-10-14",
+ "note": "Outside resources Claude may use with Motion DNA, licenses checked at the source on the date above (UNVERIFIED in a license string means the primary page could not be read). status: recommended | ok | reference_only | excluded (kept so nobody re-checks it). vendor_in_repo = redistribution allowed and small enough for git; everything else is downloaded on demand into assets.free/ (git-ignored) or used locally. Read with MCP list_resources. Download only with the user's approval; tools/fetch_free_assets.py fetches the entries that have a 'fetch' block.",
+ "categories": {
+  "ae_script": "ExtendScript libraries, typings and references for writing JSX jobs",
+  "expression_lib": "Expression libraries and references (loaded as .jsx footage or read only)",
+  "easing_math": "Easing, spring and bezier math to bake or convert curves",
+  "render_automation": "Headless and batch rendering",
+  "import_export": "Reading and writing .aep, Lottie, captions; bridges from design tools",
+  "shape_tools": "SVG, path, offset, boolean and morph helpers that end as AE shape layers",
+  "audio_tools": "Beats, onsets and cuts turned into markers",
+  "vfx_footage": "Fire, smoke, explosions, particles, overlays and plates",
+  "motion_graphics": "Animated graphics and templates (Lottie, AE templates)",
+  "textures": "Textures, HDRIs and surfaces",
+  "illustration_icons": "Icons and illustrations (SVG to shape layers)",
+  "sfx": "Sound effects",
+  "music": "Royalty-free music",
+  "generator": "Local generators: particles, noise, synthesized SFX"
+ },
+ "resources": [
+  {
+   "name": "after-effects-command-ids",
+   "url": "https://github.com/hyperbrew/after-effects-command-ids",
+   "category": "ae_script",
+   "tags": [
+    "executeCommand",
+    "menu"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "89 stars; pushed 2026-04-09",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "app.executeCommand IDs across AE versions, to reach menu commands that have no scripting API.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "json2.js",
+   "url": "https://github.com/douglascrockford/JSON-js",
+   "category": "ae_script",
+   "tags": [
+    "json",
+    "polyfill",
+    "extendscript"
+   ],
+   "license": "Public Domain (header of json2.js, 2023-05-10; no LICENSE file)",
+   "version": "2023-05-10; 8.7k stars",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [
+    "js"
+   ],
+   "size": "17 KB",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "#include in every JSX job that parses/serializes JSON specs (scene, edit, keyframe JSON), so it works in the legacy ExtendScript engine too.",
+   "in_repo": "vendor/json2/json2.js"
+  },
+  {
+   "name": "LST (Layer Space Transforms)",
+   "url": "https://github.com/rendertom/LST",
+   "category": "ae_script",
+   "tags": [
+    "transforms",
+    "parenting",
+    "precomp"
+   ],
+   "license": "Apache-2.0 (GitHub API)",
+   "version": "41 stars; pushed 2026-02-21",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "recommended",
+   "reason": "Keep the Apache-2.0 license and NOTICE when vendoring.",
+   "claude_use": "toComp/fromComp math in ExtendScript for un-precompose, align in comp space and baking parented transforms.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "PseudoEffect",
+   "url": "https://github.com/rendertom/PseudoEffect",
+   "category": "ae_script",
+   "tags": [
+    "rigging",
+    "controls",
+    "pseudo effect"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "35 stars; pushed 2022-08-21",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Custom pseudo-effect controllers (sliders, dropdowns, checkboxes) applied as presets: clean rig and transition controllers.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "Types-for-Adobe",
+   "url": "https://github.com/docsforadobe/Types-for-Adobe",
+   "category": "ae_script",
+   "tags": [
+    "typescript",
+    "d.ts",
+    "extendscript",
+    "autocomplete",
+    "lint"
+   ],
+   "license": "MIT (GitHub API + repo LICENSE)",
+   "version": "npm types-for-adobe 7.2.6; 645 stars; pushed 2026-05-18",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "d.ts"
+   ],
+   "size": "~2 MB",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Type-check generated JSX (tsc --noEmit with checkJs) before sending it over the bridge; catches wrong property/method names in the AE DOM before AE throws."
+  },
+  {
+   "name": "AEQuery (aequery)",
+   "url": "https://github.com/docsforadobe/aequery",
+   "category": "ae_script",
+   "tags": [
+    "selectors",
+    "query",
+    "layers",
+    "effects",
+    "jquery-like"
+   ],
+   "license": "MIT (GitHub API; npm metadata)",
+   "version": "npm 0.7.1; 53 stars; pushed 2025-06-06 (low activity)",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "jsx"
+   ],
+   "size": "~150 KB",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Selector-style queries (e.g. all effects with a matchName in the active comp) in short run_jsx jobs; fewer loop bugs in LLM-written JSX."
+  },
+  {
+   "name": "ExtendScript wiki",
+   "url": "https://github.com/ExtendScript/wiki",
+   "category": "ae_script",
+   "tags": [
+    "docs",
+    "pitfalls",
+    "extendscript"
+   ],
+   "license": "Unlicense (GitHub API)",
+   "version": "204 stars; pushed 2024-08-20",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [
+    "md"
+   ],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Reference for engine quirks (File I/O, encodings, $.evalFile, sockets); can be copied into a local docs folder for retrieval."
+  },
+  {
+   "name": "extendscript-es5-shim",
+   "url": "https://github.com/ExtendScript/extendscript-es5-shim",
+   "category": "ae_script",
+   "tags": [
+    "polyfill",
+    "es5",
+    "array",
+    "extendscript"
+   ],
+   "license": "MIT (package.json only; no LICENSE file in repo)",
+   "version": "0.3.1; 53 stars; pushed 2023-01-06",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "jsx"
+   ],
+   "size": "<100 KB",
+   "status": "ok",
+   "reason": "License declared only in package.json; keep the MIT notice when vendoring.",
+   "claude_use": "Lets Claude write Array.map/filter/forEach, Object.keys, String.trim in JSX without hand-written loops."
+  },
+  {
+   "name": "get-ae-labels",
+   "url": "https://github.com/motiondeveloper/get-ae-labels",
+   "category": "ae_script",
+   "tags": [
+    "labels",
+    "organize"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "7 stars; 2023",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Read label colours to label layers by role.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "nspell",
+   "url": "https://github.com/wooorm/nspell",
+   "category": "ae_script",
+   "tags": [
+    "spelling",
+    "preflight"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "299 stars; pushed 2021-01-17",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "Dictionaries carry their own licenses.",
+   "claude_use": "Hunspell-compatible spell check from a text-layer dump.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "Typo.js",
+   "url": "https://github.com/cfinke/Typo.js",
+   "category": "ae_script",
+   "tags": [
+    "spelling",
+    "preflight"
+   ],
+   "license": "BSD-3-Clause (license.txt)",
+   "version": "557 stars; pushed 2026-04-11",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "Dictionaries carry their own licenses.",
+   "claude_use": "Spell-check text layers (pure JS, could run in ExtendScript).",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "After Effects Scripting Guide (docsforadobe)",
+   "url": "https://github.com/docsforadobe/after-effects-scripting-guide",
+   "category": "ae_script",
+   "tags": [
+    "docs",
+    "api reference"
+   ],
+   "license": "No license file (GitHub API: none)",
+   "version": "182 stars; pushed 2026-09-11",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "md",
+    "html"
+   ],
+   "size": "n/a",
+   "status": "reference_only",
+   "reason": "No license: read online, do not copy into the repo.",
+   "claude_use": "Look up exact DOM API (matchNames, KeyframeEase, setValueAtTime) when writing JSX."
+  },
+  {
+   "name": "after-effects-mcp (Dakkshin)",
+   "url": "https://github.com/Dakkshin/after-effects-mcp",
+   "category": "ae_script",
+   "tags": [
+    "mcp",
+    "bridge",
+    "node"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "740 stars; pushed 2026-04-01",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [
+    "ts",
+    "jsx"
+   ],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "Overlaps the existing motion-dna MCP and bridge.",
+   "claude_use": "Compare tool coverage (create comp, shape/text layers, effects) to find gaps in ss_motion_mcp.py."
+  },
+  {
+   "name": "Bolt CEP",
+   "url": "https://github.com/hyperbrew/bolt-cep",
+   "category": "ae_script",
+   "tags": [
+    "cep",
+    "panel",
+    "vite",
+    "typescript"
+   ],
+   "license": "MIT (GitHub API + LICENSE)",
+   "version": "513 stars; pushed 2026-06-28",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [
+    "ts",
+    "js"
+   ],
+   "size": "n/a",
+   "status": "reference_only",
+   "reason": "Panel framework; Motion DNA already has its CEP panel. Useful only for its TS-to-ExtendScript build setup.",
+   "claude_use": "Borrow its ExtendScript build config if host.jsx moves to TypeScript."
+  },
+  {
+   "name": "extendscript-json (theasci)",
+   "url": "https://github.com/theasci/extendscript-json",
+   "category": "ae_script",
+   "tags": [
+    "json"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "5 stars; pushed 2022-07-07",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [
+    "jsx"
+   ],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "json2.js does the same job and is better known.",
+   "claude_use": "Not needed if json2.js is vendored."
+  },
+  {
+   "name": "JavaScript Tools Guide (docsforadobe)",
+   "url": "https://github.com/docsforadobe/javascript-tools-guide",
+   "category": "ae_script",
+   "tags": [
+    "docs",
+    "scriptui",
+    "file",
+    "socket"
+   ],
+   "license": "No license file (GitHub API: none)",
+   "version": "51 stars; pushed 2026-01-23",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "md",
+    "html"
+   ],
+   "size": "n/a",
+   "status": "reference_only",
+   "reason": "No license.",
+   "claude_use": "Reference for File/Folder, Socket, BridgeTalk used by the bridge."
+  },
+  {
+   "name": "JUNKDOGE-JOE after-effects-mcp",
+   "url": "https://github.com/JUNKDOGE-JOE/after-effects-mcp",
+   "category": "ae_script",
+   "tags": [],
+   "license": "MIT (GitHub API)",
+   "version": "81 stars; pushed 2026-10-11",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "Competing MCP.",
+   "claude_use": "Compare MCP tool design.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "motionXpart plugin",
+   "url": "https://github.com/motionxpart/motionXpart-plugin",
+   "category": "ae_script",
+   "tags": [],
+   "license": "MIT (GitHub API)",
+   "version": "66 stars; pushed 2026-06-17",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "Panel overlaps ours; behaviour reference.",
+   "claude_use": "Free all-in-one panel (anchor grid, sequencing, easing, captions): feature ideas.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "UnPrecompose (MickeyAeScripts)",
+   "url": "https://github.com/MickeyAeScripts/UnPrecompose",
+   "category": "ae_script",
+   "tags": [],
+   "license": "MIT (GitHub API)",
+   "version": "0 stars; pushed 2026-09-20",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "Brand new, no track record.",
+   "claude_use": "Compare un-precompose edge cases.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "ae-mcp (p10q)",
+   "url": "https://github.com/p10q/ae-mcp",
+   "category": "ae_script",
+   "tags": [
+    "mcp"
+   ],
+   "license": "UNVERIFIED (repo returns 404)",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [],
+   "size": "n/a",
+   "status": "excluded",
+   "reason": "Repo not reachable; license cannot be checked.",
+   "claude_use": ""
+  },
+  {
+   "name": "babel-preset-extendscript (docsforadobe)",
+   "url": "https://github.com/docsforadobe/babel-preset-extendscript",
+   "category": "ae_script",
+   "tags": [
+    "babel",
+    "transpile"
+   ],
+   "license": "No license file (GitHub API: none)",
+   "version": "1 star; pushed 2020-10-01",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [
+    "js"
+   ],
+   "size": "small",
+   "status": "excluded",
+   "reason": "No license; stale.",
+   "claude_use": ""
+  },
+  {
+   "name": "Cracked AE / 'free download' repos of paid scripts",
+   "url": "https://github.com/search?q=after+effects+cracked",
+   "category": "ae_script",
+   "tags": [],
+   "license": "Piracy",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": false,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "excluded",
+   "reason": "Pirated commercial software: never use or link.",
+   "claude_use": "",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "Duik Angela",
+   "url": "https://github.com/RxLaboratory/Duik",
+   "category": "ae_script",
+   "tags": [
+    "rigging",
+    "ik",
+    "animation tools"
+   ],
+   "license": "GPL-3.0 (GitHub API)",
+   "version": "407 stars; pushed 2026-10-12",
+   "attribution_required": true,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [
+    "jsx"
+   ],
+   "size": "n/a",
+   "status": "excluded",
+   "reason": "GPL-3.0 (DuAEF, its framework, is GPL too; not re-checked this session).",
+   "claude_use": ""
+  },
+  {
+   "name": "jasminejsx / estktap",
+   "url": "https://www.npmjs.com/package/estktap",
+   "category": "ae_script",
+   "tags": [
+    "testing",
+    "tap",
+    "jasmine"
+   ],
+   "license": "UNVERIFIED",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "npm",
+   "formats": [
+    "js"
+   ],
+   "size": "small",
+   "status": "excluded",
+   "reason": "Licenses not verified; InDesign-oriented. tools/test_all.py already covers JSX tests.",
+   "claude_use": ""
+  },
+  {
+   "name": "KT Testing Suite Core",
+   "url": "https://github.com/Octopodo/kt-testing-suite-core",
+   "category": "ae_script",
+   "tags": [
+    "testing",
+    "jest-like",
+    "extendscript"
+   ],
+   "license": "None (no LICENSE file; GitHub API: none)",
+   "version": "1 star; pushed 2025-12-28",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [
+    "ts"
+   ],
+   "size": "small",
+   "status": "excluded",
+   "reason": "No license.",
+   "claude_use": ""
+  },
+  {
+   "name": "kyletmartinez after-effects-scripts",
+   "url": "https://github.com/kyletmartinez/after-effects-scripts",
+   "category": "ae_script",
+   "tags": [],
+   "license": "None (no LICENSE file)",
+   "version": "284 stars",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "excluded",
+   "reason": "No license.",
+   "claude_use": "",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "PyShiftAE",
+   "url": "https://github.com/Trentonom0r3/PyShiftAE",
+   "category": "ae_script",
+   "tags": [
+    "python",
+    "aegp",
+    "plugin"
+   ],
+   "license": "AGPL-3.0 (GitHub API)",
+   "version": "62 stars; pushed 2025-01-09",
+   "attribution_required": true,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [
+    "aex",
+    "py"
+   ],
+   "size": "n/a",
+   "status": "excluded",
+   "reason": "AGPL-3.0.",
+   "claude_use": ""
+  },
+  {
+   "name": "ScriptUI Dialog Builder",
+   "url": "https://github.com/joonaspaakko/ScriptUI-Dialog-Builder-Joonas",
+   "category": "ae_script",
+   "tags": [],
+   "license": "None",
+   "version": "421 stars",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "excluded",
+   "reason": "No license.",
+   "claude_use": "",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "zl_Scriptlets",
+   "url": "https://github.com/zlovatt/zl_Scriptlets",
+   "category": "ae_script",
+   "tags": [],
+   "license": "None (GitHub API)",
+   "version": "144 stars",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "excluded",
+   "reason": "No license.",
+   "claude_use": "",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "aefunctions",
+   "url": "https://github.com/motiondeveloper/aefunctions",
+   "category": "expression_lib",
+   "tags": [
+    "layout",
+    "sourceRect",
+    "text size",
+    "utility"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "52 stars; pushed 2023-04-30",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [
+    "jsx (expression library loaded as footage)"
+   ],
+   "size": "small",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Layout helpers in expressions (layer bounds, padding, responsive boxes behind text) for auto-sizing lower thirds and cards.",
+   "in_repo": "vendor/aefunctions/aefunctions.jsx"
+  },
+  {
+   "name": "eBox",
+   "url": "https://github.com/motiondeveloper/eBox",
+   "category": "expression_lib",
+   "tags": [
+    "text box",
+    "auto size",
+    "callout"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "10 stars; pushed 2024-09-27",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Rectangles built in expressions (size, anchor, per-corner radius): base for auto-sized text boxes, highlights and callouts.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "eKeys",
+   "url": "https://github.com/motiondeveloper/eKeys",
+   "category": "expression_lib",
+   "tags": [
+    "keyframes in expressions",
+    "easing",
+    "animate()"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "41 stars; pushed 2023-03-04",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [
+    "jsx (expression library loaded as footage)"
+   ],
+   "size": "small",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Write keyframe-like animation inside an expression (time/value/ease lists) for responsive templates whose timing depends on text length or data.",
+   "in_repo": "vendor/ekeys/eKeys.jsx"
+  },
+  {
+   "name": "expression-globals-typescript",
+   "url": "https://github.com/motiondeveloper/expression-globals-typescript",
+   "category": "expression_lib",
+   "tags": [
+    "expressions",
+    "typescript",
+    "testing"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "33 stars; pushed 2025-07-15",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [],
+   "size": "small",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Types and mocks of the expression API, to lint and test preset expressions outside AE.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "create-expression-lib",
+   "url": "https://github.com/motiondeveloper/create-expression-lib",
+   "category": "expression_lib",
+   "tags": [
+    "typescript",
+    "build",
+    "expressions"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "41 stars; pushed 2022-05-10",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "ts"
+   ],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Scaffold a Motion DNA expression library in TypeScript (typed, tested) compiled to a .jsx footage file."
+  },
+  {
+   "name": "eSpring",
+   "url": "https://github.com/motiondeveloper/eSpring",
+   "category": "expression_lib",
+   "tags": [
+    "spring",
+    "follow-through"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "3 stars; pushed 2021-05-13",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Spring follow-through in expressions for secondary motion on rigs.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "eTractors",
+   "url": "https://github.com/motiondeveloper/eTractors",
+   "category": "expression_lib",
+   "tags": [
+    "effector",
+    "proximity",
+    "cloner"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "4 stars; pushed 2019-08-02",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Proximity/attractor expressions: falloff effectors on cloned layers.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "MysteryPancake After-Effects-Fun",
+   "url": "https://github.com/MysteryPancake/After-Effects-Fun",
+   "category": "expression_lib",
+   "tags": [
+    "recipes"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "67 stars; pushed 2024-05-28",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Expression and script recipes: technique ideas.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "style-parser",
+   "url": "https://github.com/motiondeveloper/style-parser",
+   "category": "expression_lib",
+   "tags": [
+    "text",
+    "templates"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "8 stars; pushed 2024-12-14",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Markdown-styled strings (bold, italic) in data-driven text templates.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "After Effects Expression Reference (docsforadobe)",
+   "url": "https://github.com/docsforadobe/after-effects-expression-reference",
+   "category": "expression_lib",
+   "tags": [
+    "docs",
+    "expressions"
+   ],
+   "license": "No license file (GitHub API: none)",
+   "version": "48 stars; pushed 2026-01-23",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "md",
+    "html"
+   ],
+   "size": "n/a",
+   "status": "reference_only",
+   "reason": "No license.",
+   "claude_use": "Reference for expression functions (valueAtTime, sourceRectAtTime, text styling API)."
+  },
+  {
+   "name": "after-effects-expression-controls",
+   "url": "https://github.com/srivatsshankar/after-effects-expression-controls",
+   "category": "expression_lib",
+   "tags": [
+    "loop",
+    "wiggle",
+    "snippets"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "1 star; pushed 2019-03-03",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [
+    "js"
+   ],
+   "size": "tiny",
+   "status": "reference_only",
+   "reason": "Very small, inactive.",
+   "claude_use": "Snippet reference only."
+  },
+  {
+   "name": "AfterEffectsExpressionLibrary (CameronFoxly)",
+   "url": "https://github.com/CameronFoxly/AfterEffectsExpressionLibrary",
+   "category": "expression_lib",
+   "tags": [
+    "looped wiggle",
+    "snippets"
+   ],
+   "license": "None (no LICENSE file)",
+   "version": "23 stars; pushed 2024-10-16",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [
+    "js"
+   ],
+   "size": "small",
+   "status": "excluded",
+   "reason": "No license.",
+   "claude_use": ""
+  },
+  {
+   "name": "Dan Ebberts MotionScript / Animoplex gists / tutorial blogs",
+   "url": "https://www.motionscript.com/",
+   "category": "expression_lib",
+   "tags": [
+    "inertia",
+    "bounce",
+    "overshoot"
+   ],
+   "license": "None stated",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "js"
+   ],
+   "size": "n/a",
+   "status": "excluded",
+   "reason": "No license; rewrite the math ourselves (inertial bounce is a damped sine).",
+   "claude_use": ""
+  },
+  {
+   "name": "ae-temporal-to-cubic-ease",
+   "url": "https://github.com/Experience-Monks/ae-temporal-to-cubic-ease",
+   "category": "easing_math",
+   "tags": [
+    "influence",
+    "speed",
+    "cubic-bezier",
+    "conversion"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "7 stars; pushed 2018-12-16",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "js"
+   ],
+   "size": "small",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Reverse direction of the tokens: read AE keyframe ease (influence/speed) and express it as cubic-bezier, e.g. to save a user-made curve into the tokens."
+  },
+  {
+   "name": "bezier-easing",
+   "url": "https://github.com/gre/bezier-easing",
+   "category": "easing_math",
+   "tags": [
+    "cubic-bezier",
+    "css easing",
+    "sampling"
+   ],
+   "license": "MIT (GitHub API; npm)",
+   "version": "npm 3.2.0; 1.8k stars; pushed 2026-10-12",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "js"
+   ],
+   "size": "5 KB",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Evaluate token curves (cubic-bezier) exactly; port to ExtendScript to sample curves into many keyframes or compare against AE influence/speed results."
+  },
+  {
+   "name": "d3-ease (Penner equations)",
+   "url": "https://github.com/d3/d3-ease",
+   "category": "easing_math",
+   "tags": [
+    "penner",
+    "elastic",
+    "back",
+    "bounce",
+    "poly"
+   ],
+   "license": "BSD-3-Clause (GitHub API); includes Robert Penner 2001 BSD notice in LICENSE",
+   "version": "npm 3.0.1; 607 stars; pushed 2023-10-06",
+   "attribution_required": true,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "js"
+   ],
+   "size": "10 KB",
+   "status": "recommended",
+   "reason": "Attribution = keep the BSD notices.",
+   "claude_use": "Reference implementations of elastic/back/bounce to bake overshoot and bounce keyframes or expressions with tunable amplitude/period."
+  },
+  {
+   "name": "ae-ease-to-gsap-customease",
+   "url": "https://github.com/SupportClass/ae-ease-to-gsap-customease",
+   "category": "easing_math",
+   "tags": [
+    "keyframes to svg path",
+    "multi-key curve",
+    "export"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "66 stars; pushed 2020-01-16",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [
+    "jsx"
+   ],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Capture a multi-keyframe curve from a property as one SVG path for the library visualizer and for multi-stop curve tokens."
+  },
+  {
+   "name": "tween.js",
+   "url": "https://github.com/tweenjs/tween.js",
+   "category": "easing_math",
+   "tags": [
+    "penner",
+    "easing",
+    "tween"
+   ],
+   "license": "MIT (LICENSE file; includes Penner 2001 copyright line; GitHub API shows NOASSERTION)",
+   "version": "10.1k stars; pushed 2026-10-06",
+   "attribution_required": true,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "js"
+   ],
+   "size": "small",
+   "status": "ok",
+   "reason": "d3-ease covers the same equations with a cleaner license file.",
+   "claude_use": "Alternative easing reference."
+  },
+  {
+   "name": "wobble",
+   "url": "https://github.com/skevy/wobble",
+   "category": "easing_math",
+   "tags": [
+    "spring",
+    "physics",
+    "stiffness",
+    "damping"
+   ],
+   "license": "MIT (LICENSE file; npm)",
+   "version": "npm 1.5.1",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "js"
+   ],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Simulate springs (stiffness/damping/mass) and bake to keyframes or a spring curve token."
+  },
+  {
+   "name": "kurve",
+   "url": "https://github.com/KyleSullivan321/kurve",
+   "category": "easing_math",
+   "tags": [],
+   "license": "MIT (GitHub API)",
+   "version": "4 stars; pushed 2026-08-07",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "Small, young.",
+   "claude_use": "Reference for a cubic-bezier editor.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "easings.net",
+   "url": "https://github.com/ai/easings.net",
+   "category": "easing_math",
+   "tags": [
+    "cheat sheet"
+   ],
+   "license": "GPL-3.0 (GitHub API)",
+   "version": "8.7k stars",
+   "attribution_required": true,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [
+    "js"
+   ],
+   "size": "n/a",
+   "status": "excluded",
+   "reason": "GPL-3.0; use d3-ease for the same equations.",
+   "claude_use": ""
+  },
+  {
+   "name": "nexrender",
+   "url": "https://github.com/inlife/nexrender",
+   "category": "render_automation",
+   "tags": [
+    "aerender",
+    "templating",
+    "data-driven",
+    "render farm"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "@nexrender/cli 1.63.3; 1.9k stars; pushed 2026-06-03",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "npm",
+   "formats": [
+    "json job",
+    "js"
+   ],
+   "size": "npm install",
+   "status": "recommended",
+   "reason": "Patches AE's commandLineRenderer.jsx on first run; test on a copy of AE.",
+   "claude_use": "Batch renders of brand variants from JSON jobs (assets replaced, scripts run, then encode) without the AE UI; complements render_comp."
+  },
+  {
+   "name": "AErender-Launcher",
+   "url": "https://github.com/LilyStilson/AErender-Launcher",
+   "category": "render_automation",
+   "tags": [],
+   "license": "MIT (GitHub API)",
+   "version": "55 stars; 2021",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "Old GUI.",
+   "claude_use": "Idea: split aerender across processes.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "node-batch-aerender",
+   "url": "https://github.com/matsilva/node-batch-aerender",
+   "category": "render_automation",
+   "tags": [],
+   "license": "GPL-2.0",
+   "version": "4 stars",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "excluded",
+   "reason": "GPL.",
+   "claude_use": "",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "bodymovin-extension",
+   "url": "https://github.com/bodymovin/bodymovin-extension",
+   "category": "import_export",
+   "tags": [
+    "lottie export",
+    "cep"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "339 stars; pushed 2024-08-27",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [
+    "jsx",
+    "json"
+   ],
+   "size": "n/a",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Export Motion DNA presets/comps to Lottie JSON (web previews, handoff to devs); its JSX shows how to read every AE property."
+  },
+  {
+   "name": "lottie-web",
+   "url": "https://github.com/airbnb/lottie-web",
+   "category": "import_export",
+   "tags": [
+    "lottie player",
+    "web preview"
+   ],
+   "license": "MIT (GitHub API; npm)",
+   "version": "npm 5.13.0; 32k stars; pushed 2025-09-01",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "js"
+   ],
+   "size": "~300 KB",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Play exported Lottie in library/index.html and render frames headlessly to check an export."
+  },
+  {
+   "name": "py-aep (formerly aep_parser)",
+   "url": "https://github.com/forticheprod/py-aep",
+   "category": "import_export",
+   "tags": [
+    "aep",
+    "rifx",
+    "headless",
+    "python"
+   ],
+   "license": "MIT (GitHub API; PyPI)",
+   "version": "PyPI 0.18.1; 74 stars; pushed 2026-10-14",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [
+    "aep"
+   ],
+   "size": "pip",
+   "status": "recommended",
+   "reason": "Cannot add/remove items; expressions not evaluated.",
+   "claude_use": "Read .aep files without AE running (comps, layers, keyframes, render queue) to answer questions or audit brand projects; small property edits saved to a new file."
+  },
+  {
+   "name": "srt",
+   "url": "https://github.com/cdown/srt",
+   "category": "import_export",
+   "tags": [
+    "subtitles",
+    "captions",
+    "srt"
+   ],
+   "license": "MIT (GitHub API; PyPI)",
+   "version": "PyPI 3.5.3; 537 stars",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [
+    "srt"
+   ],
+   "size": "pip",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Parse SRT into caption JSON (text, in, out) for a build_edit 'texts' block or kinetic captions on markers."
+  },
+  {
+   "name": "ae-to-json",
+   "url": "https://github.com/Experience-Monks/ae-to-json",
+   "category": "import_export",
+   "tags": [
+    "project to json",
+    "export"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "245 stars; pushed 2016-05-24",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "jsx",
+    "json"
+   ],
+   "size": "small",
+   "status": "ok",
+   "reason": "Old; may need fixes for current AE.",
+   "claude_use": "Dump a whole comp (layers, keyframes, eases) to JSON so Claude can read or diff an existing animation."
+  },
+  {
+   "name": "AEUX",
+   "url": "https://github.com/google/AEUX",
+   "category": "import_export",
+   "tags": [
+    "figma",
+    "sketch",
+    "shapes",
+    "layers"
+   ],
+   "license": "Apache-2.0 (GitHub API)",
+   "version": "559 stars; archived (read-only) 2024-04-18",
+   "attribution_required": true,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [
+    "jsx",
+    "js"
+   ],
+   "size": "n/a",
+   "status": "ok",
+   "reason": "Archived. Apache-2.0 requires keeping NOTICE/license.",
+   "claude_use": "Borrow its Figma-to-AE shape conversion (rounded rects, strokes, gradients, boolean groups) to extend tools/build_figma_slides.jsx."
+  },
+  {
+   "name": "fontTools",
+   "url": "https://github.com/fonttools/fonttools",
+   "category": "import_export",
+   "tags": [
+    "fonts"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "5.3k stars; pushed 2026-10-14",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Font metadata: map PostScript names for font replace and collect.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "webvtt-py",
+   "url": "https://github.com/glut23/webvtt-py",
+   "category": "import_export",
+   "tags": [
+    "subtitles",
+    "vtt"
+   ],
+   "license": "MIT (GitHub API; PyPI)",
+   "version": "PyPI 0.5.1; 235 stars; pushed 2026-10-12",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [
+    "vtt",
+    "srt"
+   ],
+   "size": "pip",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Same as srt for WebVTT captions."
+  },
+  {
+   "name": "aftereffects-aep-parser (boltframe)",
+   "url": "https://github.com/boltframe/aftereffects-aep-parser",
+   "category": "import_export",
+   "tags": [
+    "aep",
+    "go"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "130 stars; pushed 2022-02-07",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [
+    "aep"
+   ],
+   "size": "n/a",
+   "status": "reference_only",
+   "reason": "Go; py-aep is the Python option.",
+   "claude_use": "Format reference only."
+  },
+  {
+   "name": "Argos Translate",
+   "url": "https://github.com/argosopentech/argos-translate",
+   "category": "import_export",
+   "tags": [],
+   "license": "MIT (models have their own licenses)",
+   "version": "6.6k stars",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "An AI model that runs outside After Effects; the plugin stays AE-only unless the user asks (scope note 2026-10-14). Claude can translate directly.",
+   "claude_use": "Offline draft translation.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "BiRefNet",
+   "url": "https://github.com/ZhengPeng7/BiRefNet",
+   "category": "import_export",
+   "tags": [],
+   "license": "MIT (GitHub API)",
+   "version": "4.3k stars",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "An AI model that runs outside After Effects; the plugin stays AE-only unless the user asks (scope note 2026-10-14).",
+   "claude_use": "High-res cut-outs.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "Depth-Anything-V2 (Small only)",
+   "url": "https://github.com/DepthAnything/Depth-Anything-V2",
+   "category": "import_export",
+   "tags": [],
+   "license": "Apache-2.0 code + Small model; Base/Large/Giant weights CC BY-NC 4.0",
+   "version": "9k stars",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "An AI model that runs outside After Effects; the plugin stays AE-only unless the user asks (scope note 2026-10-14). Only the Small checkpoint is permissive.",
+   "claude_use": "Depth slices for 2.5D parallax.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "Lottie spec",
+   "url": "https://github.com/lottie/lottie-spec",
+   "category": "import_export",
+   "tags": [
+    "spec",
+    "schema"
+   ],
+   "license": "Community Specification License 1.0 (README; no standard LICENSE file)",
+   "version": "117 stars; pushed 2026-06-23",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "md",
+    "json schema"
+   ],
+   "size": "n/a",
+   "status": "reference_only",
+   "reason": "Not a listed permissive license; use as reading reference.",
+   "claude_use": "Schema reference when converting LottieFiles animations into AE shape layers."
+  },
+  {
+   "name": "Real-ESRGAN",
+   "url": "https://github.com/xinntao/Real-ESRGAN",
+   "category": "import_export",
+   "tags": [],
+   "license": "BSD-3-Clause (GitHub API)",
+   "version": "37k stars",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "An AI model that runs outside After Effects; the plugin stays AE-only unless the user asks (scope note 2026-10-14).",
+   "claude_use": "Upscaling.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "rembg",
+   "url": "https://github.com/danielgatis/rembg",
+   "category": "import_export",
+   "tags": [],
+   "license": "MIT (GitHub API)",
+   "version": "25k stars",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "An AI model that runs outside After Effects; the plugin stays AE-only unless the user asks (scope note 2026-10-14).",
+   "claude_use": "Still cut-outs.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "RIFE (ECCV2022)",
+   "url": "https://github.com/hzwer/ECCV2022-RIFE",
+   "category": "import_export",
+   "tags": [],
+   "license": "MIT (GitHub API)",
+   "version": "5.6k stars",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "An AI model that runs outside After Effects; the plugin stays AE-only unless the user asks (scope note 2026-10-14).",
+   "claude_use": "Frame interpolation / slow motion.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "SAM 2",
+   "url": "https://github.com/facebookresearch/sam2",
+   "category": "import_export",
+   "tags": [],
+   "license": "Apache-2.0 (GitHub API)",
+   "version": "20k stars",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "An AI model that runs outside After Effects; the plugin stays AE-only unless the user asks (scope note 2026-10-14).",
+   "claude_use": "Prompted video masks.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "CorridorKey",
+   "url": "https://github.com/nikopueringer/CorridorKey",
+   "category": "import_export",
+   "tags": [],
+   "license": "CC BY-NC-SA 4.0 + additional terms",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": false,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "excluded",
+   "reason": "Non-commercial, ShareAlike.",
+   "claude_use": "",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "CoTracker",
+   "url": "https://github.com/facebookresearch/co-tracker",
+   "category": "import_export",
+   "tags": [],
+   "license": "CC BY-NC 4.0",
+   "version": "5.2k stars",
+   "attribution_required": false,
+   "commercial_ok": false,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "excluded",
+   "reason": "Non-commercial.",
+   "claude_use": "",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "python-lottie",
+   "url": "https://pypi.org/project/lottie/",
+   "category": "import_export",
+   "tags": [
+    "lottie",
+    "python"
+   ],
+   "license": "AGPL-3.0-or-later (PyPI classifier)",
+   "version": "0.7.2",
+   "attribution_required": true,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [
+    "json"
+   ],
+   "size": "n/a",
+   "status": "excluded",
+   "reason": "AGPL.",
+   "claude_use": ""
+  },
+  {
+   "name": "RobustVideoMatting",
+   "url": "https://github.com/PeterL1n/RobustVideoMatting",
+   "category": "import_export",
+   "tags": [],
+   "license": "GPL-3.0",
+   "version": "9.6k stars",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "excluded",
+   "reason": "GPL.",
+   "claude_use": "",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "culori",
+   "url": "https://github.com/Evercoder/culori",
+   "category": "shape_tools",
+   "tags": [
+    "color",
+    "palette",
+    "contrast"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "1.2k stars; pushed 2026-07-02",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [],
+   "size": "small",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Oklab/OKLCH tints and shades, interpolation and contrast checks for brand tokens.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "Shapely",
+   "url": "https://github.com/shapely/shapely",
+   "category": "shape_tools",
+   "tags": [
+    "offset",
+    "buffer",
+    "union",
+    "simplify"
+   ],
+   "license": "BSD-3-Clause (PyPI license_expression)",
+   "version": "PyPI 2.2.0",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [
+    "py"
+   ],
+   "size": "pip",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Path offset/inset rings, outline unions, simplification of matte contours before they become mask/shape keyframes."
+  },
+  {
+   "name": "svgpathtools",
+   "url": "https://github.com/mathandy/svgpathtools",
+   "category": "shape_tools",
+   "tags": [
+    "svg",
+    "bezier",
+    "paths",
+    "arc length"
+   ],
+   "license": "MIT (GitHub API; PyPI)",
+   "version": "PyPI 1.8.0; 639 stars; pushed 2026-10-07",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [
+    "svg"
+   ],
+   "size": "pip",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Convert SVG icons/illustrations (Lucide, Tabler, traced marks) into AE Shape vertices + in/out tangents JSON; arc-length for path-follow timing."
+  },
+  {
+   "name": "vtracer",
+   "url": "https://github.com/visioncortex/vtracer",
+   "category": "shape_tools",
+   "tags": [
+    "vectorize",
+    "svg"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "7.3k stars; pushed 2026-10-12",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [],
+   "size": "small",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Raster to SVG, then SVG to AE shape layers.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "chroma.js",
+   "url": "https://github.com/gka/chroma.js",
+   "category": "shape_tools",
+   "tags": [
+    "color"
+   ],
+   "license": "BSD-3-Clause (LICENSE; includes Apache-2.0 ColorBrewer data)",
+   "version": "10.6k stars; pushed 2026-09-14",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Colour scales and palettes.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "color-thief",
+   "url": "https://github.com/lokesh/color-thief",
+   "category": "shape_tools",
+   "tags": [
+    "color",
+    "palette"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "13.7k stars; pushed 2026-08-03",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Pull a palette from a reference frame into a brand profile.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "d3-scale",
+   "url": "https://github.com/d3/d3-scale",
+   "category": "shape_tools",
+   "tags": [
+    "charts",
+    "data"
+   ],
+   "license": "ISC (GitHub API)",
+   "version": "1.6k stars; pushed 2026-02-23",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Nice ticks and domain mapping for a chart builder.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "flubber",
+   "url": "https://github.com/veltman/flubber",
+   "category": "shape_tools",
+   "tags": [
+    "morph",
+    "interpolation"
+   ],
+   "license": "MIT (GitHub API; npm)",
+   "version": "npm 0.4.2; 6.9k stars; pushed 2022-11-08",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "js"
+   ],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Pre-compute clean morphs between shapes with different point counts, baked as path keyframes."
+  },
+  {
+   "name": "opentype.js",
+   "url": "https://github.com/opentypejs/opentype.js",
+   "category": "shape_tools",
+   "tags": [
+    "glyph outlines",
+    "text to path"
+   ],
+   "license": "MIT (GitHub API; npm)",
+   "version": "npm 2.0.0; 5k stars; pushed 2026-08-08",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "js"
+   ],
+   "size": "~200 KB",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Glyph outlines as shape paths (letter-by-letter path animation, text-on-path layouts) without AE's Create Shapes from Text."
+  },
+  {
+   "name": "paper.js",
+   "url": "https://github.com/paperjs/paper.js",
+   "category": "shape_tools",
+   "tags": [
+    "booleans",
+    "paths",
+    "vector"
+   ],
+   "license": "MIT (LICENSE.txt; GitHub API shows NOASSERTION)",
+   "version": "npm 0.12.18; 15k stars; pushed 2024-07-23",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "js"
+   ],
+   "size": "~400 KB",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Boolean ops and path math in Node before building AE shapes."
+  },
+  {
+   "name": "paperjs-offset",
+   "url": "https://github.com/glenzli/paperjs-offset",
+   "category": "shape_tools",
+   "tags": [
+    "offset",
+    "stroke outline"
+   ],
+   "license": "MIT (GitHub API; npm)",
+   "version": "npm 2.2.1; 122 stars; pushed 2026-10-03",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "js"
+   ],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Expand strokes to fills, offset paths for outline/echo looks."
+  },
+  {
+   "name": "pyclipper",
+   "url": "https://pypi.org/project/pyclipper/",
+   "category": "shape_tools",
+   "tags": [
+    "offset",
+    "clipping"
+   ],
+   "license": "MIT wrapper (PyPI) around Clipper (Boost Software License)",
+   "version": "PyPI 1.4.0",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [
+    "py"
+   ],
+   "size": "pip",
+   "status": "reference_only",
+   "reason": "Bundled Clipper is Boost-licensed, outside the allowed list; Shapely covers the need.",
+   "claude_use": ""
+  },
+  {
+   "name": "auto-editor",
+   "url": "https://github.com/WyattBlue/auto-editor",
+   "category": "audio_tools",
+   "tags": [
+    "silence",
+    "cuts"
+   ],
+   "license": "Unlicense (GitHub API)",
+   "version": "5.5k stars; pushed 2026-10-12",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [],
+   "size": "small",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Silence/motion-based cut lists as JSON, then trim layers in AE.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "Beat This!",
+   "url": "https://github.com/CPJKU/beat_this",
+   "category": "audio_tools",
+   "tags": [
+    "beats",
+    "downbeats",
+    "markers"
+   ],
+   "license": "MIT for code and published weights (README + GitHub API); some training data has other licenses",
+   "version": "PyPI beat-this 1.1.0; 421 stars; pushed 2026-05-28",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [
+    "wav",
+    "mp3"
+   ],
+   "size": "pip + checkpoint download (torch)",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Beats and downbeats as AE comp markers so cuts and key moves land on the bar; more accurate than librosa beat_track."
+  },
+  {
+   "name": "PySceneDetect",
+   "url": "https://github.com/Breakthrough/PySceneDetect",
+   "category": "audio_tools",
+   "tags": [
+    "cuts",
+    "scene detection",
+    "markers"
+   ],
+   "license": "BSD-3-Clause (GitHub API; PyPI)",
+   "version": "PyPI scenedetect 0.7.2; 5.2k stars; pushed 2026-10-12",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [
+    "mp4",
+    "mov"
+   ],
+   "size": "pip",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Cut list of a reference or AI clip as markers / build_edit JSON; measures shot length for reference analyses."
+  },
+  {
+   "name": "librosa",
+   "url": "https://github.com/librosa/librosa",
+   "category": "audio_tools",
+   "tags": [
+    "beats",
+    "onsets",
+    "rms"
+   ],
+   "license": "ISC (PyPI classifier)",
+   "version": "PyPI 1.0.0",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [
+    "wav",
+    "mp3"
+   ],
+   "size": "pip",
+   "status": "ok",
+   "reason": "Already used by tools/style_research/audio.py.",
+   "claude_use": "Onsets and RMS envelopes to keyframe JSON."
+  },
+  {
+   "name": "faster-whisper",
+   "url": "https://github.com/SYSTRAN/faster-whisper",
+   "category": "audio_tools",
+   "tags": [],
+   "license": "MIT (GitHub API)",
+   "version": "25.9k stars",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "An AI model that runs outside After Effects; the plugin stays AE-only unless the user asks (scope note 2026-10-14).",
+   "claude_use": "Faster whisper backend for long VOs.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "spleeter",
+   "url": "https://github.com/deezer/spleeter",
+   "category": "audio_tools",
+   "tags": [],
+   "license": "MIT (GitHub API)",
+   "version": "28.5k stars",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "An AI model that runs outside After Effects; the plugin stays AE-only unless the user asks (scope note 2026-10-14).",
+   "claude_use": "Stem separation (drums for beat markers).",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "whisperX",
+   "url": "https://github.com/m-bain/whisperX",
+   "category": "audio_tools",
+   "tags": [],
+   "license": "BSD-2-Clause (GitHub API)",
+   "version": "24.5k stars",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "An AI model that runs outside After Effects; the plugin stays AE-only unless the user asks (scope note 2026-10-14).",
+   "claude_use": "Word-level alignment, tighter than plain whisper.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "aubio",
+   "url": "https://github.com/aubio/aubio",
+   "category": "audio_tools",
+   "tags": [
+    "beats",
+    "onsets"
+   ],
+   "license": "GPL-3.0 (known; not re-checked this session)",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [],
+   "size": "n/a",
+   "status": "excluded",
+   "reason": "GPL.",
+   "claude_use": ""
+  },
+  {
+   "name": "Essentia / madmom",
+   "url": "https://github.com/MTG/essentia",
+   "category": "audio_tools",
+   "tags": [
+    "beats",
+    "music analysis"
+   ],
+   "license": "Essentia AGPL-3.0; madmom code BSD but models CC BY-NC-SA (UNVERIFIED this session)",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": false,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [],
+   "size": "n/a",
+   "status": "excluded",
+   "reason": "AGPL / non-commercial model weights.",
+   "claude_use": ""
+  },
+  {
+   "name": "Kenney Particle Pack",
+   "url": "https://kenney.nl/assets/particle-pack",
+   "category": "vfx_footage",
+   "tags": [
+    "particles",
+    "flames",
+    "smoke",
+    "sparks",
+    "magic",
+    "light"
+   ],
+   "license": "CC0 (asset page)",
+   "version": "80 files",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "direct",
+   "formats": [
+    "PNG (512x512 tiles)"
+   ],
+   "size": "zip, small",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Sprites for CC Particle World / emitters, spark bursts, magic glints.",
+   "fetch": {
+    "folder": "kenney-particles",
+    "type": "texture",
+    "license": "CC0 1.0",
+    "source": "https://kenney.nl/assets/particle-pack",
+    "files": [
+     "https://kenney.nl/media/pages/assets/particle-pack/f8fe0f8cb8-1677578741/kenney_particle-pack.zip"
+    ]
+   },
+   "in_repo": "assets.free/kenney-particles (after tools/fetch_free_assets.py; git-ignored)"
+  },
+  {
+   "name": "Kenney Smoke Particles",
+   "url": "https://kenney.nl/assets/smoke-particles",
+   "category": "vfx_footage",
+   "tags": [
+    "smoke",
+    "puffs",
+    "dust"
+   ],
+   "license": "CC0 (asset page)",
+   "version": "70 files",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "direct",
+   "formats": [
+    "PNG"
+   ],
+   "size": "zip, small",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Smoke puffs and dust hits on impacts and landings.",
+   "fetch": {
+    "folder": "kenney-smoke",
+    "type": "texture",
+    "license": "CC0 1.0",
+    "source": "https://kenney.nl/assets/smoke-particles",
+    "files": [
+     "https://kenney.nl/media/pages/assets/smoke-particles/23249a0d35-1677695171/kenney_smoke-particles.zip"
+    ]
+   },
+   "in_repo": "assets.free/kenney-smoke (after tools/fetch_free_assets.py; git-ignored)"
+  },
+  {
+   "name": "Unity Labs free VFX image sequences and flipbooks",
+   "url": "https://unity.com/blog/technology/free-vfx-image-sequences-flipbooks",
+   "category": "vfx_footage",
+   "tags": [
+    "explosion",
+    "fireball",
+    "flame",
+    "smoke",
+    "clouds",
+    "wispy smoke",
+    "candle smoke"
+   ],
+   "license": "CC0 1.0 (stated on the Unity blog page)",
+   "version": "22+ packages; download links live (checked one zip 2026-10-14)",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "EXR sequence (HDR linear)",
+    "TGA sequence",
+    "flipbook sheets"
+   ],
+   "size": "~1.7 MB (CandleSmoke01 flipbooks) up to large EXR sets",
+   "status": "recommended",
+   "reason": "CC0 allows vendoring, but EXR sets are large: download on demand into a local cache.",
+   "claude_use": "Realistic explosions, fireballs, flames and smoke: import sequence as footage, set alpha/linear, precompose, loop or time-remap, Add/Screen blend.",
+   "fetch": {
+    "folder": "unity-vfx",
+    "type": "vfx",
+    "license": "CC0 1.0",
+    "source": "https://unity.com/blog/technology/free-vfx-image-sequences-flipbooks",
+    "files": [
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/CandleSmoke01/CandleSmoke01-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/Cloud01/Cloud01-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/Cloud02/Cloud02-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/Cloud03/Cloud03-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/Cloud04/Cloud04-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/DiscSmoke01/DiscSmoke01-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/Explosion00/Explosion00-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/Explosion01/Explosion01-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/Explosion01-light/Explosion01-light-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/Explosion01-light-nofire/Explosion01-light-nofire-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/Explosion01-nofire/Explosion01-nofire-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/Explosion02/Explosion02-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/Explosion02HD/Explosion02HD-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/FireBall01/FireBall01-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/FireBall02/FireBall02-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/FireBall03/FireBall03-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/FireBall04/FireBall04-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/Flame02/Flame02-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/Flame02-temperature/Flame02-temperature-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/Flame03/Flame03-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/Flame03-hollow/Flame03-hollow-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/SmallFlame01-mini-temperature/SmallFlame01-mini-temperature-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/SmallFlame01-smaller-temperature/SmallFlame01-smaller-temperature-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/SmallFlame01-temperature/SmallFlame01-temperature-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/WispySmoke01/WispySmoke01-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/WispySmoke02/WispySmoke02-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/WispySmoke03/WispySmoke03-sequence-tga.zip",
+     "https://unity3d.com/files/labs/downloads/vfx/assets01/WispySmoke03b/WispySmoke03b-sequence-tga.zip"
+    ]
+   },
+   "in_repo": "assets.free/unity-vfx (after tools/fetch_free_assets.py; git-ignored)"
+  },
+  {
+   "name": "Coverr",
+   "url": "https://coverr.co/",
+   "category": "vfx_footage",
+   "tags": [
+    "b-roll",
+    "backgrounds"
+   ],
+   "license": "Coverr license (license page): free commercial, no attribution; no resale/redistribution, no AI training",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "MP4"
+   ],
+   "size": "varies",
+   "status": "ok",
+   "reason": "Few VFX elements; mostly b-roll.",
+   "claude_use": "Background plates for scene tests."
+  },
+  {
+   "name": "Mixkit stock video",
+   "url": "https://mixkit.co/free-stock-video/",
+   "category": "vfx_footage",
+   "tags": [
+    "overlays",
+    "b-roll"
+   ],
+   "license": "Mixkit Stock Video Free License (commercial, no attribution) or Restricted License (personal only), per item (from mixkit.co/llm-info; full license text UNVERIFIED)",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "MP4"
+   ],
+   "size": "varies",
+   "status": "ok",
+   "reason": "Check each item's license: Restricted items are non-commercial.",
+   "claude_use": "Overlays and b-roll when Pexels/Pixabay lack a match."
+  },
+  {
+   "name": "OpenGameArt (general, music and SFX too)",
+   "url": "https://opengameart.org/",
+   "category": "vfx_footage",
+   "tags": [
+    "sprites",
+    "explosions",
+    "music",
+    "sfx"
+   ],
+   "license": "Per asset: CC0, CC-BY, CC-BY-SA, GPL, OGA-BY (filter to CC0)",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "PNG",
+    "OGG",
+    "WAV",
+    "MP3"
+   ],
+   "size": "varies",
+   "status": "ok",
+   "reason": "Use only items whose page shows CC0 (or CC-BY with credit). Music section not re-checked this session.",
+   "claude_use": "Fallback source for stylized sprites and game-style music/SFX; record each asset's license next to it."
+  },
+  {
+   "name": "OpenGameArt Explosion (BenHickling)",
+   "url": "https://opengameart.org/content/explosion-7",
+   "category": "vfx_footage",
+   "tags": [
+    "explosion",
+    "pixel art",
+    "sprite sheet"
+   ],
+   "license": "CC0 (asset page)",
+   "version": "posted 2018-10-02",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "direct",
+   "formats": [
+    "PNG sprite sheet, 100x100, 50 frames"
+   ],
+   "size": "51 KB",
+   "status": "ok",
+   "reason": "Pixel-art look only.",
+   "claude_use": "Stylized/retro explosion: split the sheet into frames (or use an expression to step the sheet), loopOut."
+  },
+  {
+   "name": "OpenGameArt Explosion effects and more (Soluna Software)",
+   "url": "https://opengameart.org/content/explosion-effects-and-more",
+   "category": "vfx_footage",
+   "tags": [
+    "explosion",
+    "aura",
+    "effects",
+    "sprite sheet"
+   ],
+   "license": "CC0 or CC-BY 3.0 (both listed; author comment says changed to CC0)",
+   "version": "5 PNG sheets",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "direct",
+   "formats": [
+    "PNG sprite sheets"
+   ],
+   "size": "~1.3 MB",
+   "status": "ok",
+   "reason": "Choose CC0 when using; record the choice.",
+   "claude_use": "Auras and stylized bursts for game-like energy hits."
+  },
+  {
+   "name": "Pexels videos",
+   "url": "https://www.pexels.com/videos/",
+   "category": "vfx_footage",
+   "tags": [
+    "light leaks",
+    "smoke",
+    "dust",
+    "bokeh",
+    "film",
+    "b-roll"
+   ],
+   "license": "Pexels License (license page): free incl. commercial, no attribution, edits allowed; no selling unaltered copies, no redistribution on stock/wallpaper platforms",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "api_key",
+   "formats": [
+    "MP4"
+   ],
+   "size": "varies (HD-4K)",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Light leaks, dust, bokeh and smoke plates on black: import, Screen/Add blend, cache locally per project, never commit."
+  },
+  {
+   "name": "Pixabay videos",
+   "url": "https://pixabay.com/videos/",
+   "category": "vfx_footage",
+   "tags": [
+    "light leaks",
+    "smoke",
+    "particles",
+    "overlays"
+   ],
+   "license": "Pixabay Content License (summary page): no attribution, modification allowed; no standalone redistribution/sale, no trademark use",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "api_key",
+   "formats": [
+    "MP4"
+   ],
+   "size": "varies",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Same use as Pexels; the API can search by keyword."
+  },
+  {
+   "name": "ActionVFX free elements",
+   "url": "https://www.actionvfx.com/",
+   "category": "vfx_footage",
+   "tags": [
+    "fire",
+    "smoke",
+    "dust",
+    "sparks",
+    "muzzle flash",
+    "blood"
+   ],
+   "license": "ActionVFX standard license (UNVERIFIED: license page returned 429; news reports say commercial use allowed)",
+   "version": "free account, ~10 downloads/day (Practice Footage Library, per news)",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "account",
+   "formats": [
+    "MOV/ProRes 4444 alpha",
+    "PNG sequence (UNVERIFIED)"
+   ],
+   "size": "large",
+   "status": "reference_only",
+   "reason": "Account-gated, no redistribution, terms not verified at the source.",
+   "claude_use": "Only if the user downloads clips themselves; then add_asset/import as footage with alpha."
+  },
+  {
+   "name": "Videvo",
+   "url": "https://www.videvo.net/",
+   "category": "vfx_footage",
+   "tags": [
+    "stock",
+    "motion graphics",
+    "sfx"
+   ],
+   "license": "Mixed per clip: legacy Videvo Standard, Videvo Attribution, CC BY 3.0, Premium (Freepik-owned since 2022; current terms page redirects to Freepik)",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "account",
+   "formats": [
+    "MP4",
+    "MOV"
+   ],
+   "size": "varies",
+   "status": "reference_only",
+   "reason": "Per-clip licenses; current terms not readable.",
+   "claude_use": "Only when a clip's page shows a no-attribution license."
+  },
+  {
+   "name": "FootageCrate / ProductionCrate free tier",
+   "url": "https://footagecrate.com/",
+   "category": "vfx_footage",
+   "tags": [
+    "explosions",
+    "muzzle flash",
+    "debris",
+    "smoke"
+   ],
+   "license": "UNVERIFIED (license page 404; news: commercial OK, free account, 5 downloads/day)",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "account",
+   "formats": [
+    "MOV alpha (HD on free tier)"
+   ],
+   "size": "n/a",
+   "status": "excluded",
+   "reason": "Terms not verifiable; signup reportedly pre-checks a monthly donation.",
+   "claude_use": ""
+  },
+  {
+   "name": "Vecteezy",
+   "url": "https://www.vecteezy.com/",
+   "category": "vfx_footage",
+   "tags": [
+    "vectors",
+    "video"
+   ],
+   "license": "Vecteezy Free License: attribution required, no redistribution, commercial limited (video budgets up to $1,000)",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": false,
+   "vendor_in_repo": false,
+   "access": "account",
+   "formats": [
+    "SVG",
+    "MP4"
+   ],
+   "size": "n/a",
+   "status": "excluded",
+   "reason": "Attribution + commercial caps + no redistribution.",
+   "claude_use": ""
+  },
+  {
+   "name": "gl-transitions",
+   "url": "https://github.com/gl-transitions/gl-transitions",
+   "category": "motion_graphics",
+   "tags": [
+    "transitions",
+    "luma matte",
+    "glsl"
+   ],
+   "license": "MIT (repo LICENSE; each shader carries its own header)",
+   "version": "active",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "Check each shader's license header.",
+   "claude_use": "Large GLSL transition collection: run through ISF4AE, or bake luma mattes offline as transition references.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "LottieFiles free animations",
+   "url": "https://lottiefiles.com/",
+   "category": "motion_graphics",
+   "tags": [
+    "lottie",
+    "icons",
+    "ui animations",
+    "stickers"
+   ],
+   "license": "Lottie Simple License (FL 9.13.21): commercial OK, no attribution, redistribution OK under the same terms, no compiling into a competing service",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "account",
+   "formats": [
+    "Lottie JSON",
+    "dotLottie"
+   ],
+   "size": "KB each",
+   "status": "ok",
+   "reason": "AE has no native Lottie import: needs a converter (lottie-spec as reference). Do not bulk-collect.",
+   "claude_use": "Animated icons/UI elements converted into AE shape layers by a small JSX importer, then restyled with brand tokens."
+  },
+  {
+   "name": "Noto Emoji Animation",
+   "url": "https://googlefonts.github.io/noto-emoji-animation/",
+   "category": "motion_graphics",
+   "tags": [
+    "emoji",
+    "lottie",
+    "stickers"
+   ],
+   "license": "CC BY 4.0 (UNVERIFIED at primary source; reported by third-party packages; static Noto Emoji is OFL/Apache-2.0)",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "Lottie JSON",
+    "GIF",
+    "WebP"
+   ],
+   "size": "KB each",
+   "status": "ok",
+   "reason": "Confirm license before shipping.",
+   "claude_use": "Reaction emoji in social cuts, with credit."
+  },
+  {
+   "name": "Mixkit After Effects templates",
+   "url": "https://mixkit.co/free-after-effects-templates/",
+   "category": "motion_graphics",
+   "tags": [
+    "titles",
+    "transitions",
+    "lower thirds",
+    "logo reveals",
+    "templates"
+   ],
+   "license": "Mixkit license (which one UNVERIFIED; page says no attribution or signup)",
+   "version": "~23 templates; needs latest AE and Adobe Fonts",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "aep"
+   ],
+   "size": "varies",
+   "status": "reference_only",
+   "reason": "Templates, not library assets; license per item unverified.",
+   "claude_use": "Behavioral reference for title/transition timing, like Animation Composer."
+  },
+  {
+   "name": "ambientCG",
+   "url": "https://ambientcg.com/",
+   "category": "textures",
+   "tags": [
+    "textures",
+    "paper",
+    "grain",
+    "metal"
+   ],
+   "license": "CC0 1.0 Universal (license page)",
+   "version": "API v1-v3",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "direct",
+   "formats": [
+    "JPG",
+    "PNG",
+    "EXR"
+   ],
+   "size": "1K-8K",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Paper, cardboard, grain-like textures for track mattes and print looks."
+  },
+  {
+   "name": "Poly Haven",
+   "url": "https://polyhaven.com/",
+   "category": "textures",
+   "tags": [
+    "hdri",
+    "textures",
+    "pbr"
+   ],
+   "license": "CC0 (license page); API at api.polyhaven.com under separate API terms; site ToS forbids scraping",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "api_key",
+   "formats": [
+    "EXR/HDR",
+    "JPG/PNG"
+   ],
+   "size": "1K-16K",
+   "status": "recommended",
+   "reason": "Vendor only small picks.",
+   "claude_use": "Surfaces and HDRI reflections for 3D layers, paper/concrete backgrounds."
+  },
+  {
+   "name": "Lucide",
+   "url": "https://github.com/lucide-icons/lucide",
+   "category": "illustration_icons",
+   "tags": [
+    "icons",
+    "stroke",
+    "svg"
+   ],
+   "license": "ISC (LICENSE file)",
+   "version": "active",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "SVG"
+   ],
+   "size": "~1.5k icons",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Stroke icons converted to shape layers (svgpathtools) so Trim Paths draw-on and presets work natively."
+  },
+  {
+   "name": "Open Doodles",
+   "url": "https://www.opendoodles.com/",
+   "category": "illustration_icons",
+   "tags": [
+    "hand-drawn",
+    "people",
+    "doodle"
+   ],
+   "license": "CC0 (badge on page; 'Free for Commercial and Personal Use')",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "direct",
+   "formats": [
+    "SVG",
+    "PNG",
+    "GIF (4 items)"
+   ],
+   "size": "small",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Hand-drawn people/scenes as shapes for explainer scenes with wiggle-path boil."
+  },
+  {
+   "name": "Tabler Icons",
+   "url": "https://github.com/tabler/tabler-icons",
+   "category": "illustration_icons",
+   "tags": [
+    "icons",
+    "stroke",
+    "filled",
+    "svg"
+   ],
+   "license": "MIT (LICENSE file)",
+   "version": "active",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "SVG"
+   ],
+   "size": "~5k icons",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Same as Lucide, larger set."
+  },
+  {
+   "name": "Humaaans",
+   "url": "https://www.humaaans.com/",
+   "category": "illustration_icons",
+   "tags": [
+    "people",
+    "mix-and-match",
+    "illustration"
+   ],
+   "license": "CC0 (page)",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "direct",
+   "formats": [
+    "SVG (download via Gumroad link)"
+   ],
+   "size": "small",
+   "status": "ok",
+   "reason": "Gumroad may ask for an email.",
+   "claude_use": "Modular characters for explainer slides, rigged per limb."
+  },
+  {
+   "name": "IRA Design",
+   "url": "https://iradesign.io/",
+   "category": "illustration_icons",
+   "tags": [
+    "gradient illustration",
+    "components"
+   ],
+   "license": "MIT (stated on the page, no full text; UNVERIFIED in detail)",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "SVG",
+    "PNG",
+    "AI"
+   ],
+   "size": "n/a",
+   "status": "ok",
+   "reason": "No license text found; keep out of git until confirmed.",
+   "claude_use": "Gradient illustration parts for SaaS-style explainers."
+  },
+  {
+   "name": "Phosphor Icons",
+   "url": "https://github.com/phosphor-icons/core",
+   "category": "illustration_icons",
+   "tags": [
+    "icons",
+    "weights",
+    "duotone"
+   ],
+   "license": "MIT (LICENSE file)",
+   "version": "active",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "SVG"
+   ],
+   "size": "~9k files (6 weights)",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Icons with several weights to match brand stroke widths."
+  },
+  {
+   "name": "Twemoji (jdecked fork)",
+   "url": "https://github.com/jdecked/twemoji",
+   "category": "illustration_icons",
+   "tags": [
+    "emoji",
+    "svg"
+   ],
+   "license": "Graphics CC-BY 4.0 (LICENSE-GRAPHICS); code MIT",
+   "version": "active",
+   "attribution_required": true,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [
+    "SVG",
+    "PNG"
+   ],
+   "size": "~4k files",
+   "status": "ok",
+   "reason": "Credit required.",
+   "claude_use": "Emoji as SVG to shape layers that animate with presets."
+  },
+  {
+   "name": "unDraw",
+   "url": "https://undraw.co/",
+   "category": "illustration_icons",
+   "tags": [
+    "flat illustration",
+    "recolor"
+   ],
+   "license": "unDraw license (license page): commercial OK, no attribution; no packs/redistribution, no scraping without consent, no AI use",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "SVG",
+    "PNG"
+   ],
+   "size": "n/a",
+   "status": "ok",
+   "reason": "Manual download only (no scraping); never commit.",
+   "claude_use": "Recolorable scene illustrations for a single project, fetched by the user."
+  },
+  {
+   "name": "OpenMoji",
+   "url": "https://github.com/hfg-gmuend/openmoji",
+   "category": "illustration_icons",
+   "tags": [
+    "emoji",
+    "icons"
+   ],
+   "license": "CC BY-SA 4.0 (LICENSE.txt)",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [
+    "SVG",
+    "PNG"
+   ],
+   "size": "n/a",
+   "status": "excluded",
+   "reason": "ShareAlike would force derived works under CC BY-SA.",
+   "claude_use": ""
+  },
+  {
+   "name": "Storyset",
+   "url": "https://storyset.com/",
+   "category": "illustration_icons",
+   "tags": [
+    "animated illustration"
+   ],
+   "license": "Storyset terms: free only with credit, no redistribution, editorial limits on commercial use",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": false,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "SVG",
+    "GIF",
+    "MP4"
+   ],
+   "size": "n/a",
+   "status": "excluded",
+   "reason": "Attribution plus commercial restrictions.",
+   "claude_use": ""
+  },
+  {
+   "name": "BigSoundBank",
+   "url": "https://bigsoundbank.com/",
+   "category": "sfx",
+   "tags": [
+    "foley",
+    "ambience",
+    "whoosh"
+   ],
+   "license": "CC0 1.0 / WTFPL / Public Domain Dedication (rights page); free for commercial, no attribution, redistribution allowed",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "direct",
+   "formats": [
+    "WAV",
+    "MP3 (per sound page)"
+   ],
+   "size": "per file",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Real-world foley and ambiences that can live in the repo."
+  },
+  {
+   "name": "Kenney audio (Impact Sounds, Interface Sounds, and others)",
+   "url": "https://kenney.nl/assets/impact-sounds",
+   "category": "sfx",
+   "tags": [
+    "impacts",
+    "ui",
+    "clicks",
+    "whoosh"
+   ],
+   "license": "CC0 (asset pages)",
+   "version": "Impact 130 files; Interface 100 files",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "direct",
+   "formats": [
+    "OGG (UNVERIFIED; not stated on page)"
+   ],
+   "size": "zip, small",
+   "status": "recommended",
+   "reason": "AE does not import OGG: convert to WAV with ffmpeg.",
+   "claude_use": "UI clicks and impacts synced to pop/recoil presets; index with tools/index_assets.py.",
+   "fetch": {
+    "folder": "kenney-audio",
+    "type": "sfx",
+    "license": "CC0 1.0",
+    "source": "https://kenney.nl/assets?t=audio",
+    "files": [
+     "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip",
+     "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip",
+     "https://kenney.nl/media/pages/assets/ui-audio/490d233f68-1677590494/kenney_ui-audio.zip",
+     "https://kenney.nl/media/pages/assets/digital-audio/216eac4753-1677590265/kenney_digital-audio.zip",
+     "https://kenney.nl/media/pages/assets/sci-fi-sounds/6b296f9ecf-1677589334/kenney_sci-fi-sounds.zip",
+     "https://kenney.nl/media/pages/assets/casino-audio/2472606a04-1721639069/kenney_casino-audio.zip",
+     "https://kenney.nl/media/pages/assets/rpg-audio/8e99002d76-1677590336/kenney_rpg-audio.zip"
+    ]
+   },
+   "in_repo": "assets.free/kenney-audio (after tools/fetch_free_assets.py; git-ignored)"
+  },
+  {
+   "name": "Sonniss GDC Game Audio Bundles",
+   "url": "https://sonniss.com/gameaudiogdc",
+   "category": "sfx",
+   "tags": [
+    "pro sfx",
+    "impacts",
+    "whooshes",
+    "ambience",
+    "weapons"
+   ],
+   "license": "Sonniss GDC bundle license v2.0 (27 Aug 2026): commercial OK, no attribution, no redistribution as SFX, no AI training",
+   "version": "bundles 2015-2024",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "WAV (UNVERIFIED this session)"
+   ],
+   "size": "9-48 GB per year",
+   "status": "recommended",
+   "reason": "Local only; index it like the AC asset packs.",
+   "claude_use": "Highest-quality whooshes/impacts for final edits; index locally (ASSETS.local.txt style)."
+  },
+  {
+   "name": "99Sounds",
+   "url": "https://99sounds.org/",
+   "category": "sfx",
+   "tags": [
+    "cinematic",
+    "textures",
+    "impacts"
+   ],
+   "license": "99Sounds license: royalty-free commercial, no attribution; no redistribution even free; not for noise/sleep apps",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "WAV (UNVERIFIED)"
+   ],
+   "size": "per library",
+   "status": "ok",
+   "reason": "Local only.",
+   "claude_use": "Cinematic risers and hits for trailers."
+  },
+  {
+   "name": "Freesound (CC0 filter)",
+   "url": "https://freesound.org/",
+   "category": "sfx",
+   "tags": [
+    "everything",
+    "field recordings"
+   ],
+   "license": "Per sound: CC0, CC-BY, CC-BY-NC (+ legacy Sampling+). Use CC0 (or CC-BY with credit)",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "api_key",
+   "formats": [
+    "WAV",
+    "FLAC",
+    "MP3",
+    "OGG"
+   ],
+   "size": "per file",
+   "status": "ok",
+   "reason": "Account needed to download; API token for search/previews, OAuth2 for originals (from API docs index; details UNVERIFIED).",
+   "claude_use": "Search by tag with a license:\"Creative Commons 0\" filter when Kenney/BigSoundBank lack a sound; vendor CC0 picks with their IDs."
+  },
+  {
+   "name": "Mixkit sound effects",
+   "url": "https://mixkit.co/free-sound-effects/",
+   "category": "sfx",
+   "tags": [
+    "whoosh",
+    "ui",
+    "transitions"
+   ],
+   "license": "Mixkit Sound Effects Free License: commercial OK, no attribution, no resale unaltered (mixkit.co/llm-info summary; full text UNVERIFIED)",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "WAV",
+    "MP3 (UNVERIFIED)"
+   ],
+   "size": "per file",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Transition whooshes when the local index lacks one."
+  },
+  {
+   "name": "Pixabay sound effects",
+   "url": "https://pixabay.com/sound-effects/",
+   "category": "sfx",
+   "tags": [
+    "whoosh",
+    "ui",
+    "impacts"
+   ],
+   "license": "Pixabay Content License",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "MP3"
+   ],
+   "size": "per file",
+   "status": "ok",
+   "reason": "No standalone redistribution; audio API availability UNVERIFIED.",
+   "claude_use": "Quick whooshes for drafts."
+  },
+  {
+   "name": "SoundBible",
+   "url": "https://soundbible.com/",
+   "category": "sfx",
+   "tags": [
+    "misc sfx"
+   ],
+   "license": "Per file: Public Domain or Creative Commons Attribution count as royalty-free (about page); other files are personal use only",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "WAV",
+    "MP3"
+   ],
+   "size": "per file",
+   "status": "ok",
+   "reason": "Check each file's license; skip personal-use ones.",
+   "claude_use": "Fallback single sounds."
+  },
+  {
+   "name": "BBC Sound Effects",
+   "url": "https://sound-effects.bbcrewind.co.uk/",
+   "category": "sfx",
+   "tags": [
+    "archive"
+   ],
+   "license": "RemArc licence: personal, educational, research only; commercial via Pro Sound Effects (page not fetchable; secondary sources agree)",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": false,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "WAV",
+    "MP3"
+   ],
+   "size": "n/a",
+   "status": "excluded",
+   "reason": "Non-commercial.",
+   "claude_use": ""
+  },
+  {
+   "name": "Zapsplat (free tier)",
+   "url": "https://www.zapsplat.com/",
+   "category": "sfx",
+   "tags": [
+    "sfx"
+   ],
+   "license": "Zapsplat Standard License (UNVERIFIED: page 403); secondary sources: attribution required on free tier, MP3 only, account needed, no redistribution",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "account",
+   "formats": [
+    "MP3 (free)",
+    "WAV (paid)"
+   ],
+   "size": "n/a",
+   "status": "excluded",
+   "reason": "Terms not readable; conflicting reports about editing.",
+   "claude_use": ""
+  },
+  {
+   "name": "Dark Sci-Fi Audio Pack (SRG774, OpenGameArt)",
+   "url": "https://opengameart.org/node/188336",
+   "category": "music",
+   "tags": [
+    "ambient",
+    "sci-fi",
+    "loop",
+    "tech"
+   ],
+   "license": "CC0 1.0 (asset page, checked 2026-10-14)",
+   "version": "8 tracks",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "direct",
+   "formats": [
+    "MP3"
+   ],
+   "size": "~15 MB",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Ambient tech/sci-fi beds and stingers (loopable) for product, HUD and tech pieces.",
+   "fetch": {
+    "folder": "oga-music-scifi",
+    "type": "music",
+    "license": "CC0 1.0",
+    "source": "https://opengameart.org/node/188336",
+    "files": [
+     "https://opengameart.org/sites/default/files/sector_0.mp3",
+     "https://opengameart.org/sites/default/files/airy_0.mp3",
+     "https://opengameart.org/sites/default/files/pulse_0.mp3",
+     "https://opengameart.org/sites/default/files/urgent_0.mp3",
+     "https://opengameart.org/sites/default/files/transmission_1.mp3",
+     "https://opengameart.org/sites/default/files/victory_4.mp3",
+     "https://opengameart.org/sites/default/files/hover_0.mp3",
+     "https://opengameart.org/sites/default/files/title_6.mp3"
+    ]
+   },
+   "in_repo": "assets.free/oga-music-scifi (after tools/fetch_free_assets.py; git-ignored)"
+  },
+  {
+   "name": "Kenney Music Jingles",
+   "url": "https://kenney.nl/assets/music-jingles",
+   "category": "music",
+   "tags": [
+    "jingles",
+    "stingers",
+    "logo sting",
+    "short"
+   ],
+   "license": "CC0 (asset page)",
+   "version": "85 jingles",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "direct",
+   "formats": [
+    "OGG -> WAV"
+   ],
+   "size": "zip, small",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Short stingers for logo reveals and end cards (1-4 s).",
+   "fetch": {
+    "folder": "kenney-music",
+    "type": "music",
+    "license": "CC0 1.0",
+    "source": "https://kenney.nl/assets/music-jingles",
+    "files": [
+     "https://kenney.nl/media/pages/assets/music-jingles/f37e530b9e-1677590399/kenney_music-jingles.zip"
+    ]
+   },
+   "in_repo": "assets.free/kenney-music (after tools/fetch_free_assets.py; git-ignored)"
+  },
+  {
+   "name": "Short Loops Background Music Pack (hernandack, OpenGameArt)",
+   "url": "https://opengameart.org/content/short-loops-background-music-pack",
+   "category": "music",
+   "tags": [
+    "calm",
+    "loop",
+    "lofi",
+    "background"
+   ],
+   "license": "CC0 1.0 (asset page, checked 2026-10-14)",
+   "version": "4 loops",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "direct",
+   "formats": [
+    "OGG -> WAV"
+   ],
+   "size": "~6 MB",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Calm seamless loops for explainers and UI walkthroughs.",
+   "fetch": {
+    "folder": "oga-music-loops",
+    "type": "music",
+    "license": "CC0 1.0",
+    "source": "https://opengameart.org/content/short-loops-background-music-pack",
+    "files": [
+     "https://opengameart.org/sites/default/files/A%20Brand%20New%20Wisdom.ogg",
+     "https://opengameart.org/sites/default/files/Just%20Saying%20Tho.ogg",
+     "https://opengameart.org/sites/default/files/Winter%20Dust_0.ogg",
+     "https://opengameart.org/sites/default/files/Swinging%20Sweet_0.ogg"
+    ]
+   },
+   "in_repo": "assets.free/oga-music-loops (after tools/fetch_free_assets.py; git-ignored)"
+  },
+  {
+   "name": "ccMixter (commercial filter)",
+   "url": "https://dig.ccmixter.org/",
+   "category": "music",
+   "tags": [
+    "remix",
+    "instrumental",
+    "electronic"
+   ],
+   "license": "Per track CC; most are BY-NC; 'free for commercial use' filter shows CC BY (credit required) (UNVERIFIED at primary source)",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "MP3"
+   ],
+   "size": "per track",
+   "status": "ok",
+   "reason": "Per-track check mandatory.",
+   "claude_use": "Instrumentals with credit when other sources lack a genre."
+  },
+  {
+   "name": "Coverr music",
+   "url": "https://coverr.co/",
+   "category": "music",
+   "tags": [
+    "background"
+   ],
+   "license": "Coverr license (covers videos and music): commercial, no attribution, no redistribution, no AI training",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "MP3"
+   ],
+   "size": "per track",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Alternative background music."
+  },
+  {
+   "name": "Free Music Archive (CC0 / CC BY only)",
+   "url": "https://freemusicarchive.org/",
+   "category": "music",
+   "tags": [
+    "electronic",
+    "ambient",
+    "indie"
+   ],
+   "license": "Per track: CC BY, BY-SA, BY-NC, BY-NC-SA, BY-ND, BY-NC-ND, CC0 (License Guide). Use CC0 or CC BY only",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "MP3"
+   ],
+   "size": "per track",
+   "status": "ok",
+   "reason": "Filter/account terms UNVERIFIED; CC BY needs credit; avoid ND (syncing to video is an adaptation).",
+   "claude_use": "Music beds for tests and demos with a recorded license per track; CC0 tracks may be vendored."
+  },
+  {
+   "name": "Incompetech (Kevin MacLeod)",
+   "url": "https://incompetech.com/",
+   "category": "music",
+   "tags": [
+    "cinematic",
+    "corporate",
+    "comedy",
+    "all genres"
+   ],
+   "license": "Creative Commons free option requiring credit (version reported as CC BY 4.0, UNVERIFIED at source) or paid Standard License without credit",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "MP3"
+   ],
+   "size": "per track",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Demo music with the credit line: \"Title\" Kevin MacLeod (incompetech.com), Licensed under CC BY 4.0."
+  },
+  {
+   "name": "Mixkit music",
+   "url": "https://mixkit.co/free-stock-music/",
+   "category": "music",
+   "tags": [
+    "background"
+   ],
+   "license": "Mixkit Stock Music Free License or Restricted License per item (full text UNVERIFIED)",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "MP3"
+   ],
+   "size": "per track",
+   "status": "ok",
+   "reason": "Skip Restricted items.",
+   "claude_use": "Background music when the track page shows the Free License."
+  },
+  {
+   "name": "Musopen",
+   "url": "https://musopen.org/",
+   "category": "music",
+   "tags": [
+    "classical",
+    "public domain recordings"
+   ],
+   "license": "Recordings released to public domain / CC0 per Musopen's older FAQ (UNVERIFIED: page 403); courtesy asks for credit and not reselling recordings",
+   "version": "free tier reportedly 5 downloads/day (2018 data)",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "account",
+   "formats": [
+    "MP3",
+    "FLAC (members)"
+   ],
+   "size": "per track",
+   "status": "ok",
+   "reason": "Verify each recording's license tag.",
+   "claude_use": "Classical pieces for elegant/luxury tones."
+  },
+  {
+   "name": "Pixabay Music",
+   "url": "https://pixabay.com/music/",
+   "category": "music",
+   "tags": [
+    "corporate",
+    "lofi",
+    "cinematic",
+    "beats"
+   ],
+   "license": "Pixabay Content License",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "MP3"
+   ],
+   "size": "per track",
+   "status": "ok",
+   "reason": "Some tracks may be registered in Content ID (UNVERIFIED); keep proof of download.",
+   "claude_use": "Default music bed for internal demos; beat grid with Beat This!."
+  },
+  {
+   "name": "Chosic",
+   "url": "https://www.chosic.com/free-music/all/",
+   "category": "music",
+   "tags": [
+    "aggregator"
+   ],
+   "license": "Per track CC (mostly CC BY per secondary sources; page 403)",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "MP3"
+   ],
+   "size": "per track",
+   "status": "reference_only",
+   "reason": "Aggregator; verify at the artist's original source.",
+   "claude_use": "Discovery only."
+  },
+  {
+   "name": "Bensound (free tier)",
+   "url": "https://www.bensound.com/",
+   "category": "music",
+   "tags": [
+    "corporate",
+    "acoustic"
+   ],
+   "license": "Bensound free license (UNVERIFIED: page 404): credit required, limited to free online video; no ads",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": false,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "MP3"
+   ],
+   "size": "per track",
+   "status": "excluded",
+   "reason": "Restricted commercial use; terms unclear.",
+   "claude_use": ""
+  },
+  {
+   "name": "Jamendo Music",
+   "url": "https://www.jamendo.com/",
+   "category": "music",
+   "tags": [
+    "indie"
+   ],
+   "license": "Per track CC, all BY, most BY-NC; commercial use via paid Jamendo Licensing",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": false,
+   "vendor_in_repo": false,
+   "access": "account",
+   "formats": [
+    "MP3"
+   ],
+   "size": "per track",
+   "status": "excluded",
+   "reason": "Mostly non-commercial; commercial needs a paid license.",
+   "claude_use": ""
+  },
+  {
+   "name": "Purple Planet Music",
+   "url": "https://www.purple-planet.com/",
+   "category": "music",
+   "tags": [
+    "background"
+   ],
+   "license": "Free with attribution; claims CC BY 3.0 but forbids remixing (secondary sources; official page not readable)",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "direct",
+   "formats": [
+    "MP3",
+    "WAV"
+   ],
+   "size": "per track",
+   "status": "excluded",
+   "reason": "Conflicting terms.",
+   "claude_use": ""
+  },
+  {
+   "name": "Uppbeat (free tier)",
+   "url": "https://uppbeat.io/",
+   "category": "music",
+   "tags": [
+    "creator music"
+   ],
+   "license": "Uppbeat free plan (UNVERIFIED: 429): credit link required, ~3 downloads, not for business/ads",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": false,
+   "vendor_in_repo": false,
+   "access": "account",
+   "formats": [
+    "MP3"
+   ],
+   "size": "per track",
+   "status": "excluded",
+   "reason": "No business/ad use on free tier.",
+   "claude_use": ""
+  },
+  {
+   "name": "YouTube Audio Library",
+   "url": "https://studio.youtube.com/",
+   "category": "music",
+   "tags": [
+    "music",
+    "sfx"
+   ],
+   "license": "Standard YouTube Audio Library license (reported YouTube-only) or CC BY 4.0 per track (secondary sources conflict)",
+   "version": "n/a",
+   "attribution_required": true,
+   "commercial_ok": null,
+   "vendor_in_repo": false,
+   "access": "account",
+   "formats": [
+    "MP3"
+   ],
+   "size": "per track",
+   "status": "excluded",
+   "reason": "Standard tracks restricted to YouTube; no API; terms unclear outside YouTube.",
+   "claude_use": ""
+  },
+  {
+   "name": "ISF4AE",
+   "url": "https://github.com/baku89/ISF4AE",
+   "category": "generator",
+   "tags": [
+    "shader",
+    "glsl",
+    "fx"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "323 stars; pushed 2026-05-01",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "recommended",
+   "reason": "Native plugin: needs a per-machine install; check code signing first.",
+   "claude_use": "Native plugin that runs ISF GLSL shaders as an AE effect: halftone, chromatic aberration, glow, dither and shader transitions written as text.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "matter-js",
+   "url": "https://github.com/liabru/matter-js",
+   "category": "generator",
+   "tags": [
+    "physics",
+    "bake"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "18.5k stars; pushed 2026-09-30",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "npm",
+   "formats": [],
+   "size": "small",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "2D physics simulated offline in Node, baked to per-frame keys (drop, stack, collide layers).",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "baffects.js",
+   "url": "https://github.com/rheadsh/baffects.js",
+   "category": "generator",
+   "tags": [
+    "generative",
+    "patterns"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "167 stars; pushed 2023-01-06",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Processing-style generative drawing inside AE: patterns and grids built by script.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "Effekseer",
+   "url": "https://github.com/effekseer/Effekseer",
+   "category": "generator",
+   "tags": [
+    "particles",
+    "explosions",
+    "magic",
+    "vfx authoring"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "1.8k stars; pushed 2026-09-14",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [
+    "png sequence",
+    "sprite sheet (export UNVERIFIED this session)"
+   ],
+   "size": "app download",
+   "status": "ok",
+   "reason": "Bundled sample effects may carry their own licenses (UNVERIFIED).",
+   "claude_use": "Author and render magic/energy/explosion elements locally to PNG sequences, then import as footage with alpha and loop."
+  },
+  {
+   "name": "ISF-Files (Vidvox)",
+   "url": "https://github.com/Vidvox/ISF-Files",
+   "category": "generator",
+   "tags": [
+    "shader"
+   ],
+   "license": "MIT (LICENSE file)",
+   "version": "LICENSE (c) 2018",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Stock ISF shaders for ISF4AE.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "jsfxr",
+   "url": "https://github.com/chr15m/jsfxr",
+   "category": "generator",
+   "tags": [
+    "sfx synth",
+    "ui sounds",
+    "retro"
+   ],
+   "license": "Unlicense (GitHub API)",
+   "version": "456 stars; pushed 2026-05-05",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "wav"
+   ],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Generate UI blips, pops, whooshes as WAV locally to sync with pop/recoil presets."
+  },
+  {
+   "name": "opensimplex",
+   "url": "https://pypi.org/project/opensimplex/",
+   "category": "generator",
+   "tags": [
+    "noise",
+    "python"
+   ],
+   "license": "MIT (PyPI classifier)",
+   "version": "0.4.5.1",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [
+    "py"
+   ],
+   "size": "pip",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Same as simplex-noise from Python tools."
+  },
+  {
+   "name": "PixiJS particle-emitter",
+   "url": "https://github.com/pixijs/particle-emitter",
+   "category": "generator",
+   "tags": [
+    "particles",
+    "sprites"
+   ],
+   "license": "MIT (LICENSE file)",
+   "version": "n/a",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "png sequence via headless browser"
+   ],
+   "size": "npm",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Drive Kenney particle sprites through an emitter and render frames for smoke puffs, dust, sparks."
+  },
+  {
+   "name": "planck.js",
+   "url": "https://github.com/piqnt/planck.js",
+   "category": "generator",
+   "tags": [
+    "physics"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "5.3k stars; pushed 2026-10-14",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "npm",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Box2D port for stable joints when baking physics.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "pymunk",
+   "url": "https://github.com/viblo/pymunk",
+   "category": "generator",
+   "tags": [
+    "physics",
+    "python"
+   ],
+   "license": "MIT (LICENSE.txt)",
+   "version": "active",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Python 2D physics for a physics_bake.py tool.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "simplex-noise.js",
+   "url": "https://github.com/jwagner/simplex-noise.js",
+   "category": "generator",
+   "tags": [
+    "noise",
+    "procedural"
+   ],
+   "license": "MIT (GitHub API; npm)",
+   "version": "npm 4.0.3; 1.8k stars",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "js"
+   ],
+   "size": "small",
+   "status": "ok",
+   "reason": "AE expressions already have noise(); useful only to bake outside AE.",
+   "claude_use": "Seeded organic paths/positions baked as keyframes reproducible across renders."
+  },
+  {
+   "name": "tsParticles",
+   "url": "https://github.com/tsparticles/tsparticles",
+   "category": "generator",
+   "tags": [
+    "particles",
+    "confetti",
+    "fireworks",
+    "sparks"
+   ],
+   "license": "MIT (LICENSE file)",
+   "version": "active",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "png sequence via headless browser"
+   ],
+   "size": "npm",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Confetti, fireworks, sparks rendered headless (Playwright, like record_cep_panel.py) to transparent PNG sequences."
+  },
+  {
+   "name": "tweak_shader_ae_plugin",
+   "url": "https://github.com/mobile-bungalow/tweak_shader_ae_plugin",
+   "category": "generator",
+   "tags": [
+    "shader"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "59 stars; pushed 2025-12-24",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Shadertoy-like multipass shaders in AE (early development).",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "ZzFX",
+   "url": "https://github.com/KilledByAPixel/ZzFX",
+   "category": "generator",
+   "tags": [
+    "sfx synth"
+   ],
+   "license": "MIT (GitHub API)",
+   "version": "801 stars; pushed 2026-10-01",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [
+    "wav"
+   ],
+   "size": "tiny",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Same as jsfxr with tiny parameter arrays an LLM can tune."
+  },
+  {
+   "name": "ae-physics (mickeyperry)",
+   "url": "https://github.com/mickeyperry/ae-physics",
+   "category": "generator",
+   "tags": [],
+   "license": "MIT (LICENSE file)",
+   "version": "0 stars; pushed 2026-09-10",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "git",
+   "formats": [],
+   "size": "small",
+   "status": "reference_only",
+   "reason": "Brand new.",
+   "claude_use": "Reference for a bake-to-keyframes physics flow.",
+   "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  }
+ ]
+}

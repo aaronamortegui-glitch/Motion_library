@@ -3,7 +3,7 @@
 # Motion DNA
 
 Motion made with AI all looks the same: same curves, same moves, same templates. **Motion DNA** gives it an identity.
-It is a motion library for After Effects (80 moves, 14 curves, 9 styles, 11 techniques, built on measured references)
+It is a motion library for After Effects (80 moves, 14 curves, 9 styles, 12 techniques and a kit of 159 pieces Claude builds for you, built on measured references)
 with a panel for designers and an AI agent that works inside After Effects. You direct; it accelerates. Every brand you
 animate keeps a profile that **learns from each review**, and everything it makes is native keyframes.
 
@@ -91,11 +91,12 @@ or to the brand.
 
 <br clear="right">
 
-### Styles and techniques, ready to ask for
+### Styles, techniques and the kit, ready to ask for
 <img src="docs/screens/cep-library.gif" width="300" align="right" alt="The Agent library">
 
-*Agent › Library* shows the **Styles** (a whole comp, role by role) and the **Techniques** (tracked labels, text behind
-people, roto, speed ramps, HUD…) with a preview, what each one does and a ready order: **Use in chat** sends it to the
+*Agent › Library* shows the **Styles** (a whole comp, role by role), the **Techniques** (tracked labels, text behind
+people, roto, speed ramps, HUD, stroke build…) and the **Kit** (transitions, elements, shapes, backgrounds, looks, text,
+moves and behaviours) with a preview, what each one does and a ready order: **Use in chat** sends it to the
 agent, **Copy order** takes it to Claude Code. Layers that already move keep their animation.
 
 <br clear="right">
@@ -135,13 +136,21 @@ Open the repo (or a brand or project folder) in Claude Code and approve the `mot
 
 | To… | Tools |
 |---|---|
-| Browse | `list_presets` · `list_packs` · `list_tags` · `suggest_mix` · `match_reference` · `list_brands` · `get_brand` |
+| Browse | `list_presets` · `list_packs` · `list_tags` · `suggest_mix` · `match_reference` · `list_brands` · `get_brand` · `list_assets` · `list_resources` (outside scripts, VFX, SFX and music, license checked) |
 | Act in After Effects | `apply_preset` · `apply_pack` · `apply_brand` (`existing` = modify / replace) · `apply_transition` · `add_asset` · `remove_animation` |
+| Build what AC packs ship (by behavior, on our tokens) | `solid_transition` (42 named looks: solid/mask wipes, iris, fan, dots, flash, glitch, twirl, slices…) · `add_element` (25 self-sizing kinds: titles, callouts, counters, timers, social, quotes, lists, chat, rating, cinematic…) · `add_shape` (39 animated shapes, lines, impacts, fireworks, glitter…) · `move` (3D flip, hinge, orbit, fly…) · `animate_text` (per char/word/line, decode, mask, typewriter) · `add_captions` · `add_look` (backgrounds, tones, grain, letterbox, particles, long shadow, glitch) · `add_behavior` (9 behaviours by family, each drawn into shapes, backgrounds, text mattes, element boxes or transitions: bubbles, blob, voronoi, grow, flow, flock, spring, rope, and the hand-drawn `line_boil`) · `list_kit` |
+| Edit keyframes | `keyframes` (reverse, mirror_out, stagger, shift, to_playhead, sequence, distribute, loop, bake, stretch, copy_to) · `anchor_point` |
 | Run techniques | `matte` (a cut-out on the local GPU) · `text_behind` |
 | Learn and check | `add_brand_note` · `ae_status` · `list_layers` · `render_frame` · `check_layout` |
 
 The order of work and recipes that worked: [User guide › For Claude](docs/USER_GUIDE.md#for-claude). Without MCP, any
 LLM reads `library/INDEX.txt` and runs `.jsx` jobs with `bash tools/bridge.sh`.
+
+**Background resources for Claude** (not in the panel):
+- `library/resources.json` catalogs 166 outside scripts, expression libraries, VFX, sound effects and music. Each entry has its license checked, whether it needs credit, and whether it can live in the repo.
+- `python tools/fetch_free_assets.py` downloads the free CC0 packs (fire, smoke and explosion sequences, particles, SFX, jingles, music tracks) into `assets.free/`.
+- `vendor/` holds small open-source code (json2, eKeys, aefunctions) with its licenses.
+- Behavior maps: [Animation Composer](docs/animation-composer-map.md) and [paid AE tools vs open source](docs/ae-tools-map.md).
 
 ## Tested on real work
 
@@ -175,15 +184,42 @@ Motion DNA it tests, shows the result, and leaves a tip. What broke and how it w
 
 ## The library
 
-| Moves | Classics | Text | Loops | Recipes | Styles | Techniques | Curves |
-|---|---|---|---|---|---|---|---|
-| 32 | 17 | 11 | 11 | 9 | 9 | 11 | 14 + 6 durations |
+| Moves | Classics | Text | Loops | Recipes | Styles | Techniques | Curves | Kit |
+|---|---|---|---|---|---|---|---|---|
+| 32 | 17 | 11 | 11 | 9 | 9 | 12 | 14 + 6 durations | 159 |
 
 ![Every preset with its energy range and tones](docs/examples/library-mosaic.gif)
 
-Full catalog with live thumbnails: **[docs/CATALOG.md](docs/CATALOG.md)** · filterable: `library/index.html` · for LLMs:
+Full catalog with live thumbnails, kit included: **[docs/CATALOG.md](docs/CATALOG.md)** · filterable: `library/index.html` · for LLMs:
 `library/INDEX.txt` · tags: `library/tags.json`. All timing comes from the motion tokens: presets ask for `Arrive` +
 `Land`, never a raw speed, so the whole library retunes in one place.
+
+### The kit: everything Claude can build, by category
+
+Besides presets, styles and techniques, Claude builds these pieces on the open comp through the MCP server. They are
+semi-finished like Animation Composer's: they size themselves to the text, take brand colours and fonts, and every
+movement uses the token curves (acceleration and deceleration, overshoot when the energy asks for it). Browse them in
+the panel (*Agent › Library › Kit*, with a ready order), in `docs/CATALOG.md` or `library/index.html`, and ask for them by name in the chat. The full list with energy and tones is `library/kit.json`
+(`list_kit`); transition looks are in `library/transitions.json`.
+
+| Category | Ask for… | Tool |
+|---|---|---|
+| **Solid transitions** (34 looks; colour layers and masks, one controller) | `Clean Wipe`, `Diagonal Wipe`, `Vertical Drop`, `Color Stack`, `Stack Rise`, `Slanted Bars`, `Bar Cascade`, `Venetian Blinds`, `Shutter`, `Center Split`, `Horizon Split`, `Zipper`, `Comb`, `Iris Pop`, `Ring Burst`, `Diamond Reveal`, `Pixel Grid`, `Grid Scatter`, `Grid Bloom`, `Soft Wipe`, `Corner Burst`, `Rainbow Rise`, `Dot Matrix`, `Fan Sweep`, `Corner Fan`, `Gradient Wipe`, `Liquid Wipe`, `Liquid Rise`, `Ink Drop`, `Ink Corner`, `Bubble Wipe`, `Bubble Rise`, `Shatter`, `Shard Sweep` | `solid_transition` |
+| **Clip transitions** (12; shot to shot) | `Zoom Through`, `Spin Through`, `Stretch Slide`, `Whip Slide`, `Vertical Whip`, `Flash Cut`, `Dip to Black`, `Camera Shake`, `Twirl Zoom`, `Slice Cut`, `Glitch Cut`, `Camera Roll` | `solid_transition` |
+| **Elements** (self-sizing graphics) | `label`, `lower_third`, `title`, `underline`, `highlight`, `callout`, `counter`, `timer`, `price_tag`, `handle`, `bubble`, `sticker`, `quote`, `list`, `progress`, `button`, `kinetic`, `tiles`, `text_box`, `media`, `scale_title`, `cinematic`, `chat`, `rating`, `ring`, `glass_card`, `end_card` (our logo close) | `add_element` |
+| **Shapes** (draw on, hold, leave) | `circle`, `ring`, `square`, `frame`, `triangle`, `diamond`, `pentagon`, `hexagon`, `star`, `sparkle`, `badge`, `heart`, `shield`, `cross`, `plus`, `check`, `line`, `wave`, `zigzag`, `arrow`, `curved_arrow`, `chevrons`, `brackets`, `spiral`, `infinity`, `brush`, `speed_lines`, `burst`, `impact`, `rings`, `loader`, `dots`, `pops`, `shape_row`, `fireworks`, `glitter`, `swoosh`, `confetti`, `blob` | `add_shape` |
+| **Backgrounds** (looping, brand colours) | `stripes`, `dots`, `grid`, `gradient`, `liquid`, `topo`, `network`, `blobs`, `mesh`, `glass` | `add_look` |
+| **Behaviours** (the algorithm apart from what it draws; by family) | **fill** `bubbles` (metaballs that merge), `blob`, `voronoi` (cells, shards), `grow` (vines) · **swarm** `flow` (noise flow field), `flock` · **physics** `spring` (jelly box), `rope` (verlet) · **modifier** `line_boil` (hand-drawn tremble on 3s, any layer; the Collage style applies it). Targets: `shape`, `background`, `text` / `mask`, `box` (an element's box), `transition`, `layer` | `add_behavior` |
+| **Looks** (finishing layers) | `tritone`, `duotone`, `vignette`, `grain`, `scanlines`, `letterbox`, `dust`, `embers`, `snow`, `long_shadow`, `glitch` | `add_look` |
+| **Text engine** (per char, word or line) | `Chars Pop Rise`, `Words Decode`, `Lines Mask Rise`, `Chars 3D Flip`, `Chars Wiggly Scale`, `Words Tracking Blur`, `Chars Skew Slide`, `Words Colour Pop`, `Typewriter Cursor`, `Captions`; channels fade, rise, drop, slide, scale, rotate, 3D, skew, tracking, blur, decode, colour | `animate_text`, `add_captions` |
+| **Moves** (2D/3D entrances and exits) | `flip`, `hinge`, `orbit`, `fly`, `tumble`, `grow_edge`, `squash` | `move` |
+| **Keyframe tools** | `ease`, `copy_ease`, `reverse`, `mirror_out`, `stagger`, `randomize`, `shift`, `to_playhead`, `sequence`, `distribute`, `loop`, `copy_to`, `bake`, `stretch`, anchor point (9 positions) | `keyframes`, `anchor_point` |
+| **Resources** (outside, licensed) | CC0 SFX, music, VFX sequences, textures, open-source scripts | `list_resources`, `add_asset` |
+
+**Our logo** (the helix mark and its MOTION / DNA lockups) lives in `assets/brand/` and in the Figma file [Motion DNA — Logo & Library](https://www.figma.com/design/oFm28esz50v8d5Cxn54ytA), with its manual (lockups, colours, clear space, misuse, how it moves) and the library overview. Every Motion DNA demo closes on it: `add_element(kind="end_card")` builds the mark piece by piece (the *Stroke build* technique), then MOTION / DNA rise under it.
+
+Example: *"Open on a `mesh` background, a `glass_card` with the title, `Ink Drop` into the plexus (`network`) scene, and
+finish with `grain`."* Samples: `docs/examples/`.
 
 ### Built on research: the Motion Style Map, by Gian Orsi
 
@@ -211,7 +247,7 @@ pipeline in `tools/style_research/`.
 | | What it is | Where |
 |---|---|---|
 | **Research** | 20 reference films measured frame by frame (Motion Style Map, by Gian Orsi) and brand analyses | `research/`, `library/references/` |
-| **Library** | 80 moves, 14 curves, 9 styles, 11 techniques, tagged by role, energy 1–5 and tone | `library/`, `tokens/`, `tools/ss_presets.jsx` |
+| **Library** | 80 moves, 14 curves, 9 styles, 12 techniques and the kit (46 transitions, 27 elements, 39 shapes, 10 backgrounds, 11 looks, 10 text animations, 7 moves, 9 behaviours), tagged by role, energy 1–5 and tone | `library/`, `tokens/`, `tools/ss_presets.jsx` |
 | **Brands** | Rules, curves and timing learned in every review; on your computer, shared as a file | `library/brands.local/` or your folder |
 | **Who drives it** | A designer in the panel, or Claude through the MCP server `motion-dna` | `panel/`, `tools/mcp/` |
 | **Output** | Native After Effects keyframes, checked by the layout QA and the tests | `tools/check_layout.jsx`, `tools/test_all.py` |

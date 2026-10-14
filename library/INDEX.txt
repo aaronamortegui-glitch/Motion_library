@@ -5,9 +5,13 @@
 # styles: SSP.applyPack(comp, name[, layers, in|out|both]) · roles title/subtitle/body/shape/media/logo · library/packs.json · listed at the end
 # markers: SSP.markerTiming(true) before apply → layer markers 'SS in'/'SS out' retime the animation when dragged · classics (family classic) = animate.css 4.1.1 MIT
 # mcp: .mcp.json motion-dna → tools/mcp/ss_motion_mcp.py (list_tags, suggest_mix, match_reference, list_presets, apply_preset[duration,intensity,direction,ease], remove_animation, apply_pack, add_asset, render_frame, run_jsx…)
-# assets (local, licensed, not in repo): python tools/index_assets.py -> library/ASSETS.local.txt (sfx/overlays by category + loudness) · include tools/ss_assets.jsx · SSA.sfx(comp,name,t,gainDb[,len]) · SSA.overlay(comp,name,t[,blend,opacity])
+# assets (local, licensed, not in repo + free CC0 packs: python tools/fetch_free_assets.py): python tools/index_assets.py -> library/ASSETS.local.txt (sfx/music/overlays/vfx/textures by category + loudness) · include tools/ss_assets.jsx · SSA.sfx(comp,name,t,gainDb[,len]) · SSA.overlay(comp,name,t[,blend,opacity]) · SSA.vfx(comp,name,t[,blend,scale])
+# transitions: include tools/ss_transitions.jsx · SST.recipe(comp, name, t, {colors}) · SST.add(comp, type, t, o) · solids over a cut (wipe bars blinds split interleave stack iris diamond grid dots fan liquid ink behavior) or clip to clip (zoom spin stretch slide flash dip shake twirl slices glitch; o.outgoing/o.incoming) · token dur + ease_in/ease_out · looks in library/transitions.json · MCP solid_transition
+# elements: include tools/ss_presets.jsx + tools/ss_elements.jsx (+ ss_shapes, ss_looks) · SSE.<kind>(comp, …) · MCP add_element · end_card = our logo close (stroke build, tools/logo_parts.py) · kit lines below
+# kit (library/kit.json · MCP list_kit): shapes tools/ss_shapes.jsx SSS.add (40) · moves tools/ss_moves.jsx SSMV.apply (flip hinge orbit fly tumble grow_edge squash) · text tools/ss_text.jsx SSTX.animate/typewriter/captions · looks tools/ss_looks.jsx SSL.background (incl. network, blobs, mesh, glass)/look/glassCard/longShadow/glitch · all on token curves
+# outside resources (OSS scripts, VFX, SFX, music; license checked): library/resources.json · MCP list_resources · vendored code in vendor/ (json2, eKeys, aefunctions; include tools/ss_vendor.jsx) · AC map docs/animation-composer-map.md · paid-tool map docs/ae-tools-map.md
 # hud: SSHUD.bracket/callout/meter/chip/contour/faceScan on TRK nulls · include tools/ss_hud.jsx · scenes: tools/build_scene.jsx + JSON (matte, behind text) · breakdown: tools/build_breakdown.jsx · edits: tools/build_edit.jsx + JSON · read docs/LEARNINGS.md
-# tags (library/tags.json): roles enter/exit/emphasis/loop/transition · energy range 1 calm..5 explosive · tones bold, cinematic, corporate, editorial, elegant, friendly, handmade, luxury, modern, organic, playful, retro, technical, warm · MCP list_tags / suggest_mix / match_reference
+# tags (library/tags.json): roles enter/exit/emphasis/loop/transition · energy range 1 calm..5 explosive · tones bold, calm, cinematic, corporate, editorial, elegant, friendly, handmade, luxury, modern, organic, playful, retro, technical, warm · MCP list_tags / suggest_mix / match_reference
 # references: a brand or video analysed into energy + tones → library/references/<slug>.json → match_reference → build what fits, CREATE the gaps (CONTRIBUTING §8)
 # kind|name|channels|e|use|roles|energy|tones
 motion|Fade|Fade|s|Corporate, UI, supporting text|enter/exit|1-2|modern/corporate/elegant
@@ -34,7 +38,7 @@ motion|Surge Rise|Fade&Position (Surge curve)|m|Headlines, cards, elegant entran
 motion|Speed Ramp|Time Remap (footage / precomps)|d|Footage, product shots, action beats, transitions|transition/emphasis|3-5|cinematic/bold
 motion|Punch Zoom|Scale (camera)|m|Footage, precomps, freeze frames, cut emphasis|emphasis|3-4|cinematic/bold
 motion|Coast Rise|Fade&Position (Coast curve)|s|Product UI, editorial headlines, icons: fast start, clean stop|enter/exit|2-3|modern/corporate/technical
-motion|Glide In|Fade, Position&Scale (Coast curve)|s|Products, cars, premium heroes: a long glide in that settles, no bounce
+motion|Glide In|Fade, Position&Scale (Coast curve)|s|Products, cars, premium heroes: a long glide in that settles, no bounce|enter/exit|1-2|luxury/calm/elegant/modern
 motion|Wind-up Slide|Fade&Position (Wind-up curve)|s|Logo slides, premium reveals: a small pull-back, then a long glide|enter/exit|1-3|elegant/cinematic/luxury
 motion|Nudge Grow|Scale Y (Nudge curve)|s|Bars, charts, columns, panels growing from their anchor (put the anchor at the base)|enter/exit|1-3|modern/corporate/friendly
 motion|Snap Scale|Scale&Fade (Snap curve)|m|Editorial cuts on the action: shapes and type that jump in size and settle|enter/exit/emphasis|2-4|technical/modern/bold
@@ -90,6 +94,166 @@ recipe|calibration__X9R|opacity&scale|m|AC ref · CALIBRATION
 recipe|calibration__PE6|position|m|AC ref · CALIBRATION
 recipe|calibration__4VW|position&scale|d|AC ref · CALIBRATION
 recipe|calibration__2JV|scale|d|AC ref · CALIBRATION
+# kit: group|name|energy|tones|call|use  (GIFs library/gifs/kit-<kind>/; library/kit.json, library/transitions.json)
+kit|Solid transitions|Clean Wipe|2-3|modern/corporate/editorial|solid_transition(look="Clean Wipe")|One colour panel crosses the frame: the neutral default between scenes.
+kit|Solid transitions|Diagonal Wipe|3-4|modern/bold|solid_transition(look="Diagonal Wipe")|A wipe with more drive; pairs with diagonal layouts.
+kit|Solid transitions|Vertical Drop|3-4|bold/playful|solid_transition(look="Vertical Drop")|Panel falls from the top: social and list beats.
+kit|Solid transitions|Color Stack|3-4|playful/bold/modern|solid_transition(look="Color Stack")|Brand colours slide in one over the other and back off in reverse: the signature AC look.
+kit|Solid transitions|Stack Rise|3-4|playful/friendly|solid_transition(look="Stack Rise")|Colour stack rising from the bottom.
+kit|Solid transitions|Slanted Bars|3-4|modern/bold/technical|solid_transition(look="Slanted Bars")|Diagonal bars from the middle outward.
+kit|Solid transitions|Bar Cascade|3-3|corporate/editorial/modern|solid_transition(look="Bar Cascade")|Horizontal bars arrive top to bottom like a list.
+kit|Solid transitions|Venetian Blinds|2-3|elegant/editorial/retro|solid_transition(look="Venetian Blinds")|Slats grow across, then shrink away: a classic, tidy reveal.
+kit|Solid transitions|Shutter|3-4|technical/modern|solid_transition(look="Shutter")|Many thin slats, fast: tech and data pieces.
+kit|Solid transitions|Center Split|3-4|cinematic/bold|solid_transition(look="Center Split")|Two halves close from the sides and open again: doors.
+kit|Solid transitions|Horizon Split|3-4|cinematic/bold|solid_transition(look="Horizon Split")|Halves close from top and bottom.
+kit|Solid transitions|Zipper|4-5|playful/bold|solid_transition(look="Zipper")|Alternating bars from both sides, tilted: high-energy social.
+kit|Solid transitions|Comb|4-5|technical/bold|solid_transition(look="Comb")|Thin interleaved strips, very fast.
+kit|Solid transitions|Iris Pop|3-4|playful/friendly/retro|solid_transition(look="Iris Pop")|A circle grows over the frame and opens a hole to the next shot.
+kit|Solid transitions|Ring Burst|4-5|playful/bold|solid_transition(look="Ring Burst")|Concentric colour rings burst out and open back in reverse.
+kit|Solid transitions|Diamond Reveal|3-4|bold/luxury/modern|solid_transition(look="Diamond Reveal")|Rotated-square panels from the centre.
+kit|Solid transitions|Pixel Grid|3-4|technical/playful/retro|solid_transition(look="Pixel Grid")|Checker cells fill diagonally then empty.
+kit|Solid transitions|Grid Scatter|4-5|technical/playful|solid_transition(look="Grid Scatter")|Random cells flicker in and out: glitchy, digital.
+kit|Solid transitions|Grid Bloom|3-4|modern/friendly|solid_transition(look="Grid Bloom")|Cells bloom from the centre.
+kit|Solid transitions|Soft Wipe|1-2|elegant/warm/luxury|solid_transition(look="Soft Wipe")|Slow, soft single panel for calm pieces.
+kit|Clip transitions|Zoom Through|3-4|bold/cinematic/modern|solid_transition(look="Zoom Through")|Clip to clip: the shot pushes in with blur and the next lands from a push, with a small overshoot.
+kit|Clip transitions|Spin Through|4-5|playful/bold|solid_transition(look="Spin Through")|Clip to clip: rotate through the cut with blur; scaled so the frame never shows an edge.
+kit|Clip transitions|Stretch Slide|4-5|playful/bold|solid_transition(look="Stretch Slide")|Clip to clip: the shot slides out stretching and the next squashes in, with motion blur.
+kit|Clip transitions|Whip Slide|3-4|modern/bold/cinematic|solid_transition(look="Whip Slide")|Clip to clip: a whip pan between shots, with motion blur.
+kit|Clip transitions|Vertical Whip|3-4|modern/playful|solid_transition(look="Vertical Whip")|Clip to clip: whip upward (social feeds, lists).
+kit|Solid transitions|Corner Burst|4-5|playful/bold|solid_transition(look="Corner Burst")|Colour rings burst from a corner and pull back into it.
+kit|Solid transitions|Rainbow Rise|3-4|playful/friendly/retro|solid_transition(look="Rainbow Rise")|Concentric arcs rise from the bottom edge (use 3+ colours).
+kit|Solid transitions|Dot Matrix|3-4|technical/retro/playful|solid_transition(look="Dot Matrix")|Round cells swell into a dot matrix and shrink away.
+kit|Solid transitions|Fan Sweep|3-4|playful/bold/retro|solid_transition(look="Fan Sweep")|Pie slices sweep round the centre like a fan.
+kit|Solid transitions|Corner Fan|4-5|bold/playful|solid_transition(look="Corner Fan")|Slices fan out from a corner.
+kit|Solid transitions|Gradient Wipe|2-3|modern/elegant/luxury|solid_transition(look="Gradient Wipe")|One panel with a gradient between two brand colours.
+kit|Clip transitions|Flash Cut|4-5|bold/cinematic|solid_transition(look="Flash Cut")|Clip to clip: a white flash peaks on the cut.
+kit|Clip transitions|Dip to Black|1-2|cinematic/elegant|solid_transition(look="Dip to Black")|Clip to clip: blur and dip through black.
+kit|Clip transitions|Camera Shake|4-5|bold/cinematic|solid_transition(look="Camera Shake")|Clip to clip: a hard cut inside a decaying camera shake (impacts, beats).
+kit|Clip transitions|Twirl Zoom|4-5|playful/bold|solid_transition(look="Twirl Zoom")|Clip to clip: twirl and push through the cut.
+kit|Clip transitions|Slice Cut|4-5|bold/modern|solid_transition(look="Slice Cut")|Clip to clip: the shot breaks into slices that slide off over the next.
+kit|Clip transitions|Glitch Cut|4-5|technical/bold|solid_transition(look="Glitch Cut")|Clip to clip: RGB split and jumps across the cut.
+kit|Clip transitions|Camera Roll|4-5|bold/playful|solid_transition(look="Camera Roll")|Clip to clip: a half roll through the cut, frame always covered.
+kit|Solid transitions|Liquid Wipe|2-3|organic/elegant/warm|solid_transition(look="Liquid Wipe")|Colour layers with a living wavy edge flow over the cut and away (one colour = tonal shades).
+kit|Solid transitions|Liquid Rise|2-3|organic/friendly|solid_transition(look="Liquid Rise")|The liquid wipe rising from the bottom.
+kit|Solid transitions|Ink Drop|2-3|organic/handmade/elegant|solid_transition(look="Ink Drop")|Ink blooms with wobbly edges and opens a wobbly hole to the next shot.
+kit|Solid transitions|Ink Corner|2-3|organic/playful|solid_transition(look="Ink Corner")|Ink spreading from a corner.
+kit|Solid transitions|Bubble Wipe|2-4|playful/organic/friendly|solid_transition(look="Bubble Wipe")|Liquid bubbles bloom from the centre and merge over the frame in two colours, then bubbles of the next shot eat through them.
+kit|Solid transitions|Bubble Rise|3-4|playful/organic|solid_transition(look="Bubble Rise")|The bubble wipe boiling up from the bottom.
+kit|Solid transitions|Shatter|3-4|modern/technical/bold|solid_transition(look="Shatter")|Voronoi shards pop in from the centre in three colours, then shrink away to the next shot.
+kit|Solid transitions|Shard Sweep|3-5|modern/bold|solid_transition(look="Shard Sweep")|Voronoi shards sweep across from the left and fall away.
+kit|Elements|label|2-3|modern/corporate/friendly|add_element(kind="label", …)|Chip that hugs its text, grows from the left.
+kit|Elements|lower_third|2-3|corporate/editorial/modern|add_element(kind="lower_third", …)|Name and role on a box with an accent bar.
+kit|Elements|title|2-3|elegant/editorial/luxury|add_element(kind="title", …)|Display title with an accent rule and subtitle.
+kit|Elements|underline|2-3|editorial/modern|add_element(kind="underline", …)|Accent line under an existing text layer.
+kit|Elements|highlight|2-3|playful/editorial/friendly|add_element(kind="highlight", …)|Marker highlight behind an existing text layer.
+kit|Elements|callout|2-3|technical/modern|add_element(kind="callout", …)|Dot and leader line to a label (product features).
+kit|Elements|counter|2-3|corporate/technical|add_element(kind="counter", …)|Number counting to a value with prefix/suffix (KPIs, prices).
+kit|Elements|timer|2-4|technical/bold|add_element(kind="timer", …)|mm:ss.cc running or counting down.
+kit|Elements|price_tag|2-3|bold/playful|add_element(kind="price_tag", …)|Big price over a small label.
+kit|Elements|handle|2-3|friendly/modern|add_element(kind="handle", …)|@handle pill (generic, no network logos).
+kit|Elements|bubble|2-3|friendly/playful|add_element(kind="bubble", …)|Speech bubble with a tail.
+kit|Elements|sticker|4-5|playful/bold|add_element(kind="sticker", …)|Outlined word that pops in tilted (reactions).
+kit|Elements|quote|1-2|elegant/editorial/warm|add_element(kind="quote", …)|Quote card: big quote mark, paragraph, author.
+kit|Elements|list|2-3|corporate/friendly|add_element(kind="list", …)|Bullet list, lines staggered.
+kit|Elements|progress|2-3|technical/corporate|add_element(kind="progress", …)|Bar filling to a value with a counting %.
+kit|Elements|button|3-4|friendly/playful|add_element(kind="button", …)|Button that a cursor clicks; swaps label and colours.
+kit|Elements|kinetic|4-5|bold/playful|add_element(kind="kinetic", …)|Lines fitted to one width sliding in from alternate sides.
+kit|Elements|tiles|3-4|playful/bold/retro|add_element(kind="tiles", …)|Each letter on a tile flipping in (3D).
+kit|Elements|text_box|1-2|corporate/editorial|add_element(kind="text_box", …)|Title over a paragraph on a box.
+kit|Elements|media|2-3|modern/corporate|add_element(kind="media", …)|Framed image slot with a title; fits a layer into it.
+kit|Elements|scale_title|3-4|bold/modern|add_element(kind="scale_title", …)|Title pushes in (mode push) or drops in (mode drop).
+kit|Elements|cinematic|1-3|cinematic/luxury/elegant|add_element(kind="cinematic", …)|Title styles: neon, blur, kerning.
+kit|Elements|chat|2-3|friendly/playful|add_element(kind="chat", …)|Chat bubble: typing dots, then the message.
+kit|Elements|rating|2-3|friendly/corporate|add_element(kind="rating", …)|Five stars, the value ones fill and pop.
+kit|Elements|ring|2-3|technical/modern|add_element(kind="ring", …)|Progress ring drawing to a value with a counting %.
+kit|Shapes|circle|2-4|playful/modern|add_shape(kind="circle", …)|Filled circle (pop).
+kit|Shapes|ring|2-3|modern/technical|add_shape(kind="ring", …)|Ring drawing on.
+kit|Shapes|square|2-3|modern|add_shape(kind="square", …)|Square (pop).
+kit|Shapes|frame|2-3|modern/editorial|add_shape(kind="frame", …)|Rectangle outline drawing on.
+kit|Shapes|triangle|3-4|bold/playful|add_shape(kind="triangle", …)|Triangle (pop).
+kit|Shapes|diamond|3-4|bold/luxury|add_shape(kind="diamond", …)|Diamond (pop).
+kit|Shapes|pentagon|2-3|technical|add_shape(kind="pentagon", …)|Pentagon.
+kit|Shapes|hexagon|2-3|technical|add_shape(kind="hexagon", …)|Hexagon.
+kit|Shapes|star|3-5|playful/bold|add_shape(kind="star", …)|Star (pop).
+kit|Shapes|sparkle|3-4|playful/luxury|add_shape(kind="sparkle", …)|Four-point sparkle.
+kit|Shapes|badge|3-4|playful/bold/retro|add_shape(kind="badge", …)|Scalloped seal badge.
+kit|Shapes|heart|3-4|playful/warm/friendly|add_shape(kind="heart", …)|Heart.
+kit|Shapes|shield|2-3|corporate/technical|add_shape(kind="shield", …)|Shield / crest.
+kit|Shapes|cross|3-4|bold/playful|add_shape(kind="cross", …)|X mark drawing on.
+kit|Shapes|plus|2-3|modern/technical|add_shape(kind="plus", …)|Plus drawing on.
+kit|Shapes|check|2-3|friendly/corporate|add_shape(kind="check", …)|Check mark drawing on.
+kit|Shapes|line|1-3|modern/editorial|add_shape(kind="line", …)|Straight line drawing on.
+kit|Shapes|wave|2-3|playful/organic|add_shape(kind="wave", …)|Sine wave drawing on.
+kit|Shapes|zigzag|3-4|playful/retro|add_shape(kind="zigzag", …)|Zigzag drawing on.
+kit|Shapes|arrow|2-3|modern/technical|add_shape(kind="arrow", …)|Arrow drawing on.
+kit|Shapes|curved_arrow|2-3|handmade/friendly|add_shape(kind="curved_arrow", …)|Curved arrow drawing on.
+kit|Shapes|chevrons|3-4|bold/technical|add_shape(kind="chevrons", …)|Chevrons >>> drawing on.
+kit|Shapes|brackets|2-3|technical/modern|add_shape(kind="brackets", …)|Four corner brackets (focus frame).
+kit|Shapes|spiral|3-4|playful/organic|add_shape(kind="spiral", …)|Spiral drawing on.
+kit|Shapes|infinity|2-3|modern|add_shape(kind="infinity", …)|Infinity loop drawing on.
+kit|Shapes|brush|3-4|handmade/organic|add_shape(kind="brush", …)|Tapered brush stroke.
+kit|Shapes|speed_lines|4-5|bold/playful|add_shape(kind="speed_lines", …)|Horizontal speed lines.
+kit|Shapes|burst|4-5|bold/playful|add_shape(kind="burst", …)|Rays fly out and vanish.
+kit|Shapes|impact|4-5|bold/playful|add_shape(kind="impact", …)|Impact rays over a spread (360/180/90/45°), mirror.
+kit|Shapes|rings|3-4|technical/playful|add_shape(kind="rings", …)|Shockwave: rings expand, thin out and fade.
+kit|Shapes|loader|2-3|technical/modern|add_shape(kind="loader", …)|Arc that keeps turning.
+kit|Shapes|dots|2-3|modern/friendly|add_shape(kind="dots", …)|Row of dots popping.
+kit|Shapes|pops|4-5|playful|add_shape(kind="pops", …)|Particles burst from the centre, spin and shrink away.
+kit|Shapes|shape_row|3-4|playful/friendly|add_shape(kind="shape_row", …)|Row of small shapes popping.
+kit|Shapes|fireworks|4-5|playful/bold|add_shape(kind="fireworks", …)|Staggered bursts at a few spots.
+kit|Shapes|glitter|3-4|luxury/playful|add_shape(kind="glitter", …)|Twinkling sparkles (loop).
+kit|Shapes|swoosh|4-5|bold/playful|add_shape(kind="swoosh", …)|Three curved strokes echoing along a curve.
+kit|Shapes|confetti|4-5|playful/bold|add_shape(kind="confetti", …)|Confetti burst with gravity.
+kit|Moves|flip|3-4|modern/bold|move(move="flip", layers=[…])|Card turn on the anchor (3D).
+kit|Moves|hinge|3-4|modern/editorial|move(move="hinge", layers=[…])|Door swing on an edge (3D).
+kit|Moves|orbit|3-4|cinematic/modern|move(move="orbit", layers=[…])|Swings in round a distant pivot (carousel).
+kit|Moves|fly|3-5|cinematic/bold|move(move="fly", layers=[…])|Z fly-in from far or near.
+kit|Moves|tumble|4-5|bold/playful|move(move="tumble", layers=[…])|Fly-in while turning on two axes.
+kit|Moves|grow_edge|2-3|modern/corporate|move(move="grow_edge", layers=[…])|Grows from an edge, one axis or uniform.
+kit|Moves|squash|3-5|playful|move(move="squash", layers=[…])|One-axis bounce (squash and stretch).
+kit|Text engine|Chars Pop Rise|3-4|playful/bold|animate_text(unit="chars", channels=["fade","rise"], ease="Pop")|Letters rise with overshoot.
+kit|Text engine|Words Decode|3-4|technical|animate_text(unit="words", channels=["decode","fade"], mode="flicker")|Words scramble in, flickering.
+kit|Text engine|Lines Mask Rise|2-3|editorial/elegant/cinematic|animate_text(unit="lines", channels=["rise"], mask=true)|Lines slide up from behind a mask.
+kit|Text engine|Chars 3D Flip|3-4|modern/bold|animate_text(unit="chars", channels=["rotate3d","fade"], order="center", ease="Nudge")|Letters flip in on X from the centre.
+kit|Text engine|Chars Wiggly Scale|4-5|playful|animate_text(unit="chars", channels=["scale"], mode="wiggly", order="random")|Letters pop with a wobble, random order.
+kit|Text engine|Words Tracking Blur|1-2|elegant/luxury/cinematic|animate_text(unit="words", channels=["tracking","blur","fade"])|Words settle from wide spacing and blur.
+kit|Text engine|Chars Skew Slide|3-4|bold/modern|animate_text(unit="chars", channels=["skew","slide","fade"], ease="Whip")|Letters whip in skewed.
+kit|Text engine|Words Colour Pop|3-4|playful/bold|animate_text(unit="words", channels=["color","scale"], ease="Pop")|Words pop through the accent colour.
+kit|Text engine|Typewriter Cursor|2-3|technical/retro|animate_text(typewriter=true, cps=18)|Types with a blinking cursor.
+kit|Text engine|Captions|2-3|friendly/modern|add_captions(words_path=…, style="highlight")|Word-timed captions (highlight, karaoke, build, pop, word).
+kit|Looks|tritone|1-3|cinematic/editorial|add_look(kind="tritone", …)|Three-colour tone over everything.
+kit|Looks|duotone|1-3|editorial/retro|add_look(kind="duotone", …)|Two-colour tone.
+kit|Looks|vignette|1-2|cinematic/warm|add_look(kind="vignette", …)|Dark edges.
+kit|Looks|grain|1-3|retro/cinematic/handmade|add_look(kind="grain", …)|Film grain.
+kit|Looks|scanlines|2-3|retro/technical|add_look(kind="scanlines", …)|Moving scanlines.
+kit|Looks|letterbox|1-3|cinematic|add_look(kind="letterbox", …)|Cinema bars (animate in with t).
+kit|Looks|dust|1-2|cinematic/organic|add_look(kind="dust", …)|Floating dust.
+kit|Looks|embers|2-3|warm/cinematic|add_look(kind="embers", …)|Rising embers.
+kit|Looks|snow|1-2|warm/friendly|add_look(kind="snow", …)|Falling snow.
+kit|Looks|long_shadow|2-3|retro/bold|add_look(kind="long_shadow", …)|Flat long shadow on a layer.
+kit|Looks|glitch|4-5|technical/bold|add_look(kind="glitch", …)|RGB split + jumps burst on a layer.
+kit|Backgrounds|stripes|2-3|playful/retro|add_look(kind="stripes", …)|Diagonal stripes drifting (loop).
+kit|Backgrounds|dots|1-2|modern/friendly|add_look(kind="dots", …)|Dot grid drifting.
+kit|Backgrounds|grid|1-2|technical/modern|add_look(kind="grid", …)|Line grid drifting.
+kit|Backgrounds|gradient|1-2|modern/elegant/luxury|add_look(kind="gradient", …)|Four-colour gradient drifting.
+kit|Backgrounds|liquid|1-2|organic/elegant/warm|add_look(kind="liquid", …)|Liquid gradient flowing.
+kit|Backgrounds|topo|1-2|technical/organic|add_look(kind="topo", …)|Topographic contour lines.
+kit|Backgrounds|network|1-3|technical/modern|add_look(kind="network", …)|Plexus: drifting points joined by lines that fade with distance.
+kit|Backgrounds|blobs|1-2|organic/playful/friendly|add_look(kind="blobs", …)|Liquid shapes in brand colours breathing and drifting.
+kit|Backgrounds|mesh|1-2|modern/elegant/luxury|add_look(kind="mesh", …)|Mesh gradient: big colour fields drifting under a heavy blur.
+kit|Backgrounds|glass|1-2|modern/luxury/technical|add_look(kind="glass", …)|Mesh gradient behind floating frosted-glass panes.
+kit|Elements|glass_card|1-2|modern/luxury|add_element(kind="glass_card", text=…, sub=…)|Smoky frosted card that blurs what is behind it, title and line.
+kit|Elements|end_card|2-3|modern/elegant/technical|add_element(kind="end_card", text="Motion DNA", sub=tagline, style="horizontal"?)|Logo close: the mark builds piece by piece (stroke build with grain), then the wordmark rises behind line masks. Stacked (as on the box) or horizontal. Closes every Motion DNA demo.
+kit|Shapes|blob|1-3|organic/playful|add_shape(kind="blob", …)|Liquid blob that keeps breathing.
+kit|Behaviours|bubbles|2-4|playful/organic/friendly|add_behavior(behavior="bubbles", target="shape", …)|Liquid bubbles that bloom from the origin and melt into each other (metaballs: blur + alpha threshold); as a background they rise like a lava lamp.
+kit|Behaviours|blob|2-3|organic/elegant/playful|add_behavior(behavior="blob", target="shape", …)|One liquid blob growing from the origin with a breathing edge (shared by the ink transition, the blob shape and the blobs background).
+kit|Behaviours|voronoi|3-4|modern/technical/bold|add_behavior(behavior="voronoi", target="background", …)|Voronoi cells: the region shatters into drifting cells that pop in from the origin (shards, stained glass, cells).
+kit|Behaviours|grow|1-3|organic/handmade/calm/elegant|add_behavior(behavior="grow", target="shape", …)|Organic growth: branches grow from the origin, wander and split like vines or roots, tapering each generation, buds at the tips.
+kit|Behaviours|flow|1-2|calm/organic/elegant/technical|add_behavior(behavior="flow", target="background", …)|Noise flow field: streamlines that follow a slowly turning noise field, like wind or water currents.
+kit|Behaviours|flock|2-3|organic/calm/cinematic|add_behavior(behavior="flock", target="shape", …)|A flock or school crossing a region: a leader wanders on noise, members trail with their own lag and orbit, turned to their heading.
+kit|Behaviours|spring|3-4|playful/friendly/bold|add_behavior(behavior="spring", target="box", …)|Jelly box: a rounded rectangle on the token curve whose edges lag and wobble like damped springs driven by the curve's speed, then settle.
+kit|Behaviours|rope|2-3|playful/handmade|add_behavior(behavior="rope", target="shape", …)|Verlet rope: pinned at one end, the other carried into place on the token curve; it pays out, sags, swings and settles (an underline under a layer).
+kit|Behaviours|line_boil|2-4|handmade/retro/playful/organic|add_behavior(behavior="line_boil", target="layer", …)|Hand-drawn line boil on any existing layer: outlines tremble as if redrawn on 3s (three drawings cycling). Shapes get Wiggle Paths, everything else a fine Turbulent Displace. The Collage style applies it.
 # styles: name|energy range|tones|curve|transition|title,subtitle,body,shape,media,logo
 style|Dynamic|4-5|bold/playful/cinematic|-|Whip Pan|Words Slam,Scramble,Chars Pop,Spin Pop,Whip Pan,Ramp Zoom
 style|Elegant|1-2|elegant/luxury/cinematic|Surge|Ramp Slide|Blur Words,Tracking Settle,Words Fade Up,Blur In,Surge Rise,Fade Up
@@ -112,5 +276,6 @@ technique|Marker timing|1-5||
 technique|Styles|1-5||
 technique|Cut on the voice|1-5||voiceover
 technique|Face refinement|1-5||footage/real people
+technique|Stroke build|2-3|modern/elegant/technical|a filled logo or shape (SVG)
 # brands: slug|name|style|curve|energy|tones|rules  (read one with get_brand before animating for it; save notes with add_brand_note)
 brand|motion-dna|Motion DNA|Playful|Snap|3-4|playful/retro/bold|22

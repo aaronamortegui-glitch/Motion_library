@@ -379,6 +379,12 @@ def fonts(remove=False):
         ctypes.windll.user32.SendMessageTimeoutW(0xFFFF, 0x001D, 0, 0, 0x0002, 2000, None)   # WM_FONTCHANGE to every app
     print((OK if remove or loaded == len(files) else WARN) +
           (f"{len(files)} fonts removed" if remove else f"{loaded}/{len(files)} fonts installed and loaded for this user (restart After Effects to see them)"))
+    # Some After Effects installs only read C:\Windows\Fonts and draw per-user fonts as Times (see LEARNINGS)
+    system = pathlib.Path(os.environ.get("WINDIR", r"C:\Windows")) / "Fonts"
+    missing = [f.name for f in files if not (system / f.name).exists()]
+    if not remove and missing:
+        print(WARN + "If After Effects draws these fonts as Times, install them for all users: right-click each file in "
+              f"{ROOT / 'assets/fonts'} > Install for all users (needs admin), then restart After Effects.")
     return remove or loaded == len(files)
 
 

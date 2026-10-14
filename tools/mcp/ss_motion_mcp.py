@@ -180,6 +180,237 @@ return "{b['name']}: style " + {js(f['style'])} + " with curve " + {js(f.get('cu
         "\nThe brand's own timing is applied where its entries name a layer or role. Check its motion rules (get_brand) on a rendered frame, then run check_layout."
 
 
+def t_solid_transition(look=None, type=None, at_s=None, comp=None, colors=None, brand=None, dur=None, duration=None, ease_in=None, ease_out=None,
+                       count=None, angle=None, stagger=None, order=None, cols=None, outgoing=None, incoming=None, energy=None, tone=None):
+    """Flat 2D transition from solids and masks (tools/ss_transitions.jsx). No look/type: list the named looks."""
+    lib = json.loads((ROOT / "library" / "transitions.json").read_text(encoding="utf-8"))["transitions"]
+    if not look and not type:
+        rows = [t for t in lib if (not energy or t["energy"][0] <= energy <= t["energy"][1]) and (not tone or tone in t["tones"])]
+        return "\n".join(f"{t['name']} ({t['type']}{', clip to clip' if t.get('clip_to_clip') else ''}, {t['dur']} · {' → '.join(t['curves'])}, energy {t['energy'][0]}-{t['energy'][1]}, {'/'.join(t['tones'])}): {t['use']}"
+                         for t in rows) or "no look matches; types: wipe, bars, blinds, split, interleave, stack, iris, diamond, grid"
+    if not colors and brand:
+        colors = [v for v in (_brand.load(brand).get("identity", {}).get("colors") or {}).values() if str(v).startswith("#")][:3] or None
+    o = {k: v for k, v in dict(colors=colors, dur=dur, duration=duration, ease_in=ease_in, ease_out=ease_out, count=count, angle=angle, stagger=stagger, order=order,
+                               cols=cols, outgoing=outgoing, incoming=incoming).items() if v is not None}
+    at = "c.time" if at_s is None else str(float(at_s))
+    call = f"SST.recipe(c, {js(look)}, {at}, {js(o)})" if look else f"SST.add(c, {js(type)}, {at}, {js(o)})"
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)});
+app.beginUndoGroup("Motion DNA solid transition");
+var ctrl; try {{ ctrl = {call}; }} finally {{ app.endUndoGroup(); }}
+if (typeof ctrl === "string") return ctrl + " (clip to clip: both layers are trimmed at the cut and keyed with token curves)";
+return ctrl.name + ": covers the frame at " + {at} + " s (Progress 50), from " + ctrl.inPoint.toFixed(2) + " to " + ctrl.outPoint.toFixed(2) +
+  " s. Edit Direction, Stagger, Ease In / Ease Out (token curves) and Color 1-3 on the controller.";""", includes=("ss_presets.jsx", "ss_behaviors.jsx", "ss_looks.jsx", "ss_transitions.jsx")) + \
+        ("" if outgoing or incoming else "\nPlace it on a cut: the clip below should change at that time (or pass outgoing/incoming to trim them).")
+
+
+def _brand_colors(brand):
+    b = _brand.load(brand)
+    return [v for v in (b.get("identity", {}).get("colors") or {}).values() if str(v).startswith("#")]
+
+
+def t_add_element(kind, text=None, sub=None, layer=None, point=None, comp=None, t=None, out=None, colors=None, brand=None,
+                  size=None, position=None, padding=None, radius=None, text_preset=None, items=None, value=None, start=None,
+                  style=None, mode=None, outline=None, slot=None, click=None, pressed=None, prefix=None, suffix=None, decimals=None, width=None, pressed_box=None, logo=None):
+    """Self-sizing graphic elements (tools/ss_elements.jsx): label, lower_third, title, underline, highlight, callout."""
+    cols = {}
+    if colors:
+        cols = dict(zip(("box", "accent", "text"), colors))
+    elif brand:
+        b = _brand.load(brand); vals = [v for v in (b.get("identity", {}).get("colors") or {}).values() if str(v).startswith("#")]
+        cols = dict(zip(("box", "accent", "text"), vals[:3]))
+        f = b.get("identity", {}).get("fonts") or {}
+    o = {k: v for k, v in dict(t=t, out=out, colors=cols or None, size=size, position=position, padding=padding, radius=radius,
+                               textPreset=text_preset, style=style, mode=mode, outline=outline, slot=slot, click=click, prefix=prefix,
+                               suffix=suffix, decimals=decimals, width=width, pressedBox=pressed_box, logo=str((ROOT / logo).as_posix()) if logo and not pathlib.Path(logo).is_absolute() else logo, layer=layer if kind == "media" else None).items() if v is not None}
+    if brand and colors is None:
+        fonts = {k: [f[k]] for k in ("title", "text") if f.get(k)}
+        if f.get("accent"): fonts["display"] = [f["accent"]]
+        if fonts: o["fonts"] = fonts
+    at = "c.time" if t is None else None
+    if at: o_js = js(o)[:-1] + (", " if o else "") + '"t": c.time}'
+    else: o_js = js(o)
+    end_o = js(dict(o, t=t, text=text or "Motion DNA", **({"tagline": sub} if sub else {}), **({"layout": "horizontal"} if style == "horizontal" else {}))) if t is not None else js(dict(o, text=text or "Motion DNA", **({"tagline": sub} if sub else {}), **({"layout": "horizontal"} if style == "horizontal" else {})))[:-1] + ', "t": c.time}'
+    calls = {"label": f"SSE.label(c, {js(text)}, {o_js})", "lower_third": f"SSE.lowerThird(c, {js(text)}, {js(sub)}, {o_js})",
+             "title": f"SSE.title(c, {js(text)}, {js(sub)}, {o_js})", "underline": f"SSE.underline(c, {js(layer)}, {o_js})",
+             "highlight": f"SSE.highlight(c, {js(layer)}, {o_js})", "callout": f"SSE.callout(c, {js(text)}, {js(point or [0, 0])}, {o_js})",
+             "counter": f"SSE.counter(c, {js(start or 0)}, {js(value if value is not None else 100)}, {o_js})", "timer": f"SSE.timer(c, {js(value or 0)}, {o_js})",
+             "price_tag": f"SSE.priceTag(c, {js(text)}, {js(sub)}, {o_js})", "handle": f"SSE.handle(c, {js(text)}, {o_js})",
+             "bubble": f"SSE.bubble(c, {js(text)}, {o_js})", "sticker": f"SSE.sticker(c, {js(text)}, {o_js})",
+             "quote": f"SSE.quote(c, {js(text)}, {js(sub)}, {o_js})", "list": f"SSE.list(c, {js(items or [])}, {o_js})",
+             "progress": f"SSE.progress(c, {js(value if value is not None else 70)}, {o_js})", "button": f"SSE.button(c, {js(text)}, {js(pressed)}, {o_js})",
+             "kinetic": f"SSE.kinetic(c, {js(items or [])}, {o_js})", "tiles": f"SSE.tiles(c, {js(text)}, {o_js})",
+             "text_box": f"SSE.textbox(c, {js(text)}, {js(sub)}, {o_js})", "media": f"SSE.media(c, {js(text)}, {o_js})",
+             "scale_title": f"SSE.scaleTitle(c, {js(text)}, {js(sub)}, {o_js})", "cinematic": f"SSE.cinematic(c, {js(text)}, {o_js})",
+             "chat": f"SSE.chat(c, {js(text)}, {o_js})", "rating": f"SSE.rating(c, {js(value if value is not None else 5)}, {o_js})",
+             "ring": f"SSE.ring(c, {js(value if value is not None else 70)}, {o_js})",
+             "end_card": f"SSE.endCard(c, {end_o})",
+             "glass_card": f"{{name: SSL.glassCard(c, {js(text)}, {js(sub)}, {o_js}), inPoint: c.time, outPoint: c.duration}}"}
+    if kind not in calls:
+        return "unknown kind: " + kind + " (" + ", ".join(calls) + ")"
+    if kind in ("underline", "highlight") and not layer:
+        return kind + " needs layer: the name of an existing text layer"
+    if kind == "callout" and not point:
+        return "callout needs point: [x, y] in comp pixels"
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)});
+app.beginUndoGroup("Motion DNA element: {kind}");
+var ctrl; try {{ ctrl = {calls[kind]}; }} finally {{ app.endUndoGroup(); }}
+return ctrl.name + " built (" + ctrl.inPoint.toFixed(2) + "-" + ctrl.outPoint.toFixed(2) + " s). Restyle it on the controller: Reveal, Padding X/Y, Radius, Gap, Box/Accent/Text colours.";""",
+                   includes=("ss_presets.jsx", "ss_shapes.jsx", "ss_behaviors.jsx", "ss_looks.jsx", "ss_elements.jsx")) + "\nCheck it with render_frame and check_layout (text must not touch other objects)."
+
+
+def t_add_shape(kind, comp=None, t=None, out=None, position=None, size=None, stroke=None, style=None, anim=None, ease=None, dur=None,
+                colors=None, brand=None, count=None, loop=None, spread=None, angle=None, mirror=None, item=None, hold=None):
+    """Animated shape primitives, lines and AC Shape-Elements families (tools/ss_shapes.jsx)."""
+    cols = colors or ((_brand_colors(brand)[1:3] or None) if brand else None)
+    o = {k: v for k, v in dict(t=t, out=out, position=position, size=size, stroke=stroke, style=style, anim=anim, ease=ease, dur=dur, colors=cols,
+                               count=count, loop=loop, spread=spread, angle=angle, mirror=mirror, item=item, hold=hold).items() if v is not None}
+    o_js = js(o) if t is not None else js(o)[:-1] + (", " if o else "") + '"t": c.time}'
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)});
+app.beginUndoGroup("Motion DNA shape: {kind}");
+var L; try {{ L = SSS.add(c, {js(kind)}, {o_js}); }} finally {{ app.endUndoGroup(); }}
+return L.name + " (" + L.comment.replace("SS shape: ", "") + "), in at " + L.inPoint.toFixed(2) + " s. Controls on the layer: Reveal, Size, Stroke, Color 1/2.";""",
+                   includes=("ss_presets.jsx", "ss_behaviors.jsx", "ss_shapes.jsx"))
+
+
+def t_move(move, layers=None, comp=None, phase="in", t=None, dur=None, ease=None, axis=None, edge=None, direction=None, origin=None,
+           distance=None, angle=None, fade=None, uniform=None):
+    """Parametric 2D/3D entrances and exits (tools/ss_moves.jsx): flip, hinge, orbit, fly, tumble, grow_edge, squash."""
+    o = {k: v for k, v in dict(dur=dur, ease=ease, axis=axis, edge=edge, direction=direction, distance=distance, angle=angle, fade=fade,
+                               uniform=uniform, **({"from": origin} if origin else {})).items() if v is not None}
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), ls = findLayers(c, {js(layers or [])}), r = [];
+app.beginUndoGroup("Motion DNA move: {move}");
+try {{ for (var i = 0; i < ls.length; i++) r.push(SSMV.apply(ls[i], {js(move)}, {js(phase)}, {js(t)}, {js(o)})); }} finally {{ app.endUndoGroup(); }}
+return r.join("\\n");""", includes=("ss_presets.jsx", "ss_keyframes.jsx", "ss_moves.jsx"))
+
+
+def t_animate_text(layers=None, comp=None, unit="chars", channels=None, mode=None, order=None, phase="in", t=None, dur=None, ease=None,
+                   spread=None, amount=None, color=None, mask=None, typewriter=None, cps=None, cursor=None):
+    """Per-character / word / line text animation on token curves (tools/ss_text.jsx), or a typewriter with a cursor."""
+    if typewriter:
+        o = {k: v for k, v in dict(t=t, cps=cps, cursor=cursor).items() if v is not None}
+        call = f"SSTX.typewriter(ls[i], {js(o)})"
+    else:
+        o = {k: v for k, v in dict(unit=unit, channels=channels or ["fade", "rise"], mode=mode, order=order, phase=phase, t=t, dur=dur, ease=ease,
+                                   spread=spread, amount=amount, color=color, mask=mask).items() if v is not None}
+        call = f"SSTX.animate(ls[i], {js(o)})"
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), ls = findLayers(c, {js(layers or [])}), r = [];
+app.beginUndoGroup("Motion DNA text animation");
+try {{ for (var i = 0; i < ls.length; i++) if (ls[i] instanceof TextLayer) r.push({call}); }} finally {{ app.endUndoGroup(); }}
+return r.length ? r.join("\\n") : "No text layer among the named or selected layers";""", includes=("ss_text.jsx",))
+
+
+def t_add_look(kind, comp=None, layer=None, t=None, dur=None, colors=None, brand=None, amount=None, length=None, angle=None, color=None,
+               ratio=None, speed=None, count=None, particle_color=None):
+    """Backgrounds, finishing looks, long shadow and glitch (tools/ss_looks.jsx)."""
+    cols = colors or (_brand_colors(brand) if brand else None)
+    bgs = ("stripes", "dots", "grid", "gradient", "liquid", "topo", "network", "blobs", "mesh", "glass")
+    if kind in bgs:
+        o = {k: v for k, v in dict(colors=cols, speed=speed, t=t).items() if v is not None}
+        call = f"var r = SSL.background(c, {js(kind)}, {js(o)}).name;"
+    elif kind == "long_shadow":
+        if not layer: return "long_shadow needs layer"
+        o = {k: v for k, v in dict(length=length, angle=angle, color=color or (cols[0] if cols else None)).items() if v is not None}
+        call = f"var r = SSL.longShadow(c, {js(layer)}, {js(o)});"
+    elif kind == "glitch":
+        if not layer: return "glitch needs layer"
+        o = {k: v for k, v in dict(t=t, dur=dur, amount=amount).items() if v is not None}
+        call = f"var r = SSL.glitch(c, {js(layer)}, {js(o)});"
+    else:
+        o = {k: v for k, v in dict(colors=cols, amount=amount, ratio=ratio, t=t, dur=dur, count=count, particleColor=particle_color).items() if v is not None}
+        call = f"var r = SSL.look(c, {js(kind)}, {js(o)});"
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)});
+app.beginUndoGroup("Motion DNA look: {kind}");
+try {{ {call} }} finally {{ app.endUndoGroup(); }}
+return r;""", includes=("ss_presets.jsx", "ss_behaviors.jsx", "ss_looks.jsx"))
+
+
+def t_add_captions(words=None, words_path=None, srt_path=None, comp=None, style="highlight", size=None, position=None, colors=None, brand=None,
+                   box=None, stroke=None, max_chars=None):
+    """Captions from word timings ([{w, s, e}], tools/vo_words.py) or an SRT file, styled (tools/ss_text.jsx)."""
+    if words_path:
+        words = json.loads(pathlib.Path(words_path).read_text(encoding="utf-8"))
+    elif srt_path:   # cues → words spread evenly over each cue
+        import re
+        words = []
+        for blk in re.split(r"\n\s*\n", pathlib.Path(srt_path).read_text(encoding="utf-8-sig").strip()):
+            ls = blk.strip().splitlines()
+            tm = next((x for x in ls if "-->" in x), None)
+            if not tm: continue
+            def sec(x):
+                h, mm, rest = x.strip().replace(",", ".").split(":"); return int(h) * 3600 + int(mm) * 60 + float(rest)
+            a, b = [sec(x) for x in tm.split("-->")]
+            txt = " ".join(ls[ls.index(tm) + 1:]).split()
+            for i, w in enumerate(txt):
+                words.append({"w": w, "s": round(a + (b - a) * i / len(txt), 3), "e": round(a + (b - a) * (i + 1) / len(txt), 3)})
+    if not words:
+        return "give words ([{w, s, e}]), words_path (tools/vo_words.py output) or srt_path"
+    c = {}
+    if colors: c = dict(zip(("text", "accent", "box"), colors))
+    elif brand:
+        v = _brand_colors(brand); c = {"text": v[2] if len(v) > 2 else "#FFFFFF", "accent": v[1] if len(v) > 1 else "#D8FF85", "box": v[0] if v else "#000000"}
+    o = {k: v for k, v in dict(style=style, size=size, position=position, colors=c or None, box=box, stroke=stroke, maxChars=max_chars).items() if v is not None}
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)});
+app.beginUndoGroup("Motion DNA captions");
+var r; try {{ r = SSTX.captions(c, {js(words)}, {js(o)}); }} finally {{ app.endUndoGroup(); }}
+return r;""", includes=("ss_text.jsx",))
+
+
+def t_add_behavior(behavior=None, target="shape", comp=None, t=None, out=None, at_s=None, layer=None, layers=None, element=None, colors=None,
+                   brand=None, count=None, seed=None, origin=None, speed=None, size=None, stroke=None, goo=None, dur=None, ease=None,
+                   box=None, amount=None, step=None, ease_in=None, ease_out=None, spread=None):
+    """Behaviours (tools/ss_behaviors.jsx): an algorithm drawn into a target. No behavior: list them by family."""
+    rows = [b for b in json.loads((ROOT / "library" / "kit.json").read_text(encoding="utf-8"))["items"] if b["kind"] == "behavior"]
+    if not behavior:
+        return "\n".join(f"{fam} · {b['name']} [targets: {', '.join(b['targets'])}] (energy {b['energy'][0]}-{b['energy'][1]}, {'/'.join(b['tones'])}): {b['use']}"
+                         + (f"\n    pairs well with: {'; '.join(b['pairs'])}" if b.get("pairs") else "")
+                         for fam in ("fill", "swarm", "physics", "modifier") for b in rows if b.get("family") == fam)
+    known = {b["name"]: b for b in rows}
+    if behavior not in known:
+        return f"unknown behavior: {behavior} ({', '.join(known)})"
+    tg = "mask" if target == "text" else target
+    if tg not in known[behavior]["targets"]:
+        why = (known[behavior].get("avoid") or {}).get(tg)
+        return (f"{behavior} does not pass on {target}" + (f" ({why})" if why else "") + f": use one of {', '.join(known[behavior]['targets'])}"
+                + (f". Pairs well with: {'; '.join(known[behavior]['pairs'])}" if known[behavior].get("pairs") else ""))
+    cols = colors or (_brand_colors(brand) if brand else None)
+    o = {k: v for k, v in dict(t=t, out=out, layer=layer, layers=layers, element=element, colors=cols, count=count, seed=seed, origin=origin,
+                               speed=speed, size=size, stroke=stroke, goo=goo, dur=dur, ease=ease, box=box, amount=amount, step=step,
+                               ease_in=ease_in, ease_out=ease_out, spread=spread).items() if v is not None}
+    if tg == "transition":
+        at = "c.time" if at_s is None else str(float(at_s))
+        o["behavior"] = behavior
+        call = (f'var R = SST.add(c, "behavior", {at}, {js(o)});\n'
+                f'var r = R.name + ": covers the frame at " + {at} + " s (Progress 50), " + R.inPoint.toFixed(2) + "-" + R.outPoint.toFixed(2) + '
+                '" s. Edit Progress, Stagger, Ease In / Ease Out and Color 1-3 on the controller.";')
+    else:
+        o_js = js(o)[:-1] + (", " if o else "") + '"t": c.time}' if (tg in ("shape", "mask") and t is None) else js(o)
+        call = f'var R = SSB.add(c, {js(behavior)}, {js(tg)}, {o_js}); var r = typeof R === "string" ? R : R.name + " (" + R.comment.replace(/^SS [a-z]+: /, "") + ")";'
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)});
+app.beginUndoGroup("Motion DNA behavior: {behavior} on {target}");
+try {{ {call} }} finally {{ app.endUndoGroup(); }}
+return r;""", includes=("ss_presets.jsx", "ss_behaviors.jsx", "ss_looks.jsx", "ss_transitions.jsx")) + ("\nCheck it with render_frame." if tg != "layer" else "")
+
+
+def t_list_kit(kind=None, energy=None, tone=None, query=None):
+    """The building blocks beyond presets: elements, shapes, moves, text channels, looks, backgrounds and transitions."""
+    kit = json.loads((ROOT / "library" / "kit.json").read_text(encoding="utf-8"))
+    rows = []
+    for it in kit["items"]:
+        if kind and it["kind"] != kind: continue
+        if energy and not (it["energy"][0] <= energy <= it["energy"][1]): continue
+        if tone and tone not in it["tones"]: continue
+        if query and query.lower() not in json.dumps(it).lower(): continue
+        rows.append(f"[{it['kind']}] {it['name']} (energy {it['energy'][0]}-{it['energy'][1]}, {'/'.join(it['tones'])}): {it['use']} -> {it['call']}")
+    tr = json.loads((ROOT / "library" / "transitions.json").read_text(encoding="utf-8"))["transitions"]
+    if not kind or kind == "transition":
+        for x in tr:
+            if energy and not (x["energy"][0] <= energy <= x["energy"][1]): continue
+            if tone and tone not in x["tones"]: continue
+            if query and query.lower() not in json.dumps(x).lower(): continue
+            rows.append(f"[transition] {x['name']} ({x['type']}, energy {x['energy'][0]}-{x['energy'][1]}, {'/'.join(x['tones'])}): {x['use']} -> solid_transition(look=\"{x['name']}\")")
+    return "\n".join(rows) if rows else "no match · kinds: element, shape, move, text, look, background, transition"
+
+
 def _tags():
     return json.loads((ROOT / "library" / "tags.json").read_text(encoding="utf-8"))
 
@@ -242,6 +473,13 @@ def t_suggest_mix(role="enter", target="title", tones=None, energy=None, avoid=N
     for sc, p in moves[:limit]:
         lines.append(f'{p["name"]} ({p["kind"]}, tones {"/".join(p["tones"])}, energy {p["energy"][0]}-{p["energy"][1]}) -> '
                      f'apply_preset(preset="{p["name"]}", ease="{cv[0]}")')
+    if role == "transition":   # the named solid/clip transitions (library/transitions.json) fit the same feel
+        looks = json.loads((ROOT / "library" / "transitions.json").read_text(encoding="utf-8"))["transitions"]
+        ranked = sorted(((2 if l["energy"][0] <= e <= l["energy"][1] else -1) + len(set(l["tones"]) & set(tones)), l["name"], l.get("clip_to_clip"))
+                        for l in looks if l["name"] not in avoid)
+        for sc, name, clip in sorted(ranked, key=lambda x: -x[0])[:3]:
+            lines.append(f'{name} (named transition{", clip to clip" if clip else ""}) -> solid_transition(look="{name}"' + (', outgoing=…, incoming=…' if clip else '') + ')')
+        return "\n".join(lines)
     return "\n".join(lines) if moves else "No preset for that role/target: it is a gap (create it, see CONTRIBUTING.md §8)."
 
 
@@ -258,6 +496,30 @@ def t_list_assets(type=None, category=None, query=None, limit=60):
             continue
         out.append(line)
     return "\n".join(out[:limit]) + (f"\n… {len(out) - limit} more" if len(out) > limit else "") if out else "no match"
+
+
+def t_list_resources(category=None, query=None, commercial_only=True, no_attribution=False, include_excluded=False, limit=40):
+    """The catalog of outside resources (library/resources.json): what exists, its license, how to get it, when to use it."""
+    data = json.loads((ROOT / "library" / "resources.json").read_text(encoding="utf-8"))
+    q = (query or "").lower(); out = []
+    for r in data["resources"]:
+        if category and r["category"] != category:
+            continue
+        if r["status"] == "excluded" and not include_excluded:
+            continue
+        if commercial_only and r.get("commercial_ok") is False:
+            continue
+        if no_attribution and r.get("attribution_required"):
+            continue
+        if q and q not in json.dumps(r, ensure_ascii=False).lower():
+            continue
+        out.append(f"[{r['category']}] {r['name']} ({r['status']}) · {r['license']}" + (" · credit required" if r.get("attribution_required") else "") +
+                   (" · can live in the repo" if r.get("vendor_in_repo") else " · local only") + f" · {r['access']} · {r['url']}\n  use: {r['claude_use']}" +
+                   (f"\n  why: {r['reason']}" if r.get("reason") else "") +
+                   (f"\n  already here: {r['in_repo']} (list_assets / add_asset)" if r.get("in_repo") else ""))
+    if not out:
+        return "no match · categories: " + ", ".join(sorted({r["category"] for r in data["resources"]}))
+    return "\n".join(out[:limit]) + (f"\n… {len(out) - limit} more" if len(out) > limit else "")
 
 
 def t_ae_status():
@@ -304,6 +566,36 @@ finally {{ SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); }}
 return "{preset} ({kind}, {phase}) → " + done.join(", ");""")
 
 
+def t_keyframes(action, layers=None, comp=None, frames=None, order=None, type=None, factor=None, which=None, at_s=None, source=None):
+    """Keyframe toolkit (tools/ss_keyframes.jsx) on named or selected layers."""
+    args = {"reverse": "SSK.reverse(ls)",
+            "mirror_out": f"SSK.mirrorOut(ls, {js(frames or 0)})",
+            "stagger": f"SSK.stagger(ls, {js(3 if frames is None else frames)}, {js(order)})",
+            "shift": f"SSK.shift(ls, {js((frames or 0))} * c.frameDuration)",
+            "to_playhead": f"SSK.toPlayhead(ls, {js(which or 'start')}, {js(at_s)})",
+            "sequence": f"SSK.sequence(ls, {js(frames or 0)})",
+            "distribute": "SSK.distribute(ls)",
+            "loop": f"SSK.loop(ls, {js(type or 'cycle')})",
+            "bake": "SSK.bake(ls)",
+            "stretch": f"SSK.stretch(ls, {js(factor or 1.0)})",
+            "copy_to": f"SSK.copyTo(c.layer({js(source)}), ls, false)",
+            "ease": f"SSK.ease(ls, {js(type or 'Settle')})",
+            "copy_ease": f"SSK.copyEase(c.layer({js(source)}), ls)",
+            "randomize": f"SSK.randomize(ls, {js(frames or 4)})"}
+    if action not in args:
+        return "unknown action: " + action + " (use " + ", ".join(args) + ")"
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), ls = findLayers(c, {js(layers or [])});
+app.beginUndoGroup("Motion DNA keyframes: {action}");
+try {{ return {args[action]}; }} finally {{ app.endUndoGroup(); }}""", includes=("ss_presets.jsx", "ss_keyframes.jsx"))
+
+
+def t_anchor_point(where="center", layers=None, comp=None):
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), ls = findLayers(c, {js(layers or [])}), o = [];
+app.beginUndoGroup("Motion DNA anchor point");
+try {{ for (var i = 0; i < ls.length; i++) o.push(SSK.anchor(ls[i], {js(where)})); }} finally {{ app.endUndoGroup(); }}
+return o.join("\\n");""", includes=("ss_presets.jsx", "ss_keyframes.jsx"))
+
+
 def t_remove_animation(layers=None, comp=None):
     return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), ls = findLayers(c, {js(layers or [])}), n = 0, done = [];
 app.beginUndoGroup("Motion DNA (MCP): remove");
@@ -316,13 +608,29 @@ def t_apply_pack(pack, comp=None, layers=None, phase="both", marker_timing=True,
 if (names.length) ls = findLayers(c, names);
 SSP.markerTiming({str(bool(marker_timing)).lower()}); {tune_js(duration, intensity)}
 app.beginUndoGroup("Motion DNA style (MCP): {pack}");
-var r; try {{ r = SSP.applyPack(c, {js(pack)}, ls, {js(phase)}, {js(existing)}); }} finally {{ SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); }}
-return r.length ? r.join("\\n") : "No layers matched";""")
+var r; try {{ r = SSP.applyPack(c, {js(pack)}, ls, {js(phase)}, {js(existing)});
+  var mods = {js(_pack_modifiers(pack))};   // style modifiers from packs.json (e.g. Collage: line_boil, the hand-drawn tremble)
+  for (var m = 0; m < mods.length; m++) {{ var tg = [], pool = ls;
+    if (!pool) {{ pool = []; for (var i = 1; i <= c.numLayers; i++) pool.push(c.layer(i)); }}
+    for (var j = 0; j < pool.length; j++) {{ var L = pool[j];
+      if ((L instanceof ShapeLayer || L instanceof TextLayer) && L.enabled && !/^(BG|LK|TR|GL) · /.test(L.name) && String(L.comment).indexOf("line boil") < 0) tg.push(L.name); }}
+    if (tg.length) r.push(SSB.add(c, mods[m], "layer", {{layers: tg}})); }}
+}} finally {{ SSP.markerTiming(false); SSP.tune(); app.endUndoGroup(); }}
+return r.length ? r.join("\\n") : "No layers matched";""", includes=("ss_presets.jsx", "ss_assets.jsx", "ss_behaviors.jsx"))
 
 
-def t_add_asset(name, type="sfx", time_s=None, gain_db=-9, opacity=70, comp=None):
+def _pack_modifiers(pack):
+    """Style modifiers a pack carries in library/packs.json ("modifiers": ["line_boil"]): applied after its presets."""
+    for x in json.loads((ROOT / "library" / "packs.json").read_text(encoding="utf-8"))["packs"]:
+        if pack.lower() in (x["name"].lower(), x.get("slug", "")):
+            return x.get("modifiers", [])
+    return []
+
+
+def t_add_asset(name, type="sfx", time_s=None, gain_db=-9, opacity=70, comp=None, blend=None, scale=None):
     at = "c.time" if time_s is None else str(float(time_s))
-    call = f"SSA.sfx(c, {js(name)}, {at}, {float(gain_db)})" if type == "sfx" else f"SSA.overlay(c, {js(name)}, {at}, null, {float(opacity)})"
+    call = {"sfx": f"SSA.sfx(c, {js(name)}, {at}, {float(gain_db)})", "music": f"SSA.sfx(c, {js(name)}, {at}, {float(gain_db)})",
+            "vfx": f"SSA.vfx(c, {js(name)}, {at}, {js(blend)}, {js(scale)})"}.get(type, f"SSA.overlay(c, {js(name)}, {at}, {js(blend)}, {float(opacity)})")
     return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}); app.beginUndoGroup("SS asset (MCP)"); var L = {call}; app.endUndoGroup(); return "added " + L.name + " at " + {at};""")
 
 
@@ -448,21 +756,80 @@ TOOLS_DEF = [
     ("suggest_mix", t_suggest_mix, "Ranked move x curve x duration combinations for a layer (role: enter/exit/emphasis/loop/transition, target: title/text/shape/icon/logo/ui/media/footage/background) and a feel (tones, energy 1-5, avoid). Each line says how to apply it.",
      {"role": {"type": "string"}, "target": {"type": "string"}, "tones": {"type": "array", "items": {"type": "string"}}, "energy": {"type": "integer"},
       "avoid": {"type": "array", "items": {"type": "string"}}, "limit": {"type": "integer"}}),
-    ("list_assets", t_list_assets, "List locally installed SFX and overlays (licensed, never in the repo) with category, seconds, loudness and flags.",
-     {"type": {"type": "string", "description": "sfx | overlay"}, "category": {"type": "string"}, "query": {"type": "string"}, "limit": {"type": "integer"}}),
+    ("list_assets", t_list_assets, "List the assets on this machine: licensed packs (never in the repo) and the free CC0 packs in assets.free/ (flag cc0): SFX, music, overlays, VFX image sequences (fire, smoke, explosions) and particle textures, with category, seconds, loudness and flags.",
+     {"type": {"type": "string", "description": "sfx | music | overlay | vfx | texture"}, "category": {"type": "string"}, "query": {"type": "string"}, "limit": {"type": "integer"}}),
+    ("list_resources", t_list_resources, "Catalog of outside resources Claude may use, each with its license checked: AE scripts and expression libraries, easing math, render automation, VFX footage (fire, smoke, explosions), motion graphics, textures, icons, sound effects, royalty-free music and local generators. Says whether credit is needed, whether it can live in the repo or stays local, how to get it and when to use it. Nothing here is downloaded by itself: ask the user before downloading.",
+     {"category": {"type": "string", "description": "ae_script | expression_lib | easing_math | render_automation | import_export | shape_tools | audio_tools | vfx_footage | motion_graphics | textures | illustration_icons | sfx | music | generator"},
+      "query": {"type": "string"}, "commercial_only": {"type": "boolean", "description": "default true"}, "no_attribution": {"type": "boolean"},
+      "include_excluded": {"type": "boolean", "description": "also list what was ruled out and why"}, "limit": {"type": "integer"}}),
     ("list_layers", t_list_layers, "List the layers of a comp (default: the active comp) with type, timing and selection.", {"comp": {"type": "string"}}),
     ("apply_preset", t_apply_preset, "Apply a preset to layers (by name, or the selected layers) of a comp (default: active). A layer that already moves keeps its animation (existing=modify, default: its keyframe values stay, it gets the preset's curve and the duration factor) or loses it (existing=replace); a layer with no animation gets the preset generated. phase in|out|both. With marker_timing the layer gets 'SS in'/'SS out' markers: dragging them retimes the animation. Tuning (same as the panel's Controls): duration multiplier (0.5-2), intensity (0.25-2, scales the travel), direction (as designed | mirror horizontal | mirror vertical | mirror both), ease (token: Land, Settle, Launch, Cruise, Surge, Ramp, Whip, Flat).",
      {"preset": {"type": "string"}, "layers": {"type": "array", "items": {"type": "string"}}, "comp": {"type": "string"},
       "phase": {"type": "string", "enum": ["in", "out", "both"]}, "stagger_frames": {"type": "number"}, "marker_timing": {"type": "boolean"},
       "duration": {"type": "number"}, "intensity": {"type": "number"}, "direction": {"type": "string"}, "ease": {"type": "string"}, "existing": {"type": "string", "enum": ["modify", "replace"]}}, ["preset"]),
+    ("solid_transition", t_solid_transition, "Flat 2D transition built from solids and masks (like Animation Composer's Flat 2D transitions): coloured pieces cover the frame at the cut and uncover it after, driven by one editable controller (Progress, Direction, Stagger, Ease In / Ease Out token curves, Color 1-3). Timing and curves are Motion DNA tokens: dur = duration token (Tick … Stage), ease_in / ease_out = curve tokens (Surge, Pop, Whip, Land…). Call with no look/type to list the named looks (filter by energy 1-5 or tone); look = a named look, or type = wipe | bars | blinds | split | interleave | stack | iris | diamond | grid (solid pieces over a cut), or zoom | spin | stretch | slide (clip to clip: the outgoing and incoming layers move themselves; both names required). Colours: a hex list, or brand = slug to use the brand's colours. at_s = the cut (default playhead); outgoing/incoming = layer names to trim at the cut.",
+     {"look": {"type": "string"}, "type": {"type": "string", "enum": ["wipe", "bars", "blinds", "split", "interleave", "stack", "iris", "diamond", "grid", "dots", "fan", "liquid", "ink", "zoom", "spin", "stretch", "slide", "flash", "dip", "shake", "twirl", "slices", "glitch"]},
+      "at_s": {"type": "number"}, "comp": {"type": "string"}, "colors": {"type": "array", "items": {"type": "string"}}, "brand": {"type": "string"},
+      "dur": {"type": "string", "description": "duration token: Tick, Blink, Glide, Arrive, Sweep, Stage"}, "duration": {"type": "number", "description": "seconds, overrides dur"},
+      "ease_in": {"type": "string", "description": "curve token while covering"}, "ease_out": {"type": "string", "description": "curve token while uncovering"},
+      "count": {"type": "integer"}, "angle": {"type": "number"}, "stagger": {"type": "number"},
+      "order": {"type": "string", "enum": ["index", "reverse", "center", "edges", "random", "diagonal"]},
+      "cols": {"type": "integer"}, "outgoing": {"type": "string"}, "incoming": {"type": "string"}, "energy": {"type": "integer"}, "tone": {"type": "string"}}),
+    ("list_kit", t_list_kit, "List the building blocks beyond presets, each with energy, tones, use and the call to make: element (self-sizing titles, callouts, counters, social…), shape (primitives, lines, impacts, fireworks, glitter…), move (2D/3D entrances), text (per-unit text animation, typewriter, captions), look (finishing looks), background, transition. Filter by kind, energy 1-5, tone or a word.",
+     {"kind": {"type": "string", "enum": ["element", "shape", "move", "text", "look", "background", "transition"]}, "energy": {"type": "integer"}, "tone": {"type": "string"}, "query": {"type": "string"}}),
+    ("add_shape", t_add_shape, "Animated shape on its own layer, keyed with token curves (Reveal, Size, Stroke, Color 1/2 on the layer): primitives (circle, ring, square, frame, triangle, diamond, pentagon, hexagon, star, sparkle, badge, heart, shield), lines (line, wave, zigzag, arrow, curved_arrow, chevrons, brackets, spiral, infinity, brush, speed_lines), marks (cross, plus, check, dots, loader, rings) and Shape-Elements families (burst, impact with spread/mirror, pops, shape_row, fireworks, glitter, swoosh, confetti), blob (liquid shape that keeps breathing); lines draw on and, with out or hold, travel off. anim: draw | pop | spin | burst | pulse; loop keeps it moving.",
+     {"kind": {"type": "string"}, "comp": {"type": "string"}, "t": {"type": "number"}, "out": {"type": "number"}, "position": {"type": "array", "items": {"type": "number"}},
+      "size": {"type": "number"}, "stroke": {"type": "number"}, "style": {"type": "string", "enum": ["fill", "outline", "dotted"]}, "anim": {"type": "string", "enum": ["draw", "pop", "spin", "burst", "pulse"]}, "hold": {"type": "number", "description": "seconds on screen before it leaves (lines travel off)"},
+      "ease": {"type": "string"}, "dur": {"type": "string"}, "colors": {"type": "array", "items": {"type": "string"}}, "brand": {"type": "string"}, "count": {"type": "integer"},
+      "loop": {"type": "boolean"}, "spread": {"type": "number"}, "angle": {"type": "number"}, "mirror": {"type": "boolean"}, "item": {"type": "string"}}, ["kind"]),
+    ("add_behavior", t_add_behavior, "Behaviours: an algorithm apart from what it draws, so one behaviour feeds many targets. Call with no behavior to list them by family with the targets where each passed the quality check. Families: fill (covers a region: bubbles = liquid metaballs that merge, blob, voronoi = cells and shards, grow = branching vines), swarm (flock, flow = noise flow-field streamlines), physics (spring = jelly box driven by the token curve, rope = verlet rope that pays out and settles), modifier (line_boil = hand-drawn tremble on 3s, on any existing layer; the Collage style applies it). target: shape (its own layer; box [x, y, w, h] or layer = a layer to wrap) | background (loops at the bottom; colors[0] = base) | mask or text (layer = the layer revealed through it) | box (element = an add_element controller such as 'EL · label 1': its box is redrawn) | transition (at_s = the cut: covers, then uncovers, like solid_transition) | layer (layers = names, for modifiers). Timing on token curves: t, out, dur, ease (ease_in / ease_out for transitions).",
+     {"behavior": {"type": "string"}, "target": {"type": "string", "enum": ["shape", "background", "mask", "text", "box", "transition", "layer"]}, "comp": {"type": "string"},
+      "t": {"type": "number"}, "out": {"type": "number"}, "at_s": {"type": "number"}, "layer": {"type": "string"}, "layers": {"type": "array", "items": {"type": "string"}},
+      "element": {"type": "string"}, "colors": {"type": "array", "items": {"type": "string"}}, "brand": {"type": "string"}, "count": {"type": "integer"},
+      "seed": {"type": "integer"}, "origin": {"type": "string"}, "speed": {"type": "number"}, "size": {"type": "number"}, "stroke": {"type": "number"},
+      "goo": {"type": "number"}, "dur": {"type": "string"}, "ease": {"type": "string"}, "box": {"type": "array", "items": {"type": "number"}},
+      "amount": {"type": "number"}, "step": {"type": "integer"}, "ease_in": {"type": "string"}, "ease_out": {"type": "string"}, "spread": {"type": "number"}}),
+    ("move", t_move, "2D/3D entrance or exit for named or selected layers on token curves (AC 3D Transitions and Scale families): flip (card turn, axis x|y), hinge (door on an edge: left|right|top|bottom, direction forward|backward), orbit (swings in round a distant pivot, origin behind|front), fly (Z, origin near|far), tumble (fly + turn), grow_edge (from an edge, one axis or uniform), squash (one-axis bounce).",
+     {"move": {"type": "string", "enum": ["flip", "hinge", "orbit", "fly", "tumble", "grow_edge", "squash"]}, "layers": {"type": "array", "items": {"type": "string"}}, "comp": {"type": "string"},
+      "phase": {"type": "string", "enum": ["in", "out", "both"]}, "t": {"type": "number"}, "dur": {"type": "string"}, "ease": {"type": "string"}, "axis": {"type": "string"}, "edge": {"type": "string"},
+      "direction": {"type": "string"}, "origin": {"type": "string"}, "distance": {"type": "number"}, "angle": {"type": "number"}, "fade": {"type": "boolean"}, "uniform": {"type": "boolean"}}, ["move"]),
+    ("animate_text", t_animate_text, "Animate named or selected text layers per unit (chars | words | lines) on token curves, overshoot per letter included (AC Text Presets): channels fade, rise, drop, slide, scale, rotate, rotate3d, skew, tracking, blur, decode, color; mode ease | flicker | wiggly; order forward | reverse | center | edges | random; mask = slide up from behind the text box. typewriter = true types the text with a blinking cursor (cps).",
+     {"layers": {"type": "array", "items": {"type": "string"}}, "comp": {"type": "string"}, "unit": {"type": "string", "enum": ["chars", "words", "lines"]},
+      "channels": {"type": "array", "items": {"type": "string"}}, "mode": {"type": "string", "enum": ["ease", "flicker", "wiggly"]}, "order": {"type": "string"},
+      "phase": {"type": "string", "enum": ["in", "out", "both"]}, "t": {"type": "number"}, "dur": {"type": "string"}, "ease": {"type": "string"}, "spread": {"type": "number"},
+      "amount": {"type": "number"}, "color": {"type": "string"}, "mask": {"type": "boolean"}, "typewriter": {"type": "boolean"}, "cps": {"type": "number"}, "cursor": {"type": "string"}}),
+    ("add_look", t_add_look, "Backgrounds and finishing looks from native effects (AC Backgrounds / Overlays / Mixed): backgrounds stripes | dots | grid | gradient | liquid | topo | network (plexus: drifting points joined by lines that fade with distance) | blobs (liquid shapes breathing) | mesh (blurred colour mesh gradient) | glass (mesh behind frosted panes) (at the bottom, looping); looks tritone | duotone | vignette | grain | scanlines | letterbox | dust | embers | snow (on top; for light leaks use real footage with add_asset); long_shadow and glitch on a named layer. Colours from a list or brand.",
+     {"kind": {"type": "string"}, "comp": {"type": "string"}, "layer": {"type": "string"}, "t": {"type": "number"}, "dur": {"type": "number"}, "colors": {"type": "array", "items": {"type": "string"}},
+      "brand": {"type": "string"}, "amount": {"type": "number"}, "length": {"type": "number"}, "angle": {"type": "number"}, "color": {"type": "string"}, "ratio": {"type": "number"},
+      "speed": {"type": "number"}, "count": {"type": "integer"}, "particle_color": {"type": "string"}}, ["kind"]),
+    ("add_captions", t_add_captions, "Captions from word timings (words [{w, s, e}] or words_path from tools/vo_words.py) or an SRT file: lines grouped by length and pauses; style highlight (spoken word in the accent) | karaoke | build (words appear as spoken) | pop | word (one word at a time); optional box and outline.",
+     {"words": {"type": "array", "items": {"type": "object"}}, "words_path": {"type": "string"}, "srt_path": {"type": "string"}, "comp": {"type": "string"},
+      "style": {"type": "string", "enum": ["highlight", "karaoke", "build", "pop", "word"]}, "size": {"type": "number"}, "position": {"type": "array", "items": {"type": "number"}},
+      "colors": {"type": "array", "items": {"type": "string"}}, "brand": {"type": "string"}, "box": {"type": "boolean"}, "stroke": {"type": "boolean"}, "max_chars": {"type": "integer"}}),
+    ("add_element", t_add_element, "Semi-finished graphic element that sizes itself to its text (like Animation Composer's titles, callouts, social and counters): label (chip), lower_third (text = name, sub = role), title (text + sub, accent rule), underline / highlight (layer = an existing text layer), callout (point = [x, y]), counter (start → value, prefix/suffix/decimals), timer (value = countdown s, 0 counts up), price_tag (text = price, sub = label), handle (@name pill), bubble, chat (typing dots then text), sticker (tilted outlined word), quote (text, sub = author), text_box (text = title, sub = body), list (items), progress / ring (value %), rating (value of 5), button (text, pressed, click time; a cursor clicks; pressed_box Box on light scenes), kinetic (items = lines), tiles (letters on 3D tiles), media (slot [w, h] + optional layer to fit), scale_title (mode push|drop), cinematic (style neon|blur|kerning), glass_card (text, sub: a smoky frosted pane that blurs what is behind it; size [w, h]), end_card (the Motion DNA logo close, as in the logo manual: the helix mark grows up its diagonal with overshoot, the arrow kicks, MOTION / DNA rise into place below it; style horizontal for the side-by-side lockup; text = wordmark, sub = tagline, size = mark height; close every Motion DNA demo with it). outline = true draws boxes as outlines. list_kit shows them all with energy and tones. One controller per element (Reveal, Padding, Radius, Gap, Box/Accent/Text colours). Colours: [box, accent, text] hex, or brand = slug (its colours and fonts). t = in (s, default playhead), out = exit (s, optional).",
+     {"kind": {"type": "string", "enum": ["label", "lower_third", "title", "underline", "highlight", "callout", "counter", "timer", "price_tag", "handle", "bubble", "sticker",
+                                          "quote", "list", "progress", "button", "kinetic", "tiles", "text_box", "media", "scale_title", "cinematic", "chat", "rating", "ring", "glass_card", "end_card"]},
+      "items": {"type": "array", "items": {"type": "string"}}, "value": {"type": "number"}, "start": {"type": "number"}, "style": {"type": "string"}, "mode": {"type": "string"},
+      "outline": {"type": "boolean"}, "slot": {"type": "array", "items": {"type": "number"}}, "click": {"type": "number"}, "pressed": {"type": "string"}, "prefix": {"type": "string"},
+      "suffix": {"type": "string"}, "decimals": {"type": "integer"}, "width": {"type": "number"}, "text": {"type": "string"}, "sub": {"type": "string"}, "pressed_box": {"type": "string", "enum": ["Text", "Box"]}, "logo": {"type": "string", "description": "end_card: a mark JSON from tools/logo_to_shape.py + tools/logo_strokes.py (default: the Motion DNA mark)"},
+      "layer": {"type": "string"}, "point": {"type": "array", "items": {"type": "number"}}, "comp": {"type": "string"}, "t": {"type": "number"}, "out": {"type": "number"},
+      "colors": {"type": "array", "items": {"type": "string"}}, "brand": {"type": "string"}, "size": {"type": "number"},
+      "position": {"type": "array", "items": {"type": "number"}}, "padding": {"type": "array", "items": {"type": "number"}}, "radius": {"type": "number"},
+      "text_preset": {"type": "string"}}, ["kind"]),
+    ("keyframes", t_keyframes, "Keyframe toolkit for named or selected layers (all their animated properties), the helpers an animator uses between presets: ease (type = curve token for every segment) | copy_ease (source = layer whose easing to copy, values kept) | randomize (frames = max random shift per layer) | reverse | mirror_out (build the exit from the entrance, ending at the out point; frames = gap) | stagger (frames apart; order selection/top/bottom/random/center) | shift (frames) | to_playhead (which = start|end; at_s overrides the playhead) | sequence (end to end, frames = overlap) | distribute (selected keys evenly) | loop (type cycle/pingpong/offset/continue) | bake (expressions to keys) | stretch (factor) | copy_to (source = layer name to copy from).",
+     {"action": {"type": "string", "enum": ["reverse", "mirror_out", "stagger", "shift", "to_playhead", "sequence", "distribute", "loop", "bake", "stretch", "copy_to", "ease", "copy_ease", "randomize"]},
+      "layers": {"type": "array", "items": {"type": "string"}}, "comp": {"type": "string"}, "frames": {"type": "number"}, "order": {"type": "string"},
+      "type": {"type": "string"}, "factor": {"type": "number"}, "which": {"type": "string"}, "at_s": {"type": "number"}, "source": {"type": "string"}}, ["action"]),
+    ("anchor_point", t_anchor_point, "Move the anchor point of named or selected layers to center, top, bottom, left, right or a corner (top-left, bottom-right…) of their own box, without moving them on screen (keyed positions are compensated).",
+     {"where": {"type": "string"}, "layers": {"type": "array", "items": {"type": "string"}}, "comp": {"type": "string"}}),
     ("remove_animation", t_remove_animation, "Remove what Motion DNA added to layers (keyframes, our expressions, SS in/out markers, SS text animators and effects); each property keeps its resting value.",
      {"layers": {"type": "array", "items": {"type": "string"}}, "comp": {"type": "string"}}),
     ("apply_pack", t_apply_pack, "Apply a style pack to a whole comp (or the named layers): titles, text, shapes, media and logo each get the pack's preset, staggered.",
      {"pack": {"type": "string"}, "comp": {"type": "string"}, "layers": {"type": "array", "items": {"type": "string"}},
       "phase": {"type": "string", "enum": ["in", "out", "both"]}, "marker_timing": {"type": "boolean"}, "duration": {"type": "number"}, "intensity": {"type": "number"}, "existing": {"type": "string", "enum": ["modify", "replace"]}}, ["pack"]),
-    ("add_asset", t_add_asset, "Place a local SFX or overlay (by exact name from list_assets) in a comp at a time (default: playhead).",
-     {"name": {"type": "string"}, "type": {"type": "string", "enum": ["sfx", "overlay"]}, "time_s": {"type": "number"}, "gain_db": {"type": "number"},
-      "opacity": {"type": "number"}, "comp": {"type": "string"}}, ["name"]),
+    ("add_asset", t_add_asset, "Place an asset by exact name from list_assets in a comp at a time (default: playhead): sfx or music (audio, gain_db), overlay (full frame, looped, blend + opacity), or vfx (a free CC0 image sequence with alpha: fire, smoke, explosion; blend default add, scale %).",
+     {"name": {"type": "string"}, "type": {"type": "string", "enum": ["sfx", "music", "overlay", "vfx"]}, "time_s": {"type": "number"}, "gain_db": {"type": "number"},
+      "opacity": {"type": "number"}, "blend": {"type": "string"}, "scale": {"type": "number"}, "comp": {"type": "string"}}, ["name"]),
     ("show_in_panel", t_show_in_panel, "Select a preset in the open Motion DNA panel so the user sees its live preview.",
      {"kind": {"type": "string"}, "name": {"type": "string"}}, ["kind", "name"]),
     ("render_frame", t_render_frame, "Save one frame of a comp as PNG (default: active comp at the playhead) and return its path, to check the result visually.",

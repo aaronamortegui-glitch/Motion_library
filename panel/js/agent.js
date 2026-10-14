@@ -4,7 +4,7 @@
 //   Chat     the conversation. Safe mode: only the Motion DNA tools. Full mode: also Figma, files and scripts (never
 //            git commit or push). Review notes come back as rule proposals: keep them in the brand, the project or the
 //            general rules (CONTRIBUTING §9) with one click.
-//   Library  the Styles and Techniques: what each one does, with a ready order to send or copy (for Claude Code too).
+//   Library  the Styles, Techniques and Kit: what each one does, with a ready order to send or copy (for Claude Code too).
 //   Project  a folder per piece (motion-dna.project.json + CLAUDE.md + .mcp.json): Claude works there, with its brand,
 //            and keeps ONE conversation per project that also opens in the Claude app or a terminal (claude --resume).
 // One-time setup: Connect Claude (one button, a sign-in window), and optionally Figma.
@@ -444,9 +444,15 @@ function chatView() {
   return wrap;
 }
 
-// ---------- Library: Styles and Techniques, as guides the agent applies ----------
+// ---------- Library: Styles, Techniques and the Kit, as guides the agent applies ----------
 function libItems() {
   const q = AG.libQ;
+  if (AG.libKind === "kit") return (S.kit || []).filter((k) => !q || (k.name + " " + k.group + " " + k.use).toLowerCase().includes(q)).map((k) => {
+    const base = `library/gifs/kit-${k.kind}/${slug(k.name)}`;
+    return { key: "kit/" + k.kind + "/" + k.name, name: k.name, sub: k.group, desc: k.use, how: "MCP " + k.call,
+      thumb: asset(base + "_md.png"), img: asset(base + ".gif"),
+      order: `Add the ${k.name} (${k.group.toLowerCase()}) from the Motion DNA kit to the open comp at the playhead (${k.call}), in the brand's colours if a brand is set. Then render a frame and tell me what you did.` };
+  });
   if (AG.libKind === "styles") return S.packs.filter((pk) => !q || (pk.name + " " + pk.desc + " " + (pk.tones || []).join(" ")).toLowerCase().includes(q)).map((pk) => ({
     key: "style/" + pk.name, name: pk.name, sub: `${pk.energy}${pk.energy_range ? " " + pk.energy_range.join("–") : ""}`, desc: pk.desc,
     thumb: asset(`library/packs/${pk.slug}_md.png`), img: asset(`library/packs/${pk.slug}.gif`),
@@ -476,17 +482,17 @@ function libraryView() {
     const items = libItems();
     grid.replaceChildren(...items.map((it) => {
       const img = safeImg([it.thumb, it.fallback], it.name, { loading: "lazy" });
-      const c = h("button", { class: "card" + (AG.libSel === it.key ? " sel" : ""), title: it.desc }, h("span", { class: "thumb" }, img), AG.libKind === "styles" ? h("span", { class: "label" }, it.name) : null, h("span", { class: "label dim" }, it.sub));
+      const c = h("button", { class: "card" + (AG.libSel === it.key ? " sel" : ""), title: it.desc }, h("span", { class: "thumb" }, img), AG.libKind !== "techniques" ? h("span", { class: "label" }, it.name) : null, h("span", { class: "label dim" }, it.sub));
       c.dataset.key = it.key;
-      if (AG.libKind === "styles") hoverPlay(c, img, it.img);
+      if (AG.libKind !== "techniques") hoverPlay(c, img, it.img);
       c.onclick = () => show(it);
       return c;
     }));
     const sel = items.find((x) => x.key === AG.libSel); if (sel) show(sel); else detail.hidden = true;
   };
-  const kind = h("div", { class: "seg" }, ...[["styles", "Styles"], ["techniques", "Techniques"]].map(([k, l]) => h("button", { class: AG.libKind === k ? "on" : "",
+  const kind = h("div", { class: "seg" }, ...[["styles", "Styles"], ["techniques", "Techniques"], ["kit", "Kit"]].map(([k, l]) => h("button", { class: AG.libKind === k ? "on" : "",
     onclick: (e) => { AG.libKind = k; store.set("agentLib", k); for (const b of kind.children) b.classList.toggle("on", b === e.currentTarget); draw(); } }, l)));
-  const search = h("input", { class: "field", type: "search", placeholder: "Search styles and techniques", value: AG.libQ, oninput: (e) => { AG.libQ = e.target.value.toLowerCase(); draw(); } });
+  const search = h("input", { class: "field", type: "search", placeholder: "Search styles, techniques and the kit", value: AG.libQ, oninput: (e) => { AG.libQ = e.target.value.toLowerCase(); draw(); } });
   wrap.append(kind, h("div", { class: "note", style: "padding:0" }, "A guide to what the agent can do for you: pick one, read what it does, then send its order to the agent (or copy it into Claude Code). The agent applies it to your comps."),
     search, detail, grid);
   draw();

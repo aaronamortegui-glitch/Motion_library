@@ -3,7 +3,7 @@
   "tool": "ae_status",
   "ok": true,
   "args": {},
-  "answer": "AE 26.5x89 · project: use-cases.aep · active: UC20 Eyewear · Oku v3 (1920x1080, 4.00s, 8 layers, selected: 3) · panel: loaded (Window > Extensions > Motion DNA) · fonts ok"
+  "answer": "AE 26.5x89 · project: use-cases.aep · active: MDNA Kit Demo (1920x1080, 24.00s, 18 layers, selected: 1) · panel: not loaded · WARNING fonts substituted (InterTight-SemiBold, InterTight-Regular, InstrumentSerif-Regular, InstrumentSerif-Italic, InterTight-Bold, InterTight-Black): restart After Effects"
  },
  {
   "tool": "list_presets",
@@ -56,7 +56,24 @@
    "type": "sfx",
    "limit": 3
   },
-  "answer": "sfx|cartoon|Balloon Blow 04|1.01|-26.0|-12.0|\nsfx|cartoon|Clean Decelerating Creak 01|0.91|-22.9|-3.4|\nsfx|cartoon|Creaking Rubber 05|0.79|-26.8|-0.4|\n… 154 more"
+  "answer": "sfx|cartoon|Balloon Blow 04|1.01|-26.0|-12.0||\nsfx|cartoon|Clean Decelerating Creak 01|0.91|-22.9|-3.4||\nsfx|cartoon|Creaking Rubber 05|0.79|-26.8|-0.4||\n… 675 more"
+ },
+ {
+  "tool": "list_resources",
+  "ok": true,
+  "args": {
+   "category": "music"
+  },
+  "answer": "[music] Dark Sci-Fi Audio Pack (SRG774, OpenGameArt) (recommended) · CC0 1.0 (asset page, checked 2026-10-14) · can live in the repo · direct · https://opengameart.org/node/188336\n  use: Ambient tech/sci-fi beds and stingers (loopable) for product, HUD and tech pieces.\n  already here: assets.free/og"
+ },
+ {
+  "tool": "list_resources",
+  "ok": true,
+  "args": {
+   "query": "explosion",
+   "include_excluded": true
+  },
+  "answer": "[vfx_footage] Unity Labs free VFX image sequences and flipbooks (recommended) · CC0 1.0 (stated on the Unity blog page) · local only · direct · https://unity.com/blog/technology/free-vfx-image-sequences-flipbooks\n  use: Realistic explosions, fireballs, flames and smoke: import sequence as footage, s"
  },
  {
   "tool": "run_jsx",
@@ -109,7 +126,7 @@
    "kind": "motion",
    "name": "Surge Rise"
   },
-  "answer": "selected motion/Surge Rise"
+  "answer": "Motion DNA panel is not open (Window > Extensions > Motion DNA)"
  },
  {
   "tool": "render_frame",
@@ -118,7 +135,7 @@
    "comp": "_MCP_TEST",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1791941537769.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1791993762529.png (open it to look at the frame)"
  },
  {
   "tool": "check_layout",
@@ -128,7 +145,7 @@
     "_MCP_TEST"
    ]
   },
-  "answer": "layout QA: 1 comps, 0 warnings ()"
+  "answer": "layout QA: STOP · 6 fonts are substituted (InterTight-SemiBold, InterTight-Regular, InstrumentSerif-Regular, InstrumentSerif-Italic, InterTight-Bold, InterTight-Black). Restart After Effects, then rebuild."
  },
  {
   "tool": "apply_transition",
@@ -143,6 +160,445 @@
   "answer": "Chip leaves as Title arrives: Whip Pan at 1.00 s"
  },
  {
+  "tool": "solid_transition",
+  "ok": true,
+  "args": {
+   "energy": 4
+  },
+  "answer": "Diagonal Wipe (wipe, Arrive · Whip → Whip, energy 3-4, modern/bold): A wipe with more drive; pairs with diagonal layouts.\nVertical Drop (wipe, Arrive · Pop → Launch, energy 3-4, bold/playful): Panel falls from the top: social and list beats.\nColor Stack (stack, Sweep · Cruise → Ramp, energy 3-4, pla"
+ },
+ {
+  "tool": "solid_transition",
+  "ok": true,
+  "args": {
+   "look": "Slanted Bars",
+   "at_s": 1.0,
+   "comp": "_MCP_TEST",
+   "brand": "motion-dna"
+  },
+  "answer": "TR · Slanted Bars 1: covers the frame at 1 s (Progress 50), from 0.65 to 1.35 s. Edit Direction, Stagger, Ease In / Ease Out (token curves) and Color 1-3 on the controller.\nPlace it on a cut: the clip below should change at that time (or pass outgoing/incoming to trim them)."
+ },
+ {
+  "tool": "solid_transition",
+  "ok": true,
+  "args": {
+   "type": "zoom",
+   "at_s": 2.0,
+   "comp": "_MCP_TEST",
+   "outgoing": "Chip",
+   "incoming": "Title"
+  },
+  "answer": "Chip → Title (zoom) at 2.00 s (clip to clip: both layers are trimmed at the cut and keyed with token curves)"
+ },
+ {
+  "tool": "add_element",
+  "ok": true,
+  "args": {
+   "kind": "lower_third",
+   "text": "Dana Ruiz",
+   "sub": "Head of Design",
+   "comp": "_MCP_TEST",
+   "t": 0.5,
+   "out": 3.0,
+   "brand": "motion-dna"
+  },
+  "answer": "EL · lower third 1 built (0.50-3.52 s). Restyle it on the controller: Reveal, Padding X/Y, Radius, Gap, Box/Accent/Text colours.\nCheck it with render_frame and check_layout (text must not touch other objects)."
+ },
+ {
+  "tool": "add_element",
+  "ok": true,
+  "args": {
+   "kind": "underline",
+   "layer": "Title",
+   "comp": "_MCP_TEST",
+   "t": 0.5
+  },
+  "answer": "EL · underline 1 built (0.50-4.00 s). Restyle it on the controller: Reveal, Padding X/Y, Radius, Gap, Box/Accent/Text colours.\nCheck it with render_frame and check_layout (text must not touch other objects)."
+ },
+ {
+  "tool": "list_kit",
+  "ok": true,
+  "args": {
+   "kind": "element",
+   "energy": 4
+  },
+  "answer": "[element] timer (energy 2-4, technical/bold): mm:ss.cc running or counting down. -> add_element(kind=\"timer\", …)\n[element] sticker (energy 4-5, playful/bold): Outlined word that pops in tilted (reactions). -> add_element(kind=\"sticker\", …)\n[element] button (energy 3-4, friendly/playful): Button that"
+ },
+ {
+  "tool": "add_shape",
+  "ok": true,
+  "args": {
+   "kind": "impact",
+   "comp": "_MCP_TEST",
+   "t": 0.3,
+   "spread": 90,
+   "brand": "motion-dna"
+  },
+  "answer": "SH · impact 1 (impact (none)), in at 0.30 s. Controls on the layer: Reveal, Size, Stroke, Color 1/2."
+ },
+ {
+  "tool": "add_element",
+  "ok": true,
+  "args": {
+   "kind": "counter",
+   "comp": "_MCP_TEST",
+   "t": 0.2,
+   "start": 0,
+   "value": 1200,
+   "prefix": "$"
+  },
+  "answer": "EL · counter 1 built (0.20-4.00 s). Restyle it on the controller: Reveal, Padding X/Y, Radius, Gap, Box/Accent/Text colours.\nCheck it with render_frame and check_layout (text must not touch other objects)."
+ },
+ {
+  "tool": "add_look",
+  "ok": true,
+  "args": {
+   "kind": "grain",
+   "comp": "_MCP_TEST"
+  },
+  "answer": "LK · grain 1"
+ },
+ {
+  "tool": "add_look",
+  "ok": true,
+  "args": {
+   "kind": "dots",
+   "comp": "_MCP_TEST",
+   "brand": "motion-dna"
+  },
+  "answer": "BG · dots 1"
+ },
+ {
+  "tool": "add_look",
+  "ok": true,
+  "args": {
+   "kind": "network",
+   "comp": "_MCP_TEST",
+   "brand": "motion-dna"
+  },
+  "answer": "BG · network 1"
+ },
+ {
+  "tool": "add_look",
+  "ok": true,
+  "args": {
+   "kind": "glass",
+   "comp": "_MCP_TEST"
+  },
+  "answer": "BG · glass 1"
+ },
+ {
+  "tool": "add_element",
+  "ok": true,
+  "args": {
+   "kind": "glass_card",
+   "text": "Glass card",
+   "sub": "Frosted and smoky",
+   "comp": "_MCP_TEST",
+   "t": 0.3
+  },
+  "answer": "GL · rim 3 built (0.00-4.00 s). Restyle it on the controller: Reveal, Padding X/Y, Radius, Gap, Box/Accent/Text colours.\nCheck it with render_frame and check_layout (text must not touch other objects)."
+ },
+ {
+  "tool": "add_shape",
+  "ok": true,
+  "args": {
+   "kind": "blob",
+   "comp": "_MCP_TEST",
+   "t": 0.2
+  },
+  "answer": "SH · blob 1 (blob (pop)), in at 0.20 s. Controls on the layer: Reveal, Size, Stroke, Color 1/2."
+ },
+ {
+  "tool": "add_element",
+  "ok": true,
+  "args": {
+   "kind": "end_card",
+   "text": "Motion DNA",
+   "sub": "The motion library",
+   "comp": "_MCP_TEST",
+   "t": 0.1
+  },
+  "answer": "EL · end card 1 built (0.10-4.00 s). Restyle it on the controller: Reveal, Padding X/Y, Radius, Gap, Box/Accent/Text colours.\nCheck it with render_frame and check_layout (text must not touch other objects)."
+ },
+ {
+  "tool": "add_element",
+  "ok": true,
+  "args": {
+   "kind": "end_card",
+   "style": "horizontal",
+   "comp": "_MCP_TEST",
+   "t": 0.1
+  },
+  "answer": "EL · end card 2 built (0.10-4.00 s). Restyle it on the controller: Reveal, Padding X/Y, Radius, Gap, Box/Accent/Text colours.\nCheck it with render_frame and check_layout (text must not touch other objects)."
+ },
+ {
+  "tool": "solid_transition",
+  "ok": true,
+  "args": {
+   "look": "Liquid Wipe",
+   "at_s": 2.5,
+   "comp": "_MCP_TEST"
+  },
+  "answer": "TR · Liquid Wipe 1: covers the frame at 2.5 s (Progress 50), from 1.95 to 3.05 s. Edit Direction, Stagger, Ease In / Ease Out (token curves) and Color 1-3 on the controller.\nPlace it on a cut: the clip below should change at that time (or pass outgoing/incoming to trim them)."
+ },
+ {
+  "tool": "solid_transition",
+  "ok": true,
+  "args": {
+   "look": "Ink Drop",
+   "at_s": 3.5,
+   "comp": "_MCP_TEST"
+  },
+  "answer": "TR · Ink Drop 1: covers the frame at 3.5 s (Progress 50), from 2.95 to 4.05 s. Edit Direction, Stagger, Ease In / Ease Out (token curves) and Color 1-3 on the controller.\nPlace it on a cut: the clip below should change at that time (or pass outgoing/incoming to trim them)."
+ },
+ {
+  "tool": "add_behavior",
+  "ok": true,
+  "args": {},
+  "answer": "fill · bubbles [targets: shape, background, mask, transition] (energy 2-4, playful/organic/friendly): Liquid bubbles that bloom from the origin and melt into each other (metaballs: blur + alpha threshold); as a background they rise like a lava lamp.\n    pairs well with: Bubble Wipe / Bubble Rise bet"
+ },
+ {
+  "tool": "add_behavior",
+  "ok": true,
+  "args": {
+   "behavior": "bubbles",
+   "target": "shape",
+   "comp": "_MCP_TEST",
+   "t": 0.3,
+   "brand": "motion-dna"
+  },
+  "answer": "BH · bubbles 1 (bubbles)\nCheck it with render_frame."
+ },
+ {
+  "tool": "add_behavior",
+  "ok": true,
+  "args": {
+   "behavior": "voronoi",
+   "target": "background",
+   "comp": "_MCP_TEST"
+  },
+  "answer": "BG · voronoi 1 (voronoi)\nCheck it with render_frame."
+ },
+ {
+  "tool": "add_behavior",
+  "ok": true,
+  "args": {
+   "behavior": "flow",
+   "target": "background",
+   "comp": "_MCP_TEST"
+  },
+  "answer": "BG · flow 1 (flow)\nCheck it with render_frame."
+ },
+ {
+  "tool": "add_behavior",
+  "ok": true,
+  "args": {
+   "behavior": "bubbles",
+   "target": "text",
+   "layer": "Title",
+   "comp": "_MCP_TEST",
+   "t": 0.2
+  },
+  "answer": "BH · bubbles matte 1 (bubbles matte for Title)\nCheck it with render_frame."
+ },
+ {
+  "tool": "add_behavior",
+  "ok": true,
+  "args": {
+   "behavior": "spring",
+   "target": "box",
+   "element": "EL · lower third 1",
+   "comp": "_MCP_TEST"
+  },
+  "answer": "EL · lower third 1 spring 1 (EL · lower third 1 (spring box))\nCheck it with render_frame."
+ },
+ {
+  "tool": "add_behavior",
+  "ok": true,
+  "args": {
+   "behavior": "rope",
+   "target": "shape",
+   "layer": "Title",
+   "comp": "_MCP_TEST",
+   "t": 0.4
+  },
+  "answer": "BH · rope 1 (rope)\nCheck it with render_frame."
+ },
+ {
+  "tool": "add_behavior",
+  "ok": true,
+  "args": {
+   "behavior": "grow",
+   "target": "shape",
+   "comp": "_MCP_TEST",
+   "t": 0.2,
+   "origin": "bottom"
+  },
+  "answer": "BH · grow 1 (grow)\nCheck it with render_frame."
+ },
+ {
+  "tool": "add_behavior",
+  "ok": true,
+  "args": {
+   "behavior": "bubbles",
+   "target": "transition",
+   "at_s": 1.5,
+   "comp": "_MCP_TEST"
+  },
+  "answer": "TR · behavior 1: covers the frame at 1.5 s (Progress 50), 1.15-1.85 s. Edit Progress, Stagger, Ease In / Ease Out and Color 1-3 on the controller.\nCheck it with render_frame."
+ },
+ {
+  "tool": "add_behavior",
+  "ok": true,
+  "args": {
+   "behavior": "line_boil",
+   "target": "layer",
+   "layers": [
+    "Chip"
+   ],
+   "comp": "_MCP_TEST"
+  },
+  "answer": "Chip: line boil on 3s, 3 drawings (Wiggle Paths + Turbulent Displace)"
+ },
+ {
+  "tool": "add_behavior",
+  "ok": true,
+  "args": {
+   "behavior": "flock",
+   "target": "background",
+   "comp": "_MCP_TEST"
+  },
+  "answer": "flock does not pass on background (a small cluster in an empty frame (2026-10-14 review)): use one of shape. Pairs well with: a flock crossing behind a title; Cruise curve, Stage duration; cinematic scenes with space to cross"
+ },
+ {
+  "tool": "solid_transition",
+  "ok": true,
+  "args": {
+   "look": "Shatter",
+   "at_s": 2.0,
+   "comp": "_MCP_TEST"
+  },
+  "answer": "TR · Shatter 1: covers the frame at 2 s (Progress 50), from 1.65 to 2.35 s. Edit Direction, Stagger, Ease In / Ease Out (token curves) and Color 1-3 on the controller.\nPlace it on a cut: the clip below should change at that time (or pass outgoing/incoming to trim them)."
+ },
+ {
+  "tool": "move",
+  "ok": true,
+  "args": {
+   "move": "hinge",
+   "layers": [
+    "Chip"
+   ],
+   "comp": "_MCP_TEST",
+   "t": 0.2,
+   "edge": "left"
+  },
+  "answer": "Chip: hinge in"
+ },
+ {
+  "tool": "animate_text",
+  "ok": true,
+  "args": {
+   "layers": [
+    "Title"
+   ],
+   "comp": "_MCP_TEST",
+   "unit": "chars",
+   "channels": [
+    "fade",
+    "rise"
+   ],
+   "ease": "Pop",
+   "t": 0.2
+  },
+  "answer": "Title: SS Text · chars fade+rise"
+ },
+ {
+  "tool": "add_captions",
+  "ok": true,
+  "args": {
+   "comp": "_MCP_TEST",
+   "words": [
+    {
+     "w": "Motion",
+     "s": 0.2,
+     "e": 0.5
+    },
+    {
+     "w": "DNA",
+     "s": 0.5,
+     "e": 0.9
+    }
+   ],
+   "style": "highlight"
+  },
+  "answer": "1 caption lines (highlight)"
+ },
+ {
+  "tool": "keyframes",
+  "ok": true,
+  "args": {
+   "action": "ease",
+   "layers": [
+    "Chip"
+   ],
+   "comp": "_MCP_TEST",
+   "type": "Settle"
+  },
+  "answer": "eased 16 segments with Settle"
+ },
+ {
+  "tool": "keyframes",
+  "ok": true,
+  "args": {
+   "action": "stagger",
+   "layers": [
+    "Chip",
+    "Title"
+   ],
+   "comp": "_MCP_TEST",
+   "frames": 4
+  },
+  "answer": "staggered 2 layers by 4 f"
+ },
+ {
+  "tool": "keyframes",
+  "ok": true,
+  "args": {
+   "action": "mirror_out",
+   "layers": [
+    "Chip"
+   ],
+   "comp": "_MCP_TEST"
+  },
+  "answer": "mirrored the entrance into an exit on 0 properties"
+ },
+ {
+  "tool": "keyframes",
+  "ok": true,
+  "args": {
+   "action": "copy_to",
+   "source": "Chip",
+   "layers": [
+    "Title"
+   ],
+   "comp": "_MCP_TEST"
+  },
+  "answer": "copied 5 animated properties to 1 layers (4 written)"
+ },
+ {
+  "tool": "anchor_point",
+  "ok": true,
+  "args": {
+   "where": "bottom-left",
+   "layers": [
+    "Chip"
+   ],
+   "comp": "_MCP_TEST"
+  },
+  "answer": "Chip: anchor → bottom-left"
+ },
+ {
   "tool": "remove_animation",
   "ok": true,
   "args": {
@@ -152,7 +608,7 @@
    ],
    "comp": "_MCP_TEST"
   },
-  "answer": "cleared 11 properties on Chip, Title"
+  "answer": "cleared 21 properties on Chip, Title"
  },
  {
   "tool": "apply_pack",
@@ -161,7 +617,7 @@
    "pack": "Calm Modern",
    "comp": "_MCP_TEST"
   },
-  "answer": "Chip → shape: Fade Up\nTitle → title: Chars Rise"
+  "answer": "BG · flow 1 → shape: Fade Up\nBG · voronoi 1 → shape: Fade Up\nBG · glass 1 → shape: Fade Up\nGL · rim 1 → shape: Fade Up\nGL · rim 2 → shape: Fade Up\nBG · network 1 → shape: Fade Up\nBG · dots 1 → shape: Fade Up\nEL · underline 1 underline → shape: Fade Up\nChip → shape: Fade Up\nEL · lower third 1 box → s"
  },
  {
   "tool": "list_brands",
@@ -187,7 +643,7 @@
    ],
    "comp": "_MCP_TEST"
   },
-  "answer": "cleared 11 properties on Chip, Title"
+  "answer": "cleared 12 properties on Chip, Title"
  },
  {
   "tool": "apply_brand",
@@ -196,7 +652,19 @@
    "slug": "motion-dna",
    "comp": "_MCP_TEST"
   },
-  "answer": "Motion DNA: style Playful with curve Snap\nChip → shape: Bounce In + Swing\nTitle → title: Chars Pop\nThe brand's own timing is applied where its entries name a layer or role. Check its motion rules (get_brand) on a rendered frame, then run check_layout."
+  "answer": "Motion DNA: style Playful with curve Snap\nBG · flow 1 → shape: Bounce In + Swing (replaced)\nBG · voronoi 1 → shape: Bounce In + Swing (replaced)\nBG · glass 1 → shape: Bounce In + Swing (replaced)\nGL · rim 1 → shape: Bounce In + Swing (replaced)\nGL · rim 2 → shape: Bounce In + Swing (replaced)\nBG · n"
+ },
+ {
+  "tool": "apply_pack",
+  "ok": true,
+  "args": {
+   "pack": "Collage",
+   "comp": "_MCP_TEST",
+   "layers": [
+    "Title"
+   ]
+  },
+  "answer": "Title → title: Scramble (replaced)\nTitle: line boil on 3s, 3 drawings (Turbulent Displace)"
  },
  {
   "tool": "add_asset",
@@ -210,6 +678,18 @@
   "answer": "added SFX · Swoosh Transition 28 at 0.2"
  },
  {
+  "tool": "add_asset",
+  "ok": true,
+  "args": {
+   "name": "Explosion02HD",
+   "type": "vfx",
+   "comp": "_MCP_TEST",
+   "time_s": 0.5,
+   "scale": 60
+  },
+  "answer": "added VFX · Explosion02HD at 0.5"
+ },
+ {
   "tool": "add_brand_note",
   "ok": true,
   "args": {
@@ -218,16 +698,16 @@
    "category": "motion",
    "why": "test"
   },
-  "answer": "saved rule 1 (motion) in D:/motion category ai library/research/_mcp_test/20261013-213211/brand/brand.json: Product shots glide in, never pop"
+  "answer": "saved rule 1 (motion) in D:/motion category ai library/research/_mcp_test/20261014-120233/brand/brand.json: Product shots glide in, never pop"
  },
  {
   "tool": "matte",
   "ok": true,
   "args": {
-   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261013-213211\\product_car_side.jpg",
-   "out": "D:\\motion category ai library\\research\\_mcp_test\\20261013-213211\\product_cutout.png"
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261014-120233\\product_car_side.jpg",
+   "out": "D:\\motion category ai library\\research\\_mcp_test\\20261014-120233\\product_cutout.png"
   },
-  "answer": "matte: D:/motion category ai library/research/_mcp_test/20261013-213211/product_cutout.png"
+  "answer": "matte: D:/motion category ai library/research/_mcp_test/20261014-120233/product_cutout.png"
  },
  {
   "tool": "run_jsx",

@@ -2,8 +2,11 @@
 pick them by category, length and loudness. The files are licensed and are never copied into the repo: the index
 holds names and measurements only, and its output files are git-ignored.
 
+It also indexes the free CC0 packs in assets.free/ (tools/fetch_free_assets.py): SFX, music, VFX image sequences
+(fire, smoke, explosions) and particle textures. Those lines carry the flag "cc0" and a relative path.
+
 Output:  library/assets.local.json   (full data)
-         library/ASSETS.local.txt    (compact, one line per asset: type|category|name|seconds|mean dB|peak dB|flags)
+         library/ASSETS.local.txt    (compact, one line per asset: type|category|name|seconds|mean dB|peak dB|flags|path)
 Usage:   python tools/index_assets.py [--packs <folder>]
 In AE:   #include "ss_assets.jsx"  →  SSA.sfx(comp, "Swoosh Wood 01_Variant Main", t, -9)
 """
@@ -83,15 +86,64 @@ def loudness(path):
         return None, None
 
 
+FREE = ROOT / "assets.free"
+VFX_CATS = [("explosion", r"explosion"), ("fire", r"fire|flame"), ("smoke", r"smoke|cloud"), ("spark", r"spark|star|flare|light"),
+            ("magic", r"magic|twirl|circle|symbol"), ("dust", r"dirt|dust|scorch|splat")]
+FREE_SFX = [("impact", r"explosion|crunch"), ("ui", r"minimize|maximize|rollover|scroll|back|question|mouse|tone|bong|pluck|pep"),
+            ("riser", r"power ?up|high ?up|phase ?jump"), ("sci-fi", r"thruster|engine|low ?frequency|low ?random|low ?down|high ?down"),
+            ("cartoon", r"slime|scratch|knife|chop|belt|handle|leather|die")] + SFX_CATS + [("impact", r"footstep|metal|wood|glass|plate|punch"), ("ui", r"select|confirm|error|drop|open|close|switch|toggle"),
+                       ("sci-fi", r"laser|phaser|zap|force|space|computer"), ("cartoon", r"chip|coin|dice|card|cloth|book|door")]
+
+
+SKIP_FREE = re.compile(r"black background|/rotated/|unity samples|preview|sample\.|license|\.url$|\.ini$", re.I)   # duplicates and pack extras
+
+
+def free_assets():
+    """Assets in assets.free/<pack>/…: audio files, image sequences (one entry per folder) and textures."""
+    items = []
+    if not FREE.exists():
+        return items
+    for pack in sorted(d for d in FREE.iterdir() if d.is_dir()):
+        seqs = {}
+        for f in sorted(pack.rglob("*")):
+            if not f.is_file() or SKIP_FREE.search(f.relative_to(pack).as_posix()):
+                continue
+            ext, rel = f.suffix.lower().lstrip("."), f.relative_to(ROOT).as_posix()
+            if ext in ("wav", "mp3", "aif", "aiff"):
+                music = "music" in pack.name
+                it = {"name": f.stem, "ext": ext, "pack": pack.name, "path": rel, "type": "music" if music else "sfx",
+                      "category": ("jingle" if pack.name == "kenney-music" else "track") if music else cat(f.stem.replace("_", " "), FREE_SFX, "misc")}
+                it["seconds"], _, _ = probe(f)
+                it["mean_db"], it["peak_db"] = loudness(f)
+                it["flags"] = ["cc0"] + (["loud"] if it["mean_db"] is not None and it["mean_db"] > -12 else [])
+                items.append(it)
+            elif ext in ("tga", "png", "exr") and re.search(r"\d{2,}$", f.stem):
+                seqs.setdefault((f.parent, re.sub(r"[_\-. ]*\d+$", "", f.stem)), []).append(f)   # frames share a prefix
+            elif ext in ("png", "jpg", "jpeg"):
+                items.append({"name": f"{pack.name}/{f.stem}", "ext": ext, "pack": pack.name, "path": rel, "type": "texture",
+                              "category": cat(f.stem.replace("_", " "), VFX_CATS, "particle"), "flags": ["cc0"]})
+        for (folder, prefix), frames in seqs.items():
+            if len(frames) < 60:   # numbered stills (circle_01.png, blackSmoke00-24 …), not a sequence
+                for f in frames:
+                    items.append({"name": f"{pack.name}/{f.stem}", "ext": f.suffix.lower().lstrip("."), "pack": pack.name, "path": f.relative_to(ROOT).as_posix(),
+                                  "type": "texture", "category": cat(f.stem.replace("_", " "), VFX_CATS, "particle"), "flags": ["cc0"]})
+                continue
+            name = folder.relative_to(pack).parts[0] if folder != pack else prefix
+            items.append({"name": name, "ext": frames[0].suffix.lower().lstrip("."), "pack": pack.name, "path": frames[0].relative_to(ROOT).as_posix(),
+                          "type": "vfx", "category": cat(name, VFX_CATS, "vfx"), "frames": len(frames),
+                          "seconds": round(len(frames) / 30, 2), "flags": ["cc0", "sequence", "alpha"]})
+    return items
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--packs", default=str(DEFAULT))
     a = ap.parse_args()
     packs = pathlib.Path(a.packs)
-    if not packs.exists():
-        raise SystemExit(f"No asset packs at {packs}")
+    if not packs.exists() and not FREE.exists():
+        raise SystemExit(f"No asset packs at {packs} and no {FREE} (python tools/fetch_free_assets.py)")
     items, seen = [], set()
-    for f in sorted(packs.rglob("*")):
+    for f in sorted(packs.rglob("*")) if packs.exists() else []:
         if not f.is_file():
             continue
         ext = f.suffix.lower().lstrip(".")
@@ -129,15 +181,17 @@ def main():
             it["flags"] = []
         items.append(it)
 
-    (ROOT / "library/assets.local.json").write_text(json.dumps({"source": str(packs), "assets": items}, indent=1), encoding="utf-8")
-    lines = ["# Local asset packs (licensed, NOT in the repo) · type|category|name|seconds|mean dB|peak dB|flags",
+    items += free_assets()
+    (ROOT / "library/assets.local.json").write_text(json.dumps({"source": str(packs), "free": str(FREE), "assets": items}, indent=1), encoding="utf-8")
+    lines = ["# Local asset packs (licensed, NOT in the repo) + free CC0 packs (assets.free/) · type|category|name|seconds|mean dB|peak dB|flags|path",
              "# use in AE: #include \"ss_assets.jsx\" · SSA.sfx(comp, name, t, gainDb[, len]) · SSA.overlay(comp, name, t[, blend, opacity])",
-             "# sfx tip: prefer mean dB below -15 for UI sounds; 'loud' ones need -12 dB or more of gain reduction"]
-    order = {"sfx": 0, "overlay": 1, "texture": 2, "graphic": 3}
+             "# sfx tip: prefer mean dB below -15 for UI sounds; 'loud' ones need -12 dB or more of gain reduction",
+             "# vfx (cc0 image sequences with alpha): SSA.vfx(comp, name, t[, blend, scale %]) · music: SSA.sfx works for music too"]
+    order = {"sfx": 0, "music": 1, "overlay": 2, "vfx": 3, "texture": 4, "graphic": 5}
     for it in sorted(items, key=lambda x: (order.get(x["type"], 9), x["category"], x["name"])):
         lines.append("|".join([it["type"], it["category"], it["name"], str(it.get("seconds", "")),
                                "" if it.get("mean_db") is None else str(it["mean_db"]),
-                               "" if it.get("peak_db") is None else str(it["peak_db"]), ",".join(it["flags"])]))
+                               "" if it.get("peak_db") is None else str(it["peak_db"]), ",".join(it["flags"]), it.get("path", "")]))
     (ROOT / "library/ASSETS.local.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
     by = {}
     for it in items:

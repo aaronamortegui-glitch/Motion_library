@@ -1,0 +1,1098 @@
+{
+ "version": "2026-10-14",
+ "note": "Named flat 2D transitions built by tools/ss_transitions.jsx (SST) from solids and masks: one controller null (Progress, Direction, Stagger, Ease In / Ease Out token curves, Color 1-3) drives every piece, so the look stays editable. Pieces cover the frame at the cut (Progress 50) and uncover it after. Behavior modelled on Animation Composer's Flat 2D transitions (median 0.6 s, snappy); timing and curves are Motion DNA tokens: dur = duration token of the whole transition, ease_in / ease_out = curve tokens for covering / uncovering, rebuilt from scratch. Colours come from the brand (MCP solid_transition brand=…) or a list; any option can be overridden. Clip-to-clip types (zoom, spin, stretch, slide) move the outgoing and incoming layers themselves (give both names). MCP: solid_transition. energy 1 calm .. 5 explosive. Type behavior draws the pieces with a behaviour from tools/ss_behaviors.jsx (options.behavior: bubbles, blob, voronoi).",
+ "transitions": [
+  {
+   "name": "Clean Wipe",
+   "type": "wipe",
+   "options": {
+    "angle": 0,
+    "ease_in": "Surge",
+    "ease_out": "Surge"
+   },
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "corporate",
+    "editorial"
+   ],
+   "use": "One colour panel crosses the frame: the neutral default between scenes.",
+   "dur": "Sweep",
+   "curves": [
+    "Surge",
+    "Surge"
+   ]
+  },
+  {
+   "name": "Diagonal Wipe",
+   "type": "wipe",
+   "options": {
+    "angle": 35,
+    "ease_in": "Whip",
+    "ease_out": "Whip"
+   },
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "modern",
+    "bold"
+   ],
+   "use": "A wipe with more drive; pairs with diagonal layouts.",
+   "dur": "Arrive",
+   "curves": [
+    "Whip",
+    "Whip"
+   ]
+  },
+  {
+   "name": "Vertical Drop",
+   "type": "wipe",
+   "options": {
+    "angle": 90,
+    "ease_in": "Pop",
+    "ease_out": "Launch"
+   },
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "bold",
+    "playful"
+   ],
+   "use": "Panel falls from the top: social and list beats.",
+   "dur": "Arrive",
+   "curves": [
+    "Pop",
+    "Launch"
+   ]
+  },
+  {
+   "name": "Color Stack",
+   "type": "stack",
+   "options": {
+    "angle": 0,
+    "stagger": 45,
+    "ease_in": "Cruise",
+    "ease_out": "Ramp"
+   },
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "bold",
+    "modern"
+   ],
+   "use": "Brand colours slide in one over the other and back off in reverse: the signature AC look.",
+   "dur": "Sweep",
+   "curves": [
+    "Cruise",
+    "Ramp"
+   ]
+  },
+  {
+   "name": "Stack Rise",
+   "type": "stack",
+   "options": {
+    "angle": -90,
+    "stagger": 40,
+    "ease_in": "Land",
+    "ease_out": "Launch"
+   },
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "friendly"
+   ],
+   "use": "Colour stack rising from the bottom.",
+   "dur": "Sweep",
+   "curves": [
+    "Land",
+    "Launch"
+   ]
+  },
+  {
+   "name": "Slanted Bars",
+   "type": "bars",
+   "options": {
+    "count": 6,
+    "angle": 30,
+    "stagger": 35,
+    "order": "center",
+    "ease_in": "Surge",
+    "ease_out": "Surge"
+   },
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "modern",
+    "bold",
+    "technical"
+   ],
+   "use": "Diagonal bars from the middle outward.",
+   "dur": "Sweep",
+   "curves": [
+    "Surge",
+    "Surge"
+   ]
+  },
+  {
+   "name": "Bar Cascade",
+   "type": "bars",
+   "options": {
+    "count": 5,
+    "angle": 0,
+    "stagger": 55,
+    "order": "index",
+    "ease_in": "Settle",
+    "ease_out": "Settle"
+   },
+   "energy": [
+    3,
+    3
+   ],
+   "tones": [
+    "corporate",
+    "editorial",
+    "modern"
+   ],
+   "use": "Horizontal bars arrive top to bottom like a list.",
+   "dur": "Sweep",
+   "curves": [
+    "Settle",
+    "Settle"
+   ]
+  },
+  {
+   "name": "Venetian Blinds",
+   "type": "blinds",
+   "options": {
+    "count": 8,
+    "angle": 90,
+    "stagger": 40,
+    "ease_in": "Cruise",
+    "ease_out": "Cruise"
+   },
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "elegant",
+    "editorial",
+    "retro"
+   ],
+   "use": "Slats grow across, then shrink away: a classic, tidy reveal.",
+   "dur": "Sweep",
+   "curves": [
+    "Cruise",
+    "Cruise"
+   ]
+  },
+  {
+   "name": "Shutter",
+   "type": "blinds",
+   "options": {
+    "count": 14,
+    "angle": 0,
+    "stagger": 25,
+    "ease_in": "Whip",
+    "ease_out": "Whip"
+   },
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "technical",
+    "modern"
+   ],
+   "use": "Many thin slats, fast: tech and data pieces.",
+   "dur": "Arrive",
+   "curves": [
+    "Whip",
+    "Whip"
+   ]
+  },
+  {
+   "name": "Center Split",
+   "type": "split",
+   "options": {
+    "angle": 90,
+    "ease_in": "Ramp",
+    "ease_out": "Ramp"
+   },
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "cinematic",
+    "bold"
+   ],
+   "use": "Two halves close from the sides and open again: doors.",
+   "dur": "Sweep",
+   "curves": [
+    "Ramp",
+    "Ramp"
+   ]
+  },
+  {
+   "name": "Horizon Split",
+   "type": "split",
+   "options": {
+    "angle": 0,
+    "ease_in": "Ramp",
+    "ease_out": "Ramp"
+   },
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "cinematic",
+    "bold"
+   ],
+   "use": "Halves close from top and bottom.",
+   "dur": "Sweep",
+   "curves": [
+    "Ramp",
+    "Ramp"
+   ]
+  },
+  {
+   "name": "Zipper",
+   "type": "interleave",
+   "options": {
+    "count": 10,
+    "angle": -20,
+    "stagger": 30,
+    "ease_in": "Snap",
+    "ease_out": "Whip"
+   },
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "Alternating bars from both sides, tilted: high-energy social.",
+   "dur": "Sweep",
+   "curves": [
+    "Snap",
+    "Whip"
+   ]
+  },
+  {
+   "name": "Comb",
+   "type": "interleave",
+   "options": {
+    "count": 16,
+    "angle": 0,
+    "stagger": 15,
+    "ease_in": "Whip",
+    "ease_out": "Whip"
+   },
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "technical",
+    "bold"
+   ],
+   "use": "Thin interleaved strips, very fast.",
+   "dur": "Arrive",
+   "curves": [
+    "Whip",
+    "Whip"
+   ]
+  },
+  {
+   "name": "Iris Pop",
+   "type": "iris",
+   "options": {
+    "count": 1,
+    "ease_in": "Pop",
+    "ease_out": "Launch"
+   },
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "friendly",
+    "retro"
+   ],
+   "use": "A circle grows over the frame and opens a hole to the next shot.",
+   "dur": "Sweep",
+   "curves": [
+    "Pop",
+    "Launch"
+   ]
+  },
+  {
+   "name": "Ring Burst",
+   "type": "iris",
+   "options": {
+    "count": 3,
+    "stagger": 40,
+    "ease_in": "Pop",
+    "ease_out": "Launch"
+   },
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "Concentric colour rings burst out and open back in reverse.",
+   "dur": "Sweep",
+   "curves": [
+    "Pop",
+    "Launch"
+   ]
+  },
+  {
+   "name": "Diamond Reveal",
+   "type": "diamond",
+   "options": {
+    "count": 2,
+    "stagger": 35,
+    "ease_in": "Surge",
+    "ease_out": "Surge"
+   },
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "bold",
+    "luxury",
+    "modern"
+   ],
+   "use": "Rotated-square panels from the centre.",
+   "dur": "Sweep",
+   "curves": [
+    "Surge",
+    "Surge"
+   ]
+  },
+  {
+   "name": "Pixel Grid",
+   "type": "grid",
+   "options": {
+    "cols": 8,
+    "order": "diagonal",
+    "stagger": 55,
+    "ease_in": "Pop",
+    "ease_out": "Launch"
+   },
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "technical",
+    "playful",
+    "retro"
+   ],
+   "use": "Checker cells fill diagonally then empty.",
+   "dur": "Sweep",
+   "curves": [
+    "Pop",
+    "Launch"
+   ]
+  },
+  {
+   "name": "Grid Scatter",
+   "type": "grid",
+   "options": {
+    "cols": 12,
+    "order": "random",
+    "stagger": 70,
+    "ease_in": "Snap",
+    "ease_out": "Snap"
+   },
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "technical",
+    "playful"
+   ],
+   "use": "Random cells flicker in and out: glitchy, digital.",
+   "dur": "Sweep",
+   "curves": [
+    "Snap",
+    "Snap"
+   ]
+  },
+  {
+   "name": "Grid Bloom",
+   "type": "grid",
+   "options": {
+    "cols": 10,
+    "order": "center",
+    "stagger": 60,
+    "ease_in": "Nudge",
+    "ease_out": "Launch"
+   },
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "modern",
+    "friendly"
+   ],
+   "use": "Cells bloom from the centre.",
+   "dur": "Sweep",
+   "curves": [
+    "Nudge",
+    "Launch"
+   ]
+  },
+  {
+   "name": "Soft Wipe",
+   "type": "wipe",
+   "options": {
+    "angle": 0,
+    "ease_in": "Cruise",
+    "ease_out": "Cruise"
+   },
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "elegant",
+    "warm",
+    "luxury"
+   ],
+   "use": "Slow, soft single panel for calm pieces.",
+   "dur": "Stage",
+   "curves": [
+    "Cruise",
+    "Cruise"
+   ]
+  },
+  {
+   "name": "Zoom Through",
+   "type": "zoom",
+   "options": {},
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "bold",
+    "cinematic",
+    "modern"
+   ],
+   "use": "Clip to clip: the shot pushes in with blur and the next lands from a push, with a small overshoot.",
+   "clip_to_clip": true,
+   "dur": "Arrive",
+   "curves": [
+    "Launch",
+    "Land"
+   ]
+  },
+  {
+   "name": "Spin Through",
+   "type": "spin",
+   "options": {
+    "angle": 90
+   },
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "Clip to clip: rotate through the cut with blur; scaled so the frame never shows an edge.",
+   "clip_to_clip": true,
+   "dur": "Arrive",
+   "curves": [
+    "Launch",
+    "Land"
+   ]
+  },
+  {
+   "name": "Stretch Slide",
+   "type": "stretch",
+   "options": {
+    "angle": 0
+   },
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "Clip to clip: the shot slides out stretching and the next squashes in, with motion blur.",
+   "clip_to_clip": true,
+   "dur": "Arrive",
+   "curves": [
+    "Launch",
+    "Land"
+   ]
+  },
+  {
+   "name": "Whip Slide",
+   "type": "slide",
+   "options": {
+    "angle": 0
+   },
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "modern",
+    "bold",
+    "cinematic"
+   ],
+   "use": "Clip to clip: a whip pan between shots, with motion blur.",
+   "clip_to_clip": true,
+   "dur": "Arrive",
+   "curves": [
+    "Launch",
+    "Land"
+   ]
+  },
+  {
+   "name": "Vertical Whip",
+   "type": "slide",
+   "options": {
+    "angle": 90
+   },
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "modern",
+    "playful"
+   ],
+   "use": "Clip to clip: whip upward (social feeds, lists).",
+   "clip_to_clip": true,
+   "dur": "Arrive",
+   "curves": [
+    "Launch",
+    "Land"
+   ]
+  },
+  {
+   "name": "Corner Burst",
+   "type": "iris",
+   "options": {
+    "origin": "top-left",
+    "count": 3,
+    "stagger": 35,
+    "ease_in": "Pop",
+    "ease_out": "Launch"
+   },
+   "dur": "Sweep",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "Colour rings burst from a corner and pull back into it.",
+   "curves": [
+    "Pop",
+    "Launch"
+   ]
+  },
+  {
+   "name": "Rainbow Rise",
+   "type": "iris",
+   "options": {
+    "origin": "bottom",
+    "count": 5,
+    "stagger": 30,
+    "ease_in": "Surge",
+    "ease_out": "Surge"
+   },
+   "dur": "Sweep",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "friendly",
+    "retro"
+   ],
+   "use": "Concentric arcs rise from the bottom edge (use 3+ colours).",
+   "curves": [
+    "Surge",
+    "Surge"
+   ]
+  },
+  {
+   "name": "Dot Matrix",
+   "type": "dots",
+   "options": {
+    "cols": 14,
+    "order": "diagonal",
+    "stagger": 60,
+    "ease_in": "Pop",
+    "ease_out": "Launch"
+   },
+   "dur": "Sweep",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "technical",
+    "retro",
+    "playful"
+   ],
+   "use": "Round cells swell into a dot matrix and shrink away.",
+   "curves": [
+    "Pop",
+    "Launch"
+   ]
+  },
+  {
+   "name": "Fan Sweep",
+   "type": "fan",
+   "options": {
+    "count": 4,
+    "stagger": 25,
+    "ease_in": "Surge",
+    "ease_out": "Surge"
+   },
+   "dur": "Sweep",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "bold",
+    "retro"
+   ],
+   "use": "Pie slices sweep round the centre like a fan.",
+   "curves": [
+    "Surge",
+    "Surge"
+   ]
+  },
+  {
+   "name": "Corner Fan",
+   "type": "fan",
+   "options": {
+    "origin": "bottom-left",
+    "count": 3,
+    "stagger": 30,
+    "ease_in": "Whip",
+    "ease_out": "Whip"
+   },
+   "dur": "Sweep",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "playful"
+   ],
+   "use": "Slices fan out from a corner.",
+   "curves": [
+    "Whip",
+    "Whip"
+   ]
+  },
+  {
+   "name": "Gradient Wipe",
+   "type": "wipe",
+   "options": {
+    "angle": 20,
+    "gradient": true,
+    "ease_in": "Surge",
+    "ease_out": "Surge"
+   },
+   "dur": "Sweep",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "elegant",
+    "luxury"
+   ],
+   "use": "One panel with a gradient between two brand colours.",
+   "curves": [
+    "Surge",
+    "Surge"
+   ]
+  },
+  {
+   "name": "Flash Cut",
+   "type": "flash",
+   "options": {},
+   "dur": "Glide",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "cinematic"
+   ],
+   "use": "Clip to clip: a white flash peaks on the cut.",
+   "clip_to_clip": true,
+   "curves": [
+    "Launch",
+    "Land"
+   ]
+  },
+  {
+   "name": "Dip to Black",
+   "type": "dip",
+   "options": {},
+   "dur": "Sweep",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "cinematic",
+    "elegant"
+   ],
+   "use": "Clip to clip: blur and dip through black.",
+   "curves": [
+    "Launch",
+    "Nudge"
+   ]
+  },
+  {
+   "name": "Camera Shake",
+   "type": "shake",
+   "options": {},
+   "dur": "Arrive",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "cinematic"
+   ],
+   "use": "Clip to clip: a hard cut inside a decaying camera shake (impacts, beats).",
+   "curves": [
+    "Launch",
+    "Nudge"
+   ]
+  },
+  {
+   "name": "Twirl Zoom",
+   "type": "twirl",
+   "options": {},
+   "dur": "Arrive",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "Clip to clip: twirl and push through the cut.",
+   "curves": [
+    "Launch",
+    "Nudge"
+   ]
+  },
+  {
+   "name": "Slice Cut",
+   "type": "slices",
+   "options": {
+    "count": 3
+   },
+   "dur": "Sweep",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "modern"
+   ],
+   "use": "Clip to clip: the shot breaks into slices that slide off over the next.",
+   "curves": [
+    "Launch",
+    "Nudge"
+   ]
+  },
+  {
+   "name": "Glitch Cut",
+   "type": "glitch",
+   "options": {},
+   "dur": "Arrive",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "technical",
+    "bold"
+   ],
+   "use": "Clip to clip: RGB split and jumps across the cut.",
+   "curves": [
+    "Launch",
+    "Nudge"
+   ]
+  },
+  {
+   "name": "Camera Roll",
+   "type": "spin",
+   "options": {
+    "angle": 180
+   },
+   "dur": "Sweep",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "playful"
+   ],
+   "use": "Clip to clip: a half roll through the cut, frame always covered.",
+   "curves": [
+    "Launch",
+    "Nudge"
+   ]
+  },
+  {
+   "name": "Liquid Wipe",
+   "type": "liquid",
+   "options": {
+    "stagger": 30,
+    "ease_in": "Surge",
+    "ease_out": "Surge"
+   },
+   "dur": "Stage",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "organic",
+    "elegant",
+    "warm"
+   ],
+   "use": "Colour layers with a living wavy edge flow over the cut and away (one colour = tonal shades).",
+   "curves": [
+    "Surge",
+    "Surge"
+   ]
+  },
+  {
+   "name": "Liquid Rise",
+   "type": "liquid",
+   "options": {
+    "angle": -90,
+    "stagger": 30,
+    "ease_in": "Settle",
+    "ease_out": "Cruise"
+   },
+   "dur": "Stage",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "organic",
+    "friendly"
+   ],
+   "use": "The liquid wipe rising from the bottom.",
+   "curves": [
+    "Settle",
+    "Cruise"
+   ]
+  },
+  {
+   "name": "Ink Drop",
+   "type": "ink",
+   "options": {
+    "count": 3,
+    "stagger": 35,
+    "ease_in": "Settle",
+    "ease_out": "Surge"
+   },
+   "dur": "Stage",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "organic",
+    "handmade",
+    "elegant"
+   ],
+   "use": "Ink blooms with wobbly edges and opens a wobbly hole to the next shot.",
+   "curves": [
+    "Settle",
+    "Surge"
+   ]
+  },
+  {
+   "name": "Ink Corner",
+   "type": "ink",
+   "options": {
+    "origin": "bottom-left",
+    "count": 2,
+    "stagger": 30,
+    "ease_in": "Surge",
+    "ease_out": "Surge"
+   },
+   "dur": "Sweep",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "organic",
+    "playful"
+   ],
+   "use": "Ink spreading from a corner.",
+   "curves": [
+    "Surge",
+    "Surge"
+   ]
+  },
+  {
+   "name": "Bubble Wipe",
+   "type": "behavior",
+   "options": {
+    "behavior": "bubbles",
+    "layers": 2,
+    "stagger": 30,
+    "ease_in": "Settle",
+    "ease_out": "Surge"
+   },
+   "dur": "Stage",
+   "energy": [
+    2,
+    4
+   ],
+   "tones": [
+    "playful",
+    "organic",
+    "friendly"
+   ],
+   "use": "Liquid bubbles bloom from the centre and merge over the frame in two colours, then bubbles of the next shot eat through them.",
+   "curves": [
+    "Settle",
+    "Surge"
+   ]
+  },
+  {
+   "name": "Bubble Rise",
+   "type": "behavior",
+   "options": {
+    "behavior": "bubbles",
+    "origin": "bottom",
+    "layers": 2,
+    "stagger": 30,
+    "ease_in": "Surge",
+    "ease_out": "Surge"
+   },
+   "dur": "Stage",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "organic"
+   ],
+   "use": "The bubble wipe boiling up from the bottom.",
+   "curves": [
+    "Surge",
+    "Surge"
+   ]
+  },
+  {
+   "name": "Shatter",
+   "type": "behavior",
+   "options": {
+    "behavior": "voronoi",
+    "origin": "center",
+    "ease_in": "Surge",
+    "ease_out": "Surge"
+   },
+   "dur": "Sweep",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "modern",
+    "technical",
+    "bold"
+   ],
+   "use": "Voronoi shards pop in from the centre in three colours, then shrink away to the next shot.",
+   "curves": [
+    "Surge",
+    "Surge"
+   ]
+  },
+  {
+   "name": "Shard Sweep",
+   "type": "behavior",
+   "options": {
+    "behavior": "voronoi",
+    "origin": "left",
+    "ease_in": "Surge",
+    "ease_out": "Launch"
+   },
+   "dur": "Sweep",
+   "energy": [
+    3,
+    5
+   ],
+   "tones": [
+    "modern",
+    "bold"
+   ],
+   "use": "Voronoi shards sweep across from the left and fall away.",
+   "curves": [
+    "Surge",
+    "Launch"
+   ]
+  }
+ ]
+}

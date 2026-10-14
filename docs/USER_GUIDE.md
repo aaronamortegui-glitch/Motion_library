@@ -208,8 +208,11 @@ When you drive After Effects for a person (MCP server `motion-dna`):
 3. **Act:**
    - `apply_preset` (`existing` = modify | replace, `marker_timing`, `duration`, `intensity`, `direction`, `ease`);
    - `apply_pack` and `apply_brand`, which applies the brand's own timing;
-   - `apply_transition` for an outgoing and an incoming layer;
-   - `add_asset`;
+   - `apply_transition` for an outgoing and an incoming layer (preset pairs); `solid_transition` for flat transitions from solids and masks over a cut, or clip-to-clip zoom/spin/stretch/slide (`solid_transition` with no look lists the named looks);
+   - `list_kit` first when the brief asks for something a preset does not cover: it lists elements, shapes, moves, text recipes, looks, backgrounds and transitions by energy and tone;
+   - `add_element` (27 self-sizing kinds, incl. `glass_card` and `end_card`, the Motion DNA logo close used only in Motion DNA's own videos), `add_shape` (39 shapes), `move` (3D entrances), `animate_text` (per char/word/line, typewriter), `add_captions` (from `tools/vo_words.py` words), `add_look` (backgrounds, tones, particles, long shadow, glitch), `add_behavior` (behaviours by family — fill, swarm, physics, modifier — into a shape, background, text matte, element box, transition or existing layers; call it empty to list them with the targets that passed); all keyed with the token curves, brand colours with `brand`;
+   - `add_asset` (local licensed packs); `list_resources` for outside scripts, VFX, sound effects and music, each with its license (ask before downloading);
+   - `keyframes` to re-time what is already there (stagger, mirror_out, sequence, loop, bake, copy_to…) and `anchor_point`;
    - `matte` (still or video cut-out on the local GPU) and `text_behind` (text behind a subject, in one call);
    - `run_jsx` only for what no tool covers.
 4. **Check before you call it done:**

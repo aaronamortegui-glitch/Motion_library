@@ -30,7 +30,18 @@ for p in lib["presets"]:   # energy range, tones and roles from library/tags.jso
 TT = {t["name"]: t for t in tags["techniques"]}
 for t in techs:
     t["tags"] = TT.get(t["name"], {})
-data = json.dumps({"presets": lib["presets"], "tokens": tok, "tones": tags["tones"], "packs": packs, "techniques": techs}, ensure_ascii=False)
+kit = json.loads((ROOT / "library/kit.json").read_text(encoding="utf-8"))["items"]
+trs = json.loads((ROOT / "library/transitions.json").read_text(encoding="utf-8"))["transitions"]
+CLIP = {"zoom", "spin", "stretch", "slide", "flash", "dip", "shake", "twirl", "slices", "glitch"}
+GROUP = {"element": "Elements", "shape": "Shapes", "background": "Backgrounds", "look": "Looks", "text": "Text engine", "move": "Moves", "behavior": "Behaviours"}
+def kslug(n): return re.sub(r"[^a-z0-9]+", "-", n.lower()).strip("-")
+KIT = [{"group": "Clip transitions" if x["type"] in CLIP else "Solid transitions", "kind": "transition", "name": x["name"], "energy": x["energy"],
+        "tones": x["tones"], "use": x["use"], "call": f'solid_transition(look="{x["name"]}")', "gif": f"gifs/kit-transition/{kslug(x['name'])}.gif"} for x in trs]
+KIT += [{"group": GROUP[x["kind"]], "kind": x["kind"], "name": x["name"], "energy": x["energy"], "tones": x["tones"], "use": x["use"], "call": x["call"],
+         "gif": f"gifs/kit-{x['kind']}/{kslug(x['name'])}.gif"} for x in kit]
+for k in KIT:
+    k["has"] = (ROOT / "library" / k["gif"]).exists()
+data = json.dumps({"presets": lib["presets"], "tokens": tok, "tones": tags["tones"], "packs": packs, "techniques": techs, "kit": KIT}, ensure_ascii=False)
 
 HTML = r"""<!doctype html>
 <html lang="en">
@@ -90,7 +101,7 @@ footer{margin-top:64px;color:var(--muted);font-size:13px}
 <div class="wrap">
   <div class="eyebrow">Motion library for After Effects</div>
   <h1>Motion DNA</h1>
-  <p class="lead">Motion made with AI all looks the same. Motion DNA is a library of moves, styles and techniques, tagged by energy (1 calm → 5 explosive) and tone, so you or Claude can pick, mix and grow an identity. Everything is native keyframes and expressions.</p>
+  <p class="lead">Motion made with AI all looks the same. Motion DNA is a library of moves, styles, techniques and a kit of pieces Claude builds for you, tagged by energy (1 calm → 5 explosive) and tone, so you or Claude can pick, mix and grow an identity. Everything is native keyframes and expressions.</p>
 
   <div class="bar" role="toolbar" aria-label="Filters">
     <button class="chip" data-kind="all" aria-pressed="true">All</button>
@@ -114,6 +125,10 @@ footer{margin-top:64px;color:var(--muted);font-size:13px}
   <h2>Techniques</h2>
   <p class="meta">Script workflows that leave a technique in every project. Each one says what it needs and what to ask Claude.</p>
   <div class="grid" id="techs"></div>
+  <h2>The kit</h2>
+  <p class="meta">Pieces Claude builds on the open comp through the MCP server, on the same token curves: transitions, elements, shapes, backgrounds, looks, text, moves and behaviours. Ask for them by name; the call is on each card.</p>
+  <div class="bar" role="toolbar" aria-label="Kit groups" id="kitgroups"></div>
+  <div class="grid" id="kit"></div>
 
   <h2>Durations</h2>
   <div class="tokens" id="durs"></div>
@@ -153,9 +168,9 @@ function render(){
     (!state.energy || p.energy === state.energy) &&
     (!state.tone || (p.tones || []).includes(state.tone)) &&
     (!q || (p.name + " " + p.channels + " " + p.use + " " + (p.tones || []).join(" ")).toLowerCase().includes(q)));
-  if (!list.length) { grid.innerHTML = '<div class="empty">No preset matches the filter.</div>'; return; }
+  if (!list.length) { grid.innerHTML = '<div class="empty">No preset matches the filter.</div>'; renderStyles(); renderTechs(); renderKit(); return; }
   list.forEach(p => grid.appendChild(card(p)));
-  renderStyles(); renderTechs();
+  renderStyles(); renderTechs(); renderKit();
 }
 function renderStyles(){
   const el = document.getElementById("styles");
@@ -174,6 +189,20 @@ function renderTechs(){
     <div class="tones">${tonesHTML(t.tags.tones)}</div><div class="meta">${t.what}</div>
     ${(t.tags.needs || []).length ? `<div class="meta">needs ${t.tags.needs.join(", ")}</div>` : ""}
     <div class="call"><code>Ask Claude: ${t.ask}</code></div></div></article>`).join("");
+}
+const KG = [...new Set(DATA.kit.map(k => k.group))];
+state.kg = QS.get("kit") || "all";
+function renderKit(){
+  const el = document.getElementById("kit"), q = state.q.toLowerCase();
+  document.getElementById("kitgroups").innerHTML = ["all", ...KG].map(g => `<button class="chip" data-kg="${g}" aria-pressed="${state.kg === g}">${g === "all" ? "All (" + DATA.kit.length + ")" : g + " (" + DATA.kit.filter(k => k.group === g).length + ")"}</button>`).join("");
+  document.querySelectorAll("[data-kg]").forEach(b => b.onclick = () => { state.kg = b.dataset.kg; renderKit(); });
+  const list = DATA.kit.filter(k => (state.kg === "all" || k.group === state.kg) && (!state.tone || (k.tones || []).includes(state.tone)) &&
+    (!q || (k.name + " " + k.use + " " + k.group + " " + (k.tones || []).join(" ")).toLowerCase().includes(q)));
+  el.innerHTML = list.map(k => `<article class="card">
+    ${k.has ? `<img width="240" height="135" decoding="async" src="${POSTER ? k.gif.replace(".gif", "_md.png") : k.gif}" alt="Preview of ${k.name}">` : ""}
+    <div class="body"><div class="row"><span class="name">${k.name}</span><span class="badge e-medium">${k.energy[0]}–${k.energy[1]}</span></div>
+    <div class="tones">${tonesHTML(k.tones)}</div><div class="meta">${k.group}</div><div class="meta">${k.use}</div>
+    <div class="call"><code>${k.call}</code></div></div></article>`).join("") || '<div class="empty">No piece matches the filter.</div>';
 }
 document.getElementById("tones").innerHTML = DATA.tones.map(t => `<button class="chip" data-tone="${t}" aria-pressed="${state.tone === t}">${t}</button>`).join("");
 document.querySelectorAll("[data-tone]").forEach(b => b.onclick = () => {
@@ -222,7 +251,11 @@ lines = [
     "# styles: SSP.applyPack(comp, name[, layers, in|out|both]) · roles title/subtitle/body/shape/media/logo · library/packs.json · listed at the end",
     "# markers: SSP.markerTiming(true) before apply → layer markers 'SS in'/'SS out' retime the animation when dragged · classics (family classic) = animate.css 4.1.1 MIT",
     "# mcp: .mcp.json motion-dna → tools/mcp/ss_motion_mcp.py (list_tags, suggest_mix, match_reference, list_presets, apply_preset[duration,intensity,direction,ease], remove_animation, apply_pack, add_asset, render_frame, run_jsx…)",
-    "# assets (local, licensed, not in repo): python tools/index_assets.py -> library/ASSETS.local.txt (sfx/overlays by category + loudness) · include tools/ss_assets.jsx · SSA.sfx(comp,name,t,gainDb[,len]) · SSA.overlay(comp,name,t[,blend,opacity])",
+    "# assets (local, licensed, not in repo + free CC0 packs: python tools/fetch_free_assets.py): python tools/index_assets.py -> library/ASSETS.local.txt (sfx/music/overlays/vfx/textures by category + loudness) · include tools/ss_assets.jsx · SSA.sfx(comp,name,t,gainDb[,len]) · SSA.overlay(comp,name,t[,blend,opacity]) · SSA.vfx(comp,name,t[,blend,scale])",
+    "# transitions: include tools/ss_transitions.jsx · SST.recipe(comp, name, t, {colors}) · SST.add(comp, type, t, o) · solids over a cut (wipe bars blinds split interleave stack iris diamond grid dots fan liquid ink behavior) or clip to clip (zoom spin stretch slide flash dip shake twirl slices glitch; o.outgoing/o.incoming) · token dur + ease_in/ease_out · looks in library/transitions.json · MCP solid_transition",
+    "# elements: include tools/ss_presets.jsx + tools/ss_elements.jsx (+ ss_shapes, ss_looks) · SSE.<kind>(comp, …) · MCP add_element · end_card = our logo close (stroke build, tools/logo_parts.py) · kit lines below",
+    "# kit (library/kit.json · MCP list_kit): shapes tools/ss_shapes.jsx SSS.add (40) · moves tools/ss_moves.jsx SSMV.apply (flip hinge orbit fly tumble grow_edge squash) · text tools/ss_text.jsx SSTX.animate/typewriter/captions · looks tools/ss_looks.jsx SSL.background (incl. network, blobs, mesh, glass)/look/glassCard/longShadow/glitch · all on token curves",
+    "# outside resources (OSS scripts, VFX, SFX, music; license checked): library/resources.json · MCP list_resources · vendored code in vendor/ (json2, eKeys, aefunctions; include tools/ss_vendor.jsx) · AC map docs/animation-composer-map.md · paid-tool map docs/ae-tools-map.md",
     "# hud: SSHUD.bracket/callout/meter/chip/contour/faceScan on TRK nulls · include tools/ss_hud.jsx · scenes: tools/build_scene.jsx + JSON (matte, behind text) · breakdown: tools/build_breakdown.jsx · edits: tools/build_edit.jsx + JSON · read docs/LEARNINGS.md",
     "# tags (library/tags.json): roles enter/exit/emphasis/loop/transition · energy range 1 calm..5 explosive · tones " + ", ".join(tags["tones"]) + " · MCP list_tags / suggest_mix / match_reference",
     "# references: a brand or video analysed into energy + tones → library/references/<slug>.json → match_reference → build what fits, CREATE the gaps (CONTRIBUTING §8)",
@@ -230,6 +263,8 @@ lines = [
 ]
 lines += [f"{p['kind']}|{p.get('id', p['name'])}|{p['channels'].replace(' & ', '&').replace('Text · ', '')}|{E.get(p['energy'], p['energy'])}|{p['use']}"
           + (f"|{'/'.join(p['roles'])}|{p['range'][0]}-{p['range'][1]}|{'/'.join(p['tones'])}" if p.get("tones") else "") for p in lib["presets"]]
+lines += ["# kit: group|name|energy|tones|call|use  (GIFs library/gifs/kit-<kind>/; library/kit.json, library/transitions.json)"]
+lines += [f"kit|{k['group']}|{k['name']}|{k['energy'][0]}-{k['energy'][1]}|{'/'.join(k['tones'])}|{k['call']}|{k['use']}" for k in KIT]
 lines += ["# styles: name|energy range|tones|curve|transition|title,subtitle,body,shape,media,logo"]
 lines += [f"style|{s['name']}|{s.get('energy_range', ['?', '?'])[0]}-{s.get('energy_range', ['?', '?'])[1]}|{'/'.join(s.get('tones', []))}|{s.get('curve', '-')}|{s.get('transition', '-')}|"
           + ",".join((s['roles'].get(r) or {}).get('text') or (s['roles'].get(r) or {}).get('motion') or '-' for r in ['title', 'subtitle', 'body', 'shape', 'media', 'logo']) for s in packs]
@@ -242,4 +277,4 @@ for bp in sorted((ROOT / "library/brands").glob("*/brand.json")):
     lines.append(f"brand|{b['slug']}|{b['name']}|{f['style']}|{f.get('curve') or '-'}|{f['energy'][0]}-{f['energy'][1]}|{'/'.join(f['tones'])}|{len(b['rules'])}")
 (ROOT / "library/INDEX.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 (ROOT / "library/index.html").write_text(HTML.replace("__DATA__", data), encoding="utf-8")
-print("library/index.html", len(lib["presets"]), "presets")
+print("library/index.html", len(lib["presets"]), "presets,", len(KIT), "kit pieces")

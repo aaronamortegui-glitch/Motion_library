@@ -2195,6 +2195,21 @@
     "footage",
     "real people"
    ]
+  },
+  {
+   "name": "Stroke build",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "elegant",
+    "technical"
+   ],
+   "needs": [
+    "a filled logo or shape (SVG)"
+   ]
   }
  ]
 }

@@ -79,12 +79,18 @@ async function boot() {
   } else {
     S.url = new URL("../", location.href).href;
   }
-  const [lib, tags, rec, packs, tech] = await Promise.all([
+  const [lib, tags, rec, packs, tech, kit, trs] = await Promise.all([
     readJSON(asset("library/library.json")), readJSON(asset("library/tags.json")).catch(() => ({ presets: [], tones: [] })),
     readJSON(asset("library/recipes.json")).catch(() => ({ recipes: [] })), readJSON(asset("library/packs.json")).catch(() => ({ packs: [] })),
     readJSON(asset("library/techniques.json")).catch(() => ({ techniques: [] })),
+    readJSON(asset("library/kit.json")).catch(() => ({ items: [] })), readJSON(asset("library/transitions.json")).catch(() => ({ transitions: [] })),
   ]);
   S.lib = lib.presets; S.tags = tags; S.packs = packs.packs; S.techniques = tech.techniques;
+  // the kit Claude builds through MCP (transitions, elements, shapes, backgrounds, looks, text, moves, behaviours)
+  const CLIP = ["zoom", "spin", "stretch", "slide", "flash", "dip", "shake", "twirl", "slices", "glitch"];
+  const GROUP = { element: "Elements", shape: "Shapes", background: "Backgrounds", look: "Looks", text: "Text engine", move: "Moves", behavior: "Behaviours" };
+  S.kit = trs.transitions.map((x) => ({ kind: "transition", group: CLIP.includes(x.type) ? "Clip transitions" : "Solid transitions", name: x.name, energy: x.energy, use: x.use, call: `solid_transition(look="${x.name}")` }))
+    .concat(kit.items.map((x) => ({ kind: x.kind, group: GROUP[x.kind] || x.kind, name: x.name, energy: x.energy, use: x.use, call: x.call })));
   for (const t of tags.presets || []) S.tagOf[t.name] = t;
   S.recipes = rec.recipes.map((r) => ({ name: r.id, slug: slug(r.id), kind: "recipe", channels: (r.channels || []).join(" & "),
     energy: ENERGY_WORD[r.energy] || r.energy, use: "Measured reference · " + (r.section || "") }));

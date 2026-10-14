@@ -4,6 +4,7 @@
 // Usage: #include "ss_assets.jsx"
 //        SSA.sfx(comp, "Swoosh Wood 01_Variant Main", 1.2, -9);            // name, time, gain dB [, max length s]
 //        SSA.overlay(comp, "Light Leak B1 10", 0, "screen", 60);           // name, time [, blend, opacity %]
+//        SSA.vfx(comp, "Explosion02HD", 1.0, "add", 80);                   // free CC0 image sequence [, blend, scale %]
 var SSA = (function () {
     var PACKS = Folder(SSM.assetPacks());
     var BLEND = { normal: BlendingMode.NORMAL, screen: BlendingMode.SCREEN, add: BlendingMode.ADD, overlay: BlendingMode.OVERLAY,
@@ -11,15 +12,28 @@ var SSA = (function () {
     // sensible defaults per overlay family (from library/ASSETS.local.txt categories)
     var DEFAULT_BLEND = [[/light ?leak|burn/i, "screen"], [/grain|scratch|film \d|8mm|16mm|35mm/i, "overlay"], [/vhs|tv_noise|crt|glitch|distort/i, "screen"]];
 
+    var ROOT = File($.fileName).parent.parent;
+    // free CC0 packs (assets.free/, tools/fetch_free_assets.py): the index line ends with the file's path in the repo
+    function findFree(name) {
+        var f = File(ROOT.fsName + "/library/ASSETS.local.txt");
+        if (!f.exists) return null;
+        f.encoding = "UTF-8"; f.open("r"); var txt = f.read(); f.close();
+        var lines = txt.split("\n");
+        for (var i = 0; i < lines.length; i++) {
+            var c = lines[i].split("|");
+            if (c.length >= 8 && c[2] === name && c[7]) { var g = File(ROOT.fsName + "/" + c[7].replace(/\r$/, "")); if (g.exists) return g; }
+        }
+        return null;
+    }
     function find(name) {
-        if (!PACKS.exists) return null;
+        if (!PACKS.exists) return findFree(name);
         var packs = PACKS.getFiles();
         for (var i = 0; i < packs.length; i++) {
             if (!(packs[i] instanceof Folder)) continue;
             var hits = packs[i].getFiles(name + " #*");   // waveform previews are named "<name>.wav #hash.png": no match
             if (hits.length) return hits[0];
         }
-        return null;
+        return findFree(name);
     }
     function footage(file) {
         var proj = app.project;
@@ -28,7 +42,7 @@ var SSA = (function () {
     }
     function need(name) {
         var f = find(name);
-        if (!f) throw new Error("Asset not found in local packs: " + name + " (see library/ASSETS.local.txt)");
+        if (!f) throw new Error("Asset not found in local or free packs: " + name + " (see library/ASSETS.local.txt; free packs: python tools/fetch_free_assets.py)");
         return f;
     }
     return {
@@ -42,6 +56,19 @@ var SSA = (function () {
             lv.setValue([g, g]);
             if (len) { lv.setValueAtTime(t + len - 0.5, [g, g]); lv.setValueAtTime(t + len, [-48, -48]); L.outPoint = t + len; }
             if (L.hasVideo) L.enabled = false;
+            return L;
+        },
+        // Image-sequence VFX (fire, smoke, explosions with alpha) at t, centred, Add/Screen blend; scale in %.
+        vfx: function (comp, name, t, blend, scale) {
+            var first = need(name), item = null, proj = app.project;
+            for (var i = 1; i <= proj.numItems; i++) { var it = proj.item(i); if (it instanceof FootageItem && it.file && it.file.fsName === first.fsName) item = it; }
+            if (!item) { var io = new ImportOptions(first); io.sequence = true; io.forceAlphabetical = true; item = proj.importFile(io); }
+            item.mainSource.conformFrameRate = 30;
+            try { item.mainSource.alphaMode = AlphaMode.STRAIGHT; } catch (e) {}
+            var L = comp.layers.add(item);
+            L.name = "VFX · " + name; L.startTime = t || 0;
+            L.blendingMode = BLEND[blend || "add"];
+            if (scale) L.property("ADBE Transform Group").property("ADBE Scale").setValue([scale, scale]);
             return L;
         },
         // Full-frame overlay from t to the end of the comp (looped), scaled to cover, with a blend mode.
