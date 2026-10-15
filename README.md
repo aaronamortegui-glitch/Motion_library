@@ -324,6 +324,16 @@ transition per cut. [`docs/examples/claude-vs-motion-dna.mp4`](docs/examples/cla
 |---|---|---|
 | ![Title slide, alone vs with Motion DNA](docs/examples/claude-vs-motion-dna-1.gif) | ![Numbers slide](docs/examples/claude-vs-motion-dna-2.gif) | ![Timeline slide](docs/examples/claude-vs-motion-dna-3.gif) |
 
+**The Motion DNA teaser** (102 s): a 1985 TV ad for the plugin, made with it. AI plates and voices, the Figma storyboard
+rebuilt in After Effects as live layers, UI scenes where the cursor really drives the panel, word-timed supers, tracked
+labels and a car spot the "agent" builds on screen; checked by `tools/qa_hidden.jsx` before every render.
+[`docs/examples/motion-dna-teaser.mp4`](docs/examples/motion-dna-teaser.mp4) ·
+[step by step](docs/case-studies/motion-dna-teaser.md).
+
+| The curve follows the cursor | "Just ask" | The spot the agent built |
+|---|---|---|
+| ![Curve drag](docs/examples/teaser-curve.gif) | ![Just ask](docs/examples/teaser-just-ask.gif) | ![The spot](docs/examples/teaser-spot.gif) |
+
 Renders from the test suite (`python tools/test_all.py`): the same layout in every style, moves mixed by tags, and one
 move through the panel's controls.
 
@@ -380,6 +390,26 @@ Lessons from real reviews, checked automatically on the built comps by `tools/ch
 touching, nothing outside the safe area (labels stack into up to 3 lines instead), at least 32 px, contrast or a card,
 nothing on a face, no substituted fonts. Edit rules: never cut a phrase, trim AI shots to their action, music leads the
 key moments. All of them: [CONTRIBUTING §9](CONTRIBUTING.md#9-layout-and-edit-rules-every-video-every-comp).
+
+### Tips from making a full video with it
+
+Learned in eleven review rounds of the teaser; each one is a rule in CONTRIBUTING §9 or the checklist in `CLAUDE.md`.
+- **Run the QA before every render:** `tools/qa_hidden.jsx` (layers hidden under a plate, footage that ends before its
+  layer, overlays that never show), `check_layout`, a look at `render_frame` on each beat you touched, and
+  `blackdetect=d=0.03` on the master: one black frame counts.
+- **Generated clips lie at the edges:** they can end in black frames or swap a prop between shots. Check the source,
+  cut at its last image, and hide a wrong prop with a crop computed in source pixels.
+- **Nested comps keep their own clock:** when a cursor drives something inside a panel comp, key it on the nested time,
+  with the cursor's ease, or the result happens before the hand.
+- **Supers land on the word:** one word per spoken beat (whisper times), 150 px and up, never a typed sentence; text
+  beside a UI is a two-line block with its own column.
+- **Show the tool doing it:** UI as live layers, a cursor that hovers, clicks and drags, the camera pushing into the
+  action, the result happening on screen. Never a screenshot fading in.
+- **Footage plays forward:** a playhead that scrubs back and forth reads as a glitch; cut on the footage's own
+  transitions and keep the keys linear.
+- **Level the voices before the master:** lines from different models came 2-6 LU apart; level each line, then
+  normalise the mix (≈ −14 LUFS).
+- **Hand it off complete:** `tools/collect_project.jsx` + a `HANDOFF.md` let another person or Claude resume the video.
 
 ## Credits and requirements
 

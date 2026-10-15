@@ -176,6 +176,25 @@ These came out of reviewing the Motion DNA promo; `tools/check_layout.jsx` check
 14. **Effects stay tasteful:** halos rotate slowly and stay thin (no line sticking out of the silhouette), bursts are
     solid colour, one technique per beat.
 
+16. **Supers land on the word.** Each word of a spoken super enters when it is said (whisper word times), big
+    (150 px+), one or two lines, stacked bottom-left; never a full sentence typed in at once.
+17. **Text that explains a UI is a block, not a caption:** kicker 32 px, a two-line headline 86-136 px, a two-line sub
+    40-44 px, left-aligned in its own column, entering with energy (`Words Slam`); move the UI aside to make the room.
+18. **Plates must outlast their layer.** Check `startTime + duration × stretch ≥ outPoint` for every footage layer,
+    nested comps included (`tools/qa_hidden.jsx`); a clip that runs out leaves the frame dark under the UI.
+19. **When the UI does something, the camera goes there:** zoom (a rig null parenting the panel, cursor and clicks)
+    into the control while it is used, with a movement large enough to read (a curve handle travels ~70% of the editor).
+20. **A typed request looks like a chat:** a composer that rises from the keyboard, placeholder, typing with a caret,
+    the pasted link as a chip, Send pressed, the message lifting into the thread and an answer. Everything inside the
+    shot's duration, so the answer is read for 0.8 s or more.
+21. **Callouts point at the product's details** (lamp, wheel, window) with a ring on the detail, never at type or empty
+    space; they appear while that detail is on screen.
+22. **A word "behind" two people** is big and centred between them, so their cut-outs cover its edges and the middle
+    letters stay clear (shifted to one side, one person hid the whole Y). Check the frame: the word must still read.
+23. **Overlays stay inside their shot** (hearts, bursts, labels): clamp their outPoint to the shot end.
+24. **Nothing hides its own label:** a sticker's text sits above its disc (parent the text, keep the stacking), and
+    after `copyToComp` re-check the stacking.
+
 ## 10. Work for a brand: its profile learns
 Every brand or project gets a profile (schema: `library/brands/_schema.md`). **Client brands never go in the repo**: they
 live in `library/brands.local/<slug>/` (git-ignored) or in a folder the user chose; only templates (Motion DNA) are in

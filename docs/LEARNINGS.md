@@ -360,10 +360,39 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **Callouts must point at what is on screen at that moment:** map the playhead to source time, check frames, and give
   each callout the duration of its shot.
 
+- **Review round v9 (Motion DNA teaser), what went wrong and the fix** — now rules 16-24 in CONTRIBUTING §9:
+  supers typed as a sentence and small → one word per beat on the whisper time, 150 px; UI side text 32-34 px in one
+  long line → two-line blocks 86-136 px with `Words Slam`, the panels moved left to make the column; a background plate
+  went black under the UI → the clip (12.07 s) started at −6.6 s and ran out at 5.47 s (`tools/qa_hidden.jsx` now flags
+  it); the curve drag was too small to read → bigger handle travel plus a zoom rig on the editor; "just ask" typed into
+  a floating card → a real chat composer, answer included; callouts on random spots → rings on car parts while that
+  part is on screen; YES! fully hidden by one person → moved so one person covers it partly; hearts spilled into the
+  next shot → outPoint clamped to the shot; the box sticker lost its text → text parented to the disc, stacked above.
+- **Review round v10, what went wrong and the fix:** the curve in the panel moved 1.4 s before the cursor dragged it →
+  a nested comp runs on its own clock (here editor time = scene time − 2.0 because of the panel's time remap): compute
+  the offset through the chain and key the nested animation on it, with the same ease as the cursor; a spot played in
+  the AE viewer jumped (the playhead scrubbed 15.5 → 3 → 20 → 9 s) → play the footage forward and cut only on its own
+  wipes; cutting inside a wipe showed the spot's own black gaps (an iris that opens from black) → `blackdetect -d 0.04`
+  on the source and cut around them; a generated close-up used a different mug than the wide shot → a hard punch-in on
+  the liquid hides the prop; a title repeated what the product already says (MOTION DNA on the box) → use the empty wall
+  for the presenter's name instead; a plate that ends one frame early still flashes black → `qa_hidden.jsx` now
+  flags anything shorter than half a frame, and the final check runs `blackdetect` with `d=0.04`, not 0.3.
+- **Review round v11:** a generated clip can end in black frames of its own (the box shot had 5) → `blackdetect` the
+  source and cut at its last image, starting the next shot there; a tracked label froze when the shot got longer →
+  re-track the whole new duration; a prop that should not be there (a white mug) is hidden with a punch-in computed in
+  source pixels (keep the prop's top edge below the frame and the hands inside), then checked on a rendered frame.
+- **Patching big JSX files from Python:** the files are CRLF; detect the newline (`chr(13) + chr(10)`) and replace
+  with it. Never write the patch through a bash heredoc that contains `\n` / `\r` escapes meant for Python: write the
+  `.py` with an editor tool instead (a heredoc turned them into real line breaks and broke the script).
+
 ## 6. Audio
 - Target about **−16 LUFS integrated** for web (measure: `ffmpeg -i out.mp4 -af ebur128 -f null -`).
 - Music at 0 dB with a 1 s fade at the end; UI SFX around −9 to −11 dB.
 - **Fit generated music without splicing:** find the drop with an RMS envelope (0.5 s windows) and offset the whole track so the drop lands on the key word; with ElevenLabs Music the structure in the prompt is followed roughly (asked 6.5 s, got the drop at 16.3 s), so measure, then shift.
+
+- **Level every line, then the master.** Lines from different sources came 2-6 LU apart (TTS, speech-to-speech,
+  generated video with its own audio). Measure each line in the mix (`ebur128` over its span), set per-layer gains so
+  they sit within ~1.5 LU, then `loudnorm` + `alimiter` on the master (≈ −14 LUFS).
 
 ## 7. Repo hygiene
 - All repo content is **English** (code, UI, docs, commits).

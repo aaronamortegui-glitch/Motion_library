@@ -51,6 +51,18 @@ Install everything, library included — the panel reads the library from the re
 - **Every user interface has an animated GIF in the repo** (`docs/screens/`, under ~500 KB) showing it in use. If you change the panel, the visualizer or any UI, re-record its GIF (see CONTRIBUTING §7) in the same commit.
 - Never commit temporary jobs (`tools/_*.jsx`), candidates, A/B tests or raw downloads (see `.gitignore`).
 
+## Before every render (video edits)
+Every item below cost a review round once; check them all, then render (details: CONTRIBUTING §9, rules 16-24).
+1. `tools/qa_hidden.jsx` (`QA_HIDDEN("<comp>")` via `run_jsx`): no overlay under an opaque full-frame plate, no
+   footage that ends before its layer (the plate "goes dark"), no disabled or zero-opacity overlay left by mistake.
+   Explain each remaining line (e.g. a word behind a cut-out is meant to be covered).
+2. `check_layout` on the edit and every scene comp: fix every warning or say why it stays.
+3. `render_frame` the key beats and **look** at them: supers, UI blocks, callouts, overlays that cross a cut.
+4. Measure each voice line (ebur128) and level them to within ~1.5 LU; then normalise the master (~−14 LUFS) and run
+   `blackdetect -vf blackdetect=d=0.04` on the result (one black frame counts).
+6. Nested comps run on their own clock: when a cursor drives something inside a panel comp, key it on the nested time.
+5. New problem found in review? Add it to `docs/LEARNINGS.md` (symptom → cause → fix) and, if it is a rule, here too.
+
 ## Where things go
 | You made… | Put it in… |
 |---|---|
@@ -63,6 +75,7 @@ Install everything, library included — the panel reads the library from the re
 | A new MCP tool | `tools/mcp/ss_motion_mcp.py` (`TOOLS_DEF`), documented in README |
 | A new curve or duration | `tokens/superside_motion_tokens.json` (bezier + AE influence/speed) |
 | A test video / case study | `media/<case>/` (specs + final assets), `docs/case-studies/<case>.md` (from `_TEMPLATE.md`), GIFs in `docs/examples/`, a section at the end of `README.md` |
+| A handoff of a video project (so someone else, or Claude, can resume) | `tools/collect_project.jsx` into a git-ignored `media/<case>/handoff_<v>/` with `HANDOFF.md` (context, build chain, QA, pitfalls) and a `CLAUDE.md` pointing to it |
 | A reference analysis | `library/references/<slug>.json`, then CONTRIBUTING §8 (match, create the gaps, add a style) |
 | A review note while working for a brand | the brand's own folder (`library/brands.local/<slug>/` or the folder it was created in, never the repo) via `tools/brand.py note` or MCP `add_brand_note` (CONTRIBUTING §10) |
 | Tags for a new preset, curve or technique | `tools/tag_library.py` → `python tools/tag_library.py` (writes `library/tags.json`) |

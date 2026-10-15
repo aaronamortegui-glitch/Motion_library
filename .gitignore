@@ -107,3 +107,5 @@ research/kit_gif_comps.txt
 
 # Flora archive: every generated video/audio is kept locally (see media/flora_archive/INDEX.md); only the index is versioned
 media/flora_archive/*/
+# handoff folders (collected projects, hundreds of MB): local only
+media/*/handoff_*/
