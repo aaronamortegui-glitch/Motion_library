@@ -10,7 +10,9 @@
 var FIGMA_SLIDES = (function () {
     var proj = app.project, FPS = 30, W = 1920, H = 1080, PFX = "FS_", folder = null, ASSET_DIR = "";
     var FONT = { "Inter Tight|Regular": "InterTight-Regular", "Inter Tight|Medium": "InterTight-Medium", "Inter Tight|SemiBold": "InterTight-SemiBold",
-                 "Inter Tight|Bold": "InterTight-Bold", "Inter Tight|ExtraBold": "InterTight-ExtraBold", "Instrument Serif|Italic": "InstrumentSerif-Italic", "Instrument Serif|Regular": "InstrumentSerif-Regular" };
+                 "Inter Tight|Bold": "InterTight-Bold", "Inter Tight|ExtraBold": "InterTight-ExtraBold", "Instrument Serif|Italic": "InstrumentSerif-Italic", "Instrument Serif|Regular": "InstrumentSerif-Regular",
+                 // Inter (UI mock-ups of other apps) maps to the installed Inter Tight of the same weight
+                 "Inter|Regular": "InterTight-Regular", "Inter|Medium": "InterTight-Medium", "Inter|SemiBold": "InterTight-SemiBold", "Inter|Bold": "InterTight-Bold" };
     // groups that only wrap other layers: their children go straight into the parent
     var FLAT = { "hero-object": 1, "text": 1, "header": 1, "texture": 1, "title-words": 1, "headline-words": 1, "type": 1, "fx-back": 1, "fx-front": 1 };
     var R;
@@ -120,7 +122,7 @@ var FIGMA_SLIDES = (function () {
         var tp = L.property("ADBE Text Properties").property("ADBE Text Document"), td = tp.value;
         td.resetCharStyle(); td.font = font(g0.f); td.fontSize = g0.z; td.fillColor = hex(g0.c); td.applyFill = true; td.applyStroke = false;
         td.autoLeading = false; td.leading = lh;
-        td.tracking = g0.ls ? g0.ls / g0.z * 1000 : 0;
+        td.tracking = g0.ls ? Math.round(g0.ls / g0.z * 1000) : 0;   // AE only takes whole tracking units
         td.justification = u.al === "C" ? ParagraphJustification.CENTER_JUSTIFY : (u.al === "R" ? ParagraphJustification.RIGHT_JUSTIFY : ParagraphJustification.LEFT_JUSTIFY);
         tp.setValue(td);
         if (segs.length > 1) {                            // mixed styles inside one text (AE 2024+ character ranges)

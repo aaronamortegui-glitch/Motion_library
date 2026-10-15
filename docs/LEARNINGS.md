@@ -41,6 +41,31 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **Helper names in `ss_presets.jsx` share one scope**: a new `function wipe(L, name, angle)` silently replaced the existing `wipe(L)` and broke *Wipe Reveal* ("Unable to call property… undefined"). Grep `function <name>(` before adding a helper; the Style Map set uses `linearWipe`.
 - Multi-key curves (Pop, Recoil, Nudge, Wind-up, Snap) have no 2-key `ae.out/in`: `SSM.animate` dispatches them by their token fields (`overshoot`, `anticipation`, `jump`), and `easeSegment` (the panel's Easing control) re-eases them with their closest 2-key token.
 - **Scheduled tasks from a `#targetengine` job did not reach the panel** on the second recording (the `SS_PANEL` calls were no-ops), while the same call sent as a normal bridge job worked. `tools/record_panel.py` drops one bridge job per step into `bridge/inbox` instead.
+- **A layer reference dies after `addProperty`** ("null is not an object" on the next line): adding a shape group or effect
+  invalidates the JS objects you held for that layer → keep `layer.index` and re-fetch `comp.layer(index)` after every
+  `addProperty`, then read the new property by index (`property(numProperties)`).
+- **Matchnames that are not what the UI says:** a 2D layer's rotation is `ADBE Rotate Z` (not `ADBE Rotation`);
+  `textDocument.tracking` must be an **integer** (240.000001 throws "is not an integer": `Math.round`); a spatial
+  property (Position) takes **one** `KeyframeEase` per key, a 3D Scale takes three; ExtendScript has no `forEach`.
+- **Shape layers drawn with absolute vertices sit in the wrong place**: `addShape()` puts the layer at the comp centre, so
+  a path built from comp coordinates is shifted by (w/2, h/2) → set Position and Anchor Point to `[0, 0]` on any layer
+  whose path you build in comp space (callout lines, live curves, leader lines).
+- **Extending nested precomps: extend the source first.** Setting `layer.outPoint = 25` while its source comp is still
+  20 s long clamps the layer at 20 s even after the source grows (the panels vanished after second 20, the outPoint
+  read 25) → recurse into the source comp, then set the layer's outPoint. Screen comps that must outlive their length:
+  time remap with `Math.min(time, source.duration - 0.05)`.
+- **Time remap can refuse to key** ("can not set value at time… property is hidden") on some footage layers → use
+  `layer.stretch` and `startTime` for slow motion instead.
+- **`copyToComp` does not keep the stacking you expect**: copied layers landed under the full-frame shot they belong
+  on (the box hero lost its whole type column) → after copying, `moveBefore` the overlay layers above their plate.
+- **A literal newline in a generated JSX string** ("Unterminated string constant"): a Python patch that writes `\r`
+  or `\n` must emit the two characters backslash + letter (`chr(92) + "n"`), not the control character.
+- **Text preset names are exact**: `SSP.applyText` takes the text list (`Words Fade Up`, `Chars Rise`, …); motion names
+  like `Fade Up` throw "Text preset not found". `Tracking Settle` starts very wide and slow: on a 1 s label it never
+  reads (and widens the box past the safe area) → use `Words Fade Up` for short labels and counters.
+- **Easing a playhead that drives footage:** a time-remap expression that follows an eased key makes the footage crawl
+  at the start of the shot (the callouts arrived before the content) → keep the keys linear wherever the playhead plays
+  footage at a known rate.
 
 ### Rendering
 - `aerender` **hangs** when the project contains layers with Animation Composer presets (the plugin waits for UI). Use the open AE's render queue: `tools/render_comps.jsx` / `tools/render_queue.jsx`.
@@ -232,6 +257,19 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - Local files → Flora: `flora_create_asset(source="signed-url")` then `python tools/signed_upload.py <file> '<upload json>'`, then `flora_complete_asset`.
 - Music: ElevenLabs Music follows duration and structure from the prompt ("26 seconds… breakdown at second 15…"); design the edit to the BPM (96 BPM → 8 beats = 5 s = one shot).
 - Use blank labels / fictional brands in prompts ("whisky bottle with a blank cream label") so overlays can carry fictional data.
+- **Voices must be one per character for the whole film.** Generic TTS lines (ElevenLabs "Adam") next to Seedance clips
+  that already speak in the character's voice sound like two people (similarity 0.64) → convert every line with
+  speech-to-speech (`resemble-ai/chatterboxhd/speech-to-speech`, target = the character's reference wav): 0.75–0.87
+  similarity, same words and timing, ≈ $0.02/min. Measure with `resemblyzer` instead of guessing by ear. Also level
+  every line to the clips' dialogue (−21 LUFS here): TTS came 4–8 dB louder.
+- **A shout that has to sync:** do not paste a voice over a silent clip. Kling **v3 pro** image-to-video with
+  `generate_audio: true` ($0.14/s) gave a clean, synced "Yes!"; Kling 2.6 audio was garbled, MiniMax H3 reference-to-video
+  returned 2.2 s and looked wrong, Veo 3 fast refused (content policy). Write **"no music, no background music"** in every
+  video prompt: generated clips with their own score fight the edit's track.
+- **Kling image-to-video for living plates:** five R4 stills became moving shots (village, key, coast, sunset, café) at
+  $0.35 each; a shot that carries a still cut-out (text behind the car) stays a still, because the car moves in the clip.
+- **lipsync** (`fal-ai/sync-lipsync/v2`, $3/min) fixed a talking-to-camera Kling shot in one pass; pad the line with
+  silence to the clip's start offset.
 
 ## 3b. Keeping real people's likeness (The 1974 Cypher)
 - **Identity references = real photos only.** Using earlier AI shots of the same person as extra references compounds drift (the Boardroom close-ups had already made both collaborators slimmer and younger; reusing them made it worse).
@@ -268,6 +306,9 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **Contours** (`tools/matte_contours.py`): biggest external contours per frame, resampled to a fixed point count starting at the top-most point, temporally smoothed → stable animated paths. When subjects touch (a toast), use `--split-x` to cut the mask so each person keeps their own line. Add *Wiggle Paths* (Roughen, smooth points) + an offset echo line for an organic, hand-drawn feel.
 - **Face scan:** a sweeping band used as track matte for (a) a sideways-shifted copy of the plate (the "slice") and (b) Find Edges → Threshold → Tint copy screened on top (holographic face). Without Threshold, hair/beard edges turn into a green blob.
 - **Holographic look:** Glow + faint Venetian Blinds scanlines + a rare opacity flicker; motion always comes from library presets so timing stays on-brand.
+- **Template tracking beats colour tracking** for a small object: tracking a pale blue car by colour locked onto the sea;
+  OpenCV `matchTemplate` on a 90×70 crop, re-cut from each new frame, followed it for 5 s. Parent a null to the footage
+  layer and key its Position in source pixels; labels and leader lines read `toComp([0, 0])`.
 
 ## 4b. Organic motion, freezes and voiceover
 - **Organic strokes come from keyframe spacing**, not from a single curve: split the travel into 3–5 uneven segments, give each its own duration (some rush, some crawl) and ease (Land/Cruise/Settle), and drop 2–4 frame holds between some of them. `SSM.organicStops(v0, v1, frames, seed)` + `SSM.animateStops` do it with a repeatable seed per layer. A chasing Trim Start (offset by a Glide) turns it into a traveling brush stroke.
@@ -305,6 +346,19 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 
 - **Promotional cut (not a slide explainer):** full-screen footage under oversized type (150–300 px), one idea per beat, hard cuts on the spoken word, and big two-colour shape wipes (Spark + Pine bars on the Whip curve) as transitions: the closing bars cover the last frames so the cut happens under a solid colour. Put the type on a bottom band (Pine at ~50 %) or on the empty side of the frame, never on faces. Busy demo footage goes into a big card next to the word, not full screen behind it (its own text fights the title). **One hero per beat**: a huge word (250–330 px) with a small kicker (60–76 px); two stacked lines of similar size read as a fight. Shape wipes need time and **continuity**: the bars that cover the end of a scene and the bars that reveal the next must have the same colours and direction (a colour swap at the cut reads as a flash), accelerate in (Launch) and decelerate out (Land), ~0.5 s + ~0.75 s; and every cut gets one (hard cuts between scenes felt abrupt). Short scenes lose half their time to the bars: open breaths in the VO (silence inserted in the pause before a phrase, `BREATHS` in `make_promo.py`) so each beat stays on screen ≥ 2.5 s and a speed ramp ~3 s. SFX must be set against the bed: at −14/−19 dB under a −13 LUFS pop track they disappear; a whoosh per cut at −3 dB and swooshes on hero words at −8 dB read clearly. Static pattern backgrounds look cheap; slow drifting lines (`lines` element) keep empty frames alive. Over footage, reuse the tracked scene comps (HUD chips, callouts) instead of the bare clip (`media` with `comp` and `hide`). Never put type over footage that has its own titles (the end card's reel showed through a Pine veil); use a clean plate. `tools/build_promo_all.jsx`.
 - **Voice for promos:** one continuous read (ElevenLabs Multilingual v2, Chris, stability 0.45), never line by line, never stretched. Cut the scenes to the VO word times (`tools/vo_words.py`, whisper): a scene changes only in a pause, after its last word.
+- **UI scenes in a promo for a motion tool must show the tool doing what the line says**, not a screenshot fading in:
+  the panel builds on a base that stretches from a line, its sections and cards arrive in reading order, the cursor
+  hovers / clicks / drags the real controls (positions read from the panel comps, not guessed), the result happens on
+  screen (a live curve built from the dragged handle, its values updating by expression; a rule card flying into the
+  brand), and a type block on the side swaps with each step. Split the VO so each phrase lands on its action. Blurred
+  *video* behind the UI, never a still.
+- **Layout QA before rendering** (`check_layout`): overlay type at 32 px or more, kickers included; microcopy inside a
+  rebuilt app UI may stay small (say so). Headlines in a side block are left-aligned with their kicker. On light UI
+  (Figma) put labels on a dark pill, never Spark on white.
+- **Content on a CRT:** Screen blend plus a feathered mask (≈110 px) so the edge does not show; darken the glass under it
+  when the plate already has something on screen; track the glass box frame by frame when the camera pushes in.
+- **Callouts must point at what is on screen at that moment:** map the playhead to source time, check frames, and give
+  each callout the duration of its shot.
 
 ## 6. Audio
 - Target about **−16 LUFS integrated** for web (measure: `ffmpeg -i out.mp4 -af ebur128 -f null -`).
@@ -354,6 +408,15 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 | fal `fal-ai/elevenlabs/tts/eleven-v3` (list price 0.10 / 1k characters) | ≈ 0.01 per short line (9 lines ≈ 0.04) |
 | fal `elevenlabs/music/v2.5` (0.60 / min), 102 s teaser track | ≈ 1.02 |
 | fal `fal-ai/kling-video/v2.5-turbo/pro/image-to-video`, 5 s 1080p (1928x1072) | 0.35 list price (3 clips ≈ 1.05) |
+| fal `resemble-ai/chatterboxhd/speech-to-speech` (voice conversion) | 0.02 / min (13 lines ≈ 0.02) |
+| fal `fal-ai/sync-lipsync/v2`, 5 s | ≈ 0.25 |
+| fal `fal-ai/elevenlabs/sound-effects/v2` (0.002 / s) | ≈ 0.03 for 5 effects |
+| fal `fal-ai/kling-video/v2.6/pro/image-to-video` with audio, 5 s | 0.35 (audio unusable) |
+| fal `fal-ai/kling-video/v3/pro/image-to-video` with audio, 4 s | 0.56 (the one used) |
+| fal `fal-ai/kling-video/o3/pro/image-to-video`, 4 s | 0.56 |
+| fal `minimax/h3-max/reference-to-video`, 1080P (0.05 / s) | ≈ 0.25 (clip came back 2.2 s) |
+| fal Kling 2.5 turbo pro, six R4 plates, 5 s each | ≈ 2.10 |
+| fal `elevenlabs/music/v2.5`, 102 s 1985 commercial track | ≈ 1.02 |
 
 - **fal Seedance rejects our fictional characters** (`content_policy_violation` on `bytedance/seedance-2.5/reference-to-video`
   with the character sheets as references; the likeness filter does not know they are generated) → animate each shot from
