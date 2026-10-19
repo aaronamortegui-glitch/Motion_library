@@ -450,6 +450,8 @@ the app (Behaviors, Curves, Figma, like the After Effects panel) and a live link
 | Claude's live link | Canva's Cavalry MCP | `motion-dna-blender` MCP (the add-on listens while Blender is open) |
 | Figma | Claude prepares the frame in a folder; **Figma › Import frame › Animate by role** | the same |
 
+**The proof:** the same Figma frame and choreography rendered in After Effects, Cavalry and Blender match frame by frame (letters, blur, wipes, the "MOTION DNA" wordmark).
+
 Neither tool has a Figma link of its own, so Claude reads the frame, exports what needs pixels and writes a manifest
 with each layer's role; the panel rebuilds it in place with live text. Step by step for each tool, what each can and
 cannot do (techniques included) and troubleshooting:

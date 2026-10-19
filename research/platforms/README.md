@@ -10,6 +10,7 @@ plugin, until it is approved.
 - [Cavalry: step by step](#cavalry-step-by-step)
 - [Blender: step by step](#blender-step-by-step)
 - [Figma frames in Cavalry and Blender](#figma-frames-in-cavalry-and-blender)
+- [The proof: the same animation in the three tools](#the-proof-the-same-animation-in-after-effects-cavalry-and-blender)
 - [What each tool can do](#what-each-tool-can-do)
 - [How it works](#how-it-works) · [Files](#files) · [For Claude and maintainers](#for-claude-and-maintainers) · [Troubleshooting](#troubleshooting)
 
@@ -102,6 +103,42 @@ rebuilds it. Nobody exports by hand. The full procedure for Claude is in [figma/
 **Tip for designers:** name Figma layers by role (`title`, `subtitle`, `photo`, `logo / mark`, `cta`): roles are then
 exact instead of guessed from the layout. Tested on *motion-adn › 06 storyboard › Shot 09f*: both rebuilds match the
 Figma screenshot.
+
+## The proof: the same animation in After Effects, Cavalry and Blender
+One Figma frame (*motion-adn › 06 storyboard › Shot 09f*, a fictional car ad) with the Motion DNA logo as a sign-off,
+and one choreography (`out/proof/choreo.json`, 12 steps, 96 frames at 30 fps): the kicker word by word, "Drive"
+letter by letter, the photo blurring in, "into summer." word by word, three stripes wiping in, the price, then the
+logo mark (Scale Pop) and the wordmark "MOTION DNA" letter by letter. Each tool built the frame from Figma and ran
+the same steps with the same presets and token curves:
+- After Effects: `tools/build_figma_slides.jsx` + `SSP.apply` / `SSP.applyText`.
+- Cavalry: `cavalry/proof_cavalry.js` (Canva's MCP), which saves and restores the open scene.
+- Blender: `blender/proof_blender.py` (headless).
+- Comparison: `python research/platforms/proof_compare.py <proof folder> <AE render.mp4>` → a 2×2 video (Figma,
+  AE, Cavalry, Blender), a sheet of key frames and the mean pixel difference to After Effects.
+
+**Result** (mean absolute pixel difference to the After Effects render, 0–255; an identical frame through video
+encoding alone scores about 2.7):
+
+| t | 0.30 s | 0.55 s | 1.00 s | 1.90 s | 3.10 s |
+|---|---|---|---|---|---|
+| Cavalry | 3.16 | 3.20 | 2.86 | 2.95 | 2.95 |
+| Blender | 3.01 | 3.67 | 3.91 | 4.32 | 4.35 |
+
+Letters and words appear in the same order, at the same moments, with the same rise, scale and blur; the photo blurs
+in the same way; the stripes reveal right to left with a hard edge; the wordmark in Inter Tight Bold matches. What it
+took:
+- **Text pieces copy After Effects' Range Selector** (a Ramp Up window sweeping the text) instead of a fixed stagger,
+  baked per unit and frame; each letter or word has its own blur.
+- **Cavalry** splits the text into one layer per unit placed on its glyph: its Sub-Mesh shows per-letter changes in
+  the viewport but not in renders (Starter licence). Its Fast Blur takes 0.3 × AE's blurriness.
+- **Blender** pre-blurs photos (its depth of field is disc-shaped and softened the rest of the frame), keeps depth of
+  field only inside blur windows, and mixes colours in display space like AE.
+- **The comparison found a bug in After Effects' Figma import:** text with "Auto" line height sat 0.05 em too high;
+  fixed on `main` (the font's own line height, as Figma uses).
+
+Still different: Blender's blurred letters are a little lighter as they appear (disc bokeh vs Gaussian), the
+Cavalry photo shows a faint darker band at its edge in the first blurred frames, and Blender's fill of the
+letter-spaced kicker is a few pixels narrower.
 
 ## What each tool can do
 **Moves and kit** (curves measured against the token: 0.000 % error in both)
