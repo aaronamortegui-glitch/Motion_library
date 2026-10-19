@@ -1,5 +1,6 @@
 // Motion DNA for Cavalry (beta): a dockable window (Window › Scripts › Motion DNA) laid out like the After Effects
-// panel: Behaviors (pick a preset from thumbnails, adjust, In / Out / Both, Create) and Curves (the token curves, an
+// panel: Behaviors (choose a type: Moves = presets, or Effects / Text / Loops / Elements = kit pieces; pick from thumbnails, adjust,
+// In / Out / Both or the piece's own phase, Create) and Curves (the token curves, an
 // editable curve, Apply to the selected keyframes). install.py copies this file into Cavalry's Scripts folder and
 // writes the clone's path below; presets, curves and thumbnails are read from the clone, so a git pull updates them.
 var MDNA_ROOT = "__MDNA_ROOT__";
@@ -11,13 +12,24 @@ var C = { bg: "#141a18", card: "#1d2522", line: "#2c3833", lime: "#c9f25a", text
 var INFO = {}, ENERGY = { s: "Soft", m: "Medium", d: "Dynamic" };
 api.readFromFile(MDNA_ROOT + "/library/INDEX.txt").split("\n").forEach(function (l) {
     var f = l.split("|");
-    if (f[0] === "motion" && f.length > 4) INFO[f[1]] = { channels: f[2], energy: ENERGY[f[3]] || f[3], use: f[4] };
+    if ((f[0] === "motion" || f[0] === "fx" || f[0] === "text") && f.length > 4 && !INFO[f[1]]) INFO[f[1]] = { channels: f[2], energy: ENERGY[f[3]] || f[3], use: f[4] };
 });
 var ALL = MDNA.list();
+var TYPES = MDNA.kitTypes();
 var TOKENS = JSON.parse(api.readFromFile(MDNA_ROOT + "/tokens/superside_motion_tokens.json"));
 var CURVES = TOKENS.easings.map(function (e) { return e.name; });
+var ALIAS = { wiggle: "Wiggle Rotate", counter: "Count Up" };   // kit pieces whose library entry / thumbnail has another name
 function slug(n) { return n.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
 function thumb(n) { return MDNA_ROOT + "/library/thumbs_sm/motion/" + slug(n) + ".png"; }
+function kitThumb(p) {
+    var names = [p.name, ALIAS[p.id]].filter(Boolean), dirs = ["motion", "fx", "text"];
+    for (var i = 0; i < names.length; i++) for (var j = 0; j < dirs.length; j++) {
+        var f = MDNA_ROOT + "/library/thumbs_sm/" + dirs[j] + "/" + slug(names[i]) + ".png";
+        if (api.filePathExists(f)) return f;
+    }
+    return null;
+}
+function kitInfo(p) { return INFO[p.name] || INFO[ALIAS[p.id]] || {}; }
 function label(text, color, size) { var l = new ui.Label(text); if (color) l.setTextColor(color); if (size) l.setFontSize(size); return l; }
 function step(n, text) { var h = new ui.HLayout(); var b = label(" " + n + " ", "#0f1412", 12); b.setBackgroundColor(C.lime); b.setCornerRounding(8); h.add(b); h.add(label(text, C.text, 13)); h.addStretch(); return h; }
 
@@ -26,9 +38,17 @@ ui.setMinimumWidth(300);
 ui.setBackgroundColor(C.bg);
 
 // ------------------------------------------------------------------ Behaviors
-var state = { preset: ALL[0], energy: "All", phase: "in", query: "" };
+// type "Moves" = the portable presets (MDNA.apply); Effects, Text, Loops, Elements = kit pieces (MDNA.kit, research/platforms/kit_portable.json)
+var state = { type: "Moves", preset: ALL[0], piece: null, energy: "All", phase: "in", query: "" };
 var B = new ui.VLayout();
-B.add(step(1, "Pick a preset"));
+B.add(step(1, "Choose a type"));
+var typeDrop = new ui.DropDown();
+TYPES.forEach(function (t) { typeDrop.addEntry(t); });
+B.add(typeDrop);
+B.addSpacing(4);
+var stepTwo = label("Pick a preset", C.text, 13), two = new ui.HLayout(), twoBadge = label(" 2 ", "#0f1412", 12);
+twoBadge.setBackgroundColor(C.lime); twoBadge.setCornerRounding(8); two.add(twoBadge); two.add(stepTwo); two.addStretch();
+B.add(two);
 
 var search = new ui.LineEdit(); search.setPlaceholder("Search presets");
 search.onValueChanged = function () { state.query = search.getText().toLowerCase(); grid(); };
@@ -47,37 +67,59 @@ B.add(chipRow);
 var flow = new ui.FlowLayout(6, 6), scroll = new ui.ScrollView(), tiles = {};
 scroll.setLayout(flow); scroll.setMinimumHeight(250);
 B.add(scroll);
-function tile(n) {
-    var box = new ui.Container(), v = new ui.VLayout();
-    var img = new ui.ImageButton(thumb(n)); img.setImageSize(112, 63); img.setDrawStroke(false);
-    img.setToolTip(INFO[n] ? INFO[n].use + " · " + INFO[n].channels : n);
-    img.onClick = function () { state.preset = n; select(); };
-    var name = label(n, C.text, 11); name.setAlignment(1);
-    v.add(img); v.add(name); v.setMargins(4, 4, 4, 4); v.setSpaceBetween(2);
+function tile(title, tip, img, onPick) {
+    var box = new ui.Container(), v = new ui.VLayout(), pic;
+    if (img) { pic = new ui.ImageButton(img); pic.setImageSize(112, 63); pic.setDrawStroke(false); }
+    else { pic = new ui.Button(title); pic.setFixedSize(112, 63); pic.setBackgroundColor(C.line); pic.setDrawStroke(false); }   // text tile: no thumbnail for it yet
+    pic.setToolTip(tip);
+    pic.onClick = onPick;
+    var name = label(title, C.text, 11); name.setAlignment(1);
+    v.add(pic); v.add(name); v.setMargins(4, 4, 4, 4); v.setSpaceBetween(2);
     box.setLayout(v); box.setRadius(6, 6, 6, 6); box.setBackgroundColor(C.card); box.setFixedWidth(124);
     return box;
 }
+function matches(name, i) {
+    return (state.energy === "All" || i.energy === state.energy) && (!state.query || (name + " " + (i.use || "")).toLowerCase().indexOf(state.query) >= 0);
+}
 function grid() {
     flow.clear(); tiles = {};
-    var shown = ALL.filter(function (n) {
-        var i = INFO[n] || {};
-        return (state.energy === "All" || i.energy === state.energy) && (!state.query || (n + " " + (i.use || "")).toLowerCase().indexOf(state.query) >= 0);
-    });
-    shown.forEach(function (n) { tiles[n] = tile(n); flow.add(tiles[n]); });
-    count.setText(shown.length + " / " + ALL.length);
+    if (state.type === "Moves") {
+        var shown = ALL.filter(function (n) { return matches(n, INFO[n] || {}); });
+        shown.forEach(function (n) {
+            var i = INFO[n] || {};
+            tiles[n] = tile(n, i.use ? i.use + " · " + i.channels : n, thumb(n), function () { state.preset = n; select(); });
+            flow.add(tiles[n]);
+        });
+        count.setText(shown.length + " / " + ALL.length);
+    } else {
+        var all = MDNA.kitList(state.type);
+        var kshown = all.filter(function (p) { return matches(p.name, { energy: kitInfo(p).energy, use: p.use }); });
+        kshown.forEach(function (p) {
+            tiles[p.id] = tile(p.name, p.use, kitThumb(p), function () { state.piece = p; select(); paintPhase(); });
+            flow.add(tiles[p.id]);
+        });
+        count.setText(kshown.length + " / " + all.length);
+    }
     select();
 }
 var chosen = label("", C.text, 13), chosenInfo = label("", C.dim, 11);
 function select() {
-    for (var n in tiles) tiles[n].setBorder(n === state.preset ? C.lime : C.card, 2);
-    var i = INFO[state.preset] || {};
-    chosen.setText("● " + state.preset + (i.energy ? "  ·  " + i.energy.toLowerCase() : ""));
-    chosenInfo.setText(i.use ? i.use + "  ·  " + i.channels : "");
+    var cur = state.type === "Moves" ? state.preset : (state.piece ? state.piece.id : "");
+    for (var n in tiles) tiles[n].setBorder(n === cur ? C.lime : C.card, 2);
+    if (state.type === "Moves") {
+        var i = INFO[state.preset] || {};
+        chosen.setText("● " + state.preset + (i.energy ? "  ·  " + i.energy.toLowerCase() : ""));
+        chosenInfo.setText(i.use ? i.use + "  ·  " + i.channels : "");
+    } else if (state.piece) {
+        var k = kitInfo(state.piece);
+        chosen.setText("● " + state.piece.name + (k.energy ? "  ·  " + k.energy.toLowerCase() : ""));
+        chosenInfo.setText(state.piece.use + (state.piece.creates ? "  ·  creates " + state.piece.creates : ""));
+    } else { chosen.setText(""); chosenInfo.setText(""); }
 }
 B.add(chosen); B.add(chosenInfo);
 
 B.addSpacing(6);
-B.add(step(2, "Adjust, then Create"));
+B.add(step(3, "Adjust, then Create"));
 function field(v, type, stepv, min) { var f = new ui.NumericField(v); f.setType(type); f.setStep(stepv); if (min !== undefined) f.setMin(min); return f; }
 function row(name, a, b) { var h = new ui.HLayout(); var l = label(name, C.dim, 12); l.setFixedWidth(84); h.add(l); h.add(a); if (b) h.add(b); return h; }
 var duration = field(1, 1, 0.05, 0.25), intensity = field(1, 1, 0.05, 0), stagger = field(3, 0, 1, 0), start = field(0, 0, 1, 0);
@@ -86,21 +128,60 @@ var now = new ui.Button("Playhead"); now.onClick = function () { start.setValue(
 B.add(row("Duration ×", duration)); B.add(row("Intensity ×", intensity)); B.add(row("Curve", ease));
 B.add(row("Stagger (f)", stagger)); B.add(row("Start frame", start, now));
 
-var phases = {}, ph = new ui.HLayout();
-[["in", "In"], ["out", "Out"], ["both", "Both"]].forEach(function (p) {
-    var b = new ui.Button(p[1]); b.onClick = function () { state.phase = p[0]; paintPhase(); }; phases[p[0]] = b; ph.add(b);
+// In / Out / Both, plus one button for a piece's own phase (Emphasis, Loop, Transition); only the phases it supports are enabled
+var phases = {}, ph = new ui.HLayout(), special = "";
+[["in", "In"], ["out", "Out"], ["both", "Both"], ["special", "Loop"]].forEach(function (p) {
+    var b = new ui.Button(p[1]); b.onClick = function () { if (b.isEnabled()) { state.phase = p[0] === "special" ? special : p[0]; paintPhase(); } };
+    phases[p[0]] = b; ph.add(b);
 });
-function paintPhase() { for (var k in phases) phases[k].setBackgroundColor(k === state.phase ? C.line : C.card); }
+function supported() {
+    if (state.type === "Moves") return ["in", "out", "both"];
+    var ps = state.piece ? state.piece.phase.slice() : [];
+    if (ps.indexOf("in") >= 0 && ps.indexOf("out") >= 0) ps.push("both");
+    return ps;
+}
+function paintPhase() {
+    var ok = supported();
+    special = ok.filter(function (x) { return x !== "in" && x !== "out" && x !== "both"; })[0] || "";
+    if (ok.indexOf(state.phase) < 0) state.phase = ok[0] || "in";
+    phases.special.setHidden(!special);
+    if (special) phases.special.setText(special.charAt(0).toUpperCase() + special.slice(1));
+    ["in", "out", "both"].forEach(function (k) { phases[k].setEnabled(ok.indexOf(k) >= 0); phases[k].setHidden(!!special); });
+    for (var k in phases) {
+        var on = k === "special" ? (special && state.phase === special) : k === state.phase;
+        phases[k].setBackgroundColor(on ? C.line : C.card);
+    }
+}
 B.add(ph);
+
+typeDrop.onValueChanged = function () {
+    state.type = typeDrop.getText();
+    if (state.type !== "Moves" && (!state.piece || state.piece.type !== state.type)) state.piece = MDNA.kitList(state.type)[0] || null;
+    stepTwo.setText(state.type === "Moves" ? "Pick a preset" : "Pick a piece");
+    search.setPlaceholder(state.type === "Moves" ? "Search presets" : "Search " + state.type.toLowerCase());
+    grid(); paintPhase();
+};
 
 var status = label("Select layers in the Viewport, pick a preset, Create.", C.dim, 11);
 var create = new ui.Button("Create"), remove = new ui.Button("Remove");
 create.setBackgroundColor(C.lime); remove.setBackgroundColor(C.warm); create.setFixedHeight(30); remove.setFixedHeight(30);
 create.onClick = function () {
     var sel = api.getSelection();
-    if (!sel.length) { status.setText("Select one or more layers first."); return; }
     var opts = { duration: duration.getValue(), intensity: intensity.getValue(), ease: ease.getValue() > 0 ? ease.getText() : null };
     var s0 = start.getValue(), st = stagger.getValue(), ends = [];
+    if (state.type !== "Moves") {   // kit piece: Elements that create layers (counter, bars) work with no selection
+        if (!state.piece) { status.setText("Pick a piece first."); return; }
+        if (!state.piece.creates && !sel.length) { status.setText("Select one or more layers first."); return; }
+        try {
+            opts.stagger = st;
+            var r = MDNA.kit(state.piece.id, sel, state.phase, s0, opts);
+            status.setText(state.piece.name + (state.piece.creates ? " created" : " on " + sel.length + " layer" + (sel.length > 1 ? "s" : "")) +
+                (r.end > s0 ? ", ends at frame " + r.end : "") + (r.cut !== undefined ? " (cut at frame " + r.cut + ")" : "") + ".");
+            if (state.piece.creates && r.layers.length) api.select(r.layers);
+        } catch (e) { status.setText(String(e)); }
+        return;
+    }
+    if (!sel.length) { status.setText("Select one or more layers first."); return; }
     try {
         if (state.phase !== "out") ends = MDNA.applyMany(sel, state.preset, "in", s0, st, opts);
         if (state.phase !== "in") {
@@ -113,7 +194,8 @@ create.onClick = function () {
 };
 remove.onClick = function () {
     var sel = api.getSelection();
-    sel.forEach(function (id) { ["position", "scale", "rotation", "opacity"].forEach(function (a) { try { api.deleteAnimation(id, a); } catch (e) {} }); });
+    var gone = MDNA.kitRemove(sel);   // kit helpers (filters, deformers, masks, behaviours) and the layers a piece created
+    sel.forEach(function (id) { if (gone.indexOf(id) < 0) ["position", "scale", "rotation", "opacity"].forEach(function (a) { try { api.deleteAnimation(id, a); } catch (e) {} }); });
     status.setText(sel.length ? "Removed the animation." : "Select layers first.");
 };
 var act = new ui.HLayout(); act.add(create); act.add(remove); B.add(act); B.add(status);
@@ -184,7 +266,7 @@ K.add(kapply); K.add(kstatus); K.addStretch();
 var tabs = new ui.TabView();
 tabs.add("Behaviors", B);
 tabs.add("Curves", K);
-var head = new ui.HLayout(); head.add(label("Motion DNA", C.lime, 15)); head.addStretch(); head.add(label(ALL.length + " presets · " + CURVES.length + " curves", C.dim, 11));
+var head = new ui.HLayout(); head.add(label("Motion DNA", C.lime, 15)); head.addStretch(); head.add(label(ALL.length + " presets · " + MDNA.kitList().length + " kit · " + CURVES.length + " curves", C.dim, 11));
 ui.add(head);
 ui.add(tabs);
 paintChips(); paintPhase(); grid(); paint();
