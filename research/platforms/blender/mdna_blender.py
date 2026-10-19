@@ -88,8 +88,9 @@ def _fade_material(obj):
         m["mdna_fade"] = True
 
 
-def apply(obj, name, phase="in", start=0, px=1 / 180, duration=1.0, intensity=1.0):
-    """Applies preset `name` (phase in|out) to obj from frame `start`. Returns the end frame."""
+def apply(obj, name, phase="in", start=0, px=1 / 180, duration=1.0, intensity=1.0, ease=None):
+    """Applies preset `name` (phase in|out) to obj from frame `start`. Returns the end frame. ease: a token that replaces
+    the preset's own curves (opacity keeps its own)."""
     rec = RECIPES["presets"].get(name)
     if not rec:
         raise KeyError(f"preset not found: {name}")
@@ -107,7 +108,8 @@ def apply(obj, name, phase="in", start=0, px=1 / 180, duration=1.0, intensity=1.
         if not ch:
             continue
         f0 = start + s["start_f"] * k
-        pieces = [(s["from"], s["to"], s["frames"], _bezier_of(s))]
+        bz0 = EASE[ease] if ease and ch != "opacity" and ease in EASE else _bezier_of(s)   # the panel's Curve override (fades keep theirs)
+        pieces = [(s["from"], s["to"], s["frames"], bz0)]
         if s["kind"] == "stops":   # several token segments in a row
             pieces, v = [], s["from"]
             for st in s["stops"]:
@@ -131,6 +133,26 @@ def apply(obj, name, phase="in", start=0, px=1 / 180, duration=1.0, intensity=1.
             end = max(end, f1)
     obj["mdna_preset"] = f"{name} ({phase})"
     return end
+
+
+def ease_selected_keys(obj, ease_or_bezier):
+    """Gives every pair of consecutive selected keyframes on obj's curves the token curve (or a [x1,y1,x2,y2] list)."""
+    bz = EASE[ease_or_bezier] if isinstance(ease_or_bezier, str) else list(ease_or_bezier)
+    ad = obj.animation_data
+    if not ad or not ad.action:
+        return 0
+    act = ad.action
+    curves = act.fcurves if hasattr(act, "fcurves") else [c for l in act.layers for st in l.strips for c in st.channelbag(ad.action_slot).fcurves]
+    n = 0
+    for fc in curves:
+        ks = sorted((k for k in fc.keyframe_points if k.select_control_point), key=lambda k: k.co.x)
+        for k0, k1 in zip(ks, ks[1:]):
+            (f0, v0), (f1, v1) = k0.co, k1.co
+            k0.interpolation = "BEZIER"; k0.handle_right_type = "FREE"; k1.handle_left_type = "FREE"
+            k0.handle_right = (f0 + bz[0] * (f1 - f0), v0 + bz[1] * (v1 - v0))
+            k1.handle_left = (f0 + bz[2] * (f1 - f0), v0 + bz[3] * (v1 - v0))
+            n += 1
+    return n
 
 
 def _cli(argv):

@@ -21,9 +21,10 @@ FONT_DIR = M.ROOT / "assets/fonts"
 
 
 def bold_font():
-    fonts = sorted(FONT_DIR.glob("*.ttf"))
-    f = next((f for f in fonts if "Bold" in f.name or "SemiBold" in f.name), None)
-    return bpy.data.fonts.load(str(f)) if f else None
+    """Blender's built-in font. NOTE: the token font Inter Tight (static and variable) renders with holes and seams
+    in Blender text objects and in GN Fill Curve (its glyphs have overlapping contours); Instrument Serif renders
+    clean. Inter Tight needs its overlaps removed first (fontTools + skia-pathops removeOverlaps)."""
+    return bpy.data.fonts.load("<builtin>")
 
 
 def scene(w=960, h=540, frames=60, ortho=10.67, bg=(0.012, 0.03, 0.026)):
@@ -111,29 +112,28 @@ def fcurves(id_data):
 
 
 def key_bezier(id_data, path, index, f0, v0, f1, v1, ease="Land"):
-    """Keys any keyable property path (also nested, e.g. 'data.bevel_factor_end') with a token curve."""
+    """Keys a property with a token curve as free bezier handles. path: 'location' (with index), a nested path
+    ('data.bevel_factor_end', index None) or a custom property ('["mdna_wipe"]', index None). Returns the F-curve."""
     bz = M.EASE[ease] if isinstance(ease, str) else ease
     owner, attr = id_data, path
-    if path.startswith('["'):   # custom property: obj["name"]
-        name = path[2:-2]
+    if path.startswith('["'):   # custom property
         for f, v in ((f0, v0), (f1, v1)):
-            owner[name] = v
+            owner[path[2:-2]] = v
             owner.keyframe_insert(path, frame=f)
-        index = None
-    elif "." in path:
-        parts = path.split(".")
-        for p in parts[:-1]:
-            owner = getattr(owner, p)
-        attr = parts[-1]
-    for f, v in (((f0, v0), (f1, v1)) if not path.startswith('["') else ()):
-        cur = getattr(owner, attr)
-        if index is not None and index >= 0 and hasattr(cur, "__len__"):
-            cur[index] = v
-        else:
-            setattr(owner, attr, v)
-        owner.keyframe_insert(attr, index=-1 if index is None else index, frame=f)
-    fc = next(c for c in fcurves(owner) if c.data_path.endswith(attr) and (index is None or c.array_index == max(index, 0)))
-    fc.keyframe_points.foreach_set("interpolation", [0] * 0) if False else None
+        fc = next(c for c in fcurves(owner) if c.data_path == path)
+    else:
+        if "." in path:
+            parts = path.split(".")
+            for p in parts[:-1]:
+                owner = getattr(owner, p)
+            attr = parts[-1]
+        for f, v in ((f0, v0), (f1, v1)):
+            if index is not None:
+                getattr(owner, attr)[index] = v
+            else:
+                setattr(owner, attr, v)
+            owner.keyframe_insert(attr, index=-1 if index is None else index, frame=f)
+        fc = next(c for c in fcurves(owner) if c.data_path.endswith(attr) and c.array_index == (index or 0))
     pts = {round(k.co.x, 3): k for k in fc.keyframe_points}
     k0, k1 = pts[round(f0, 3)], pts[round(f1, 3)]
     dt, dv = f1 - f0, v1 - v0

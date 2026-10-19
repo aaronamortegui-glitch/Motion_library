@@ -77,7 +77,7 @@ function select() {
 B.add(chosen); B.add(chosenInfo);
 
 B.addSpacing(6);
-B.add(step(2, "Adjust, choose In / Out / Both, then Create"));
+B.add(step(2, "Adjust, then Create"));
 function field(v, type, stepv, min) { var f = new ui.NumericField(v); f.setType(type); f.setStep(stepv); if (min !== undefined) f.setMin(min); return f; }
 function row(name, a, b) { var h = new ui.HLayout(); var l = label(name, C.dim, 12); l.setFixedWidth(84); h.add(l); h.add(a); if (b) h.add(b); return h; }
 var duration = field(1, 1, 0.05, 0.25), intensity = field(1, 1, 0.05, 0), stagger = field(3, 0, 1, 0), start = field(0, 0, 1, 0);
@@ -158,7 +158,7 @@ CURVES.forEach(function (n) { var b = new ui.Button(n); b.onClick = function () 
 K.add(cflow);
 var dh = new ui.HLayout(); dh.addStretch(); dh.add(draw); dh.addStretch(); K.add(dh); K.add(values);
 K.addSpacing(6);
-K.add(step(2, "Select keyframes in the Time Editor, then Apply"));
+K.add(step(2, "Select keyframes, then Apply"));
 var kstatus = label("Each pair of selected keyframes on an attribute gets this curve.", C.dim, 11);
 var kapply = new ui.Button("Apply to selected keyframes"); kapply.setBackgroundColor(C.lime); kapply.setFixedHeight(30);
 kapply.onClick = function () {

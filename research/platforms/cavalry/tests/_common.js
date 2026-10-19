@@ -48,8 +48,13 @@ var T = (function () {
         api.select(mine); api.bringToFront(); api.select(sel);
         return api.getChildren(api.getActiveComp());
     }
+    function stack(ids) {   // explicit stacking, bottom -> top, all above the user's layers
+        var sel = api.getSelection();
+        for (var i = 0; i < ids.length; i++) { api.select([ids[i]]); api.bringToFront(); }
+        api.select(sel); return api.getChildren(api.getActiveComp());
+    }
     function sample(id, attr, frames) {
         var out = {}; for (var i = 0; i < frames.length; i++) { api.setFrame(frames[i]); out[frames[i]] = api.get(id, attr); } return out;
     }
-    return { ROOT: ROOT, BASE: BASE, ease: ease, key: key, rect: rect, text: text, stage: stage, cleanup: cleanup, sample: sample, front: front };
+    return { ROOT: ROOT, BASE: BASE, ease: ease, key: key, rect: rect, text: text, stage: stage, cleanup: cleanup, sample: sample, front: front, stack: stack };
 })();
