@@ -62,6 +62,11 @@
      "energy": [3, 4], "tones": ["confident", "clean"], "duration_s": 5, "aspect": "16:9",
      "inspired_by": ["ho-ba-761062", "techhalla-498547"],
      "vars": {"name": "wordmark (fictional)", "tag": "tagline", "mark": "three colours for disc, bar, arc"},
-     "prompt": "Make a {duration}s logo reveal on transparency for a fictional mark built from three primitives (disc, bar, arc): each part flies in on its own curve (Wind-up, Whip, Settle), they lock with a Pop, the mark slides left, the wordmark types on letter by letter and the tagline settles. Never use a real brand's logo."}
+     "prompt": "Make a {duration}s logo reveal on transparency for a fictional mark built from three primitives (disc, bar, arc): each part flies in on its own curve (Wind-up, Whip, Settle), they lock with a Pop, the mark slides left, the wordmark types on letter by letter and the tagline settles. Never use a real brand's logo."},
+    {"id": "t13_install_tutorial", "file": "t13_install_tutorial.html", "title": "Install tutorial (app walkthrough)", "uses": ["tutorial", "onboarding", "explainer"], "route": "A", "alpha": false,
+     "energy": [2, 3], "tones": ["clear", "friendly"], "duration_s": 59, "aspect": "16:9",
+     "inspired_by": [],
+     "vars": {"steps": "step titles and one-line bodies", "app": "the app window being walked through (fictional or our own UI)"},
+     "prompt": "Make a {duration}s step-by-step install tutorial: a desktop app window drawn in code over a soft blurred office background, a cursor that clicks through each step, a numbered step card (STEP n OF 7, title, one line) and a progress bar; each step lands on its voice line, with gaps left for presenter clips between steps."}
   ]
 }

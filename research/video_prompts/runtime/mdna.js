@@ -115,7 +115,8 @@
       addEventListener("resize", fit); fit();
       const t0 = performance.now(); const loop = () => { SCENE.render(((performance.now() - t0) / 1000) % SCENE.duration); requestAnimationFrame(loop); }; loop();
     }
-    document.fonts.ready.then(() => { window.MDNA_READY = true; });
+    // ready once the fonts and any images the template declares (def.images: [Image]) have loaded
+    Promise.all([document.fonts.ready, ...(SCENE.images || []).map(im => im.decode ? im.decode().catch(() => {}) : Promise.resolve())]).then(() => { window.MDNA_READY = true; });
   }
   TOKENS.fps = 30;
   window.MDNA = { T: TOKENS, EASE, clamp, lerp, seg, k, rng, noise, scene, draw, NOTEXT, finish, glow, rich, kicker,
