@@ -723,6 +723,16 @@ def _counter(obj, f0, f1, prm, bz):
         sc.collection.objects.link(obj)
         obj.location = sc.cursor.location
         obj.rotation_euler = sc.camera.matrix_world.to_euler() if sc.camera else (math.pi / 2, 0, 0)
+        if sc.camera:   # a new counter sits in front of what is already there (else a photo plane can hide it)
+            cm = sc.camera.matrix_world; fwd = -(cm.to_3x3() @ Vector((0, 0, 1))).normalized()
+            depths = [(o.matrix_world.translation - cm.translation).dot(fwd) for o in sc.objects
+                      if o is not obj and o.type in ("MESH", "CURVE", "FONT") and not o.hide_render]
+            here = (obj.location - cm.translation).dot(fwd)
+            dof = sc.camera.data.dof
+            if dof.use_dof:   # Blur In turned depth of field on: only the focus plane is sharp (other objects may be mid-blur)
+                obj.location = obj.location + fwd * ((dof.focus_distance - 0.0005) - here)
+            elif depths and min(depths) - 0.001 < here:
+                obj.location = obj.location + fwd * ((min(depths) - 0.001) - here)
         font, size, align, mat = bpy.data.fonts.load("<builtin>"), prm.get("size", 1.0), "CENTER", None
     else:
         cu = obj.data if obj.type == "FONT" else None

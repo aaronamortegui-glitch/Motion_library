@@ -447,6 +447,48 @@ class MDNA_PT_panel(bpy.types.Panel):
         row.operator("mdna.ease_keys", icon="IPO_BEZIER")
 
 
+# ------------------------------------------------------------------ Claude link (file bridge, no network port)
+# mcp_blender.py writes a job (Python) to bridge/inbox; this timer runs it inside the open Blender and writes the result
+# to bridge/outbox, like the After Effects bridge. bridge/alive.json says Blender is listening.
+BRIDGE = HERE / "bridge"
+
+
+def _bridge_tick():
+    import json, time, traceback
+    try:
+        inbox, outbox = BRIDGE / "inbox", BRIDGE / "outbox"
+        inbox.mkdir(parents=True, exist_ok=True); outbox.mkdir(parents=True, exist_ok=True)
+        (BRIDGE / "alive.json").write_text(json.dumps({"t": time.time(), "blender": bpy.app.version_string,
+                                                        "file": bpy.data.filepath, "scene": bpy.context.scene.name}), encoding="utf-8")
+        for job in sorted(inbox.glob("*.py")):
+            code = job.read_text(encoding="utf-8"); job.unlink()
+            import mdna_figma
+            ns = {"bpy": bpy, "M": M, "F": mdna_figma, "result": None}
+            try:
+                exec(compile(code, job.name, "exec"), ns)
+                out = {"ok": True, "result": ns.get("result")}
+            except Exception as e:
+                out = {"ok": False, "error": f"{type(e).__name__}: {e}", "trace": traceback.format_exc()[-1500:]}
+            (outbox / (job.stem + ".json")).write_text(json.dumps(out, default=str), encoding="utf-8")
+    except Exception as e:
+        print("[motion dna bridge]", e)
+    return 0.25
+
+
+def bridge_on():
+    if not bpy.app.timers.is_registered(_bridge_tick):
+        bpy.app.timers.register(_bridge_tick, first_interval=0.5, persistent=True)
+
+
+def bridge_off():
+    if bpy.app.timers.is_registered(_bridge_tick):
+        bpy.app.timers.unregister(_bridge_tick)
+    try:
+        (BRIDGE / "alive.json").unlink()
+    except OSError:
+        pass
+
+
 CLASSES = (MDNA_OT_workspace, MDNA_OT_preview, MDNA_Props, MDNA_OT_apply, MDNA_OT_remove, MDNA_OT_playhead, MDNA_OT_ease_keys, MDNA_OT_figma_import, MDNA_OT_figma_animate, MDNA_PT_panel)
 
 
@@ -456,9 +498,12 @@ def register():
     for c in CLASSES:
         bpy.utils.register_class(c)
     bpy.types.Scene.mdna = bpy.props.PointerProperty(type=MDNA_Props)
+    if not bpy.app.background:   # an open Blender listens for Claude; headless runs never do
+        bridge_on()
 
 
 def unregister():
+    bridge_off()
     del bpy.types.Scene.mdna
     for c in reversed(CLASSES):
         bpy.utils.unregister_class(c)

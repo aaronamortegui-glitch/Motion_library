@@ -45,6 +45,14 @@ Both show the same controls: energy filter, preset (with what it is for, its cha
 **Apply to selected** and **Remove**. Presets and curves are read from the clone, so `setup.py --update` (a git pull)
 updates both. Before these leave research, each needs its GIF in `docs/screens/` (CLAUDE.md).
 
+## Claude driving an open Blender (live)
+The add-on listens while Blender is open (a file bridge like After Effects': `blender/bridge/inbox` → `outbox`,
+no network port; `bridge/alive.json` says it is listening). Register its MCP server once in Claude Code:
+`claude mcp add motion-dna-blender -- python "<clone>/research/platforms/blender/mcp_blender.py"`
+Tools: blender_status, list_objects, list_presets, apply_preset, add_kit, figma_build, figma_animate,
+remove_animation, render_frame (look at it), run_python. Tested live: Figma frame built, animated by role, Float and a
+Counter added, frames rendered and checked. Cavalry needs no bridge of ours: Canva's Cavalry MCP is the live link.
+
 ## Blender
 ```
 blender -b --factory-startup -P research/platforms/blender/test_blender.py      # test + demo → blender/out/
