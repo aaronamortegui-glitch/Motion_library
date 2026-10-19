@@ -2,6 +2,17 @@
 
 The same presets and token curves in other tools. Not part of the plugin yet: each port is a beta to judge.
 
+## Keeping After Effects safe (read before changing anything here)
+- This work lives on the branch **`platforms-beta`**, checked out in its own folder (a git worktree:
+  `git worktree add "../motion category ai library - platforms" platforms-beta`). The main clone stays on `main`:
+  After Effects loads its panel from that clone, and teammates get `main` with Update.
+- The ports **only read** After Effects data (tokens, `library/INDEX.txt`, thumbnails, `portable_presets.json`); they
+  never write to it, and no After Effects installer or panel knows they exist. Their installers point to the clone
+  they are run from.
+- Before merging into `main`, this must print nothing (the branch may only add `research/platforms`, LEARNINGS and
+  `.gitignore` lines):
+  `git diff --stat main platforms-beta -- . ':!research/platforms' ':!docs/LEARNINGS.md' ':!.gitignore'`
+
 ## How it works
 1. **Portable recipes.** `export_portable.jsx` runs inside After Effects: it applies every motion preset to a test
    solid with the engine's animation calls wrapped, and writes what each one animates as data
