@@ -553,3 +553,19 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **Captions ran past their card in the tutorial** → `research/video_prompts/text_check.py` hooks `D.txt`/`D.rr`, samples
   the frames and lists every visible text that leaves the safe area or overflows the card under it. Run it before
   every render, with a `snap.py` sheet for centring.
+
+## 10. Other tools: Blender, Cavalry, Affinity (research/platforms)
+- **Porting presets one by one would not scale** → the AE engine's animation calls (SSM.animate, animateBezier,
+  animateStops, animateRaw) are wrapped while each preset runs on a test solid, so every preset becomes data
+  (`portable_presets.json`); each tool only needs an interpreter. 37 of 49 motion presets are fully portable.
+- **AE cannot hold a curve that leaves 0-1 (Pop, Recoil) in two keys**, so the engine splits them into three; Blender
+  and Cavalry take the cubic-bezier directly, so the recipes keep the token name, not AE's keys. Measured against the
+  CSS cubic-bezier, both tools match at 0.000 %.
+- **Blender 5:** actions are layered (`action.fcurves` is gone: `action.layers[0].strips[0].channelbag(slot).fcurves`)
+  and video left `image_settings.file_format` → render PNGs and join them with ffmpeg.
+- **Cavalry:** `setFrame` rounds to whole frames (sampling at fractions looked like a 31 % curve error); y is up and
+  rotation counter-clockwise; opacity is 0-100; a text box is 300 px tall by default and hangs below its pivot, so text
+  sat ~155 px low on its card → `autoWidth` + `autoHeight`, then centre on `getBoundingBox`. Its MCP server (Canva's
+  extension, `localhost:6768/sse`) runs on the free Starter licence and asks for approval in Cavalry the first time;
+  Windows' `Get-NetTCPConnection` did not always list its port while it answered.
+- **Affinity** has an MCP server of its own (Settings › Model Context Protocol, `localhost:6767`), off by default.

@@ -114,3 +114,4 @@ media/*/handoff_*/
 research/video_prompts/source/
 research/video_prompts/renders/
 panel/.python
+research/platforms/blender/out/
