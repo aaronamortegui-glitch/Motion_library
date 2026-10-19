@@ -157,6 +157,8 @@ class MDNA_OT_apply(bpy.types.Operator):
                 M.apply(ob, p.preset, "out", s, **kw)
             if p.phase == "both":
                 M.apply(ob, p.preset, "out", max(s + 10, end_scene - round(21 * p.duration) - (len(objs) - 1 - i) * p.stagger), **kw)
+        if "motion blur" in INFO.get(p.preset, {}).get("channels", "").lower():   # e.g. Whip Pan: AE turns it on too
+            context.scene.render.use_motion_blur = True
         self.report({"INFO"}, f"{p.preset} on {len(objs)} object(s)")
         return {"FINISHED"}
 
@@ -275,6 +277,45 @@ class MDNA_OT_figma_animate(bpy.types.Operator):
         return {"FINISHED"}
 
 
+class MDNA_OT_workspace(bpy.types.Operator):
+    bl_idname = "mdna.workspace"
+    bl_label = "Motion DNA workspace"
+    bl_description = "Switch to the Animation workspace, look through the camera with material preview, timeline below"
+
+    def execute(self, context):
+        ws = bpy.data.workspaces.get("Animation")
+        if ws is not None:
+            context.window.workspace = ws
+        bpy.app.timers.register(lambda: _frame_views(), first_interval=0.2)
+        return {"FINISHED"}
+
+
+def _frame_views():
+    sc = bpy.context.scene
+    for win in bpy.context.window_manager.windows:
+        for area in win.screen.areas:
+            if area.type == "VIEW_3D":
+                sp = area.spaces[0]
+                sp.shading.type = "MATERIAL"; sp.show_region_ui = True
+                if sc.camera:
+                    sp.region_3d.view_perspective = "CAMERA"
+                    sp.lock_camera = False
+    return None
+
+
+class MDNA_OT_preview(bpy.types.Operator):
+    bl_idname = "mdna.preview"
+    bl_label = "Preview"
+    bl_description = "Play the animation in the viewport from the start (press again to stop)"
+
+    def execute(self, context):
+        sc = context.scene
+        if not context.screen.is_animation_playing:
+            sc.frame_current = sc.frame_start
+        bpy.ops.screen.animation_play()
+        return {"FINISHED"}
+
+
 class MDNA_PT_panel(bpy.types.Panel):
     bl_label = "Motion DNA"
     bl_space_type = "VIEW_3D"
@@ -283,6 +324,14 @@ class MDNA_PT_panel(bpy.types.Panel):
 
     def draw(self, context):
         p, lay = context.scene.mdna, self.layout
+        row = lay.row(align=True)
+        row.operator("mdna.workspace", text="Workspace", icon="WORKSPACE")
+        playing = context.screen.is_animation_playing
+        row.operator("mdna.preview", text="Stop" if playing else "Preview", icon="PAUSE" if playing else "PLAY")
+        row = lay.row(align=True)
+        row.prop(context.scene.render, "use_motion_blur", text="Motion blur", toggle=True, icon="MOD_TIME")
+        if context.scene.render.use_motion_blur:
+            row.prop(context.scene.render, "motion_blur_shutter", text="Shutter")
         lay.prop(p, "tab", expand=True)
         {"BEHAVIORS": self.behaviors, "CURVES": self.curves, "FIGMA": self.figma}[p.tab](p, lay)
 
@@ -398,7 +447,7 @@ class MDNA_PT_panel(bpy.types.Panel):
         row.operator("mdna.ease_keys", icon="IPO_BEZIER")
 
 
-CLASSES = (MDNA_Props, MDNA_OT_apply, MDNA_OT_remove, MDNA_OT_playhead, MDNA_OT_ease_keys, MDNA_OT_figma_import, MDNA_OT_figma_animate, MDNA_PT_panel)
+CLASSES = (MDNA_OT_workspace, MDNA_OT_preview, MDNA_Props, MDNA_OT_apply, MDNA_OT_remove, MDNA_OT_playhead, MDNA_OT_ease_keys, MDNA_OT_figma_import, MDNA_OT_figma_animate, MDNA_PT_panel)
 
 
 def register():

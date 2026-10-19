@@ -299,7 +299,20 @@ tabs.add("Behaviors", B);
 tabs.add("Curves", K);
 tabs.add("Figma", F);
 var head = new ui.HLayout(); head.add(label("Motion DNA", C.lime, 15)); head.addStretch(); head.add(label(ALL.length + " presets · " + MDNA.kitList().length + " kit · " + CURVES.length + " curves", C.dim, 11));
+// Play and Motion blur, like the panel header in After Effects: blur needs the comp switch and each layer's own (Full)
+var bar = new ui.HLayout();
+var play = new ui.Button("Play"); play.onClick = function () { api.play(); };
+var mb = new ui.Button("Motion blur: off");
+function paintMb() { var on = !!api.get(api.getActiveComp(), "motionBlur"); mb.setText("Motion blur: " + (on ? "on" : "off")); mb.setBackgroundColor(on ? C.line : C.card); }
+mb.onClick = function () {
+    var comp = api.getActiveComp(), on = !api.get(comp, "motionBlur"), sel = api.getSelection();
+    api.set(comp, { motionBlur: on });
+    (sel.length ? sel : api.getCompLayers(true)).forEach(function (id) { try { api.set(id, { motionBlur: on ? 1 : 0 }); } catch (e) {} });
+    paintMb();
+};
+bar.add(play); bar.add(mb);
 ui.add(head);
+ui.add(bar);
 ui.add(tabs);
-paintChips(); paintPhase(); grid(); paint();
+paintChips(); paintPhase(); grid(); paint(); paintMb();
 ui.show();
