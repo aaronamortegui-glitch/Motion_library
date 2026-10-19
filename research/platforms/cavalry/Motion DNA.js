@@ -7,6 +7,7 @@ var MDNA_ROOT = "__MDNA_ROOT__";
 
 api.load(MDNA_ROOT + "/research/platforms/cavalry/mdna_cavalry.js");
 MDNA.init(MDNA_ROOT);
+api.load(MDNA_ROOT + "/research/platforms/cavalry/mdna_figma.js");
 
 var C = { bg: "#141a18", card: "#1d2522", line: "#2c3833", lime: "#c9f25a", text: "#e6efe9", dim: "#8fa39b", warm: "#d9a48f" };
 var INFO = {}, ENERGY = { s: "Soft", m: "Medium", d: "Dynamic" };
@@ -263,9 +264,40 @@ kapply.onClick = function () {
 K.add(kapply); K.add(kstatus); K.addStretch();
 
 // ------------------------------------------------------------------ window
+// ------------------------------------------------------------------ Figma
+// Cavalry has no Figma link: Claude reads the frame with the Figma MCP and writes a folder (manifest.json + assets),
+// research/platforms/figma/README.md. Here: rebuild that folder as layers, then animate it by role.
+var F = new ui.VLayout(), FIG = { folder: "", built: null };
+F.add(step(1, "Import a frame Claude prepared from Figma"));
+F.add(label("Ask Claude: “bring this Figma frame to Cavalry” with the frame's link. It writes a folder with the layers; pick it here.", C.dim, 11));
+var figPath = label("No folder yet", C.text, 12);
+var pick = new ui.Button("Choose frame folder…");
+pick.onClick = function () { var d = api.presentChooseFolder(FIG.folder || MDNA_ROOT, "Figma frame folder (manifest.json)"); if (d) { FIG.folder = d; figPath.setText(d); } };
+var imp = new ui.Button("Import frame"); imp.setBackgroundColor(C.lime); imp.setFixedHeight(30);
+var figStatus = label("", C.dim, 11);
+imp.onClick = function () {
+    if (!FIG.folder) { figStatus.setText("Choose the folder first."); return; }
+    try { FIG.built = MDNA_FIGMA.build(FIG.folder, { resize: true }); figStatus.setText(FIG.built.length + " layers, Figma names kept: " + FIG.built.map(function (b) { return b.role; }).join(", ")); }
+    catch (e) { figStatus.setText(String(e)); }
+};
+F.add(pick); F.add(figPath); F.add(imp);
+F.addSpacing(6);
+F.add(step(2, "Animate it by role"));
+F.add(label("title → Chars Rise · subtitle → Words Fade Up · media → Blur In · shapes → Wipe Reveal · body → Fade Up · logo → Scale Pop", C.dim, 11));
+var figStagger = field(4, 0, 1, 0);
+F.add(row("Stagger (f)", figStagger));
+var anim = new ui.Button("Animate by role"); anim.setBackgroundColor(C.lime); anim.setFixedHeight(30);
+anim.onClick = function () {
+    if (!FIG.built) { figStatus.setText("Import a frame first."); return; }
+    var done = MDNA_FIGMA.animate(FIG.built, null, api.getFrame(), figStagger.getValue());
+    figStatus.setText(done.length + " layers animated from the playhead.");
+};
+F.add(anim); F.add(figStatus); F.addStretch();
+
 var tabs = new ui.TabView();
 tabs.add("Behaviors", B);
 tabs.add("Curves", K);
+tabs.add("Figma", F);
 var head = new ui.HLayout(); head.add(label("Motion DNA", C.lime, 15)); head.addStretch(); head.add(label(ALL.length + " presets · " + MDNA.kitList().length + " kit · " + CURVES.length + " curves", C.dim, 11));
 ui.add(head);
 ui.add(tabs);

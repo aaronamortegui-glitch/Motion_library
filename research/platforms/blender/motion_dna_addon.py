@@ -105,7 +105,9 @@ def override_items(self, context):
 
 
 class MDNA_Props(bpy.types.PropertyGroup):
-    tab: bpy.props.EnumProperty(items=[("BEHAVIORS", "Behaviors", "", "ANIM", 0), ("CURVES", "Curves", "", "IPO_BEZIER", 1)])
+    tab: bpy.props.EnumProperty(items=[("BEHAVIORS", "Behaviors", "", "ANIM", 0), ("CURVES", "Curves", "", "IPO_BEZIER", 1), ("FIGMA", "Figma", "", "IMAGE_DATA", 2)])
+    figma_folder: bpy.props.StringProperty(name="Frame folder", subtype="DIR_PATH", description="The folder Claude wrote from a Figma frame (manifest.json + assets)")
+    figma_stagger: bpy.props.IntProperty(name="Stagger", default=4, min=0)
     kind: bpy.props.EnumProperty(name="Type", items=[
         ("MOVES", "Moves", "The portable presets"), ("Effects", "Effects", "Blur, wipes, skew, line draw"),
         ("Text", "Text", "Per letter, per word, typewriter"), ("Loops", "Loops", "Float, pulse, wiggle"),
@@ -241,6 +243,38 @@ class MDNA_OT_ease_keys(bpy.types.Operator):
         return {"FINISHED"}
 
 
+class MDNA_OT_figma_import(bpy.types.Operator):
+    bl_idname = "mdna.figma_import"
+    bl_label = "Import frame"
+    bl_description = "Rebuild the Figma frame (manifest.json) as text, shapes and image planes facing the camera"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        import mdna_figma
+        folder = bpy.path.abspath(context.scene.mdna.figma_folder)
+        if not (pathlib.Path(folder) / "manifest.json").exists():
+            self.report({"WARNING"}, "Pick the folder that has manifest.json"); return {"CANCELLED"}
+        built = mdna_figma.build(folder)
+        self.report({"INFO"}, f"{len(built)} layers imported, Figma names kept")
+        return {"FINISHED"}
+
+
+class MDNA_OT_figma_animate(bpy.types.Operator):
+    bl_idname = "mdna.figma_animate"
+    bl_label = "Animate by role"
+    bl_description = "Animate the imported Figma layers by their role, staggered in reading order from the playhead"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        import mdna_figma
+        built = [{"name": o.name, "object": o, "role": o["mdna_role"], "order": o["mdna_order"]} for o in context.scene.objects if "mdna_role" in o]
+        if not built:
+            self.report({"WARNING"}, "Import a frame first"); return {"CANCELLED"}
+        done = mdna_figma.animate(built, start=context.scene.frame_current, stagger=context.scene.mdna.figma_stagger)
+        self.report({"INFO"}, f"{len(done)} layers animated")
+        return {"FINISHED"}
+
+
 class MDNA_PT_panel(bpy.types.Panel):
     bl_label = "Motion DNA"
     bl_space_type = "VIEW_3D"
@@ -250,7 +284,7 @@ class MDNA_PT_panel(bpy.types.Panel):
     def draw(self, context):
         p, lay = context.scene.mdna, self.layout
         lay.prop(p, "tab", expand=True)
-        (self.behaviors if p.tab == "BEHAVIORS" else self.curves)(p, lay)
+        {"BEHAVIORS": self.behaviors, "CURVES": self.curves, "FIGMA": self.figma}[p.tab](p, lay)
 
     def behaviors(self, p, lay):
         lay.label(text="1  Choose a type")
@@ -338,6 +372,21 @@ class MDNA_PT_panel(bpy.types.Panel):
         row = lay.row(align=True); row.scale_y = 1.5
         row.operator("mdna.apply", icon="PLAY"); row.operator("mdna.remove", icon="X")
 
+    def figma(self, p, lay):
+        lay.label(text="1  Import a frame Claude prepared")
+        col = lay.column(align=True)
+        col.label(text="Ask Claude: bring this Figma frame to Blender.")
+        col.label(text="It writes a folder with the layers: pick it.")
+        lay.prop(p, "figma_folder", text="")
+        row = lay.row(); row.scale_y = 1.5; row.operator("mdna.figma_import", icon="IMPORT")
+        lay.separator()
+        lay.label(text="2  Animate it by role")
+        box = lay.box(); col = box.column(align=True)
+        for line in ("title: Chars Rise · subtitle: Words Fade Up", "media: Blur In · shapes: Wipe Reveal", "body: Fade Up · logo: Scale Pop"):
+            col.label(text=line)
+        lay.prop(p, "figma_stagger")
+        row = lay.row(); row.scale_y = 1.5; row.operator("mdna.figma_animate", icon="PLAY")
+
     def curves(self, p, lay):
         lay.label(text="1  Pick a token curve")
         lay.template_icon_view(p, "curve", show_labels=True, scale=7.0, scale_popup=4.0)
@@ -349,7 +398,7 @@ class MDNA_PT_panel(bpy.types.Panel):
         row.operator("mdna.ease_keys", icon="IPO_BEZIER")
 
 
-CLASSES = (MDNA_Props, MDNA_OT_apply, MDNA_OT_remove, MDNA_OT_playhead, MDNA_OT_ease_keys, MDNA_PT_panel)
+CLASSES = (MDNA_Props, MDNA_OT_apply, MDNA_OT_remove, MDNA_OT_playhead, MDNA_OT_ease_keys, MDNA_OT_figma_import, MDNA_OT_figma_animate, MDNA_PT_panel)
 
 
 def register():
