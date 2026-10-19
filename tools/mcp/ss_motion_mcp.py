@@ -23,8 +23,17 @@ AFX = os.environ.get("SS_AFTERFX", r"C:\Program Files\Adobe\Adobe After Effects 
 
 
 def mac_app():
+    """The After Effects that is running (2025 and 2026 can both be installed), else the newest one installed."""
     if os.environ.get("SS_AE_APP"):
         return os.environ["SS_AE_APP"]
+    try:
+        out = subprocess.run(["pgrep", "-fl", "Adobe After Effects 20[0-9]+.app/Contents/MacOS/"], capture_output=True, text=True, timeout=10).stdout
+        import re
+        m = re.search(r"(Adobe After Effects 20\d\d)\.app", out)
+        if m:
+            return m.group(1)
+    except Exception:
+        pass
     apps = sorted(p.name for p in pathlib.Path("/Applications").glob("Adobe After Effects 20*"))
     return apps[-1] if apps else "Adobe After Effects 2026"
 PROTOCOL = "2025-06-18"
@@ -34,7 +43,7 @@ PROTOCOL = "2025-06-18"
 def ae_running():
     try:
         if IS_MAC:
-            return subprocess.run(["pgrep", "-f", mac_app() + ".app/Contents/MacOS"], capture_output=True, timeout=10).returncode == 0
+            return subprocess.run(["pgrep", "-f", "Adobe After Effects 20[0-9]+.app/Contents/MacOS/"], capture_output=True, timeout=10).returncode == 0
         out = subprocess.run(["tasklist", "/FI", "IMAGENAME eq AfterFX.exe"], capture_output=True, text=True, timeout=10).stdout
         return "afterfx" in out.lower()
     except Exception:
@@ -758,14 +767,86 @@ return names.join("|") + "\\n" + c.name + " (" + c.width + "x" + c.height + ") -
     return text + "\nLook at each size with render_frame(comp=...)."
 
 
-def t_import_media(source, comp=None, time_s=None, dest=None, name=None, fit=True, layer=True):
-    """Brings generated or local media into AE: an https URL (Krea, Flora, Figma exports…) is downloaded first."""
+MEDIA_EXT = {".mp4", ".mov", ".m4v", ".webm", ".avi", ".mxf", ".png", ".jpg", ".jpeg", ".tif", ".tiff", ".gif", ".psd", ".ai", ".pdf",
+             ".svg", ".exr", ".webp", ".mp3", ".wav", ".aif", ".aiff", ".m4a", ".aac"}
+MEDIA_TYPES = {"video/mp4": ".mp4", "video/quicktime": ".mov", "video/webm": ".webm", "image/png": ".png", "image/jpeg": ".jpg",
+               "image/gif": ".gif", "image/webp": ".webp", "image/tiff": ".tif", "image/svg+xml": ".svg", "audio/mpeg": ".mp3",
+               "audio/wav": ".wav", "audio/x-wav": ".wav", "audio/wave": ".wav", "audio/mp4": ".m4a", "audio/aac": ".aac"}
+MAX_DOWNLOAD = 2 * 1024 ** 3   # 2 GB
+
+
+def _sniff_ext(head):
+    for sig, ext in ((b"\x89PNG", ".png"), (b"\xff\xd8\xff", ".jpg"), (b"GIF8", ".gif"), (b"ID3", ".mp3"), (b"\x1aE\xdf\xa3", ".webm")):
+        if head.startswith(sig):
+            return ext
+    if head[4:8] == b"ftyp":
+        return ".mov" if head[8:10] == b"qt" else ".mp4"
+    if head[:4] == b"RIFF":
+        return ".wav" if head[8:12] == b"WAVE" else ".webp" if head[8:12] == b"WEBP" else ""
+    return ""
+
+
+def _safe_name(s):
+    import re
+    import urllib.parse
+    s = re.sub(r'[<>:"/\|?*\x00-\x1f%]', "_", urllib.parse.unquote(str(s))).strip(" .")
+    return s[:120] or f"media_{int(time.time())}"
+
+
+def _download(url, folder, name):
+    """Streams url into folder (a .part file renamed when complete); returns the path. Refuses web pages and huge files."""
+    import shutil
     import urllib.parse
     import urllib.request
+    base = _safe_name(name or pathlib.Path(urllib.parse.urlparse(url).path).name)
+    stem, ext = (base[: -len(pathlib.Path(base).suffix)], pathlib.Path(base).suffix.lower()) if pathlib.Path(base).suffix.lower() in MEDIA_EXT else (base, "")
+    part = folder / f"{stem}.{int(time.time() * 1000)}.part"
+    ctype = ""
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "MotionDNA/1.0"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            ctype = r.headers.get_content_type()
+            if ctype == "text/html":
+                raise RuntimeError("the URL answers with a web page, not a media file (a login or an expired link?)")
+            if int(r.headers.get("Content-Length") or 0) > MAX_DOWNLOAD:
+                raise RuntimeError("the file is larger than 2 GB")
+            got, t0 = 0, time.time()
+            with open(part, "wb") as f:
+                while True:
+                    chunk = r.read(1 << 20)
+                    if not chunk:
+                        break
+                    got += len(chunk); f.write(chunk)
+                    if got > MAX_DOWNLOAD or time.time() - t0 > 1800:
+                        raise RuntimeError("the download is larger than 2 GB or took over 30 minutes")
+    except RuntimeError:
+        part.unlink(missing_ok=True); raise
+    except Exception as e:   # python.org's Python on macOS has no CA certificates: curl uses the system's
+        part.unlink(missing_ok=True)
+        if "CERTIFICATE" not in str(e).upper() and "SSL" not in str(e).upper():
+            raise
+        r = subprocess.run(["curl", "-fsSL", "--max-time", "1800", "--max-filesize", str(MAX_DOWNLOAD), "-o", str(part), url], capture_output=True, text=True)
+        if r.returncode != 0:
+            part.unlink(missing_ok=True)
+            raise RuntimeError("download failed: " + (r.stderr.strip() or str(e)))
+    head = part.read_bytes()[:64]
+    if head.lstrip().lower().startswith((b"<!doctype html", b"<html")):
+        part.unlink(missing_ok=True)
+        raise RuntimeError("the URL answers with a web page, not a media file (a login or an expired link?)")
+    ext = ext or MEDIA_TYPES.get(ctype, "") or _sniff_ext(head)
+    path = folder / f"{stem}{ext}"
+    if path.exists():
+        path = folder / f"{stem}_{int(time.time())}{ext}"
+    part.replace(path)
+    return path
+
+
+def t_import_media(source, comp=None, time_s=None, dest=None, name=None, fit=True, layer=True):
+    """Brings generated or local media into AE: an https URL (Krea, Flora, Figma exports…) is downloaded first."""
     src = str(source).strip()
     if src.lower().startswith(("http://", "https://")):
         if dest:
-            folder = pathlib.Path(dest)
+            folder = pathlib.Path(dest).expanduser().resolve()
         else:   # next to the open AE project, else renders/generated (git-ignored)
             try:
                 aep = run_jsx("return app.project.file ? app.project.file.parent.fsName : '';", includes=())
@@ -773,31 +854,30 @@ def t_import_media(source, comp=None, time_s=None, dest=None, name=None, fit=Tru
                 aep = ""
             folder = (pathlib.Path(aep) if aep else ROOT / "renders") / "generated"
         folder.mkdir(parents=True, exist_ok=True)
-        base = name or pathlib.Path(urllib.parse.urlparse(src).path).name or f"media_{int(time.time())}"
-        req = urllib.request.Request(src, headers={"User-Agent": "MotionDNA/1.0"})
-        with urllib.request.urlopen(req, timeout=300) as r:
-            if not pathlib.Path(base).suffix:   # signed URLs often hide the extension
-                ext = {"video/mp4": ".mp4", "video/quicktime": ".mov", "image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp",
-                       "audio/mpeg": ".mp3", "audio/wav": ".wav", "audio/x-wav": ".wav"}.get(r.headers.get_content_type(), "")
-                base += ext
-            path = folder / base
-            if path.exists():
-                path = folder / f"{path.stem}_{int(time.time())}{path.suffix}"
-            path.write_bytes(r.read())
+        try:
+            path = _download(src, folder, name)
+        except Exception as e:
+            return f"download failed: {e}"
     else:
-        path = pathlib.Path(src)
+        path = pathlib.Path(src).expanduser().resolve()
         if not path.exists():
             return f"not found: {src}"
     if path.suffix.lower() == ".webp":
         return f"saved {path.as_posix()} — After Effects does not import WebP: convert it (ffmpeg -i in.webp out.png) and call import_media with the PNG"
+    if not path.suffix:
+        return f"saved {path.as_posix()} — its type is unknown (no extension): rename it with the right extension and call import_media with the file"
     at = "c.time" if time_s is None else str(float(time_s))
-    body = f"""var it = app.project.importFile(new ImportOptions(new File({js(path.as_posix())})));
+    # the comp is found first: a missing comp must not leave a stray item in the project
+    body = f"""var c = {'findComp(' + js(comp) + ')' if layer else 'null'};
+app.beginUndoGroup("Motion DNA import (MCP)");
+try {{
+var it = app.project.importFile(new ImportOptions(new File({js(path.as_posix())})));
 if ({js(name)}) it.name = {js(name)};
-if (!{'true' if layer else 'false'}) return "imported " + it.name + " (project panel only)";
-var c = findComp({js(comp)}); app.beginUndoGroup("Motion DNA import (MCP)");
+if (!c) return "imported " + it.name + " (project panel only)";
 var L = c.layers.add(it); L.startTime = {at};
 if ({'true' if fit else 'false'} && it.width && it.height) {{ var s = Math.max(c.width / it.width, c.height / it.height) * 100; L.property("ADBE Transform Group").property("ADBE Scale").setValue([s, s, 100]); }}
-app.endUndoGroup(); return "imported " + it.name + " as layer " + L.index + " in " + c.name + " at " + L.startTime.toFixed(2) + " s";"""
+return "imported " + it.name + " as layer " + L.index + " in " + c.name + " at " + L.startTime.toFixed(2) + " s";
+}} finally {{ app.endUndoGroup(); }}"""
     return ("saved " if src.lower().startswith("http") else "file ") + path.as_posix() + "\n" + run_jsx(COMP_JS + body, includes=())
 
 

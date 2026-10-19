@@ -27,16 +27,22 @@ const PROJECT_FOLDERS = ["01_brief", "02_references", "03_footage", "04_audio", 
   try {
     if (typeof process === "undefined" || process.platform !== "darwin") return;
     const home = nodeReq()("os").homedir(), have = (process.env.PATH || "").split(":");
-    const add = ["/opt/homebrew/bin", "/usr/local/bin", home + "/.local/bin", home + "/.npm-global/bin", home + "/.volta/bin"].filter((d) => have.indexOf(d) < 0);
+    let nvm = [];   // npm installs under nvm: the newest node's bin
+    try { const d = home + "/.nvm/versions/node"; nvm = nodeReq()("fs").readdirSync(d).sort((a, b) => b.localeCompare(a, undefined, { numeric: true })).slice(0, 1).map((v) => d + "/" + v + "/bin"); } catch (e) {}
+    const add = ["/opt/homebrew/bin", "/usr/local/bin", home + "/.local/bin", home + "/.npm-global/bin", home + "/.volta/bin"].concat(nvm).filter((d) => have.indexOf(d) < 0);
     process.env.PATH = add.concat(have).filter(Boolean).join(":");
   } catch (e) {}
 })();
-// a command in a new Terminal window (macOS): AppleScript needs \ and " escaped inside its string
-function macTerminal(cmd, activate) {
-  const esc = cmd.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-  const a = ["-e", `tell application "Terminal" to do script "${esc}"`];
-  if (activate !== false) a.push("-e", 'tell application "Terminal" to activate');
-  nodeReq()("child_process").execFile("osascript", a);
+// a command in a new Terminal window (macOS): a .command file opened with `open` needs no permission to control
+// Terminal (AppleScript would, and fails silently when it is denied)
+function macTerminal(cmd) {
+  const req = nodeReq(), fs = req("fs"), path = req("path"), os = req("os");
+  const file = path.join(os.tmpdir(), "motion-dna-" + Date.now() + ".command");
+  try {
+    fs.writeFileSync(file, "#!/bin/zsh\nexport PATH=" + JSON.stringify(process.env.PATH || "") + "\n" + cmd + "\n");
+    fs.chmodSync(file, 0o755);
+  } catch (e) { toast("Could not open Terminal: " + e.message, true); return; }
+  req("child_process").execFile("open", ["-a", "Terminal", file], (err) => { if (err) toast("Could not open Terminal: " + err.message, true); });
 }
 // the newest Claude Code shipped with the desktop app (its folder changes with every update), else `claude` on PATH
 function findClaude() {
@@ -104,7 +110,7 @@ async function svcStatus(name, fresh) {   // "connected" | "auth" | "missing" | 
   const lines = out.split(/\r?\n/).map((l) => l.trim()).filter((l) => re.test(l));
   if (!lines.length) return err ? "unknown" : "missing";
   const ok = lines.find((l) => /connected/i.test(l) && !/fail|need/i.test(l));
-  AG.server = AG.server || {}; AG.server[name] = (ok || lines[0]).split(": http")[0].replace(/:$/, "");   // e.g. "claude.ai Krea", "figma"
+  AG.server = AG.server || {}; const ln = ok || lines[0]; AG.server[name] = ln.slice(0, ln.indexOf(": ")).replace(/:$/, "");   // e.g. "claude.ai Krea", "figma"
   return ok ? "connected" : "auth";
 }
 function figmaStatus() { return svcStatus("figma", true).then((st) => { AG.figmaServer = AG.server && AG.server.figma; return st; }); }
@@ -124,8 +130,13 @@ function authStatus() {   // claude auth status: JSON with loggedIn and authMeth
 }
 // macOS has no "python" (only python3), and AE's PATH misses Homebrew: use the first python3 that exists
 function pyExe() {
-  if (process.platform === "win32") return "python";
+  if (typeof process === "undefined" || !nodeReq()) return "python";
   const fs = nodeReq()("fs");
+  try {   // the Python setup.py ran with (it writes panel/.python): never the Windows Store stub or a Python without the tools
+    const p = fs.readFileSync((S.root || ".") + "/panel/.python", "utf8").trim();
+    if (p && fs.existsSync(p)) return p;
+  } catch (e) {}
+  if (process.platform === "win32") return "python";
   return ["/opt/homebrew/bin/python3", "/usr/local/bin/python3", "/Library/Frameworks/Python.framework/Versions/Current/bin/python3", "/usr/bin/python3"]
     .find((p) => { try { return fs.existsSync(p); } catch (e) { return false; } }) || "python3";
 }
@@ -137,7 +148,8 @@ const NEVER = ["Bash(git commit:*)", "Bash(git push:*)", "Bash(git reset:*)", "B
   "mcp__motion-dna__add_brand_note",   // in the panel the user decides where a rule goes (the proposal card)
   // account, sharing and deleting stay with the user: tokens, plans, trials, LoRA training, shares, deletes
   ...GEN.flatMap((g) => ["create_api_token", "revoke_api_token", "list_api_tokens", "start_free_trial", "show_plans", "delete_moodboard", "delete_style",
-    "overwrite_files", "flora_share_project", "flora_update_project_sharing", "flora_train_lora", "flora_delete_comment"].map((t) => `mcp__${g}__${t}`))];
+    "overwrite_files", "create_style", "update_style", "write_files", "create_folders", "create_api_token", "flora_share_project",
+    "flora_remove_from_canvas", "flora_rename_project", "flora_resolve_comment_thread", "flora_update_project_sharing", "flora_train_lora", "flora_delete_comment"].map((t) => `mcp__${g}__${t}`))];
 
 const TEMPLATES = [
   ["Figma → animate", "Take the frames from this Figma file: <paste URL>. Import their assets into After Effects as editable layers and animate them in the <style> style. Render a few check frames and tell me what you built."],
@@ -169,9 +181,16 @@ async function contextBlock() {
   }
   if (AG.mode === "full") {
     AG.svc = AG.svc || {};
-    for (const n of ["krea", "flora"]) if (AG.svc[n] == null) AG.svc[n] = await svcStatus(n);   // the sheet may never have been opened
+    AG.svcAt = AG.svcAt || {};
+    for (const n of ["krea", "flora"]) {   // re-checked every 5 minutes, and never more than 3 s on the way to a message
+      if (AG.svc[n] != null && Date.now() - (AG.svcAt[n] || 0) < 300000) continue;
+      const st = await Promise.race([svcStatus(n), new Promise((r) => setTimeout(() => r(null), 3000))]);
+      if (st) { AG.svc[n] = st; AG.svcAt[n] = Date.now(); }
+    }
     const on = ["krea", "flora"].filter((n) => AG.svc[n] === "connected").map((n) => SVC[n].label);
-    lines.push((on.length ? `Generators connected: ${on.join(", ")}.` : "No generator is connected (Krea or Flora: Agent › Connect).") +
+    const unsure = ["krea", "flora"].some((n) => AG.svc[n] == null || AG.svc[n] === "unknown");
+    lines.push((on.length ? `Generators connected: ${on.join(", ")}.` : unsure ? "Generator status unknown: if Krea or Flora tools are available, use them."
+      : "No generator is connected (Krea or Flora: Agent › Connect).") +
       " When the order needs footage, stills, textures or audio that the library and list_assets do not have: list the assets the video needs" +
       " (what, size and fps of the comp, seconds, which references keep characters and style consistent), quote the cost (USD, or the provider's credits when it gives no USD price; use a free preflight when the tool has one) and wait for my yes;" +
       " then generate with Krea or Flora, bring each result in with import_media (dest = the project's generated folder), place it (keep the clip's own frame rate: reinterpreting it changes its speed), and check with render_frame." +
@@ -319,8 +338,13 @@ async function runAgent(prompt) {
   const cp = nodeReq()("child_process");
   let sid = sessionNow();
   if (busyElsewhere(sid) && !confirm("This conversation was used in the last seconds somewhere else (the Claude app or a terminal).\nMessages from both would mix. Send anyway?")) return;
+  // busy from the first moment: building the context can take seconds, and a second Enter must not start a second run
+  AG.cancelled = false; AG.proc = { kill: () => { AG.cancelled = true; AG.proc = null; agent.draw(); } };
   push("you", prompt);
-  const full = prompt + "\n\n---\n" + (await contextBlock());
+  let full;
+  try { full = prompt + "\n\n---\n" + (await contextBlock()); }
+  catch (e) { AG.proc = null; push("error", "Could not read the context: " + e.message); return; }
+  if (AG.cancelled) { push("error", "Stopped."); return; }
   const mcp = JSON.stringify({ mcpServers: { "motion-dna": { command: pyExe(), args: [S.root + "/tools/mcp/ss_motion_mcp.py"] } } });
   const args = ["-p", full, "--output-format", "stream-json", "--verbose", "--mcp-config", mcp,
     "--allowedTools", ...(AG.mode === "full" ? FULL_TOOLS : SAFE_TOOLS), "--disallowedTools", ...NEVER];
@@ -644,14 +668,27 @@ function openTerminal(args) {   // a visible terminal window running Claude Code
 function runInWindow(args) {   // Figma's sign-in needs a real terminal: a small window that closes when it is done
   const cp = nodeReq()("child_process"), exe = AG.exe;
   if (process.platform === "win32") cp.exec(`start "Connecting Figma" /min cmd /c ""${exe}" ${args}"`, { windowsHide: false });
-  else macTerminal(`"${exe}" ${args}; exit`, false);
+  else macTerminal(`"${exe}" ${args}; exit`);
 }
 function waitForService(name, onDone) {   // checks every 6 s for 4 minutes after the permission page opens
-  AG.waits = AG.waits || {}; clearInterval(AG.waits[name]); let n = 0;
-  AG.waits[name] = setInterval(async () => {
-    if (++n > 40) return clearInterval(AG.waits[name]);
-    const st = await svcStatus(name, true);
-    if (st === "connected") { clearInterval(AG.waits[name]); AG.svc[name] = st; if (name === "figma") { AG.figma = st; setDot("st-figma", true, "Figma: connected"); } toast(SVC[name].label + " is connected."); onDone(); }
+  AG.waits = AG.waits || {}; AG.waits[name] = { until: Date.now() + 240000, onDone };
+  if (AG.waitTimer) return;
+  let busy = false;
+  AG.waitTimer = setInterval(async () => {   // one poller for all of them; a tick is skipped while the last check runs
+    if (busy) return;
+    const names = Object.keys(AG.waits).filter((n) => AG.waits[n] && AG.waits[n].until > Date.now());
+    if (!names.length) { clearInterval(AG.waitTimer); AG.waitTimer = null; return; }
+    busy = true;
+    try {
+      await mcpList(true);
+      for (const n of names) {
+        const st = await svcStatus(n);
+        if (st !== "connected") continue;
+        const w = AG.waits[n]; AG.waits[n] = null; AG.svc[n] = st; AG.svcAt = AG.svcAt || {}; AG.svcAt[n] = Date.now();
+        if (n === "figma") { AG.figma = st; setDot("st-figma", true, "Figma: connected"); }
+        toast(SVC[n].label + " is connected."); w.onDone();
+      }
+    } finally { busy = false; }
   }, 6000);
 }
 // One click: the browser opens the service's own permission page (nothing to type); the sheet turns green by itself.
@@ -670,13 +707,19 @@ function findCodex() {
   const fs = req("fs"), path = req("path"), os = req("os"), cp = req("child_process");
   const cands = process.platform === "win32" ? [path.join(process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"), "npm", "codex.cmd")] : ["/opt/homebrew/bin/codex", "/usr/local/bin/codex", path.join(os.homedir(), ".npm-global", "bin", "codex")];
   for (const c of cands) if (fs.existsSync(c)) return c;
-  try { const out = cp.execSync(process.platform === "win32" ? "where codex" : "command -v codex", { encoding: "utf8", windowsHide: true, timeout: 5000 }); const first = out.split(/\r?\n/).find((l) => l.trim()); if (first) return first.trim(); } catch (e) {}
+  try { const out = cp.execSync(process.platform === "win32" ? "where codex" : "command -v codex", { encoding: "utf8", windowsHide: true, timeout: 5000 }); const ls = out.split(/\r?\n/).map((l) => l.trim()).filter(Boolean); const first = process.platform === "win32" ? ls.find((l) => /\.(cmd|exe)$/i.test(l)) : ls[0]; if (first) return first; } catch (e) {}
   return null;
 }
-function runCodex(args) {   // a promise of {err, out}; .cmd needs a shell on Windows
+function runCodex(args) {   // a promise of {err, out}; a .cmd runs through cmd.exe with each argument quoted (spaces in paths)
   return new Promise((resolve) => {
-    try { nodeReq()("child_process").execFile(AG.codex, args, { timeout: 30000, windowsHide: true, shell: /\.cmd$/i.test(AG.codex) }, (err, out, er) => resolve({ err, out: String(out || "") + String(er || "") })); }
-    catch (e) { resolve({ err: e, out: "" }); }
+    const cp = nodeReq()("child_process"), done = (err, out, er) => resolve({ err, out: String(out || "") + String(er || "") });
+    try {
+      if (/\.cmd$/i.test(AG.codex)) {
+        const q = (a) => '"' + String(a).replace(/"/g, '""') + '"';
+        cp.execFile(process.env.ComSpec || "cmd.exe", ["/d", "/s", "/c", '"' + [AG.codex].concat(args).map(q).join(" ") + '"'],
+          { timeout: 30000, windowsHide: true, windowsVerbatimArguments: true }, done);
+      } else cp.execFile(AG.codex, args, { timeout: 30000, windowsHide: true }, done);
+    } catch (e) { resolve({ err: e, out: "" }); }
   });
 }
 async function codexStatus() {   // { found, logged, mcp }
@@ -691,7 +734,11 @@ function codexWindow(args, title) {   // a visible terminal running codex (its s
 }
 function addMotionDnaToCodex(redraw) {
   const py = pyExe(), server = (S.root || ".") + "/tools/mcp/ss_motion_mcp.py";
-  runCodex(["mcp", "add", "motion-dna", "--", py, server]).then((r) => { toast(r.err ? "Codex could not add Motion DNA: " + r.out.slice(0, 120) : "Motion DNA is in Codex: its tools drive After Effects."); AG.codexSt = null; redraw(); });
+  runCodex(["mcp", "add", "motion-dna", "--", py, server]).then(async (r) => {
+    const ok = !r.err && /(^|\s)motion-dna(\s|$)/m.test((await runCodex(["mcp", "list"])).out);   // trust the list, not the exit code
+    toast(ok ? "Motion DNA is in Codex: its tools drive After Effects." : "Codex could not add Motion DNA: " + (r.out.slice(0, 120) || "see codex mcp list"), !ok);
+    AG.codexSt = null; redraw();
+  });
 }
 
 // Update: git pull through setup.py --update (never over local changes), in a visible window; then reload the panel
@@ -704,8 +751,10 @@ function repoStatus() {   // { head, when, behind } after a quiet fetch; behind 
   });
 }
 function runUpdate() {
+  if (AG.updating && Date.now() - AG.updating < 60000) return toast("The update is already running in its window.");
+  AG.updating = Date.now();
   const cp = nodeReq()("child_process");
-  if (process.platform === "win32") cp.exec(`start "Motion DNA update" /d "${S.root}" cmd /k python tools\\setup.py --update`, { windowsHide: false });
+  if (process.platform === "win32") cp.exec(`start "Motion DNA update" /d "${S.root}" cmd /k ""${pyExe()}" tools\\setup.py --update"`, { windowsHide: false });
   else macTerminal(`cd "${S.root}" && "${pyExe()}" tools/setup.py --update`);
   toast("Updating in a window. When it says done, press Reload panel (or restart After Effects).");
 }
@@ -724,7 +773,7 @@ function showSetup(setup) {
   setup.hidden = false;
   const runCmd = () => process.platform === "win32" ? `& "${AG.exe}"` : `"${AG.exe}"`;   // PowerShell needs & before a quoted path
   const cmdRow = (cmd) => h("div", { class: "cmdrow" }, h("code", { class: "cmd" }, cmd),
-    h("button", { class: "btn", onclick: () => { navigator.clipboard && navigator.clipboard.writeText(cmd); toast("Copied: paste it in PowerShell."); } }, "Copy"));
+    h("button", { class: "btn", onclick: () => { navigator.clipboard && navigator.clipboard.writeText(cmd); toast("Copied: paste it in " + (process.platform === "win32" ? "PowerShell." : "Terminal.")); } }, "Copy"));
   const close = h("button", { class: "btn ghost", title: "Close", onclick: () => (setup.hidden = true) }, "✕");
   const redraw = () => showSetup(setup);
   const step = (ok, title, body) => h("div", { class: "conn" + (ok ? " ok" : "") }, h("div", { class: "conn-head" }, h("i", { class: "sdot " + (ok ? "ok" : "") }), h("b", {}, title)), ...kids(body));
@@ -746,7 +795,8 @@ function showSetup(setup) {
       : step(false, lab + " (optional)", [
           h("span", {}, st === "auth" ? lab + " needs your permission again (it asks from time to time)." : blurb[name]),
           h("span", { class: "dim" }, "Press the button and choose Allow in the " + lab + " page that opens. That's it: this turns green by itself."),
-          h("button", { class: "solid apply big", disabled: !AG.logged, title: AG.logged ? "" : "Connect Claude first", onclick: () => connectService(name, redraw) }, "Connect " + lab)]); };
+          // while its status is still being read, connecting could add a second server next to the account's connector
+          h("button", { class: "solid apply big", disabled: !AG.logged || st == null, title: !AG.logged ? "Connect Claude first" : st == null ? "Checking…" : "", onclick: () => connectService(name, redraw) }, st == null && AG.logged ? "Checking…" : "Connect " + lab)]); };
   const figma = service("figma"), krea = service("krea"), flora = service("flora");
   const fig = AG.figma;
 
@@ -767,11 +817,11 @@ function showSetup(setup) {
     h("div", { class: "crow" }, h("button", { class: rs && rs.behind ? "solid apply" : "btn", onclick: runUpdate }, "Update"), h("button", { class: "btn", onclick: () => location.reload() }, "Reload panel")));
 
   const trouble = h("details", { class: "trouble" }, h("summary", {}, "Having trouble?"),
-    h("span", { class: "dim" }, "Do it yourself in PowerShell: sign in to Claude"), cmdRow(`${runCmd()} auth login`),
+    h("span", { class: "dim" }, "Do it yourself in " + (process.platform === "win32" ? "PowerShell" : "Terminal") + ": sign in to Claude"), cmdRow(`${runCmd()} auth login`),
     h("span", { class: "dim" }, "Figma, yourself:"), cmdRow(`${runCmd()} mcp login "${AG.figmaServer || "figma"}"`),
     h("span", { class: "dim" }, "or claude.ai › Settings › Connectors › Figma › Connect."),
     h("span", { class: "dim" }, "Krea or Flora, yourself:"), cmdRow(`${runCmd()} mcp login "${(AG.server && AG.server.krea) || "krea"}"`),
-    h("span", { class: "dim" }, "Update, yourself (in the Motion DNA folder):"), cmdRow("python tools/setup.py --update"));
+    h("span", { class: "dim" }, "Update, yourself (in the Motion DNA folder):"), cmdRow((process.platform === "win32" ? "python" : "python3") + " tools/setup.py --update"));
 
   setup.replaceChildren(h("div", { class: "kit-top" }, h("b", { class: "kit-title" }, "Connect"), close), claude, figma, krea, flora, codex, upd,
     h("div", { class: "crow" }, h("button", { class: "btn", onclick: async () => { AG.logged = await authStatus(); AG.figma = await figmaStatus(); for (const n of ["krea", "flora"]) AG.svc[n] = await svcStatus(n); AG.codexSt = await codexStatus(); AG.repoSt = await repoStatus(); redraw(); if (agent.draw) agent.draw(); } }, "Check again")), trouble);

@@ -113,3 +113,4 @@ media/*/handoff_*/
 # video prompt research: third-party prompt texts and renders stay local
 research/video_prompts/source/
 research/video_prompts/renders/
+panel/.python

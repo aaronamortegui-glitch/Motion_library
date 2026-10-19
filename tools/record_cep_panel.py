@@ -59,7 +59,9 @@ window.require = (m) => ({
   os: { homedir: () => 'C:/Users/you' },
   crypto: null,
   child_process: {
-    execFile: (exe, args, opts, cb) => { cb = cb || opts; const codex = /codex/i.test(exe);
+    execFile: (exe, args, opts, cb) => { cb = cb || opts;
+      if (/cmd(\\.exe)?$/i.test(exe) && /codex/i.test(String(args))) { exe = 'codex'; args = (String(args[3]).slice(1, -1).match(/"[^"]*"/g) || []).slice(1).map((a) => a.slice(1, -1)); }   // .cmd through cmd.exe
+      const codex = /codex/i.test(exe);
       const mcp = [window.__figmaOn ? 'claude.ai Figma: https://mcp.figma.com/mcp - ✔ Connected' : 'plugin:figma:figma: https://mcp.figma.com/mcp (HTTP) - ! Needs authentication',
                    window.__kreaOn ? 'claude.ai Krea: https://api.krea.ai/mcp - ✔ Connected' : '', window.__floraOn ? 'claude.ai Flora: https://agents.flora.ai/mcp - ✔ Connected' : ''].filter(Boolean).join('\\n');
       setTimeout(() => cb && cb(null,

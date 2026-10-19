@@ -119,7 +119,7 @@
    "comp": "_MCP_TEST · 9x16",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1792432701908.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1792438342769.png (open it to look at the frame)"
  },
  {
   "tool": "apply_preset",
@@ -165,7 +165,7 @@
    "comp": "_MCP_TEST",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1792432706964.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1792438346741.png (open it to look at the frame)"
  },
  {
   "tool": "check_layout",
@@ -711,23 +711,32 @@
   "tool": "import_media",
   "ok": true,
   "args": {
-   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261019-135812\\product_car_side.jpg",
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261019-153213\\product_car_side.jpg",
    "comp": "_MCP_TEST",
    "time_s": 0.5,
    "name": "imported_photo"
   },
-  "answer": "file D:/motion category ai library/research/_mcp_test/20261019-135812/product_car_side.jpg\nimported imported_photo as layer 1 in _MCP_TEST at 0.50 s"
+  "answer": "file D:/motion category ai library/research/_mcp_test/20261019-153213/product_car_side.jpg\nimported imported_photo as layer 1 in _MCP_TEST at 0.50 s"
  },
  {
   "tool": "import_media",
   "ok": true,
   "args": {
    "source": "https://raw.githubusercontent.com/aaronamortegui-glitch/Motion_library/main/library/packs/calm-modern.png",
-   "dest": "D:\\motion category ai library\\research\\_mcp_test\\20261019-135812\\generated",
+   "dest": "D:\\motion category ai library\\research\\_mcp_test\\20261019-153213\\generated",
    "comp": "_MCP_TEST",
    "fit": false
   },
-  "answer": "saved D:/motion category ai library/research/_mcp_test/20261019-135812/generated/calm-modern.png\nimported calm-modern.png as layer 1 in _MCP_TEST at 0.00 s"
+  "answer": "saved D:/motion category ai library/research/_mcp_test/20261019-153213/generated/calm-modern.png\nimported calm-modern.png as layer 1 in _MCP_TEST at 0.00 s"
+ },
+ {
+  "tool": "import_media",
+  "ok": true,
+  "args": {
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261019-153213\\missing.png",
+   "comp": "_MCP_TEST"
+  },
+  "answer": "not found: D:\\motion category ai library\\research\\_mcp_test\\20261019-153213\\missing.png"
  },
  {
   "tool": "add_asset",
@@ -750,16 +759,16 @@
    "category": "motion",
    "why": "test"
   },
-  "answer": "saved rule 1 (motion) in D:/motion category ai library/research/_mcp_test/20261019-135812/brand/brand.json: Product shots glide in, never pop"
+  "answer": "saved rule 1 (motion) in D:/motion category ai library/research/_mcp_test/20261019-153213/brand/brand.json: Product shots glide in, never pop"
  },
  {
   "tool": "matte",
   "ok": true,
   "args": {
-   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261019-135812\\product_car_side.jpg",
-   "out": "D:\\motion category ai library\\research\\_mcp_test\\20261019-135812\\product_cutout.png"
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261019-153213\\product_car_side.jpg",
+   "out": "D:\\motion category ai library\\research\\_mcp_test\\20261019-153213\\product_cutout.png"
   },
-  "answer": "matte: D:/motion category ai library/research/_mcp_test/20261019-135812/product_cutout.png"
+  "answer": "matte: D:/motion category ai library/research/_mcp_test/20261019-153213/product_cutout.png"
  },
  {
   "tool": "run_jsx",

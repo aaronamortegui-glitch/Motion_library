@@ -167,6 +167,10 @@ def update():
         log = git("log", "--oneline", f"{before}..{after}").stdout.strip().splitlines()
         for l in log[:10]:
             print("        " + l)
+        if git("diff", "--quiet", before, after, "--", "tools/setup.py").returncode != 0:   # the rest must run the new installer
+            print("      setup.py changed: running the new version\n")
+            args = [a for a in sys.argv[1:] if a != "--update"]
+            sys.exit(subprocess.call([sys.executable, str(ROOT / "tools/setup.py")] + args))
     return True
 
 
@@ -209,13 +213,25 @@ SIGNER_URL = "https://raw.githubusercontent.com/Adobe-CEP/CEP-Resources/master/Z
 CACHE = ROOT / "tools/.cache"   # git-ignored: the signer, this machine's self-signed certificate, the built .zxp
 
 
+def is_junction(path):
+    """os.path.isjunction exists only from Python 3.12 (macOS ships 3.9): read the reparse-point flag instead."""
+    if hasattr(os.path, "isjunction"):
+        return os.path.isjunction(path)
+    if MAC:
+        return False
+    try:
+        return bool(os.lstat(path).st_file_attributes & 0x400) and not os.path.islink(path)   # FILE_ATTRIBUTE_REPARSE_POINT
+    except (OSError, AttributeError):
+        return False
+
+
 def remove_ext(path):
     """Removes the installed panel: a link (junction / symlink) only loses the link, never the files it points to."""
     if not (path.exists() or path.is_symlink()):
         return
     if path.is_symlink():
         os.unlink(path)
-    elif os.path.isjunction(path):
+    elif is_junction(path):
         os.rmdir(path)
     else:
         shutil.rmtree(path)
@@ -227,7 +243,15 @@ def signer():
         import urllib.request
         CACHE.mkdir(parents=True, exist_ok=True)
         print(f"      downloading Adobe's ZXPSignCmd (once) from {SIGNER_URL}")
-        urllib.request.urlretrieve(SIGNER_URL, exe)
+        part = exe.with_name(exe.name + ".part")   # a cut download never stays cached as the signer
+        try:
+            urllib.request.urlretrieve(SIGNER_URL, part)
+        except Exception:   # python.org's Python on macOS has no CA certificates until "Install Certificates.command"
+            r = run(["curl", "-fsSL", "-o", str(part), SIGNER_URL])
+            if r.returncode != 0:
+                part.unlink(missing_ok=True)
+                raise RuntimeError("could not download ZXPSignCmd: " + (r.stderr.strip() or "curl failed"))
+        part.replace(exe)
         if MAC:
             exe.chmod(0o755)
     return exe
@@ -278,17 +302,34 @@ def cep(remove=False, dev=False):
             zxp = sign_panel()
         except Exception as e:   # no network, blocked download...: fall back to the developer link
             print(WARN + f"could not sign the panel ({e}); installing the developer link instead")
+            if MAC and ("Bad CPU" in str(e) or getattr(e, "errno", None) == 86):   # ZXPSignCmd is Intel-only
+                print("      Apple Silicon: install Rosetta (softwareupdate --install-rosetta), then run setup again for the signed panel")
             return cep(dev=True)
         import zipfile
-        remove_ext(target)
-        with zipfile.ZipFile(zxp) as z:
-            z.extractall(target)
+        fresh, old = target.with_name(target.name + ".new"), target.with_name(target.name + ".old")
+        try:   # extract next to it, then swap: a failure never leaves After Effects without a panel
+            for d in (fresh, old):
+                remove_ext(d)
+            with zipfile.ZipFile(zxp) as z:
+                z.extractall(fresh)
+            if target.exists() or target.is_symlink():
+                if target.is_symlink() or is_junction(target):
+                    remove_ext(target)
+                else:
+                    target.rename(old)
+            fresh.rename(target)
+            remove_ext(old)
+        except OSError as e:
+            if old.exists() and not target.exists():
+                old.rename(target)
+            print(WARN + f"could not replace the panel in {target} ({e}): close After Effects and run setup again")
+            return False
         print(OK + f"signed panel installed in {target} (no developer mode needed; restart After Effects)")
         return True
     linked = False
     if target.exists() or target.is_symlink():
         try:
-            linked = (target.is_symlink() or os.path.isjunction(target)) and target.resolve() == (ROOT / "panel").resolve()
+            linked = (target.is_symlink() or is_junction(target)) and target.resolve() == (ROOT / "panel").resolve()
         except OSError:
             linked = False
         if not linked:
@@ -320,6 +361,14 @@ def font_files():
 def fonts(remove=False):
     print(("Remove fonts" if remove else "3. Fonts (assets/fonts, OFL)"))
     files = font_files()
+    if not remove:
+        pointers = [f for f in files if f.read_bytes()[:40].startswith(b"version https://git-lfs")]
+        if pointers:
+            print(WARN + f"{len(pointers)} font file(s) are Git LFS pointers, not fonts: install Git LFS "
+                  "(https://git-lfs.com), then run  git lfs install && git lfs pull  and this setup again")
+            files = [f for f in files if f not in pointers]
+            if not files:
+                return False
     if MAC:
         dst = pathlib.Path.home() / "Library/Fonts"
         dst.mkdir(parents=True, exist_ok=True)
@@ -440,10 +489,13 @@ def mcp_user(remove=False):
 
 
 def mcp_local(remove=False):
-    """.mcp.json starts the server with `python`, which macOS (and some Linux/Windows setups) does not have: register it
-    for this folder (local scope, which wins over .mcp.json) with this Python's absolute path."""
-    if shutil.which("python") and not MAC:
-        return True
+    """.mcp.json starts the server with `python`, which macOS does not have and Windows may resolve to the Store stub:
+    register it for this folder (local scope, which wins over .mcp.json) with this Python's absolute path."""
+    py_file = ROOT / "panel/.python"   # the panel's Agent starts the MCP server with the same Python (git-ignored)
+    if remove:
+        py_file.unlink(missing_ok=True)
+    else:
+        py_file.write_text(sys.executable.replace("\\", "/"), encoding="utf-8")
     if not shutil.which("claude"):
         print(WARN + "Claude Code CLI not found: in Claude Code, run  claude mcp add -s local motion-dna -- "
               f"{sys.executable} tools/mcp/ss_motion_mcp.py  in this folder")
@@ -452,7 +504,7 @@ def mcp_local(remove=False):
     if remove:
         return True
     r = run(["claude", "mcp", "add", "-s", "local", "motion-dna", "--", sys.executable, str(ROOT / "tools/mcp/ss_motion_mcp.py")], cwd=ROOT)
-    print((OK if r.returncode == 0 else WARN) + f"MCP server for Claude Code in this folder: {sys.executable} (no 'python' on this machine)")
+    print((OK if r.returncode == 0 else WARN) + f"MCP server for Claude Code in this folder, with {sys.executable}")
     return r.returncode == 0
 
 

@@ -461,6 +461,22 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   now looks in `~/Library/Application Support/Claude/claude-code`, `~/.local/bin` and Homebrew; the repo's `.mcp.json`
   says `python`, so `setup.py` registers `motion-dna` for the clone in Claude Code's local scope (which wins) with its
   own Python's absolute path wherever `python` is missing.
+- **Review of the install/update path once teammates were using it** (three independent reviews, each finding
+  verified before fixing):
+  - `setup.py --update` crashed after the pull on Python < 3.12 (macOS ships 3.9): `os.path.isjunction` is 3.12+ →
+    `is_junction()` reads the reparse-point flag. The pull had already happened, and the installed panel is a shell
+    that loads its code from the clone, so Reload panel still got the new code; the rest of setup did not run.
+  - The panel was deleted before the new one was extracted → it extracts next to it and swaps.
+  - An update ran the old installer from memory → after a pull that changed `setup.py`, it runs the new one.
+  - `codex.cmd` with `shell: true` split `D:/motion category ai library/…` into words and still reported success →
+    run it through `cmd.exe /d /s /c` with each argument quoted (`windowsVerbatimArguments`), and trust
+    `codex mcp list`, not the exit code. `where codex` lists the extensionless npm shim first → take the `.cmd`.
+  - The first Full-mode message waited ~8 s for `claude mcp list` with Send still enabled → a second Enter started a
+    second paid run; the panel is busy from the first moment now, and the generator check waits 3 s at most.
+  - `import_media`: names with `%20` or `:` broke the file (unquote and sanitise), HTML error pages were "imported"
+    (refused), downloads had no size cap (streamed to a `.part`, 2 GB), python.org's Python on macOS has no CA
+    certificates (curl fallback).
+  - The Python setup ran with is written to `panel/.python` (git-ignored); the panel uses it, never the Store stub.
 - **`tools/record_cep_panel.py` stand-ins are JS inside a Python string:** a `'\n'` became a real newline and broke the
   injected script silently (the sheet never rendered) → write `'\\n'` in the Python source, and check the page console
   when a recorded scene comes out blank.
