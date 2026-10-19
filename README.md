@@ -435,6 +435,26 @@ Renders go to `research/video_prompts/renders/` (git-ignored). `snap.py` checks 
 remake of the same prompt, recoloured to our palette, to judge form and detail. What works, what does not yet (audio
 and beat maps, slow motion blur) and the next steps: [REPORT.md](research/video_prompts/REPORT.md).
 
+## Cavalry and Blender (beta)
+
+Motion DNA also works in **Cavalry** (2D motion graphics, free Starter licence) and **Blender** (3D, and 2D through a
+camera): the same presets with the exact token curves, 15 kit pieces (blur, wipes, iris, skew, line draw, text by
+letter or word, typewriter, loops, counter, bars transition), styles by role and Figma frames, each with a panel inside
+the app (Behaviors, Curves, Figma, like the After Effects panel) and a live link for Claude. It is a beta on the branch
+`platforms-beta`, kept apart from the After Effects plugin until it is approved.
+
+| | Cavalry | Blender |
+|---|---|---|
+| Install | `python research/platforms/cavalry/install.py` | `python research/platforms/blender/install.py` |
+| Open the panel | Window › Scripts › Motion DNA | 3D Viewport › **N** › Motion DNA |
+| Claude's live link | Canva's Cavalry MCP | `motion-dna-blender` MCP (the add-on listens while Blender is open) |
+| Figma | Claude prepares the frame in a folder; **Figma › Import frame › Animate by role** | the same |
+
+Neither tool has a Figma link of its own, so Claude reads the frame, exports what needs pixels and writes a manifest
+with each layer's role; the panel rebuilds it in place with live text. Step by step for each tool, what each can and
+cannot do (techniques included) and troubleshooting:
+**[research/platforms/README.md](research/platforms/README.md)**.
+
 ## For contributors
 
 **Feeding the plugin** (a new kit piece, technique, preset, style or resource) follows one route, the same for people and
