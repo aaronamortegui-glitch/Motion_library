@@ -451,6 +451,16 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   sharing, deletes). Claude.ai connectors show `pending` in the init message and connect a moment later: check the
   tools a run actually called, not the init list. Generated media comes in with MCP `import_media` (URL → file →
   layer); Krea's `generate_video` with `preflight: true` gives the exact cost in compute units for free.
+- **On a Mac the panel's Agent said the `motion-dna` MCP server "failed to connect (Executable not found in $PATH)"**
+  → the panel started it with `python`, which macOS does not have (only `python3`, often in Homebrew, outside AE's
+  PATH) → `pyExe()` in `panel/js/agent.js` picks the first python3 that exists on macOS. The same report showed Safe
+  mode asked to read Figma: Safe has only the Motion DNA tools, Figma needs Full. A review for macOS found more:
+  AE starts with a bare PATH (no Homebrew, no `~/.local/bin`, no `node` for npm-installed `codex`/`claude`) → the panel
+  prepends them to `process.env.PATH`; Connect's Terminal window broke on the quotes in `mcp login "claude.ai Krea"`
+  (AppleScript string) → every Terminal launch goes through `macTerminal()`, which escapes `\` and `"`; `findClaude`
+  now looks in `~/Library/Application Support/Claude/claude-code`, `~/.local/bin` and Homebrew; the repo's `.mcp.json`
+  says `python`, so `setup.py` registers `motion-dna` for the clone in Claude Code's local scope (which wins) with its
+  own Python's absolute path wherever `python` is missing.
 - **`tools/record_cep_panel.py` stand-ins are JS inside a Python string:** a `'\n'` became a real newline and broke the
   injected script silently (the sheet never rendered) → write `'\\n'` in the Python source, and check the page console
   when a recorded scene comes out blank.

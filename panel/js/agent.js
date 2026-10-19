@@ -21,13 +21,31 @@ let PJ = null;   // the open project: {dir, p} (p = motion-dna.project.json)
 const nodeReq = () => window.require || (window.cep_node && window.cep_node.require) || null;
 const PROJECT_FOLDERS = ["01_brief", "02_references", "03_footage", "04_audio", "05_ae", "06_renders", "07_exports", "claude"];
 
+// macOS apps start with a bare PATH (/usr/bin:/bin…): add Homebrew, ~/.local/bin and npm's folder so claude, codex,
+// node, git and python3 resolve the same way they do in a terminal
+(function macPath() {
+  try {
+    if (typeof process === "undefined" || process.platform !== "darwin") return;
+    const home = nodeReq()("os").homedir(), have = (process.env.PATH || "").split(":");
+    const add = ["/opt/homebrew/bin", "/usr/local/bin", home + "/.local/bin", home + "/.npm-global/bin", home + "/.volta/bin"].filter((d) => have.indexOf(d) < 0);
+    process.env.PATH = add.concat(have).filter(Boolean).join(":");
+  } catch (e) {}
+})();
+// a command in a new Terminal window (macOS): AppleScript needs \ and " escaped inside its string
+function macTerminal(cmd, activate) {
+  const esc = cmd.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const a = ["-e", `tell application "Terminal" to do script "${esc}"`];
+  if (activate !== false) a.push("-e", 'tell application "Terminal" to activate');
+  nodeReq()("child_process").execFile("osascript", a);
+}
 // the newest Claude Code shipped with the desktop app (its folder changes with every update), else `claude` on PATH
 function findClaude() {
   const req = nodeReq(); if (!req) return null;
   const fs = req("fs"), path = req("path"), os = req("os");
   // the Windows Store build of the desktop app keeps its files in a private folder (AppData\Local\Packages\Claude_*
   // LocalCache\Roaming): other programs, like After Effects, only see them there
-  const bases = [path.join(process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"), "Claude", "claude-code")];
+  const bases = process.platform === "darwin" ? [path.join(os.homedir(), "Library", "Application Support", "Claude", "claude-code")]
+    : [path.join(process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"), "Claude", "claude-code")];
   try {
     const pk = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local"), "Packages");
     for (const d of fs.readdirSync(pk)) if (/^Claude_/i.test(d)) bases.push(path.join(pk, d, "LocalCache", "Roaming", "Claude", "claude-code"));
@@ -44,7 +62,7 @@ function findClaude() {
   const ver = (s) => s.split(".").map((n) => +n || 0);
   cands.sort((a, b) => { const x = ver(a.v), y = ver(b.v); for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return y[i] - x[i]; return 0; });
   if (cands.length) return cands[0].exe;
-  if (process.platform !== "win32" && fs.existsSync("/usr/local/bin/claude")) return "/usr/local/bin/claude";
+  if (process.platform !== "win32") for (const p of [path.join(os.homedir(), ".local", "bin", "claude"), "/opt/homebrew/bin/claude", "/usr/local/bin/claude"]) if (fs.existsSync(p)) return p;
   return "claude";
 }
 // header dots for Claude and Figma: checked when the panel opens, every 10 minutes, and after Setup's Check again
@@ -103,6 +121,13 @@ function authStatus() {   // claude auth status: JSON with loggedIn and authMeth
       });
     } catch (e) { resolve(null); }
   });
+}
+// macOS has no "python" (only python3), and AE's PATH misses Homebrew: use the first python3 that exists
+function pyExe() {
+  if (process.platform === "win32") return "python";
+  const fs = nodeReq()("fs");
+  return ["/opt/homebrew/bin/python3", "/usr/local/bin/python3", "/Library/Frameworks/Python.framework/Versions/Current/bin/python3", "/usr/bin/python3"]
+    .find((p) => { try { return fs.existsSync(p); } catch (e) { return false; } }) || "python3";
 }
 const SAFE_TOOLS = ["mcp__motion-dna"];
 const GEN = ["claude_ai_Krea", "krea", "claude_ai_Flora", "flora"];   // generators: claude.ai connectors or servers added by hand
@@ -247,7 +272,7 @@ function openInClaudeApp(id) {
 // the files Claude reads when it works in a brand's folder or a project's folder (written once, never overwritten)
 async function ensureClaudeFolder(dir, kind, name, slug) {
   const has = async (f) => !String(await call("mdna_read_file", dir + "/" + f)).startsWith("ERR");
-  const mcp = JSON.stringify({ mcpServers: { "motion-dna": { command: "python", args: [S.root + "/tools/mcp/ss_motion_mcp.py"] } } }, null, 1) + "\n";
+  const mcp = JSON.stringify({ mcpServers: { "motion-dna": { command: pyExe(), args: [S.root + "/tools/mcp/ss_motion_mcp.py"] } } }, null, 1) + "\n";
   const md = kind === "brand"
     ? `# ${name} · a Motion DNA brand\n\nEverything about this brand happens in this folder and its conversation.\n\n` +
       `- **brand.json** (here): the brand's rules, curves and timing. Read it with \`get_brand\` (slug \`${slug}\`) before animating; ` +
@@ -296,7 +321,7 @@ async function runAgent(prompt) {
   if (busyElsewhere(sid) && !confirm("This conversation was used in the last seconds somewhere else (the Claude app or a terminal).\nMessages from both would mix. Send anyway?")) return;
   push("you", prompt);
   const full = prompt + "\n\n---\n" + (await contextBlock());
-  const mcp = JSON.stringify({ mcpServers: { "motion-dna": { command: "python", args: [S.root + "/tools/mcp/ss_motion_mcp.py"] } } });
+  const mcp = JSON.stringify({ mcpServers: { "motion-dna": { command: pyExe(), args: [S.root + "/tools/mcp/ss_motion_mcp.py"] } } });
   const args = ["-p", full, "--output-format", "stream-json", "--verbose", "--mcp-config", mcp,
     "--allowedTools", ...(AG.mode === "full" ? FULL_TOOLS : SAFE_TOOLS), "--disallowedTools", ...NEVER];
   if (AG.mode !== "full") args.push("--strict-mcp-config");   // Safe: only Motion DNA, not every server of the account
@@ -546,7 +571,7 @@ function projectView() {
         (p.brand ? `Brand: **${brandSel.selectedOptions[0].textContent}** (slug \`${p.brand}\`). Read it with \`get_brand\` before animating, and save every review note with \`add_brand_note\`.\n\n` : "") +
         `Project rules and the conversation history are in \`motion-dna.project.json\`. Folders: ${folders.map((f) => "`" + f + "`").join(", ")}.\n` +
         `Put everything you make in these folders, never in the Motion DNA repo. Ask before any paid generation.\n`;
-      const mcp = JSON.stringify({ mcpServers: { "motion-dna": { command: "python", args: [S.root + "/tools/mcp/ss_motion_mcp.py"] } } }, null, 1) + "\n";
+      const mcp = JSON.stringify({ mcpServers: { "motion-dna": { command: pyExe(), args: [S.root + "/tools/mcp/ss_motion_mcp.py"] } } }, null, 1) + "\n";
       const r = await call("mdna_project_new", { parent, name: nm, slug: sl, folders, saveAep: saveAep.checked, text: JSON.stringify(p, null, 1) + "\n", claude, mcp });
       if (String(r).startsWith("ERR")) return report(r);
       const res = parse(r); PJ = { dir: res.dir, p };
@@ -614,12 +639,12 @@ function conversationCard() {
 function openTerminal(args) {   // a visible terminal window running Claude Code with these arguments
   const cp = nodeReq()("child_process"), exe = AG.exe;
   if (process.platform === "win32") cp.exec(`start "Claude" cmd /k ""${exe}" ${args}"`, { windowsHide: false });
-  else cp.execFile("osascript", ["-e", `tell application "Terminal" to do script "\\"${exe}\\" ${args}"`, "-e", 'tell application "Terminal" to activate']);
+  else macTerminal(`"${exe}" ${args}`);
 }
 function runInWindow(args) {   // Figma's sign-in needs a real terminal: a small window that closes when it is done
   const cp = nodeReq()("child_process"), exe = AG.exe;
   if (process.platform === "win32") cp.exec(`start "Connecting Figma" /min cmd /c ""${exe}" ${args}"`, { windowsHide: false });
-  else cp.execFile("osascript", ["-e", `tell application "Terminal" to do script "\"${exe}\" ${args}; exit"`]);
+  else macTerminal(`"${exe}" ${args}; exit`, false);
 }
 function waitForService(name, onDone) {   // checks every 6 s for 4 minutes after the permission page opens
   AG.waits = AG.waits || {}; clearInterval(AG.waits[name]); let n = 0;
@@ -662,10 +687,10 @@ async function codexStatus() {   // { found, logged, mcp }
 function codexWindow(args, title) {   // a visible terminal running codex (its sign-in opens the browser)
   const cp = nodeReq()("child_process");
   if (process.platform === "win32") cp.exec(`start "${title}" cmd /k ""${AG.codex}" ${args}"`, { windowsHide: false });
-  else cp.execFile("osascript", ["-e", `tell application "Terminal" to do script "\\"${AG.codex}\\" ${args}"`, "-e", 'tell application "Terminal" to activate']);
+  else macTerminal(`"${AG.codex}" ${args}`);
 }
 function addMotionDnaToCodex(redraw) {
-  const py = process.platform === "win32" ? "python" : "python3", server = (S.root || ".") + "/tools/mcp/ss_motion_mcp.py";
+  const py = pyExe(), server = (S.root || ".") + "/tools/mcp/ss_motion_mcp.py";
   runCodex(["mcp", "add", "motion-dna", "--", py, server]).then((r) => { toast(r.err ? "Codex could not add Motion DNA: " + r.out.slice(0, 120) : "Motion DNA is in Codex: its tools drive After Effects."); AG.codexSt = null; redraw(); });
 }
 
@@ -681,7 +706,7 @@ function repoStatus() {   // { head, when, behind } after a quiet fetch; behind 
 function runUpdate() {
   const cp = nodeReq()("child_process");
   if (process.platform === "win32") cp.exec(`start "Motion DNA update" /d "${S.root}" cmd /k python tools\\setup.py --update`, { windowsHide: false });
-  else cp.execFile("osascript", ["-e", `tell application "Terminal" to do script "cd '${S.root}' && python3 tools/setup.py --update"`, "-e", 'tell application "Terminal" to activate']);
+  else macTerminal(`cd "${S.root}" && "${pyExe()}" tools/setup.py --update`);
   toast("Updating in a window. When it says done, press Reload panel (or restart After Effects).");
 }
 function openUrl(url) {   // the default browser

@@ -439,6 +439,23 @@ def mcp_user(remove=False):
     return r.returncode == 0
 
 
+def mcp_local(remove=False):
+    """.mcp.json starts the server with `python`, which macOS (and some Linux/Windows setups) does not have: register it
+    for this folder (local scope, which wins over .mcp.json) with this Python's absolute path."""
+    if shutil.which("python") and not MAC:
+        return True
+    if not shutil.which("claude"):
+        print(WARN + "Claude Code CLI not found: in Claude Code, run  claude mcp add -s local motion-dna -- "
+              f"{sys.executable} tools/mcp/ss_motion_mcp.py  in this folder")
+        return not remove
+    run(["claude", "mcp", "remove", "motion-dna", "-s", "local"], cwd=ROOT)
+    if remove:
+        return True
+    r = run(["claude", "mcp", "add", "-s", "local", "motion-dna", "--", sys.executable, str(ROOT / "tools/mcp/ss_motion_mcp.py")], cwd=ROOT)
+    print((OK if r.returncode == 0 else WARN) + f"MCP server for Claude Code in this folder: {sys.executable} (no 'python' on this machine)")
+    return r.returncode == 0
+
+
 def uninstall():
     print(f"Motion DNA uninstall · {ROOT}\n")
     for d in [x for x, _ in panel_dirs()] + scripts_dirs() + [x / "Startup" for x in scripts_dirs()]:
@@ -450,6 +467,7 @@ def uninstall():
                 except OSError:
                     print(WARN + f"cannot remove {f} (needs admin)")
     mcp_user(remove=True)
+    mcp_local(remove=True)
     fonts(remove=True)
     cep(remove=True)
     print("\nThe repo folder itself is untouched; delete it by hand if you want. Restart After Effects.")
@@ -469,7 +487,7 @@ def main():
         if not ok:
             print("\nUpdate stopped: nothing was changed."); sys.exit(1)
         results.append(ok)
-    results += [clean_old(), panel(), fonts(), cep(dev="--dev" in sys.argv), assets(), checks()]
+    results += [clean_old(), panel(), fonts(), cep(dev="--dev" in sys.argv), assets(), checks(), mcp_local()]
     if "--mcp-user" in sys.argv:
         results.append(mcp_user())
     print("\nLast steps in After Effects (only you can do these):")
