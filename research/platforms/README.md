@@ -32,7 +32,7 @@ plugin, until it is approved.
   installer, panel or MCP tool knows they exist, and their installers point to the folder they are run from.
 - Before merging into `main`, this must print nothing (the branch may only add `research/platforms`, docs and
   `.gitignore` lines):
-  `git diff --stat main platforms-beta -- . ':!research/platforms' ':!docs/LEARNINGS.md' ':!.gitignore' ':!README.md'`
+  `git diff --stat main...platforms-beta -- . ':!research/platforms' ':!docs/LEARNINGS.md' ':!.gitignore' ':!README.md'`
 
 ## Cavalry: step by step
 **Needs:** Cavalry 2.8 or newer (the free Starter licence is enough), Python 3, this branch's folder.
