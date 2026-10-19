@@ -160,8 +160,20 @@ var MDNA = (function () {
 
     var BUILD = {
         blur_in: function (L, ph, f0, c) {
-            var g = helper(L, "blur", "sceneGroup::gaussianBlurFilter", "filters", "MDNA Blur", c.made);
-            var px = c.p.blur_px * c.amt, F = c.p.frames * c.k, Ff = c.p.fade_frames * c.k, op = c.restOp(L);
+            // Fast Blur (amount = Gaussian sigma) with Clamp tiling: AE's Gaussian Blur with Repeat Edge Pixels keeps a hard edge
+            var g = helper(L, "blur", "blurFilter", "filters", "MDNA Blur", c.made);
+            if (helper.fresh) {
+                // and AE crops the result to the layer (no glow past the edge): clip the filter's output with a hidden matte of the layer's box
+                api.set(g, { tileMode: 0, matteApplyMode: 1 });
+                var b = bbox(L), mt = api.primitive("rectangle", "MDNA Blur Edge");
+                api.set(mt, { "generator.dimensions": [b.width, b.height] });
+                api.parent(mt, L);
+                var mb = bbox(mt), mp = api.get(mt, "position");
+                api.set(mt, { position: [mp.x + b.centre.x - mb.centre.x, mp.y + b.centre.y - mb.centre.y], hidden: true });
+                api.connect(mt, "id", g, "mattes");
+                var mm = meta(L); mm.helpers.blurEdge = mt; saveMeta(L, mm); c.made.push(mt);
+            }
+            var px = AE_BLUR_SIGMA * c.p.blur_px * c.amt, F = c.p.frames * c.k, Ff = c.p.fade_frames * c.k, op = c.restOp(L);
             if (ph === "in") {
                 key(g, "amount.x", f0, px, f0 + F, 0, c.bz); key(g, "amount.y", f0, px, f0 + F, 0, c.bz);
                 key(L, "opacity", f0, 0, f0 + Ff, op, c.flat);
@@ -309,20 +321,78 @@ var MDNA = (function () {
         }
     };
 
-    function perUnit(L, ph, f0, c, level) {   // autoAnimate per character (3) or word (2), Drift up + Fade Up
-        if (!isText(L)) throw new Error(c.piece.name + " needs a text layer");
-        var str = textOf(L), n = level === 3 ? str.replace(/\s+/g, "").length : str.split(/\s+/).filter(Boolean).length;
-        var S = c.p.stagger_frames * c.k, F = c.p.frames * c.k;
-        var a = helper(L, "units", "autoAnimate", null, "MDNA " + c.piece.name, c.made), fresh = helper.fresh;
-        if (fresh) {
-            var ks = api.getKeyframeTimes(a, "progress"); for (var i = 0; i < ks.length; i++) api.deleteKeyframe(a, "progress", ks[i]);
-            api.connect(a, "id", L, "deformers");
+    // After Effects' Range Selector (shape Ramp Up, by characters or words), as in kit_portable.json "text_model":
+    // unit i of n sits at x_i = 100·(i + 0.5)/n (AE counts spaces as characters), the offset o(t) runs −W → 100 over the
+    // piece's frames on its token curve, and each unit is affected by a_i = clamp((x_i − o)/W): it moves down rise·a_i,
+    // scales to 1 + (scale_from − 1)·a_i, blurs blur_px·a_i and fades to 1 − a_i.
+    // Cavalry: every unit becomes its own text layer (same font, size, colour, tracking), a child of the original text,
+    // placed exactly on its glyph (a Get Sub-Mesh Transform reads each glyph's or word's box centre in the laid-out text, so
+    // kerning and tracking stay), with its own Fast Blur; the original keeps its layout but stops drawing (fill off).
+    // Each unit's position y, scale, opacity and blur are baked frame by frame (linear keys at every frame, equal to the
+    // formula there). Why not a Sub-Mesh on the text: Cavalry 2.8 shows Sub-Mesh in the viewport but its renderer drops it
+    // (measured on the Starter licence: the render draws the text untouched), so per-unit blur and timing need real layers.
+    var AE_BLUR_SIGMA = 0.3;   // After Effects blurriness → Gaussian sigma in px (measured on the AE proof render); Cavalry's Fast Blur amount is sigma
+    function bezEase(bz, x) {   // CSS cubic-bezier(x1, y1, x2, y2) at x (the same curve the keyed tangents draw)
+        if (x <= 0) return 0; if (x >= 1) return 1;
+        var lo = 0, hi = 1, t = x;
+        for (var i = 0; i < 60; i++) {
+            t = (lo + hi) / 2;
+            var X = 3 * (1 - t) * (1 - t) * t * bz[0] + 3 * (1 - t) * t * t * bz[2] + t * t * t;
+            if (X < x) lo = t; else hi = t;
         }
-        // timeOffset is the total stagger: unit i starts i * |timeOffset| / (units - 1) frames later (measured), drift 180 deg = from below
-        api.set(a, { useLevels: true, levelMode: level, timingMode: 0, automaticTimeOffset: true, timeOffset: -S * Math.max(0, n - 1),
-            positionMode: 2, angleDistance: [180, c.p.rise_px * c.amt], opacityMode: 1, scaleMode: 0, rotationMode: 0 });
-        if (ph === "in") key(a, "progress", f0, 0, f0 + F, 100, c.bz); else key(a, "progress", f0, 100, f0 + F, 0, c.bz);
-        return Math.round(f0 + F + S * Math.max(0, n - 1));
+        return 3 * (1 - t) * (1 - t) * t * bz[1] + 3 * (1 - t) * t * t * bz[3] + t * t * t;
+    }
+    function unitStrings(str, level) {   // the units Cavalry's text levels count (characters skip spaces), with AE's x_i
+        var out = [], i;
+        if (level === 3) {
+            for (i = 0; i < str.length; i++) if (!/\s/.test(str[i])) out.push({ s: str[i], x: 100 * (i + 0.5) / str.length });
+        } else {
+            var words = str.split(/\s+/).filter(Boolean);
+            for (i = 0; i < words.length; i++) out.push({ s: words[i], x: 100 * (i + 0.5) / words.length });
+        }
+        return out;
+    }
+    function splitUnits(L, level, made) {   // one child text layer per unit, sitting exactly on its glyph(s)
+        var units = unitStrings(textOf(L), level), probe = api.create("getSubMeshTransform", "MDNA probe"), ids = [];
+        api.connect(L, "id", probe, "inputShape"); api.set(probe, { levelMode: level, useBoundingBox: true });
+        var copy = ["fontSize", "letterSpacing", "lineSpacing", "font", "material.materialColor", "horizontalAlignment", "verticalAlignment", "autoWidth", "autoHeight"];
+        var base = {}; copy.forEach(function (k) { try { base[k] = api.get(L, k); } catch (e) {} });
+        for (var i = 0; i < units.length; i++) {
+            api.set(probe, { index: i }); var c = api.get(probe, "position");   // the unit's box centre (world)
+            var u = api.create("textShape", "MDNA unit " + units[i].s); made.push(u); ids.push(u);
+            // its origin on the baseline, centred on its advance: AE scales a character about that point (its anchor)
+            api.set(u, base); api.set(u, { text: units[i].s, horizontalAlignment: 1, verticalAlignment: 3 });
+            api.parent(u, L);
+            var bb = api.getBoundingBox(u, true), p = api.get(u, "position");
+            api.set(u, { position: [p.x + c.x - bb.centre.x, p.y + c.y - bb.centre.y] });
+            var g = api.create("blurFilter", "MDNA unit blur"); made.push(g);
+            api.set(g, { tileMode: 2, amount: [0, 0] }); api.connect(g, "id", u, "filters");
+            units[i].id = u; units[i].blur = g; units[i].y = api.get(u, "position").y;
+        }
+        api.deleteLayer(probe);
+        api.setFill(L, false);   // the original keeps its layout (and the units' parent) but no longer draws
+        return units;
+    }
+    function perUnit(L, ph, f0, c, level) {
+        if (!isText(L)) throw new Error(c.piece.name + " needs a text layer");
+        var p = c.p, W = p.window_pct || 35, F = p.frames * c.k, m = meta(L), units = m.units;
+        if (!units || !units.length || api.getAllSceneLayers().indexOf(units[0].id) < 0) {
+            units = splitUnits(L, level, c.made);
+            m.units = units; units.forEach(function (u, i) { m.helpers["unit" + i] = u.id; m.helpers["unitBlur" + i] = u.blur; });
+            m.fillOff = true; saveMeta(L, m);
+        }
+        var amt = c.amt, sf = p.scale_from === undefined ? 1 : p.scale_from;
+        var rise = p.rise_px * amt, ks = (sf - 1) * amt, kb = AE_BLUR_SIGMA * (p.blur_px || 0) * amt;
+        var fa = Math.round(f0), fb = Math.ceil(f0 + F);
+        for (var f = fa; f <= fb; f++) {
+            var e = bezEase(c.bz, (f - f0) / F), o = ph === "in" ? -W + (100 + W) * e : 100 - (100 + W) * e;
+            for (var i = 0; i < units.length; i++) {
+                var U = units[i], a = Math.min(1, Math.max(0, (U.x - o) / W));
+                api.keyframe(U.id, f, { "position.y": U.y - rise * a, "scale.x": 1 + ks * a, "scale.y": 1 + ks * a, opacity: 100 * (1 - a) });   // AE moves the unit down; Cavalry's y is up
+                api.keyframe(U.blur, f, { "amount.x": kb * a, "amount.y": kb * a });
+            }
+        }
+        return fb;
     }
 
     function kit(idOrName, ids, phase, start, opts) {
@@ -379,6 +449,7 @@ var MDNA = (function () {
             if (m.rest["position.y"] !== undefined) { var p = api.get(id, "position"); api.set(id, { position: [p.x, m.rest["position.y"]] }); }
             if (m.rest.scale !== undefined) api.set(id, { scale: m.rest.scale });
             if (m.rest["rotation.z"] !== undefined) { var r = api.get(id, "rotation"); api.set(id, { rotation: [r.x, r.y, m.rest["rotation.z"]] }); }
+            if (m.fillOff) { try { api.setFill(id, true); } catch (e) {} }
             if (m.piece) { try { api.deleteLayer(id); gone.push(id); } catch (e) {} }
             else dropUserKey(id, "mdnaKit");
         });

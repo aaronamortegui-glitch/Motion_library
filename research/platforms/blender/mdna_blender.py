@@ -6,11 +6,14 @@ become Blender units through `px` (default 1/180: 1080 px ≈ 6 units, the frame
 
 Kit pieces (research/platforms/kit_portable.json: Effects, Text, Loops, Elements): M.kit_list(), and
 M.kit("blur_in", [obj], "in", start=0, duration=1, intensity=1, stagger=3, ease=None, params=None) -> {"end", "objects"}.
-How each piece is built (all saved in the .blend, no frame handlers): Blur In / Slam In = camera depth of field, the
-object moved toward the camera by drivers from a keyed obj["mdna_blur"] (px at 1080p); Wipe / Iris = a material mask
+How each piece is built (all saved in the .blend, no frame handlers): Blur In / Slam In = a keyed obj["mdna_blur"] (px of
+AE blurriness at 1080p): a photo plane cross-fades pre-blurred copies of its image (AE's Gaussian Blur, edges repeated),
+anything else uses camera depth of field (the object moved toward the camera by drivers, depth of field keyed on only
+inside blur windows); Wipe / Iris = a material mask
 reading keyed object properties; Jello / Light Speed In = a Geometry Nodes skew modifier with its input keyed; Line Draw
 = curve bevel_factor_end/start; Chars Rise / Words Fade Up / Typewriter = the text split into one object per letter or
-word (String to Curves layout), keyed per piece (typewriter: keyed visibility); Float / Pulse / Wiggle = delta
+word (String to Curves layout); Chars Rise / Words Fade Up follow AE's Range Selector (kit_portable text_model), each
+unit's position, scale, blur and opacity baked frame by frame (typewriter: keyed visibility); Float / Pulse / Wiggle = delta
 transforms with CYCLES / NOISE modifiers; Counter = Geometry Nodes (Value to String + string nodes for the thousands
 separator), the value keyed; Bars Transition = planes parented to the camera. Notes: text pieces keep the object's
 font (Blender's built-in one by default): Inter Tight renders broken in Blender (overlapping contours); the counter
@@ -119,7 +122,8 @@ def _alpha_node(m):
         node.location = (out.location.x - 200 + dx, out.location.y - (160 if node is mul else 0))
     out.location.x += 200
     if hasattr(m, "surface_render_method"):
-        m.surface_render_method = "DITHERED"
+        if m.surface_render_method != "BLENDED":   # keep Blended (smooth fades); depth of field blur switches to Dithered
+            m.surface_render_method = "DITHERED"
     elif hasattr(m, "blend_method"):
         m.blend_method = "BLEND"
     return mul
@@ -228,10 +232,15 @@ def kit_list(kind=None):
 
 
 def _srgb_to_linear(hexstr):
+    """A hex colour as working values: linear, or its sRGB numbers when the scene renders in display space (Raw view,
+    see mdna_figma.DISPLAY_SPACE)."""
     h = hexstr.lstrip("#")
     out = []
+    raw = bpy.context.scene.view_settings.view_transform == "Raw"
     for i in (0, 2, 4):
         c = int(h[i:i + 2], 16) / 255
+        if raw:
+            out.append(c); continue
         out.append(c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4)
     return tuple(out)
 
@@ -373,27 +382,58 @@ def _frame_size(sc, cam, dist=1.0):
     return (size, size * ry / rx) if fit == "HORIZONTAL" else (size * rx / ry, size)
 
 
-# --- blur (Blur In, Slam In): depth of field ---------------------------------------------------------------------------
-# A panel user can blur any object (text, mesh, image plane) in one render pass, and several objects each on their own
-# timing, with no view layers or compositor: the camera's depth of field is on, focused on the object's plane, and the
-# object is moved toward the camera while it is blurred. The blur amount (px at 1080p) is a keyed custom property
-# obj["mdna_blur"] with the token curve; drivers turn it into the depth offset (delta_location), so the blur follows
-# the curve exactly. Ortho camera: blur is linear in depth and the size does not change. Perspective camera: the object
-# slides along the camera ray and delta_scale compensates, so it keeps its size on screen (k = Q / (Q + blur)).
-# Trade-offs: the bokeh is EEVEE's depth of field (a disc, softer than AE's Gaussian at the same radius); other objects
-# off the focus plane get a little blur (the f-stop is chosen so the requested blur uses ~85% of the room in front of
-# the object, so a layer 0.2 units deeper gets <1 px); in perspective, Float/Pulse on the same object fight the drivers.
-def _blur(obj, f0, f1, b0, b1, bz):
+# --- blur (Blur In, Slam In, per character in Chars Rise / Words Fade Up): depth of field ---------------------------------
+# A panel user can blur any object (text, mesh, image plane, one letter of a split text) in one render pass, and several
+# objects each on their own timing, with no view layers or compositor: the camera's depth of field is focused on the
+# objects' plane, and an object is moved toward the camera while it is blurred. The blur amount (px at 1080p) is a keyed
+# custom property obj["mdna_blur"]; drivers turn it into the depth offset (delta_location), so the blur follows the curve
+# exactly. Ortho camera: blur is linear in depth and the size does not change. Perspective camera: the object slides along
+# the camera ray and delta_scale compensates, so it keeps its size on screen (k = Q / (Q + blur)).
+# The camera's f-stop is chosen once for BLUR_ROOM_PX (EEVEE's own bokeh limit), so every blurred object shares the same
+# px-per-unit scale whatever order the pieces are applied in. Depth of field is keyed ON only inside the blur windows
+# (camera["mdna_dof_windows"]): outside them the render is exactly as sharp as without it. Inside a window, objects that
+# are not blurring sit on the focus plane (keep layers' stacking offsets tiny, see mdna_figma) and stay sharp; the world
+# background is infinitely far and EEVEE bleeds in-focus edges into it (a halo), so put a backdrop plane right behind the
+# layers (mdna_figma.build does). Trade-off: EEVEE's bokeh is a disc; BLUR_GAUSS scales the radius so it looks like AE's
+# Gaussian Blur of the same "blurriness".
+BLUR_ROOM_PX = 100.0
+BLUR_GAUSS = 1.0
+
+
+def _dof_window(cam, f0, f1):
+    """Depth of field is keyed on over [f0, f1] (merged with the camera's other windows), off elsewhere."""
+    c = cam.data
+    wins = [list(w) for w in c.get("mdna_dof_windows", [])] + [[math.floor(f0) - 1, math.ceil(f1) + 1]]
+    wins.sort(); merged = []
+    for w in wins:
+        if merged and w[0] <= merged[-1][1] + 1:
+            merged[-1][1] = max(merged[-1][1], w[1])
+        else:
+            merged.append(w)
+    c["mdna_dof_windows"] = merged
+    _clear_fc(c, "dof.use_dof", 0)
+    pairs = []
+    for w0, w1 in merged:
+        pairs += [(w0 - 1, False), (w0, True), (w1, False)]
+    for f, v in pairs:
+        c.dof.use_dof = v; c.dof.keyframe_insert("use_dof", frame=f)
+    fc = _find_fc(c, "dof.use_dof", 0)
+    if fc:
+        for k in fc.keyframe_points:
+            k.interpolation = "CONSTANT"
+
+
+def _blur_rig(obj, bmax=None):
+    """Sets the depth-of-field rig on obj (drivers from obj["mdna_blur"], px at 1080p). Returns False without a camera."""
     sc = bpy.context.scene
     cam = sc.camera
-    obj["mdna_blur"] = float(b0)
-    fc = _keyp(obj, '["mdna_blur"]', None, f0, b0, f1, b1, bz)
+    if "mdna_blur" not in obj:
+        obj["mdna_blur"] = 0.0
     if not cam:
-        print(f"[mdna] {obj.name}: no scene camera, the blur is keyed (obj['mdna_blur']) but not shown"); return fc
-    bmax = max(abs(b0), abs(b1), 1e-6)
+        print(f"[mdna] {obj.name}: no scene camera, the blur is keyed (obj['mdna_blur']) but not shown"); return False
     c = cam.data
-    rx, ry = sc.render.resolution_x, sc.render.resolution_y
-    s_r = min(rx, ry) / 1080 * sc.render.resolution_percentage / 100   # render px per 1080p px
+    rx = sc.render.resolution_x
+    s_r = min(rx, sc.render.resolution_y) / 1080 * sc.render.resolution_percentage / 100   # render px per 1080p px
     cm = cam.matrix_world
     fwd = -(cm.to_3x3() @ Vector((0, 0, 1))).normalized()   # camera looks along its -Z
     to_world = (obj.parent.matrix_world @ obj.matrix_parent_inverse).to_3x3() if obj.parent else Matrix.Identity(3)
@@ -401,29 +441,31 @@ def _blur(obj, f0, f1, b0, b1, bz):
     depth = (P - cm.translation).dot(fwd)
     room = depth - c.clip_start
     if depth <= 0:
-        print(f"[mdna] {obj.name}: behind the camera, no blur"); return fc
+        print(f"[mdna] {obj.name}: behind the camera, no blur"); return False
     W, H = _frame_size(sc, cam, depth)
     ppu = rx * sc.render.resolution_percentage / 100 / W          # render px per scene unit on the object's plane
-    ours = c.get("mdna_dof")
-    if not c.dof.use_dof:
-        c.dof.use_dof = True; c.dof.focus_object = None; c.dof.focus_distance = depth; c["mdna_dof"] = True
-        ours = True
+    cap = max(BLUR_ROOM_PX, (bmax or 0) * BLUR_GAUSS)
+    if not c.get("mdna_dof"):
+        if not c.get("mdna_focus"):   # mdna_figma.build focuses on its layer stack already
+            c.dof.focus_object = None; c.dof.focus_distance = depth
+        c["mdna_dof"] = True
+        sc.eevee.bokeh_max_size = max(sc.eevee.bokeh_max_size, cap * s_r)
         if c.type == "ORTHO":
-            c.dof.aperture_fstop = 0.85 * room * DOF_ORTHO * ppu / (bmax * s_r)
+            c.dof.aperture_fstop = 0.85 * room * DOF_ORTHO * ppu / (cap * s_r)
         else:
             f = c.lens / 1000; sens = W / depth * f   # sensor size (scene units) across the frame width
             k_min = max(0.15, 1.5 * c.clip_start / depth)
-            c.dof.aperture_fstop = f * f / (2 * (depth - f)) * (rx / sens) * (1 / k_min - 1) / (bmax * s_r)
+            c.dof.aperture_fstop = f * f / (2 * (depth - f)) * (rx / sens) * (1 / k_min - 1) / (cap * s_r)
     focus = (c.dof.focus_object.matrix_world.translation - cm.translation).dot(fwd) if c.dof.focus_object else c.dof.focus_distance
     N = max(c.dof.aperture_fstop, 1e-4)
     rest_px = abs(focus - depth) * DOF_ORTHO * ppu / N / s_r if c.type == "ORTHO" else 0
-    if rest_px > 1 or (c.type != "ORTHO" and abs(focus - depth) > 0.01 * depth):
-        print(f"[mdna] {obj.name}: off the camera's focus plane ({focus:.2f} vs {depth:.2f}): blurred at rest too")
+    if rest_px > 0.5 or (c.type != "ORTHO" and abs(focus - depth) > 0.01 * depth):
+        print(f"[mdna] {obj.name}: off the camera's focus plane ({focus:.3f} vs {depth:.3f}): blurred at rest too")
     var = '["mdna_blur"]'
     if c.type == "ORTHO":
-        K = s_r * N / (DOF_ORTHO * ppu)                            # scene units per px of blur
-        if bmax * K > 0.95 * room:
-            print(f"[mdna] {obj.name}: {bmax:.0f} px needs {bmax * K:.2f} units of room, only {room:.2f}: lower the camera f-stop")
+        K = BLUR_GAUSS * s_r * N / (DOF_ORTHO * ppu)              # scene units per px of blur
+        if (bmax or 0) * K > 0.95 * room:
+            print(f"[mdna] {obj.name}: {bmax:.0f} px needs {bmax * K:.2f} units of room, only {room:.2f}")
         d = _loc_space(obj, -fwd)                                   # toward the camera
         for i in range(3):
             if abs(d[i]) > 1e-6:
@@ -432,12 +474,120 @@ def _blur(obj, f0, f1, b0, b1, bz):
                 obj.delta_location[i] = 0.0
     else:
         f = c.lens / 1000; sens = W / depth * f
-        Q = f * f / (2 * N * (depth - f)) * (rx * sc.render.resolution_percentage / 100 / sens) / s_r   # 1080p px
+        Q = f * f / (2 * N * (depth - f)) * (rx * sc.render.resolution_percentage / 100 / sens) / s_r / BLUR_GAUSS
         V = _loc_space(obj, P - cm.translation)
         for i in range(3):
             _driver(obj, "delta_location", i, f"-{V[i]:.9g}*b/({Q:.9g}+b)", var)
             _driver(obj, "delta_scale", i, f"{Q:.9g}/({Q:.9g}+b)", var)
-    obj["mdna_blur_dof"] = "ours" if ours else "camera"
+    for slot in obj.material_slots:   # EEVEE leaves Blended surfaces out of depth of field
+        if slot.material and hasattr(slot.material, "surface_render_method"):
+            slot.material.surface_render_method = "DITHERED"
+    obj["mdna_blur_dof"] = "ours"
+    return True
+
+
+# --- image blur (Blur In on a photo): After Effects' Gaussian Blur with Repeat Edge Pixels, in the material -------------
+# A photo plane's texture is blurred ahead (numpy, exact Gaussian, edges repeated so the layer's bounds stay crisp like
+# AE's) at IMAGE_BLUR_LEVELS, and the material cross-fades the two levels around obj["mdna_blur"]. Exact opacity (no
+# depth-of-field coverage spread), no other object touched, and the same look as AE: sigma = AE_SIGMA x blurriness
+# (measured on the proof's AE render: Blur In 38 -> 7 px matched best at 0.33).
+AE_SIGMA = 0.33
+IMAGE_BLUR_LEVELS = [0, 1.5, 3, 5, 8, 12, 17, 24, 33, 45, 60, 80]
+
+
+def _image_tex(m):
+    if not m or not m.node_tree:
+        return None
+    return next((n for n in m.node_tree.nodes if n.type == "TEX_IMAGE" and n.image and not n.name.startswith("MDNA")), None)
+
+
+def _gauss_matrix(n, sig):
+    import numpy as np
+    r = int(3 * sig) + 1
+    x = np.arange(-r, r + 1); k = np.exp(-x * x / (2 * sig * sig)); k /= k.sum()
+    A = np.zeros((n, n), dtype=np.float32)
+    idx = np.arange(n)
+    for o, w in zip(x, k):
+        A[idx, np.clip(idx + o, 0, n - 1)] += w   # repeat edge pixels
+    return A
+
+
+def _image_blur_rig(obj):
+    """Gives obj's image materials the blur-level stack driven by obj["mdna_blur"] (px of AE blurriness at 1080p)."""
+    import numpy as np
+    sc = bpy.context.scene
+    if "mdna_blur" not in obj:
+        obj["mdna_blur"] = 0.0
+    scr_px = None
+    if sc.camera:
+        W, H = _frame_size(sc, sc.camera, 1.0) if sc.camera.data.type == "ORTHO" else (None, None)
+        if W:
+            scr_px = obj.dimensions.x * 1080 / H   # the plane's width on screen in 1080p px
+    for slot in obj.material_slots:
+        m = slot.material; tex = _image_tex(m)
+        if not tex or m.node_tree.nodes.get("MDNA Blur"):
+            continue
+        nt, img = m.node_tree, tex.image
+        w, h = img.size
+        scale = w / scr_px if scr_px else 1.0
+        a = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+        pm = a.copy(); pm[..., :3] *= a[..., 3:4]
+        L = IMAGE_BLUR_LEVELS
+        imgs = [img]
+        for b in L[1:]:
+            sig = AE_SIGMA * b * scale
+            Ay, Ax = _gauss_matrix(h, sig), _gauss_matrix(w, sig)
+            out = np.einsum("ij,jkc->ikc", Ay, pm); out = np.einsum("ij,kjc->kic", Ax, out)
+            al = out[..., 3:4]; rgb = np.where(al > 1e-6, out[..., :3] / np.maximum(al, 1e-6), 0)
+            res = np.concatenate([rgb, al], -1).clip(0, 1)
+            name = f"{img.name}.mdna_blur{b:g}"
+            bi = bpy.data.images.get(name) or bpy.data.images.new(name, w, h, alpha=True)
+            bi.colorspace_settings.name = img.colorspace_settings.name
+            bi.pixels.foreach_set(res.ravel()); bi.pack()
+            imgs.append(bi)
+        vec = tex.inputs["Vector"].links[0].from_socket if tex.inputs["Vector"].is_linked else None
+        targets = {o: [lk.to_socket for lk in tex.outputs[o].links] for o in ("Color", "Alpha")}
+        bnode = _attr(nt, "mdna_blur"); bnode.node.name = "MDNA Blur"
+        bsock = _math(nt, "MAXIMUM", bnode, 0.0)
+        col_sum = alpha_sum = None
+        for i, (lv, im) in enumerate(zip(L, imgs)):
+            t = tex if i == 0 else nt.nodes.new("ShaderNodeTexImage")
+            if i:
+                t.name = f"MDNA blur {lv:g}"; t.image = im; t.interpolation = tex.interpolation; t.extension = "EXTEND"
+                if vec:
+                    nt.links.new(vec, t.inputs["Vector"])
+            # hat weight around level i (piecewise linear in blur px)
+            up = _math(nt, "DIVIDE", _math(nt, "SUBTRACT", bsock, L[i - 1]), lv - L[i - 1]) if i else None
+            dn = _math(nt, "DIVIDE", _math(nt, "SUBTRACT", L[i + 1], bsock), L[i + 1] - lv) if i + 1 < len(L) else None
+            wgt = _math(nt, "MINIMUM", up, dn, clamp=True) if up and dn else _math(nt, "MULTIPLY", up or dn, 1.0, clamp=True)
+            sc_c = nt.nodes.new("ShaderNodeVectorMath"); sc_c.operation = "SCALE"
+            nt.links.new(t.outputs["Color"], sc_c.inputs[0]); nt.links.new(wgt, sc_c.inputs["Scale"])
+            al = _math(nt, "MULTIPLY", t.outputs["Alpha"], wgt)
+            if col_sum is None:
+                col_sum, alpha_sum = sc_c.outputs[0], al
+            else:
+                ad = nt.nodes.new("ShaderNodeVectorMath"); ad.operation = "ADD"
+                nt.links.new(col_sum, ad.inputs[0]); nt.links.new(sc_c.outputs[0], ad.inputs[1]); col_sum = ad.outputs[0]
+                alpha_sum = _math(nt, "ADD", alpha_sum, al)
+        for out_name, new in (("Color", col_sum), ("Alpha", alpha_sum)):
+            for to in targets[out_name]:
+                nt.links.new(new, to)
+        tex.extension = "EXTEND"
+    obj["mdna_blur_dof"] = "image"
+    return True
+
+
+def _is_image(obj):
+    return any(_image_tex(s.material) for s in obj.material_slots)
+
+
+def _blur(obj, f0, f1, b0, b1, bz):
+    obj["mdna_blur"] = float(b0)
+    fc = _keyp(obj, '["mdna_blur"]', None, f0, b0, f1, b1, bz)
+    if _is_image(obj):
+        _image_blur_rig(obj)
+    elif _blur_rig(obj, max(abs(b0), abs(b1))):
+        _dof_window(bpy.context.scene.camera, f0, f1)
     return fc
 
 
@@ -467,7 +617,7 @@ def _wipe_mask(m):
         return
     tc = nt.nodes.new("ShaderNodeTexCoord"); tc.name = tc.label = "MDNA Wipe"
     axis = _attr(nt, "mdna_wipe_axis", "Vector")
-    fe = _math(nt, "MAXIMUM", _attr(nt, "mdna_wipe_feather"), 0.002)
+    fe = _math(nt, "MAXIMUM", _attr(nt, "mdna_wipe_feather"), 1e-5)   # 0 = AE's hard edge (EEVEE's samples antialias it)
     win, wout = _attr(nt, "mdna_wipe_in"), _attr(nt, "mdna_wipe_out")
     c = nt.nodes.new("ShaderNodeVectorMath"); c.operation = "SUBTRACT"; c.inputs[1].default_value = (0.5, 0.5, 0.5)
     nt.links.new(tc.outputs["Generated"], c.inputs[0])
@@ -581,23 +731,27 @@ def _split_text(obj, unit):
     chars = [ch for ch in cu.body if not ch.isspace()]
     if len(mats) != len(chars):
         raise RuntimeError(f"{obj.name}: layout gave {len(mats)} glyphs for {len(chars)} characters")
-    units, ci, cur = [], 0, None   # (text, matrix) per piece
-    for ch in cu.body:
+    units, ci, cur = [], 0, None   # (text, matrix, After Effects unit index) per piece
+    for bi, ch in enumerate(cu.body):
         if ch.isspace():
             cur = None; continue
         if unit == "chars" or cur is None:
-            cur = [ch, mats[ci]]; units.append(cur)
+            cur = [ch, mats[ci], bi if unit == "chars" else len(units)]; units.append(cur)
         else:
             cur[0] += ch
         ci += 1
+    n_units = len(cu.body) if unit == "chars" else len(units)   # AE's "Characters" counts spaces
     pieces = []
-    for i, (body, mw) in enumerate(units):
+    for i, (body, mw, ui) in enumerate(units):
         d = cu.copy(); d.body = body; d.align_x = "LEFT"; d.align_y = "TOP_BASELINE"; d.offset_x = d.offset_y = 0
         o = bpy.data.objects.new(f"{obj.name}.{unit[0]}{i:02d}", d)
         for col in obj.users_collection:
             col.objects.link(o)
         o.parent = obj; o.matrix_parent_inverse = obj.matrix_world.inverted(); o.matrix_world = mw
-        o["mdna_piece"] = i
+        bpy.context.view_layer.update()   # origin on the glyph's baseline centre: AE scales each unit around it
+        xs = [v[0] for v in o.bound_box]; cx = (min(xs) + max(xs)) / 2 if body.strip() else 0.0
+        d.offset_x = -cx; o.matrix_world = mw @ Matrix.Translation((cx, 0, 0))
+        o["mdna_piece"] = i; o["mdna_unit"] = ui; o["mdna_units"] = n_units
         pieces.append(o)
     obj["mdna_split"] = unit
     obj.hide_render = True; obj["mdna_display"] = obj.display_type; obj.display_type = "BOUNDS"
@@ -729,7 +883,7 @@ def _counter(obj, f0, f1, prm, bz):
                       if o is not obj and o.type in ("MESH", "CURVE", "FONT") and not o.hide_render]
             here = (obj.location - cm.translation).dot(fwd)
             dof = sc.camera.data.dof
-            if dof.use_dof:   # Blur In turned depth of field on: only the focus plane is sharp (other objects may be mid-blur)
+            if dof.use_dof or sc.camera.data.get("mdna_dof"):   # Blur In turned depth of field on: only the focus plane is sharp (other objects may be mid-blur)
                 obj.location = obj.location + fwd * ((dof.focus_distance - 0.0005) - here)
             elif depths and min(depths) - 0.001 < here:
                 obj.location = obj.location + fwd * ((min(depths) - 0.001) - here)
@@ -814,6 +968,75 @@ def _bars(start, prm, k, bz_in, bz_out):
 
 
 # --- kit() --------------------------------------------------------------------------------------------------------------
+def _bezier_y(bz, t):
+    """The token curve's value at time fraction t (cubic bezier (0,0) (x1,y1) (x2,y2) (1,1), solved for x = t)."""
+    x1, y1, x2, y2 = bz
+    if t <= 0:
+        return 0.0
+    if t >= 1:
+        return 1.0
+    bx = lambda u: 3 * (1 - u) ** 2 * u * x1 + 3 * (1 - u) * u * u * x2 + u ** 3
+    lo, hi = 0.0, 1.0
+    for _ in range(60):
+        mid = (lo + hi) / 2
+        if bx(mid) < t:
+            lo = mid
+        else:
+            hi = mid
+    u = (lo + hi) / 2
+    return 3 * (1 - u) ** 2 * u * y1 + 3 * (1 - u) * u * u * y2 + u ** 3
+
+
+def text_amount(x, t, window, bz):
+    """After Effects' Range Selector (Ramp Up, Start 0 / End window, Offset -window -> 100 on the curve bz): the affected
+    amount (0..1) of a unit at x (% of the text) at time fraction t. See kit_portable.json text_model."""
+    o = -window + (100 + window) * _bezier_y(bz, t)
+    return min(1.0, max(0.0, (x - o) / window))
+
+
+def _bake(idb, path, index, frames, values):
+    """Linear keys at every frame (a per-unit window of one curve has no single bezier)."""
+    _clear_fc(idb, path, index)
+    _set(idb, path, index, values[0])
+    idb.keyframe_insert(path, index=-1 if index is None else index, frame=frames[0])
+    fc = _find_fc(idb, path, index)
+    for f, v in zip(frames[1:], values[1:]):
+        fc.keyframe_points.insert(f, v, options={"FAST"})
+    for kp in fc.keyframe_points:
+        kp.interpolation = "LINEAR"
+    fc.update()
+    return fc
+
+
+def _text_range(pieces, prm, s, F, bz, phase, px, intensity):
+    """Chars Rise / Words Fade Up: each unit's position (down), scale, blur and opacity follow AE's Range Selector,
+    baked frame by frame from s to s + F. Phase out plays the reveal backwards (last unit leaves first)."""
+    W = prm.get("window_pct", 35)
+    rise = prm.get("rise_px", 0) * px * intensity
+    sf = 1 + (prm.get("scale_from", 1.0) - 1) * intensity
+    blur = prm.get("blur_px", 0) * intensity
+    n = max(1, int(round(F)))
+    frames = [s + F * i / n for i in range(n + 1)]
+    cam = bpy.context.scene.camera
+    if blur > 0 and cam:
+        _dof_window(cam, s, s + F)
+    for p in pieces:
+        x = 100 * (p.get("mdna_unit", p["mdna_piece"]) + 0.5) / max(1, p.get("mdna_units", len(pieces)))
+        a = [text_amount(x, (i / n) if phase == "in" else 1 - i / n, W, bz) for i in range(n + 1)]
+        if "mdna_rest" not in p:
+            p["mdna_rest"] = [p.location[2], p.scale[0], p.scale[1]]
+        z0, sx, sy = p["mdna_rest"]
+        _bake(p, "location", 2, frames, [z0 - rise * v for v in a])
+        if sf != 1:
+            _bake(p, "scale", 0, frames, [sx * (1 + (sf - 1) * v) for v in a])
+            _bake(p, "scale", 1, frames, [sy * (1 + (sf - 1) * v) for v in a])
+        _fade_material(p)
+        _bake(p, "color", 3, frames, [1 - v for v in a])
+        if blur > 0:
+            _blur_rig(p, blur)
+            _bake(p, '["mdna_blur"]', None, frames, [blur * v for v in a])
+
+
 def kit(id, objects=None, phase=None, start=0, duration=1.0, intensity=1.0, stagger=3, ease=None, params=None, px=1 / 180):
     """Applies kit piece `id` (see kit_list()) to objects (objects or names; default: the selection) from frame `start`,
     `stagger` frames between objects. phase: one of the piece's phases (in / out / emphasis / loop / transition; None =
@@ -864,10 +1087,15 @@ def kit(id, objects=None, phase=None, start=0, duration=1.0, intensity=1.0, stag
         rest_loc, rest_scale, rest_rot = ob.location.copy(), ob.scale.copy(), ob.rotation_euler.copy()
         if id == "blur_in":
             fade = prm["fade_frames"] * k; b = prm["blur_px"] * intensity
+            fbz = _ease(prm.get("fade_ease"), None) if prm.get("fade_ease") else bz
             if phase == "in":
-                _blur(ob, s, s + F, b, 0.0, bz); _fade(ob, s, s + fade, 0.0, 1.0, bz)
+                _blur(ob, s, s + F, b, 0.0, bz); _fade(ob, s, s + fade, 0.0, 1.0, fbz)
             else:
-                _blur(ob, s, s + F, 0.0, b, bz); _fade(ob, s + F - fade, s + F, 1.0, 0.0, bz)
+                o = prm.get("out") or {}
+                Fo = o.get("frames", prm["frames"]) * k; fade = o.get("fade_frames", prm["fade_frames"]) * k
+                obz = _ease(o.get("ease"), ease) if o.get("ease") else bz
+                _blur(ob, s, s + Fo, 0.0, b, obz); _fade(ob, s + Fo - fade, s + Fo, 1.0, 0.0, obz)
+                F = Fo
             e = s + F
         elif id == "slam_in":
             _appear(ob, s)
@@ -890,8 +1118,10 @@ def kit(id, objects=None, phase=None, start=0, duration=1.0, intensity=1.0, stag
                     ob["mdna_wipe_out"] = 0.0
                     _keyp(ob, '["mdna_wipe_in"]', None, s, 1.0, s + F, 0.0, bz)
                 else:
+                    o = prm.get("out") or {}
+                    F = o.get("frames", prm["frames"]) * k
                     ob["mdna_wipe_in"] = ob.get("mdna_wipe_in", 0.0)
-                    _keyp(ob, '["mdna_wipe_out"]', None, s, 0.0, s + F, 1.0, bz)
+                    _keyp(ob, '["mdna_wipe_out"]', None, s, 0.0, s + F, 1.0, _ease(o.get("ease"), ease) if o.get("ease") else bz)
             else:
                 d = ob.dimensions
                 ob["mdna_iris_aspect"] = (d.x / d.y) if d.y else 1.0
@@ -936,15 +1166,8 @@ def kit(id, objects=None, phase=None, start=0, duration=1.0, intensity=1.0, stag
                         _key_const(p, path, None, [(min(s, f) - 1, True), (f, False)])
                     e = f
             else:
-                rise = prm["rise_px"] * px * intensity; st = prm["stagger_frames"] * k
-                for j, p in enumerate(pieces):
-                    f = s + j * st
-                    z = p.location[2]
-                    if phase == "in":
-                        _key(p, "location", 2, f, z - rise, f + F, z, bz); _fade(p, f, f + F, 0.0, 1.0, bz)
-                    else:
-                        _key(p, "location", 2, f, z, f + F, z + rise, bz); _fade(p, f, f + F, 1.0, 0.0, bz)
-                    e = f + F
+                _text_range(pieces, prm, s, F, bz, phase, px, intensity)
+                e = s + F
             out.extend(pieces)
         elif id == "float":
             T = prm["period_frames"] * duration * sc.render.fps / sc.render.fps_base / 30

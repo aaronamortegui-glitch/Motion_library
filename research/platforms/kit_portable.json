@@ -1,40 +1,275 @@
 {
  "version": 1,
- "note": "The kit pieces both platform panels offer beyond the 37 portable presets, with the same names, types and defaults, so Cavalry and Blender stay in step. Frames are at 30 fps (scaled to the scene); ease is a token in tokens/superside_motion_tokens.json; 'phase' says which of In / Out / Both apply. Each piece animates the selected layers / objects (stagger between them as in the panel) unless 'creates' says it builds new ones. Reference implementations: research/platforms/<tool>/tests/.",
- "types": ["Moves", "Effects", "Text", "Loops", "Elements"],
+ "note": "The kit pieces both platform panels offer beyond the 37 portable presets, with the same names, types and defaults, so Cavalry and Blender stay in step. Frames are at 30 fps (scaled to the scene); ease is a token in tokens/superside_motion_tokens.json; 'phase' says which of In / Out / Both apply. Each piece animates the selected layers / objects (stagger between them as in the panel) unless 'creates' says it builds new ones. Reference implementations: research/platforms/<tool>/tests/. Pieces with ae_reference copy the After Effects preset exactly (the proof compares the three tools frame by frame); the others are close equivalents.",
+ "types": [
+  "Moves",
+  "Effects",
+  "Text",
+  "Loops",
+  "Elements"
+ ],
  "items": [
-  {"id": "blur_in", "type": "Effects", "name": "Blur In", "use": "Photos, backgrounds, premium moments: sharpens from a soft blur while it fades in", "phase": ["in", "out"],
-   "params": {"blur_px": 40, "frames": 14, "ease": "Surge", "fade_frames": 9}},
-  {"id": "slam_in", "type": "Effects", "name": "Slam In", "use": "Hero words, titles over footage: big, blurred and turned, it slams into place", "phase": ["in"],
-   "params": {"blur_px": 30, "scale_from": 1.6, "rotation_from": -8, "frames": 9, "ease": "Whip"}},
-  {"id": "wipe_reveal", "type": "Effects", "name": "Wipe Reveal", "use": "Bars, lower thirds, underlines: revealed left to right", "phase": ["in", "out"],
-   "params": {"direction": "left_to_right", "feather_px": 0, "frames": 14, "ease": "Surge"}},
-  {"id": "iris_reveal", "type": "Effects", "name": "Iris Reveal", "use": "Photo reveals, a new section opening from its centre", "phase": ["in", "out"],
-   "params": {"frames": 21, "ease": "Wind-up"}},
-  {"id": "jello", "type": "Effects", "name": "Jello", "use": "Playful accents, stickers: a skew wobble that settles", "phase": ["emphasis"],
-   "params": {"skew_deg": [-12.5, 6.25, -3.125, 1.56, 0], "frames": 21, "ease": "Settle"}},
-  {"id": "light_speed_in", "type": "Effects", "name": "Light Speed In", "use": "Fast entrances from the right: slides in leaning, straightens", "phase": ["in"],
-   "params": {"from_x_px": 600, "skew_from_deg": -30, "frames": 14, "ease": "Whip"}},
-  {"id": "line_draw", "type": "Effects", "name": "Line Draw", "use": "Lines, strokes, underlines (curves / paths only): the stroke draws on", "phase": ["in", "out"],
-   "params": {"frames": 21, "ease": "Cruise"}},
-
-  {"id": "chars_rise", "type": "Text", "name": "Chars Rise", "use": "Headlines: letter by letter, each rises and fades in", "phase": ["in", "out"],
-   "params": {"unit": "chars", "rise_px": 40, "frames": 14, "stagger_frames": 1.5, "ease": "Land"}},
-  {"id": "words_fade_up", "type": "Text", "name": "Words Fade Up", "use": "Sentences, subtitles: word by word", "phase": ["in", "out"],
-   "params": {"unit": "words", "rise_px": 24, "frames": 14, "stagger_frames": 3, "ease": "Land"}},
-  {"id": "typewriter", "type": "Text", "name": "Typewriter", "use": "UI copy, prompts, code: types on letter by letter", "phase": ["in"],
-   "params": {"chars_per_second": 24}},
-
-  {"id": "float", "type": "Loops", "name": "Float", "use": "Products, icons, cards at rest: a slow up and down", "phase": ["loop"],
-   "params": {"amp_px": 12, "period_frames": 60, "ease": "Cruise"}},
-  {"id": "pulse", "type": "Loops", "name": "Pulse", "use": "Buttons, live dots, CTAs: a gentle scale beat", "phase": ["loop"],
-   "params": {"scale": 1.06, "period_frames": 30, "ease": "Cruise"}},
-  {"id": "wiggle", "type": "Loops", "name": "Wiggle", "use": "Hand-made energy on icons and stickers: small random rotation", "phase": ["loop"],
-   "params": {"rotation_deg": 4, "frequency_hz": 2}},
-
-  {"id": "counter", "type": "Elements", "name": "Counter", "use": "Numbers that count up to a value (prices, stats)", "phase": ["in"], "creates": "a text layer, or the selected text",
-   "params": {"from": 0, "to": 1250, "decimals": 0, "separator": ",", "prefix": "", "suffix": "", "frames": 33, "ease": "Land"}},
-  {"id": "bars_transition", "type": "Elements", "name": "Bars Transition", "use": "A scene change: bars cover the frame, then uncover it", "phase": ["transition"], "creates": "bar layers over everything, at the start frame",
-   "params": {"count": 6, "direction": "left_to_right", "cover_frames": 9, "uncover_frames": 9, "stagger_frames": 1.5, "ease_in": "Surge", "ease_out": "Launch", "colors": ["#c9f25a", "#0b4a3d"]}}
- ]
+  {
+   "id": "blur_in",
+   "type": "Effects",
+   "name": "Blur In",
+   "use": "Photos, backgrounds, premium moments: sharpens from a soft blur while it fades in",
+   "phase": [
+    "in",
+    "out"
+   ],
+   "params": {
+    "blur_px": 40,
+    "frames": 21,
+    "ease": "Settle",
+    "fade_frames": 9,
+    "fade_ease": "Flat",
+    "out": {
+     "frames": 14,
+     "ease": "Launch",
+     "fade_frames": 14
+    }
+   },
+   "ae_reference": "SSP 'Blur In': Gaussian Blur 40→0 over Sweep (21 f) on Settle; opacity 0→100 over Glide (9 f), Flat."
+  },
+  {
+   "id": "slam_in",
+   "type": "Effects",
+   "name": "Slam In",
+   "use": "Hero words, titles over footage: big, blurred and turned, it slams into place",
+   "phase": [
+    "in"
+   ],
+   "params": {
+    "blur_px": 30,
+    "scale_from": 1.6,
+    "rotation_from": -8,
+    "frames": 9,
+    "ease": "Whip"
+   }
+  },
+  {
+   "id": "wipe_reveal",
+   "type": "Effects",
+   "name": "Wipe Reveal",
+   "use": "Bars, lower thirds, underlines: revealed left to right",
+   "phase": [
+    "in",
+    "out"
+   ],
+   "params": {
+    "direction": "right_to_left",
+    "feather_px": 0,
+    "frames": 21,
+    "ease": "Cruise",
+    "out": {
+     "frames": 14,
+     "ease": "Launch"
+    }
+   },
+   "ae_reference": "SSP 'Wipe Reveal': Linear Wipe at 90° (hard edge), completion 100→0 over Sweep (21 f) on Cruise: the reveal travels right to left."
+  },
+  {
+   "id": "iris_reveal",
+   "type": "Effects",
+   "name": "Iris Reveal",
+   "use": "Photo reveals, a new section opening from its centre",
+   "phase": [
+    "in",
+    "out"
+   ],
+   "params": {
+    "frames": 21,
+    "ease": "Wind-up"
+   }
+  },
+  {
+   "id": "jello",
+   "type": "Effects",
+   "name": "Jello",
+   "use": "Playful accents, stickers: a skew wobble that settles",
+   "phase": [
+    "emphasis"
+   ],
+   "params": {
+    "skew_deg": [
+     -12.5,
+     6.25,
+     -3.125,
+     1.56,
+     0
+    ],
+    "frames": 21,
+    "ease": "Settle"
+   }
+  },
+  {
+   "id": "light_speed_in",
+   "type": "Effects",
+   "name": "Light Speed In",
+   "use": "Fast entrances from the right: slides in leaning, straightens",
+   "phase": [
+    "in"
+   ],
+   "params": {
+    "from_x_px": 600,
+    "skew_from_deg": -30,
+    "frames": 14,
+    "ease": "Whip"
+   }
+  },
+  {
+   "id": "line_draw",
+   "type": "Effects",
+   "name": "Line Draw",
+   "use": "Lines, strokes, underlines (curves / paths only): the stroke draws on",
+   "phase": [
+    "in",
+    "out"
+   ],
+   "params": {
+    "frames": 21,
+    "ease": "Cruise"
+   }
+  },
+  {
+   "id": "chars_rise",
+   "type": "Text",
+   "name": "Chars Rise",
+   "use": "Headlines: letter by letter, each rises and fades in",
+   "phase": [
+    "in",
+    "out"
+   ],
+   "params": {
+    "unit": "chars",
+    "window_pct": 35,
+    "frames": 21,
+    "ease": "Cruise",
+    "rise_px": 50,
+    "scale_from": 1.18,
+    "blur_px": 14,
+    "opacity_from": 0
+   },
+   "ae_reference": "SSP text 'Chars Rise': a Range Selector by characters, shape Ramp Up, Start 0 / End 35 (%), Offset −35→100 over Sweep (21 f) on Cruise; the affected amount a per character = clamp((x − offset)/35) with x its position in % of the text; it moves the character down 50 px, scales it to 118 %, blurs it 14 px and makes it transparent in proportion to a."
+  },
+  {
+   "id": "words_fade_up",
+   "type": "Text",
+   "name": "Words Fade Up",
+   "use": "Sentences, subtitles: word by word",
+   "phase": [
+    "in",
+    "out"
+   ],
+   "params": {
+    "unit": "words",
+    "window_pct": 35,
+    "frames": 33,
+    "ease": "Settle",
+    "rise_px": 24,
+    "scale_from": 1.0,
+    "blur_px": 8,
+    "opacity_from": 0
+   },
+   "ae_reference": "SSP text 'Words Fade Up': the same Range Selector by words, Offset −35→100 over Stage (33 f) on Settle; 24 px down, blur 8 px, transparent in proportion to a."
+  },
+  {
+   "id": "typewriter",
+   "type": "Text",
+   "name": "Typewriter",
+   "use": "UI copy, prompts, code: types on letter by letter",
+   "phase": [
+    "in"
+   ],
+   "params": {
+    "chars_per_second": 24
+   }
+  },
+  {
+   "id": "float",
+   "type": "Loops",
+   "name": "Float",
+   "use": "Products, icons, cards at rest: a slow up and down",
+   "phase": [
+    "loop"
+   ],
+   "params": {
+    "amp_px": 12,
+    "period_frames": 60,
+    "ease": "Cruise"
+   }
+  },
+  {
+   "id": "pulse",
+   "type": "Loops",
+   "name": "Pulse",
+   "use": "Buttons, live dots, CTAs: a gentle scale beat",
+   "phase": [
+    "loop"
+   ],
+   "params": {
+    "scale": 1.06,
+    "period_frames": 30,
+    "ease": "Cruise"
+   }
+  },
+  {
+   "id": "wiggle",
+   "type": "Loops",
+   "name": "Wiggle",
+   "use": "Hand-made energy on icons and stickers: small random rotation",
+   "phase": [
+    "loop"
+   ],
+   "params": {
+    "rotation_deg": 4,
+    "frequency_hz": 2
+   }
+  },
+  {
+   "id": "counter",
+   "type": "Elements",
+   "name": "Counter",
+   "use": "Numbers that count up to a value (prices, stats)",
+   "phase": [
+    "in"
+   ],
+   "creates": "a text layer, or the selected text",
+   "params": {
+    "from": 0,
+    "to": 1250,
+    "decimals": 0,
+    "separator": ",",
+    "prefix": "",
+    "suffix": "",
+    "frames": 33,
+    "ease": "Land"
+   }
+  },
+  {
+   "id": "bars_transition",
+   "type": "Elements",
+   "name": "Bars Transition",
+   "use": "A scene change: bars cover the frame, then uncover it",
+   "phase": [
+    "transition"
+   ],
+   "creates": "bar layers over everything, at the start frame",
+   "params": {
+    "count": 6,
+    "direction": "left_to_right",
+    "cover_frames": 9,
+    "uncover_frames": 9,
+    "stagger_frames": 1.5,
+    "ease_in": "Surge",
+    "ease_out": "Launch",
+    "colors": [
+     "#c9f25a",
+     "#0b4a3d"
+    ]
+   }
+  }
+ ],
+ "text_model": "Text pieces follow After Effects' Range Selector with a Ramp Up shape: for unit i of n (chars or words) at x_i = 100·(i + 0.5)/n, offset o(t) = −W + (100 + W)·ease(t) over the piece's frames, affected a_i = clamp((x_i − o)/W, 0, 1); then position y += rise·a_i (down on screen), scale = 1 + (scale_from − 1)·a_i, blur = blur_px·a_i, opacity = 1 − a_i. Because a_i is a window of one curve, each unit is baked frame by frame (linear keys at every frame). AE's 'Characters' counts spaces as units (n includes them; a space just has nothing to draw)."
 }

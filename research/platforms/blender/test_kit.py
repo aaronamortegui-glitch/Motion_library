@@ -45,6 +45,22 @@ def err(fc, f0, f1, ease, n=40):
     return 100 * max(abs((fc.evaluate(f0 + (f1 - f0) * i / n) - v0) / (v1 - v0) - css(bz, i / n)) for i in range(n + 1))
 
 
+def P(piece):
+    return M.KIT_BY_ID[piece]["params"]
+
+
+def text_err(pcs, piece, start):
+    """Max deviation (opacity units / px) of each unit's baked keys from AE's Range Selector (kit_portable text_model)."""
+    prm = P(piece); bz = M.EASE[prm["ease"]]; sc = bpy.context.scene; worst = 0.0
+    for p in pcs:
+        x = 100 * (p["mdna_unit"] + 0.5) / p["mdna_units"]; z0 = p["mdna_rest"][0]
+        for f in range(start - 1, start + prm["frames"] + 2):
+            sc.frame_set(f); a = M.text_amount(x, (f - start) / prm["frames"], prm["window_pct"], bz)
+            worst = max(worst, abs(p.color[3] - (1 - a)), abs(p["mdna_blur"] - prm["blur_px"] * a),
+                        abs(p.location[2] - (z0 - prm["rise_px"] / 180 * a)) * 180)
+    return worst
+
+
 def scene(frames=60):
     sc = C.scene(frames=frames)
     sc.eevee.taa_render_samples = 32
@@ -84,14 +100,15 @@ def pieces():
     # blur_in: a photo plane, a static label 0.2 units deeper (checks the unwanted DOF blur)
     sc = scene(); ph = photo("Photo", 4.8, 2.7, (0, 0, 0.2)); lab = C.text("Static label", 0.4, (0, 0.2, -1.9), mint, F())
     r = M.kit("blur_in", [ph], "in", 0)
-    e1 = err(M._find_fc(ph, '["mdna_blur"]'), 0, 14, "Surge"); e2 = err(M._find_fc(ph, "color", 3), 0, 9, "Surge")
+    pb = P("blur_in")
+    e1 = err(M._find_fc(ph, '["mdna_blur"]'), 0, pb["frames"], pb["ease"]); e2 = err(M._find_fc(ph, "color", 3), 0, pb["fade_frames"], pb["fade_ease"])
     sc.frame_set(7); b = ph["mdna_blur"]; dy = ph.delta_location[1]
     cam = sc.camera.data
     ob2 = C.text("Out", 0.6, (3.5, 0, 2.2), mint, F()); M.kit("blur_in", [ob2], "out", 20)
-    e3 = err(M._find_fc(ob2, '["mdna_blur"]'), 20, 34, "Surge")
+    e3 = err(M._find_fc(ob2, '["mdna_blur"]'), 20, 20 + pb["out"]["frames"], pb["out"]["ease"])
     render(sc, "blur_in", (2, 5, 9, 14))
     rec("blur_in", "works", f"blur {e1:.3f}% fade {e2:.3f}% out {e3:.3f}%", "2,5,9,14",
-        f"f7 blur {b:.1f}px -> depth {dy:.3f}; fstop {cam.dof.aperture_fstop:.3f}; label 0.2 deeper unblurred")
+        f"f7 blur {b:.1f}px ({ph['mdna_blur_dof']}: photo = pre-blurred levels, text = depth of field {ob2['mdna_blur_dof']}); fstop {cam.dof.aperture_fstop:.3f}")
 
     # slam_in
     sc = scene(30); t = C.text("SLAM", 1.6, (0, 0, 0), lime, F())
@@ -108,7 +125,8 @@ def pieces():
     bar2 = C.plane("BarOut", 6, 0.5, (0, 0, -1.4), (0.9, 0.5, 0.3), 1.0)
     M.kit("wipe_reveal", [bar, w], "in", 0, stagger=4)
     M.kit("wipe_reveal", [bar2], "out", 0)
-    ew = err(M._find_fc(bar, '["mdna_wipe_in"]'), 0, 14, "Surge"); eo = err(M._find_fc(bar2, '["mdna_wipe_out"]'), 0, 14, "Surge")
+    pw = P("wipe_reveal")
+    ew = err(M._find_fc(bar, '["mdna_wipe_in"]'), 0, pw["frames"], pw["ease"]); eo = err(M._find_fc(bar2, '["mdna_wipe_out"]'), 0, pw["out"]["frames"], pw["out"]["ease"])
     render(sc, "wipe_reveal", (4, 8, 12, 18))
     rec("wipe_reveal", "works", f"in {ew:.3f}% out {eo:.3f}%", "4,8,12,18", "bottom bar = out")
 
@@ -162,20 +180,19 @@ def pieces():
     r = M.kit("chars_rise", [t], "in", 0)
     pcs = [o for o in r["objects"] if o.get("mdna_piece") is not None]
     sc.frame_set(59); after = bbox(pcs)
-    ec = max(err(M._fcurve(p, "location", 2), 1.5 * i, 1.5 * i + 14, "Land") for i, p in enumerate(pcs))
-    ef = err(M._fcurve(pcs[0], "color", 3), 0, 14, "Land")
+    ec = text_err(pcs, "chars_rise", 0)
     t2 = C.text("Chars out", 0.8, (0, 0, -1.6), mint, F()); M.kit("chars_rise", [t2], "out", 30)
     render(sc, "chars_rise", (3, 8, 14, 40))
-    rec("chars_rise", "works", f"rise {ec:.3f}% fade {ef:.3f}%", "3,8,14,40",
+    rec("chars_rise", "works", f"baked vs AE range selector: max {ec:.5f} (opacity / px)", "3,8,14,40",
         f"{len(pcs)} chars; bounds original {before} vs pieces {after}")
 
     # words_fade_up
     sc = scene(60); t = C.text("Words fade up one by one", 0.6, (0, 0, 0), mint, F())
     r = M.kit("words_fade_up", [t], "in", 0)
     pcs = [o for o in r["objects"] if o.get("mdna_piece") is not None]
-    ew = max(err(M._fcurve(p, "location", 2), 3 * i, 3 * i + 14, "Land") for i, p in enumerate(pcs))
+    ew = text_err(pcs, "words_fade_up", 0)
     render(sc, "words_fade_up", (4, 9, 15, 30))
-    rec("words_fade_up", "works", f"{ew:.3f}%", "4,9,15,30", f"{len(pcs)} words: {[p.data.body for p in pcs]}")
+    rec("words_fade_up", "works", f"baked vs AE range selector: max {ew:.5f}", "4,9,15,30", f"{len(pcs)} words: {[p.data.body for p in pcs]}")
 
     # typewriter
     sc = scene(60); t = C.text("Typewriter, keyed", 0.7, (0, 0, 0), lime, F()); t.data.align_x = "LEFT"; t.location.x = -3.5

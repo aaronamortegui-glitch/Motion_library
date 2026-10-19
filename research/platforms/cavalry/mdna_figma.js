@@ -32,11 +32,16 @@ var MDNA_FIGMA = (function () {
                 api.set(id, { text: t.string, fontSize: t.size, "material.materialColor": t.color, letterSpacing: t.tracking || 0,
                               autoWidth: true, autoHeight: true, horizontalAlignment: { left: 0, center: 1, right: 2 }[t.align] || 0, verticalAlignment: 1 });
                 try { api.set(id, { font: { font: t.family, style: t.style } }); } catch (e) { out.fontMissing = (out.fontMissing || []).concat(t.family + " " + t.style); }
-                // match Figma's text box: left (or centre/right) edge on its x, glyphs centred on its box
+                // match Figma's text box: left (or centre/right) edge on its x; vertically Figma centres the font's line box
+                // (hhea ascent + descent, which Cavalry's Top alignment also uses) in the text box, so the first line's top sits at
+                // box top + (box height - natural line height) / 2. Natural line height = Bottom-aligned minus Top-aligned glyph bottom.
+                api.set(id, { verticalAlignment: 2 }); var yb = api.getBoundingBox(id, true).bottom;
+                api.set(id, { verticalAlignment: 0 }); var yt = api.getBoundingBox(id, true).bottom, natural = yb - yt;
                 var bb = api.getBoundingBox(id, true), pos = api.get(id, "position");
                 var ax = t.align === "center" ? c.x : t.align === "right" ? b[0] + b[2] - W / 2 : b[0] - W / 2;
                 var cur = t.align === "center" ? bb.centre.x : t.align === "right" ? bb.right : bb.left;
-                api.set(id, { "position.x": pos.x + (ax - cur), "position.y": pos.y + (c.y - bb.centre.y) });
+                var lineTop = b[1] + (b[3] - natural) / 2;   // Figma y (down)
+                api.set(id, { "position.x": pos.x + (ax - cur), "position.y": H / 2 - lineTop });
             } else if (L.kind === "image" && L.file) {
                 var asset = api.loadAsset(folder + "/" + L.file, false), r = api.addAssetToComp(asset);
                 id = typeof r === "string" ? r : r[0];   // a layer id, or a list of them

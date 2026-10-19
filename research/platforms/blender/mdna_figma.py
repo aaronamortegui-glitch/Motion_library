@@ -23,6 +23,11 @@ if str(HERE) not in sys.path:
 import mdna_blender as M   # noqa: E402
 
 PX = 1 / 180
+# After Effects (8/16 bpc, no linear workspace) blends, fades and blurs in sRGB numbers; Blender does it in linear light,
+# so a 22 % fade looks ~50 % opaque and blurs glow. DISPLAY_SPACE renders like AE: the view transform is Raw (no curve),
+# colours are given as their sRGB numbers and images are read as Non-Color, so every mix happens on display values.
+DISPLAY_SPACE = True
+STACK = 0.0002   # depth step between layers: enough for draw order, ~0.001 px of depth-of-field blur at rest
 FONT_FILES = {"Instrument Serif|Italic": "InstrumentSerif-Italic.ttf", "Instrument Serif|Regular": "InstrumentSerif-Regular.ttf"}
 BROKEN_FONTS = {"Inter Tight", "Inter"}   # overlapping contours: holes in Blender (see the module docstring)
 
@@ -61,8 +66,12 @@ def _builtin_factor():
 
 
 def _lin(hexstr):
+    """A Figma hex colour as the render's working values: sRGB numbers as they are in display space (DISPLAY_SPACE),
+    else linear."""
     h = hexstr.lstrip("#")[:6]
     c = [int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+    if DISPLAY_SPACE:
+        return tuple(c)
     return tuple(x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4 for x in c)
 
 
@@ -73,6 +82,8 @@ def _emission(name, hexstr, alpha=1.0, image=None):
     mix = nt.nodes.new("ShaderNodeMixShader"); tr = nt.nodes.new("ShaderNodeBsdfTransparent")
     if image:
         tex = nt.nodes.new("ShaderNodeTexImage"); tex.image = bpy.data.images.load(str(image), check_existing=True)
+        if DISPLAY_SPACE:
+            tex.image.colorspace_settings.name = "Non-Color"
         nt.links.new(tex.outputs["Color"], em.inputs["Color"]); nt.links.new(tex.outputs["Alpha"], mix.inputs[0])
     else:
         em.inputs["Color"].default_value = (*_lin(hexstr), 1); mix.inputs[0].default_value = alpha
@@ -91,7 +102,7 @@ def _camera(W, H):
         sc.collection.objects.link(cam); sc.camera = cam
     cam.data.type = "ORTHO"; cam.data.ortho_scale = max(W, H) * PX
     cam.location = (0, -20, 0); cam.rotation_euler = (math.pi / 2, 0, 0)
-    sc.view_settings.view_transform = "Standard"   # Figma's hex colours, not AgX's
+    sc.view_settings.view_transform = "Raw" if DISPLAY_SPACE else "Standard"   # Figma's hex colours, not AgX's
     return cam
 
 
@@ -149,7 +160,7 @@ def build(folder, collection_name=None):
         x, y, w, h = L["box"]
         cx, cz = (x + w / 2 - W / 2) * PX, (H / 2 - (y + h / 2)) * PX
         depth += 1
-        cy = -depth * 0.002   # later Figma layers sit closer to the camera (on top)
+        cy = -depth * STACK   # later Figma layers sit closer to the camera (on top)
         ob = None
         if L["kind"] in ("rect", "ellipse", "image"):
             if L["kind"] == "ellipse":
@@ -217,6 +228,18 @@ def build(folder, collection_name=None):
             ob.rotation_euler[1] = math.radians(-L["rotation"])
         ob["mdna_role"] = L["role"]; ob["mdna_order"] = L["order"]; ob["mdna_figma"] = L["id"]
         built.append({"name": L["name"], "object": ob, "role": L["role"], "order": L["order"]})
+    # a backdrop plane right behind the layers, on the focus plane: with the world as background, EEVEE's depth of field
+    # (the blur pieces) bleeds every in-focus edge into the infinitely far world, a soft halo around all layers
+    bpy.ops.mesh.primitive_plane_add(size=1)
+    bd = bpy.context.object; bd.name = "Backdrop"
+    for c in list(bd.users_collection):
+        c.objects.unlink(bd)
+    col.objects.link(bd)
+    bd.rotation_euler = (math.pi / 2, 0, 0); bd.scale = (W * PX * 1.5, H * PX * 1.5, 1); bd.location = (0, STACK, 0)
+    bd.data.materials.append(_emission("Backdrop", m["bg"])); bd["mdna_role"] = "backdrop"
+    cam = sc.camera.data   # depth of field (blur pieces) focuses on the middle of the stack
+    cam.dof.focus_object = None
+    cam.dof.focus_distance = (0 - sc.camera.location.y) - depth * STACK / 2; cam["mdna_focus"] = True
     bpy.context.view_layer.update()
     return built
 
