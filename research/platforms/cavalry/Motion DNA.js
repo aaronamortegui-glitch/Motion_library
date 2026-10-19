@@ -4,6 +4,7 @@
 // editable curve, Apply to the selected keyframes). install.py copies this file into Cavalry's Scripts folder and
 // writes the clone's path below; presets, curves and thumbnails are read from the clone, so a git pull updates them.
 var MDNA_ROOT = "__MDNA_ROOT__";
+try {
 
 api.load(MDNA_ROOT + "/research/platforms/cavalry/mdna_cavalry.js");
 MDNA.init(MDNA_ROOT);
@@ -66,12 +67,12 @@ function paintChips() { for (var e in chips) chips[e].setBackgroundColor(e === s
 B.add(chipRow);
 
 var flow = new ui.FlowLayout(6, 6), scroll = new ui.ScrollView(), tiles = {};
-scroll.setLayout(flow); scroll.setMinimumHeight(250);
+scroll.setLayout(flow); scroll.setFixedHeight(250);   // a ScrollView takes fixed sizes only
 B.add(scroll);
 function tile(title, tip, img, onPick) {
     var box = new ui.Container(), v = new ui.VLayout(), pic;
     if (img) { pic = new ui.ImageButton(img); pic.setImageSize(112, 63); pic.setDrawStroke(false); }
-    else { pic = new ui.Button(title); pic.setFixedSize(112, 63); pic.setBackgroundColor(C.line); pic.setDrawStroke(false); }   // text tile: no thumbnail for it yet
+    else { pic = new ui.Button(title); pic.setFixedWidth(112); pic.setFixedHeight(63); pic.setBackgroundColor(C.line); pic.setDrawStroke(false); }   // text tile: no thumbnail for it yet
     pic.setToolTip(tip);
     pic.onClick = onPick;
     var name = label(title, C.text, 11); name.setAlignment(1);
@@ -316,3 +317,8 @@ ui.add(bar);
 ui.add(tabs);
 paintChips(); paintPhase(); grid(); paint(); paintMb();
 ui.show();
+
+} catch (MDNA_ERR) {   // never an empty window: say what failed
+    var errLabel = new ui.Label("Motion DNA could not start: " + MDNA_ERR + (MDNA_ERR && MDNA_ERR.stack ? " · " + String(MDNA_ERR.stack).split(String.fromCharCode(10)).slice(1, 3).join(" · ") : ""));
+    ui.setTitle("Motion DNA"); ui.add(errLabel); ui.show();
+}
