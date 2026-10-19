@@ -53,12 +53,16 @@ animate keeps a profile that **learns from each review**, and everything it make
 
 ## Get started
 
+**Easiest:** open Claude Code and send *"Install Motion DNA from https://github.com/aaronamortegui-glitch/Motion_library"*:
+Claude installs it and tells you the two steps only you can do. Seven steps in all, with a short video:
+[docs/quick-install](docs/quick-install/README.md). By hand: [docs/quick-install/MANUAL.md](docs/quick-install/MANUAL.md).
+
 1. **Install** (Windows or macOS): double-click `INSTALL-Windows.cmd` / `INSTALL-macOS.command`, or run
    `python tools/setup.py` (or ask Claude to install Motion DNA). The panel is signed on your machine: no Adobe
    developer mode, no admin rights.
 2. **Open After Effects** › **Window › Extensions › Motion DNA** (also *File › Scripts › Motion DNA*) and dock it once:
    it comes back every time. The link with Claude starts with After Effects by itself.
-3. **Agent › Connect:** *Connect Claude* (sign in once) and, if you use Figma, *Connect Figma* (press Allow).
+3. **Agent › Connect:** *Connect Claude* (sign in once); optional *Connect Figma*, *Krea* or *Flora* (press Allow) and Codex. *Update* gets new versions.
 4. Once, in After Effects: *Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
 
 Update with `python tools/setup.py --update` (never over your local changes) · remove with `--uninstall`.
@@ -87,12 +91,26 @@ Update with `python tools/setup.py --update` (never over your local changes) · 
 > section for Claude. [docs/use-cases](docs/use-cases/README.md) has the tests behind it: each tool on a real-looking
 > piece (fashion, eyewear, beauty, kitchen, cars), what broke, and how it was fixed.
 
-### Connect Claude and Figma
-<img src="docs/screens/cep-connect.gif" width="300" align="right" alt="Connect Claude and Figma">
+### Connect Claude, Figma, Krea, Flora and Codex · Update
+<img src="docs/screens/cep-connect.gif" width="300" align="right" alt="Connect Claude, Figma, Krea, Flora and Codex, and update">
 
 *Agent › Connect* has one button each. **Connect Claude** opens the sign-in (your Claude account) and turns green by
-itself. **Connect Figma** opens Figma's own permission page: press Allow. The header shows **MCP · Claude · Figma**:
-green is ready, a click opens Connect. When Figma asks for permission again, the same button reconnects it.
+itself. **Connect Figma**, **Connect Krea** and **Connect Flora** open each service's own permission page: press Allow
+(the panel adds the official MCP first when it is missing). The header shows **MCP · Claude · Figma**: green is ready,
+a click opens Connect. When a service asks for permission again, the same button reconnects it.
+**Codex** (optional): *Sign in to Codex* (ChatGPT) and *Add Motion DNA to Codex*, so OpenAI's Codex drives After
+Effects with the same tools. **Update** checks GitHub for a new version and runs `python tools/setup.py --update` in a
+window (never over your local changes); then *Reload panel*.
+
+**What the Agent does with them** (Full mode). When an order needs footage, stills, textures or audio that the
+library and `list_assets` do not have, the Agent lists the assets the video needs (what, the comp's size and fps,
+seconds, the references that keep characters and style consistent), quotes the cost (a free preflight when the
+generator has one) and **waits for your yes**. Then it generates with Krea or Flora, brings each result into After
+Effects with `import_media` (saved in a `generated` folder next to the project), places it and checks it with
+`render_frame`. Figma works the same way in both directions: frames and layers come in through the Figma tools, and
+the Agent can build in Figma from what is in the comp. Account actions stay yours: the Agent can never create or revoke
+API tokens, start trials, train LoRAs, share projects or delete anything in Krea or Flora. Safe mode uses only the
+Motion DNA tools.
 
 <br clear="right">
 
@@ -166,7 +184,7 @@ Open the repo (or a brand or project folder) in Claude Code and approve the `mot
 | To… | Tools |
 |---|---|
 | Browse | `list_presets` · `list_packs` · `list_tags` · `suggest_mix` · `match_reference` · `list_brands` · `get_brand` · `list_assets` · `list_resources` (outside scripts, VFX, SFX and music, license checked) |
-| Act in After Effects | `apply_preset` · `apply_pack` · `apply_brand` (`existing` = modify / replace) · `apply_transition` · `add_asset` · `remove_animation` |
+| Act in After Effects | `apply_preset` · `apply_pack` · `apply_brand` (`existing` = modify / replace) · `apply_transition` · `add_asset` · `import_media` (a file or an https URL, e.g. a Krea/Flora generation: downloaded, imported, placed) · `remove_animation` |
 | Build what AC packs ship (by behavior, on our tokens) | `solid_transition` (46 named looks: solid/mask wipes, iris, fan, dots, liquid, ink, bubbles, shatter, flash, glitch, twirl, slices…) · `add_element` (27 self-sizing kinds: titles, callouts, counters, timers, social, quotes, lists, chat, rating, cinematic, glass card, our logo end card…) · `add_shape` (39 animated shapes, lines, impacts, fireworks, glitter…) · `move` (3D flip, hinge, orbit, fly…) · `animate_text` (per char/word/line, decode, mask, typewriter) · `add_captions` · `add_look` (backgrounds incl. plexus, blobs, mesh and frosted glass, tones, grain, letterbox, particles, long shadow, glitch) · `add_behavior` (9 behaviours by family, each drawn into shapes, backgrounds, text mattes, element boxes or transitions: bubbles, blob, voronoi, grow, flow, flock, spring, rope, and the hand-drawn `line_boil`) · `list_kit` |
 | Deliver | `resize_comp` (social resizes 9:16 · 1:1 · 4:5 or any WxH: every keyframe kept, content reframed inside the title-safe area, then the layout QA on each) · `render_comp` |
 | Edit keyframes | `keyframes` (reverse, mirror_out, stagger, shift, to_playhead, sequence, distribute, loop, bake, stretch, copy_to) · `anchor_point` |

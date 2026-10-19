@@ -27,7 +27,8 @@ beauty, kitchen and cars.
    Network*.
 3. Restart After Effects and open **Window › Extensions › Motion DNA**. You can also use *File › Scripts › Motion DNA*.
    Dock it next to Effects & Presets: it then comes back every time After Effects starts.
-4. Go to **Agent › Connect** and sign in to Claude once. Figma comes from the connectors of your Claude account.
+4. Go to **Agent › Connect** and sign in to Claude once. Figma, Krea and Flora are one button and an Allow each (or come from
+   the connectors of your Claude account); Codex can get the same tools; **Update** there pulls new versions.
 
 > **Tip:** after `git pull`, close and reopen the panel to see the new version. You don't need to reinstall: the panel
 > loads its code from your clone. Only changes to `panel/index.html` or the manifest need `setup.py --update`.
@@ -212,7 +213,7 @@ When you drive After Effects for a person (MCP server `motion-dna`):
    - `list_kit` first when the brief asks for something a preset does not cover: it lists elements, shapes, moves, text recipes, looks, backgrounds and transitions by energy and tone;
    - `resize_comp` for the social resizes (9:16, 1:1, 4:5 by default, or any WxH): it duplicates the comp keeping every keyframe, reframes it inside each size's title-safe area and runs `check_layout` on each; look at every size with `render_frame`;
    - `add_element` (27 self-sizing kinds, incl. `glass_card` and `end_card`, the Motion DNA logo close used only in Motion DNA's own videos), `add_shape` (39 shapes), `move` (3D entrances), `animate_text` (per char/word/line, typewriter), `add_captions` (from `tools/vo_words.py` words), `add_look` (backgrounds, tones, particles, long shadow, glitch), `add_behavior` (behaviours by family — fill, swarm, physics, modifier — into a shape, background, text matte, element box, transition or existing layers; call it empty to list them with the targets that passed); all keyed with the token curves, brand colours with `brand`;
-   - `add_asset` (local licensed packs); `list_resources` for outside scripts, VFX, sound effects and music, each with its license (ask before downloading);
+   - `add_asset` (local licensed packs); `import_media` for any file or https URL (generated stills and clips, Figma exports); `list_resources` for outside scripts, VFX, sound effects and music, each with its license (ask before downloading);
    - `keyframes` to re-time what is already there (stagger, mirror_out, sequence, loop, bake, copy_to…) and `anchor_point`;
    - `matte` (still or video cut-out on the local GPU) and `text_behind` (text behind a subject, in one call);
    - `run_jsx` only for what no tool covers.
@@ -233,6 +234,13 @@ Recipes that worked in the tests:
 - **Text behind a person:** `text_behind subject="Portrait" text="Big word"`, then animate the text (Chars Rise or Blur
   Words) and render a frame where they overlap.
 - **A client file that already moves:** `apply_preset … existing=modify`. Never replace unless asked.
+- **Footage the library does not have (Krea or Flora connected):**
+  - list what the video needs: each asset, the comp's size and fps, seconds, and the references (character, location
+    and style sheets) that keep it consistent;
+  - quote the cost (Krea: `generate_video`/`generate_image` with `preflight: true` is free and exact, in compute
+    units) and wait for the yes;
+  - generate, then `import_media source=<result URL> dest=<project>/generated time_s=<s>`; keep the clip's own frame
+    rate; `render_frame` to look at it.
 
 ## Tips by industry
 | Industry | What worked | Watch out for |

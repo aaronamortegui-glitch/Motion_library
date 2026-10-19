@@ -3,7 +3,7 @@
 The panel runs in its browser preview mode (host.js answers for After Effects; for the Agent, small Node stand-ins
 answer for Claude Code), with a fictional demo brand (Vela), so the GIFs are the same on every machine. Each GIF is
 ~340 px wide and under 500 KB, in docs/screens/:
-  cep-connect.gif        Agent > Connect: Claude and Figma, each one button, green by itself
+  cep-connect.gif        Agent > Connect: Claude, Figma, Krea and Flora, each one button, green by itself; Codex; Update
   cep-create-modify.gif  Behaviors: no keyframes → Create; keyframes → Modify or Replace
   cep-curves.gif         Curves: drag a handle, pick a curve from the library
   cep-brand-learns.gif   a review note in the chat → a rule proposal → one click → the brand's rules
@@ -59,10 +59,16 @@ window.require = (m) => ({
   os: { homedir: () => 'C:/Users/you' },
   crypto: null,
   child_process: {
-    execFile: (exe, args, opts, cb) => { cb = cb || opts; setTimeout(() => cb && cb(null,
-      args[0] === 'auth' ? JSON.stringify({ loggedIn: window.__signedIn, authMethod: 'claude.ai' })
-      : args[0] === 'mcp' && args[1] === 'list' ? (window.__figmaOn ? 'claude.ai Figma: https://mcp.figma.com/mcp - ✔ Connected' : 'plugin:figma:figma: https://mcp.figma.com/mcp (HTTP) - ! Needs authentication') : '', ''), 150); },
-    exec: () => { setTimeout(() => { window.__signedIn = true; window.__figmaOn = window.__figmaWanted; }, 1200); },
+    execFile: (exe, args, opts, cb) => { cb = cb || opts; const codex = /codex/i.test(exe);
+      const mcp = [window.__figmaOn ? 'claude.ai Figma: https://mcp.figma.com/mcp - ✔ Connected' : 'plugin:figma:figma: https://mcp.figma.com/mcp (HTTP) - ! Needs authentication',
+                   window.__kreaOn ? 'claude.ai Krea: https://api.krea.ai/mcp - ✔ Connected' : '', window.__floraOn ? 'claude.ai Flora: https://agents.flora.ai/mcp - ✔ Connected' : ''].filter(Boolean).join('\\n');
+      setTimeout(() => cb && cb(null,
+      exe === 'git' ? (args[2] === 'log' ? '7151105|2 days ago' : args[2] === 'rev-list' ? String(window.__behind ?? 3) : '')
+      : codex ? (args[0] === 'login' ? 'Logged in using ChatGPT' : args[0] === 'mcp' && args[1] === 'list' ? (window.__codexMcp ? 'motion-dna  python  tools/mcp/ss_motion_mcp.py  enabled' : 'node_repl  node  enabled') : (window.__codexMcp = true, 'Added global MCP server motion-dna'))
+      : args[0] === 'auth' ? JSON.stringify({ loggedIn: window.__signedIn, authMethod: 'claude.ai' })
+      : args[0] === 'mcp' && args[1] === 'list' ? mcp : '', ''), 150); },
+    execSync: (cmd) => /codex/.test(cmd) ? 'C:/Users/you/AppData/Roaming/npm/codex.cmd' : '',
+    exec: (cmd) => { setTimeout(() => { window.__signedIn = true; window.__figmaOn = window.__figmaWanted; window.__kreaOn = window.__kreaWanted; window.__floraOn = window.__floraWanted; if (/setup.py --update/.test(cmd)) window.__behind = 0; }, 1200); },
     spawn: () => ({ stdout: { on() {} }, stderr: { on() {} }, on() {}, kill() {} }),
   },
 }[m]);
@@ -119,11 +125,24 @@ def main():
         tab = "AG.tab = '{0}'; store.set('agentTab', '{0}'); agent.render();"
 
         # 1 · Connect: Claude, then Figma, each one button
-        js(go.format("agent") + "AG.logged = false; AG.figma = 'auth'; agent.render(); agent.showSetup(); document.querySelector('#main').scrollTop = 0", wait=600, hold=8)
+        js(go.format("agent") + "S.root = S.root || 'C:/Users/you/Documents/Projects/Motion_library'; AG.logged = false; AG.figma = 'auth'; agent.render(); agent.showSetup(); document.querySelector('#main').scrollTop = 0", wait=600, hold=8)
         js("[...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Connect Claude').click()", wait=200, hold=3)
         page.wait_for_timeout(5200); shot(6)
         js("window.__figmaWanted = true; [...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Connect Figma').click()", wait=200, hold=3)
-        page.wait_for_timeout(7000); shot(10)
+        page.wait_for_timeout(7000); shot(8)
+        # Krea and Flora: the same button and Allow
+        js("document.querySelector('.setup').querySelectorAll('.conn')[2].scrollIntoView({ block: 'center' })", wait=300, hold=4)
+        js("window.__kreaWanted = true; [...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Connect Krea').click()", wait=200, hold=3)
+        page.wait_for_timeout(7000); shot(5)
+        js("window.__floraWanted = true; [...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Connect Flora').click()", wait=200, hold=3)
+        page.wait_for_timeout(7000); shot(6)
+        # Codex: add the Motion DNA tools; then Update
+        js("document.querySelector('.setup').querySelectorAll('.conn')[4].scrollIntoView({ block: 'center' })", wait=300, hold=5)
+        js("[...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Add Motion DNA to Codex').click()", wait=900, hold=6)
+        js("AG.repoSt = null; agent.showSetup(); document.querySelector('.setup').querySelectorAll('.conn')[5].scrollIntoView({ block: 'center' })", wait=900, hold=6)
+        js("[...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Update').click()", wait=200, hold=4)
+        page.wait_for_timeout(1500)
+        js("[...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Check again').click()", wait=1500, hold=10)
         section("connect")
 
         # 2 · Create / Modify / Replace
@@ -186,7 +205,7 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     for name, frames in parts.items():
         gif(frames, OUT / f"cep-{name}.gif")
-    gif([f for k in parts for f in parts[k][::4]], OUT / "cep-panel.gif", 280, 56)   # the tour: a third of the frames, lighter
+    gif([f for k in parts for f in parts[k][::5]], OUT / "cep-panel.gif", 260, 40)   # the tour: a third of the frames, lighter
     if "--png" not in sys.argv:
         shutil.rmtree(FRAMES)
 

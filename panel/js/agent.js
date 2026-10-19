@@ -68,20 +68,28 @@ async function connStatus() {
   if (AG.figma === "unknown") setDot("st-figma", null, "Figma: status unknown. Click to check.");
 }
 function openSetup() { S.sec = "agent"; store.set("section", "agent"); showSection(); if (agent.showSetup) agent.showSetup(); }
-function figmaStatus() {   // "connected" | "auth" | "missing" | "unknown" (claude mcp list runs a health check: a few seconds)
-  return new Promise((resolve) => {
-    try {
-      nodeReq()("child_process").execFile(AG.exe, ["mcp", "list"], { timeout: 45000, windowsHide: true, cwd: S.root || undefined }, (err, out) => {
-        // Figma comes from the Claude account (claude.ai connector "claude.ai Figma") or from a server added by hand ("figma")
-        const lines = String(out || "").split(/\r?\n/).map((l) => l.trim()).filter((l) => /^(claude\.ai |plugin:figma:)?figma:/i.test(l));   // account connector, Figma plugin or hand-added
-        if (!lines.length) return resolve(err ? "unknown" : "missing");
-        const ok = lines.find((l) => /connected/i.test(l) && !/fail|need/i.test(l));
-        AG.figmaServer = (ok || lines[0]).split(": http")[0].replace(/:$/, "");   // e.g. "claude.ai Figma", "plugin:figma:figma"
-        resolve(ok ? "connected" : "auth");
-      });
-    } catch (e) { resolve("unknown"); }
+// Connectors the Agent can use, found in `claude mcp list` either from the Claude account ("claude.ai Krea"), a plugin
+// ("plugin:figma:figma") or added by hand ("krea"); each one connects with a browser Allow (`claude mcp login`).
+const SVC = { figma: { label: "Figma", url: "https://mcp.figma.com/mcp" }, krea: { label: "Krea", url: "https://api.krea.ai/mcp" }, flora: { label: "Flora", url: "https://agents.flora.ai/mcp" } };
+let MCPLIST = null;
+function mcpList(fresh) {   // claude mcp list runs a health check (a few seconds): one read serves every connector for 20 s
+  if (!fresh && MCPLIST && Date.now() - MCPLIST.at < 20000) return MCPLIST.p;
+  const p = new Promise((resolve) => {
+    try { nodeReq()("child_process").execFile(AG.exe, ["mcp", "list"], { timeout: 45000, windowsHide: true, cwd: S.root || undefined }, (err, out) => resolve({ err, out: String(out || "") })); }
+    catch (e) { resolve({ err: e, out: "" }); }
   });
+  MCPLIST = { at: Date.now(), p }; return p;
 }
+async function svcStatus(name, fresh) {   // "connected" | "auth" | "missing" | "unknown"
+  const { err, out } = await mcpList(fresh);
+  const re = new RegExp("^(claude\\.ai |plugin:[\\w-]+:)?" + name + ":", "i");
+  const lines = out.split(/\r?\n/).map((l) => l.trim()).filter((l) => re.test(l));
+  if (!lines.length) return err ? "unknown" : "missing";
+  const ok = lines.find((l) => /connected/i.test(l) && !/fail|need/i.test(l));
+  AG.server = AG.server || {}; AG.server[name] = (ok || lines[0]).split(": http")[0].replace(/:$/, "");   // e.g. "claude.ai Krea", "figma"
+  return ok ? "connected" : "auth";
+}
+function figmaStatus() { return svcStatus("figma", true).then((st) => { AG.figmaServer = AG.server && AG.server.figma; return st; }); }
 document.addEventListener("DOMContentLoaded", () => {
   for (const id of ["st-claude", "st-figma"]) { const b = document.getElementById(id); if (b) b.onclick = openSetup; }
 });
@@ -97,10 +105,14 @@ function authStatus() {   // claude auth status: JSON with loggedIn and authMeth
   });
 }
 const SAFE_TOOLS = ["mcp__motion-dna"];
-const FULL_TOOLS = ["mcp__motion-dna", "mcp__figma", "mcp__claude_ai_Figma", "mcp__plugin_figma_figma", "Read", "Write", "Edit", "Glob", "Grep", "WebFetch",
+const GEN = ["claude_ai_Krea", "krea", "claude_ai_Flora", "flora"];   // generators: claude.ai connectors or servers added by hand
+const FULL_TOOLS = ["mcp__motion-dna", "mcp__figma", "mcp__claude_ai_Figma", "mcp__plugin_figma_figma", ...GEN.map((g) => "mcp__" + g), "ToolSearch", "Read", "Write", "Edit", "Glob", "Grep", "WebFetch",
   "Bash(python:*)", "Bash(python3:*)", "Bash(bash tools/:*)", "Bash(ffmpeg:*)", "Bash(ffprobe:*)", "Bash(ls:*)", "Bash(mkdir:*)"];
 const NEVER = ["Bash(git commit:*)", "Bash(git push:*)", "Bash(git reset:*)", "Bash(rm -rf:*)",
-  "mcp__motion-dna__add_brand_note"];   // in the panel the user decides where a rule goes (the proposal card)
+  "mcp__motion-dna__add_brand_note",   // in the panel the user decides where a rule goes (the proposal card)
+  // account, sharing and deleting stay with the user: tokens, plans, trials, LoRA training, shares, deletes
+  ...GEN.flatMap((g) => ["create_api_token", "revoke_api_token", "list_api_tokens", "start_free_trial", "show_plans", "delete_moodboard", "delete_style",
+    "overwrite_files", "flora_share_project", "flora_update_project_sharing", "flora_train_lora", "flora_delete_comment"].map((t) => `mcp__${g}__${t}`))];
 
 const TEMPLATES = [
   ["Figma → animate", "Take the frames from this Figma file: <paste URL>. Import their assets into After Effects as editable layers and animate them in the <style> style. Render a few check frames and tell me what you built."],
@@ -130,6 +142,16 @@ async function contextBlock() {
     if (AG.ctx.selection) lines.push(c.selected && c.selected.length ? `Selected layers (${c.selected.length}): ${c.selected.join(", ")}.`
       : "No layers are selected: an order about \"the selected layers\" means every layer of the open comp.");
   }
+  if (AG.mode === "full") {
+    AG.svc = AG.svc || {};
+    for (const n of ["krea", "flora"]) if (AG.svc[n] == null) AG.svc[n] = await svcStatus(n);   // the sheet may never have been opened
+    const on = ["krea", "flora"].filter((n) => AG.svc[n] === "connected").map((n) => SVC[n].label);
+    lines.push((on.length ? `Generators connected: ${on.join(", ")}.` : "No generator is connected (Krea or Flora: Agent › Connect).") +
+      " When the order needs footage, stills, textures or audio that the library and list_assets do not have: list the assets the video needs" +
+      " (what, size and fps of the comp, seconds, which references keep characters and style consistent), quote the cost (USD, or the provider's credits when it gives no USD price; use a free preflight when the tool has one) and wait for my yes;" +
+      " then generate with Krea or Flora, bring each result in with import_media (dest = the project's generated folder), place it (keep the clip's own frame rate: reinterpreting it changes its speed), and check with render_frame." +
+      " Figma frames come in through the Figma tools (export the layers, then import_media).");
+  } else lines.push("Safe mode: only the Motion DNA tools. If the order needs generated footage or Figma, say that it needs Full mode.");
   lines.push(EXISTING_ASK, RULE_ASK);
   return lines.join("\n");
 }
@@ -332,7 +354,7 @@ async function runAgent(prompt) {
   AG.proc.on("error", (e) => { AG.proc = null; push("error", "Could not start Claude Code: " + e.message); });
 }
 function stepText(c) {
-  const n = c.name.replace(/^mcp__motion-dna__/, "").replace(/^mcp__(claude_ai_)?[Ff]igma__/, "Figma · ").replace(/^mcp__/, "");
+  const n = c.name.replace(/^mcp__motion-dna__/, "").replace(/^mcp__(claude_ai_)?[Ff]igma__/, "Figma · ").replace(/^mcp__(claude_ai_)?[Kk]rea__/, "Krea · ").replace(/^mcp__(claude_ai_)?[Ff]lora__(flora_)?/, "Flora · ").replace(/^mcp__/, "");
   const i = c.input || {};
   const hint = i.preset || i.name || i.file_path || i.path || i.url || i.command || i.pattern || "";
   return n + (hint ? " · " + String(hint).slice(0, 80) : "");
@@ -369,7 +391,7 @@ function agent() {
     }
     AG.node = true; AG.exe = AG.exe || findClaude();
     const modeSeg = h("div", { class: "seg small" }, ...[["safe", "Safe"], ["full", "Full"]].map(([k, l]) => h("button", {
-      class: AG.mode === k ? "on" : "", title: k === "safe" ? "Only the Motion DNA tools (apply, layers, frames)" : "Also Figma, files and scripts (never commits or pushes)",
+      class: AG.mode === k ? "on" : "", title: k === "safe" ? "Only the Motion DNA tools (apply, layers, frames)" : "Also Figma, Krea, Flora, files and scripts (asks before paid generations; never commits or pushes)",
       onclick: () => { AG.mode = k; store.set("agentMode", k); render(); } }, l)));
     const setup = h("div", { class: "card-box setup", hidden: true });
     const tabsEl = h("div", { class: "seg agent-tabs" }, ...[["chat", "Chat"], ["library", "Library"], ["project", "Project"]].map(([k, l]) =>
@@ -587,8 +609,8 @@ function conversationCard() {
     rows.length > 1 || (rows.length && rows[0].id !== sid) ? h("details", {}, h("summary", { class: "dim" }, "Other conversations in this folder"), ...rows) : null);
 }
 
-// Setup: one clear step to connect Claude (a sign-in window, then it turns green by itself); Figma is optional;
-// the manual commands only show under "Having trouble?".
+// Setup: one clear step to connect Claude (a sign-in window, then it turns green by itself); Figma, Krea, Flora and
+// Codex are optional; Update pulls the new version; the manual commands only show under "Having trouble?".
 function openTerminal(args) {   // a visible terminal window running Claude Code with these arguments
   const cp = nodeReq()("child_process"), exe = AG.exe;
   if (process.platform === "win32") cp.exec(`start "Claude" cmd /k ""${exe}" ${args}"`, { windowsHide: false });
@@ -599,21 +621,68 @@ function runInWindow(args) {   // Figma's sign-in needs a real terminal: a small
   if (process.platform === "win32") cp.exec(`start "Connecting Figma" /min cmd /c ""${exe}" ${args}"`, { windowsHide: false });
   else cp.execFile("osascript", ["-e", `tell application "Terminal" to do script "\"${exe}\" ${args}; exit"`]);
 }
-function waitForFigma(onDone) {   // checks every 6 s for 4 minutes after the permission page opens
-  clearInterval(AG.figmaWait); let n = 0;
-  AG.figmaWait = setInterval(async () => {
-    if (++n > 40) return clearInterval(AG.figmaWait);
-    const f = await figmaStatus();
-    if (f === "connected") { clearInterval(AG.figmaWait); AG.figma = f; setDot("st-figma", true, "Figma: connected"); toast("Figma is connected."); onDone(); }
+function waitForService(name, onDone) {   // checks every 6 s for 4 minutes after the permission page opens
+  AG.waits = AG.waits || {}; clearInterval(AG.waits[name]); let n = 0;
+  AG.waits[name] = setInterval(async () => {
+    if (++n > 40) return clearInterval(AG.waits[name]);
+    const st = await svcStatus(name, true);
+    if (st === "connected") { clearInterval(AG.waits[name]); AG.svc[name] = st; if (name === "figma") { AG.figma = st; setDot("st-figma", true, "Figma: connected"); } toast(SVC[name].label + " is connected."); onDone(); }
   }, 6000);
 }
-// One click: the browser opens Figma's own permission page (no Claude settings, nothing to type); the panel turns
-// green by itself. With no Figma server at all, it adds Figma's official one first.
-function connectFigma(redraw) {
-  const go = (name) => { runInWindow(`mcp login "${name}"`); toast("Your browser opens Figma: press Allow. This turns green by itself."); waitForFigma(redraw); };
-  if (AG.figmaServer) return go(AG.figmaServer);
-  nodeReq()("child_process").execFile(AG.exe, ["mcp", "add", "--scope", "user", "--transport", "http", "figma", "https://mcp.figma.com/mcp"],
-    { windowsHide: true, timeout: 30000 }, () => { AG.figmaServer = "figma"; go("figma"); });
+// One click: the browser opens the service's own permission page (nothing to type); the sheet turns green by itself.
+// With no server for it yet, it adds the service's official MCP first.
+function connectService(name, redraw) {
+  const go = (server) => { runInWindow(`mcp login "${server}"`); toast(`Your browser opens ${SVC[name].label}: press Allow. This turns green by itself.`); waitForService(name, redraw); };
+  if (AG.server && AG.server[name]) return go(AG.server[name]);
+  nodeReq()("child_process").execFile(AG.exe, ["mcp", "add", "--scope", "user", "--transport", "http", name, SVC[name].url],
+    { windowsHide: true, timeout: 30000 }, () => { AG.server = AG.server || {}; AG.server[name] = name; go(name); });
+}
+function connectFigma(redraw) { connectService("figma", redraw); }
+
+// Codex (optional): the same Motion DNA tools from OpenAI's Codex, signed in with ChatGPT
+function findCodex() {
+  const req = nodeReq(); if (!req) return null;
+  const fs = req("fs"), path = req("path"), os = req("os"), cp = req("child_process");
+  const cands = process.platform === "win32" ? [path.join(process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"), "npm", "codex.cmd")] : ["/opt/homebrew/bin/codex", "/usr/local/bin/codex", path.join(os.homedir(), ".npm-global", "bin", "codex")];
+  for (const c of cands) if (fs.existsSync(c)) return c;
+  try { const out = cp.execSync(process.platform === "win32" ? "where codex" : "command -v codex", { encoding: "utf8", windowsHide: true, timeout: 5000 }); const first = out.split(/\r?\n/).find((l) => l.trim()); if (first) return first.trim(); } catch (e) {}
+  return null;
+}
+function runCodex(args) {   // a promise of {err, out}; .cmd needs a shell on Windows
+  return new Promise((resolve) => {
+    try { nodeReq()("child_process").execFile(AG.codex, args, { timeout: 30000, windowsHide: true, shell: /\.cmd$/i.test(AG.codex) }, (err, out, er) => resolve({ err, out: String(out || "") + String(er || "") })); }
+    catch (e) { resolve({ err: e, out: "" }); }
+  });
+}
+async function codexStatus() {   // { found, logged, mcp }
+  AG.codex = AG.codex || findCodex(); if (!AG.codex) return { found: false };
+  const [l, m] = await Promise.all([runCodex(["login", "status"]), runCodex(["mcp", "list"])]);
+  return { found: true, logged: /logged in/i.test(l.out) && !/not logged/i.test(l.out), mcp: /(^|\s)motion-dna(\s|$)/m.test(m.out) };
+}
+function codexWindow(args, title) {   // a visible terminal running codex (its sign-in opens the browser)
+  const cp = nodeReq()("child_process");
+  if (process.platform === "win32") cp.exec(`start "${title}" cmd /k ""${AG.codex}" ${args}"`, { windowsHide: false });
+  else cp.execFile("osascript", ["-e", `tell application "Terminal" to do script "\\"${AG.codex}\\" ${args}"`, "-e", 'tell application "Terminal" to activate']);
+}
+function addMotionDnaToCodex(redraw) {
+  const py = process.platform === "win32" ? "python" : "python3", server = (S.root || ".") + "/tools/mcp/ss_motion_mcp.py";
+  runCodex(["mcp", "add", "motion-dna", "--", py, server]).then((r) => { toast(r.err ? "Codex could not add Motion DNA: " + r.out.slice(0, 120) : "Motion DNA is in Codex: its tools drive After Effects."); AG.codexSt = null; redraw(); });
+}
+
+// Update: git pull through setup.py --update (never over local changes), in a visible window; then reload the panel
+function repoStatus() {   // { head, when, behind } after a quiet fetch; behind is null when it cannot tell
+  return new Promise((resolve) => {
+    const cp = nodeReq()("child_process"), git = (a, cb) => cp.execFile("git", ["-C", S.root, ...a], { timeout: 30000, windowsHide: true }, (e, o) => cb(e, String(o || "").trim()));
+    if (!S.root) return resolve(null);
+    git(["log", "-1", "--format=%h|%cr"], (e, o) => { const [head, when] = (o || "|").split("|");
+      git(["fetch", "-q"], () => git(["rev-list", "--count", "HEAD..@{u}"], (e2, n) => resolve({ head, when, behind: e2 ? null : parseInt(n, 10) || 0 }))); });
+  });
+}
+function runUpdate() {
+  const cp = nodeReq()("child_process");
+  if (process.platform === "win32") cp.exec(`start "Motion DNA update" /d "${S.root}" cmd /k python tools\\setup.py --update`, { windowsHide: false });
+  else cp.execFile("osascript", ["-e", `tell application "Terminal" to do script "cd '${S.root}' && python3 tools/setup.py --update"`, "-e", 'tell application "Terminal" to activate']);
+  toast("Updating in a window. When it says done, press Reload panel (or restart After Effects).");
 }
 function openUrl(url) {   // the default browser
   const cp = nodeReq()("child_process");
@@ -643,21 +712,46 @@ function showSetup(setup) {
           h("li", {}, "If it shows a code, paste it in the window. Done: this turns green by itself.")),
         h("button", { class: "solid apply big", onclick: () => { openTerminal("auth login"); toast("Sign in in your browser…"); waitForSignIn(() => { if (agent.render) agent.render(); if (agent.showSetup) agent.showSetup(); }); } }, "Connect Claude")]);   // stays open: green, and Figma next
 
-  // 2. Figma (optional)
+  // 2. Figma, Krea, Flora (optional): a button and an Allow in the browser each
+  AG.svc = AG.svc || {};
+  const blurb = { figma: "Only if you want the agent to animate your Figma frames.", krea: "Generate images and video (Seedance, Kling…) with your Krea account.", flora: "Generate with your Flora workspace and its canvases." };
+  const service = (name) => { const st = name === "figma" ? AG.figma : AG.svc[name], lab = SVC[name].label;
+    return st === "connected"
+      ? step(true, lab + " is connected", h("span", { class: "dim" }, name === "figma" ? "Orders can read your Figma files (Full mode)." : "The Agent can generate with " + lab + " (Full mode)."))
+      : step(false, lab + " (optional)", [
+          h("span", {}, st === "auth" ? lab + " needs your permission again (it asks from time to time)." : blurb[name]),
+          h("span", { class: "dim" }, "Press the button and choose Allow in the " + lab + " page that opens. That's it: this turns green by itself."),
+          h("button", { class: "solid apply big", disabled: !AG.logged, title: AG.logged ? "" : "Connect Claude first", onclick: () => connectService(name, redraw) }, "Connect " + lab)]); };
+  const figma = service("figma"), krea = service("krea"), flora = service("flora");
   const fig = AG.figma;
-  const figma = fig === "connected"
-    ? step(true, "Figma is connected", h("span", { class: "dim" }, "Orders can read your Figma files (Full mode)."))
-    : step(false, "Figma (optional)", [
-        h("span", {}, fig === "auth" ? "Figma needs your permission again (it asks from time to time)." : "Only if you want the agent to animate your Figma frames."),
-        h("span", { class: "dim" }, "Press the button and choose Allow in the Figma page that opens. That's it: this turns green by itself."),
-        h("button", { class: "solid apply big", disabled: !AG.logged, title: AG.logged ? "" : "Connect Claude first", onclick: () => connectFigma(redraw) }, "Connect Figma")]);
+
+  // 3. Codex (optional): the same tools from OpenAI's Codex
+  const cx = AG.codexSt;
+  const codex = !cx ? step(false, "Codex (optional)", h("span", { class: "dim" }, "Checking Codex…"))
+    : !cx.found ? step(false, "Codex (optional)", [h("span", {}, "Use the same Motion DNA tools from OpenAI's Codex."), h("button", { class: "btn", onclick: () => openUrl("https://developers.openai.com/codex/cli") }, "Install Codex")])
+    : cx.logged && cx.mcp ? step(true, "Codex is ready", h("span", { class: "dim" }, "Codex has the Motion DNA tools: open After Effects with this panel and ask Codex."))
+    : step(false, "Codex (optional)", [h("span", {}, "Use the same Motion DNA tools from OpenAI's Codex."),
+        !cx.logged ? h("button", { class: "solid apply big", onclick: () => { codexWindow("login", "Codex sign-in"); toast("Sign in with ChatGPT in your browser, then Check again."); } }, "Sign in to Codex") : null,
+        !cx.mcp ? h("button", { class: cx.logged ? "solid apply big" : "btn", onclick: () => addMotionDnaToCodex(redraw) }, "Add Motion DNA to Codex") : null]);
+
+  // 4. Update
+  const rs = AG.repoSt;
+  const upd = h("div", { class: "conn" + (rs && rs.behind === 0 ? " ok" : "") }, h("div", { class: "conn-head" }, h("i", { class: "sdot " + (rs && rs.behind === 0 ? "ok" : "") }),
+      h("b", {}, !rs || rs.behind === null ? "Update" : rs.behind ? `Update available (${rs.behind} new)` : "Motion DNA is up to date")),
+    h("span", { class: "dim" }, rs ? `Version ${rs.head} · ${rs.when}` + (rs.behind === null ? " · could not reach GitHub" : "") : "Checking for a new version…"),
+    h("div", { class: "crow" }, h("button", { class: rs && rs.behind ? "solid apply" : "btn", onclick: runUpdate }, "Update"), h("button", { class: "btn", onclick: () => location.reload() }, "Reload panel")));
 
   const trouble = h("details", { class: "trouble" }, h("summary", {}, "Having trouble?"),
     h("span", { class: "dim" }, "Do it yourself in PowerShell: sign in to Claude"), cmdRow(`${runCmd()} auth login`),
     h("span", { class: "dim" }, "Figma, yourself:"), cmdRow(`${runCmd()} mcp login "${AG.figmaServer || "figma"}"`),
-    h("span", { class: "dim" }, "or claude.ai › Settings › Connectors › Figma › Connect."));
+    h("span", { class: "dim" }, "or claude.ai › Settings › Connectors › Figma › Connect."),
+    h("span", { class: "dim" }, "Krea or Flora, yourself:"), cmdRow(`${runCmd()} mcp login "${(AG.server && AG.server.krea) || "krea"}"`),
+    h("span", { class: "dim" }, "Update, yourself (in the Motion DNA folder):"), cmdRow("python tools/setup.py --update"));
 
-  setup.replaceChildren(h("div", { class: "kit-top" }, h("b", { class: "kit-title" }, "Connect"), close), claude, figma,
-    h("div", { class: "crow" }, h("button", { class: "btn", onclick: async () => { AG.logged = await authStatus(); AG.figma = await figmaStatus(); redraw(); if (agent.draw) agent.draw(); } }, "Check again")), trouble);
+  setup.replaceChildren(h("div", { class: "kit-top" }, h("b", { class: "kit-title" }, "Connect"), close), claude, figma, krea, flora, codex, upd,
+    h("div", { class: "crow" }, h("button", { class: "btn", onclick: async () => { AG.logged = await authStatus(); AG.figma = await figmaStatus(); for (const n of ["krea", "flora"]) AG.svc[n] = await svcStatus(n); AG.codexSt = await codexStatus(); AG.repoSt = await repoStatus(); redraw(); if (agent.draw) agent.draw(); } }, "Check again")), trouble);
   if (fig === undefined) figmaStatus().then((f) => { AG.figma = f; setDot("st-figma", f === "connected", f === "connected" ? "Figma: connected" : "Figma: not connected (optional). Click to connect."); redraw(); });
+  for (const n of ["krea", "flora"]) if (AG.svc[n] === undefined) { AG.svc[n] = null; svcStatus(n).then((st) => { AG.svc[n] = st; redraw(); }); }
+  if (!AG.codexSt && !AG.codexBusy) { AG.codexBusy = true; codexStatus().then((c) => { AG.codexSt = c; AG.codexBusy = false; redraw(); }); }
+  if (!AG.repoSt && !AG.repoBusy && nodeReq()) { AG.repoBusy = true; repoStatus().then((r) => { AG.repoSt = r || { head: "?", when: "", behind: null }; AG.repoBusy = false; redraw(); }); }
 }

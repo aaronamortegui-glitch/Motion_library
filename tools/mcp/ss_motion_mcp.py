@@ -758,6 +758,49 @@ return names.join("|") + "\\n" + c.name + " (" + c.width + "x" + c.height + ") -
     return text + "\nLook at each size with render_frame(comp=...)."
 
 
+def t_import_media(source, comp=None, time_s=None, dest=None, name=None, fit=True, layer=True):
+    """Brings generated or local media into AE: an https URL (Krea, Flora, Figma exports…) is downloaded first."""
+    import urllib.parse
+    import urllib.request
+    src = str(source).strip()
+    if src.lower().startswith(("http://", "https://")):
+        if dest:
+            folder = pathlib.Path(dest)
+        else:   # next to the open AE project, else renders/generated (git-ignored)
+            try:
+                aep = run_jsx("return app.project.file ? app.project.file.parent.fsName : '';", includes=())
+            except RuntimeError:
+                aep = ""
+            folder = (pathlib.Path(aep) if aep else ROOT / "renders") / "generated"
+        folder.mkdir(parents=True, exist_ok=True)
+        base = name or pathlib.Path(urllib.parse.urlparse(src).path).name or f"media_{int(time.time())}"
+        req = urllib.request.Request(src, headers={"User-Agent": "MotionDNA/1.0"})
+        with urllib.request.urlopen(req, timeout=300) as r:
+            if not pathlib.Path(base).suffix:   # signed URLs often hide the extension
+                ext = {"video/mp4": ".mp4", "video/quicktime": ".mov", "image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp",
+                       "audio/mpeg": ".mp3", "audio/wav": ".wav", "audio/x-wav": ".wav"}.get(r.headers.get_content_type(), "")
+                base += ext
+            path = folder / base
+            if path.exists():
+                path = folder / f"{path.stem}_{int(time.time())}{path.suffix}"
+            path.write_bytes(r.read())
+    else:
+        path = pathlib.Path(src)
+        if not path.exists():
+            return f"not found: {src}"
+    if path.suffix.lower() == ".webp":
+        return f"saved {path.as_posix()} — After Effects does not import WebP: convert it (ffmpeg -i in.webp out.png) and call import_media with the PNG"
+    at = "c.time" if time_s is None else str(float(time_s))
+    body = f"""var it = app.project.importFile(new ImportOptions(new File({js(path.as_posix())})));
+if ({js(name)}) it.name = {js(name)};
+if (!{'true' if layer else 'false'}) return "imported " + it.name + " (project panel only)";
+var c = findComp({js(comp)}); app.beginUndoGroup("Motion DNA import (MCP)");
+var L = c.layers.add(it); L.startTime = {at};
+if ({'true' if fit else 'false'} && it.width && it.height) {{ var s = Math.max(c.width / it.width, c.height / it.height) * 100; L.property("ADBE Transform Group").property("ADBE Scale").setValue([s, s, 100]); }}
+app.endUndoGroup(); return "imported " + it.name + " as layer " + L.index + " in " + c.name + " at " + L.startTime.toFixed(2) + " s";"""
+    return ("saved " if src.lower().startswith("http") else "file ") + path.as_posix() + "\n" + run_jsx(COMP_JS + body, includes=())
+
+
 def t_run_jsx(code, timeout_s=180):
     return run_jsx(code, timeout=timeout_s)
 
@@ -875,6 +918,10 @@ TOOLS_DEF = [
     ("resize_comp", t_resize_comp, "Social resizes of a comp (default: the active one): duplicates it once per size — 9:16 (1080x1920), 1:1 (1080x1080) and 4:5 (1080x1350) by default; also 16:9, 4:3, 2:3 or any WxH such as 1200x628 — keeping every keyframe and expression (nothing is re-keyed), and reframes it inside the size's title-safe area (9:16 stays clear of the Reels/TikTok/Shorts interface). Full-frame backgrounds (plates, solids, footage, adjustment layers) cover the new frame. mode reflow (default): layers that rest on or next to each other move as a group, each group keeps its own size where it fits (never above the source size) and is placed round the frame centre, so a 16:9 title stays legible in 9:16; mode fit: the whole layout scales as one block, and a text that would still rest outside the safe area gets its own fit null. Every placement is a null ('SS resize · content', 'SS resize · bg', 'SS fit · <layer>': shy guide layers) to adjust by hand. New comps are named '<comp> · 9x16' etc. Runs check_layout on each (check=false skips it); then look at each with render_frame. Layers inside precomps are not reframed. safe = title-safe insets [top, right, bottom, left] as fractions to override the default.",
      {"comp": {"type": "string"}, "sizes": {"type": "array", "items": {"type": "string"}, "description": "9:16 | 1:1 | 4:5 | 16:9 | 4:3 | 2:3 | WxH; default 9:16, 1:1, 4:5"},
       "mode": {"type": "string", "enum": ["reflow", "fit"]}, "safe": {"type": "array", "items": {"type": "number"}}, "suffix": {"type": "string"}, "check": {"type": "boolean"}}),
+    ("import_media", t_import_media, "Bring media into After Effects: a local file or an https URL (a Krea or Flora generation, a Figma export…), downloaded first into dest (default: a 'generated' folder next to the open .aep, else renders/generated). Imports it and, unless layer=false, adds it to the comp (default: active) at time_s (default: playhead), scaled to cover the frame (fit=false keeps 100%). Use it for every generated still, clip or audio instead of downloading by hand.",
+     {"source": {"type": "string", "description": "file path or https URL"}, "comp": {"type": "string"}, "time_s": {"type": "number"},
+      "dest": {"type": "string", "description": "folder to save downloads in (the project's folder, e.g. <project>/generated)"},
+      "name": {"type": "string", "description": "file and item name"}, "fit": {"type": "boolean"}, "layer": {"type": "boolean"}}, ["source"]),
     ("run_jsx", t_run_jsx, "Advanced: run ExtendScript in AE with the library loaded (SSM, SSP, SSA available). The code is a function body: use `return` for the result.",
      {"code": {"type": "string"}, "timeout_s": {"type": "number"}}, ["code"]),
 ]

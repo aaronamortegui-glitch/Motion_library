@@ -438,6 +438,22 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **Editing a UTF-8 file with PowerShell 5.1 `Get-Content -Raw | Set-Content` double-encoded every `·` and `…` (read as ANSI) and turned LF into CRLF** → edit repo files with Python (`read_text/write_text(encoding="utf-8")`) or the Edit tool, never `Set-Content`.
 - Anonymous GitHub API calls hit the hourly rate limit after a research pass, and `gh` is not installed on this machine → `git clone --depth 1` into a scratch folder and read LICENSE files directly; release assets are listed at `github.com/<repo>/releases/expanded_assets/<tag>`. aescripts.com answers 403 to scripts: browse it in the browser pane.
 - **A library item without its preview showed a broken image in the panel** (a style added without its demo) → the panel trusted that every file existed → every panel image now goes through `safeImg` (tries each source, then a named placeholder) and hover GIFs swap in only once loaded; `python tools/check_previews.py` (run by setup and `test_all.py`) lists what is missing.
+- **Panel connectors (Agent › Connect):** `claude mcp list` names the same service three ways (`figma:`,
+  `plugin:figma:figma:`, `claude.ai Krea:`) and a stale manual entry (`krea: … Needs authentication`) can sit next to a
+  connected claude.ai one → match `^(claude\.ai |plugin:[\w-]+:)?<name>:` and call it connected if **any** line is
+  connected; log in with the exact server name found (`claude mcp login "claude.ai Krea"`). Codex installs as
+  `%APPDATA%\npm\codex.cmd`, which `execFile` only runs with `shell: true`. The Update check reads
+  `git rev-list --count HEAD..@{u}` after `git fetch`; offline it fails → show "Update" (unknown), never "up to date".
+- **The panel's Agent could not use Krea or Flora although both showed connected** → a headless run (`claude -p`) only
+  calls the tools in `--allowedTools`, and the list had Figma but no generator → `FULL_TOOLS` lists
+  `mcp__claude_ai_Krea`, `mcp__claude_ai_Flora` (and the hand-added `mcp__krea` / `mcp__flora`) plus `ToolSearch`
+  (connector tools are deferred), and `NEVER` blocks the account tools (API tokens, trials, plans, LoRA training,
+  sharing, deletes). Claude.ai connectors show `pending` in the init message and connect a moment later: check the
+  tools a run actually called, not the init list. Generated media comes in with MCP `import_media` (URL → file →
+  layer); Krea's `generate_video` with `preflight: true` gives the exact cost in compute units for free.
+- **`tools/record_cep_panel.py` stand-ins are JS inside a Python string:** a `'\n'` became a real newline and broke the
+  injected script silently (the sheet never rendered) → write `'\\n'` in the Python source, and check the page console
+  when a recorded scene comes out blank.
 
 ## 8. Costs observed (Flora, USD)
 | Item | Cost |
@@ -505,3 +521,9 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **A curve to AE keys: `setTemporalEaseAtKey` wants one ease per dimension of the property** (Scale is 3D on a 2D
   layer even when you key 2 values) → count the property's value, not the value you pass.
 - Third-party prompts and remakes stay in `source/` (git-ignored, `fetch_sources.py`); the index keeps only metadata.
+- **Two renders of the same template ran at once and wrote the same MP4** (a background chain that `wmic … terminate`
+  did not stop, plus a new one) → before re-rendering, list the processes (`Get-CimInstance Win32_Process` with
+  `html_to_mp4`) and stop the old one, or render to a new file name; a shared output is corrupt even if both finish.
+- **Captions ran past their card in the tutorial** → `research/video_prompts/text_check.py` hooks `D.txt`/`D.rr`, samples
+  the frames and lists every visible text that leaves the safe area or overflows the card under it. Run it before
+  every render, with a `snap.py` sheet for centring.

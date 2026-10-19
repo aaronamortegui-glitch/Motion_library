@@ -3,7 +3,7 @@
   "tool": "ae_status",
   "ok": true,
   "args": {},
-  "answer": "AE 26.5x89 · project: unsaved · active: R4 Vintage spot (1920x1080, 24.00s, 9 layers, selected: 6) · panel: loaded (Window > Extensions > Motion DNA) · fonts ok"
+  "answer": "AE 26.5x89 · project: unsaved · active: none · panel: loaded (Window > Extensions > Motion DNA) · fonts ok"
  },
  {
   "tool": "list_presets",
@@ -119,7 +119,7 @@
    "comp": "_MCP_TEST · 9x16",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1792013300266.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1792432701908.png (open it to look at the frame)"
  },
  {
   "tool": "apply_preset",
@@ -165,7 +165,7 @@
    "comp": "_MCP_TEST",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1792013304142.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1792432706964.png (open it to look at the frame)"
  },
  {
   "tool": "check_layout",
@@ -708,6 +708,28 @@
   "answer": "added SFX · Swoosh Transition 28 at 0.2"
  },
  {
+  "tool": "import_media",
+  "ok": true,
+  "args": {
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261019-135812\\product_car_side.jpg",
+   "comp": "_MCP_TEST",
+   "time_s": 0.5,
+   "name": "imported_photo"
+  },
+  "answer": "file D:/motion category ai library/research/_mcp_test/20261019-135812/product_car_side.jpg\nimported imported_photo as layer 1 in _MCP_TEST at 0.50 s"
+ },
+ {
+  "tool": "import_media",
+  "ok": true,
+  "args": {
+   "source": "https://raw.githubusercontent.com/aaronamortegui-glitch/Motion_library/main/library/packs/calm-modern.png",
+   "dest": "D:\\motion category ai library\\research\\_mcp_test\\20261019-135812\\generated",
+   "comp": "_MCP_TEST",
+   "fit": false
+  },
+  "answer": "saved D:/motion category ai library/research/_mcp_test/20261019-135812/generated/calm-modern.png\nimported calm-modern.png as layer 1 in _MCP_TEST at 0.00 s"
+ },
+ {
   "tool": "add_asset",
   "ok": true,
   "args": {
@@ -728,16 +750,16 @@
    "category": "motion",
    "why": "test"
   },
-  "answer": "saved rule 1 (motion) in D:/motion category ai library/research/_mcp_test/20261014-172812/brand/brand.json: Product shots glide in, never pop"
+  "answer": "saved rule 1 (motion) in D:/motion category ai library/research/_mcp_test/20261019-135812/brand/brand.json: Product shots glide in, never pop"
  },
  {
   "tool": "matte",
   "ok": true,
   "args": {
-   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261014-172812\\product_car_side.jpg",
-   "out": "D:\\motion category ai library\\research\\_mcp_test\\20261014-172812\\product_cutout.png"
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261019-135812\\product_car_side.jpg",
+   "out": "D:\\motion category ai library\\research\\_mcp_test\\20261019-135812\\product_cutout.png"
   },
-  "answer": "matte: D:/motion category ai library/research/_mcp_test/20261014-172812/product_cutout.png"
+  "answer": "matte: D:/motion category ai library/research/_mcp_test/20261019-135812/product_cutout.png"
  },
  {
   "tool": "run_jsx",
