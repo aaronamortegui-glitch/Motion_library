@@ -1,0 +1,57 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T07 · Timeline explainer</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<script>
+// T07 · history timeline (archetype "a brief history of X from start to today"), v2 after the pilot review: paper
+// texture with a halftone, a giant serif year behind the action, minor ticks and a running year counter, cards with
+// illustrations that build, a "today" stamp, a slight camera tilt. Hybrid: the copy goes live in AE (--notext).
+const VARS = { kicker: "A short history", title: "From a napkin to *the world.*",
+  items: [["2019", "A sketch on a napkin", "napkin"], ["2020", "First prototype", "proto"], ["2022", "Beta with 40 teams", "people"], ["2024", "One million projects", "chart"], ["2026", "Ships worldwide", "globe"]] };
+const { T, seg, k, lerp, clamp, rng, NOTEXT, rich, kicker, finish, glow } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080, GAP = 640, Y0 = 2019, Y1 = 2026;
+const halftone = (() => { const c = document.createElement("canvas"); c.width = c.height = 24; const x = c.getContext("2d"); x.fillStyle = "#0A211F"; x.beginPath(); x.arc(12, 12, 2.2, 0, 7); x.fill(); return c; })();
+
+function illo(kind, p, t) {   // small illustrations that build with p (0..1), drawn in pine and spark
+  g.lineWidth = 5; g.lineCap = "round"; g.lineJoin = "round"; g.strokeStyle = C.pine;
+  if (kind === "napkin") { D.at(0, 0, 1, -0.08, () => { D.rr(-70, -55, 140, 110, 6); D.fill("#fff"); g.stroke(); g.save(); g.setLineDash([300]); g.lineDashOffset = 300 * (1 - p);
+      g.beginPath(); g.moveTo(-45, 20); g.bezierCurveTo(-20, -40, 10, 40, 45, -20); g.strokeStyle = C.coral; g.stroke(); g.restore(); }); }
+  else if (kind === "proto") { D.rr(-80, -50, 160, 100, 10); D.fill(C.sea); D.rr(-68, -38, 136, 64, 6); D.fill(C.pine); for (let i = 0; i < 3; i++) { D.rr(-58, -28 + i * 18, 100 * clamp(p * 3 - i), 8, 4); D.fill(C.spark); } D.rr(-30, 50, 60, 10, 5); D.fill(C.pine); }
+  else if (kind === "people") { for (let i = 0; i < 5; i++) { const q = seg(p, i * 0.15, i * 0.15 + 0.4, "Pop"), x = -80 + i * 40; D.at(x, 10, q, 0, () => { g.beginPath(); g.arc(0, -26, 14, 0, 7); D.fill(i === 2 ? C.spark : C.pine); g.beginPath(); g.arc(0, 14, 22, Math.PI, 0); D.fill(i === 2 ? C.spark : C.pine); }); } }
+  else if (kind === "chart") { [0.3, 0.45, 0.4, 0.7, 1].forEach((v, i) => { const h = 90 * v * seg(p, i * 0.12, i * 0.12 + 0.5, "Land"); D.rr(-80 + i * 34, 45 - h, 24, h, 5); D.fill(i === 4 ? C.spark : C.pine); }); }
+  else { g.beginPath(); g.arc(0, 0, 55, 0, 7); D.fill(C.sea); g.stroke(); g.save(); g.beginPath(); g.arc(0, 0, 55, 0, 7); g.clip(); g.strokeStyle = C.spark;
+      for (let i = -2; i <= 2; i++) { g.beginPath(); g.ellipse(((i * 30 + t * 40) % 150) - 0, 0, 14, 55, 0, 0, 7); g.stroke(); } g.beginPath(); g.moveTo(-60, 0); g.lineTo(60, 0); g.stroke(); g.restore(); }
+}
+
+MDNA.scene({ duration: 12, background: C.cloud, render(t) {
+  D.bg("#F3F1E8");
+  g.save(); g.globalAlpha = 0.08; g.fillStyle = g.createPattern(halftone, "repeat"); g.fillRect(0, 0, W, H); g.restore();
+  const n = VARS.items.length, at = i => 1.6 + i * 1.75;
+  const head = k(t, VARS.items.flatMap((_, i) => [[at(i) - 0.9, i * GAP, i ? "Settle" : "Flat"], [at(i) + 0.6, i * GAP]]));
+  const cam = k(t, [[0, -300], [1.2, 0, "Settle"], ...VARS.items.map((_, i) => [at(i) + 0.4, i * GAP, "Settle"]), [11, (n - 1) * GAP * 0.5, "Settle"]]);
+  const zoom = k(t, [[10.0, 1], [11.2, 0.5, "Settle"]]), tilt = k(t, [[0, -0.02], [10, 0.015, "Cruise"], [11.2, 0, "Settle"]]);
+  // a giant serif year behind everything, following the playhead
+  const hi = clamp(head / GAP, 0, n - 1), i0 = Math.floor(Math.min(hi, n - 2)), yr = Math.round(lerp(+VARS.items[i0][0], +VARS.items[i0 + 1][0], hi - i0));   // years between milestones
+  if (!NOTEXT) D.alpha(0.07 * (1 - seg(t, 10, 10.8)), () => D.txt(String(yr), W / 2, H / 2 + 40, 640, C.pine, 400, T.font.display));
+  if (!NOTEXT) D.alpha(seg(t, 0.2, 0.67, "Land") * (1 - seg(t, 1.6, 2.0)), () => { kicker(D, VARS.kicker, W / 2, 170, C.sea); rich(D, VARS.title, W / 2, 270, 84, C.pine, C.coral); });
+  D.at(W / 2, H / 2 + 40, zoom, tilt, () => { g.translate(-cam, 0);
+    // axis with minor ticks, one per quarter
+    g.strokeStyle = "#0A211F22"; g.lineWidth = 8; g.lineCap = "round"; g.beginPath(); g.moveTo(-260, 0); g.lineTo((n - 1) * GAP + 260, 0); g.stroke();
+    for (let q = -4; q <= (n - 1) * 4 + 4; q++) { const x = q * GAP / 4; g.strokeStyle = q % 4 ? "#0A211F33" : "#0A211F88"; g.lineWidth = 3; g.beginPath(); g.moveTo(x, -10); g.lineTo(x, q % 4 ? 10 : 18); g.stroke(); }
+    g.strokeStyle = C.pine; g.lineWidth = 8; g.beginPath(); g.moveTo(-260, 0); g.lineTo(Math.max(-260, head), 0); g.stroke();
+    glow(g, head, 0, 60, "#D8FF85", 0.9); g.beginPath(); g.arc(head, 0, 10, 0, 7); D.fill(C.pine);
+    VARS.items.forEach(([y, title, kind], i) => {
+      const x = i * GAP, p = seg(t, at(i) - 0.15, at(i) + 0.3, "Pop"), c = seg(t, at(i), at(i) + 0.467, "Land"), up = i % 2 ? 1 : -1, ill = seg(t, at(i) + 0.2, at(i) + 1.2, "Cruise");
+      g.beginPath(); g.arc(x, 0, 24 * p, 0, 7); D.fill(C.spark); g.lineWidth = 6; g.strokeStyle = C.pine; if (p > 0) g.stroke();
+      D.alpha(c, () => { g.save(); g.setLineDash([6, 8]); g.strokeStyle = C.pine; g.lineWidth = 3; g.beginPath(); g.moveTo(x, up * 34); g.lineTo(x, up * (34 + 70 * c)); g.stroke(); g.restore();
+        const cy = up * 250 + up * 30 * (1 - c); g.shadowColor = "#0A211F33"; g.shadowBlur = 30; g.shadowOffsetY = 12; D.rr(x - 250, cy - 120, 500, 240, 22); D.fill("#fff"); g.shadowColor = "transparent";
+        D.rr(x - 250, cy - 120, 500, 10, 5); D.fill(i === n - 1 ? C.spark : C.sea);
+        D.at(x - 150, cy + 10, 1, 0, () => illo(kind, ill, t));
+        if (!NOTEXT) { kicker(D, "Chapter " + (i + 1), x - 40, cy - 66, C.sea, "left", 18); D.txt(y, x - 40, cy - 10, 64, C.pine, 400, T.font.display, "left"); D.txt(title, x - 40, cy + 54, 28, C.pine, 600, T.font.ui, "left"); } });
+      if (i === n - 1 && !NOTEXT) { const s = seg(t, at(i) + 0.8, at(i) + 1.2, "Pop"); D.at(x + 220, -300, s, -0.2, () => { g.beginPath(); g.arc(0, 0, 70, 0, 7); D.fill(C.coral); kicker(D, "Today", 0, 2, C.cloud, "center", 22); }); }
+    });
+  });
+  finish(g, t, { grain: 0.08, vignette: 0.18 });
+} });
+</script>

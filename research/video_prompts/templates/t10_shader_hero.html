@@ -1,0 +1,46 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T10 · Shader hero object</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<script>
+// T10 · hero object in a shader (archetype "a glossy 3D product shot written as a fragment shader"). Route A: a
+// ray-marched soft capsule-torus morph with a spark rim light on a pine studio floor, turntable + slow push.
+// Rendered frame by frame (the shader only reads uTime), exported as an MP4 plate.
+const { T } = MDNA; const cv = document.getElementById("c"), gl = cv.getContext("webgl", { preserveDrawingBuffer: true });
+const VS = "attribute vec2 p; void main(){ gl_Position = vec4(p,0.,1.); }";
+const FS = `precision highp float; uniform float uTime; uniform vec2 uRes;
+mat2 rot(float a){ float c=cos(a), s=sin(a); return mat2(c,-s,s,c); }
+float sdTorus(vec3 p, vec2 t){ vec2 q = vec2(length(p.xz)-t.x, p.y); return length(q)-t.y; }
+float sdCapsule(vec3 p, float h, float r){ p.y -= clamp(p.y, -h, h); return length(p)-r; }
+float smin(float a, float b, float k){ float h = clamp(.5+.5*(b-a)/k,0.,1.); return mix(b,a,h)-k*h*(1.-h); }
+float map(vec3 p){
+  float m = .5+.5*sin(uTime*.9);                                   // breathing morph
+  vec3 q = p - vec3(0.,.15,0.); q.xz *= rot(uTime*.6); q.xy *= rot(.35);
+  float d = mix(sdTorus(q, vec2(.62,.22)), sdCapsule(q.yxz, .45, .32), m*.6);
+  d = smin(d, length(q - vec3(.0,.0,.0)) - .18, .25);
+  return min(d, p.y + .62);                                          // floor
+}
+vec3 nrm(vec3 p){ vec2 e = vec2(.001,0.); return normalize(vec3(map(p+e.xyy)-map(p-e.xyy), map(p+e.yxy)-map(p-e.yxy), map(p+e.yyx)-map(p-e.yyx))); }
+void main(){
+  vec2 uv = (gl_FragCoord.xy - .5*uRes)/uRes.y;
+  float push = 3.2 - .5*smoothstep(0., 8., uTime);
+  vec3 ro = vec3(0., .35, push), rd = normalize(vec3(uv, -1.6));
+  float t = 0.; float d; for(int i=0;i<90;i++){ d = map(ro+rd*t); if(d<.001||t>8.) break; t += d; }
+  vec3 pine = vec3(.039,.129,.122), sea = vec3(.09,.29,.275), spark = vec3(.847,1.,.522), cloud = vec3(.97,.976,.95);
+  vec3 col = mix(pine, sea, smoothstep(-.4,.6,uv.y)) * (1. - .35*length(uv));
+  if (t < 8.) {
+    vec3 p = ro+rd*t, n = nrm(p), l = normalize(vec3(-.5,.8,.6));
+    float dif = clamp(dot(n,l),0.,1.), rim = pow(1.-clamp(dot(n,-rd),0.,1.),3.), spec = pow(clamp(dot(reflect(rd,n),l),0.,1.),40.);
+    if (p.y < -.6) { float sh = 1.; float st = .02; for(int i=0;i<30;i++){ float h = map(p+l*st); sh = min(sh, 8.*h/st); st += clamp(h,.02,.2); } col = mix(pine, sea, .35)*(.5+.5*clamp(sh,0.,1.)) + spark*.06*exp(-3.*length(p.xz)); }
+    else col = mix(vec3(.07,.2,.19), cloud, dif*.55) + spark*rim*1.1 + spec*.9;
+  }
+  col = pow(col, vec3(.95)); gl_FragColor = vec4(col,1.);
+}`;
+function sh(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr); gl.useProgram(pr);
+const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+const loc = gl.getAttribLocation(pr, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+const uT = gl.getUniformLocation(pr, "uTime"), uR = gl.getUniformLocation(pr, "uRes");
+MDNA.scene({ duration: 8, render(t) { gl.viewport(0, 0, cv.width, cv.height); gl.uniform1f(uT, t); gl.uniform2f(uR, cv.width, cv.height); gl.drawArrays(gl.TRIANGLES, 0, 3); gl.finish(); } });
+</script>

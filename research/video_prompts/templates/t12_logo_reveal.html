@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T12 · Logo reveal</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<script>
+// T12 · logo reveal over transparency (archetype "break the mark into parts and animate the parts"). A fictional
+// mark of three primitives (disc, bar, arc) flies in on Motion DNA curves, locks with a Pop, the wordmark types on
+// and the tagline settles. Route B: each part is one AE shape layer; this HTML is the reference and an alpha asset.
+const VARS = { name: "northwind", tag: "Design that moves", mark: [MDNA.T.color.spark, MDNA.T.color.cloud, MDNA.T.color.mint] };
+const { T, seg, k, lerp, clamp } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
+
+MDNA.scene({ duration: 5, alpha: true, render(t) {
+  g.clearRect(0, 0, W, H);
+  const lock = seg(t, 1.25, 1.6, "Pop"), slide = seg(t, 1.9, 2.5, "Settle"), mx = W / 2 - 300 * slide, my = H / 2;
+  D.at(mx, my, lerp(1.0, 1.0 + 0.08 * Math.sin(lock * Math.PI), lock), 0, () => {
+    // disc from the top-left with Wind-up, bar from below with Whip, arc spins in with Settle
+    const dp = seg(t, 0.2, 1.2, "Wind-up"); D.at(lerp(-700, -60, dp), lerp(-500, -40, dp), 1, 0, () => { g.beginPath(); g.arc(0, 0, 70, 0, 7); D.fill(VARS.mark[0]); });
+    const bp = seg(t, 0.35, 1.1, "Whip"); D.at(70, lerp(700, 30, bp), 1, 0, () => { D.rr(-34, -110, 68, 220, 34); D.fill(VARS.mark[1]); });
+    const ap = seg(t, 0.5, 1.3, "Settle"); D.at(0, 0, 1, lerp(-Math.PI * 1.5, 0, ap), () => { g.beginPath(); g.arc(0, 0, 150, Math.PI * 0.15, Math.PI * (0.15 + 1.1 * ap)); g.lineWidth = 34; g.lineCap = "round"; g.strokeStyle = VARS.mark[2]; g.stroke(); });
+  });
+  // wordmark types on, letter by letter, after the mark slides left
+  const letters = VARS.name.split(""), x0 = W / 2 - 60; let x = x0;
+  letters.forEach((ch, i) => { const p = seg(t, 2.2 + i * 0.06, 2.5 + i * 0.06, "Land"); const w = D.width(ch, 150, 800, T.font.ui, -4);
+    D.alpha(p, () => D.txt(ch, x, H / 2 + 8 + 40 * (1 - p), 150, C.cloud, 800, T.font.ui, "left", -4)); x += w; });
+  const tp = seg(t, 3.0, 3.5, "Land"); D.alpha(tp, () => D.txt(VARS.tag.toUpperCase(), x0 + 4, H / 2 + 120 + 16 * (1 - tp), 34, C.spark, 600, T.font.ui, "left", 10));
+  const out = seg(t, 4.5, 5.0, "Launch"); if (out > 0) { g.globalCompositeOperation = "destination-out"; g.fillStyle = `rgba(0,0,0,${out})`; g.fillRect(0, 0, W, H); g.globalCompositeOperation = "source-over"; }
+} });
+</script>

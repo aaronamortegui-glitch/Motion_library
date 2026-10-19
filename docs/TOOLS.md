@@ -135,6 +135,20 @@ The repo can be cloned anywhere: scripts compute the repo root (`SS_ROOT`) from 
 
 On macOS, the first `osascript` call asks for permission to control After Effects (System Settings › Privacy & Security › Automation): allow it for your terminal. The macOS path is written to mirror the tested Windows one but has not been run on a Mac yet; report anything that breaks.
 
+## Video templates (research, `research/video_prompts/`)
+
+Not part of the plugin yet; Claude finds them through the `video-templates` skill. Needs `pip install playwright numpy pillow` and `python -m playwright install chromium`.
+
+| Script | What it does |
+|---|---|
+| `research/video_prompts/html_to_mp4.py <template.html> [--notext] [--mblur N]` | Renders a template frame by frame: H.264 MP4, or ProRes 4444 with alpha; `--notext` gives a hybrid plate. |
+| `research/video_prompts/snap.py <template.html> out.jpg <t…>` | A contact sheet of a few frames, to check before rendering. |
+| `research/video_prompts/ae/import_render.jsx` · `VP_IMPORT(path, comp, t)` | Puts a render into an AE comp (reuses the footage, keeps alpha). |
+| `research/video_prompts/ae/route_b.jsx` · `VP_T05()`, `VP_T12()` | Native AE rebuilds of two templates with `SSTX` and token curves. |
+| `research/video_prompts/fetch_sources.py` | Downloads the third-party prompt collection and the Skillry remakes into `source/` (git-ignored). |
+| `research/video_prompts/build_index.py` | Categorizes the 703 source prompts into `index.json` / `INDEX.md` (metadata only). |
+| `research/video_prompts/compare.py` · `make_reel.py` | Side-by-side test with the gradient-mapped remakes; one review reel of every template. |
+
 ## Notes
 
 - If a project contains Animation Composer layers, `aerender` hangs: render through `tools/render_comps.jsx` / `tools/render_queue.jsx` (the open AE's queue). AE shows "Not Responding" while a scripted render runs; that is expected.

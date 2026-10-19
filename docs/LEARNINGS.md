@@ -381,6 +381,34 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   source and cut at its last image, starting the next shot there; a tracked label froze when the shot got longer →
   re-track the whole new duration; a prop that should not be there (a white mug) is hidden with a punch-in computed in
   source pixels (keep the prop's top edge below the frame and the hands inside), then checked on a rendered frame.
+- **Generating with characters that look real (teaser v12):** Flora refused every run with
+  BILLING_WORKSPACE_MEMBER_USAGE_LIMIT_EXCEEDED (no charge); fal Seedance 2.5 reference-to-video rejected 4 of 6 shots
+  ("likeness of real people", no charge) and accepted only the ones whose references show a robot or a wide shot;
+  **Krea's Seedance 2.5** (MCP `https://api.krea.ai/mcp`, enterprise credits) accepted the same faces and references.
+  Give each shot reference images (frames of the neighbouring shots) + `reference_audios` (the character's wav): the
+  speaking clips came back with the right line and the character's voice (resemblyzer 0.84-0.87), no speech-to-speech
+  needed. Seedance sometimes adds its own cut inside a 4 s clip: detect it (frame difference) and use the right part.
+- **Continuity across shots → one multi-shot generation (teaser v12 round 2).** Symptom: a prop changed between
+  separately generated shots (Marcus's mug went from amber glass to white ceramic), a door "burst" into flying wood,
+  a hand came into frame from nowhere. Cause: each clip was its own generation, and "bursts open" reads as breaking.
+  Fix: ask Seedance 2.5 for the whole beat in one run, with timed shots (`SHOT 1 — WIDE (0–3.5s) … HARD CUT to SHOT
+  2 — CLOSE-UP INSERT … RAMPS TO SLOW MOTION … SNAPS BACK … HARD CUT to SHOT 3`), name the prop's exact look in
+  every shot and again in a constraints tail ("the same amber tortoiseshell glass mug in shot 1 and 2, never white"),
+  say "swings open fast… stays intact, no splinters, no debris", and "no other hands, no hand from outside the
+  frame". Result: 9 s, three cuts exactly where asked (2.92 s, 5.88 s), the same mug in the wide and the insert.
+  Whisper `small` can drop the first words of a line said under room noise: re-check with `medium` before regenerating.
+- **SFX against dialogue:** measure each SFX window with ebur128 next to the lines around it before normalising. A
+  door bang inside a generated clip was 4.5 LU over the line that follows it; duck that clip's first second with
+  audio-level keys instead of lowering the whole clip.
+- **Clips copied from an older edit keep their old speed.** Symptom: "the end looks slowed down and too short". Cause:
+  the box close came from the v5 edit with `stretch` 222 % (2.1 s of source). Fix: read `stretch`/time remap of copied
+  layers; play the move at 100 % and hold the last frame with time remap. From a script: enable time remap, set the
+  new keys, then remove the default end key (removing every key first leaves the property hidden: "Can not set value
+  at time").
+- **Relinking ~140 footage items in one `run_jsx`** froze the file bridge and then After Effects closed (the project
+  saved before it was fine). Relink or collect in slices of 30-60 items per call; if the bridge stops answering, clear
+  `bridge/inbox` and `bridge/outbox/_bridge_started.txt` and start `tools/ss_bridge.jsx` again (`AfterFX -s`) once
+  AE has finished loading.
 - **Patching big JSX files from Python:** the files are CRLF; detect the newline (`chr(13) + chr(10)`) and replace
   with it. Never write the patch through a bash heredoc that contains `\n` / `\r` escapes meant for Python: write the
   `.py` with an editor tool instead (a heredoc turned them into real line breaks and broke the script).
@@ -458,3 +486,22 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   bill) → poll every batch before assuming outputs exist, stop launching once one run reports the limit, and ask the
   workspace admin to raise it; failed runs are not charged.
 | *The 1974 Boardroom* v3 total (3 stills, 3 clips, 3 mattes, 3 music tracks, 6 VO lines) | ≈ 5.24 |
+
+## 9. Code-rendered video templates (research/video_prompts)
+- **A page that animates with timers or the real clock renders differently on every machine** → templates draw each
+  frame as a pure function of time (`MDNA.scene({render(t)})`, random only through a seed) and the renderer calls
+  `MDNA.frame(t)` per frame before the screenshot: frame N is always the same picture.
+- **The first templates read as "basic" next to the Opus remakes** → what the remakes had: content density (kickers,
+  meta text, real numbers, several layers at once), a finish (grain, glow, vignette, light), type hierarchy (tracked
+  kicker + sans headline + serif-italic accent) and illustration (counters, corona, an illustrated poster). The runtime
+  now ships `finish`, `glow`, `rich` and `kicker`; check templates on a `snap.py` sheet before rendering.
+- **The Skillry remakes are MP4 only (no code to recolour)** → compare form, not colour: a Hald CLUT gradient map
+  (luminance → ink, pine, sea, mint, spark, cloud) puts the remake in our palette next to our render (`compare.py`).
+- **Motion blur by averaging 3 screenshots per frame took ~17 min for 15 s and ghosted discrete swaps** (two words at
+  once on a beat) → blur only continuous moves; next, accumulate sub-frames inside the page instead of in Python.
+- **`glow()` drew at full strength inside a faded group** (it set `globalAlpha` itself) → multiply by the current
+  alpha. **`FootageItem.hasAlpha` does not exist** → read `item.mainSource.hasAlpha`.
+- **`add_asset` only places indexed assets** → renders go into AE with `research/video_prompts/ae/import_render.jsx`.
+- **A curve to AE keys: `setTemporalEaseAtKey` wants one ease per dimension of the property** (Scale is 3D on a 2D
+  layer even when you key 2 values) → count the property's value, not the value you pass.
+- Third-party prompts and remakes stay in `source/` (git-ignored, `fetch_sources.py`); the index keeps only metadata.

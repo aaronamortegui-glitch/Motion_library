@@ -1,0 +1,48 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T09 · Particle world</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<script>
+// T09 · particle environment (archetype "a place drawn with thousands of glowing specks, the time of day changes").
+// v2 after the pilot review: additive light, a sea of specks with the sun's reflection road, a pier and a Ferris wheel
+// built from light points, flowing ribbons, stars at dusk and a bloom pass. Seamless loop: day → dusk → day.
+const VARS = { day: [159, 216, 194], dusk: [255, 138, 107], title: "Golden *hour.*" };
+const { T, seg, k, lerp, clamp, rng, glow, rich, finish } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080, DUR = 12, HZ = 560, R = rng(9);
+const sea = Array.from({ length: 16000 }, () => [(R() * 2 - 1) * 2400, 120 + R() * 3000, R()]);
+const stars = Array.from({ length: 500 }, () => [R() * W, R() * HZ * 0.9, R()]);
+const pier = []; for (let i = 0; i < 60; i++) for (let j = 0; j < 4; j++) pier.push([-300 - i * 30, 300 + i * 34, j]);
+const mix = (a, b, p) => a.map((v, i) => Math.round(lerp(v, b[i], p)));
+const proj = (x, y, z) => [W / 2 + (x / z) * 900, HZ + ((y) / z) * 900];   // camera at height, y down = towards the sea plane
+
+MDNA.scene({ duration: DUR, background: C.ink, render(t) {
+  const ph = (t / DUR) * Math.PI * 2, dusk = 0.5 - 0.5 * Math.cos(ph), col = mix(VARS.day, VARS.dusk, dusk);
+  const sky = g.createLinearGradient(0, 0, 0, HZ + 40); sky.addColorStop(0, `rgb(${mix([10, 40, 46], [30, 16, 40], dusk)})`); sky.addColorStop(0.7, `rgb(${mix([40, 110, 104], [210, 96, 92], dusk)})`); sky.addColorStop(1, `rgb(${mix([150, 210, 190], [255, 196, 140], dusk)})`);
+  g.fillStyle = sky; g.fillRect(0, 0, W, HZ + 2); g.fillStyle = "#04120F"; g.fillRect(0, HZ, W, H - HZ);
+  stars.forEach(([x, y, r]) => D.alpha(dusk * (0.3 + 0.7 * r) * (0.6 + 0.4 * Math.sin(t * 4 + x)), () => g.fillRect(x, y, 2, 2)), g.fillStyle = "#F7F9F2");
+  const sunX = W * 0.62, sunY = lerp(HZ - 260, HZ - 30, dusk); glow(g, sunX, sunY, 700, `rgb(${mix([216, 255, 133], [255, 160, 110], dusk)})`, 0.55); glow(g, sunX, sunY, 160, "#FFF6DA", 1);
+  g.save(); g.globalCompositeOperation = "lighter";
+  // the sea: specks on a moving swell, brighter in the sun's reflection road
+  for (const [x, z, r] of sea) {
+    const zz = ((z - t * 120) % 3000 + 3000) % 3000 + 120, y = 260 + 18 * Math.sin(x * 0.01 + zz * 0.02 + ph * 3);
+    const [sx, sy] = proj(x, y, zz); if (sx < 0 || sx > W || sy < HZ || sy > H) continue;
+    const road = Math.exp(-((sx - sunX) ** 2) / (2 * (90 + 500 * (1 - zz / 3000)) ** 2)), a = clamp(1.5 - zz / 2600) * (0.5 + 0.5 * road * (0.5 + 0.5 * Math.sin(r * 40 + t * 6)));
+    const s = clamp(4.2 * 300 / zz, 1.2, 4.5); g.fillStyle = `rgba(${road > 0.4 ? "255,236,190" : col.join(",")},${a})`; g.fillRect(sx, sy, s * (1 + road * 3), s * 0.7);
+  }
+  // the Ferris wheel: rings and spokes of light, turning
+  const fx = W * 0.2, fy = HZ - 170, fr = 150;
+  for (let i = 0; i < 160; i++) { const a = i / 160 * Math.PI * 2 + t * 0.25; g.fillStyle = i % 10 ? `rgba(${col.join(",")},0.85)` : "rgba(216,255,133,1)"; g.fillRect(fx + Math.cos(a) * fr, fy + Math.sin(a) * fr, 3, 3); }
+  for (let s = 0; s < 16; s++) { const a = s / 16 * Math.PI * 2 + t * 0.25; for (let r = 0; r < fr; r += 12) { g.fillStyle = `rgba(${col.join(",")},0.35)`; g.fillRect(fx + Math.cos(a) * r, fy + Math.sin(a) * r, 2, 2); }
+    g.beginPath(); g.arc(fx + Math.cos(a) * fr, fy + Math.sin(a) * fr, 6, 0, 7); g.fillStyle = s % 4 ? "rgba(255,214,150,0.9)" : "rgba(216,255,133,1)"; g.fill(); }
+  [[-1, 1], [1, 1]].forEach(([d]) => { for (let r = 0; r < 220; r += 8) { g.fillStyle = `rgba(${col.join(",")},0.45)`; g.fillRect(fx + d * r * 0.45, fy + r, 2, 2); } });
+  // flowing ribbons of light along the shore
+  for (let rb = 0; rb < 3; rb++) for (let i = 0; i < 260; i++) { const u = i / 260, x = lerp(-100, W + 100, u), y = HZ + 70 + rb * 34 + 26 * Math.sin(u * 9 + t * 1.6 + rb), a = 0.25 * Math.sin(u * Math.PI) * (0.6 + 0.4 * Math.sin(u * 30 - t * 5 + rb));
+    g.fillStyle = `rgba(216,255,133,${Math.max(0, a)})`; g.fillRect(x, y, 4, 2); }
+  g.restore();
+  // horizon glow line
+  const hz = g.createLinearGradient(0, HZ - 6, 0, HZ + 6); hz.addColorStop(0, "#00000000"); hz.addColorStop(0.5, `rgba(255,236,190,${0.35 + 0.4 * dusk})`); hz.addColorStop(1, "#00000000"); g.fillStyle = hz; g.fillRect(0, HZ - 6, W, 12);
+  const e = seg(t, 3.5, 4.2, "Land") * (1 - seg(t, 7.0, 7.6, "Launch")); D.alpha(e, () => rich(D, VARS.title, W / 2, 210 + 16 * (1 - e), 120, C.cloud, C.spark, "center", 600));
+  finish(g, t, { grain: 0.06, vignette: 0.55 });
+} });
+</script>

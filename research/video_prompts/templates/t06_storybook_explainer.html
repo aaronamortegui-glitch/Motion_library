@@ -1,0 +1,86 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T06 · Storybook explainer</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<script>
+// T06 · storybook explainer with a character (archetype "the journey of a photon, given a personality").
+// v2 (pilot review "too basic"): layered skies, a sun with a particle corona, a light trail, hand-written annotations,
+// live counters (kicker + big number), depth in the clouds, a sunrise landscape, grain and vignette.
+// Hybrid route: captions, counters and annotations are text in AE; --notext gives the plate.
+const VARS = { hero: "a photon", caps: ["It leaves the Sun at the speed of light…", "…dodges clouds and rain…", "…and wakes up a leaf."],
+               stats: [["Distance", 150000000, " km"], ["Travel time", "8 min 20 s", ""], ["Drops dodged", 12, ""]], end: "and the leaf *wakes up.*" };
+const { T, seg, k, lerp, clamp, rng, noise, NOTEXT, glow, rich, kicker, finish } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
+
+function pip(x, y, s, mood, t, trail) {   // the character: a glowing spark with eyes, a light trail behind it
+  if (trail) for (let i = 1; i < 26; i++) { const tx = x - i * trail * 9, ty = y + Math.sin((t - i * 0.03) * 2.2) * 40 - Math.sin(t * 2.2) * 40;
+    D.alpha(0.5 * (1 - i / 26), () => { g.beginPath(); g.arc(tx, ty, 34 * s * (1 - i / 30), 0, 7); D.fill(C.spark); }); }
+  glow(g, x, y, 170 * s, "#D8FF85", 0.55);
+  D.at(x, y, s, 0, () => {
+    g.beginPath(); g.arc(0, 0, 40, 0, 7); D.fill(C.spark); g.beginPath(); g.arc(-12, -14, 12, 0, 7); D.alpha(0.6, () => D.fill("#ffffff"));
+    const blink = (t % 2.7) < 0.12 ? 0.15 : 1, eh = lerp(7, 12, mood) * blink;
+    [-13, 13].forEach(ex => { g.beginPath(); g.ellipse(ex, -2, 6, eh, 0, 0, 7); D.fill(C.pine); });
+    [-24, 24].forEach(ex => { g.beginPath(); g.ellipse(ex, 10, 7, 4, 0, 0, 7); D.alpha(0.35, () => D.fill(C.coral)); });
+    g.beginPath(); if (mood > 0.5) { g.arc(0, 16, 7, 0, 7); D.fill(C.pine); } else { g.arc(0, 12, 12, 0.15 * Math.PI, 0.85 * Math.PI); g.strokeStyle = C.pine; g.lineWidth = 4; g.lineCap = "round"; g.stroke(); }
+  });
+}
+function caption(i, a, b, t) { if (NOTEXT) return; const p = seg(t, a, a + 0.47, "Land") * (1 - seg(t, b - 0.3, b, "Launch")); D.alpha(p, () => {
+  const s = VARS.caps[i], w = D.width(s, 46, 400, T.font.display) + 80; D.rr(W / 2 - w / 2, 940 + 20 * (1 - p), w, 84, 42); D.fill("#071513cc"); D.txt(s, W / 2, 984 + 20 * (1 - p), 46, C.cloud, 400, T.font.display); }); }
+function stat(i, a, t, x, y, val) { if (NOTEXT) return; const p = seg(t, a, a + 0.47, "Land"); D.alpha(p, () => {
+  D.rr(x - 20, y - 70, 470, 150, 22); D.fill("#071513aa"); g.strokeStyle = "#D8FF8533"; g.lineWidth = 2; g.stroke();
+  kicker(D, VARS.stats[i][0], x, y - 32, C.mint, "left", 20); D.txt(val, x, y + 30, 64, C.cloud, 800, T.font.ui, "left", -1); }); }
+function note(s, x, y, ax, ay, a, t) {   // hand-written annotation with a curved arrow
+  if (NOTEXT) return; const p = seg(t, a, a + 0.6, "Cruise"), gone = seg(t, a + 1.6, a + 2.0, "Launch");
+  D.alpha(Math.min(1, p * 2) * (1 - gone), () => { D.txt(s, x, y, 40, C.cloud, 400, T.font.display, "left"); g.save(); g.setLineDash([600]); g.lineDashOffset = 600 * (1 - p);
+    g.beginPath(); g.moveTo(x - 10, y + 6); g.quadraticCurveTo(x - 60, ay - 10, ax, ay); g.strokeStyle = C.cloud; g.lineWidth = 3; g.lineCap = "round"; g.stroke(); g.restore(); });
+}
+
+MDNA.scene({ duration: 15, render(t) {
+  if (t < 5) {   // 1 · space
+    const sky = g.createLinearGradient(0, 0, W, H); sky.addColorStop(0, "#0D2A3A"); sky.addColorStop(1, "#061411"); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+    const R = rng(4); for (let l = 0; l < 3; l++) for (let i = 0; i < 90; i++) { const x = ((R() * W * 1.5 - t * (40 + l * 120)) % (W * 1.5) + W * 1.5) % (W * 1.5) - 100, y = R() * H, tw = 0.5 + 0.5 * Math.sin(t * 3 + i);
+      g.beginPath(); g.arc(x, y, 0.8 + l * 0.9, 0, 7); D.alpha((0.25 + l * 0.25) * (0.6 + 0.4 * tw), () => D.fill(C.cloud)); }
+    // the Sun: layered glow, a granular surface and a rotating particle corona
+    const sx = -60 - t * 30, sy = H / 2; glow(g, sx, sy, 900, "#FF8A6B", 0.55); glow(g, sx, sy, 520, "#FFB86B", 0.8);
+    g.beginPath(); g.arc(sx, sy, 330, 0, 7); const sg = g.createRadialGradient(sx + 60, sy - 40, 20, sx, sy, 330); sg.addColorStop(0, "#FFF2C2"); sg.addColorStop(0.6, "#FFB86B"); sg.addColorStop(1, "#FF8A6B"); g.fillStyle = sg; g.fill();
+    const Rc = rng(5); for (let i = 0; i < 420; i++) { const a = Rc() * 7 + t * (0.05 + Rc() * 0.1), r = 340 + Rc() * 180 + 30 * Math.sin(t * 2 + i); g.fillStyle = Rc() < 0.5 ? "#FFE9A8" : "#FF8A6B";
+      D.alpha(0.5 + 0.5 * Rc(), () => g.fillRect(sx + Math.cos(a) * r, sy + Math.sin(a) * r, 3, 3)); }
+    const px = k(t, [[0, 520], [4.8, 1560, "Cruise"]]), py = H / 2 + 40 * Math.sin(t * 2.2);
+    pip(px, py, 1.5, 0, t, seg(t, 0.4, 1.2));
+    note(VARS.hero, 640, 300, px - 40, py - 70, 0.6, t);
+    stat(0, 1.4, t, 1380, 200, Math.round(VARS.stats[0][1] * seg(t, 1.5, 4.2, "Settle")).toLocaleString("en-US") + VARS.stats[0][2]);
+    stat(1, 2.2, t, 1380, 400, VARS.stats[1][1]);
+    caption(0, 0.5, 4.8, t);
+  } else if (t < 10) {   // 2 · weather: three depths of clouds, rain with motion streaks, Pip squashes through a drop
+    const lt = t - 5, sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, "#29504C"); sky.addColorStop(1, "#122C29"); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+    const cloud = (x, y, s, col, sh) => { [[0, 0, 80], [70, -30, 95], [160, 0, 85], [90, 20, 90], [-60, 15, 60]].forEach(([dx, dy, r]) => { g.beginPath(); g.arc(x + dx * s, y + dy * s, r * s, 0, 7); D.fill(col); });
+      [[40, 30, 70], [130, 35, 70]].forEach(([dx, dy, r]) => { g.beginPath(); g.arc(x + dx * s, y + dy * s, r * s, 0, 7); D.fill(sh); }); };
+    [[0.55, 60, "#3C6662", "#335A56", 300], [0.85, 140, "#5E8782", "#527A75", 220], [1.25, 260, "#9FB8B2", "#86A39C", 140]].forEach(([s, sp, col, sh, y], li) => {
+      for (let i = 0; i < 5; i++) cloud(((i * 520 - lt * sp) % 2600 + 2600) % 2600 - 300, y + (i % 2) * 60 + li * 30, s, col, sh); });
+    const R = rng(11); g.strokeStyle = "#7FB8FF99"; g.lineWidth = 3; g.lineCap = "round"; for (let i = 0; i < 220; i++) { const x = R() * W, y = ((R() * H + lt * 1100) % (H + 100)) - 50, l = 20 + R() * 30; g.beginPath(); g.moveTo(x, y); g.lineTo(x - 4, y + l); g.stroke(); }
+    const hit = seg(lt, 2.0, 2.3, "Flat") * (1 - seg(lt, 2.3, 2.9, "Pop")), x = k(lt, [[0, 160], [2.0, 960, "Settle"], [3.0, 960], [5, 1760, "Launch"]]);
+    if (lt > 1.6 && lt < 3.2) { const q = seg(lt, 1.8, 2.4, "Land"); g.beginPath(); g.ellipse(960, H / 2 + 10, 150 * q, 170 * q * (1 - seg(lt, 2.4, 3.2)), 0, 0, 7); g.fillStyle = "#7FB8FF33"; g.fill(); g.strokeStyle = "#BFE0FF88"; g.lineWidth = 4; g.stroke();
+      for (let i = 0; i < 14; i++) { const a = i / 14 * 7, r = 120 + 220 * seg(lt, 2.3, 3.0, "Land"); D.alpha(1 - seg(lt, 2.6, 3.2), () => { g.beginPath(); g.arc(960 + Math.cos(a) * r, H / 2 + Math.sin(a) * r, 7, 0, 7); D.fill("#BFE0FF"); }); } }
+    D.at(x, H / 2, 1, 0, () => { g.scale(1 + 0.35 * hit, 1 - 0.3 * hit); pip(0, 0, 1.5, hit > 0.2 ? 1 : 0, t, 0); });
+    stat(2, 5.6, t, 1380, 200, String(Math.round(VARS.stats[2][1] * seg(t, 5.8, 9, "Settle"))));
+    if (!NOTEXT && lt > 2.1 && lt < 3.6) D.alpha(seg(lt, 2.1, 2.3) * (1 - seg(lt, 3.2, 3.6)), () => D.txt("splash!", 1060, H / 2 - 150, 56, C.spark, 400, T.font.display, "left"));
+    caption(1, 5.4, 9.8, t);
+  } else {   // 3 · sunrise over the hills, the leaf lights up from the stem
+    const lt = t - 10, sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, "#2A1E3A"); sky.addColorStop(0.55, "#FF8A6B"); sky.addColorStop(1, "#FFD39A"); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+    for (let i = 0; i < 16; i++) { const a = -Math.PI + (i / 15) * Math.PI; g.beginPath(); g.moveTo(W * 0.72, 760); g.lineTo(W * 0.72 + Math.cos(a - 0.03) * 2200, 760 + Math.sin(a - 0.03) * 2200); g.lineTo(W * 0.72 + Math.cos(a + 0.03) * 2200, 760 + Math.sin(a + 0.03) * 2200); g.closePath(); D.alpha(0.08, () => D.fill("#FFF2C2")); }
+    glow(g, W * 0.72, 760, 420, "#FFF2C2", 0.9);
+    [[780, "#6B3A5A", 0.3], [860, "#3E2A48", 0.6], [950, "#1E2B2A", 1]].forEach(([y, col, d]) => { g.beginPath(); g.moveTo(0, H); for (let x = 0; x <= W; x += 40) g.lineTo(x, y + 60 * Math.sin(x / 300 + d * 3) + 30 * Math.sin(x / 120 + d)); g.lineTo(W, H); D.fill(col); });
+    D.at(W * 0.42, H / 2 + 40, 1, -0.3, () => { g.beginPath(); g.moveTo(-420, 0); g.bezierCurveTo(-200, -300, 260, -260, 420, 0); g.bezierCurveTo(260, 260, -200, 300, -420, 0);
+      const lg = g.createLinearGradient(0, -260, 0, 260); lg.addColorStop(0, "#58B07A"); lg.addColorStop(1, "#2F7A52"); g.fillStyle = lg; g.fill();
+      const p = seg(lt, 1.4, 3.6, "Cruise"); g.strokeStyle = C.spark; g.lineCap = "round"; g.lineWidth = 8; g.shadowColor = C.spark; g.shadowBlur = 24; g.beginPath(); g.moveTo(-420, 0); g.lineTo(-420 + 840 * p, 0); g.stroke();
+      for (let i = 0; i < 6; i++) { const q = seg(lt, 1.8 + i * 0.25, 2.4 + i * 0.25, "Land"), bx = -300 + i * 120; g.lineWidth = 5; g.beginPath(); g.moveTo(bx, 0); g.quadraticCurveTo(bx + 30 * q, -90 * q, bx + 90 * q, -150 * q); g.moveTo(bx, 0); g.quadraticCurveTo(bx + 30 * q, 90 * q, bx + 90 * q, 150 * q); g.stroke(); }
+      g.shadowBlur = 0; });
+    const Rl = rng(31); for (let i = 0; i < 60; i++) { const b = seg(lt, 2.4, 5, "Cruise"), x = W * 0.42 + (Rl() - 0.5) * 800, y = H / 2 + 100 - b * (200 + Rl() * 500); D.alpha(b * (1 - b) * 3, () => { g.beginPath(); g.arc(x, y, 3 + Rl() * 4, 0, 7); D.fill(C.spark); }); }
+    const land = seg(lt, 0, 1.4, "Land"); pip(lerp(W * 0.9, W * 0.42 - 40, land), lerp(-100, H / 2 - 30, land) + 10 * Math.sin(lt * 3) * (1 - land), 1.3, 0, t, 0.6 * (1 - land));
+    if (!NOTEXT) { const e = seg(lt, 3.4, 3.9, "Land"); D.alpha(e, () => { kicker(D, "Photosynthesis", W / 2, 140, C.cloud); rich(D, VARS.end, W / 2, 230 + 20 * (1 - e), 86, C.cloud, C.spark); }); }
+    caption(2, 10.5, 15, t);
+  }
+  finish(g, t, { grain: 0.07, vignette: 0.5 });
+} });
+</script>

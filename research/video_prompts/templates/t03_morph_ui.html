@@ -1,0 +1,56 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T03 · One shape becomes the UI</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<script>
+// T03 · one shape, never cut (archetype "a single shape morphs into every interface component"): a pill becomes a
+// button, a toggle, a slider, a card and a progress ring, driven by a cursor. Route B: every state is a size / radius /
+// colour key, so it maps 1:1 to one AE shape layer with Motion DNA curves.
+const VARS = { label: "Get started", card: ["Weekly focus", "12 h 40 m"], done: "Saved" };
+const { T, seg, k, lerp, clamp, glow, kicker, rich, finish } = MDNA, C = T.color;
+const STATES = [[0, "Button"], [2.7, "Toggle"], [4.7, "Slider"], [7.0, "Card"], [9.3, "Progress"]];
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
+// states: [time, w, h, radius, colour index]
+const COLS = [C.spark, C.cloud, C.sea, C.cloud, C.spark];
+const S = [[0, 80, 80, 40], [0.8, 520, 120, 60, "Pop"], [2.4, 520, 120, 60], [3.0, 220, 110, 55, "Settle"], [4.4, 220, 110, 55], [5.0, 760, 24, 12, "Whip"],
+           [6.6, 760, 24, 12], [7.3, 620, 420, 40, "Settle"], [8.9, 620, 420, 40], [9.5, 260, 260, 130, "Settle"], [12, 260, 260, 130]];
+const key = i => S.map(s => [s[0], s[i], s[4]]);
+const mix = (a, b, p) => { const h = x => [1, 3, 5].map(i => parseInt(x.substr(i, 2), 16)); const A = h(a), B = h(b); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], p))).join(",")})`; };
+function colorAt(t) { const stops = [[0, 0], [2.4, 0], [3.0, 1], [4.4, 1], [5.0, 2], [6.6, 2], [7.3, 3], [8.9, 3], [9.5, 4]]; for (let i = 1; i < stops.length; i++) if (t <= stops[i][0]) { const p = seg(t, stops[i - 1][0], stops[i][0], "Cruise"); return mix(COLS[stops[i - 1][1]], COLS[stops[i][1]], p); } return COLS[4]; }
+
+MDNA.scene({ duration: 12, background: C.pine, render(t) {
+  D.bg(C.pine); glow(g, W / 2, H / 2, 900, "#174A46", 1);
+  g.fillStyle = "#F7F9F214"; for (let x = 60; x < W; x += 60) for (let y = 60; y < H; y += 60) g.fillRect(x, y, 2, 2);
+  // the app window the shape lives in
+  D.alpha(seg(t, 0, 0.6, "Land"), () => { D.rr(360, 150, 1200, 780, 36); D.fill("#0F2B28"); g.strokeStyle = "#F7F9F21f"; g.lineWidth = 2; g.stroke();
+    [0, 1, 2].forEach(i => { g.beginPath(); g.arc(410 + i * 30, 195, 8, 0, 7); D.fill(i === 0 ? C.coral : "#F7F9F233"); }); D.rr(560, 183, 800, 24, 12); D.fill("#F7F9F212");
+    for (let i = 0; i < 5; i++) { D.rr(400, 260 + i * 56, 140, 18, 9); D.fill(i === STATES.findLastIndex(s => t >= s[0]) ? "#D8FF8566" : "#F7F9F214"); } });
+  const w = k(t, key(1)), h = k(t, key(2)), r = k(t, key(3)), cx = W / 2 + 80, cy = H / 2 + 20;
+  D.alpha(0.5, () => { g.filter = "blur(24px)"; D.rr(cx - w / 2, cy - h / 2 + 30, w, h, r); D.fill("#000000"); g.filter = "none"; });
+  if (t > 9.4) glow(g, cx, cy, 300, "#D8FF85", 0.4 * seg(t, 10.6, 11.2));
+  D.rr(cx - w / 2, cy - h / 2, w, h, r); const sg = g.createLinearGradient(0, cy - h / 2, 0, cy + h / 2); sg.addColorStop(0, "#ffffff22"); sg.addColorStop(1, "#00000014"); D.fill(colorAt(t)); g.fillStyle = sg; g.fill();
+  // state label with step dots
+  const si = STATES.findLastIndex(s => t >= s[0]), sl = seg(t, STATES[si][0], STATES[si][0] + 0.4, "Land");
+  D.alpha(sl, () => { kicker(D, `State 0${si + 1} — ${STATES[si][1]}`, cx, 280 - 10 * (1 - sl), C.mint); });
+  STATES.forEach((_, i) => { g.beginPath(); g.arc(cx - 48 + i * 24, 320, i === si ? 6 : 4, 0, 7); D.fill(i === si ? C.spark : "#F7F9F244"); });
+  // state content, each with its own enter/exit and a short blur
+  const show = (a, b, fn) => { const p = seg(t, a, a + 0.3, "Land") * (1 - seg(t, b - 0.2, b, "Launch")); if (p > 0) { g.filter = `blur(${(1 - p) * 8}px)`; D.alpha(p, fn); g.filter = "none"; } };
+  show(1.0, 2.6, () => { D.txt(VARS.label, cx - 24, cy + 2, 46, C.pine, 700); g.beginPath(); g.moveTo(cx + 150, cy - 14); g.lineTo(cx + 172, cy); g.lineTo(cx + 150, cy + 14); g.strokeStyle = C.pine; g.lineWidth = 6; g.lineCap = "round"; g.stroke(); });
+  show(3.1, 4.6, () => { const on = seg(t, 3.6, 3.9, "Pop"); g.beginPath(); g.arc(cx - 55 + 110 * on, cy, 40, 0, 7); D.fill(on > 0.5 ? C.spark : C.sea); });
+  show(5.1, 6.8, () => { const v = k(t, [[5.3, 0.15], [6.3, 0.72, "Settle"]]); D.rr(cx - w / 2, cy - h / 2, w * v, h, r); D.fill(C.spark); g.beginPath(); g.arc(cx - w / 2 + w * v, cy, 34, 0, 7); D.fill(C.cloud); g.lineWidth = 6; g.strokeStyle = C.spark; g.stroke();
+    D.txt(Math.round(v * 100) + "%", cx - w / 2 + w * v, cy - 80, 40, C.cloud, 700); });
+  show(7.5, 9.0, () => { D.txt(VARS.card[0], cx - 250, cy - 120, 34, C.sea, 600, T.font.ui, "left"); D.txt(VARS.card[1], cx - 250, cy - 40, 86, C.pine, 800, T.font.ui, "left");
+    [0.5, 0.8, 0.35, 0.9, 0.6, 0.7, 0.45].forEach((v, i) => { const bh = 150 * v * seg(t, 7.6 + i * 0.05, 8.1 + i * 0.05, "Land"); D.rr(cx - 250 + i * 72, cy + 170 - bh, 48, bh, 10); D.fill(i === 3 ? C.spark : C.sea); }); });
+  show(9.6, 12.5, () => { const p = seg(t, 9.7, 10.9, "Settle"); g.beginPath(); g.arc(cx, cy, 100, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2); g.lineWidth = 22; g.lineCap = "round"; g.strokeStyle = C.pine; g.stroke();
+    const c = seg(t, 10.9, 11.3, "Pop"); D.at(cx, cy, c, 0, () => { g.beginPath(); g.moveTo(-36, 0); g.lineTo(-10, 26); g.lineTo(40, -28); g.lineWidth = 18; g.lineJoin = "round"; g.strokeStyle = C.pine; g.stroke(); });
+    D.alpha(seg(t, 11.1, 11.5, "Land"), () => D.txt(VARS.done, cx, cy + 210, 48, C.cloud, 700)); });
+  // the cursor drives every change
+  const px = k(t, [[0, 1500], [1.6, cx + 120, "Settle"], [2.6, cx + 120], [3.3, cx - 20, "Settle"], [4.6, cx - 20], [5.4, cx - w / 2 + 120, "Settle"], [6.3, cx + 170, "Settle"], [6.8, cx + 170], [7.6, cx + 400, "Settle"], [9.3, cx + 120, "Settle"], [12, 1600, "Launch"]]);
+  const py = k(t, [[0, 900], [1.6, cy + 20, "Settle"], [2.6, cy + 20], [3.3, cy + 10, "Settle"], [4.6, cy + 10], [5.4, cy + 10, "Settle"], [6.8, cy + 10], [7.6, cy + 260, "Settle"], [9.3, cy + 40, "Settle"], [12, 1100, "Launch"]]);
+  const clicks = [2.3, 3.6, 5.5, 9.3]; let press = 0; clicks.forEach(c => { if (t > c && t < c + 0.4) press = seg(t, c, c + 0.4, "Flat"); });
+  D.alpha(0.18, () => { g.beginPath(); g.arc(px, py, 26, 0, 7); D.fill(C.spark); });
+  D.cursor(px, py, press);
+  finish(g, t, { grain: 0.05, vignette: 0.45 });
+} });
+</script>

@@ -38,7 +38,10 @@ Install everything, library included — the panel reads the library from the re
 7. **Working for a brand or a project?** Read its profile first (`get_brand` / `python tools/brand.py show <slug>`),
    follow its rules, and save **every review note** the user gives as a rule in it (`add_brand_note` /
    `python tools/brand.py note`). Each brand learns on its own (CONTRIBUTING §10).
-8. **Prefer the MCP server** (`motion-dna`, registered in `.mcp.json`): `list_presets`, `apply_preset`, `apply_pack`, `add_asset`, `render_frame`, `run_jsx`… It drives the open After Effects through the file bridge (started by the Motion DNA panel). Check your work with `render_frame` and look at the PNG.
+8. **Videos made as code** (showreels, launch films, explainers, particle loops, shader shots, transitions rendered to
+   MP4/MOV, or rebuilt natively in AE): the research skill `.claude/skills/video-templates/SKILL.md` and
+   `research/video_prompts/` (not part of the plugin yet; its REPORT says what works).
+9. **Prefer the MCP server** (`motion-dna`, registered in `.mcp.json`): `list_presets`, `apply_preset`, `apply_pack`, `add_asset`, `render_frame`, `run_jsx`… It drives the open After Effects through the file bridge (started by the Motion DNA panel). Check your work with `render_frame` and look at the PNG.
 
 ## Non-negotiable rules
 - **Everything in the repo is English**: code, comments, metadata, docs, commit messages. Chat with the user can be in their language.
@@ -81,3 +84,4 @@ Every item below cost a review round once; check them all, then render (details:
 | Tags for a new preset, curve or technique | `tools/tag_library.py` → `python tools/tag_library.py` (writes `library/tags.json`) |
 | Something you learned | `docs/LEARNINGS.md`, in the matching section, as *symptom → cause → fix* |
 | A reusable script | `tools/` with a header comment (what, usage) and an entry in the README tools table |
+| A code-rendered video template (research) | `research/video_prompts/templates/` + a card in `templates/catalog.json` + a GIF in `previews/` (see the `video-templates` skill) |

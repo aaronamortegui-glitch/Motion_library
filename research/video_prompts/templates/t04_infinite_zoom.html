@@ -1,0 +1,48 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T04 · Infinite zoom</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<script>
+// T04 · infinite zoom (archetype "a dot on black becomes a whole workspace, zoom out to a point in space, zoom back
+// into a phone"). Route A: one continuous camera over a world drawn in world units, exported as an MP4 asset.
+const VARS = { product: "Orbit Terminal", panels: ["Chart", "Positions", "Watchlist", "Orders"], end: "One screen. Every market." };
+const { T, seg, k, lerp, clamp, rng } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
+const R = rng(3), STARS = Array.from({ length: 900 }, () => [R() * 2 - 1, R() * 2 - 1, R()]);
+function chart(x, y, w, h, p, seed) { const r = rng(seed); let v = 0.5; g.beginPath(); for (let i = 0; i <= 60 * p; i++) { v = clamp(v + (r() - 0.48) * 0.12, 0.1, 0.9); const X = x + (i / 60) * w, Y = y + h - v * h; i ? g.lineTo(X, Y) : g.moveTo(X, Y); } g.strokeStyle = C.spark; g.lineWidth = 3; g.stroke(); }
+function panel(x, y, w, h, title, p, seed) {   // world-space panel
+  D.alpha(p, () => { D.rr(x, y, w, h, 14); D.fill("#0F2B28"); g.strokeStyle = "#D8FF8533"; g.lineWidth = 2; g.stroke();
+    D.txt(title, x + 24, y + 34, 22, C.mint, 600, T.font.ui, "left");
+    if (seed % 2) chart(x + 24, y + 70, w - 48, h - 100, p, seed); else for (let i = 0; i < 6; i++) { D.rr(x + 24, y + 70 + i * ((h - 90) / 6), (w - 48) * (0.4 + 0.5 * rng(seed + i)()), (h - 90) / 6 - 10, 6); D.fill(i % 3 ? "#174A46" : "#D8FF8555"); } });
+}
+function world(t) {   // the desktop, 1600 x 900 world units around (0,0)
+  const ps = [[-780, -430, 900, 520], [150, -430, 630, 250], [150, -150, 630, 240], [-780, 120, 1560, 310]];
+  ps.forEach((q, i) => panel(...q, VARS.panels[i], seg(t, 1.2 + i * 0.25, 1.7 + i * 0.25, "Land"), i + 1));
+}
+function phone(t, p) { D.alpha(p, () => { D.rr(-260, -130, 520, 260, 34); D.fill(C.ink); g.strokeStyle = C.sea; g.lineWidth = 6; g.stroke();
+  D.rr(-240, -110, 230, 220, 14); D.fill("#0F2B28"); chart(-230, -90, 210, 180, seg(t, 9.6, 10.6, "Cruise"), 9);
+  for (let i = 0; i < 6; i++) { D.rr(10, -100 + i * 35, 220, 26, 6); D.fill(i % 2 ? "#174A46" : "#D8FF8544"); } }); }
+
+MDNA.scene({ duration: 12, background: C.ink, render(t) {
+  D.bg(C.ink);
+  // camera scale: dot (huge zoom) → desktop → a point in space → phone
+  const s = Math.exp(k(t, [[0, Math.log(18)], [1.0, Math.log(18)], [1.6, Math.log(1.0), "Settle"], [3.4, Math.log(1.0)], [4.2, Math.log(2.4), "Settle"], [5.2, Math.log(2.4)],
+                           [7.6, Math.log(0.004), "Ramp"], [8.6, Math.log(0.004)], [9.6, Math.log(1.8), "Ramp"], [12, Math.log(1.9)]]));
+  const cx = k(t, [[3.4, 0], [4.2, -330, "Settle"], [5.2, -330], [6.4, 0, "Settle"]]), cy = k(t, [[3.4, 0], [4.2, -170, "Settle"], [5.2, -170], [6.4, 0, "Settle"]]);
+  // stars appear as we leave the desktop
+  const space = seg(t, 5.8, 7.0, "Cruise") * (1 - seg(t, 8.8, 9.5, "Cruise"));
+  STARS.forEach(([x, y, z]) => { const r = (0.6 + z * 1.8); D.alpha(space * (0.3 + 0.7 * z), () => { g.beginPath(); g.arc(W / 2 + x * W * (0.6 + z * 0.4) * (1 + seg(t, 5.8, 8, "Cruise") * 0.2), H / 2 + y * H * (0.6 + z * 0.4), r, 0, 7); D.fill(C.cloud); }); });
+  D.at(W / 2, H / 2, s, 0, () => { g.translate(-cx, -cy);
+    if (t < 1.4) { g.beginPath(); g.arc(0, 0, 6, 0, 7); D.fill(C.spark); }
+    if (t < 9.2) world(t);
+    if (t > 8.4) phone(t, seg(t, 8.6, 9.2, "Cruise"));
+  });
+  if (t > 1.0 && t < 1.6) D.alpha(1 - seg(t, 1.0, 1.6), () => { g.beginPath(); g.arc(W / 2, H / 2, 6 * s, 0, 7); D.fill(C.spark); });
+  // far away, the whole desktop reads as one glowing point among the stars
+  const far = seg(t, 6.6, 7.4, "Cruise") * (1 - seg(t, 8.6, 9.0, "Cruise"));
+  if (far > 0) D.alpha(far, () => { const gr = g.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 60); gr.addColorStop(0, "#D8FF85ff"); gr.addColorStop(0.15, "#D8FF85aa"); gr.addColorStop(1, "#D8FF8500"); g.fillStyle = gr; g.fillRect(W / 2 - 60, H / 2 - 60, 120, 120); });
+  D.alpha(seg(t, 0.2, 0.67, "Land") * (1 - seg(t, 1.0, 1.3)), () => D.txt(VARS.product, W / 2, H / 2 + 220, 54, C.cloud, 700));
+  D.alpha(seg(t, 10.4, 10.9, "Land"), () => D.txt(VARS.end, W / 2, H - 150, 64, C.cloud, 700));
+} });
+</script>

@@ -1,0 +1,60 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T02 · SaaS launch</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<script>
+// T02 · SaaS product launch (archetype "the typical launch video people post on X": hook, the product assembles,
+// three features with a cursor, end card). Hybrid route: render with --notext to get the plate only, and set the
+// hook, feature lines and end card as live text in After Effects (Motion DNA presets) on top.
+const VARS = { app: "Ledgerly", hook: ["Your books.", "Done before", "your coffee."], features: ["Auto-categorized", "Receipts by photo", "Tax-ready in May"],
+               cta: "Try it free", url: "ledgerly.example" };
+const { T, seg, k, lerp, clamp, rng, NOTEXT } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
+
+function card(x, y, w, h, p, fn) {   // a UI card that lands from below and fades in
+  const e = clamp(p); D.alpha(e, () => D.at(x, y + 60 * (1 - e), 1, 0, () => { g.shadowColor = "#0006"; g.shadowBlur = 40; g.shadowOffsetY = 18;
+    D.rr(-w / 2, -h / 2, w, h, 28); D.fill(C.cloud); g.shadowColor = "transparent"; fn && fn(w, h); }));
+}
+function bars(w, h, p, hi) { const vals = [0.4, 0.62, 0.5, 0.78, 0.66, 0.9]; vals.forEach((v, i) => { const bh = (h - 120) * v * seg(p, i * 0.08, 0.5 + i * 0.08, "Land");
+  D.rr(-w / 2 + 40 + i * (w - 80) / 6, h / 2 - 40 - bh, (w - 80) / 6 - 18, bh, 10); D.fill(i === hi ? C.spark : C.sea); }); }
+
+MDNA.scene({ duration: 14, background: C.pine, render(t) {
+  D.bg(C.pine);
+  // soft moving gradient blobs behind everything
+  for (let i = 0; i < 3; i++) { const x = W * (0.25 + 0.25 * i) + 120 * Math.sin(t * 0.4 + i * 2), y = H * 0.5 + 160 * Math.cos(t * 0.3 + i);
+    const gr = g.createRadialGradient(x, y, 0, x, y, 620); gr.addColorStop(0, i === 1 ? "#174A46cc" : "#174A4688"); gr.addColorStop(1, "#0A211F00"); g.fillStyle = gr; g.fillRect(0, 0, W, H); }
+
+  // 0-3 s · hook, one line per beat
+  if (t < 3.2 && !NOTEXT) VARS.hook.forEach((l, i) => { const p = seg(t, 0.2 + i * 0.5, 0.67 + i * 0.5, "Land"), o = seg(t, 2.7, 3.1, "Launch");
+    D.alpha(p * (1 - o), () => D.txt(l, W / 2, 380 + i * 150 + 40 * (1 - p) - 120 * o, 132, i === 2 ? C.spark : C.cloud, 800, T.font.ui, "center", -3)); });
+
+  // 3-8 s · the dashboard assembles card by card, camera drifts
+  if (t >= 3 && t < 11.2) {
+    const z = k(t, [[3, 1.12], [8, 1.0, "Settle"], [9.4, 1.0], [10.6, 1.9, "Whip"]]), fx = k(t, [[8, 0], [9.4, 0], [10.6, 420, "Whip"]]);
+    const out = seg(t, 10.6, 11.1, "Launch");
+    D.alpha(1 - out, () => D.at(W / 2 - fx, H / 2, z, 0, () => {
+      card(-420, -150, 600, 380, seg(t, 3.2, 3.67, "Land"), (w, h) => { if (!NOTEXT) D.txt("Cash flow", -w / 2 + 40, -h / 2 + 50, 30, C.pine, 700, T.font.ui, "left"); bars(w, h, seg(t, 3.4, 5, "Cruise"), t > 6.2 && t < 8 ? 5 : -1); });
+      card(330, -230, 520, 220, seg(t, 3.5, 3.97, "Land"), (w, h) => { if (!NOTEXT) { D.txt("Balance", -w / 2 + 40, -40, 28, C.sea, 600, T.font.ui, "left"); D.txt("$" + Math.round(48210 * seg(t, 3.6, 5.2, "Settle")).toLocaleString("en-US"), -w / 2 + 40, 30, 72, C.pine, 800, T.font.ui, "left"); } });
+      card(330, 60, 520, 300, seg(t, 3.8, 4.27, "Land"), (w, h) => { ["Coffee · Rome", "Train · Milan", "Hotel · Turin"].forEach((r, i) => { const p = seg(t, 4.2 + i * 0.15, 4.6 + i * 0.15, "Land");
+        D.alpha(p, () => { D.rr(-w / 2 + 30, -h / 2 + 30 + i * 84, w - 60, 64, 16); D.fill(t > 7 && i === 1 ? "#D8FF8566" : "#0A211F0d"); if (!NOTEXT) D.txt(r, -w / 2 + 60, -h / 2 + 62 + i * 84, 26, C.pine, 600, T.font.ui, "left"); }); }); });
+      card(-420, 250, 600, 160, seg(t, 4.0, 4.47, "Land"), (w, h) => { const p = seg(t, 5.5, 7.5, "Cruise"); D.rr(-w / 2 + 40, -12, (w - 80), 24, 12); D.fill("#0A211F14"); D.rr(-w / 2 + 40, -12, (w - 80) * p, 24, 12); D.fill(C.spark); });
+      // cursor: tap the highlighted expense, then the progress card
+      const cx = k(t, [[4.6, 760], [6.0, 330, "Settle"], [7.6, 330], [8.6, -300, "Settle"]]), cy = k(t, [[4.6, 520], [6.0, 60, "Settle"], [7.6, 60], [8.6, 250, "Settle"]]);
+      const press = Math.max(seg(t, 6.1, 6.5, "Flat") * (t < 6.5 ? 1 : 0), seg(t, 8.7, 9.1, "Flat") * (t < 9.1 ? 1 : 0));
+      if (!NOTEXT) D.cursor(cx, cy, press);
+    }));
+  }
+
+  // 5-10 s · feature callouts, one per beat of the story
+  if (!NOTEXT) VARS.features.forEach((f, i) => { const a = 5.2 + i * 1.5, p = seg(t, a, a + 0.47, "Land"), o = seg(t, a + 1.3, a + 1.6, "Launch");
+    if (t > a && t < a + 1.7) D.alpha(p * (1 - o), () => { const w = D.width(f, 44, 700) + 90; D.rr(W / 2 - w / 2, 900 + 30 * (1 - p), w, 84, 42); D.fill(C.spark); D.txt(f, W / 2, 943 + 30 * (1 - p), 44, C.pine, 700); }); });
+
+  // 11-14 s · end card
+  if (t >= 10.9) { const a = seg(t, 11.0, 11.47, "Land"), b = seg(t, 11.4, 11.9, "Pop"), c = seg(t, 11.8, 12.3, "Land");
+    D.at(W / 2, H / 2 - 80, 0.7 + 0.3 * b, 0, () => { D.rr(-70, -70, 140, 140, 36); D.fill(C.spark); g.fillStyle = C.pine; g.beginPath(); g.moveTo(-30, 26); g.lineTo(-30, -26); g.lineTo(0, 6); g.lineTo(30, -26); g.lineTo(30, 26); g.lineWidth = 14; g.strokeStyle = C.pine; g.lineJoin = "round"; g.stroke(); });
+    if (!NOTEXT) { D.alpha(a, () => D.txt(VARS.app, W / 2, H / 2 + 80 + 30 * (1 - a), 96, C.cloud, 800, T.font.ui, "center", -2));
+      D.alpha(c, () => { const w = D.width(VARS.cta, 36, 700) + 80; D.rr(W / 2 - w / 2, H / 2 + 160, w, 72, 36); D.fill(C.spark); D.txt(VARS.cta, W / 2, H / 2 + 197, 36, C.pine, 700); D.txt(VARS.url, W / 2, H / 2 + 290, 28, C.mint, 500); }); }
+  }
+} });
+</script>

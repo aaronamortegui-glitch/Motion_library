@@ -27,6 +27,9 @@ animate keeps a profile that **learns from each review**, and everything it make
 
 ## What's new
 
+- **Videos made as code (research):** 12 templates on the Motion DNA tokens, inspired by the Opus 5.5 code-video
+  prompts, rendered frame by frame to MP4/MOV or rebuilt in AE, used by Claude through the `video-templates` skill
+  ([see them](#videos-made-as-code-research)). The plugin itself is unchanged.
 - **The kit: 159 pieces, all on the token curves** ([see them](#the-kit-everything-claude-can-build-by-category), every
   one with a preview in [docs/CATALOG.md](docs/CATALOG.md)): 46 transitions (34 from solids and masks, 12 clip to clip),
   27 self-sizing elements, 39 animated shapes, 10 backgrounds, 11 finishing looks, 10 text animations, 7 3D moves and
@@ -369,6 +372,51 @@ People in these earlier showcases are the project collaborators (Aaron Amortegui
 subjects; every clip went through the face refinement pass. Prices, bottlings and roles are fictional.
 </details>
 
+## Videos made as code (research)
+
+Not part of the plugin yet, and the panel and the MCP are untouched: it lives in
+[`research/video_prompts/`](research/video_prompts/REPORT.md) and Claude uses it through the project skill
+[`video-templates`](.claude/skills/video-templates/SKILL.md), so anyone who clones the repo can ask for it.
+
+The idea comes from the videos people make by asking Claude to **write the animation as code** (HTML, canvas, SVG,
+WebGL) instead of keying it in After Effects ([awesome-opus5-5-videos](https://github.com/yihui-dev/awesome-opus5-5-videos),
+703 prompts). We indexed them by use, output route, tech and quality, kept the **archetypes** and rewrote each one as
+our own template on the Motion DNA tokens (colours, Inter Tight and Instrument Serif, the 14 curves): the source prompts
+stay behavioral references and are never copied into the repo.
+
+**How it works.** A template is a page whose `render(t)` draws the frame at time *t* and depends on nothing else, so
+`html_to_mp4.py` screenshots it frame by frame into the same video on any machine: an H.264 MP4, or a ProRes 4444 MOV
+with transparency for overlays and transitions. Each template card in `templates/catalog.json` has its uses, energy,
+tones, the content you change (`vars`) and our own brief for making a new version.
+
+| Route | When | What you get |
+|---|---|---|
+| **A · render as an asset** | 3D, shaders, particles, long camera moves, alpha overlays | An MP4/MOV dropped into AE (`ae/import_render.jsx`) |
+| **B · native in AE** | Type and a few shapes that must stay editable | Text and shape layers on the text engine and token curves (`ae/route_b.jsx`) |
+| **C · hybrid** | Explainers, launch films, data stories | The plate rendered without text (`--notext`), the copy live in AE with Motion DNA presets |
+
+| Showreel on the beat | One shape becomes the UI | Storybook explainer |
+|---|---|---|
+| ![Showreel](research/video_prompts/previews/t01_showreel.gif) | ![UI morph](research/video_prompts/previews/t03_morph_ui.gif) | ![Explainer](research/video_prompts/previews/t06_storybook_explainer.gif) |
+| **Timeline** | **Data story** | **Particle world** |
+| ![Timeline](research/video_prompts/previews/t07_timeline.gif) | ![Data story](research/video_prompts/previews/t08_data_story.gif) | ![Particle world](research/video_prompts/previews/t09_particle_world.gif) |
+| **Infinite zoom** | **Shader hero** | **Logo reveal (alpha)** |
+| ![Infinite zoom](research/video_prompts/previews/t04_infinite_zoom.gif) | ![Shader hero](research/video_prompts/previews/t10_shader_hero.gif) | ![Logo reveal](research/video_prompts/previews/t12_logo_reveal.gif) |
+
+**Try it** (once per machine, then ask Claude, e.g. *"make a 12 s launch film for a fictional app with the SaaS template
+and put it in my comp at 4 s"*):
+
+```
+pip install playwright numpy pillow
+python -m playwright install chromium
+python research/video_prompts/html_to_mp4.py research/video_prompts/templates/t01_showreel.html
+```
+
+Renders go to `research/video_prompts/renders/` (git-ignored). `snap.py` checks a few frames before a render,
+`fetch_sources.py` downloads the third-party prompts and remakes locally, and `compare.py` puts our render next to the
+remake of the same prompt, recoloured to our palette, to judge form and detail. What works, what does not yet (audio
+and beat maps, slow motion blur) and the next steps: [REPORT.md](research/video_prompts/REPORT.md).
+
 ## For contributors
 
 **Feeding the plugin** (a new kit piece, technique, preset, style or resource) follows one route, the same for people and
@@ -383,6 +431,7 @@ The full protocol: [CONTRIBUTING §11](CONTRIBUTING.md#11-feed-the-plugin-the-ro
 - [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) and [`docs/use-cases/`](docs/use-cases/README.md): the manual and the tests behind it.
 - [`docs/LEARNINGS.md`](docs/LEARNINGS.md): every pitfall already solved (driving AE from an LLM, ExtendScript, rendering, AI footage, tracking and roto, typography, audio, costs).
 - [`CLAUDE.md`](CLAUDE.md): the rules every Claude follows in this repo.
+- [`research/video_prompts/`](research/video_prompts/REPORT.md) (research, not in the plugin yet): videos written as code. 12 templates (showreel, launch film, UI morph, infinite zoom, kinetic type, explainers, data story, particle loop, shader hero, liquid wipe, logo reveal) rendered frame by frame to MP4/MOV on the Motion DNA tokens, or rebuilt in AE; Claude uses them through the `video-templates` skill.
 
 ### Rules that keep the work clean
 

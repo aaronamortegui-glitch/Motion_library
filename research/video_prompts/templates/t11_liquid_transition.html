@@ -1,0 +1,33 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T11 · Liquid wipe transition</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<script>
+// T11 · transition over transparency (archetype "every cut lands on the beat with a liquid wipe"). Route A with
+// alpha: a 1.2 s ProRes 4444 overlay that covers the frame at 0.6 s (cut the two shots under it there) and uncovers
+// it by 1.2 s. Two layers: a spark leading edge and a pine body, each with a noisy, wobbling front.
+const VARS = { lead: MDNA.T.color.spark, body: MDNA.T.color.pine, dir: 1 };
+const { T, seg, k, lerp, clamp, noise } = MDNA;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
+function shape(L, p, seed, amp) {   // everything left of a wavy vertical edge at progress p (0 = off left, 1 = off right)
+  const x0 = lerp(-300, W + 300, p); L.beginPath(); L.moveTo(-400, -10);
+  for (let y = -10; y <= H + 10; y += 20) L.lineTo(x0 + amp * (noise(y / 140, seed) - 0.5) + amp * 0.4 * Math.sin(y / 90 + p * 9), y);
+  L.lineTo(-400, H + 10); L.closePath();
+}
+const layers = []; let li = 0;
+function layer() { if (!layers[li % 2]) { const c = document.createElement("canvas"); c.width = W; c.height = H; layers[li % 2] = c.getContext("2d"); } return layers[li++ % 2]; }
+MDNA.scene({ duration: 1.2, alpha: true, render(t) {
+  g.clearRect(0, 0, W, H);
+  // covering: both fronts sweep in (Whip); uncovering: the body's back edge follows (Launch → Land)
+  const inLead = seg(t, 0, 0.55, "Whip"), inBody = seg(t, 0.06, 0.6, "Whip"), outBody = seg(t, 0.62, 1.2, "Surge"), outLead = seg(t, 0.66, 1.2, "Surge");
+  // each layer is visible between its exit front (left) and its entry front (right): the spark leads on the way in
+  // and trails on the way out, the pine body covers the frame in between
+  [[inLead, outLead, VARS.lead, 1, 7], [inBody, outBody, VARS.body, 2, 5]].forEach(([pin, pout, col, s1, s2]) => {
+    const L = layer(); L.clearRect(0, 0, W, H); L.save(); if (VARS.dir < 0) { L.translate(W, 0); L.scale(-1, 1); }
+    shape(L, pin, s1, 260); L.fillStyle = col; L.fill();
+    if (pout > 0) { L.globalCompositeOperation = "destination-out"; shape(L, pout, s2, 200); L.fill(); L.globalCompositeOperation = "source-over"; }
+    L.restore(); g.drawImage(L.canvas, 0, 0);
+  });
+} });
+</script>

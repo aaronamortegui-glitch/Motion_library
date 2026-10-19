@@ -1,0 +1,52 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T08 · Data story</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<script>
+// T08 · data story (archetype "The Pudding / 3Blue1Brown: one number shown as things you can count"), v2 after the
+// pilot review: a measured grid background, dots with a highlight and a glow, a legend, an annotation with a leader
+// line, bars with value labels and a baseline, a counter with a kicker and a rich sentence with a serif accent.
+// Hybrid: sentences and labels go live in AE (--notext).
+const VARS = { share: 37, groups: [["Mon", 12], ["Tue", 18], ["Wed", 22], ["Thu", 27], ["Fri", 21]],
+  lines: ["Out of *100 animations*…", "…*37* reuse the same three curves.", "Motion DNA keeps those 37 *on brand.*"], legend: [["Reuses a token curve", "spark"], ["Custom curve", "sea"]] };
+const { T, seg, k, lerp, clamp, rng, NOTEXT, rich, kicker, finish, glow } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080, R = rng(21);
+const dots = Array.from({ length: 100 }, (_, i) => ({ i, sx: 300 + R() * (W - 600), sy: -100 - R() * 900, d: R() * 0.6 }));
+// bars: each day keeps its share of the highlighted dots so the colour story survives the regroup
+const order = []; VARS.groups.forEach(([_, v], gi) => { for (let j = 0; j < v; j++) order.push(gi); });
+const slots = {}; const barOf = order.map(gi => [gi, (slots[gi] = (slots[gi] || 0) + 1) - 1]);
+
+function dot(x, y, r, hot) { if (hot) glow(g, x, y, r * 2.6, "#D8FF85", 0.35); g.beginPath(); g.arc(x, y, r, 0, 7); D.fill(hot ? C.spark : C.sea); g.beginPath(); g.arc(x - r * 0.3, y - r * 0.35, r * 0.35, 0, 7); D.alpha(hot ? 0.6 : 0.18, () => D.fill("#ffffff")); }
+
+MDNA.scene({ duration: 12, background: C.pine, render(t) {
+  D.bg(C.pine);
+  g.strokeStyle = "#F7F9F20d"; g.lineWidth = 1; for (let x = 0; x < W; x += 60) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); } for (let y = 0; y < H; y += 60) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
+  const toBarT = 6.2, chartIn = seg(t, 7.0, 7.6, "Land");
+  // baseline + value labels for the bars
+  if (t > 6.8) { D.alpha(chartIn, () => { g.strokeStyle = "#F7F9F255"; g.lineWidth = 3; g.beginPath(); g.moveTo(W / 2 - 600, 890); g.lineTo(W / 2 + 560, 890); g.stroke(); }); }
+  dots.forEach(d => {
+    const col = d.i % 10, row = Math.floor(d.i / 10), wx = W / 2 - 270 + col * 60, wy = 260 + row * 60;
+    const [gi, j] = barOf[d.i], bx = W / 2 - 520 + gi * 260 + (j % 4) * 44, by = 860 - Math.floor(j / 4) * 44;
+    const fall = seg(t, 0.3 + d.d, 1.2 + d.d, "Land"), toBar = seg(t, toBarT + d.d * 0.6, toBarT + 1 + d.d * 0.6, "Settle");
+    const x = lerp(lerp(d.sx, wx, fall), bx, toBar), y = lerp(lerp(d.sy, wy, fall), by, toBar), hot = d.i < VARS.share && t > 2.6 + d.i * 0.025;
+    dot(x, y, 20 * (hot ? lerp(1.25, 1, seg(t, 2.6 + d.i * 0.025, 2.9 + d.i * 0.025, "Pop")) : 1), hot);
+  });
+  if (!NOTEXT) {
+    const line = (s, a, b, y, size = 60) => { const p = seg(t, a, a + 0.47, "Land") * (1 - seg(t, b - 0.3, b, "Launch")); D.alpha(p, () => rich(D, s, W / 2, y + 16 * (1 - p), size, C.cloud, C.spark, "center", 600)); };
+    D.alpha(seg(t, 0.4, 0.8) * (1 - seg(t, 5.6, 6.0)), () => kicker(D, "Fig. 1 · 100 animations from 12 brands", W / 2, 120, C.mint));
+    line(VARS.lines[0], 0.6, 2.5, 200); line(VARS.lines[1], 2.6, 6.0, 200);
+    // legend
+    D.alpha(seg(t, 3.2, 3.6, "Land") * (1 - seg(t, 5.6, 6.0)), () => VARS.legend.forEach(([lab, c], i) => { dot(W / 2 + 420, 420 + i * 60, 12, c === "spark"); D.txt(lab, W / 2 + 450, 422 + i * 60, 26, C.cloud, 500, T.font.ui, "left"); }));
+    // annotation with a leader line to the last highlighted dot
+    const an = seg(t, 4.0, 4.6, "Cruise") * (1 - seg(t, 5.6, 6.0)); if (an > 0) D.alpha(an, () => { const tx = W / 2 - 270 + 6 * 60, ty = 260 + 3 * 60; g.save(); g.setLineDash([400]); g.lineDashOffset = 400 * (1 - an);
+      g.beginPath(); g.moveTo(tx - 30, ty + 10); g.quadraticCurveTo(W / 2 - 520, ty + 120, W / 2 - 560, ty + 230); g.strokeStyle = C.cloud; g.lineWidth = 3; g.stroke(); g.restore();
+      D.txt("37 of 100", W / 2 - 560, ty + 270, 44, C.cloud, 400, T.font.display); });
+    if (t > 7.4) VARS.groups.forEach(([lab, v], gi) => D.alpha(seg(t, 7.4 + gi * 0.1, 7.8 + gi * 0.1, "Land"), () => { D.txt(lab, W / 2 - 454 + gi * 260, 930, 30, C.mint, 600);
+      D.txt(String(v), W / 2 - 454 + gi * 260, 860 - Math.ceil(v / 4) * 44 - 20, 30, C.cloud, 700); }));
+    const n = seg(t, 8.6, 10.2, "Settle"); D.alpha(seg(t, 8.5, 8.9, "Land"), () => { kicker(D, "Share on a token curve", W / 2, 210, C.mint); D.txt(Math.round(VARS.share * n) + "%", W / 2, 320, 180, C.spark, 800); });
+    line(VARS.lines[2], 10.0, 12.5, 470, 54);
+  }
+  finish(g, t, { grain: 0.06, vignette: 0.4 });
+} });
+</script>

@@ -1,0 +1,35 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T05 · Kinetic typography</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<script>
+// T05 · kinetic typography over transparency (archetype "a manifesto read word by word, one idea per shot").
+// Route B: each line is a text layer with a Motion DNA text preset; this HTML version renders a ProRes 4444 overlay
+// to compare against the native AE build. Words land on their own beats; the key word of each line is spark.
+const VARS = { lines: [["Motion", "with", "its", "*own*"], ["*DNA.*"], ["Every", "brand", "moves"], ["the", "way", "it", "*decided.*"]], beat: 0.42 };
+const { T, seg, k, lerp, clamp } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
+const SIZE = [120, 300, 120, 120];
+
+MDNA.scene({ duration: 10, alpha: true, render(t) {
+  g.clearRect(0, 0, W, H);
+  let start = 0.3;
+  VARS.lines.forEach((words, li) => {
+    const lineStart = start, lineDur = words.length * VARS.beat + 1.0; start += lineDur;   // the 4 lines end at 9.3 s
+    if (t < lineStart - 0.1 || t > lineStart + lineDur) return;
+    const size = SIZE[li], clean = words.map(w => w.replace(/\*/g, "")), gap = size * 0.28;
+    const widths = clean.map(w => D.width(w, size, 800, T.font.ui, -size * 0.03)), total = widths.reduce((a, b) => a + b, 0) + gap * (words.length - 1);
+    let x = W / 2 - total / 2; const out = seg(t, lineStart + lineDur - 0.35, lineStart + lineDur, "Launch");
+    words.forEach((w, i) => {
+      const a = lineStart + i * VARS.beat, p = seg(t, a, a + 0.467, "Land"), hot = w.includes("*");
+      const y = H / 2 + (1 - p) * size * 0.9 - out * size * 1.2, sc = hot ? lerp(1.25, 1, seg(t, a, a + 0.5, "Pop")) : 1;
+      g.save(); g.beginPath(); g.rect(x - 20, H / 2 - size * 0.75, widths[i] + 40, size * 1.5); g.clip();
+      D.alpha(Math.min(p * 2, 1), () => D.at(x + widths[i] / 2, y, sc, 0, () => D.txt(clean[i], 0, 0, size, hot ? C.spark : C.cloud, 800, T.font.ui, "center", -size * 0.03)));
+      g.restore(); x += widths[i] + gap;
+    });
+    // underline sweeps under the key line
+    if (li === 1) { const u = seg(t, lineStart + 0.4, lineStart + 1.1, "Cruise") * (1 - out); g.fillStyle = C.spark; g.fillRect(W / 2 - 330 * u, H / 2 + 170, 660 * u, 16); }
+  });
+} });
+</script>
