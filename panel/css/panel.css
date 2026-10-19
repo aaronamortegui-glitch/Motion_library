@@ -346,6 +346,7 @@ select.field.big { height: 30px; font-weight: 600; border-color: rgba(216, 255, 
 .kit-top { flex-wrap: wrap; row-gap: 6px; }
 .crow { flex-wrap: wrap; }
 .crow > * { min-width: 64px; }
+.crow > .btn, .crow > .solid { min-width: max-content; }   /* a button keeps its whole label: the row wraps instead */
 @media (max-width: 320px) {
   .status button { font-size: 0; gap: 0; padding: 0 7px; }   /* dots only: each one's tooltip names it */
   .etabs { flex-wrap: wrap; }

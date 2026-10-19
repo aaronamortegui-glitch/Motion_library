@@ -394,8 +394,13 @@ function curves() {
     const move = (ev) => {
       const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
       const q = pt.matrixTransform(svg.getScreenCTM().inverse());
-      CV.bz[idx * 2] = Math.round(Math.max(0, Math.min(1, q.x / 100)) * 100) / 100;
-      CV.bz[idx * 2 + 1] = Math.round(Math.max(R0, Math.min(R1, (100 - q.y) / 100)) * 100) / 100;
+      let x = q.x / 100, y = (100 - q.y) / 100;
+      if (ev.shiftKey) {   // Shift: the arm snaps to 0°, 45°, 90°… from its end of the curve, keeping its length
+        const ax = idx, ay = idx, dx = x - ax, dy = y - ay, len = Math.hypot(dx, dy), a = Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4);
+        x = ax + len * Math.cos(a); y = ay + len * Math.sin(a);
+      }
+      CV.bz[idx * 2] = Math.round(Math.max(0, Math.min(1, x)) * 100) / 100;
+      CV.bz[idx * 2 + 1] = Math.round(Math.max(R0, Math.min(R1, y)) * 100) / 100;
       draw();
     };
     const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); };
@@ -447,7 +452,7 @@ function curves() {
   sec.append(h("div", { class: "editor-wrap" }, svg),
     h("div", { class: "crow" }, nameEl, vals),
     h("div", { class: "crow" }, applyBtn, readBtn, revBtn),
-    h("span", { class: "dim" }, "No keyframes selected? It re-eases every keyframe of the selected layers (values kept), and gives a layer with no animation a Fade Up on this curve."),
+    h("span", { class: "dim" }, "Hold Shift while dragging to snap a handle to 45°. No keyframes selected? It re-eases every keyframe of the selected layers (values kept), and gives a layer with no animation a Fade Up on this curve."),
     h("div", { class: "crow" }, saveBtn, del, h("button", { class: "btn tobrand", title: "Save this curve to the active brand", onclick: () => toBrand() }, "Save to brand")), form,
     h("div", { class: "lib-head" }, libCount, search), lib);
   const toBrand = async () => {
