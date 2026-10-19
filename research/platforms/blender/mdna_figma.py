@@ -7,8 +7,8 @@ Inside Blender:  import mdna_figma as F; built = F.build("<project>/figma/<frame
 Headless:        blender -b -P mdna_figma.py -- <frame folder> [--animate] [--save out.blend]
 
 Units: 1 px = 1/180 Blender unit (a 1920×1080 frame is 10.67 × 6, the same scale mdna_blender's presets use).
-Inter Tight's outlines overlap and Blender fills them with holes, so it falls back to Blender's built-in font until the
-font files are cleaned (the other families load from assets/fonts).
+Inter Tight's outlines overlap and Blender fills them with holes: fix_fonts.py makes merged copies in blender/fonts/
+(install.py runs it); without them Inter Tight falls back to Blender's built-in font.
 """
 import json
 import math
@@ -171,10 +171,11 @@ def build(folder, collection_name=None):
         elif L["kind"] == "text":
             t = L["text"]
             cu = bpy.data.curves.new(L["name"], "FONT"); cu.body = t["string"]
-            fn = FONT_FILES.get(t["family"] + "|" + t["style"])
-            path = fonts_dir / fn if fn else fonts_dir / "static" / (t["family"].replace(" ", "") + "-" + t["style"].replace(" ", "") + ".ttf")
+            fn = FONT_FILES.get(t["family"] + "|" + t["style"]) or (t["family"].replace(" ", "") + "-" + t["style"].replace(" ", "") + ".ttf")
+            safe = HERE / "fonts" / fn   # fix_fonts.py: overlaps merged, Blender fills them cleanly
+            path = safe if safe.exists() else (fonts_dir / fn if (fonts_dir / fn).exists() else fonts_dir / "static" / fn)
             factor = None
-            if path.exists() and t["family"] not in BROKEN_FONTS:
+            if path.exists() and (safe.exists() or t["family"] not in BROKEN_FONTS):
                 cu.font = bpy.data.fonts.load(str(path), check_existing=True)
                 factor = _em_factor(path)
             cu.size = t["size"] * PX * (factor or _builtin_factor())   # Figma's em size in Blender's bounding-box size
@@ -184,6 +185,16 @@ def build(folder, collection_name=None):
             ob.rotation_euler = (math.pi / 2, 0, 0)
             cu.materials.append(_emission(L["name"], t["color"]))
             ob.location = (0, cy, 0); bpy.context.view_layer.update()
+            if t.get("tracking") and len(t["string"]) > 1:   # Figma tracking is px per letter; fit Blender's factor to the width
+                import mathutils as _mu
+                def _gw():
+                    bpy.context.view_layer.update()
+                    xs = [(ob.matrix_world @ _mu.Vector(c)).x for c in ob.bound_box]
+                    return max(xs) - min(xs)
+                target = (w - t["tracking"]) * PX   # Figma's box keeps the trailing letter space
+                s0 = cu.space_character; g0 = _gw(); cu.space_character = s0 + 0.2; g1 = _gw()
+                if abs(g1 - g0) > 1e-6:
+                    cu.space_character = max(0.0, s0 + 0.2 * (target - g0) / (g1 - g0))
             # match Figma's box: left (or centre/right) edge on its x, glyphs centred on its box
             pts = [ob.matrix_world @ __import__("mathutils").Vector(c) for c in ob.bound_box]
             gx0, gx1 = min(p.x for p in pts), max(p.x for p in pts); gz = (min(p.z for p in pts) + max(p.z for p in pts)) / 2

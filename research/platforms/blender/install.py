@@ -33,6 +33,8 @@ def blenders():
 
 def main():
     remove = "--uninstall" in sys.argv
+    if not remove:   # Blender-safe copies of the token fonts (Inter Tight's overlaps merged)
+        subprocess.run([sys.executable, str(HERE / "fix_fonts.py")])
     exes = {e.parent.name.replace("Blender ", ""): e for e in blenders()}   # "5.0" → blender.exe (Windows)
     found = configs()
     for exe in exes.values():   # a Blender never opened has no config folder yet: let it make one
