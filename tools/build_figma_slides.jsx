@@ -117,7 +117,10 @@ var FIGMA_SLIDES = (function () {
         return finish(L, u, center(u, ox, oy));
     }
     function makeText(comp, u, ox, oy) {
-        var segs = u.g instanceof Array ? u.g : [u.g], g0 = segs[0], lh = g0.lh || g0.z * 1.2, str = u.caps ? u.s.toUpperCase() : u.s;   // Figma text case UPPER
+        var segs = u.g instanceof Array ? u.g : [u.g], g0 = segs[0], str = u.caps ? u.s.toUpperCase() : u.s;   // Figma text case UPPER
+        // Figma's "Auto" line height is the font's own (hhea ascent + descent), not 1.2 em: Instrument Serif is 1.3 em,
+        // so 1.2 put its lines 0.05 em too high
+        var fm = METRICS[g0.f.split("|")[0]], lh = g0.lh || (fm ? (fm[0] + fm[1]) * g0.z : g0.z * 1.2);
         var L = u.box ? comp.layers.addBoxText([u.b[2] + 14, Math.max(u.b[3] + lh, lh * 2)], str) : comp.layers.addText(str);
         var tp = L.property("ADBE Text Properties").property("ADBE Text Document"), td = tp.value;
         td.resetCharStyle(); td.font = font(g0.f); td.fontSize = g0.z; td.fillColor = hex(g0.c); td.applyFill = true; td.applyStroke = false;
