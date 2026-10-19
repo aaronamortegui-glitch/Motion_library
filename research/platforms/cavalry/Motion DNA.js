@@ -69,6 +69,26 @@ B.add(chipRow);
 var flow = new ui.FlowLayout(6, 6), scroll = new ui.ScrollView(), tiles = {};
 scroll.setLayout(flow); scroll.setFixedHeight(250);   // a ScrollView takes fixed sizes only
 B.add(scroll);
+// hover previews, like After Effects: the tile under the mouse plays its preview (frames made by install.py)
+var ANIM_DIR = MDNA_ROOT + "/research/platforms/cavalry/thumbs_anim", ANIM_N = {};
+try { ANIM_N = JSON.parse(api.readFromFile(ANIM_DIR + "/index.json")); } catch (e) {}
+var HOVER = { pic: null, key: null, still: null, i: 0, onTimeout: function () {
+    if (!this.pic) return;
+    this.i = (this.i + 1) % ANIM_N[this.key];
+    this.pic.setImage(ANIM_DIR + "/" + this.key + "/f_" + (this.i < 10 ? "0" : "") + this.i + ".png");
+} };
+var hoverTimer = new api.Timer(HOVER); hoverTimer.setInterval(80);
+function hoverOn(pic, img) {
+    var m = /thumbs_sm\/([a-z]+)\/([^\/]+)\.png$/.exec(img || ""), key = m ? m[1] + "/" + m[2] : null;
+    if (!key || !ANIM_N[key]) return;
+    hoverOff(); HOVER.pic = pic; HOVER.key = key; HOVER.still = img; HOVER.i = 0; hoverTimer.start();
+}
+function hoverOff() {
+    hoverTimer.stop();
+    if (HOVER.pic && HOVER.still) HOVER.pic.setImage(HOVER.still);
+    HOVER.pic = null;
+}
+
 function tile(title, tip, img, onPick) {
     var box = new ui.Container(), v = new ui.VLayout(), pic;
     if (img) { pic = new ui.ImageButton(img); pic.setImageSize(112, 63); pic.setDrawStroke(false); }
@@ -78,6 +98,7 @@ function tile(title, tip, img, onPick) {
     var name = label(title, C.text, 11); name.setAlignment(1);
     v.add(pic); v.add(name); v.setMargins(4, 4, 4, 4); v.setSpaceBetween(2);
     box.setLayout(v); box.setRadius(6, 6, 6, 6); box.setBackgroundColor(C.card); box.setFixedWidth(124);
+    if (img) { box.onMouseEnter = function () { hoverOn(pic, img); }; box.onMouseLeave = hoverOff; }
     return box;
 }
 function matches(name, i) {
