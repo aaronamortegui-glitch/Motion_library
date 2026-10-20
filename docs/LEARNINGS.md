@@ -107,7 +107,9 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   repainted with `hide()/show()` inside a mouse event, or a control removed by its own click handler → defer rebuilds and
   repaints to a timer; in the end the panel moved to CEP (HTML), which also gives mouse-wheel scrolling.
 - **"Cannot run a script while a modal dialog is waiting"** popping repeatedly → a repeating `app.scheduleTask` fires
-  while a dialog is open → chain one-shot tasks (each tick schedules the next) and restart them on panel use.
+  while a dialog is open → chain one-shot tasks (each tick schedules the next) and restart them on panel use. The
+  bridge itself (`tools/ss_bridge.jsx`) was still a repeating task until 2026-10-19; now its ticks chain and the panel
+  restarts the chain when the heartbeat (`SS_BRIDGE_LAST`) is older than 15 s (`host.jsx` `mdna_bridge_heal`).
 - **CEP extension does not load** (log: *Signature verification failed*) → unsigned → sign it: `tools/setup.py` makes a
   self-signed certificate with Adobe's ZXPSignCmd, signs `panel/` into a `.zxp` and unzips it into the user's CEP
   extensions folder; AE 2026 loads it with no developer mode (no UPIA needed; the 2024 UPIA known issue is about

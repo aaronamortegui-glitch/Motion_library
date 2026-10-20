@@ -5,14 +5,14 @@
    "name": "Tracked labels",
    "what": "Labels, callouts and brackets that stick to moving details in footage (shoes, faces, products).",
    "how": "python tools/track_points.py clip.mp4 --regions regions.json -o tracks.json, then a scene JSON with HUD items built by tools/build_scene.jsx (SSHUD.callout / bracket / chip on TRK nulls).",
-   "ask": "Track the sneakers and the cap in this clip and add callouts that follow them.",
+   "ask": "Track the car in this shot and add an AEROSPACE EXTERIOR label that follows it.",
    "image": "techniques/tracked-labels.png"
   },
   {
    "name": "Text behind people",
    "what": "Big type that sits behind the subject, cut by an AI matte.",
    "how": "Get a person matte (VEED background removal or rembg), then a scene JSON with \"matte\" and \"behind\" text (tools/build_scene.jsx).",
-   "ask": "Put a giant 1974 behind the man in this shot.",
+   "ask": "Put a giant YES! behind the two people cheering in this shot.",
    "image": "techniques/text-behind-people.png",
    "tool": "text_behind (matte for the cut-out alone)"
   },
@@ -20,7 +20,7 @@
    "name": "Roto breakdown",
    "what": "A 2×2 grid that shows plate, matte, contours and the final composite.",
    "how": "python tools/matte_contours.py, then tools/build_breakdown.jsx.",
-   "ask": "Make a roto breakdown of shot 2.",
+   "ask": "Make a roto breakdown of the YES shot: plate, matte, contour and composite.",
    "image": "techniques/roto-breakdown.png",
    "tool": "matte, then run_jsx with tools/build_breakdown.jsx"
   },
@@ -28,14 +28,14 @@
    "name": "HUD overlays",
    "what": "Holographic scans, meters, chips and face scans on tracked points.",
    "how": "#include tools/ss_hud.jsx · SSHUD.bracket / callout / meter / chip / contour / faceScan on TRK nulls.",
-   "ask": "Add a face scan and two data meters to the host in this shot.",
+   "ask": "Add command chips that float around the robot's screen in this shot.",
    "image": "techniques/hud-overlays.png"
   },
   {
    "name": "Speed ramps",
    "what": "Slow-mo → burst → slow-mo on footage, on the Ramp, Surge or Whip curve, with frame blending.",
    "how": "Moves > Speed Ramp on a footage layer or precomp, or \"speed\" segments in an edit JSON (tools/build_edit.jsx).",
-   "ask": "Speed-ramp this shot on the beat at 2 s with the Ramp curve and a whoosh.",
+   "ask": "Speed-ramp the car's lift-off: slow-mo as it leaves the ground, then fast out, with the Ramp curve and a whoosh.",
    "image": "techniques/speed-ramps.png",
    "tool": "apply_preset with Speed Ramp"
   },
@@ -43,14 +43,14 @@
    "name": "Freeze frame + kinetic type",
    "what": "The shot freezes, the subject is cut out and big words slam in around it.",
    "how": "\"freeze\" in an edit JSON (tools/build_edit.jsx): heroWord, leadWord, plate cut-out, SFX.",
-   "ask": "Freeze at 1.5 s and slam in THE HOST around him.",
+   "ask": "Freeze on Dana's close-up and slam in EVERY. SINGLE. TIME. beside her face.",
    "image": "techniques/freeze-frame-kinetic-type.png"
   },
   {
    "name": "Shape-wipe transitions",
    "what": "Two-colour bars that travel through a cut in one continuous move.",
    "how": "\"wipe\" elements (mode out at the end of a scene, mode in at the start of the next, same colours and direction) in a promo spec (tools/build_explainer.jsx).",
-   "ask": "Join these two scenes with a Spark and Pine wipe from left to right.",
+   "ask": "Join the office scene and the car spot with a Spark and Sea wipe.",
    "image": "techniques/shape-wipe-transitions.png",
    "tool": "apply_transition"
   },
@@ -58,7 +58,7 @@
    "name": "Marker timing",
    "what": "Drag the SS in / SS out layer markers to retime an animation; the curve keeps its shape.",
    "how": "Tick Marker timing in Controls before applying (or SSP.markerTiming(true) in a script).",
-   "ask": "Apply Surge Rise with marker timing to the title.",
+   "ask": "Apply Surge Rise with marker timing to Rex's Make it pop title, so I can retime it by dragging SS in and SS out.",
    "image": "techniques/marker-timing.png",
    "tool": "apply_preset with marker_timing"
   },
@@ -66,7 +66,7 @@
    "name": "Styles",
    "what": "One click gives a whole comp a look: each layer gets the preset for its role (title, text, shape, media, logo).",
    "how": "Styles category, pick one, then In / Out / Both (SSP.applyPack).",
-   "ask": "Apply the Elegant style to this comp and show me a frame.",
+   "ask": "Apply the Dynamic style to this spot and show me a frame.",
    "image": "techniques/styles.png",
    "tool": "apply_pack / apply_brand"
   },
@@ -74,14 +74,14 @@
    "name": "Cut on the voice",
    "what": "Scenes change only in the pauses of a voiceover; words land on the beats they are spoken.",
    "how": "python tools/vo_words.py vo.mp3 words.json, then cut times from the words (see media/promo/make_promo.py).",
-   "ask": "Cut this edit to the voiceover word times.",
+   "ask": "Cut this edit to the voiceover word times and land MOVES. on Rex's word.",
    "image": "techniques/cut-on-the-voice.png"
   },
   {
    "name": "Face refinement",
    "what": "For clips with real people: puts their real face back on generated video, keeping wardrobe and camera.",
    "how": "media/faceswap/jobs.json + python tools/faceswap_refine.py (MiniMax H3, local GPU), then tools/faceswap_apply.py.",
-   "ask": "Refine the faces in the new clips before we edit.",
+   "ask": "Check Dana's face in the new clips against her reference sheet and refine it before we edit.",
    "image": "techniques/face-refinement.png"
   },
   {

@@ -46,7 +46,7 @@ otherwise load an old panel.
 2. Restart After Effects › *Window › Extensions › Motion DNA* (also *File › Scripts › Motion DNA*), and dock it.
 
 ## 4. Connect
-- **Claude:** *Agent › Connect › Connect Claude*. A window and your browser open; sign in. If it shows a code, paste it in
+- **Claude:** *Project › Connect › Connect Claude*. A window and your browser open; sign in. If it shows a code, paste it in
   the window. The dot turns green by itself. By hand instead: `claude auth login` in a terminal.
 - **Figma** (optional): *Connect Figma* in the same sheet, then **Allow** in Figma. By hand: `claude mcp login figma`,
   or claude.ai › Settings › Connectors › Figma › Connect.

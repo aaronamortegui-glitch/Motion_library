@@ -27,6 +27,18 @@ animate keeps a profile that **learns from each review**, and everything it make
 
 ## What's new
 
+- **Project comes first:** a new first tab, left of Behaviors. Step 1 connects Claude and your apps (Figma, Krea, Flora,
+  Codex, Update); step 2 sets up the project folder. Then you move left to right: Behaviors, Curves, Brands, Agent.
+- **See what Flora and Krea make, in the chat:** every image or clip a generation returns shows up as a card with the
+  outputs side by side (click to open full size), like Flora's widget in the Claude app. Motion DNA's own check frames
+  show the same way.
+- **The chat lives with the project:** each project (or brand) shows its own conversation, and keeps it in its folder:
+  `claude/agent-chat.md` (readable, with links to every output) and `claude/sessions/` (the full transcripts).
+- **When After Effects stops answering:** type `reconnect` in the chat, press *Reconnect AE* on the *Working…* line or
+  click the MCP dot. The bridge also restarts by itself when it goes quiet, and an open dialog no longer makes After
+  Effects repeat "Cannot run a script while a modal dialog is waiting".
+- **Techniques shown with the teaser's characters:** every technique's picture and example order now come from the
+  Motion DNA teaser (Dana, Rex, the robot, the car), and the Styles tab lists the styles again.
 - **Videos made as code (research):** 12 templates on the Motion DNA tokens, inspired by the Opus 5.5 code-video
   prompts, rendered frame by frame to MP4/MOV or rebuilt in AE, used by Claude through the `video-templates` skill
   ([see them](#videos-made-as-code-research)). The plugin itself is unchanged.
@@ -62,7 +74,7 @@ Claude installs it and tells you the two steps only you can do. Seven steps in a
    developer mode, no admin rights.
 2. **Open After Effects** › **Window › Extensions › Motion DNA** (also *File › Scripts › Motion DNA*) and dock it once:
    it comes back every time. The link with Claude starts with After Effects by itself.
-3. **Agent › Connect:** *Connect Claude* (sign in once); optional *Connect Figma*, *Krea* or *Flora* (press Allow) and Codex. *Update* gets new versions.
+3. **Project › Connect** (the first tab): *Connect Claude* (sign in once); optional *Connect Figma*, *Krea* or *Flora* (press Allow) and Codex. *Update* gets new versions.
 4. Once, in After Effects: *Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
 
 Update with `python tools/setup.py --update` (never over your local changes) · remove with `--uninstall`.
@@ -94,7 +106,7 @@ Update with `python tools/setup.py --update` (never over your local changes) · 
 ### Connect Claude, Figma, Krea, Flora and Codex · Update
 <img src="docs/screens/cep-connect.gif" width="300" align="right" alt="Connect Claude, Figma, Krea, Flora and Codex, and update">
 
-*Agent › Connect* has one button each. **Connect Claude** opens the sign-in (your Claude account) and turns green by
+*Project* (the first tab) › *Connect Claude and your apps* has one button each. **Connect Claude** opens the sign-in (your Claude account) and turns green by
 itself. **Connect Figma**, **Connect Krea** and **Connect Flora** open each service's own permission page: press Allow
 (the panel adds the official MCP first when it is missing). The header shows **MCP · Claude · Figma**: green is ready,
 a click opens Connect. When a service asks for permission again, the same button reconnects it.
@@ -171,12 +183,31 @@ templates do); conversations stay on each computer.
 <img src="docs/screens/cep-workspace.gif" width="300" align="right" alt="Brand conversation and projects">
 
 A brand has its own folder and its own Claude conversation for everything about it (*Brands › Claude › Start in Claude
-app* puts it in the Claude app's sidebar). Each video is a **project** inside the brand folder (*Agent › Project*:
+app* puts it in the Claude app's sidebar). Each video is a **project** inside the brand folder (the *Project* tab, first in the bar:
 brief, references, footage, audio, AE, renders, exports), with its own conversation and rules. Continue any of them
 from the panel, the Claude app or a terminal (*Copy terminal command*, or `>_` in the chat); the panel warns if it is
 open somewhere else.
 
+**Where the chat is saved.** With a project open, the Agent's chat is written into the project folder as you work:
+`claude/agent-chat.md` (each order, the replies, and links to every Flora or Krea output), `claude/sessions/<id>.jsonl`
+(Claude Code's full transcript of each conversation) and `claude/usage.csv` (time and cost of each order). The panel
+finds the project from where the `.aep` is saved, so keep *Save the open AE project in it* ticked when you create it and
+always save the `.aep` inside the project folder. Each project shows its own chat; with no project or brand open the
+chat stays in the panel only.
+
 <br clear="right">
+
+### Previews of what Flora and Krea make
+In the Agent chat, every result from Flora or Krea that carries images or clips becomes a card: the service, the step,
+the number of outputs and the outputs side by side (*Output 1, Output 2…*). Click an image to open it full size; click a
+clip to play it, double-click to open it. The card fits the panel's width (four in a row, a 2 × 2 grid, or two columns
+in a narrow dock). A clip After Effects' browser cannot play shows as *Video · open*.
+
+### When After Effects stops answering
+The agent drives After Effects through a small bridge that checks for its requests every second. If a step hangs on
+*Working…*: type `reconnect` in the chat (handled by the panel, not by Claude), press **Reconnect AE** on that line, or
+click the **MCP** dot. Requests that waited too long are answered as skipped, so send that order again. The bridge also
+restarts by itself 15 s after it goes quiet, for example after you close a dialog.
 
 ### Claude Code and other agents
 Open the repo (or a brand or project folder) in Claude Code and approve the `motion-dna` server. Its tools:
@@ -218,7 +249,7 @@ Motion DNA it tests, shows the result, and leaves a tip. What broke and how it w
 | **UC07** · Fashion | Agent › Library › Styles | <img src="docs/use-cases/img/uc07.jpg" width="360" alt="UC07"> | No layers selected means the whole comp. |
 | **UC08** · Fashion | Agent › Library › Techniques (text behind) | <img src="docs/use-cases/img/uc08.jpg" width="360" alt="UC08"> | Cut-outs with `matte` / `text_behind`; watch the contrast. |
 | **UC09** · Cars | Agent (Full): Figma → After Effects, brand timing | <img src="docs/use-cases/img/uc09.jpg" width="360" alt="UC09"> | Put numbers in the brand's timing: `apply_brand` follows them. |
-| **UC10** · All | Agent › Project | <img src="docs/use-cases/img/uc10.jpg" width="360" alt="UC10"> | Keep the `.aep` in the project's `05_ae`. |
+| **UC10** · All | Project | <img src="docs/use-cases/img/uc10.jpg" width="360" alt="UC10"> | Keep the `.aep` in the project's `05_ae`. |
 | **UC11** · All | Claude Code (MCP: every tool, 27/27) + layout QA | <img src="docs/use-cases/img/uc11.jpg" width="360" alt="UC11"> | Before calling it done: `render_frame`, then `check_layout`. |
 | **UC12** · Cars | Technique: tracked labels + HUD | <img src="docs/use-cases/img/uc12.jpg" width="360" alt="UC12"> | On a moving shot, point callouts inward and give them a card on light plates. |
 | **UC13** · Cars | Technique: speed ramp | <img src="docs/use-cases/img/uc13.jpg" width="360" alt="UC13"> | Give the ramp a plate 2.5× longer than the rushed part. |

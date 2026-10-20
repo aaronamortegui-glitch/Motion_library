@@ -52,6 +52,8 @@ def card(t, i, out):
         d.text((PAD, y), line, font=font(50, 760), fill=CLOUD); y += 58
     y += 10
     what = re.sub(r"\s+", " ", t["what"]).strip()
+    if len(wrap(d, what, font(23, 420), W - 2 * PAD - 120)) > 4:   # too long for the card: its first clause, never a cut sentence
+        what = re.split(r"(?<=[a-z])[.:;]\s", what)[0].rstrip(".") + "."
     for line in wrap(d, what, font(23, 420), W - 2 * PAD - 120)[:4]:
         d.text((PAD, y), line, font=font(23, 420), fill=MUTED); y += 31
     im.save(out, optimize=True)

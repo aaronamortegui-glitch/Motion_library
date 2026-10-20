@@ -10,7 +10,8 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     Folder(BASE + "done").create();
 
     if ($.global.SS_BRIDGE_TASK) {
-        app.cancelTask($.global.SS_BRIDGE_TASK);
+        $.global.SS_BRIDGE_ON = false;   // a tick already running won't schedule the next one
+        try { app.cancelTask($.global.SS_BRIDGE_TASK); } catch (e) {}
         $.global.SS_BRIDGE_TASK = null;
         var hs = new File(BASE + "outbox/_bridge_started.txt"); hs.remove();
         return;
@@ -20,6 +21,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     // name) used to overwrite the poll's own variables and raise a modal error that froze every script until OK.
     $.global.SS_BRIDGE_RUN = function (jobFile) { return $.evalFile(jobFile); };
     $.global.SS_BRIDGE_POLL = function () {
+        $.global.SS_BRIDGE_LAST = new Date().getTime();   // heartbeat: the panel restarts the timer if it goes quiet
         var jobs = Folder(BASE + "inbox").getFiles("*.jsx");
         for (var i = 0; i < jobs.length; i++) {
             var job = jobs[i], name = job.name.replace(/\.jsx$/, ""), result;
@@ -39,8 +41,14 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
             } catch (e3) {}
         }
     };
-    // the scheduled string is guarded too: an error here would stop AE's scheduled tasks and show a dialog
-    $.global.SS_BRIDGE_TASK = app.scheduleTask("try { $.global.SS_BRIDGE_POLL(); } catch (e) {}", 1000, true);
+    // One tick at a time: each tick schedules the next. A repeating task fires while any dialog is open and AE answers
+    // every tick with "Cannot run a script while a modal dialog is waiting", one dialog after another; a chained tick
+    // that hits a dialog shows it once and the chain stops, and the panel restarts it when its heartbeat goes quiet
+    // (host.jsx mdna_bridge_heal). The scheduled string is guarded too: an error there would stop AE's scheduled tasks.
+    $.global.SS_BRIDGE_ON = true;
+    $.global.SS_BRIDGE_TICK = "try { $.global.SS_BRIDGE_POLL(); } catch (e) {} " +
+        "if ($.global.SS_BRIDGE_ON) $.global.SS_BRIDGE_TASK = app.scheduleTask($.global.SS_BRIDGE_TICK, 1000, false);";
+    $.global.SS_BRIDGE_TASK = app.scheduleTask($.global.SS_BRIDGE_TICK, 1000, false);
     var hb = new File(BASE + "outbox/_bridge_started.txt");
     hb.open("w"); hb.write("AE " + app.version + " · " + new Date().toString()); hb.close();
     writeLn("Motion DNA bridge active: " + BASE + "inbox");

@@ -356,3 +356,27 @@ select.field.big { height: 30px; font-weight: 600; border-color: rgba(216, 255, 
   .chat .send-row { flex-wrap: wrap; }
   .chat .send-row .solid { flex: 1 1 100%; }
 }
+
+/* Project section: step 1, set up once */
+details.step { display: block; }
+details.step > summary { width: 100%; display: flex; }
+details.step > summary .stepn { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--spark); color: var(--pine); font-size: 11px; font-weight: 700; flex: none; }
+details.step > summary .fsum { margin-left: auto; color: var(--muted); font-weight: 400; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+details.step > .card-box, details.step > .stack { margin: 0 10px 10px; }
+#sec-project .setup .kit-top { display: none; }
+
+/* Agent chat: previews of what Flora, Krea and Motion DNA make (like Flora's widget in the Claude app) */
+.msg.media { background: #111312; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; padding: 10px;
+  background-image: radial-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px); background-size: 14px 14px; white-space: normal; }
+.msg.media .mhead { display: flex; align-items: center; gap: 8px; font-size: 11px; min-width: 0; }
+.msg.media .mhead .dim { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msg.media .mhead b { letter-spacing: .06em; text-transform: uppercase; }
+.msg.media .mcount { flex: none; margin-left: auto; border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; color: var(--text-dim); }
+.msg.media .mgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr)); gap: 10px; }
+.msg.media .mtile { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.msg.media .mlabel { font-size: 10px; color: var(--text-dim); }
+.msg.media .mbox { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 10px; background: #000; cursor: pointer; display: block; }
+.msg.media .mopen { border: 1px dashed var(--line); color: var(--text-dim); font: inherit; font-size: 11px; }
+.msg.media .mopen:hover { color: var(--spark); border-color: var(--spark); }
+@media (max-width: 440px) { .msg.media { padding: 8px; gap: 6px; } .msg.media .mgrid { gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(120px, 100%), 1fr)); } .msg.media .mbox { border-radius: 8px; } }
+@media (max-width: 290px) { .msg.media .mhead .dim { display: none; } .msg.media .mgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; } .msg.media .mlabel { font-size: 9px; } }

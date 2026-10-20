@@ -18,7 +18,7 @@ Install everything, library included — the panel reads the library from the re
    DNA*) and dock it: it reopens with After Effects, and a silent Startup script starts the bridge when AE opens. setup.py installs the panel **signed** (self-signed .zxp made on the
    machine), so no developer mode is needed. `--dev` installs a link to the clone instead and asks the person at the
    terminal before turning on Adobe's developer mode: never answer that prompt or set it yourself. For the Agent:
-   *Agent › Connect* (one sign-in for Claude; Figma comes from their Claude account connectors).
+   *Project › Connect* (the first tab; one sign-in for Claude; Figma comes from their Claude account connectors).
 4. With AE open and the panel docked, confirm the connection with the MCP tool `ae_status` (the panel header's MCP dot is green).
 5. To remove it: `python tools/setup.py --uninstall` (loaders, MCP registration, fonts; the clone stays).
 

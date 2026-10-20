@@ -38,18 +38,55 @@ function mdna_boot(extPath) {
 }
 
 // Claude connection: bridge running and minutes since its last answer
+// The bridge's tick can stop: AE silently drops scheduled tasks (seen after previews and long jobs), and a tick that
+// meets an open dialog ends its chain (tools/ss_bridge.jsx). It then looks "started" but never answers. Its poll leaves
+// a heartbeat (SS_BRIDGE_LAST); if it is older than 15 s the bridge is started again, and the status says so. This runs
+// from the panel (CEP evalScript), which waits quietly while a dialog is open instead of showing an error.
+function mdna_bridge_heal() {
+    if (!$.global.SS_BRIDGE_TASK || typeof $.global.SS_BRIDGE_POLL !== "function") return false;
+    var last = $.global.SS_BRIDGE_LAST || 0;
+    if (last && new Date().getTime() - last < 15000) return false;
+    if (!last) { $.global.SS_BRIDGE_LAST = new Date().getTime(); return false; }   // an older bridge without heartbeat: give it one round
+    $.global.SS_BRIDGE_ON = false;
+    try { app.cancelTask($.global.SS_BRIDGE_TASK); } catch (e) {}
+    $.global.SS_BRIDGE_TASK = null;
+    $.evalFile(new File($.global.SS_ROOT + "/tools/ss_bridge.jsx"));   // a fresh chain of ticks
+    $.global.SS_BRIDGE_HEALED = new Date().getTime();
+    return true;
+}
 function mdna_status() {
+    var healed = false; try { healed = mdna_bridge_heal(); } catch (e) {}
     var on = !!$.global.SS_BRIDGE_TASK, mins = -1;
     try {
         var fs = Folder($.global.SS_ROOT + "/bridge/outbox").getFiles("*.txt"), best = 0;
         for (var i = 0; i < fs.length; i++) if (fs[i].name.charAt(0) !== "_" && fs[i].modified && fs[i].modified.getTime() > best) best = fs[i].modified.getTime();
         if (best) mins = Math.round((new Date().getTime() - best) / 60000);
     } catch (e) {}
-    return mdna_json({ bridge: on, minutes: mins });
+    return mdna_json({ bridge: on, minutes: mins, healed: healed });
 }
 function mdna_connect() {
     try { if (!$.global.SS_BRIDGE_TASK) $.evalFile(new File($.global.SS_ROOT + "/tools/ss_bridge.jsx")); } catch (e) { return "ERR " + e.toString(); }
     return mdna_status();
+}
+// Reconnect from the panel (the MCP dot, or "reconnect" in the Agent chat) when the bridge looks started but stopped
+// answering: the timer is restarted, and requests waiting more than 30 s are answered as skipped instead of running
+// late (their caller already gave up, and running an old apply after a retry would apply it twice).
+function mdna_reconnect() {
+    var base = $.global.SS_ROOT + "/bridge/", now = new Date().getTime(), skipped = 0;
+    $.global.SS_BRIDGE_ON = false;
+    try { if ($.global.SS_BRIDGE_TASK) app.cancelTask($.global.SS_BRIDGE_TASK); } catch (e) {}
+    $.global.SS_BRIDGE_TASK = null;
+    try {
+        var jobs = Folder(base + "inbox").getFiles("*.jsx");
+        for (var i = 0; i < jobs.length; i++) {
+            if (now - jobs[i].modified.getTime() < 30000) continue;
+            var out = new File(base + "outbox/" + jobs[i].name.replace(/\.jsx$/, "") + ".txt");
+            out.encoding = "UTF-8"; out.open("w"); out.write("ERROR\nSkipped: After Effects was reconnected and this request had waited too long. Send it again."); out.close();
+            jobs[i].copy(base + "done/" + jobs[i].name); jobs[i].remove(); skipped++;
+        }
+        $.evalFile(new File($.global.SS_ROOT + "/tools/ss_bridge.jsx"));
+    } catch (e) { return mdna_json({ ok: false, error: e.toString() }); }
+    return mdna_json({ ok: !!$.global.SS_BRIDGE_TASK, skipped: skipped });
 }
 
 function mdna_layers() {

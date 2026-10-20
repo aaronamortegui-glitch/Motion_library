@@ -1,6 +1,6 @@
 // Motion DNA panel (CEP) — UI. Reads the library straight from the repo (library/*.json, thumbnails, GIFs) and asks
-// After Effects (host/host.jsx) only to apply or remove. Sections: Behaviors · Curves · Brands · Agent (agent.js), whose
-// Library holds the Styles and Techniques: guides the Agent applies to whole comps.
+// After Effects (host/host.jsx) only to apply or remove. Sections, left to right: Project (step 1: connections and the
+// project folder) · Behaviors · Curves · Brands · Agent (agent.js), whose Library holds the Styles and Techniques.
 "use strict";
 
 const $ = (sel, el = document) => el.querySelector(sel);
@@ -38,7 +38,7 @@ const store = {   // per-user conveniences (section, filters, favorites); the pa
 
 const S = {
   root: "", url: "", lib: [], recipes: [], tags: { presets: [], tones: [] }, tagOf: {}, packs: [], techniques: [],
-  sec: ({ styles: "agent", techniques: "agent" })[store.get("section", "behaviors")] || store.get("section", "behaviors"), cat: store.get("cat", "Moves"), sel: null, phase: "in",
+  sec: ({ styles: "agent", techniques: "agent" })[store.get("section", "project")] || store.get("section", "project"),   // first run: Project, step 1 cat: store.get("cat", "Moves"), sel: null, phase: "in",
   favs: new Set(store.get("favs", [])), filters: {},
 };
 // search / energy / tone belong to each section: a filter set in Behaviors must not hide brands or curves
@@ -111,21 +111,40 @@ async function status() {
   const last = s.minutes >= 0 && s.minutes <= 1 ? " · active now" : (s.minutes > 1 && s.minutes < 60 ? ` · last ${s.minutes} min ago` : "");
   pill.title = s.bridge ? "Claude connected through MCP" + last : "Claude offline: click to connect";
 }
+// The bridge can look started yet stop answering: the MCP dot (and "reconnect" in the Agent chat) restarts it from here,
+// with no Claude involved. Requests that waited too long are answered as skipped (host.jsx mdna_reconnect).
+async function reconnectAE() {
+  const r = parse(await call("mdna_reconnect"));
+  const msg = r.ok ? "After Effects reconnected" + (r.skipped ? ` · ${r.skipped} old request${r.skipped > 1 ? "s" : ""} skipped: send ${r.skipped > 1 ? "them" : "it"} again` : "") + "."
+    : "Could not reconnect: " + (r.error || "restart After Effects.");
+  toast(msg, !r.ok); status(); return { ok: !!r.ok, msg };
+}
 function header() {
-  $("#mcp").onclick = async () => { await call("mdna_connect"); status(); };
+  $("#mcp").onclick = () => reconnectAE();
   $("#visualizer").onclick = () => call("mdna_open", S.root + "/library/index.html");
   $("#help").onclick = () => alert("Motion DNA is connected to Claude through MCP.\n\nIn Claude Code, open the repo folder (" + (S.root || "the Motion DNA clone") +
     ").\nClaude can list presets, apply them and styles to your selected layers, add assets and render frames to check its work.\n\nTry: \"Apply the Elegant style to this comp and show me a frame.\"");
 }
 
 // ---------- sections ----------
+// Project is the first section. An installed index.html older than it lacks its tab and section: add them here, so a
+// panel updated through git shows it before setup.py reinstalls the page.
+const PROJECT_TAB = '<svg viewBox="0 0 24 24"><path d="M2.5 6.5A1.5 1.5 0 0 1 4 5h5l2 2.2h9A1.5 1.5 0 0 1 21.5 8.7V18a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 18z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 10.5v6M9 13.5h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Project</span>';
+function ensureProjectSection() {
+  if (!$("#sec-project")) $("#main").insertBefore(h("section", { id: "sec-project", class: "section", hidden: true }), $("#sec-behaviors"));
+  if (!$('#tabs button[data-sec="project"]')) {
+    const b = h("button", { "data-sec": "project", title: "Project: step 1. Connect Claude and your apps, and set up the project folder; then move left to right" });
+    b.innerHTML = PROJECT_TAB; $("#tabs").prepend(b);
+  }
+}
 function tabs() {
+  ensureProjectSection();
   for (const b of document.querySelectorAll("#tabs button")) b.onclick = () => { S.sec = b.dataset.sec; store.set("section", S.sec); showSection(); };
   showSection();
 }
 function showSection() {
   for (const b of document.querySelectorAll("#tabs button")) b.classList.toggle("on", b.dataset.sec === S.sec);
-  for (const s of document.querySelectorAll("#main > .section")) s.hidden = s.id !== "sec-" + S.sec;   // only the four sections, not the stacks inside them
+  for (const s of document.querySelectorAll("#main > .section")) s.hidden = s.id !== "sec-" + S.sec;   // only the five sections, not the stacks inside them
   $("#main").scrollTop = 0;
 }
 function renderAll() { behaviors(); curves(); brands(); if (typeof agent === "function") agent(); }
@@ -741,7 +760,7 @@ function kitClaude(x) {
     h("button", { class: "solid apply", onclick: () => { setActive(x.b.slug); brands.render(); } }, `Activate ${x.b.name}`));
   if (typeof ensureClaudeFolder === "function") ensureClaudeFolder(x.dir, "brand", x.b.name, x.b.slug);
   return h("div", { class: "stack" },
-    h("div", { class: "note", style: "padding:0" }, "Everything about this brand in one conversation: here (Agent) or in the Claude app. Each video of the brand gets its own (Agent › Project)."),
+    h("div", { class: "note", style: "padding:0" }, "Everything about this brand in one conversation: here (Agent) or in the Claude app. Each video of the brand gets its own (the Project tab)."),
     typeof conversationCard === "function" ? conversationCard() : null,
     h("button", { class: "btn", onclick: () => { S.sec = "agent"; store.set("section", "agent"); AG.tab = "chat"; store.set("agentTab", "chat"); showSection(); agent.render(); } }, "Go to the chat"),
     h("div", { class: "subhead" }, "Videos of this brand"), kitProjects(x));

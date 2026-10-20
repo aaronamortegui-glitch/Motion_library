@@ -56,6 +56,10 @@ function findClaude() {
     const pk = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local"), "Packages");
     for (const d of fs.readdirSync(pk)) if (/^Claude_/i.test(d)) bases.push(path.join(pk, d, "LocalCache", "Roaming", "Claude", "claude-code"));
   } catch (e) {}
+  try {   // newer desktop builds keep it in AppData\Local\Claude-Data\claude_<id>\claude-code
+    const cd = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local"), "Claude-Data");
+    for (const d of fs.readdirSync(cd)) if (/^claude_/i.test(d)) bases.push(path.join(cd, d, "claude-code"));
+  } catch (e) {}
   const cands = [];
   for (const base of bases) {
     try {
@@ -68,7 +72,8 @@ function findClaude() {
   const ver = (s) => s.split(".").map((n) => +n || 0);
   cands.sort((a, b) => { const x = ver(a.v), y = ver(b.v); for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return y[i] - x[i]; return 0; });
   if (cands.length) return cands[0].exe;
-  if (process.platform !== "win32") for (const p of [path.join(os.homedir(), ".local", "bin", "claude"), "/opt/homebrew/bin/claude", "/usr/local/bin/claude"]) if (fs.existsSync(p)) return p;
+  if (process.platform === "win32") { const p = path.join(os.homedir(), ".local", "bin", "claude.exe"); if (fs.existsSync(p)) return p; }   // the native installer, often not on PATH
+  else for (const p of [path.join(os.homedir(), ".local", "bin", "claude"), "/opt/homebrew/bin/claude", "/usr/local/bin/claude"]) if (fs.existsSync(p)) return p;
   return "claude";
 }
 // header dots for Claude and Figma: checked when the panel opens, every 10 minutes, and after Setup's Check again
@@ -91,7 +96,7 @@ async function connStatus() {
     missing: "Figma: not connected. Click to connect it.", unknown: "Figma: status unknown. Click to check." }[AG.figma]);
   if (AG.figma === "unknown") setDot("st-figma", null, "Figma: status unknown. Click to check.");
 }
-function openSetup() { S.sec = "agent"; store.set("section", "agent"); showSection(); if (agent.showSetup) agent.showSetup(); }
+function openSetup() { if (agent.showSetup) agent.showSetup(); }
 // Connectors the Agent can use, found in `claude mcp list` either from the Claude account ("claude.ai Krea"), a plugin
 // ("plugin:figma:figma") or added by hand ("krea"); each one connects with a browser Allow (`claude mcp login`).
 const SVC = { figma: { label: "Figma", url: "https://mcp.figma.com/mcp" }, krea: { label: "Krea", url: "https://api.krea.ai/mcp" }, flora: { label: "Flora", url: "https://agents.flora.ai/mcp" } };
@@ -200,8 +205,37 @@ async function contextBlock() {
   return lines.join("\n");
 }
 
-function saveLog() { store.set("agentLog", AG.log.slice(-200)); }
-function push(role, text, extra) { AG.log.push(Object.assign({ role, text }, extra || {})); saveLog(); if (agent.draw) agent.draw(); }
+// The chat shown in the panel belongs to the folder it works in (a project, a brand, or Motion DNA itself): switching
+// project shows that project's chat. A project or brand also keeps it on disk, in <folder>/claude/: agent-chat.md (what
+// was asked, answered and made, readable by anyone) and sessions/<id>.jsonl (Claude Code's full transcript), so the
+// conversation travels with the project's folder.
+function logKey() { const sc = typeof scope === "function" && S.root ? scope() : null; return sc && sc.kind !== "repo" ? "agentLog:" + sc.dir : "agentLog"; }
+function syncLog() { const k = logKey(); if (AG.logKey !== k) { AG.logKey = k; AG.log = store.get(k, []); } }
+function saveLog() { syncLog(); store.set(AG.logKey, AG.log.slice(-200)); }
+function push(role, text, extra) {
+  syncLog(); const m = Object.assign({ role, text }, extra || {});
+  AG.log.push(m); saveLog(); writeChat(m); if (agent.draw) agent.draw();
+}
+function writeChat(m) {   // the readable copy in the project's (or brand's) folder
+  const sc = scope(); if (sc.kind === "repo" || !nodeReq()) return;
+  try {
+    const fs = nodeReq()("fs"), path = nodeReq()("path"), file = path.join(sc.dir, "claude", "agent-chat.md");
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    if (!fs.existsSync(file)) fs.writeFileSync(file, `# ${sc.name} · Agent conversation\n\nWritten by the Motion DNA panel. The full transcript of each conversation is in sessions/.\n`);
+    const t = new Date().toISOString().replace("T", " ").slice(0, 16);
+    const line = { you: `\n## ${t} · Order\n\n${m.text}\n`, agent: `\n${m.text}\n`, step: `- ${m.text}\n`, error: `\n> Error: ${m.text}\n`, done: `\n*${m.text}*\n`,
+      rule: `\n> Rule proposed: ${m.text}\n`, media: `\n**${m.text}**\n\n${(m.items || []).map((x, i) => `- Output ${i + 1} (${x.kind}): ${x.src.startsWith("data:") ? "inline image" : x.src}`).join("\n")}\n` }[m.role];
+    if (line) fs.appendFileSync(file, line);
+  } catch (e) {}
+}
+function keepTranscript(id) {   // after each order: Claude Code's transcript copied next to the project
+  const sc = scope(); if (!id || sc.kind === "repo" || !nodeReq()) return;
+  try {
+    const fs = nodeReq()("fs"), path = nodeReq()("path"), src = sessionFile(id, sc.dir), dir = path.join(sc.dir, "claude", "sessions");
+    if (!fs.existsSync(src)) return;
+    fs.mkdirSync(dir, { recursive: true }); fs.copyFileSync(src, path.join(dir, id + ".jsonl"));
+  } catch (e) {}
+}
 
 // ---------- projects and conversations ----------
 // Where the agent works, and which conversation it continues: the open project (a video), else the active brand's own
@@ -355,6 +389,7 @@ async function runAgent(prompt) {
   delete env.ANTHROPIC_API_KEY;   // headless runs would bill the API key instead of the signed-in subscription
   const t0 = Date.now();
   let buf = "", gotResult = false;
+  AG.toolOf = {};
   AG.proc = cp.spawn(AG.exe, args, { cwd: cwdNow(), windowsHide: true, env });
   agent.draw();
   AG.proc.stdout.on("data", (d) => {
@@ -378,8 +413,10 @@ async function runAgent(prompt) {
             if (sp.text) push("agent", sp.text);
             for (const r of sp.rules) push("rule", r.rule, { rule: r, state: null });
           }
-          if (c.type === "tool_use") push("step", stepText(c));
+          if (c.type === "tool_use") { push("step", stepText(c)); AG.toolOf[c.id] = c.name; }
         }
+      } else if (m.type === "user" && m.message && Array.isArray(m.message.content)) {
+        for (const c of m.message.content) if (c.type === "tool_result") mediaFromResult(AG.toolOf[c.tool_use_id], c.content);
       } else if (m.type === "result") {
         gotResult = true;
         const secs = Math.round((m.duration_ms || Date.now() - t0) / 1000);
@@ -395,6 +432,7 @@ async function runAgent(prompt) {
   let err = "";
   AG.proc.stderr.on("data", (d) => { err += d.toString(); });
   AG.proc.on("close", (code) => {
+    keepTranscript(sid);
     AG.proc = null;
     if (AG.afterRun) { const f = AG.afterRun; AG.afterRun = null; if (gotResult) setTimeout(f, 300); }
     if (!gotResult) push("error", code === null ? "Stopped." : (err.trim().split("\n").slice(-3).join(" ") || `Claude Code exited (${code}).`));
@@ -408,6 +446,61 @@ function stepText(c) {
   const hint = i.preset || i.name || i.file_path || i.path || i.url || i.command || i.pattern || "";
   return n + (hint ? " · " + String(hint).slice(0, 80) : "");
 }
+// ---------- previews of what Flora, Krea and Motion DNA make ----------
+// Every result of a Flora or Krea tool (and Motion DNA's renders, downloads and imports) is read for images and clips:
+// links to media files or to the services' media hosts, and local files. Each new batch becomes a card in the chat,
+// like Flora's own widget in the Claude app: the outputs side by side, a click opens one full size.
+const MEDIA_TOOL = /flora|krea|motion-dna__(render_frame|render_comp|flora_download|flora_swap|import_media|add_asset)/i;
+const MEDIA_HOST = /(^|\.)(flora\.ai|imagekit\.io|krea\.ai|cloudfront\.net|amazonaws\.com|googleapis\.com|r2\.cloudflarestorage\.com|supabase\.co)$/i;
+const VIDEO_EXT = /\.(mp4|webm|mov|m4v)$/i, IMAGE_EXT = /\.(png|jpe?g|webp|gif|avif)$/i;
+function mediaService(tool) { return /krea/i.test(tool) ? "Krea" : /flora/i.test(tool) && !/motion-dna/.test(tool) ? "Flora" : "Motion DNA"; }
+function mediaFromResult(tool, content) {
+  if (!tool || !MEDIA_TOOL.test(tool)) return;
+  const text = typeof content === "string" ? content : (content || []).map((x) => x.type === "text" ? x.text : "").join("\n");
+  const seen = new Set(AG.log.filter((m) => m.role === "media").flatMap((m) => m.items.map((x) => x.src)));
+  const items = [], add = (src, kind, local) => { if (!seen.has(src) && !items.some((x) => x.src === src)) items.push({ src, kind, local }); };
+  for (let u of text.match(/https:\/\/[^\s"'<>\\)\]]+/g) || []) {
+    u = u.replace(/[.,;]+$/, "");
+    let host = "", path = "";
+    try { const x = new URL(u); host = x.hostname; path = x.pathname; } catch (e) { continue; }
+    const kind = VIDEO_EXT.test(path) ? "video" : IMAGE_EXT.test(path) ? "image" : MEDIA_HOST.test(host) && !/\/api\/|\/mcp/.test(path) ? "unknown" : null;
+    if (kind) add(u, kind, false);
+  }
+  for (const f of text.match(/(?<![A-Za-z])[A-Za-z]:[\\/](?![\\/])[^"'\n<>|*?]+?\.(png|jpe?g|webp|gif|mp4|webm|mov)\b/gi) || [])   // C:\…, never the s:// of https://
+    add(f.replace(/\\/g, "/"), VIDEO_EXT.test(f) ? "video" : "image", true);
+  // pictures the tool returned inline (a Motion DNA frame): small ones only, the log is kept in the panel's storage
+  for (const x of Array.isArray(content) ? content : []) if (x.type === "image" && x.source && x.source.data && x.source.data.length < 400000)
+    add(`data:${x.source.media_type || "image/png"};base64,${x.source.data}`, "image", false);
+  if (!items.length) return;
+  const svc = mediaService(tool), name = tool.replace(/^mcp__[^_]+(_[^_]+)*?__/, "").replace(/^(flora|krea)_/, "");
+  push("media", `${svc} · ${name}`, { items: items.slice(0, 12), svc });
+}
+function openMedia(it) { if (it.local) call("mdna_open", it.src); else if (/^https:/.test(it.src)) openUrl(it.src); }
+function mediaCard(m) {
+  const tile = (it, i) => {
+    const label = h("div", { class: "mlabel" }, (it.kind === "video" ? "▶ " : "") + "Output " + (i + 1));
+    const src = it.local ? fileUrl(it.src) : it.src;
+    const fallback = () => h("button", { class: "mbox mopen", title: "Open it full size", onclick: () => openMedia(it) }, it.kind === "video" ? "Video · open" : "Open");
+    let el;
+    if (it.kind === "video") {
+      el = h("video", { class: "mbox", src, muted: true, loop: true, playsinline: true, preload: "metadata", title: "Click to play · double-click to open full size" });
+      el.muted = true;
+      el.addEventListener("click", () => (el.paused ? el.play() : el.pause()));
+      el.addEventListener("dblclick", () => openMedia(it));
+      el.addEventListener("error", () => el.replaceWith(fallback()));   // a codec After Effects' browser can't play
+    } else {
+      el = h("img", { class: "mbox", src, alt: "", loading: "lazy", title: "Click to open full size", onclick: () => openMedia(it) });
+      el.addEventListener("error", () => {   // a media link with no extension may be a clip
+        if (it.kind === "unknown") { it.kind = "video"; el.replaceWith(tile(it, i).lastChild); } else el.replaceWith(fallback());
+      });
+    }
+    return h("div", { class: "mtile" }, label, el);
+  };
+  return h("div", { class: "msg media" },
+    h("div", { class: "mhead" }, h("b", {}, m.svc || "Media"), h("span", { class: "dim" }, m.text.replace(/^[^·]+·\s*/, "")),
+      h("span", { class: "mcount" }, `${m.items.length} output${m.items.length > 1 ? "s" : ""}`)),
+    h("div", { class: "mgrid" }, ...m.items.map(tile)));
+}
 function stopAgent() { if (AG.proc) { try { AG.proc.kill(); } catch (e) {} } }
 
 // a review note the agent turned into a rule: the user picks where it lives
@@ -417,7 +510,7 @@ async function keepRule(m, where) {
     const x = brandOf(activeSlug()); if (!x) return toast("Activate a brand first (Brands › open one › Activate).", true);
     x.b.rules.push(Object.assign({ id: x.b.rules.reduce((a, q) => Math.max(a, q.id || 0), 0) + 1 }, r)); await saveBrand(x); toast(`Saved to ${x.b.name}'s rules.`);
   } else if (where === "project") {
-    if (!PJ) return toast("Open or create a project first (Agent › Project).", true);
+    if (!PJ) return toast("Open or create a project first (Project, the first tab).", true);
     PJ.p.rules.push(Object.assign({ id: PJ.p.rules.reduce((a, q) => Math.max(a, q.id || 0), 0) + 1 }, r)); await saveProjectQuiet(); toast(`Saved to ${PJ.p.name}'s rules.`);
   } else if (where === "general") {
     const order = `Add this as a general rule for every brand to CONTRIBUTING.md §9 (and to tools/check_layout.jsx if it can be checked automatically): "${r.rule}" (${r.category}; why: ${r.why || "review note"}).`;
@@ -442,22 +535,20 @@ function agent() {
     const modeSeg = h("div", { class: "seg small" }, ...[["safe", "Safe"], ["full", "Full"]].map(([k, l]) => h("button", {
       class: AG.mode === k ? "on" : "", title: k === "safe" ? "Only the Motion DNA tools (apply, layers, frames)" : "Also Figma, Krea, Flora, files and scripts (asks before paid generations; never commits or pushes)",
       onclick: () => { AG.mode = k; store.set("agentMode", k); render(); } }, l)));
-    const setup = h("div", { class: "card-box setup", hidden: true });
-    const tabsEl = h("div", { class: "seg agent-tabs" }, ...[["chat", "Chat"], ["library", "Library"], ["project", "Project"]].map(([k, l]) =>
-      h("button", { class: AG.tab === k ? "on" : "", onclick: () => { AG.tab = k; store.set("agentTab", k); render(); } }, l)));
-    const where = h("button", { class: "projchip btn ghost", style: "text-align:left;padding:0", title: "Agent › Project", onclick: () => { AG.tab = "project"; store.set("agentTab", "project"); render(); } },
+    if (AG.tab === "project") AG.tab = "chat";   // Project is its own section now (the first tab)
+    const tabsEl = h("div", { class: "seg agent-tabs" }, ...[["chat", "Chat"], ["library", "Library"]].map(([k, l]) =>
+      h("button", { class: AG.tab === k ? "on" : "", onclick: () => { AG.tab = k; store.set("agentTab", k); AG.libSel = null; render(); } }, l)));
+    const where = h("button", { class: "projchip btn ghost", style: "text-align:left;padding:0", title: "Open the Project section", onclick: () => goSection("project") },
       scopeText());
     sec.append(h("div", { class: "kit-top" }, h("span", { class: "kit-title" }, "Agent"), modeSeg,
-      h("button", { class: "btn" + (AG.logged === false ? " on" : ""), title: "Connect Claude (and Figma)", onclick: () => agent.showSetup() }, AG.logged === false ? "Connect" : "Setup")), setup, tabsEl, where);
-    agent.setupEl = setup;
+      h("button", { class: "btn" + (AG.logged === false ? " on" : ""), title: "Connect Claude and your apps (Project section)", onclick: () => agent.showSetup() }, AG.logged === false ? "Connect" : "Setup")), tabsEl, where);
     if (AG.tab === "library") sec.append(libraryView());
-    else if (AG.tab === "project") sec.append(projectView());
     else sec.append(chatView());
-    agent.showSetup = () => showSetup(setup);
-    if (AG.logged === false) showSetup(setup);
   };
-  agent.render = render;
-  render();
+  // Connect lives in the Project section: every "Connect" / "Setup" goes there with it open
+  agent.showSetup = () => { AG.connectOpen = true; goSection("project"); projectSection(); };
+  agent.render = () => { render(); projectSection(); };
+  agent.render();
   authStatus().then((ok) => { const was = AG.logged; AG.logged = ok; if (was !== ok) render(); });
   loadProject(); setInterval(loadProject, 15000);
 }
@@ -465,11 +556,18 @@ function agent() {
 function chatView() {
   const wrap = h("div", { class: "stack" });
   const logEl = h("div", { class: "agent-log" });
-  const input = h("textarea", { class: "field agent-input", rows: 6, placeholder: "Tell the agent what to do, e.g. \"Animate the selected layers in the brand's style\".\nCtrl+Enter sends." });
+  const PLACEHOLDER = "Tell the agent what to do, e.g. \"Animate the selected layers in the brand's style\".\nCtrl+Enter sends.";
+  const input = h("textarea", { class: "field agent-input", rows: 6, placeholder: PLACEHOLDER });
   if (AG.pending) { input.value = AG.pending; AG.pending = null; setTimeout(() => input.focus()); }
   const send = h("button", { class: "solid apply", onclick: () => go() }, "Send");
   const stop = h("button", { class: "solid remove", onclick: stopAgent }, "Stop");
-  const go = () => { const v = input.value.trim(); if (!v || AG.proc) return; input.value = ""; runAgent(v); };
+  const go = async () => {
+    const v = input.value.trim(); if (!v) return;
+    if (/^\/?(reconnect|reconectar)[.!]?$/i.test(v)) {   // handled here, not by Claude: works even while an order is stuck
+      input.value = ""; push("you", v); const r = await reconnectAE(); push(r.ok ? "done" : "error", r.msg); return;
+    }
+    if (AG.proc) return; input.value = ""; runAgent(v);
+  };
   input.addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); go(); } });
   const chip = (key, label) => h("button", { class: "chip" + (AG.ctx[key] ? " on" : ""), title: `Send the ${label.toLowerCase()} with the order`,
     onclick: (e) => { AG.ctx[key] = !AG.ctx[key]; store.set("agentCtx", AG.ctx); e.currentTarget.classList.toggle("on", AG.ctx[key]); } }, label);
@@ -490,12 +588,16 @@ function chatView() {
           h("button", { class: "chip ghost", onclick: () => { m.state = "dismissed"; saveLog(); agent.draw(); } }, "Dismiss")));
   };
   agent.draw = () => {
+    syncLog();   // the chat of the folder the agent works in now
     logEl.hidden = !AG.log.length && !AG.proc;   // no empty box: the conversation appears with the first order
     templates.hidden = AG.log.length > 0;
+    input.placeholder = AG.log.some((m) => m.role === "you") ? "" : PLACEHOLDER;   // the example goes once the conversation starts
     wrap.classList.toggle("talking", AG.log.length > 0);   // during a conversation the log gets the room, the field shrinks
     logEl.replaceChildren(...AG.log.map((m) =>
-      m.role === "rule" ? ruleCard(m) : h("div", { class: "msg " + m.role }, m.role === "step" ? "▸ " + m.text : m.text)));
-    if (AG.proc) logEl.append(h("div", { class: "msg working" }, h("i", { class: "spin" }), "Working…"));
+      m.role === "rule" ? ruleCard(m) : m.role === "media" ? mediaCard(m) : h("div", { class: "msg " + m.role }, m.role === "step" ? "▸ " + m.text : m.text)));
+    if (AG.proc) logEl.append(h("div", { class: "msg working" }, h("i", { class: "spin" }), "Working…",
+      h("button", { class: "chip ghost", title: "After Effects not answering? Restart the bridge (or type reconnect)", style: "margin-left:auto",
+        onclick: async () => { const r = await reconnectAE(); push(r.ok ? "hint" : "error", r.msg); } }, "Reconnect AE")));
     logEl.scrollTop = logEl.scrollHeight;
     send.hidden = !!AG.proc; stop.hidden = !AG.proc; input.disabled = !!AG.proc || AG.logged === false;
   };
@@ -526,13 +628,26 @@ function libItems() {
     });
     return Object.assign({}, variants[0], { key: "kit/" + f.name, name: f.name, sub: f.category + " · " + (variants.length > 1 ? variants.length + " variants" : "1 piece"), family: f.desc, variants });
   });
+  if (AG.libKind === "styles") return S.packs.filter((pk) => !q || (pk.name + " " + pk.desc + " " + (pk.tones || []).join(" ")).toLowerCase().includes(q)).map((pk) => ({
+    key: "style/" + pk.name, name: pk.name, sub: `${pk.energy}${pk.energy_range ? " " + pk.energy_range.join("–") : ""}`, desc: pk.desc,
+    thumb: asset(`library/packs/${pk.slug}_md.png`), img: asset(`library/packs/${pk.slug}.gif`),
+    order: `Animate the selected layers (every layer of the open comp if none are selected) in the ${pk.name} style (${pk.desc.replace(/\.$/, "")}). Layers that already move keep their animation and get the style's curve and timing; the others get the move of their role. Then render a frame and tell me what you did.` }));
   return S.techniques.filter((t) => !q || (t.name + " " + t.what).toLowerCase().includes(q)).map((t) => {
     const s = slug(t.name);
     return { key: "technique/" + t.name, name: t.name, sub: "technique", desc: t.what, how: t.how,
-      thumb: asset(`library/techniques/${s}_card.png`), fallback: asset(`library/techniques/${s}_md.png`), img: asset(`library/techniques/${s}_md.png`),
+      thumb: asset(`library/techniques/${s}_card.png`), fallback: asset(`library/techniques/${s}_md.png`), img: asset(`library/techniques/${s}.png`),   // the detail shows the 480 px frame
       order: `${t.ask} Use the Motion DNA technique "${t.name}"${t.tool ? ` (MCP tool: ${t.tool})` : ""}. If the layers already have animation, build on it instead of replacing it.` };
   });
 }
+// The big preview opens only on a click: leaving the Library (another section, or Chat) closes it, and it stays closed
+// when you come back until you pick a card again.
+function closeLibPreview() {
+  AG.libSel = null;
+  for (const d of document.querySelectorAll("#sec-agent .lib-detail")) d.hidden = true;
+  for (const c of document.querySelectorAll("#sec-agent .lib-grid .card.sel")) c.classList.remove("sel");
+}
+document.addEventListener("click", (e) => { const b = e.target.closest("#tabs button"); if (b && b.dataset.sec !== "agent") closeLibPreview(); }, true);
+
 function libraryView() {
   const wrap = h("div", { class: "stack" });
   const detail = h("div", { class: "lib-detail", hidden: true }), grid = h("div", { class: "lib-grid" });
@@ -552,11 +667,13 @@ function libraryView() {
         h("button", { class: "btn", title: "Copy the order (for Claude Code or the Claude app)", onclick: () => { navigator.clipboard.writeText(v.order); toast("Order copied."); } }, "Copy order"))));
     for (const c of grid.children) c.classList.toggle("sel", c.dataset.key === it.key);
   };
+  const energyNote = h("div", { class: "note dim", style: "padding:0" }, "The numbers under each style are its energy: 1 calm · 2 soft · 3 medium · 4 dynamic · 5 explosive. \"Dynamic 4–5\" moves between 4 and 5.");
   const draw = () => {
+    energyNote.hidden = AG.libKind !== "styles";
     const items = libItems();
     grid.replaceChildren(...items.map((it) => {
       const img = safeImg([it.thumb, it.fallback], it.name, { loading: "lazy" });
-      const c = h("button", { class: "card" + (AG.libSel === it.key ? " sel" : ""), title: it.desc }, h("span", { class: "thumb" }, img), AG.libKind !== "techniques" ? h("span", { class: "label" }, it.name) : null, h("span", { class: "label dim" }, it.sub));
+      const c = h("button", { class: "card" + (AG.libSel === it.key ? " sel" : ""), title: it.desc }, h("span", { class: "thumb" }, img), h("span", { class: "label" }, it.name), AG.libKind !== "techniques" ? h("span", { class: "label dim" }, it.sub) : null);   // a technique's card says its name; "technique" under each one says nothing
       c.dataset.key = it.key;
       if (AG.libKind !== "techniques") hoverPlay(c, img, it.img);
       c.onclick = () => show(it);
@@ -565,15 +682,40 @@ function libraryView() {
     const sel = items.find((x) => x.key === AG.libSel); if (sel) show(sel); else detail.hidden = true;
   };
   const kind = h("div", { class: "seg" }, ...[["styles", "Styles"], ["techniques", "Techniques"], ["kit", "Kit"]].map(([k, l]) => h("button", { class: AG.libKind === k ? "on" : "",
-    onclick: (e) => { AG.libKind = k; store.set("agentLib", k); for (const b of kind.children) b.classList.toggle("on", b === e.currentTarget); draw(); } }, l)));
+    onclick: (e) => { AG.libKind = k; store.set("agentLib", k); AG.libSel = null; for (const b of kind.children) b.classList.toggle("on", b === e.currentTarget); draw(); } }, l)));
   const search = h("input", { class: "field", type: "search", placeholder: "Search styles, techniques and the kit", value: AG.libQ, oninput: (e) => { AG.libQ = e.target.value.toLowerCase(); draw(); } });
   wrap.append(kind, h("div", { class: "note", style: "padding:0" }, "A guide to what the agent can do for you: pick one, read what it does, then send its order to the agent (or copy it into Claude Code). The agent applies it to your comps."),
-    search, detail, grid);
+    energyNote, search, detail, grid);
   draw();
   return wrap;
 }
 
 // ---------- Project: a folder per piece, with its brand and its conversation ----------
+// ---------- Project: the first section (step 1) ----------
+// Set up once, then move left to right: 1 connect Claude and the apps, 2 the project folder (brief, footage, AE file,
+// renders, its conversation and rules). Then Behaviors, Curves, Brands and the Agent.
+function goSection(sec) { S.sec = sec; store.set("section", sec); showSection(); }
+function projectSection() {
+  const sec = $("#sec-project"); if (!sec) return;
+  const connected = AG.logged === true;
+  const connBox = h("div", { class: "card-box setup" });
+  const conn = h("details", { class: "controls step" },
+    h("summary", {}, h("span", { class: "stepn" }, "1"), "Connect Claude and your apps",
+      h("span", { class: "fsum" }, AG.logged === true ? "Claude connected" : AG.logged === false ? "Claude not connected" : "checking…")), connBox);
+  conn.open = AG.connectOpen || AG.logged === false;
+  conn.addEventListener("toggle", () => { AG.connectOpen = conn.open; if (conn.open && AG.node) showSetup(connBox); });
+  if (AG.node) { if (conn.open) showSetup(connBox); }
+  else connBox.append(h("span", { class: "dim" }, IN_AE ? "Node.js is not enabled in this panel yet: close and reopen the panel." : "Connecting runs inside After Effects."));
+  const proj = h("details", { class: "controls step" },
+    h("summary", {}, h("span", { class: "stepn" }, "2"), "Project folder", h("span", { class: "fsum" }, PJ ? PJ.p.name : "none yet")), projectView());
+  proj.open = AG.projOpen !== undefined ? AG.projOpen : connected;
+  proj.addEventListener("toggle", () => { AG.projOpen = proj.open; });
+  sec.replaceChildren(
+    h("div", { class: "kit-top" }, h("span", { class: "kit-title" }, "Project"), h("span", { class: "dim" }, "Step 1: set up, then move left to right")),
+    conn, proj,
+    h("div", { class: "crow" }, h("button", { class: "btn", title: "Next: animate with the presets", onclick: () => goSection("behaviors") }, "Next: Behaviors →")));
+}
+
 function projectView() {
   const wrap = h("div", { class: "stack" });
   if (!PJ) {
@@ -774,7 +916,7 @@ function showSetup(setup) {
   const runCmd = () => process.platform === "win32" ? `& "${AG.exe}"` : `"${AG.exe}"`;   // PowerShell needs & before a quoted path
   const cmdRow = (cmd) => h("div", { class: "cmdrow" }, h("code", { class: "cmd" }, cmd),
     h("button", { class: "btn", onclick: () => { navigator.clipboard && navigator.clipboard.writeText(cmd); toast("Copied: paste it in " + (process.platform === "win32" ? "PowerShell." : "Terminal.")); } }, "Copy"));
-  const close = h("button", { class: "btn ghost", title: "Close", onclick: () => (setup.hidden = true) }, "✕");
+  const close = setup.closest("#sec-project") ? null : h("button", { class: "btn ghost", title: "Close", onclick: () => (setup.hidden = true) }, "✕");
   const redraw = () => showSetup(setup);
   const step = (ok, title, body) => h("div", { class: "conn" + (ok ? " ok" : "") }, h("div", { class: "conn-head" }, h("i", { class: "sdot " + (ok ? "ok" : "") }), h("b", {}, title)), ...kids(body));
 

@@ -27,7 +27,7 @@ beauty, kitchen and cars.
    Network*.
 3. Restart After Effects and open **Window › Extensions › Motion DNA**. You can also use *File › Scripts › Motion DNA*.
    Dock it next to Effects & Presets: it then comes back every time After Effects starts.
-4. Go to **Agent › Connect** and sign in to Claude once. Figma, Krea and Flora are one button and an Allow each (or come from
+4. Go to **Project › Connect** (the first tab) and sign in to Claude once. Figma, Krea and Flora are one button and an Allow each (or come from
    the connectors of your Claude account); Codex can get the same tools; **Update** there pulls new versions.
 
 > **Tip:** after `git pull`, close and reopen the panel to see the new version. You don't need to reinstall: the panel
@@ -41,14 +41,15 @@ The header shows three status dots:
 
 Green means ready. Click a dot to fix it. In a narrow dock only the dots show; hover a dot to see its name.
 
-The four tabs at the bottom:
+The five tabs at the bottom, used left to right:
 
 | Tab | What it is for |
 |---|---|
+| **Project** | Step 1: connect Claude and your apps, and set up the project folder (brief, footage, AE file, renders, its conversation and rules). |
 | **Behaviors** | 80 moves, text animations, loops, transitions and recipes. Hover a card to watch it move. |
 | **Curves** | The easing library and an editor, for the keys or layers you select. |
 | **Brands** | Each client's motion guidelines: style, curves, timing and the rules learned in reviews. |
-| **Agent** | Ask Claude in plain words. Its Library holds the Styles and Techniques; Project holds the folder and the conversation. |
+| **Agent** | Ask Claude in plain words. Its Library holds the Styles, Techniques and the Kit. |
 
 ## Behaviors: animate layers
 1. Choose a type: Moves, Classics, Text, Loops, Transitions, Recipes or ★ Favorites.
@@ -185,7 +186,7 @@ Each one was tested end to end (use cases UC12–UC19). The Agent knows the tool
 | **Cut on the voice** | `python tools/vo_words.py vo.mp3 words.json`, cuts two frames before each phrase | Whisper can mishear brand names: check them before you cut on them |
 
 ## Projects: one folder and one conversation per piece
-Agent › Project › **New project**:
+**Project** (the first tab) › 2 Project folder › **New project**:
 - name it, pick where, and choose its brand;
 - tick the folders: `01_brief` … `07_exports`, `claude`;
 - optionally save the open After Effects project in it.
@@ -259,7 +260,7 @@ Recipes that worked in the tests:
 | "Waiting for After Effects…" | After Effects is still starting. It retries for a minute; F5 retries too. |
 | The MCP dot is red | Open the panel once: it starts the bridge. Check the scripting preference in Install step 2. |
 | A card shows "no preview" | Its image is missing. Run `python tools/check_previews.py`, which says how to make it. |
-| The agent asks you to connect | Agent › Connect: your Claude sign-in expired. |
+| The agent asks you to connect | Project › Connect: your Claude sign-in expired. |
 | Fonts look substituted | Restart After Effects after `setup.py` installs the fonts. `check_layout` stops when fonts are substituted. |
 
 More pitfalls, each with its cause and fix: [docs/LEARNINGS.md](LEARNINGS.md).

@@ -36,7 +36,7 @@ Restart After Effects › *Window › Extensions › Motion DNA*, and dock it: i
 
 ## 6. Connect: Claude, Figma, Krea or Flora
 With the accounts you already have, each one is a button and an **Allow** in your browser:
-- **Claude:** in the panel, *Agent › Connect › Connect Claude*, sign in once. The **MCP** and **Claude** dots turn green.
+- **Claude:** in the panel, *Project › Connect › Connect Claude*, sign in once. The **MCP** and **Claude** dots turn green.
 - **Figma** (optional): *Connect Figma* in the same sheet, then **Allow** in the Figma page that opens.
 - **Flora / Krea** (optional, to generate images and video): claude.ai › *Settings › Connectors* › Flora or Krea ›
   **Connect**, then **Allow**. In Claude Code you can also ask: *"connect Krea as an MCP"* (it runs
@@ -45,7 +45,7 @@ With the accounts you already have, each one is a button and an **Allow** in you
 ## 7. Ask
 Select a layer and tell the Agent what you want, e.g. *"Animate the selected title with Land"*.
 
-**Update:** *Agent › Connect › Update* in the panel (it shows "Update available (N new)" when GitHub has new commits),
+**Update:** *Project › Connect › Update* in the panel (it shows "Update available (N new)" when GitHub has new commits),
 or ask Claude *"update Motion DNA"*. Both run `python tools/setup.py --update`, which never touches your local changes;
 then *Reload panel*. **Codex** (optional): the same sheet signs you in to Codex and adds the Motion DNA tools to it.
 **Remove:** `python tools/setup.py --uninstall` (your clone stays).
