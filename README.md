@@ -29,6 +29,10 @@ animate keeps a profile that **learns from each review**, and everything it make
 
 - **Project comes first:** a new first tab, left of Behaviors. Step 1 connects Claude and your apps (Figma, Krea, Flora,
   Codex, Update); step 2 sets up the project folder. Then you move left to right: Behaviors, Curves, Brands, Agent.
+- **Mark AI video in Figma:** name a layer `AI · …` in Figma (any text after it is a hint for the prompt) and, when
+  the Agent brings the frame into After Effects, that layer arrives as a placeholder marked for AI video, with the
+  Flora label colour. The mark lives in the layer, so it travels with the project. Try *Figma → AE, mark AI* in the
+  chat. For now the marks only record which layers become AI video; nothing is sent to Flora from them yet.
 - **See what Flora and Krea make, in the chat:** every image or clip a generation returns shows up as a card with the
   outputs side by side (click to open full size), like Flora's widget in the Claude app. Motion DNA's own check frames
   show the same way.
@@ -120,7 +124,8 @@ seconds, the references that keep characters and style consistent), quotes the c
 generator has one) and **waits for your yes**. Then it generates with Krea or Flora, brings each result into After
 Effects with `import_media` (saved in a `generated` folder next to the project), places it and checks it with
 `render_frame`. Figma works the same way in both directions: frames and layers come in through the Figma tools, and
-the Agent can build in Figma from what is in the comp. Account actions stay yours: the Agent can never create or revoke
+the Agent can build in Figma from what is in the comp. Layers you name `AI · …` in Figma arrive marked as placeholders
+for AI video (`flora_mark`): the Agent animates everything else and tells you which layers it marked. Account actions stay yours: the Agent can never create or revoke
 API tokens, start trials, train LoRAs, share projects or delete anything in Krea or Flora. Safe mode uses only the
 Motion DNA tools.
 
