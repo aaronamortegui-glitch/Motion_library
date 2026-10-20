@@ -38,7 +38,8 @@ const store = {   // per-user conveniences (section, filters, favorites); the pa
 
 const S = {
   root: "", url: "", lib: [], recipes: [], tags: { presets: [], tones: [] }, tagOf: {}, packs: [], techniques: [],
-  sec: ({ styles: "agent", techniques: "agent" })[store.get("section", "project")] || store.get("section", "project"),   // first run: Project, step 1 cat: store.get("cat", "Moves"), sel: null, phase: "in",
+  sec: ({ styles: "agent", techniques: "agent" })[store.get("section", "project")] || store.get("section", "project"),   // first run: Project, step 1
+  cat: store.get("cat", "Moves"), sel: null, phase: "in",
   favs: new Set(store.get("favs", [])), filters: {},
 };
 // search / energy / tone belong to each section: a filter set in Behaviors must not hide brands or curves
