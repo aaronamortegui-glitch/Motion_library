@@ -881,6 +881,18 @@ return "imported " + it.name + " as layer " + L.index + " in " + c.name + " at "
     return ("saved " if src.lower().startswith("http") else "file ") + path.as_posix() + "\n" + run_jsx(COMP_JS + body, includes=())
 
 
+FLORA_JS = f'if (typeof mdna_flora_list !== "function") $.evalFile(new File({json.dumps((ROOT / "panel/host/host.jsx").as_posix())}));\n'
+
+
+def t_flora_queue():
+    return run_jsx(FLORA_JS + "return mdna_flora_list();", includes=())
+
+
+def t_flora_mark(layers=None, prompt=None, model=None, duration=None, status=None):
+    a = {k: v for k, v in {"names": layers, "prompt": prompt, "model": model, "duration": duration, "status": status}.items() if v is not None}
+    return run_jsx(FLORA_JS + f"return mdna_flora_mark({js(json.dumps(a))});", includes=())
+
+
 def t_run_jsx(code, timeout_s=180):
     return run_jsx(code, timeout=timeout_s)
 
@@ -1004,6 +1016,9 @@ TOOLS_DEF = [
       "name": {"type": "string", "description": "file and item name"}, "fit": {"type": "boolean"}, "layer": {"type": "boolean"}}, ["source"]),
     ("run_jsx", t_run_jsx, "Advanced: run ExtendScript in AE with the library loaded (SSM, SSP, SSA available). The code is a function body: use `return` for the result.",
      {"code": {"type": "string"}, "timeout_s": {"type": "number"}}, ["code"]),
+    ("flora_queue", t_flora_queue, "The Flora queue of the active comp: every layer marked as AI video, with its id, name, optional prompt/model notes, duration (s), status (suggested | marked | in flora | done | failed), Flora job (canvas/node), generated clip, source image file and placeholder size and timing. Only layers in this queue go to Flora.", {}),
+    ("flora_mark", t_flora_mark, "Mark layers as AI video for Flora (by name, or the selected layers): sets the Flora label colour and stores the shot in the layer. Figma layers named 'AI · …' are the ones to mark (any text after it is a hint for the prompt). New layers are 'marked'. For now the marks only record which layers become AI video: nothing is sent to Flora from here. Use status 'suggested' for layers you propose yourself (the user ticks them before anything is sent).",
+     {"layers": {"type": "array", "items": {"type": "string"}}, "prompt": {"type": "string"}, "model": {"type": "string"}, "duration": {"type": "number"}, "status": {"type": "string"}}),
 ]
 
 

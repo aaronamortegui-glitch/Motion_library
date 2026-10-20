@@ -158,11 +158,15 @@ const NEVER = ["Bash(git commit:*)", "Bash(git push:*)", "Bash(git reset:*)", "B
 
 const TEMPLATES = [
   ["Figma → animate", "Take the frames from this Figma file: <paste URL>. Import their assets into After Effects as editable layers and animate them in the <style> style. Render a few check frames and tell me what you built."],
+  ["Figma → AE, mark AI", "Take the frames from this Figma file: <paste URL>. Import their assets into After Effects as editable layers and animate them in the <style> style. The layers named \"AI · …\" in Figma become AI video: mark them for Flora and leave them as placeholders. Render a few check frames and tell me which layers you marked."],
   ["Brand this comp", "Animate the open comp in the active brand's style: use its curves and timing benchmarks, follow its rules, then render a frame to check."],
   ["Review vs brand", "Review the open comp against the active brand's rules and timing. List what breaks them, without changing anything."],
   ["Explain selection", "Describe the animation on the selected layers: properties, durations in frames, curves, and which Motion DNA preset or curve is closest."],
 ];
 const EXISTING_ASK = "If a layer I point to already has animation, modify it (keep its keyframe values; change timing, curves and style) unless I say replace; if it has none, create it.";
+// AI video marked in Figma: a layer named "AI · …" there becomes a placeholder in the comp, marked in its layer
+// (comment + Flora label colour, host.jsx mdna_flora_*), so the mark travels with the project.
+const FLORA_ASK = "AI video marked in Figma: layers named \"AI · …\" there (any text after it is a hint for the prompt) are placeholders for AI video. After importing from Figma, mark them with flora_mark (status \"marked\") and leave them as placeholders; type, backgrounds, shaders and shapes are never AI: animate them with keyframes. For now nothing is sent to Flora from the marks: say which layers you marked.";
 const RULE_ASK = "When I give you a review note or a correction, apply it, then end your reply with one line per note in exactly this form: " +
   "RULE: <category> | <one instruction anyone can follow without context> | <why, in a few words>. Categories: layout, typography, motion, " +
   "effects, color, audio, edit, process. Do not save rules yourself: the panel asks me where to keep them.";
@@ -195,13 +199,14 @@ async function contextBlock() {
     const on = ["krea", "flora"].filter((n) => AG.svc[n] === "connected").map((n) => SVC[n].label);
     const unsure = ["krea", "flora"].some((n) => AG.svc[n] == null || AG.svc[n] === "unknown");
     lines.push((on.length ? `Generators connected: ${on.join(", ")}.` : unsure ? "Generator status unknown: if Krea or Flora tools are available, use them."
-      : "No generator is connected (Krea or Flora: Agent › Connect).") +
+      : "No generator is connected (Krea or Flora: Project › Connect).") +
       " When the order needs footage, stills, textures or audio that the library and list_assets do not have: list the assets the video needs" +
       " (what, size and fps of the comp, seconds, which references keep characters and style consistent), quote the cost (USD, or the provider's credits when it gives no USD price; use a free preflight when the tool has one) and wait for my yes;" +
       " then generate with Krea or Flora, bring each result in with import_media (dest = the project's generated folder), place it (keep the clip's own frame rate: reinterpreting it changes its speed), and check with render_frame." +
       " Figma frames come in through the Figma tools (export the layers, then import_media).");
   } else lines.push("Safe mode: only the Motion DNA tools. If the order needs generated footage or Figma, say that it needs Full mode.");
   lines.push(EXISTING_ASK, RULE_ASK);
+  if (AG.mode === "full") lines.push(FLORA_ASK);
   return lines.join("\n");
 }
 
@@ -450,7 +455,7 @@ function stepText(c) {
 // Every result of a Flora or Krea tool (and Motion DNA's renders, downloads and imports) is read for images and clips:
 // links to media files or to the services' media hosts, and local files. Each new batch becomes a card in the chat,
 // like Flora's own widget in the Claude app: the outputs side by side, a click opens one full size.
-const MEDIA_TOOL = /flora|krea|motion-dna__(render_frame|render_comp|flora_download|flora_swap|import_media|add_asset)/i;
+const MEDIA_TOOL = /flora|krea|motion-dna__(render_frame|render_comp|import_media|add_asset)/i;
 const MEDIA_HOST = /(^|\.)(flora\.ai|imagekit\.io|krea\.ai|cloudfront\.net|amazonaws\.com|googleapis\.com|r2\.cloudflarestorage\.com|supabase\.co)$/i;
 const VIDEO_EXT = /\.(mp4|webm|mov|m4v)$/i, IMAGE_EXT = /\.(png|jpe?g|webp|gif|avif)$/i;
 function mediaService(tool) { return /krea/i.test(tool) ? "Krea" : /flora/i.test(tool) && !/motion-dna/.test(tool) ? "Flora" : "Motion DNA"; }

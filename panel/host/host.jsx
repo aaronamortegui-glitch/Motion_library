@@ -521,6 +521,74 @@ function mdna_context() {
     return mdna_json(out);
 }
 
+// ---------- AI video marks: which layers become AI video (marked in Figma as "AI · …") ----------
+// A marked layer carries its mark in its comment (one line "MDNA-FLORA {json}": status and an optional prompt hint) and
+// the Flora label colour, so the mark travels with the project and anyone sees it in the timeline. The layer is the
+// placeholder for the clip to come. For now the marks only record which layers become AI video; nothing is sent.
+// Status: marked, or suggested (proposed by the agent).
+var MDNA_FLORA_TAG = "MDNA-FLORA ", MDNA_FLORA_LABEL = 13;   // label 13: fuchsia in the default label colours
+function mdna_flora_get(L) {
+    var c = L.comment || "", i = c.indexOf(MDNA_FLORA_TAG);
+    if (i < 0) return null;
+    try { return mdna_parse(c.substr(i + MDNA_FLORA_TAG.length).split("\n")[0]); } catch (e) { return null; }
+}
+function mdna_flora_set(L, o) {   // o = null removes the mark (other comment text stays)
+    var c = L.comment || "", i = c.indexOf(MDNA_FLORA_TAG), keep = i < 0 ? c : c.substr(0, i).replace(/\s+$/, "");
+    var rest = i < 0 ? "" : (c.substr(i).indexOf("\n") >= 0 ? c.substr(i).substr(c.substr(i).indexOf("\n") + 1) : "");
+    L.comment = [keep, o ? MDNA_FLORA_TAG + mdna_json(o) : "", rest].join("\n").replace(/^\n+|\n+$/g, "").replace(/\n{2,}/g, "\n");
+}
+function mdna_layer_by_id(id) {
+    try { var L = app.project.layerByID(id); if (L) return L; } catch (e) {}
+    var c = app.project.activeItem;
+    if (c instanceof CompItem) for (var i = 1; i <= c.numLayers; i++) if (c.layer(i).id === id) return c.layer(i);
+    return null;
+}
+var MDNA_FLORA_OLD = { "to review": "marked", "approved": "marked", "to generate": "marked", "generating": "in flora" };   // earlier statuses
+function mdna_flora_item(L) {
+    var o = mdna_flora_get(L); if (!o) return null;
+    var src = "", still = false;
+    try { if (L.source && L.source.mainSource && L.source.mainSource.file) { src = L.source.mainSource.file.fsName.split("\\").join("/"); still = !!L.source.mainSource.isStill; } } catch (e) {}
+    var r = L.sourceRectAtTime(L.inPoint, false), sc = L.property("ADBE Transform Group").property("ADBE Scale").value;
+    return { id: L.id, index: L.index, name: L.name, prompt: o.prompt || "", model: o.model || "", duration: o.duration || Math.round((L.outPoint - L.inPoint) * 10) / 10,
+             status: MDNA_FLORA_OLD[o.status] || o.status || "marked", job: o.job || "", clip: o.clip || "", src: src, still: still,
+             inPoint: Math.round(L.inPoint * 100) / 100, outPoint: Math.round(L.outPoint * 100) / 100,
+             w: Math.round(r.width * sc[0] / 100), h: Math.round(r.height * sc[1] / 100) };
+}
+function mdna_flora_list() {   // the queue of the active comp
+    var c = app.project.activeItem, out = [];
+    if (!(c instanceof CompItem)) return mdna_json({ comp: null, items: [] });
+    for (var i = 1; i <= c.numLayers; i++) { var it = mdna_flora_item(c.layer(i)); if (it) out.push(it); }
+    return mdna_json({ comp: c.name, fps: Math.round(1 / c.frameDuration * 100) / 100, items: out });
+}
+// marks the selected layers (or the layers named in a.names / a.ids): a = {prompt, model, duration, status, names, ids}
+function mdna_flora_mark(s) {
+    var a = mdna_parse(s), c = app.project.activeItem, ls = [], i, n = 0;
+    if (!(c instanceof CompItem)) return "ERR Open a composition first.";
+    if (a.ids || a.names) { for (i = 1; i <= c.numLayers; i++) { var L0 = c.layer(i); if ((a.ids && ("," + a.ids.join(",") + ",").indexOf("," + L0.id + ",") >= 0) || (a.names && ("|" + a.names.join("|") + "|").indexOf("|" + L0.name + "|") >= 0)) ls.push(L0); } }
+    else ls = c.selectedLayers;
+    if (!ls.length) return "ERR Select the layers that become AI video.";
+    app.beginUndoGroup("Motion DNA: mark for Flora");
+    for (i = 0; i < ls.length; i++) {
+        var L = ls[i], o = mdna_flora_get(L) || {};
+        if (a.prompt !== undefined) o.prompt = a.prompt;   // optional: the agent writes prompts in Flora
+        if (a.model) o.model = a.model;
+        if (a.duration) o.duration = a.duration;
+        o.status = a.status || MDNA_FLORA_OLD[o.status] || o.status || "marked";
+        mdna_flora_set(L, o); L.label = MDNA_FLORA_LABEL; n++;
+    }
+    app.endUndoGroup();
+    return "OK " + n + " layer" + (n > 1 ? "s" : "") + " marked for Flora";
+}
+function mdna_flora_unmark(s) {   // s = {ids} (or the selected layers)
+    var a = s ? mdna_parse(s) : {}, c = app.project.activeItem, n = 0, i;
+    if (!(c instanceof CompItem)) return "ERR Open a composition first.";
+    app.beginUndoGroup("Motion DNA: unmark Flora");
+    var ls = []; if (a.ids) { for (i = 0; i < a.ids.length; i++) { var L = mdna_layer_by_id(a.ids[i]); if (L) ls.push(L); } } else ls = c.selectedLayers;
+    for (i = 0; i < ls.length; i++) if (mdna_flora_get(ls[i])) { mdna_flora_set(ls[i], null); if (ls[i].label === MDNA_FLORA_LABEL) ls[i].label = 0; n++; }
+    app.endUndoGroup();
+    return "OK " + n + " removed from the Flora queue";
+}
+
 // Opens a file or a folder with the system (the visualizer, a project folder)
 function mdna_open(path) {
     var d = new Folder(path); if (d.exists) { d.execute(); return "OK"; }

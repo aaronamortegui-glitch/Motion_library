@@ -220,6 +220,7 @@ Open the repo (or a brand or project folder) in Claude Code and approve the `mot
 | Deliver | `resize_comp` (social resizes 9:16 · 1:1 · 4:5 or any WxH: every keyframe kept, content reframed inside the title-safe area, then the layout QA on each) · `render_comp` |
 | Edit keyframes | `keyframes` (reverse, mirror_out, stagger, shift, to_playhead, sequence, distribute, loop, bake, stretch, copy_to) · `anchor_point` |
 | Run techniques | `matte` (a cut-out on the local GPU) · `text_behind` |
+| AI video marked in Figma | `flora_mark` (Figma layers named `AI · …` become placeholders marked for AI video; the mark lives in the layer, with the Flora label colour) · `flora_queue` (the marked layers of the comp). Nothing is sent to Flora from the marks yet |
 | Learn and check | `add_brand_note` · `ae_status` · `list_layers` · `render_frame` · `check_layout` |
 
 The order of work and recipes that worked: [User guide › For Claude](docs/USER_GUIDE.md#for-claude). Without MCP, any
