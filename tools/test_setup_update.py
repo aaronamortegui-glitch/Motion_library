@@ -134,6 +134,36 @@ with tempfile.TemporaryDirectory() as tmp:   # 7. a local commit that is not on 
     ok, out = update(clone)
     check("local commit that origin lacks: the pull does not fast-forward and nothing is lost", [ok, g(clone, "rev-parse", "HEAD") == before, "git pull failed" in out], [False, True, True])
 
+with tempfile.TemporaryDirectory() as tmp:   # 9. own changes but nothing new to pull (a developer's clone): reinstall from disk, nothing touched
+    origin, clone = scenario(tmp)
+    g(clone, "pull", "-q", "--ff-only")
+    write(clone, "panel/js/agent.js", "agent MY WORK\n"); write(clone, "media/teaser/spec.json", "spec MINE\n"); write(clone, "research/tests/mcp_report.json", "mcp LOCAL RUN\n")
+    before = g(clone, "rev-parse", "HEAD")
+    ok, out = update(clone)
+    check("own changes and nothing to pull: continues with the install, every file untouched", [ok, read(clone, "panel/js/agent.js"), read(clone, "media/teaser/spec.json"), read(clone, "research/tests/mcp_report.json"), g(clone, "rev-parse", "HEAD") == before],
+          [True, "agent MY WORK\n", "spec MINE\n", "mcp LOCAL RUN\n", True])
+    check("  ...and says so, listing the person's files only", ("nothing new to pull" in out) and ("agent.js" in out) and ("mcp_report" not in out), True)
+
+with tempfile.TemporaryDirectory() as tmp:   # 10. own changes and commits waiting: stops and says how many
+    origin, clone = scenario(tmp)
+    write(clone, "panel/js/agent.js", "agent MY WORK\n")
+    ok, out = update(clone)
+    check("own changes and a new commit waiting: stops and counts it", [ok, "1 new commit(s) are waiting" in out, read(clone, "panel/js/agent.js")], [False, True, "agent MY WORK\n"])
+
+with tempfile.TemporaryDirectory() as tmp:   # 11. own changes and the remote cannot be reached: nothing is assumed
+    origin, clone = scenario(tmp)
+    g(clone, "pull", "-q", "--ff-only"); g(clone, "remote", "set-url", "origin", str(pathlib.Path(tmp) / "nowhere"))
+    write(clone, "panel/js/agent.js", "agent MY WORK\n")
+    ok, out = update(clone)
+    check("own changes and no way to ask the remote: stops (it cannot tell if something is waiting)", [ok, read(clone, "panel/js/agent.js")], [False, "agent MY WORK\n"])
+
+with tempfile.TemporaryDirectory() as tmp:   # 12. own changes and no upstream branch
+    origin, clone = scenario(tmp)
+    g(clone, "pull", "-q", "--ff-only"); g(clone, "branch", "--unset-upstream")
+    write(clone, "panel/js/agent.js", "agent MY WORK\n")
+    ok, out = update(clone)
+    check("own changes and no upstream branch: stops", [ok, read(clone, "panel/js/agent.js")], [False, "agent MY WORK\n"])
+
 with tempfile.TemporaryDirectory() as tmp:   # 8. not a git clone
     ok, out = update(tmp)
     check("folder that is not a clone: says so and stops", [ok, "not a git clone" in out], [False, True])

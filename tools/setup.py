@@ -157,6 +157,14 @@ def generated_output(path):
     return p in GENERATED or (p.startswith("research/tests/TEST_") and p.endswith(".png") and "/" not in p[len("research/tests/"):])
 
 
+def commits_behind():
+    """How many commits the remote has that this clone lacks; None when it cannot tell (offline, no upstream)."""
+    if git("fetch", "--quiet").returncode != 0:
+        return None
+    r = git("rev-list", "--count", "HEAD..@{u}")
+    return int(r.stdout.strip()) if r.returncode == 0 and r.stdout.strip().isdigit() else None
+
+
 def update():
     print("0. Update the repo")
     if not (ROOT / ".git").exists():
@@ -165,7 +173,13 @@ def update():
     outputs = [l[3:].strip().strip('"') for l in dirty if generated_output(l[3:].strip().strip('"'))]
     mine = [l for l in dirty if l[3:].strip().strip('"') not in outputs]
     if mine:   # the person's own work: nothing is touched, not even the test outputs
-        print(WARN + f"{len(mine)} local change(s) to tracked files; not pulling over them. Commit or stash them, then run --update again:")
+        behind = commits_behind()
+        if behind == 0:   # nothing to pull, so nothing is at risk: reinstall from the files on disk, the changes stay as they are
+            print(WARN + f"{len(mine)} local change(s) to tracked files and nothing new to pull: reinstalling the panel from your current files (your changes are kept):")
+            for l in mine[:8]:
+                print("        " + l)
+            return True
+        print(WARN + f"{len(mine)} local change(s) to tracked files; not pulling over them" + (f" ({behind} new commit(s) are waiting)" if behind else "") + ". Commit or stash them, then run --update again:")
         for l in mine[:8]:
             print("        " + l)
         return False
