@@ -73,7 +73,7 @@ check("diagnostics hide the private host", !diag.includes("private.example.com")
 check("diagnostics hide a line they cannot read", diag.includes("(line hidden)") && !diag.includes("without separators"), true);
 check("home folder on Windows, any slash and case", redactSecrets("a C:\\Users\\aaron\\x and c:/users/aaron/y", "C:\\Users\\aaron"), "a ~\\x and ~/y");
 check("home folder on Mac keeps no stray slash", redactSecrets("/Users/aaron/Library and /users/aaron/x", "/Users/aaron"), "~/Library and ~/x");
-check("bearer tokens and key-like pairs are masked", redactSecrets("Authorization: Bearer abc.def and 24a057f0-e257-4d7a-b64d-5b8682112064:KUyuTdiQlWMjkgBFZZe4OTvWgO2_Y1Rn", ""), "Authorization: Bearer *** and ***");
+check("bearer tokens and key-like pairs are masked", redactSecrets("Authorization: Bearer abc.def and 11111111-2222-4333-8444-555555555555:FAKEsecretFAKEsecretFAKE12", ""), "Authorization: Bearer *** and ***");
 
 // ---- the real functions against a scripted `claude` ----
 // mcpList, svcStatus, confirmStatus, removeStray and connectService are cut out of panel/js/agent.js and run with a fake child_process.
