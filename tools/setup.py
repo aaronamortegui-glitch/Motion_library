@@ -147,16 +147,33 @@ def clean_old():
     return True
 
 
+# Versioned files that the test tools rewrite every time they run (reports and sample images; not research/tests/fixtures, which are
+# inputs). Running the tests must not stop an update, so these are restored from git before the pull, and only these.
+GENERATED = ("research/tests/layout_report.json", "research/tests/library_report.json", "research/tests/mcp_report.json", "research/tests/library-mosaic.png")
+
+
+def generated_output(path):
+    p = path.replace("\\", "/")
+    return p in GENERATED or (p.startswith("research/tests/TEST_") and p.endswith(".png") and "/" not in p[len("research/tests/"):])
+
+
 def update():
     print("0. Update the repo")
     if not (ROOT / ".git").exists():
         print(WARN + "not a git clone: download the new version and run this again"); return False
     dirty = [l for l in git("status", "--porcelain", "--untracked-files=no").stdout.splitlines() if l.strip()]
-    if dirty:
-        print(WARN + f"{len(dirty)} local change(s) to tracked files; not pulling over them. Commit or stash them, then run --update again:")
-        for l in dirty[:8]:
+    outputs = [l[3:].strip().strip('"') for l in dirty if generated_output(l[3:].strip().strip('"'))]
+    mine = [l for l in dirty if l[3:].strip().strip('"') not in outputs]
+    if mine:   # the person's own work: nothing is touched, not even the test outputs
+        print(WARN + f"{len(mine)} local change(s) to tracked files; not pulling over them. Commit or stash them, then run --update again:")
+        for l in mine[:8]:
             print("        " + l)
         return False
+    if outputs:
+        r = git("checkout", "HEAD", "--", *outputs)
+        if r.returncode != 0:
+            print(WARN + "could not restore the test outputs (" + (r.stderr.strip() or r.stdout.strip())[:200] + "); not pulling"); return False
+        print(OK + f"restored {len(outputs)} test output file(s) the tests had rewritten (they are regenerated when the tests run)")
     before = head()
     r = git("pull", "--ff-only")
     if r.returncode != 0:
