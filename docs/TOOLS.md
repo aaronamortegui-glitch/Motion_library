@@ -45,6 +45,7 @@ panel; reach for these when building a piece.
 | `tools/build_promo_all.jsx` + `media/promo/make_promo.py` | Promotional cut: full-screen footage, oversized type, shape wipes, scenes cut on the VO word times |
 | `tools/setup.py` (+ `INSTALL-*.cmd/.command`) | One-step install: cleans old versions, panel in every AE version, fonts, local asset previews, checks; `--update` pulls and reinstalls, `--uninstall` removes it, `--mcp-user` registers the MCP server everywhere |
 | `tools/test_all.py` (`test_library.jsx`, `test_panel.jsx`, `test_mcp.py`, `test_mosaics.jsx`, `make_library_mosaic.py`) | End-to-end tests and the sample mosaics: presets, controls, Remove, panel, MCP, styles, mix |
+| `tools/test_mcp_status.js` | Tests of the panel's connector logic (Krea, Flora, Figma): duplicate servers, the Remove duplicate scopes, never adding a server on a bad read, allow list = deny list; `node tools/test_mcp_status.js`, no After Effects or CLI needed |
 | `tools/tag_library.py` → `library/tags.json` | Tags for every preset, curve and technique: roles, targets, channels, direction, energy range (1–5), tones |
 | `tools/match_reference.py` | Compares a reference profile (`library/references/<slug>.json`) with the library: what fits, how to build each move, the gaps to create, a proposed style |
 | `tools/vo_words.py` | Word timestamps of a voiceover (openai-whisper) to cut scenes on the spoken word |

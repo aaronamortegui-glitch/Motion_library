@@ -109,14 +109,111 @@ function mcpList(fresh) {   // claude mcp list runs a health check (a few second
   });
   MCPLIST = { at: Date.now(), p }; return p;
 }
+// <pure> (tools/test_mcp_status.js runs this block on its own: keep it free of panel globals)
+// The status is what follows the last " - " ("✔ Connected", "! Needs authentication", "✗ Failed to connect"): matching the whole line
+// would also take "Disconnected" or a URL that happens to contain "fail" for a status.
+const lineOk = (l) => /^[^A-Za-z]*connected\b/i.test(l.indexOf(" - ") < 0 ? l : l.slice(l.lastIndexOf(" - ") + 3));
+const clean = (s) => String(s || "").replace(/\x1b\[[0-9;]*m/g, "");   // colour codes (FORCE_COLOR) would break the line match
+// A hand-added server (`krea`) that is NOT connected, next to a connected one of the same service (from the Claude account or a
+// plugin), never finishes its login and keeps asking to reconnect. Only that line qualifies: bare name, our own URL, not connected;
+// a connected `figma` next to the plugin's is left alone.
+function strayLine(lines, name, url) {
+  const bare = new RegExp("^" + name + ":", "i");
+  return lines.some(lineOk) && lines.some((l) => bare.test(l) && !lineOk(l) && l.indexOf(url) > -1);
+}
+// how Claude Code spells a server inside tool names: "claude.ai Krea" → claude_ai_Krea, "plugin:figma:figma" → plugin_figma_figma
+const toolServer = (server) => String(server).replace(/[^A-Za-z0-9_-]/g, "_");
+// what the Agent never does on a generator, whatever the server is called: account, sharing and deleting stay with the user
+// (deny rules match exact tool names while the allow rule takes the whole server, so every way of writing a file or editing a
+// moodboard is listed: write_files_inline / write_files_upload do what write_files does, update_moodboard what update_style does)
+const GEN_DENY = ["create_api_token", "revoke_api_token", "list_api_tokens", "start_free_trial", "show_plans", "delete_moodboard", "delete_style",
+  "overwrite_files", "create_style", "update_style", "write_files", "write_files_inline", "write_files_upload", "create_folders",
+  "create_moodboard", "update_moodboard", "call_desktop_tool", "flora_share_project",
+  "flora_remove_from_canvas", "flora_rename_project", "flora_resolve_comment_thread", "flora_update_project_sharing", "flora_train_lora", "flora_delete_comment"];
+// What "Copy diagnostics" shows of `claude mcp list`: it also prints the command line and URL of every other server (which can carry
+// keys or private hosts), so only the Figma / Krea / Flora lines stay in full (query strings masked); the rest is "name: (hidden) - status".
+function listForDiagnostics(out) {
+  const mine = new RegExp("^(claude\\.ai |plugin:[\\w-]+:)?(figma|krea|flora):", "i");
+  return clean(out).split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map((l) => {
+    if (mine.test(l)) return l.replace(/\?\S*/g, "?***");
+    const i = l.indexOf(": "), j = l.lastIndexOf(" - ");
+    return i > 0 && j > i ? l.slice(0, i) + ": (hidden) - " + l.slice(j + 3) : "(line hidden)";
+  }).join("\n");
+}
+// the home folder becomes "~" (either slash, any case: C:\Users\x or c:/users/x); bearer tokens and key-like pairs are masked
+function redactSecrets(s, homedir) {
+  const parts = String(homedir || "").split(/[\\/]+/).filter(Boolean).map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const home = parts.length ? (/^[\\/]/.test(homedir) ? "[\\\\/]" : "") + parts.join("[\\\\/]") : "";   // POSIX paths start with a slash
+  if (home) s = s.replace(new RegExp(home, "gi"), "~");
+  return s.replace(/Bearer\s+\S+/gi, "Bearer ***").replace(/[A-Za-z0-9_-]{20,}:[A-Za-z0-9_-]{16,}/g, "***");
+}
+// One unconfirmed bad read (the account's connectors missing from the list) must not undo a service Setup confirmed as connected:
+// it takes two in a row. → { svc: the status to keep, miss: bad reads in a row, hold: true when the connected status was kept }
+function foldStatus(prev, miss, st) {
+  const bad = st === "missing" || st === "auth", m = bad ? (miss || 0) + 1 : 0, hold = bad && prev === "connected" && m < 2;
+  return { svc: hold ? prev : st, miss: m, hold };
+}
+const allowGen = (names) => names.map((g) => "mcp__" + g);
+const denyGen = (names) => names.flatMap((g) => GEN_DENY.map((t) => `mcp__${g}__${t}`));
+const GEN = ["claude_ai_Krea", "krea", "claude_ai_Flora", "flora"];   // generators: claude.ai connectors or servers added by hand
+// The generators' own names (from `claude mcp list`, kept in `servers`) join the fixed ones, so a connector spelled differently is
+// still usable; the allow list and the deny list are built from the same names: nothing is allowed without its deny rules.
+function genNamesFrom(servers) {
+  const set = new Set(GEN);
+  for (const n of ["krea", "flora"]) if (servers && servers[n]) set.add(toolServer(servers[n]));
+  return [...set];
+}
+const fullToolsFor = (names) => ["mcp__motion-dna", "mcp__figma", "mcp__claude_ai_Figma", "mcp__plugin_figma_figma", ...allowGen(names), "ToolSearch", "Read", "Write", "Edit", "Glob", "Grep", "WebFetch",
+  "Bash(python:*)", "Bash(python3:*)", "Bash(bash tools/:*)", "Bash(ffmpeg:*)", "Bash(ffprobe:*)", "Bash(ls:*)", "Bash(mkdir:*)"];
+const neverToolsFor = (names) => ["Bash(git commit:*)", "Bash(git push:*)", "Bash(git reset:*)", "Bash(rm -rf:*)",
+  "mcp__motion-dna__add_brand_note",   // in the panel the user decides where a rule goes (the proposal card)
+  ...denyGen(names)];   // tokens, plans, trials, LoRA training, shares and deletes stay with the user
+// </pure>
 async function svcStatus(name, fresh) {   // "connected" | "auth" | "missing" | "unknown"
   const { err, out } = await mcpList(fresh);
   const re = new RegExp("^(claude\\.ai |plugin:[\\w-]+:)?" + name + ":", "i");
-  const lines = out.split(/\r?\n/).map((l) => l.trim()).filter((l) => re.test(l));
+  const lines = clean(out).split(/\r?\n/).map((l) => l.trim()).filter((l) => re.test(l));
+  AG.stray = AG.stray || {}; AG.stray[name] = false;
   if (!lines.length) return err ? "unknown" : "missing";
-  const ok = lines.find((l) => /connected/i.test(l) && !/fail|need/i.test(l));
+  const ok = lines.find(lineOk);
   AG.server = AG.server || {}; const ln = ok || lines[0]; AG.server[name] = ln.slice(0, ln.indexOf(": ")).replace(/:$/, "");   // e.g. "claude.ai Krea", "figma"
+  AG.stray[name] = strayLine(lines, name, SVC[name].url);   // shown in Setup with a Remove button, never removed behind the user's back
   return ok ? "connected" : "auth";
+}
+// Removes the duplicate. `claude mcp get` says which scope holds it (local belongs to the folder the command runs in, so it runs
+// in the Motion DNA folder); project scope is the user's own .mcp.json and is never edited.
+function removeStray(name, done) {   // done(message) with a message when nothing was removed
+  let cp; try { cp = nodeReq()("child_process"); } catch (e) { return done("Node.js is off in this panel: restart After Effects."); }
+  if (!AG.exe) return done("Claude Code was not found: press Check again.");
+  const opt = { windowsHide: true, timeout: 30000, cwd: S.root || undefined };
+  // the flag on screen can be minutes old: read again and remove only if it is still a duplicate right now
+  svcStatus(name, true).then(() => {
+    if (!AG.stray[name]) return done("It is no longer a duplicate, so nothing was removed.");
+    cp.execFile(AG.exe, ["mcp", "get", name], opt, (err, out) => {
+      const m = /Scope:\s*(\w+)/i.exec(clean(out)), scope = m && m[1].toLowerCase();
+      if (!scope) return done("Could not find the duplicate \"" + name + "\" from this folder. In a terminal: claude mcp get " + name);
+      if (scope === "project") return done("The duplicate is in this project's .mcp.json: delete its \"" + name + "\" entry by hand.");
+      cp.execFile(AG.exe, ["mcp", "remove", name, "-s", scope], opt, (e) => { MCPLIST = null; done(e ? "Could not remove it: " + e.message : null); });
+    });
+  });
+}
+// The first `claude mcp list` after a change can leave the Claude account's connectors out (74 lines, then 75 with the same setup):
+// "not connected" is believed only after another read, so a connected service is not shown as missing and never gets a second server.
+async function confirmStatus(name, st) {
+  for (let left = st === "missing" ? 2 : st === "auth" ? 1 : 0; left > 0 && (st === "missing" || st === "auth"); left--) {
+    await new Promise((r) => setTimeout(r, 3000)); st = await svcStatus(name, true);
+  }
+  return st;
+}
+// Everything a person needs to send when something does not connect (see listForDiagnostics and redactSecrets for what is hidden)
+async function copyDiagnostics() {
+  let req, cp, os; try { req = nodeReq(); cp = req("child_process"); os = req("os"); } catch (e) { return toast("Node.js is off in this panel: restart After Effects.", true); }
+  if (!AG.exe) return toast("Claude Code was not found: nothing to report yet.", true);
+  const run = (args) => new Promise((r) => cp.execFile(AG.exe, args, { timeout: 45000, windowsHide: true, cwd: S.root || undefined }, (e, o, er) => r((String(o || "") + String(er || "")).trim() || (e ? "error: " + e.message : ""))));
+  const [ver, list] = await Promise.all([run(["--version"]), mcpList(true).then((x) => listForDiagnostics(x.out) || (x.err ? "error: " + x.err.message : ""))]);
+  const txt = redactSecrets(["Motion DNA diagnostics", `platform: ${process.platform} ${process.arch} (${os.release()})`, `claude: ${AG.exe}`, `version: ${ver}`,
+    `signed in: ${AG.logged} (${AG.method || "?"})`, `status: ${JSON.stringify(AG.svc || {})} figma=${AG.figma}`, `duplicates: ${JSON.stringify(AG.stray || {})}`, "", "claude mcp list:", list].join("\n"), os.homedir());
+  try { await navigator.clipboard.writeText(txt); toast("Diagnostics copied: paste them where you ask for help."); } catch (e) { toast("Could not copy: " + e.message, true); }
 }
 function figmaStatus() { return svcStatus("figma", true).then((st) => { AG.figmaServer = AG.server && AG.server.figma; return st; }); }
 document.addEventListener("DOMContentLoaded", () => {
@@ -146,15 +243,8 @@ function pyExe() {
     .find((p) => { try { return fs.existsSync(p); } catch (e) { return false; } }) || "python3";
 }
 const SAFE_TOOLS = ["mcp__motion-dna"];
-const GEN = ["claude_ai_Krea", "krea", "claude_ai_Flora", "flora"];   // generators: claude.ai connectors or servers added by hand
-const FULL_TOOLS = ["mcp__motion-dna", "mcp__figma", "mcp__claude_ai_Figma", "mcp__plugin_figma_figma", ...GEN.map((g) => "mcp__" + g), "ToolSearch", "Read", "Write", "Edit", "Glob", "Grep", "WebFetch",
-  "Bash(python:*)", "Bash(python3:*)", "Bash(bash tools/:*)", "Bash(ffmpeg:*)", "Bash(ffprobe:*)", "Bash(ls:*)", "Bash(mkdir:*)"];
-const NEVER = ["Bash(git commit:*)", "Bash(git push:*)", "Bash(git reset:*)", "Bash(rm -rf:*)",
-  "mcp__motion-dna__add_brand_note",   // in the panel the user decides where a rule goes (the proposal card)
-  // account, sharing and deleting stay with the user: tokens, plans, trials, LoRA training, shares, deletes
-  ...GEN.flatMap((g) => ["create_api_token", "revoke_api_token", "list_api_tokens", "start_free_trial", "show_plans", "delete_moodboard", "delete_style",
-    "overwrite_files", "create_style", "update_style", "write_files", "create_folders", "create_api_token", "flora_share_project",
-    "flora_remove_from_canvas", "flora_rename_project", "flora_resolve_comment_thread", "flora_update_project_sharing", "flora_train_lora", "flora_delete_comment"].map((t) => `mcp__${g}__${t}`))];
+// one call each, from the same `AG.server`, so the two lists always see the same names
+const fullTools = () => fullToolsFor(genNamesFrom(AG.server)), neverTools = () => neverToolsFor(genNamesFrom(AG.server));
 
 const TEMPLATES = [
   ["Figma → animate", "Take the frames from this Figma file: <paste URL>. Import their assets into After Effects as editable layers and animate them in the <style> style. Render a few check frames and tell me what you built."],
@@ -192,14 +282,21 @@ async function contextBlock() {
     AG.svc = AG.svc || {};
     AG.svcAt = AG.svcAt || {};
     for (const n of ["krea", "flora"]) {   // re-checked every 5 minutes, and never more than 3 s on the way to a message
-      if (AG.svc[n] != null && Date.now() - (AG.svcAt[n] || 0) < 300000) continue;
+      if (AG.svc[n] != null && Date.now() - (AG.svcAt[n] || 0) < (AG.svc[n] === "connected" ? 300000 : 60000)) continue;   // "not connected" is asked again after a minute
       const st = await Promise.race([svcStatus(n), new Promise((r) => setTimeout(() => r(null), 3000))]);
-      if (st) { AG.svc[n] = st; AG.svcAt[n] = Date.now(); }
+      if (st) {
+        // one unconfirmed bad read (the account's connectors missing from the list) must not undo a service Setup confirmed as
+        // connected: it takes two in a row, the second asked again after a minute
+        AG.svcMiss = AG.svcMiss || {};
+        const f = foldStatus(AG.svc[n], AG.svcMiss[n], st);
+        AG.svc[n] = f.svc; AG.svcMiss[n] = f.miss;
+        AG.svcAt[n] = f.hold ? Date.now() - 240000 : Date.now();
+      }
     }
     const on = ["krea", "flora"].filter((n) => AG.svc[n] === "connected").map((n) => SVC[n].label);
     const unsure = ["krea", "flora"].some((n) => AG.svc[n] == null || AG.svc[n] === "unknown");
     lines.push((on.length ? `Generators connected: ${on.join(", ")}.` : unsure ? "Generator status unknown: if Krea or Flora tools are available, use them."
-      : "No generator is connected (Krea or Flora: Project › Connect).") +
+      : "No generator looks connected (Krea or Flora: Project › Connect); if Krea or Flora tools are available anyway, use them.") +
       " When the order needs footage, stills, textures or audio that the library and list_assets do not have: list the assets the video needs" +
       " (what, size and fps of the comp, seconds, which references keep characters and style consistent), quote the cost (USD, or the provider's credits when it gives no USD price; use a free preflight when the tool has one) and wait for my yes;" +
       " then generate with Krea or Flora, bring each result in with import_media (dest = the project's generated folder), place it (keep the clip's own frame rate: reinterpreting it changes its speed), and check with render_frame." +
@@ -386,7 +483,7 @@ async function runAgent(prompt) {
   if (AG.cancelled) { push("error", "Stopped."); return; }
   const mcp = JSON.stringify({ mcpServers: { "motion-dna": { command: pyExe(), args: [S.root + "/tools/mcp/ss_motion_mcp.py"] } } });
   const args = ["-p", full, "--output-format", "stream-json", "--verbose", "--mcp-config", mcp,
-    "--allowedTools", ...(AG.mode === "full" ? FULL_TOOLS : SAFE_TOOLS), "--disallowedTools", ...NEVER];
+    "--allowedTools", ...(AG.mode === "full" ? fullTools() : SAFE_TOOLS), "--disallowedTools", ...neverTools()];
   if (AG.mode !== "full") args.push("--strict-mcp-config");   // Safe: only Motion DNA, not every server of the account
   if (scope().kind !== "repo") args.push("--add-dir", S.root);
   if (sid) args.push("--resume", sid);
@@ -840,11 +937,26 @@ function waitForService(name, onDone) {   // checks every 6 s for 4 minutes afte
 }
 // One click: the browser opens the service's own permission page (nothing to type); the sheet turns green by itself.
 // With no server for it yet, it adds the service's official MCP first.
-function connectService(name, redraw) {
+async function connectService(name, redraw) {
   const go = (server) => { runInWindow(`mcp login "${server}"`); toast(`Your browser opens ${SVC[name].label}: press Allow. This turns green by itself.`); waitForService(name, redraw); };
-  if (AG.server && AG.server[name]) return go(AG.server[name]);
+  AG.connecting = AG.connecting || {}; if (AG.connecting[name]) return toast("Still checking " + SVC[name].label + ", one moment…");   // the read below takes a few seconds: a second click must not start a second flow
+  AG.connecting[name] = true; toast("Checking " + SVC[name].label + "…");
+  let st;   // a fresh read first: never add a second server next to a connector that already exists
+  try {
+    st = await confirmStatus(name, await svcStatus(name, true));   // that bad first read made "missing" look true and the panel added a second server
+  } finally { AG.connecting[name] = false; }
+  if (st === "unknown") return toast("Could not read the connectors (is Claude Code reachable?). Press Check again, or use the commands under Having trouble.", true);   // never add a server blind
+  if (st === "connected") {
+    if (name === "figma") { AG.figma = st; setDot("st-figma", true, "Figma: connected"); } else { AG.svc = AG.svc || {}; AG.svc[name] = st; AG.svcAt = AG.svcAt || {}; AG.svcAt[name] = Date.now(); }
+    toast(SVC[name].label + " is connected."); return redraw();
+  }
+  if (st === "auth" && AG.server && AG.server[name]) return go(AG.server[name]);   // only a server that exists and needs its login; "missing" adds it
   nodeReq()("child_process").execFile(AG.exe, ["mcp", "add", "--scope", "user", "--transport", "http", name, SVC[name].url],
-    { windowsHide: true, timeout: 30000 }, () => { AG.server = AG.server || {}; AG.server[name] = name; go(name); });
+    { windowsHide: true, timeout: 30000 }, (err, out, er) => {
+      const msg = clean(String(er || "") + String(out || "")).trim();
+      if (err && !/already exists/i.test(msg)) return toast("Could not add " + SVC[name].label + ": " + (msg.split("\n").pop() || err.message), true);   // never open a login for a server that was not added
+      AG.server = AG.server || {}; AG.server[name] = name; go(name);
+    });
 }
 function connectFigma(redraw) { connectService("figma", redraw); }
 
@@ -937,8 +1049,11 @@ function showSetup(setup) {
   AG.svc = AG.svc || {};
   const blurb = { figma: "Only if you want the agent to animate your Figma frames.", krea: "Generate images and video (Seedance, Kling…) with your Krea account.", flora: "Generate with your Flora workspace and its canvases." };
   const service = (name) => { const st = name === "figma" ? AG.figma : AG.svc[name], lab = SVC[name].label;
+    const stray = AG.stray && AG.stray[name] ? h("div", { class: "crow" },
+      h("span", { class: "dim" }, "A second “" + name + "” server is asking you to sign in again. It is not needed."),
+      h("button", { class: "btn", onclick: () => removeStray(name, async (msg) => { if (msg) toast(msg, true); else toast("Duplicate removed."); await svcStatus(name, true); redraw(); }) }, "Remove duplicate")) : null;
     return st === "connected"
-      ? step(true, lab + " is connected", h("span", { class: "dim" }, name === "figma" ? "Orders can read your Figma files (Full mode)." : "The Agent can generate with " + lab + " (Full mode)."))
+      ? step(true, lab + " is connected", [h("span", { class: "dim" }, name === "figma" ? "Orders can read your Figma files (Full mode)." : "The Agent can generate with " + lab + " (Full mode)."), stray])
       : step(false, lab + " (optional)", [
           h("span", {}, st === "auth" ? lab + " needs your permission again (it asks from time to time)." : blurb[name]),
           h("span", { class: "dim" }, "Press the button and choose Allow in the " + lab + " page that opens. That's it: this turns green by itself."),
@@ -968,12 +1083,13 @@ function showSetup(setup) {
     h("span", { class: "dim" }, "Figma, yourself:"), cmdRow(`${runCmd()} mcp login "${AG.figmaServer || "figma"}"`),
     h("span", { class: "dim" }, "or claude.ai › Settings › Connectors › Figma › Connect."),
     h("span", { class: "dim" }, "Krea or Flora, yourself:"), cmdRow(`${runCmd()} mcp login "${(AG.server && AG.server.krea) || "krea"}"`),
-    h("span", { class: "dim" }, "Update, yourself (in the Motion DNA folder):"), cmdRow((process.platform === "win32" ? "python" : "python3") + " tools/setup.py --update"));
+    h("span", { class: "dim" }, "Update, yourself (in the Motion DNA folder):"), cmdRow((process.platform === "win32" ? "python" : "python3") + " tools/setup.py --update"),
+    h("span", { class: "dim" }, "Still stuck? Copy what is needed to find out why:"), h("button", { class: "btn", onclick: copyDiagnostics }, "Copy diagnostics"));
 
   setup.replaceChildren(h("div", { class: "kit-top" }, h("b", { class: "kit-title" }, "Connect"), close), claude, figma, krea, flora, codex, upd,
-    h("div", { class: "crow" }, h("button", { class: "btn", onclick: async () => { AG.logged = await authStatus(); AG.figma = await figmaStatus(); for (const n of ["krea", "flora"]) AG.svc[n] = await svcStatus(n); AG.codexSt = await codexStatus(); AG.repoSt = await repoStatus(); redraw(); if (agent.draw) agent.draw(); } }, "Check again")), trouble);
+    h("div", { class: "crow" }, h("button", { class: "btn", onclick: async () => { AG.logged = await authStatus(); AG.figma = await figmaStatus(); for (const n of ["krea", "flora"]) { AG.svc[n] = await confirmStatus(n, await svcStatus(n)); (AG.svcAt = AG.svcAt || {})[n] = Date.now(); } AG.codexSt = await codexStatus(); AG.repoSt = await repoStatus(); redraw(); if (agent.draw) agent.draw(); } }, "Check again")), trouble);
   if (fig === undefined) figmaStatus().then((f) => { AG.figma = f; setDot("st-figma", f === "connected", f === "connected" ? "Figma: connected" : "Figma: not connected (optional). Click to connect."); redraw(); });
-  for (const n of ["krea", "flora"]) if (AG.svc[n] === undefined) { AG.svc[n] = null; svcStatus(n).then((st) => { AG.svc[n] = st; redraw(); }); }
+  for (const n of ["krea", "flora"]) if (AG.svc[n] === undefined) { AG.svc[n] = null; svcStatus(n).then((st) => confirmStatus(n, st)).then((st) => { AG.svc[n] = st; (AG.svcAt = AG.svcAt || {})[n] = Date.now(); redraw(); }); }
   if (!AG.codexSt && !AG.codexBusy) { AG.codexBusy = true; codexStatus().then((c) => { AG.codexSt = c; AG.codexBusy = false; redraw(); }); }
   if (!AG.repoSt && !AG.repoBusy && nodeReq()) { AG.repoBusy = true; repoStatus().then((r) => { AG.repoSt = r || { head: "?", when: "", behind: null }; AG.repoBusy = false; redraw(); }); }
 }
