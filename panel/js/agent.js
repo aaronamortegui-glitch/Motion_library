@@ -418,11 +418,37 @@ function openInClaudeApp(id) {
     toast("Starting the conversation, then it opens in the Claude app…");
     return runAgent(intro);
   }
-  const cp = nodeReq()("child_process");
-  cp.execFile(AG.exe, ["--desktop", "--resume", id], { cwd: cwdNow(), windowsHide: true, timeout: 30000 }, (err, out, er) => {
-    if (err) toast("Could not open the Claude app (" + (String(er || err.message).trim().split("\n").pop() || "update Claude Code") + "). Use the terminal command instead.", true);
-    else toast("Opened in the Claude app: it stays in its sidebar.");
+  runDesktop(id, (err, how) => {
+    if (err) toast("Could not open the Claude app (" + (err || "update Claude Code") + "). Use the terminal command instead.", true);
+    else toast(how === "terminal" ? "Opening the Claude app through Terminal: if nothing opens, read its window." : "Opened in the Claude app: it stays in its sidebar.");
   });
+}
+// `claude --desktop` needs a terminal: Claude Code 2.1.30x refuses it when its output is redirected ("can't run
+// non-interactively"), and the panel has none. Windows: a minimized console runs it, with stderr and the exit code in
+// temp files the panel reads. macOS: a Terminal window runs it (the exit status cannot be read there, so the panel says where to look).
+function runDesktop(id, done) {
+  const req = nodeReq(), cp = req("child_process"), fs = req("fs"), path = req("path"), os = req("os");
+  if (!/^[0-9a-f-]{8,64}$/i.test(String(id))) return done("not a conversation id: " + id);
+  const last = (s) => String(s || "").replace(/\x1b\[[0-9;]*m/g, "").trim().split("\n").pop();
+  if (process.platform !== "win32") {   // macOS: Terminal gives claude the terminal it needs (the helper login and update use); its window shows any error
+    const shq = (s) => "'" + String(s).replace(/'/g, "'\\''") + "'";
+    macTerminal(`cd ${shq(cwdNow())} && ${shq(AG.exe)} --desktop --resume ${id}; exit`);
+    return done(null, "terminal");
+  }
+  let dir;
+  try { dir = fs.mkdtempSync(path.join(os.tmpdir(), "mdna-desktop-")); } catch (e) { return done(e.message); }
+  const errF = path.join(dir, "err.txt"), codeF = path.join(dir, "code.txt"), bat = path.join(dir, "open.cmd");
+  fs.writeFileSync(bat, `@cd /d "${cwdNow()}"\r\n@"${AG.exe}" --desktop --resume ${id} 2>"${errF}"\r\n@>"${codeF}" echo %errorlevel%\r\n`);
+  cp.exec(`start "Claude" /min cmd /c "${bat}"`, { windowsHide: true }, (e) => { if (e) { clearInterval(t); try { fs.rmSync(dir, { recursive: true, force: true }); } catch (x) {} done(e.message); } });
+  const t0 = Date.now(), t = setInterval(() => {
+    let code = null;
+    try { code = fs.readFileSync(codeF, "utf8").trim(); } catch (e) {}
+    if (code === null || code === "") { if (Date.now() - t0 < 30000) return; code = "timeout"; }
+    clearInterval(t);
+    let er = ""; try { er = fs.readFileSync(errF, "utf8"); } catch (e) {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (e) {}
+    done(code === "0" ? null : last(er) || (code === "timeout" ? "no answer after 30 s" : "exit code " + code));
+  }, 500);
 }
 // the files Claude reads when it works in a brand's folder or a project's folder (written once, never overwritten)
 async function ensureClaudeFolder(dir, kind, name, slug) {
