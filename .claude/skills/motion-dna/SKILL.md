@@ -15,6 +15,20 @@ Read `docs/LEARNINGS.md` before non-trivial AE work: it lists every pitfall alre
 Our own motion library for After Effects. Everything creates native keyframes/expressions (no plugins).
 All repo content is English: write code, comments, messages, metadata and commit messages in English.
 
+## Start here: read the request before building
+Motion DNA is a Swiss army knife: never answer an open request with the same thing every time.
+1. An **open request** ("I want a video for…", "make something for our launch", "quiero un video…"): call the MCP tool
+   `read_brief` with the user's words (and `project_dir` when you work in a project). Without the MCP:
+   `python tools/intake.py "<words>"` in the repo.
+2. Ask **only** the questions it returns, short and with their options, in the user's language (what it is for and
+   where it runs, what they already have, length, feel, the one line). Skip anything they already told you.
+3. Propose **2-3 routes** in plain words (a template, a technique or a kit piece, each with a style and the character
+   if one was asked for), say what each needs, and build the one they choose.
+4. Record it: `read_brief(project_dir=…, chose=[ids])`, so the next brief in that project offers something different.
+5. A **precise order** ("apply Land to the selected layers") comes back as `direct`: just do it.
+Characters live in `library/characters/<slug>/character.json`: paste its `traits` word for word into every brief or
+prompt, respect `never`, and use its emotions, poses and acts by name.
+
 ## Repo pieces
 | File | What it is |
 |---|---|

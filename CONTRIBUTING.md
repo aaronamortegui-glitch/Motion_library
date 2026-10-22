@@ -231,6 +231,13 @@ for a brand (§10: that stays in the brand, unless it is useful for everyone), o
 | A semi-finished piece Claude builds on a comp: a transition, an element (title, callout, counter…), a shape, a background, a look, a text animation, a 3D move, a behaviour | a **kit piece** | `tools/ss_<family>.jsx` + `library/kit.json` (or `library/transitions.json`) |
 | A workflow with scripts (tracking, roto, text behind, stroke build…) | a **technique** | `tools/` + `library/techniques.json` |
 | Something from outside (script, VFX, SFX, music, texture) | a **resource** | `library/resources.json` (license checked) |
+| A mascot, presenter or robot | a **character** | `library/characters/<slug>/character.json` (traits, never, palette, styles, emotions, poses, acts) |
+| A whole video made as code | a **video template** | `research/video_prompts/templates/` + `templates/catalog.json` |
+
+**So the Agent can propose it:** every template, technique, style and character also gets an entry in
+`library/intake.json` (the words that point to it in English and Spanish, its domain, what is on screen, what it needs
+and its energy range). `read_brief` reads requests against it; `python tools/test_intake.py` checks that no template or
+character is missing.
 
 ### Step 1 · Check it does not exist
 `list_kit`, `list_presets`, `library/INDEX.txt` or `docs/CATALOG.md`. If something close exists, extend it (a new option or

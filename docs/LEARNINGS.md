@@ -176,6 +176,12 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   old paths ("No such file … library/brands/vela") → restart the session (or Claude Code) to load server changes.
 - **Engine "undefined" in host functions** → `$.evalFile` runs in the caller's scope → publish to `$.global` after loading.
 - **Old panel code after F5** → CEP caches the page's scripts → load CSS/JS with a `?v=Date.now()` query.
+- **Open requests got the same kind of video every time** ("I want a video with DNA" → one generic build) → the Agent
+  reads the request first: `read_brief` (`tools/intake.py` over `library/intake.json`) returns what fits from different
+  kinds, 2-3 routes and only the questions the request leaves open; a precise order comes back as direct. Each project
+  keeps `claude/intake_history.json`, and what it already made goes last. The panel's context tells the Agent to do
+  this; the skill does it for Claude Code. A route of its own for a character read oddly ("C. The Agent in the modern
+  style"): characters ride along with a template or technique instead, and no style is invented without a feel.
 - **Claude only knew Motion DNA inside the clone** (the skills lived in `.claude/skills/` of the repo) → `setup.py`
   links them into `~/.claude/skills` as its last step (a junction on Windows: no admin; a symlink on macOS), wrapped so
   a failure only prints a note. A link, not a copy, so updates reach the skill; a real folder of the user's own is never

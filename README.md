@@ -222,6 +222,7 @@ Open the repo (or a brand or project folder) in Claude Code and approve the `mot
 
 | To… | Tools |
 |---|---|
+| Understand the request | `read_brief` (first, for an open request: what fits — templates, techniques, styles, characters, kit — what is missing, 2-3 routes and the few questions to ask; a precise order comes back as "direct") |
 | Browse | `list_presets` · `list_packs` · `list_tags` · `suggest_mix` · `match_reference` · `list_brands` · `get_brand` · `list_assets` · `list_resources` (outside scripts, VFX, SFX and music, license checked) |
 | Act in After Effects | `apply_preset` · `apply_pack` · `apply_brand` (`existing` = modify / replace) · `apply_transition` · `add_asset` · `import_media` (a file or an https URL, e.g. a Krea/Flora generation: downloaded, imported, placed) · `remove_animation` |
 | Build what AC packs ship (by behavior, on our tokens) | `solid_transition` (46 named looks: solid/mask wipes, iris, fan, dots, liquid, ink, bubbles, shatter, flash, glitch, twirl, slices…) · `add_element` (27 self-sizing kinds: titles, callouts, counters, timers, social, quotes, lists, chat, rating, cinematic, glass card, our logo end card…) · `add_shape` (39 animated shapes, lines, impacts, fireworks, glitter…) · `move` (3D flip, hinge, orbit, fly…) · `animate_text` (per char/word/line, decode, mask, typewriter) · `add_captions` · `add_look` (backgrounds incl. plexus, blobs, mesh and frosted glass, tones, grain, letterbox, particles, long shadow, glitch) · `add_behavior` (9 behaviours by family, each drawn into shapes, backgrounds, text mattes, element boxes or transitions: bubbles, blob, voronoi, grow, flow, flock, spring, rope, and the hand-drawn `line_boil`) · `list_kit` |
@@ -281,6 +282,32 @@ Motion DNA it tests, shows the result, and leaves a tip. What broke and how it w
 Full catalog with live thumbnails, kit included: **[docs/CATALOG.md](docs/CATALOG.md)** · filterable: `library/index.html` · for LLMs:
 `library/INDEX.txt` · tags: `library/tags.json`. All timing comes from the motion tokens: presets ask for `Arrive` +
 `Land`, never a raw speed, so the whole library retunes in one place.
+
+### What runs underneath, and what you can ask for
+
+You don't need to know any of these names. Describe the video in your own words, in the panel's Agent or in Claude
+Code, and Claude reads it first (`read_brief`): it asks only what is missing (what it is for, what you already have,
+length, feel), proposes two or three different routes, and builds the one you choose. Each project remembers what it
+already made, so the next brief offers something else: Motion DNA is a Swiss army knife, not one template.
+
+| Underneath | How many | Ask for it like… |
+|---|---|---|
+| Presets (moves, classics, text, loops) | 71 + 9 recipes | *"animate the title with Land"*, *"something calm for these layers"* |
+| Kit pieces (elements, shapes, looks, backgrounds, text engine, 3D moves, behaviours) | 113 in 48 families | *"add a lower third and a counter"*, *"a liquid background"* |
+| Transitions | 46 | *"a playful transition between these two shots"* |
+| Techniques (tracked labels, text behind people, speed ramps, cut on the voice…) | 12 | *"put labels that follow the shoe"*, *"text behind the person"* |
+| Styles (one look for a whole comp) | 9 | *"make the whole comp feel premium"* |
+| Curves and durations (the motion tokens) | 14 + 6 | *"slower and softer"*, *"more snap"* |
+| Video templates made as code (research) | 14 | *"a 15 s launch film for our app"*, *"a data story with these numbers"* |
+| Characters | 1 (The Agent, our robot) | *"a short with our robot reading the order"* |
+| Outside resources (scripts, VFX, SFX, music; licenses checked) | 166 | *"find a whoosh for this cut"* |
+| Request routes (`library/intake.json`) | 41 | *"I want a video for…"*: Claude asks, proposes, then builds |
+
+**Characters** are documented like everything else: one file per character (`library/characters/<slug>/character.json`)
+with the traits that never change (pasted word for word into every brief), what it never does, its palette, its
+references, a pixel rig, emotions, poses and acts. Its character sheet and its videos are drawn from that same file, so
+it stays on model. New characters, styles, techniques and templates join `library/intake.json` so Claude can propose
+them (CONTRIBUTING §11).
 
 ### The kit: everything Claude can build, by category
 

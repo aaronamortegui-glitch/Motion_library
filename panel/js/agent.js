@@ -253,7 +253,9 @@ const TEMPLATES = [
   ["Review vs brand", "Review the open comp against the active brand's rules and timing. List what breaks them, without changing anything."],
   ["Explain selection", "Describe the animation on the selected layers: properties, durations in frames, curves, and which Motion DNA preset or curve is closest."],
 ];
-const EXISTING_ASK = "If a layer I point to already has animation, modify it (keep its keyframe values; change timing, curves and style) unless I say replace; if it has none, create it.";
+// an open request gets a brief first (read_brief: what fits, what is missing, 2-3 routes); a precise order runs at once
+const BRIEF_ASK = "If my order is an open request for a video or a piece (not a precise action on layers), call read_brief with my words first, ask me only its questions (short, with options), propose its 2-3 routes in plain words and build the one I choose; then record my choice with read_brief chose=[ids]. A precise order: just do it.";
+const EXISTING_ASK ="If a layer I point to already has animation, modify it (keep its keyframe values; change timing, curves and style) unless I say replace; if it has none, create it.";
 // AI video marked in Figma: a layer named "AI · …" there becomes a placeholder in the comp, marked in its layer
 // (comment + Flora label colour, host.jsx mdna_flora_*), so the mark travels with the project.
 const FLORA_ASK = "AI video marked in Figma: layers named \"AI · …\" there (any text after it is a hint for the prompt) are placeholders for AI video. After importing from Figma, mark them with flora_mark (status \"marked\") and leave them as placeholders; type, backgrounds, shaders and shapes are never AI: animate them with keyframes. For now nothing is sent to Flora from the marks: say which layers you marked.";
@@ -302,7 +304,7 @@ async function contextBlock() {
       " then generate with Krea or Flora, bring each result in with import_media (dest = the project's generated folder), place it (keep the clip's own frame rate: reinterpreting it changes its speed), and check with render_frame." +
       " Figma frames come in through the Figma tools (export the layers, then import_media).");
   } else lines.push("Safe mode: only the Motion DNA tools. If the order needs generated footage or Figma, say that it needs Full mode.");
-  lines.push(EXISTING_ASK, RULE_ASK);
+  lines.push(EXISTING_ASK, RULE_ASK, BRIEF_ASK + (PJ ? ` (project_dir: ${PJ.dir})` : ""));
   if (AG.mode === "full") lines.push(FLORA_ASK);
   return lines.join("\n");
 }

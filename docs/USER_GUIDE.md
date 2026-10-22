@@ -200,6 +200,9 @@ keep rules of its own, next to the brand's.
 ## For Claude
 When you drive After Effects for a person (MCP server `motion-dna`):
 
+0. **An open request** ("I want a video for…"): `read_brief` with their words first. Ask only its questions (short,
+   with options), propose its 2-3 routes, build the one they choose, then record it (`chose=[ids]`, with
+   `project_dir`) so the next brief in that project offers something different. A precise order: just do it.
 1. **Before animating:**
    - `ae_status`;
    - `get_brand <slug>` when a brand is active: follow its rules;

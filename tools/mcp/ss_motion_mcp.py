@@ -424,6 +424,15 @@ def _tags():
     return json.loads((ROOT / "library" / "tags.json").read_text(encoding="utf-8"))
 
 
+def t_read_brief(text="", project_dir=None, chose=None):
+    import intake   # tools/intake.py (tools/ is on sys.path above)
+    if chose:
+        if not project_dir:
+            return "ERROR: chose needs project_dir (the project folder whose history to update)"
+        return "recorded for this project: " + ", ".join(intake.record(project_dir, chose if isinstance(chose, list) else [chose])[-10:])
+    return intake.as_text(intake.read_brief(text, project_dir))
+
+
 def t_list_tags(role=None, target=None, tone=None, energy=None, kind=None):
     """Presets, curves and techniques with their tags, filtered. energy: a level 1-5 the preset's range must include."""
     t, out = _tags(), []
@@ -902,6 +911,8 @@ TOOLS_DEF = [
     ("list_presets", t_list_presets, "List library presets (one line each: kind|name|channels|energy|use). Filter by kind (motion|text|fx|recipe), energy (soft|medium|dynamic), family (own|classic|recipe) or a text query. Pick presets from this before applying.",
      {"kind": {"type": "string"}, "energy": {"type": "string"}, "family": {"type": "string"}, "query": {"type": "string"}}),
     ("list_packs", t_list_packs, "List styles (Dynamic, Elegant, Modern, Playful, Tech, Calm Modern…) with their tags (energy range, tones, curve, transition) and which preset each layer role gets.", {}),
+    ("read_brief", t_read_brief, "Call FIRST when a request is open (\"I want a video for…\", \"make something for our launch\"), before building. It reads the user's words (English or Spanish) against library/intake.json and returns: direct vs open; what the request already says (energy, assets, length); candidates of different kinds (code-rendered templates, techniques, styles, characters, kit families) with what each needs; 2-3 routes to propose; and only the questions still open (purpose, assets, length, energy, the line). Ask those questions briefly with their options, propose the routes in plain words, build the one chosen, then call again with project_dir and chose=[ids] so the next brief in that project offers something different. A precise order comes back as direct: just do it.",
+     {"text": {"type": "string"}, "project_dir": {"type": "string"}, "chose": {"type": "array", "items": {"type": "string"}}}),
     ("list_tags", t_list_tags, "The tag vocabulary: every preset with roles, targets, channels, direction, energy range (1 calm … 5 explosive) and tones; the curves and techniques with theirs. Filter by role, target, tone, energy, kind. Use it to choose or combine moves for a feel.",
      {"role": {"type": "string"}, "target": {"type": "string"}, "tone": {"type": "string"}, "energy": {"type": "integer"}, "kind": {"type": "string"}}),
     ("match_reference", t_match_reference, "Compare a reference analysis (a brand or video placed in an energy range and tones, with observed moves, curves and techniques; schema in library/references/_schema.md) with the library: what already fits, how to build each observed move (preset + curve + duration), the gaps to create, and a proposed style. Pass profile_path (library/references/<slug>.json) or profile_json.",
