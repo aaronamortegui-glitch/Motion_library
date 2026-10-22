@@ -110,6 +110,10 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   while a dialog is open → chain one-shot tasks (each tick schedules the next) and restart them on panel use. The
   bridge itself (`tools/ss_bridge.jsx`) was still a repeating task until 2026-10-19; now its ticks chain and the panel
   restarts the chain when the heartbeat (`SS_BRIDGE_LAST`) is older than 15 s (`host.jsx` `mdna_bridge_heal`).
+  That restart then ran on the panel's 4 s status timer and re-armed the bridge into a dialog still open, so the
+  message came back every ~15 s (2026-10-22) → the panel restarts it only when someone is there (a click or key in
+  the panel in the last 10 s, or an Agent order running), and each restart that does not bring the heartbeat back
+  waits twice as long (15 s … 4 min).
 - **CEP extension does not load** (log: *Signature verification failed*) → unsigned → sign it: `tools/setup.py` makes a
   self-signed certificate with Adobe's ZXPSignCmd, signs `panel/` into a `.zxp` and unzips it into the user's CEP
   extensions folder; AE 2026 loads it with no developer mode (no UPIA needed; the 2024 UPIA known issue is about

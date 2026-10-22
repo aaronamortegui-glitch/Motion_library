@@ -21,12 +21,18 @@ animate keeps a profile that **learns from each review**, and everything it make
   and one per video.
 - **A kit Claude builds for you.** 159 semi-finished pieces (transitions, titles and callouts, shapes, organic
   backgrounds, looks, text animations, 3D moves and behaviours) that size themselves to your text, take the brand's
-  colours and move on the same token curves. Pick one in *Agent › Library › Kit* or ask for it by name.
+  colours and move on the same token curves. Pick one in *Agent › Prompt library › Kit* or ask for it by name.
 
 <br clear="right">
 
 ## What's new
 
+- **Show the agent an image:** paste a screenshot (Ctrl+V), drop image files on the chat or press *+ Image*. The
+  images go to Claude with your order, in Safe and Full mode, and are kept in the project's `claude/attachments`.
+- **A quieter chat:** the agent answers in a few lines, with any question first. The tools it runs fold into one
+  line (*▸ 4 steps*, click to open), and while it works you only see *Working…*.
+- **Tidier Agent:** *Chat · Prompt library* tabs; under the chat box, one row with *+ New conversation*, *Open in Claude
+  app*, *>_ Terminal* and *↻ Reconnect AE*. Connecting lives only in the Project tab (no Setup button in the Agent).
 - **Claude reads your request first:** describe the video in your own words and the Agent (or Claude Code) calls
   `read_brief`: it asks only what is missing, proposes two or three different routes and builds the one you pick. Each
   project remembers what it already made, so the next brief offers something else.
@@ -49,9 +55,9 @@ animate keeps a profile that **learns from each review**, and everything it make
   show the same way.
 - **The chat lives with the project:** each project (or brand) shows its own conversation, and keeps it in its folder:
   `claude/agent-chat.md` (readable, with links to every output) and `claude/sessions/` (the full transcripts).
-- **When After Effects stops answering:** type `reconnect` in the chat, press *Reconnect AE* on the *Working…* line or
-  click the MCP dot. The bridge also restarts by itself when it goes quiet, and an open dialog no longer makes After
-  Effects repeat "Cannot run a script while a modal dialog is waiting".
+- **When After Effects stops answering:** type `reconnect` in the chat, press *↻ Reconnect AE* under the chat box or
+  click the MCP dot. The bridge also restarts by itself when you use the panel, and an open dialog no longer makes
+  After Effects repeat "Cannot run a script while a modal dialog is waiting".
 - **Techniques shown with the teaser's characters:** every technique's picture and example order now come from the
   Motion DNA teaser (Dana, Rex, the robot, the car), and the Styles tab lists the styles again.
 - **Videos made as code (research):** 12 templates on the Motion DNA tokens, inspired by the Opus 5.5 code-video
@@ -67,7 +73,7 @@ animate keeps a profile that **learns from each review**, and everything it make
 - **Behaviours:** the algorithm apart from what it draws. `bubbles`, `voronoi`, `flow`, `flock`, `spring`, `rope`,
   `grow` and the hand-drawn `line_boil`, each drawn into a shape, a background, a text matte, an element's box or a
   transition (`add_behavior`). Every one carries its review verdict: where it works, where it was dropped and why.
-- **In the panel:** *Agent › Library* has a **Kit** tab next to Styles and Techniques, with a preview and a ready order
+- **In the panel:** *Agent › Prompt library* has a **Kit** tab next to Styles and Techniques, with a preview and a ready order
   for each piece.
 - **Our logo, built stroke by stroke:** the helix mark, cleaned into vectors and split into its pieces, assembles
   itself (strands, then rungs, then the arrow, with granular edges), then MOTION / DNA rise below it. The new
@@ -176,7 +182,7 @@ or to the brand.
 ### Styles, techniques and the kit, ready to ask for
 <img src="docs/screens/cep-library.gif" width="300" align="right" alt="The Agent library">
 
-*Agent › Library* shows the **Styles** (a whole comp, role by role), the **Techniques** (tracked labels, text behind
+*Agent › Prompt library* shows the **Styles** (a whole comp, role by role), the **Techniques** (tracked labels, text behind
 people, roto, speed ramps, HUD, stroke build…) and the **Kit** (transitions, elements, shapes, backgrounds, looks, text,
 moves and behaviours) with a preview, what each one does and a ready order: **Use in chat** sends it to the
 agent, **Copy order** takes it to Claude Code. Layers that already move keep their animation.
@@ -228,9 +234,16 @@ in a narrow dock). A clip After Effects' browser cannot play shows as *Video · 
 
 ### When After Effects stops answering
 The agent drives After Effects through a small bridge that checks for its requests every second. If a step hangs on
-*Working…*: type `reconnect` in the chat (handled by the panel, not by Claude), press **Reconnect AE** on that line, or
-click the **MCP** dot. Requests that waited too long are answered as skipped, so send that order again. The bridge also
-restarts by itself 15 s after it goes quiet, for example after you close a dialog.
+*Working…*: type `reconnect` in the chat (handled by the panel, not by Claude), press **↻ Reconnect AE** in the row
+under the chat box, or click the **MCP** dot. Requests that waited too long are answered as skipped, so send that order
+again. When the bridge goes quiet (a dialog was open, for example) the panel restarts it the next time you click or
+type in the panel, or while an order runs; it never restarts it on a timer into a dialog that is still open.
+
+### Show the agent an image
+Paste a screenshot into the chat box (Ctrl+V), drop image files on the chat, or press **+ Image** next to *With:*.
+They wait in a tray above the box (✕ removes one, up to 8) and go to Claude with your order, so it sees them in Safe
+and Full mode. Large images are scaled to 1568 px. With a project or brand open each image is saved in its
+`claude/attachments` folder and linked from `agent-chat.md`; click a thumbnail in the chat to open it.
 
 ### Claude Code and other agents
 Open the repo (or a brand or project folder) in Claude Code and approve the `motion-dna` server. Its tools:
@@ -271,8 +284,8 @@ Motion DNA it tests, shows the result, and leaves a tip. What broke and how it w
 | **UC05** · Cars | Curves | <img src="docs/use-cases/img/uc05.jpg" width="360" alt="UC05"> | "Smoother, more premium" = same keys, S curve or Coast. |
 | **UC06** · Beauty | Brands | <img src="docs/use-cases/img/uc06.jpg" width="360" alt="UC06"> | Write rules anyone could follow; share the brand as one file. |
 | **UC06b** · Beauty | Agent › Chat: a review note becomes a rule | <img src="docs/use-cases/img/uc06b.jpg" width="360" alt="UC06b"> | Keep each rule where it belongs: brand, project or general. |
-| **UC07** · Fashion | Agent › Library › Styles | <img src="docs/use-cases/img/uc07.jpg" width="360" alt="UC07"> | No layers selected means the whole comp. |
-| **UC08** · Fashion | Agent › Library › Techniques (text behind) | <img src="docs/use-cases/img/uc08.jpg" width="360" alt="UC08"> | Cut-outs with `matte` / `text_behind`; watch the contrast. |
+| **UC07** · Fashion | Agent › Prompt library › Styles | <img src="docs/use-cases/img/uc07.jpg" width="360" alt="UC07"> | No layers selected means the whole comp. |
+| **UC08** · Fashion | Agent › Prompt library › Techniques (text behind) | <img src="docs/use-cases/img/uc08.jpg" width="360" alt="UC08"> | Cut-outs with `matte` / `text_behind`; watch the contrast. |
 | **UC09** · Cars | Agent (Full): Figma → After Effects, brand timing | <img src="docs/use-cases/img/uc09.jpg" width="360" alt="UC09"> | Put numbers in the brand's timing: `apply_brand` follows them. |
 | **UC10** · All | Project | <img src="docs/use-cases/img/uc10.jpg" width="360" alt="UC10"> | Keep the `.aep` in the project's `05_ae`. |
 | **UC11** · All | Claude Code (MCP: every tool, 27/27) + layout QA | <img src="docs/use-cases/img/uc11.jpg" width="360" alt="UC11"> | Before calling it done: `render_frame`, then `check_layout`. |
@@ -329,7 +342,7 @@ them (CONTRIBUTING §11).
 Besides presets, styles and techniques, Claude builds these pieces on the open comp through the MCP server. They are
 semi-finished like Animation Composer's: they size themselves to the text, take brand colours and fonts, and every
 movement uses the token curves (acceleration and deceleration, overshoot when the energy asks for it). They come in
-48 families (`library/kit_groups.json`): the panel (*Agent › Library › Kit*, with a ready order), `docs/CATALOG.md` and
+48 families (`library/kit_groups.json`): the panel (*Agent › Prompt library › Kit*, with a ready order), `docs/CATALOG.md` and
 `library/index.html` show one card per family with its variants as chips, and you ask for any variant by name in the chat. The full list with energy and tones is `library/kit.json`
 (`list_kit`); transition looks are in `library/transitions.json`.
 

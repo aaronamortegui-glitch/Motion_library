@@ -264,7 +264,7 @@ const RULE_ASK = "When I give you a review note or a correction, apply it, then 
   "effects, color, audio, edit, process. Do not save rules yourself: the panel asks me where to keep them.";
 
 async function contextBlock() {
-  const lines = [`[Motion DNA panel · Agent. Motion DNA (library, tools, rules): ${S.root}; follow its CLAUDE.md. Report briefly what you did; ask before any paid generation. Never save the After Effects project unless I ask. Before you call a build done, run check_layout and fix its warnings (or say why one stays).]`];
+  const lines = [`[Motion DNA panel · Agent. Motion DNA (library, tools, rules): ${S.root}; follow its CLAUDE.md. Keep replies short: what changed and what needs my decision (put a question first), in one to three sentences; no step-by-step narration or tool output, the panel shows the steps. Ask before any paid generation. Never save the After Effects project unless I ask. Before you call a build done, run check_layout and fix its warnings (or say why one stays).]`];
   if (!PJ && scope().kind === "brand") lines.push(`You are in the folder of the brand ${scope().name} (${scope().dir}): this conversation is for everything about that brand.`);
   if (PJ) {
     lines.push(`Project: ${PJ.p.name}, folder ${PJ.dir} (your working folder: put what you make in its subfolders, never in the Motion DNA repo).`);
@@ -327,7 +327,7 @@ function writeChat(m) {   // the readable copy in the project's (or brand's) fol
     fs.mkdirSync(path.dirname(file), { recursive: true });
     if (!fs.existsSync(file)) fs.writeFileSync(file, `# ${sc.name} · Agent conversation\n\nWritten by the Motion DNA panel. The full transcript of each conversation is in sessions/.\n`);
     const t = new Date().toISOString().replace("T", " ").slice(0, 16);
-    const line = { you: `\n## ${t} · Order\n\n${m.text}\n`, agent: `\n${m.text}\n`, step: `- ${m.text}\n`, error: `\n> Error: ${m.text}\n`, done: `\n*${m.text}*\n`,
+    const line = { you: `\n## ${t} · Order\n\n${m.text}\n` + (m.files && m.files.length ? "\n" + m.files.map((f) => `- Image: ${f}`).join("\n") + "\n" : ""), agent: `\n${m.text}\n`, step: `- ${m.text}\n`, error: `\n> Error: ${m.text}\n`, done: `\n*${m.text}*\n`,
       rule: `\n> Rule proposed: ${m.text}\n`, media: `\n**${m.text}**\n\n${(m.items || []).map((x, i) => `- Output ${i + 1} (${x.kind}): ${x.src.startsWith("data:") ? "inline image" : x.src}`).join("\n")}\n` }[m.role];
     if (line) fs.appendFileSync(file, line);
   } catch (e) {}
@@ -497,20 +497,21 @@ function splitRules(text) {   // RULE: category | rule | why  lines become propo
   }
   return { text: keep.join("\n").trim(), rules };
 }
-async function runAgent(prompt) {
+async function runAgent(prompt, images = []) {
   if (AG.proc) return;
   const cp = nodeReq()("child_process");
   let sid = sessionNow();
   if (busyElsewhere(sid) && !confirm("This conversation was used in the last seconds somewhere else (the Claude app or a terminal).\nMessages from both would mix. Send anyway?")) return;
   // busy from the first moment: building the context can take seconds, and a second Enter must not start a second run
   AG.cancelled = false; AG.proc = { kill: () => { AG.cancelled = true; AG.proc = null; agent.draw(); } };
-  push("you", prompt);
+  push("you", prompt, images.length ? { images: images.map((x) => x.thumb), files: saveAttachments(images) } : null);
   let full;
   try { full = prompt + "\n\n---\n" + (await contextBlock()); }
   catch (e) { AG.proc = null; push("error", "Could not read the context: " + e.message); return; }
   if (AG.cancelled) { push("error", "Stopped."); return; }
   const mcp = JSON.stringify({ mcpServers: { "motion-dna": { command: pyExe(), args: [S.root + "/tools/mcp/ss_motion_mcp.py"] } } });
-  const args = ["-p", full, "--output-format", "stream-json", "--verbose", "--mcp-config", mcp,
+  // with images the order goes on stdin as one user message (text + images); without, as the -p argument
+  const args = [...(images.length ? ["-p", "--input-format", "stream-json"] : ["-p", full]), "--output-format", "stream-json", "--verbose", "--mcp-config", mcp,
     "--allowedTools", ...(AG.mode === "full" ? fullTools() : SAFE_TOOLS), "--disallowedTools", ...neverTools()];
   if (AG.mode !== "full") args.push("--strict-mcp-config");   // Safe: only Motion DNA, not every server of the account
   if (scope().kind !== "repo") args.push("--add-dir", S.root);
@@ -521,6 +522,10 @@ async function runAgent(prompt) {
   let buf = "", gotResult = false;
   AG.toolOf = {};
   AG.proc = cp.spawn(AG.exe, args, { cwd: cwdNow(), windowsHide: true, env });
+  if (images.length) {
+    const content = [{ type: "text", text: full }].concat(images.map((x) => ({ type: "image", source: { type: "base64", media_type: x.type, data: x.data } })));
+    AG.proc.stdin.write(JSON.stringify({ type: "user", message: { role: "user", content } }) + "\n"); AG.proc.stdin.end();
+  }
   agent.draw();
   AG.proc.stdout.on("data", (d) => {
     buf += d.toString();
@@ -569,6 +574,25 @@ async function runAgent(prompt) {
     agent.draw();
   });
   AG.proc.on("error", (e) => { AG.proc = null; push("error", "Could not start Claude Code: " + e.message); });
+}
+// Images in the chat: pasted (Ctrl+V), dropped, or picked with + Image. Each is scaled to 1568 px at most (what Claude
+// reads best), sent with the order, and saved in the project's (or brand's) claude/attachments; the chat keeps a thumbnail.
+async function readImage(file) {
+  const url = await new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = no; r.readAsDataURL(file); });
+  const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = url; });
+  const draw = (max, type, q) => { const s = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement("canvas");
+    c.width = Math.round(img.width * s); c.height = Math.round(img.height * s); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); return c.toDataURL(type, q); };
+  const type = file.type === "image/png" ? "image/png" : "image/jpeg";
+  const full = draw(1568, type, 0.9);
+  return { name: file.name || "pasted." + (type === "image/png" ? "png" : "jpg"), type, data: full.split(",")[1], thumb: draw(160, "image/jpeg", 0.8) };
+}
+function saveAttachments(images) {
+  const sc = scope(); if (sc.kind === "repo" || !nodeReq()) return [];
+  try {
+    const fs = nodeReq()("fs"), path = nodeReq()("path"), dir = path.join(sc.dir, "claude", "attachments"), stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    fs.mkdirSync(dir, { recursive: true });
+    return images.map((x, i) => { const f = path.join(dir, `${stamp}_${i + 1}_${x.name.replace(/[^\w.-]+/g, "_")}`); fs.writeFileSync(f, Buffer.from(x.data, "base64")); return f.split("\\").join("/"); });
+  } catch (e) { return []; }
 }
 function stepText(c) {
   const n = c.name.replace(/^mcp__motion-dna__/, "").replace(/^mcp__(claude_ai_)?[Ff]igma__/, "Figma · ").replace(/^mcp__(claude_ai_)?[Kk]rea__/, "Krea · ").replace(/^mcp__(claude_ai_)?[Ff]lora__(flora_)?/, "Flora · ").replace(/^mcp__/, "");
@@ -666,12 +690,11 @@ function agent() {
       class: AG.mode === k ? "on" : "", title: k === "safe" ? "Only the Motion DNA tools (apply, layers, frames)" : "Also Figma, Krea, Flora, files and scripts (asks before paid generations; never commits or pushes)",
       onclick: () => { AG.mode = k; store.set("agentMode", k); render(); } }, l)));
     if (AG.tab === "project") AG.tab = "chat";   // Project is its own section now (the first tab)
-    const tabsEl = h("div", { class: "seg agent-tabs" }, ...[["chat", "Chat"], ["library", "Library"]].map(([k, l]) =>
+    const tabsEl = h("div", { class: "seg agent-tabs" }, ...[["chat", "Chat"], ["library", "Prompt library"]].map(([k, l]) =>
       h("button", { class: AG.tab === k ? "on" : "", onclick: () => { AG.tab = k; store.set("agentTab", k); AG.libSel = null; render(); } }, l)));
     const where = h("button", { class: "projchip btn ghost", style: "text-align:left;padding:0", title: "Open the Project section", onclick: () => goSection("project") },
       scopeText());
-    sec.append(h("div", { class: "kit-top" }, h("span", { class: "kit-title" }, "Agent"), modeSeg,
-      h("button", { class: "btn" + (AG.logged === false ? " on" : ""), title: "Connect Claude and your apps (Project section)", onclick: () => agent.showSetup() }, AG.logged === false ? "Connect" : "Setup")), tabsEl, where);
+    sec.append(h("div", { class: "kit-top" }, h("span", { class: "kit-title" }, "Agent"), modeSeg), tabsEl, where);
     if (AG.tab === "library") sec.append(libraryView());
     else sec.append(chatView());
   };
@@ -691,12 +714,23 @@ function chatView() {
   if (AG.pending) { input.value = AG.pending; AG.pending = null; setTimeout(() => input.focus()); }
   const send = h("button", { class: "solid apply", onclick: () => go() }, "Send");
   const stop = h("button", { class: "solid remove", onclick: stopAgent }, "Stop");
+  AG.attach = AG.attach || [];
+  const tray = h("div", { class: "attach-tray" });
+  const drawTray = () => { tray.hidden = !AG.attach.length; tray.replaceChildren(...AG.attach.map((x, i) => h("div", { class: "attach" },
+    h("img", { src: x.thumb, alt: "", title: x.name }), h("button", { class: "attach-x", title: "Remove", onclick: () => { AG.attach.splice(i, 1); drawTray(); } }, "✕")))); };
+  const addFiles = async (files) => { for (const f of files) if (/^image\//.test(f.type) && AG.attach.length < 8) { try { AG.attach.push(await readImage(f)); } catch (e) { toast("Could not read " + (f.name || "the image"), true); } } drawTray(); };
+  const picker = h("input", { type: "file", accept: "image/*", multiple: true, style: "display:none", onchange: (e) => { addFiles([...e.target.files]); e.target.value = ""; } });
+  const addBtn = h("button", { class: "chip ghost", title: "Add images to the order (or paste with Ctrl+V, or drop them here)", onclick: () => picker.click() }, "+ Image");
+  input.addEventListener("paste", (e) => { const fs = [...(e.clipboardData ? e.clipboardData.items : [])].filter((x) => x.kind === "file").map((x) => x.getAsFile()).filter(Boolean); if (fs.length) { e.preventDefault(); addFiles(fs); } });
+  wrap.addEventListener("dragover", (e) => { e.preventDefault(); wrap.classList.add("dropping"); });
+  wrap.addEventListener("dragleave", () => wrap.classList.remove("dropping"));
+  wrap.addEventListener("drop", (e) => { e.preventDefault(); wrap.classList.remove("dropping"); addFiles([...e.dataTransfer.files]); });
   const go = async () => {
-    const v = input.value.trim(); if (!v) return;
+    const v = input.value.trim() || (AG.attach.length ? "Look at the attached image(s)." : ""); if (!v) return;
     if (/^\/?(reconnect|reconectar)[.!]?$/i.test(v)) {   // handled here, not by Claude: works even while an order is stuck
       input.value = ""; push("you", v); const r = await reconnectAE(); push(r.ok ? "done" : "error", r.msg); return;
     }
-    if (AG.proc) return; input.value = ""; runAgent(v);
+    if (AG.proc) return; input.value = ""; const imgs = AG.attach.splice(0); drawTray(); runAgent(v, imgs);
   };
   input.addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); go(); } });
   const chip = (key, label) => h("button", { class: "chip" + (AG.ctx[key] ? " on" : ""), title: `Send the ${label.toLowerCase()} with the order`,
@@ -723,11 +757,24 @@ function chatView() {
     templates.hidden = AG.log.length > 0;
     input.placeholder = AG.log.some((m) => m.role === "you") ? "" : PLACEHOLDER;   // the example goes once the conversation starts
     wrap.classList.toggle("talking", AG.log.length > 0);   // during a conversation the log gets the room, the field shrinks
-    logEl.replaceChildren(...AG.log.map((m) =>
-      m.role === "rule" ? ruleCard(m) : m.role === "media" ? mediaCard(m) : h("div", { class: "msg " + m.role }, m.role === "step" ? "▸ " + m.text : m.text)));
-    if (AG.proc) logEl.append(h("div", { class: "msg working" }, h("i", { class: "spin" }), "Working…",
-      h("button", { class: "chip ghost", title: "After Effects not answering? Restart the bridge (or type reconnect)", style: "margin-left:auto",
-        onclick: async () => { const r = await reconnectAE(); push(r.ok ? "hint" : "error", r.msg); } }, "Reconnect AE")));
+    // the agent's steps (tools it ran) fold into one line per run of steps; a click opens them
+    const items = [];
+    for (let i = 0; i < AG.log.length; i++) {
+      const m = AG.log[i];
+      if (m.role !== "step") { items.push(m.role === "rule" ? ruleCard(m) : m.role === "media" ? mediaCard(m) : h("div", { class: "msg " + m.role }, m.text,
+        m.images && m.images.length ? h("div", { class: "msg-images" }, ...m.images.map((src, k) => h("img", { src, alt: "", title: m.files && m.files[k] ? "Open " + m.files[k] : "",
+          onclick: () => { if (m.files && m.files[k]) call("mdna_open", m.files[k]); } }))) : null)); continue; }
+      let j = i; while (j + 1 < AG.log.length && AG.log[j + 1].role === "step") j++;
+      const run = AG.log.slice(i, j + 1), key = i;
+      const open = AG.openSteps && AG.openSteps.has(key);
+      items.push(h("button", { class: "msg step steps-fold", title: open ? "Hide the steps" : "Show what the agent ran",
+        onclick: () => { AG.openSteps = AG.openSteps || new Set(); open ? AG.openSteps.delete(key) : AG.openSteps.add(key); agent.draw(); } },
+        (open ? "▾ " : "▸ ") + run.length + (run.length === 1 ? " step" : " steps")));
+      if (open) for (const s of run) items.push(h("div", { class: "msg step" }, "· " + s.text));
+      i = j;
+    }
+    logEl.replaceChildren(...items);
+    if (AG.proc) logEl.append(h("div", { class: "msg working" }, h("i", { class: "spin" }), "Working…"));
     logEl.scrollTop = logEl.scrollHeight;
     send.hidden = !!AG.proc; stop.hidden = !AG.proc; input.disabled = !!AG.proc || AG.logged === false;
   };
@@ -736,13 +783,18 @@ function chatView() {
     h("span", { class: "dim" }, "One sign-in with your Claude account, once per computer."),
     h("button", { class: "solid apply big", onclick: () => agent.showSetup() }, "Connect Claude")));
   wrap.classList.add("chat");
-  wrap.append(logEl, input,
+  drawTray();
+  wrap.append(logEl, tray, input, picker,
     h("div", { class: "send-row" }, h("div", { class: "chips", title: "What the agent gets with your order (the repo's rules and the library always go)" },
-      h("span", { class: "dim" }, "With:"), chip("brand", "Brand"), chip("comp", "Comp"), chip("selection", "Selection")), send, stop),
+      h("span", { class: "dim" }, "With:"), chip("brand", "Brand"), chip("comp", "Comp"), chip("selection", "Selection"), addBtn), send, stop),
     templates,
-    h("div", { class: "crow foot" }, newBtn,
+    h("div", { class: "chat-tools" },
+      newBtn,
       h("button", { class: "btn ghost", title: "Continue this conversation in the Claude app (Code tab)", disabled: scope().kind === "repo" && !sid, onclick: () => openInClaudeApp(sessionNow()) }, sid ? "Open in Claude app" : "Start in Claude app"),
-      h("button", { class: "btn ghost icon", title: "Copy the command that continues this same conversation in a terminal (claude --resume …)", disabled: !sid, onclick: () => { navigator.clipboard.writeText(resumeCommand(sessionNow())); toast("Command copied: paste it in a terminal to continue this conversation there."); } }, ">_")));
+      h("button", { class: "btn ghost", title: "Copy the command that continues this same conversation in a terminal (claude --resume …)", disabled: !sid,
+        onclick: () => { navigator.clipboard.writeText(resumeCommand(sessionNow())); toast("Command copied: paste it in a terminal to continue this conversation there."); } }, ">_ Terminal"),
+      h("button", { class: "btn ghost", title: "After Effects not answering? Restart the link the agent uses (you can also type reconnect)",
+        onclick: async () => { const r = await reconnectAE(); push(r.ok ? "hint" : "error", r.msg); } }, "↻ Reconnect AE")));
   agent.draw();
   return wrap;
 }
@@ -842,8 +894,7 @@ function projectSection() {
   proj.addEventListener("toggle", () => { AG.projOpen = proj.open; });
   sec.replaceChildren(
     h("div", { class: "kit-top" }, h("span", { class: "kit-title" }, "Project"), h("span", { class: "dim" }, "Step 1: set up, then move left to right")),
-    conn, proj,
-    h("div", { class: "crow" }, h("button", { class: "btn", title: "Next: animate with the presets", onclick: () => goSection("behaviors") }, "Next: Behaviors →")));
+    conn, proj);
 }
 
 function projectView() {

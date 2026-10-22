@@ -119,11 +119,11 @@ def clean_old():
     if not found:
         print("      no old panel loaders")
     # the MCP server's old name
-    if shutil.which("claude"):
-        lst = run(["claude", "mcp", "list"]).stdout
+    if claude_cli():
+        lst = run([claude_cli(), "mcp", "list"]).stdout
         if re.search(r"^ss-motion\b", lst, re.M):
             for scope in ("user", "local", "project"):
-                run(["claude", "mcp", "remove", "ss-motion", "-s", scope])
+                run([claude_cli(), "mcp", "remove", "ss-motion", "-s", scope])
             print(OK + "removed the old MCP registration 'ss-motion' (now 'motion-dna')")
     # stale bridge jobs (a job left in the inbox would run when AE starts). Only with AE closed: while AE runs the marker
     # means "bridge active", and deleting it makes the next MCP call start the bridge again, which toggles it off.
@@ -508,15 +508,36 @@ def checks():
     return good and not wrong
 
 
+def claude_cli():
+    """Claude Code's command: on PATH, else the native installer's ~/.local/bin (often not on PATH on Windows), else the
+    newest copy the desktop app keeps (AppData/Local/Claude-Data/claude_*/claude-code/<ver>/<hash>, or the Store
+    build's Packages folder). The panel's Agent looks in the same places (panel/js/agent.js findClaude)."""
+    found = shutil.which("claude")
+    if found:
+        return found
+    exe = "claude.exe" if os.name == "nt" else "claude"
+    native = pathlib.Path.home() / ".local" / "bin" / exe
+    if native.exists():
+        return str(native)
+    local = pathlib.Path(os.environ.get("LOCALAPPDATA", pathlib.Path.home() / "AppData" / "Local"))
+    roaming = pathlib.Path(os.environ.get("APPDATA", pathlib.Path.home() / "AppData" / "Roaming"))
+    bases = [roaming / "Claude" / "claude-code", pathlib.Path.home() / "Library" / "Application Support" / "Claude" / "claude-code"]
+    bases += [d / "claude-code" for d in (local / "Claude-Data").glob("claude_*")]
+    bases += [d / "LocalCache" / "Roaming" / "Claude" / "claude-code" for d in (local / "Packages").glob("Claude_*")]
+    ver = lambda s: tuple(int(x) if x.isdigit() else 0 for x in s.split("."))
+    cands = [(ver(v.name), e) for b in bases if b.is_dir() for v in b.iterdir() if v.is_dir() for e in v.glob("*/" + exe)]
+    return str(max(cands)[1]) if cands else None
+
+
 def mcp_user(remove=False):
     print("MCP server for Claude Code in every folder")
-    if not shutil.which("claude"):
+    if not claude_cli():
         print(WARN + "Claude Code CLI not found; inside this repo .mcp.json already registers motion-dna")
         return not remove
-    run(["claude", "mcp", "remove", "motion-dna", "-s", "user"])   # re-register so the path is this clone's
+    run([claude_cli(), "mcp", "remove", "motion-dna", "-s", "user"])   # re-register so the path is this clone's
     if remove:
         print(OK + "removed motion-dna (user scope)"); return True
-    r = run(["claude", "mcp", "add", "-s", "user", "motion-dna", "--", sys.executable, str(ROOT / "tools/mcp/ss_motion_mcp.py")])
+    r = run([claude_cli(), "mcp", "add", "-s", "user", "motion-dna", "--", sys.executable, str(ROOT / "tools/mcp/ss_motion_mcp.py")])
     print((OK if r.returncode == 0 else WARN) + (r.stdout.strip() or r.stderr.strip() or "registered"))
     return r.returncode == 0
 
@@ -529,14 +550,14 @@ def mcp_local(remove=False):
         py_file.unlink(missing_ok=True)
     else:
         py_file.write_text(sys.executable.replace("\\", "/"), encoding="utf-8")
-    if not shutil.which("claude"):
+    if not claude_cli():
         print(WARN + "Claude Code CLI not found: in Claude Code, run  claude mcp add -s local motion-dna -- "
               f"{sys.executable} tools/mcp/ss_motion_mcp.py  in this folder")
         return not remove
-    run(["claude", "mcp", "remove", "motion-dna", "-s", "local"], cwd=ROOT)
+    run([claude_cli(), "mcp", "remove", "motion-dna", "-s", "local"], cwd=ROOT)
     if remove:
         return True
-    r = run(["claude", "mcp", "add", "-s", "local", "motion-dna", "--", sys.executable, str(ROOT / "tools/mcp/ss_motion_mcp.py")], cwd=ROOT)
+    r = run([claude_cli(), "mcp", "add", "-s", "local", "motion-dna", "--", sys.executable, str(ROOT / "tools/mcp/ss_motion_mcp.py")], cwd=ROOT)
     print((OK if r.returncode == 0 else WARN) + f"MCP server for Claude Code in this folder, with {sys.executable}")
     return r.returncode == 0
 

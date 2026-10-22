@@ -42,20 +42,25 @@ function mdna_boot(extPath) {
 // meets an open dialog ends its chain (tools/ss_bridge.jsx). It then looks "started" but never answers. Its poll leaves
 // a heartbeat (SS_BRIDGE_LAST); if it is older than 15 s the bridge is started again, and the status says so. This runs
 // from the panel (CEP evalScript), which waits quietly while a dialog is open instead of showing an error.
+// It is restarted only when someone is there (the panel passes heal=1 after a click or key in the panel, or while an
+// Agent order runs), never on a timer alone: a restarted tick that meets a dialog still open shows the error again.
+// After a restart that did not bring the heartbeat back, the next one waits twice as long (15 s, 30 s … 4 min).
 function mdna_bridge_heal() {
     if (!$.global.SS_BRIDGE_TASK || typeof $.global.SS_BRIDGE_POLL !== "function") return false;
-    var last = $.global.SS_BRIDGE_LAST || 0;
-    if (last && new Date().getTime() - last < 15000) return false;
-    if (!last) { $.global.SS_BRIDGE_LAST = new Date().getTime(); return false; }   // an older bridge without heartbeat: give it one round
+    var now = new Date().getTime(), last = $.global.SS_BRIDGE_LAST || 0;
+    if (!last) { $.global.SS_BRIDGE_LAST = now; return false; }   // an older bridge without heartbeat: give it one round
+    if (now - last < 15000) { $.global.SS_BRIDGE_HEAL_N = 0; return false; }   // alive
+    var n = $.global.SS_BRIDGE_HEAL_N || 0, wait = Math.min(15000 * Math.pow(2, n), 240000);
+    if ($.global.SS_BRIDGE_HEALED && now - $.global.SS_BRIDGE_HEALED < wait) return false;
     $.global.SS_BRIDGE_ON = false;
     try { app.cancelTask($.global.SS_BRIDGE_TASK); } catch (e) {}
     $.global.SS_BRIDGE_TASK = null;
     $.evalFile(new File($.global.SS_ROOT + "/tools/ss_bridge.jsx"));   // a fresh chain of ticks
-    $.global.SS_BRIDGE_HEALED = new Date().getTime();
+    $.global.SS_BRIDGE_HEALED = now; $.global.SS_BRIDGE_HEAL_N = n + 1;
     return true;
 }
-function mdna_status() {
-    var healed = false; try { healed = mdna_bridge_heal(); } catch (e) {}
+function mdna_status(heal) {
+    var healed = false; if (heal === "1") { try { healed = mdna_bridge_heal(); } catch (e) {} }
     var on = !!$.global.SS_BRIDGE_TASK, mins = -1;
     try {
         var fs = Folder($.global.SS_ROOT + "/bridge/outbox").getFiles("*.txt"), best = 0;

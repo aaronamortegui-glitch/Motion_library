@@ -106,8 +106,13 @@ async function boot() {
 }
 
 // ---------- header ----------
+// The bridge is restarted only when someone is there: a click or key in the panel in the last 10 s, or an Agent order
+// running (host.jsx mdna_bridge_heal). A timer alone would restart it into a dialog that is still open.
+let lastTouch = 0;
+for (const ev of ["pointerdown", "keydown"]) document.addEventListener(ev, () => { lastTouch = Date.now(); }, true);
 async function status() {
-  const s = parse(await call("mdna_status")), pill = $("#mcp");
+  const present = Date.now() - lastTouch < 10000 || (typeof AG !== "undefined" && !!AG.proc);
+  const s = parse(await call("mdna_status", present ? "1" : "0")), pill = $("#mcp");
   pill.classList.toggle("on", !!s.bridge); pill.classList.toggle("off", !s.bridge);
   const last = s.minutes >= 0 && s.minutes <= 1 ? " · active now" : (s.minutes > 1 && s.minutes < 60 ? ` · last ${s.minutes} min ago` : "");
   pill.title = s.bridge ? "Claude connected through MCP" + last : "Claude offline: click to connect";
