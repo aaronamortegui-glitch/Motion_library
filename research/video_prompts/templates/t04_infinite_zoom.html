@@ -4,45 +4,180 @@
 <script src="../runtime/mdna.js"></script>
 <div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
 <script>
-// T04 · infinite zoom (archetype "a dot on black becomes a whole workspace, zoom out to a point in space, zoom back
-// into a phone"). Route A: one continuous camera over a world drawn in world units, exported as an MP4 asset.
-const VARS = { product: "Orbit Terminal", panels: ["Chart", "Positions", "Watchlist", "Orders"], end: "One screen. Every market." };
+// T04 · infinite zoom (archetype "one continuous camera from a UI detail out to space and back into a phone").
+// Route A: one log-scale camera over a world drawn in world units, exported as an MP4 asset. Every scale change is a
+// match: the live data point of a chart → the whole desktop → the desktop as a glowing point among stars (true 3D
+// parallax: stars live at depths between the desktop and the camera) → that point becomes the phone screen.
+const VARS = { product: "Orbit Terminal", panels: ["Chart", "Positions", "Watchlist", "Orders"], end: "One screen. *Every market.*" };
 const { T, seg, k, lerp, clamp, rng } = MDNA, C = T.color;
-const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
-const R = rng(3), STARS = Array.from({ length: 900 }, () => [R() * 2 - 1, R() * 2 - 1, R()]);
-function chart(x, y, w, h, p, seed) { const r = rng(seed); let v = 0.5; g.beginPath(); for (let i = 0; i <= 60 * p; i++) { v = clamp(v + (r() - 0.48) * 0.12, 0.1, 0.9); const X = x + (i / 60) * w, Y = y + h - v * h; i ? g.lineTo(X, Y) : g.moveTo(X, Y); } g.strokeStyle = C.spark; g.lineWidth = 3; g.stroke(); }
-function panel(x, y, w, h, title, p, seed) {   // world-space panel
-  D.alpha(p, () => { D.rr(x, y, w, h, 14); D.fill("#0F2B28"); g.strokeStyle = "#D8FF8533"; g.lineWidth = 2; g.stroke();
-    D.txt(title, x + 24, y + 34, 22, C.mint, 600, T.font.ui, "left");
-    if (seed % 2) chart(x + 24, y + 70, w - 48, h - 100, p, seed); else for (let i = 0; i < 6; i++) { D.rr(x + 24, y + 70 + i * ((h - 90) / 6), (w - 48) * (0.4 + 0.5 * rng(seed + i)()), (h - 90) / 6 - 10, 6); D.fill(i % 3 ? "#174A46" : "#D8FF8555"); } });
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080, CX = W / 2, CY = H / 2, L = Math.log;
+const fmt = v => v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const SEA = "rgba(23,74,70,", MINT = "rgba(159,216,194,", SPK = "rgba(216,255,133,";
+
+// one price series, shared by the desktop chart and the phone chart (the same product on both screens)
+const SER = (() => { const r = rng(11), a = []; let v = 0; for (let i = 0; i < 72; i++) { v += (r() - 0.42) * 1.0; a.push(v); }
+  const lo = Math.min(...a), last = a[a.length - 1]; return a.map(x => 1196 + (x - lo) / (last - lo) * 88.6); })();
+const LO = Math.min(...SER) - 8, HI = Math.max(...SER) + 10, LAST = SER[SER.length - 1];
+const spark = (n, seed, up) => { const r = rng(seed), a = []; let v = 0; for (let i = 0; i < n; i++) { v += (r() - (up ? 0.4 : 0.6)); a.push(v); } const lo = Math.min(...a), hi = Math.max(...a); return a.map(x => (x - lo) / (hi - lo || 1)); };
+
+// ---- camera: scale s, world focus F drawn at screen point S. Camera distance from the desktop plane = 1 / s.
+function cam(t) {
+  const s = Math.exp(k(t, [[0, L(14)], [2.5, L(0.97), "Coast"], [4.3, L(1.0), "Flat"], [6.4, L(0.011), "Ramp"], [7.1, L(0.0085), "Flat"],
+                           [9.3, L(1.0), "Ramp"], [12, L(1.045), "Flat"]]));
+  if (t < 2.5) { const q = seg(t, 0, 2.5, "Coast"); return { s, F: P, S: [CX + P[0] * 0.97 * q, CY + P[1] * 0.97 * q] }; }
+  if (t < 7.0) return { s, F: [0, 0], S: [CX, CY] };
+  return { s, F: [0, 0], S: [k(t, [[8.2, CX], [9.6, 650, "Cruise"]]), CY] };
 }
-function world(t) {   // the desktop, 1600 x 900 world units around (0,0)
-  const ps = [[-780, -430, 900, 520], [150, -430, 630, 250], [150, -150, 630, 240], [-780, 120, 1560, 310]];
-  ps.forEach((q, i) => panel(...q, VARS.panels[i], seg(t, 1.2 + i * 0.25, 1.7 + i * 0.25, "Land"), i + 1));
+let S = 1;                                       // current camera scale, for screen-constant strokes
+const lw = px => px / Math.max(1, S);            // a stroke that stays px wide when zoomed in, scales down when zoomed out
+
+// world text that fades as it nears the frame edge (the camera carries text in and out of the frame)
+function wt(s, x, y, size, col, w = 700, fam = T.font.ui, align = "left", track = 0) {
+  const m = g.getTransform(), sc = Math.hypot(m.a, m.b); if (size * sc < 7) return;   // below ~10 px text is a grey line: fade it in from there
+  const width = D.width(s, size, w, fam, track) * m.a, X = m.a * x + m.c * y + m.e, Y = m.b * x + m.d * y + m.f, hh = size * sc * 0.6;
+  const x0 = align === "center" ? X - width / 2 : align === "right" ? X - width : X;
+  const a = clamp((Math.min(x0, W - x0 - width, Y - hh, H - Y - hh) - 40) / 60) * clamp((size * sc - 7) / 6);
+  if (a > 0) D.alpha(a, () => D.txt(s, x, y, size, col, w, fam, align, track));
 }
-function phone(t, p) { D.alpha(p, () => { D.rr(-260, -130, 520, 260, 34); D.fill(C.ink); g.strokeStyle = C.sea; g.lineWidth = 6; g.stroke();
-  D.rr(-240, -110, 230, 220, 14); D.fill("#0F2B28"); chart(-230, -90, 210, 180, seg(t, 9.6, 10.6, "Cruise"), 9);
-  for (let i = 0; i < 6; i++) { D.rr(10, -100 + i * 35, 220, 26, 6); D.fill(i % 2 ? "#174A46" : "#D8FF8544"); } }); }
+const kick = (s, x, y, col = C.mint, align = "left") => wt(s.toUpperCase(), x, y, 24, col, 600, T.font.ui, align, 7);
+function line(pts, col, width) { g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.strokeStyle = col; g.lineWidth = width; g.lineJoin = g.lineCap = "round"; g.stroke(); }
+function chart(x0, y0, x1, y1, t, width) {        // area + line + live point; returns the live point
+  const pts = SER.map((v, i) => [lerp(x0, x1, i / (SER.length - 1)), lerp(y1, y0, (v - LO) / (HI - LO))]);
+  const gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, SPK + "0.24)"); gr.addColorStop(1, SPK + "0)");
+  g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.lineTo(x1, y1); g.lineTo(x0, y1); g.closePath(); g.fillStyle = gr; g.fill();
+  line(pts, C.spark, width); const p = pts[pts.length - 1];
+  const ph = (t * 0.8) % 1; g.beginPath(); g.arc(p[0], p[1], 7 + 26 * ph, 0, 7); g.strokeStyle = SPK + (0.7 * (1 - ph)) + ")"; g.lineWidth = lw(2.5); g.stroke();
+  MDNA.glow(g, p[0], p[1], Math.max(16, 34 * Math.min(1, 3 / S)), C.spark, S > 3 ? 0.35 : 0.55); g.beginPath(); g.arc(p[0], p[1], 7, 0, 7); D.fill(C.spark); g.beginPath(); g.arc(p[0], p[1], 2.6, 0, 7); D.fill(S > 3 ? C.cloud : C.ink);
+  return p;
+}
+function panel(x, y, w, h) { D.rr(x, y, w, h, 16); D.fill(SEA + "0.38)"); g.strokeStyle = MINT + "0.16)"; g.lineWidth = lw(1.5); g.stroke(); }
+function rule(x0, x1, y) { g.fillStyle = MINT + "0.12)"; g.fillRect(x0, y, x1 - x0, lw(1.5)); }
+
+// ---- the desktop: 1700 x 940 world units around (0, 0)
+const PAN = [[-820, -380, 1020, 560], [230, -380, 590, 270], [230, -80, 590, 260], [-820, 204, 1640, 240]];
+const CH = (() => { const [x, y, w, h] = PAN[0]; return [x + 112, y + 160, x + w - 196, y + h - 72]; })();   // plot area
+const P = [CH[2], lerp(CH[3], CH[1], (LAST - LO) / (HI - LO))];                                            // the live point
+function desktop(t) {
+  D.rr(-850, -470, 1700, 940, 24); D.fill(C.pine); g.strokeStyle = MINT + "0.22)"; g.lineWidth = lw(2); g.stroke();
+  [C.coral, C.spark, C.mint].forEach((c, i) => { g.beginPath(); g.arc(-814 + i * 26, -440, 7, 0, 7); D.fill(c); });
+  wt(VARS.product, 0, -440, 26, C.cloud, 600, T.font.ui, "center");
+  wt("12:04:" + String(31 + Math.floor(t)).padStart(2, "0"), 818, -440, 24, C.mint, 500, T.font.ui, "right");
+  rule(-850, 850, -410);
+  const filled = t > 3.9, ins = seg(t, 3.2, 3.7, "Land");
+  // chart
+  { const [x, y, w, h] = PAN[0]; panel(x, y, w, h); kick(VARS.panels[0], x + 32, y + 44);
+    wt("NOVA / USD", x + 32, y + 92, 36, C.cloud, 700);
+    wt(fmt(LAST), x + w - 32, y + 58, 52, C.cloud, 700, T.font.ui, "right");
+    D.rr(x + w - 162, y + 92, 130, 40, 20); D.fill(C.spark); wt("+2.84%", x + w - 97, y + 113, 24, C.ink, 700, T.font.ui, "center");
+    [0, 0.5, 1].forEach(f => { const yy = lerp(CH[3], CH[1], f); rule(CH[0], CH[2] + 30, yy); wt(fmt(lerp(LO, HI, f)).replace(/\.\d+$/, ""), x + 32, yy, 24, MINT + "0.75)", 500); });
+    ["09:30", "10:30", "11:30", "12:30"].forEach((s, i) => wt(s, lerp(CH[0] + 20, CH[2] - 20, i / 3), CH[3] + 40, 24, MINT + "0.75)", 500, T.font.ui, "center"));
+    const p = chart(CH[0], CH[1], CH[2], CH[3], t, lw(4));
+    D.alpha(clamp((2.2 - S) / 1.2), () => { D.rr(p[0] + 22, p[1] - 22, 150, 44, 12); D.fill(C.spark); wt(fmt(LAST), p[0] + 97, p[1], 24, C.ink, 700, T.font.ui, "center"); });
+  }
+  // positions: NOVA grows when the new order fills
+  { const [x, y, w, h] = PAN[1]; panel(x, y, w, h); kick(VARS.panels[1], x + 32, y + 44);
+    [["NOVA", filled ? "× 50" : "× 25", filled ? "+$1,496.80" : "+$1,184.20", C.mint], ["KITE", "× 140", "+$312.55", C.mint], ["LUMA", "× 60", "−$86.10", C.coral]].forEach((r, i) => {
+      const yy = y + 104 + i * 58; if (i) rule(x + 32, x + w - 32, yy - 29);
+      wt(r[0], x + 32, yy, 28, C.cloud, 700); wt(r[1], x + 190, yy, 24, C.mint, 500);
+      D.alpha(i === 0 ? 1 - 0.6 * Math.sin(Math.PI * seg(t, 3.9, 4.5, "Flat")) : 1, () => wt(r[2], x + w - 32, yy, 28, r[3], 700, T.font.ui, "right")); });
+  }
+  // watchlist
+  { const [x, y, w, h] = PAN[2]; panel(x, y, w, h); kick(VARS.panels[2], x + 32, y + 44);
+    [["ORBX", "84.12", "+1.9%", 1], ["KITE", "22.47", "+0.6%", 1], ["VELA", "310.08", "−0.8%", 0]].forEach((r, i) => {
+      const yy = y + 100 + i * 56, sp = spark(24, 30 + i, r[3]); if (i) rule(x + 32, x + w - 32, yy - 28);
+      wt(r[0], x + 32, yy, 28, C.cloud, 700);
+      line(sp.map((v, j) => [x + 170 + j * 7, yy + 14 - v * 28]), r[3] ? C.mint : C.coral, lw(2.5));
+      wt(r[1], x + w - 150, yy, 26, C.cloud, 600, T.font.ui, "right"); wt(r[2], x + w - 32, yy, 24, r[3] ? C.mint : C.coral, 600, T.font.ui, "right"); });
+  }
+  // orders: a new order slides in on top, then fills
+  { const [x, y, w, h] = PAN[3]; panel(x, y, w, h); kick(VARS.panels[3], x + 32, y + 44);
+    const rows = [["BUY", "NOVA", "25 @ 1,284.60", "Limit", "12:04:34", filled ? "Filled" : "Working"], ["BUY", "NOVA", "25 @ 1,236.10", "Limit", "11:52:08", "Filled"],
+                  ["SELL", "VELA", "8 @ 312.40", "Market", "11:20:51", "Filled"], ["BUY", "KITE", "140 @ 20.24", "Limit", "10:47:16", "Filled"]];
+    g.save(); g.beginPath(); g.rect(x, y + 66, w, h - 70); g.clip();
+    rows.forEach((r, i) => {
+      const yy = y + 100 + (i - 1 + ins) * 50, a = i === 0 ? ins : i === 3 ? 1 - ins : 1; if (yy > y + h - 10) return;
+      D.alpha(a, () => {
+        if (i === 0) D.alpha(0.22 * (1 - seg(t, 3.9, 4.8, "Flat")) + 0.06, () => { D.rr(x + 16, yy - 24, w - 32, 48, 10); D.fill(C.spark); });
+        else rule(x + 32, x + w - 32, yy - 27);
+        D.rr(x + 32, yy - 18, 84, 36, 18); D.fill(r[0] === "BUY" ? C.spark : C.coral); wt(r[0], x + 74, yy, 24, C.ink, 700, T.font.ui, "center");
+        wt(r[1], x + 150, yy, 28, C.cloud, 700); wt(r[2], x + 320, yy, 24, C.mint, 500); wt(r[3], x + 760, yy, 24, C.mint, 500); wt(r[4], x + 1020, yy, 24, C.mint, 500);
+        wt(r[5], x + w - 32, yy, 24, r[5] === "Filled" ? C.spark : C.cloud, 700, T.font.ui, "right"); });
+    });
+    g.restore();
+  }
+}
+
+// ---- the phone: 420 x 860 world units, portrait, the same product re-laid for mobile
+function phone(t, glowA) {
+  MDNA.glow(g, 0, 40, 620, C.sea, 0.55);
+  D.rr(-210, -430, 420, 860, 66); D.fill(C.ink); g.strokeStyle = C.sea; g.lineWidth = lw(10); g.stroke();
+  D.rr(-198, -418, 396, 836, 56); D.fill(C.pine);
+  g.save(); D.rr(-198, -418, 396, 836, 56); g.clip();
+  D.rr(-62, -404, 124, 34, 17); D.fill(C.ink);
+  wt("9:41", -158, -386, 24, C.cloud, 600);
+  [0, 1, 2, 3].forEach(i => { g.fillStyle = C.cloud; g.fillRect(96 + i * 8, -380 - 5 - i * 3, 5, 8 + i * 3); });
+  D.rr(134, -396, 36, 20, 6); g.strokeStyle = C.cloud; g.lineWidth = lw(2); g.stroke(); D.rr(137, -393, 24, 14, 3); D.fill(C.mint);
+  kick("Portfolio", -168, -316);
+  wt("$48,210.37", -168, -262, 52, C.cloud, 700);
+  D.rr(-168, -230, 180, 40, 20); D.fill(C.spark); wt("+2.84% today", -78, -210, 24, C.ink, 700, T.font.ui, "center");
+  chart(-168, -168, 150, -24, t, lw(3.5));
+  ["1D", "1W", "1M", "1Y"].forEach((s, i) => { const xx = -126 + i * 84; if (!i) { D.rr(xx - 34, 12, 68, 40, 20); D.fill(C.spark); } wt(s, xx, 32, 24, i ? C.mint : C.ink, 700, T.font.ui, "center"); });
+  [["NOVA", "Nova Labs", "1,284.60", "+2.84%", 1], ["ORBX", "Orbx Corp", "84.12", "+1.9%", 1], ["VELA", "Vela Grid", "310.08", "−0.8%", 0]].forEach((r, i) => {
+    const yy = 112 + i * 82; rule(-168, 168, yy - 40);
+    wt(r[0], -168, yy - 14, 28, C.cloud, 700); wt(r[1], -168, yy + 18, 24, C.mint, 500);
+    line(spark(14, 40 + i, r[4]).map((v, j) => [-40 + j * 6, yy + 12 - v * 26]), r[4] ? C.mint : C.coral, lw(2.5));
+    wt(r[2], 168, yy - 14, 26, C.cloud, 700, T.font.ui, "right"); wt(r[3], 168, yy + 18, 24, r[4] ? C.mint : C.coral, 600, T.font.ui, "right"); });
+  rule(-198, 198, 330);
+  [0, 1, 2, 3].forEach(i => { const xx = -126 + i * 84; g.beginPath(); if (i === 0) g.arc(xx, 368, 11, 0, 7); else D.rr(xx - 11, 357, 22, 22, i === 2 ? 11 : 5); D.fill(i ? MINT + "0.6)" : C.spark); });
+  D.rr(-70, 398, 140, 6, 3); D.fill(MINT + "0.5)");
+  // far away the screen is all light: the glowing point fades into the UI as we arrive
+  if (glowA > 0) D.alpha(glowA, () => { g.fillStyle = C.spark; g.fillRect(-200, -420, 400, 840); });
+  g.restore();
+}
+
+// ---- stars at depths z between the desktop plane (z = 0) and the camera: true parallax, streaks from motion
+const R = rng(3), STARS = Array.from({ length: 900 }, () => { const z = Math.exp(lerp(L(0.3), L(130), R())); return [(R() * 2 - 1) * (z + 6) * 1500, (R() * 2 - 1) * (z + 6) * 900, z, R()]; });
+function stars(c0, c1, a) {
+  if (a <= 0) return; const Z0 = 1 / c0.s, Z1 = 1 / c1.s;
+  g.lineCap = "round";
+  STARS.forEach(([x, y, z, b]) => {
+    if (Z1 - z < 0.05 || Z0 - z < 0.05) return;
+    const p1 = 1 / (Z1 - z), p0 = 1 / (Z0 - z), X1 = c1.S[0] + x * p1, Y1 = c1.S[1] + y * p1; if (X1 < -40 || X1 > W + 40 || Y1 < -40 || Y1 > H + 40) return;
+    let X0 = c0.S[0] + x * p0, Y0 = c0.S[1] + y * p0; const d = Math.hypot(X1 - X0, Y1 - Y0); if (d > 220) { X0 = X1 + (X0 - X1) * 220 / d; Y0 = Y1 + (Y0 - Y1) * 220 / d; }
+    const r = clamp(0.7 + 2.4 * p1, 0.7, 3.0) * (0.6 + 0.6 * b);
+    g.globalAlpha = a * (0.3 + 0.7 * b) * clamp((Z1 - z) / 0.6) * clamp(1.6 / (1 + d / 30) + 0.25);
+    g.beginPath(); g.moveTo(X0, Y0); g.lineTo(X1 + 0.01, Y1); g.strokeStyle = b > 0.85 ? C.mint : C.cloud; g.lineWidth = 2 * r; g.stroke();
+  });
+  g.globalAlpha = 1;
+}
 
 MDNA.scene({ duration: 12, background: C.ink, render(t) {
-  D.bg(C.ink);
-  // camera scale: dot (huge zoom) → desktop → a point in space → phone
-  const s = Math.exp(k(t, [[0, Math.log(18)], [1.0, Math.log(18)], [1.6, Math.log(1.0), "Settle"], [3.4, Math.log(1.0)], [4.2, Math.log(2.4), "Settle"], [5.2, Math.log(2.4)],
-                           [7.6, Math.log(0.004), "Ramp"], [8.6, Math.log(0.004)], [9.6, Math.log(1.8), "Ramp"], [12, Math.log(1.9)]]));
-  const cx = k(t, [[3.4, 0], [4.2, -330, "Settle"], [5.2, -330], [6.4, 0, "Settle"]]), cy = k(t, [[3.4, 0], [4.2, -170, "Settle"], [5.2, -170], [6.4, 0, "Settle"]]);
-  // stars appear as we leave the desktop
-  const space = seg(t, 5.8, 7.0, "Cruise") * (1 - seg(t, 8.8, 9.5, "Cruise"));
-  STARS.forEach(([x, y, z]) => { const r = (0.6 + z * 1.8); D.alpha(space * (0.3 + 0.7 * z), () => { g.beginPath(); g.arc(W / 2 + x * W * (0.6 + z * 0.4) * (1 + seg(t, 5.8, 8, "Cruise") * 0.2), H / 2 + y * H * (0.6 + z * 0.4), r, 0, 7); D.fill(C.cloud); }); });
-  D.at(W / 2, H / 2, s, 0, () => { g.translate(-cx, -cy);
-    if (t < 1.4) { g.beginPath(); g.arc(0, 0, 6, 0, 7); D.fill(C.spark); }
-    if (t < 9.2) world(t);
-    if (t > 8.4) phone(t, seg(t, 8.6, 9.2, "Cruise"));
+  const c = cam(t), c0 = cam(Math.max(0, t - 0.04)); S = c.s;
+  D.bg(C.ink); MDNA.glow(g, CX, CY, 900, C.pine, 0.9);
+  const space = clamp((L(0.6) - L(c.s)) / (L(0.6) - L(0.12)));
+  stars(c0, c, space);
+  const swap = seg(t, 6.75, 7.0, "Flat");                       // under the glowing point the desktop becomes the phone
+  g.save(); g.translate(c.S[0], c.S[1]); g.scale(c.s, c.s); g.translate(-c.F[0], -c.F[1]);
+  if (swap < 1) D.alpha(1 - swap, () => desktop(t));
+  if (swap > 0) {
+    const th = k(t, [[7.0, -0.55], [9.3, -0.16, "Cruise"], [12, 0.07, "Flat"]]);
+    g.translate(0, 8 * Math.sin(t * 1.1)); g.transform(Math.cos(th), Math.sin(th) * 0.12, 0, 1, 0, 0);
+    D.alpha(swap, () => phone(t, clamp((L(0.4) - L(c.s)) / (L(0.4) - L(0.04)))));
+  }
+  g.restore();
+  // the glowing point: the desktop (then the phone) seen from far away
+  const far = clamp((L(0.07) - L(c.s)) / (L(0.07) - L(0.018)));
+  if (far > 0) { const X = c.S[0] - c.F[0] * c.s, Y = c.S[1] - c.F[1] * c.s;
+    MDNA.glow(g, X, Y, 90 + 40 * Math.sin(t * 3), C.spark, 0.85 * far); MDNA.glow(g, X, Y, 26, C.cloud, far); }
+  // end line, beside the phone
+  const lines = VARS.end.split(/(?<=\.)\s+/), tx = 1000 - 10 * seg(t, 9.2, 12, "Flat");
+  [VARS.product, ...lines].forEach((s, i) => {
+    const p = seg(t, 9.2 + i * 0.16, 9.75 + i * 0.16, "Land"), y = [420, 552, 672][i]; if (p <= 0) return;
+    g.save(); g.beginPath(); g.rect(tx - 20, y - 110, 900, 140); g.clip(); g.translate(0, (1 - p) * 110);
+    D.alpha(p, () => i === 0 ? wt((s + " · mobile").toUpperCase(), tx, y, 24, C.mint, 600, T.font.ui, "left", 7) : MDNA.rich(D, s, tx, y, 96, C.cloud, C.spark, "left", 700));
+    g.restore();
   });
-  if (t > 1.0 && t < 1.6) D.alpha(1 - seg(t, 1.0, 1.6), () => { g.beginPath(); g.arc(W / 2, H / 2, 6 * s, 0, 7); D.fill(C.spark); });
-  // far away, the whole desktop reads as one glowing point among the stars
-  const far = seg(t, 6.6, 7.4, "Cruise") * (1 - seg(t, 8.6, 9.0, "Cruise"));
-  if (far > 0) D.alpha(far, () => { const gr = g.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 60); gr.addColorStop(0, "#D8FF85ff"); gr.addColorStop(0.15, "#D8FF85aa"); gr.addColorStop(1, "#D8FF8500"); g.fillStyle = gr; g.fillRect(W / 2 - 60, H / 2 - 60, 120, 120); });
-  D.alpha(seg(t, 0.2, 0.67, "Land") * (1 - seg(t, 1.0, 1.3)), () => D.txt(VARS.product, W / 2, H / 2 + 220, 54, C.cloud, 700));
-  D.alpha(seg(t, 10.4, 10.9, "Land"), () => D.txt(VARS.end, W / 2, H - 150, 64, C.cloud, 700));
+  D.alpha(seg(t, 9.5, 10.2, "Whip"), () => { g.fillStyle = C.spark; g.fillRect(tx, 462, 120 * seg(t, 9.5, 10.2, "Whip"), 6); });
+  MDNA.finish(g, t, { grain: 0.06, vignette: 0.5 });
 } });
 </script>

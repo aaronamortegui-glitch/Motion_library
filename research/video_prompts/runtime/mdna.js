@@ -80,14 +80,17 @@
   // finish: the layer that makes code-drawn frames feel produced (grain, vignette, glow, light leaks, rich type)
   const GRAIN = (() => { const c = document.createElement("canvas"); c.width = c.height = 256; const x = c.getContext("2d"), d = x.createImageData(256, 256), r = rng(77);
     for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } x.putImageData(d, 0, 0); return c; })();
+  // o.light: a light background (paper, cloud): a soft pine-tinted vignette instead of black, which greys white out
   function finish(g, t, o = {}) {
     const W = g.canvas.width, H = g.canvas.height;
-    if (o.vignette !== 0) { const v = g.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.95); v.addColorStop(0, "#00000000"); v.addColorStop(1, `rgba(0,0,0,${o.vignette ?? 0.45})`); g.fillStyle = v; g.fillRect(0, 0, W, H); }
+    if (o.vignette !== 0) { const a = o.vignette ?? (o.light ? 0.12 : 0.45), tint = o.light ? "10,33,31" : "0,0,0";
+      const v = g.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.95); v.addColorStop(0, `rgba(${tint},0)`); v.addColorStop(1, `rgba(${tint},${a})`); g.fillStyle = v; g.fillRect(0, 0, W, H); }
     if (o.grain !== 0) { g.save(); g.globalAlpha = o.grain ?? 0.06; g.globalCompositeOperation = "overlay"; const f = Math.floor(t * 30), ox = (f * 97) % 256, oy = (f * 61) % 256;
       g.fillStyle = g.createPattern(GRAIN, "repeat"); g.translate(-ox, -oy); g.fillRect(ox, oy, W, H); g.restore(); }
   }
-  function glow(g, x, y, r, col, a = 1) { const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, col); gr.addColorStop(1, col.length === 7 ? col + "00" : "rgba(0,0,0,0)");
-    const o = g.globalAlpha; g.save(); g.globalAlpha = o * a; g.globalCompositeOperation = "lighter"; g.fillStyle = gr; g.fillRect(x - r, y - r, 2 * r, 2 * r); g.restore(); }
+  // light = true for light backgrounds: additive light washes a pale page out to a white smudge, so it paints normally
+  function glow(g, x, y, r, col, a = 1, light = false) { const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, col); gr.addColorStop(1, col.length === 7 ? col + "00" : "rgba(0,0,0,0)");
+    const o = g.globalAlpha; g.save(); g.globalAlpha = o * a * (light ? 0.35 : 1); g.globalCompositeOperation = light ? "source-over" : "lighter"; g.fillStyle = gr; g.fillRect(x - r, y - r, 2 * r, 2 * r); g.restore(); }
   // rich line: "Give your agent *taste.*" → sans words + serif italic accent in another colour; returns the width
   function rich(D, s, x, y, size, col, accent, align = "center", w = 700) {
     const parts = s.split(/(\*[^*]+\*)/).filter(Boolean).map(p => p.startsWith("*") ? { t: p.slice(1, -1), it: true } : { t: p, it: false });
@@ -97,7 +100,8 @@
     parts.forEach((p, i) => { g.font = fam(p); g.letterSpacing = p.it ? "0px" : (-size * 0.02) + "px"; g.fillStyle = p.it ? accent : col; g.textAlign = "left"; g.textBaseline = "alphabetic"; g.fillText(p.t, cx, y); cx += ws[i]; });
     g.letterSpacing = "0px"; return total;
   }
-  function kicker(D, s, x, y, col, align = "center", size = 22) { D.txt(s.toUpperCase(), x, y, size, col, 600, TOKENS.font.ui, align, size * 0.32); }
+  function kicker(D, s, x, y, col, align = "center", size = 24) { size = Math.max(24, size);   // 24 px is the smallest that reads at 1080p
+    D.txt(s.toUpperCase(), x, y, size, col, 600, TOKENS.font.ui, align, size * 0.32); }
 
   // true when the page was opened with ?notext: hybrid templates draw the plate only (text and UI go live in AE)
   const NOTEXT = /[?&]notext\b/.test(location.search);

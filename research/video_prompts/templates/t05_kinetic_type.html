@@ -6,30 +6,69 @@
 <script>
 // T05 · kinetic typography over transparency (archetype "a manifesto read word by word, one idea per shot").
 // Route B: each line is a text layer with a Motion DNA text preset; this HTML version renders a ProRes 4444 overlay
-// to compare against the native AE build. Words land on their own beats; the key word of each line is spark.
-const VARS = { lines: [["Motion", "with", "its", "*own*"], ["*DNA.*"], ["Every", "brand", "moves"], ["the", "way", "it", "*decided.*"]], beat: 0.42 };
+// to compare against the native AE build. Words rise into a mask on Land (masks clip only top and bottom, never the
+// sides); the key word of each line (*word*) is Instrument Serif italic in spark. Each shot has its own layout: a
+// two-tier line, one huge word with an underline measured to it, a stacked column, and a closing line that holds on a
+// slow push and leaves with a wipe.
+const VARS = { lines: [["Motion", "with", "its", "*own*"], ["*DNA.*"], ["Every", "brand", "*moves*"], ["the", "way", "it", "*decided.*"]], beat: 0.42 };
 const { T, seg, k, lerp, clamp } = MDNA, C = T.color;
 const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
-const SIZE = [120, 300, 120, 120];
+
+// per-shot layout: rows = [word count, sans size, baseline]; hot = size of the serif accent / the row's sans size
+const SHOTS = [
+  { rows: [[1, 250, 525], [3, 116, 712]], hot: 1.5, beat: 1, hold: 0.75 },     // "Motion / with its own"
+  { rows: [[1, 400, 680]], hot: 1.12, beat: 1, hold: 0.95, underline: true },  // "DNA."
+  { rows: [[1, 210, 390], [1, 210, 598], [1, 210, 830]], hot: 1.3, beat: 1, hold: 0.7, slide: true },   // "Every / brand / moves"
+  { rows: [[3, 104, 420], [1, 290, 716]], hot: 1.18, beat: 0.6, hold: 1.3, last: true },                 // "the way it / decided."
+];
+const isHot = w => w.includes("*"), clean = w => w.replace(/\*/g, "");
+const font = (w, size, hot) => hot ? ["italic 400", size, T.font.display, 0] : [800, size, T.font.ui, -size * 0.035];
+// shot timing: starts so the first word is already rising at frame 0, every shot starts as the last one clears
+const TIM = (() => { let s = -0.12; return SHOTS.map((sh, i) => { const n = VARS.lines[i].length, b = VARS.beat * sh.beat;
+  const inEnd = s + (n - 1) * b + (sh.slide ? 0.6 : 0.5), out = inEnd + sh.hold, r = { start: s, b, out }; s = out + 0.06 + 0.03 * n + 0.2; return r; }); })();
+
+function layout(li) {   // words with x, baseline, size, font
+  const sh = SHOTS[li], words = VARS.lines[li]; let wi = 0; const rows = [];
+  sh.rows.forEach(([n, size, base]) => {
+    const ws = words.slice(wi, wi + n).map((w, j) => { const hot = isHot(w), sz = hot ? size * sh.hot : size, f = font(w, sz, hot);
+      return { i: wi + j, s: clean(w), hot, size: sz, f, w: D.width(clean(w), f[1], f[0], f[2], f[3]) }; });
+    const gap = size * 0.26, width = ws.reduce((a, b) => a + b.w, 0) + gap * (ws.length - 1);
+    rows.push({ ws, size, base, gap, width }); wi += n;
+  });
+  const block = Math.max(...rows.map(r => r.width)), centred = rows.length === 1 || sh.last;
+  rows.forEach(r => { let x = centred ? W / 2 - r.width / 2 : W / 2 - block / 2; r.ws.forEach(w => { w.x = x; x += w.w + r.gap; }); });
+  return rows;
+}
 
 MDNA.scene({ duration: 10, alpha: true, render(t) {
   g.clearRect(0, 0, W, H);
-  let start = 0.3;
-  VARS.lines.forEach((words, li) => {
-    const lineStart = start, lineDur = words.length * VARS.beat + 1.0; start += lineDur;   // the 4 lines end at 9.3 s
-    if (t < lineStart - 0.1 || t > lineStart + lineDur) return;
-    const size = SIZE[li], clean = words.map(w => w.replace(/\*/g, "")), gap = size * 0.28;
-    const widths = clean.map(w => D.width(w, size, 800, T.font.ui, -size * 0.03)), total = widths.reduce((a, b) => a + b, 0) + gap * (words.length - 1);
-    let x = W / 2 - total / 2; const out = seg(t, lineStart + lineDur - 0.35, lineStart + lineDur, "Launch");
-    words.forEach((w, i) => {
-      const a = lineStart + i * VARS.beat, p = seg(t, a, a + 0.467, "Land"), hot = w.includes("*");
-      const y = H / 2 + (1 - p) * size * 0.9 - out * size * 1.2, sc = hot ? lerp(1.25, 1, seg(t, a, a + 0.5, "Pop")) : 1;
-      g.save(); g.beginPath(); g.rect(x - 20, H / 2 - size * 0.75, widths[i] + 40, size * 1.5); g.clip();
-      D.alpha(Math.min(p * 2, 1), () => D.at(x + widths[i] / 2, y, sc, 0, () => D.txt(clean[i], 0, 0, size, hot ? C.spark : C.cloud, 800, T.font.ui, "center", -size * 0.03)));
-      g.restore(); x += widths[i] + gap;
+  SHOTS.forEach((sh, li) => {
+    const tm = TIM[li], n = VARS.lines[li].length; if (t < tm.start - 0.05 || t > tm.out + 0.6) return;
+    const rows = layout(li);
+    // slow push while the shot holds (the last one keeps pushing until the wipe)
+    const push = 1 + 0.03 * seg(t, tm.start, sh.last ? 10 : tm.out + 0.4, "Flat");
+    g.save(); g.translate(W / 2, H / 2); g.scale(push, push); g.translate(-W / 2, -H / 2);
+    const wx = sh.last ? lerp(-60, W + 60, seg(t, tm.out, tm.out + 0.5, "Whip")) : 0;   // the closing wipe
+    if (sh.last) { g.beginPath(); g.rect(wx, 0, W + 200, H); g.clip(); }
+    rows.forEach(r => {
+      const maxS = Math.max(...r.ws.map(w => w.size));
+      g.save(); g.beginPath(); g.rect(-200, r.base - maxS * 1.02, W + 400, maxS * 1.34); g.clip();   // vertical mask only
+      r.ws.forEach(w => {
+        const a = tm.start + w.i * tm.b, out = sh.last ? 0 : seg(t, tm.out + 0.03 * w.i, tm.out + 0.03 * w.i + 0.32, "Launch");
+        let dx = 0, sk = 0, dy;
+        if (sh.slide && w.hot) { const p = seg(t, a, a + 0.6, "Whip"); dx = (1 - p) * 360; sk = -0.32 * (1 - seg(t, a, a + 0.75, "Pop")); dy = 0;   // "moves" moves sideways
+          D.alpha(clamp(p * 1.4) * (1 - out), () => D.at(w.x + dx, r.base - out * maxS * 1.1, 1, 0, () => { g.transform(1, 0, sk, 1, 0, 0); D.txt(w.s, 0, 0, w.f[1], C.spark, w.f[0], w.f[2], "left", w.f[3], "alphabetic"); }));
+          return; }
+        const p = seg(t, a, a + 0.5, w.hot ? "Pop" : "Land"); dy = (1 - p) * maxS * 0.95 - out * maxS * 1.15;
+        D.alpha(Math.min(p * 2, 1), () => D.txt(w.s, w.x, r.base + dy, w.f[1], w.hot ? C.spark : C.cloud, w.f[0], w.f[2], "left", w.f[3], "alphabetic"));
+      });
+      g.restore();
     });
-    // underline sweeps under the key line
-    if (li === 1) { const u = seg(t, lineStart + 0.4, lineStart + 1.1, "Cruise") * (1 - out); g.fillStyle = C.spark; g.fillRect(W / 2 - 330 * u, H / 2 + 170, 660 * u, 16); }
+    // the underline is measured to the word: sweeps in left to right, leaves to the right before the word goes
+    if (sh.underline) { const w = rows[0].ws[0], i = seg(t, tm.start + 0.35, tm.start + 0.95, "Whip"), o = seg(t, tm.out - 0.2, tm.out + 0.15, "Whip");
+      if (i > o) { g.fillStyle = C.spark; g.fillRect(w.x + w.w * o, rows[0].base + 44, w.w * (i - o), 18); } }
+    g.restore();
+    if (sh.last && t > tm.out && wx < W) { g.fillStyle = C.spark; g.fillRect(wx - 12, 300, 12, 500); }
   });
 } });
 </script>

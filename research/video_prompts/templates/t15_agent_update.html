@@ -1,0 +1,238 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T15 · The Agent explains (update promo + capsules)</title>
+<script src="../runtime/mdna.js"></script>
+<script src="../runtime/pixel_rig.js"></script>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<script>
+// T15 · The Agent explains what is new: a promo made of short scenes, each one also a capsule of its own.
+//   (no query)        the whole promo: hook → brief → library → skill → update
+//   ?only=brief       one scene as a capsule (brief | library | skill | update | hook)
+// The robot is drawn from library/characters/the-agent/character.json (runtime/pixel_rig.js); the world is pixel art at
+// 240x135 (x8) and the UI and type are Motion DNA at full resolution. Edit the copy in VARS.
+// Preview through a local server (the page reads the JSON): python -m http.server, then open this file.
+const VARS = {
+  hook:    { kicker: "Motion DNA · new version", line: "Update me. *I learned a lot.*" },
+  brief:   { kicker: "New · I read your brief", line: "I ask first, then I propose *different routes.*", order: "I want a video for our app launch",
+             questions: ["What is it for?", "What do you already have?", "How long?"], routes: ["A · Launch film", "B · One shape becomes the UI", "C · 3D hero shot"] },
+  library: { kicker: "New · more library", line: "More to *build with.*", counts: [[15, "video templates"], [42, "routes I can propose"], [13, "emotions, documented"]] },
+  skill:   { kicker: "New · the Claude skill", line: "Claude knows Motion DNA *in any folder.*", sub: "The motion-dna skill installs with this update.",
+             folders: ["client-a", "my-project", "launch-v2", "Downloads"], prompt: "claude  ›  make a launch video" },
+  update:  { kicker: "Get it", line: "Project › Connect › *Update*", sub: "Then restart After Effects and Claude Code.", button: "Update", done: "Done",
+             help: "Update won’t run? Ask Claude: “update Motion DNA from the repo”" },
+};
+// scene lengths in beats of the music bed (assets.free "Just Saying Tho", CC0, ~117.5 BPM): every cut lands on the beat
+const BEAT = 0.511, BEATS = { hook: 8, brief: 12, library: 8, skill: 10, update: 12 };
+const ORDER = ["hook", "brief", "library", "skill", "update"], DUR = Object.fromEntries(ORDER.map(id => [id, BEATS[id] * BEAT]));
+const { T, seg, k, lerp, clamp, rng } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
+const PX = 8, LW = W / PX + 8, LH = H / PX, GROUND = 118;      // the pixel world is 8 px wider than the frame so the camera can pan
+const low = Object.assign(document.createElement("canvas"), { width: LW, height: LH }), lg = low.getContext("2d");
+const MONO = "'JetBrains Mono', Consolas, ui-monospace, monospace";
+// camera per scene: z = size of one world pixel on screen (an integer, so pixels stay square), ox/oy = whole-px pan
+let CAM = { z: PX, ox: 0, oy: 0 };
+const FX = x => x * CAM.z + CAM.ox, FY = y => y * CAM.z + CAM.oy;
+const pan = (u, id, a, b) => Math.round(lerp(a, b, clamp(u / DUR[id])));
+const ONLY = (location.search.match(/[?&]only=(\w+)/) || [])[1];
+const SCENES = ONLY && DUR[ONLY] ? [ONLY] : ORDER;
+const STARTS = []; { let s = 0; for (const id of SCENES) { STARTS.push(s); s += DUR[id]; } }
+const TOTAL = SCENES.reduce((a, id) => a + DUR[id], 0);
+const onTwos = t => Math.floor(t * 12) / 12;
+const UX = 780;                                   // left edge of the UI column (the robot lives left of it)
+
+// ---------- small Motion DNA UI pieces at full resolution ----------
+function pill(x, y, text, o = {}) {
+  const size = o.size || 38, w = D.width(text, size, 600) + (o.dot ? 104 : 72), h = size * 2;
+  D.rr(x, y - h / 2, w, h, h / 2); D.fill(o.bg || C.cloud);
+  if (o.stroke) { g.lineWidth = 4; g.strokeStyle = o.stroke; g.stroke(); }
+  if (o.dot) { g.beginPath(); g.arc(x + 42, y, size * 0.32, 0, 7); D.fill(o.dotc || C.pine); }
+  D.txt(text, x + (o.dot ? 74 : 36), y + 2, size, o.col || C.ink, 600, T.font.ui, "left");
+  return w;
+}
+function caption(v, a, b, y = 150, x = UX) {
+  D.alpha(a, () => MDNA.kicker(D, v.kicker, x, y + 16 * (1 - a), C.spark, "left", 24));
+  D.alpha(b, () => MDNA.rich(D, v.line, x, y + 92 + 24 * (1 - b), 60, C.cloud, C.spark, "left"));
+}
+function popIn(u, t0, dur = 0.35) { const p = seg(u, t0, t0 + dur, "Pop"); return { a: clamp(p * 3), s: 0.6 + 0.4 * p }; }
+
+// ---------- the pixel world ----------
+function world(extra) {
+  lg.fillStyle = C.pine; lg.fillRect(0, 0, LW, LH);
+  lg.fillStyle = "#123A35"; for (let y = 6; y < GROUND - 4; y += 9) for (let x = 4 + (y / 9 % 2) * 4; x < LW; x += 8) lg.fillRect(x, y, 1, 1);
+  lg.fillStyle = "#0E2B27"; lg.fillRect(0, GROUND - 2, LW, LH);
+  lg.fillStyle = C.sea; lg.fillRect(0, GROUND - 2, LW, 1);
+  lg.fillStyle = "#123A35"; for (let y = GROUND + 2; y < LH; y += 2) for (let x = (y % 4) ? 0 : 1; x < LW; x += 2 + Math.floor((y - GROUND) / 4)) lg.fillRect(x, y, 1, 1);
+  if (extra) extra(lg);
+}
+function folder(x, open, lit) {   // a pixel folder standing on the floor, its lid lifts when visited
+  const y = GROUND - 15, body = lit ? C.mint : "#3F7D6E", lid = lit ? "#C9F2E2" : "#5E9C8B";
+  lg.fillStyle = "#06201B"; lg.fillRect(x - 1, y - 1 - open, 22, 17 + open);
+  lg.fillStyle = lid; lg.fillRect(x, y - open, 8, 3); lg.fillRect(x, y + 2 - open, 20, 2);
+  lg.fillStyle = body; lg.fillRect(x, y + 4, 20, 11);
+  lg.fillStyle = "#2A5E52"; lg.fillRect(x, y + 14, 20, 1);
+}
+const sparkR = rng(11), SPARKS = Array.from({ length: 30 }, () => ({ a: sparkR() * Math.PI * 2, v: 16 + sparkR() * 36, s: sparkR() < 0.3 ? 2 : 1, c: sparkR() < 0.55 ? C.spark : C.mint, d: sparkR() * 0.15 }));
+function sparkles(u, t0, ox, oy) {
+  const p = (u - t0) / 0.9; if (p <= 0 || p > 1.2) return;
+  for (const s of SPARKS) { const q = clamp((p - s.d) / 0.9); if (q <= 0 || q >= 1) continue; if (q > 0.75 && (Math.floor(u * 15) % 2)) continue;
+    const e = 1 - (1 - q) ** 3; lg.fillStyle = s.c; lg.fillRect(Math.round(ox + Math.cos(s.a) * s.v * e), Math.round(oy + Math.sin(s.a) * s.v * e * 0.8 + 10 * q * q), s.s, s.s); }
+}
+
+// ---------- the robot: an idle base every scene builds on (breathing on a beat, blinks, a pulsing light) ----------
+function idle(u, blinks = []) {
+  const q = onTwos(u);
+  return { x: 60, lean: 0, emotion: "neutral", pose: "idle", poseFrom: "idle", armT: 1, look: [0, 0], light: 1, pulse: 0, sy: 1 - 0.022 * (Math.floor(q / 0.8) % 2), hop: 0, t: q,
+           blink: blinks.some(b => q >= b && q < b + 0.12) };
+}
+function hopAt(st, q, t0, h = 6) {   // squash (Wind-up), hop with stretch (Pop), land squash, settle
+  if (q < t0 || q > t0 + 0.75) return;
+  st.sy = k(q, [[t0, 1], [t0 + 0.12, 0.88, "Wind-up"], [t0 + 0.28, 1.08, "Pop"], [t0 + 0.46, 1.03], [t0 + 0.56, 0.92, "Land"], [t0 + 0.75, 1, "Settle"]]);
+  st.hop = k(q, [[t0 + 0.12, 0], [t0 + 0.32, -h, "Pop"], [t0 + 0.52, 0, "Launch"]]);
+}
+const pulseAt = (u, t0) => k(u, [[t0, 0], [t0 + 0.1, 1, "Pop"], [t0 + 0.7, 0, "Settle"]]);   // one light pulse: Pop up, Settle down
+const poseTo = (st, q, from, to, t0, ease = "Pop") => { st.pose = to; st.poseFrom = from; st.armT = seg(q, t0, t0 + 0.28, ease); };
+
+// ---------- scenes: each draws its world, returns the robot state, then draws its UI on top ----------
+const S = {
+  hook(u) {
+    const v = VARS.hook, q = onTwos(u), st = idle(u, [2.6]);
+    st.x = k(u, [[0, 4], [1.1, 60, "Settle"]]);   // travel on ones, half in frame at 0 s; body poses stay on twos st.lean = k(q, [[0, -3], [0.7, -1], [1.1, 4, "Settle"], [1.35, -2, "Settle"], [1.6, 0, "Settle"]]);
+    st.emotion = q < 1.3 ? "neutral" : q < 1.75 ? "surprised" : "happy"; hopAt(st, q, 1.3, 5);
+    st.pulse = pulseAt(u, 1.2);
+    if (q > 1.9) poseTo(st, q, "idle", "wave", 1.9);
+    return { st, cam: { z: PX, ox: pan(u, "hook", 0, -40), oy: 0 }, ui: () => caption(v, seg(u, 1.4, 1.9, "Land"), seg(u, 1.6, 2.2, "Land"), 430) };
+  },
+  brief(u) {
+    const v = VARS.brief, q = onTwos(u), st = idle(u, [0.5]);
+    st.pulse = pulseAt(u, 4.4);
+    st.look = q < 0.9 ? [k(q, [[0.2, 0], [0.5, 3, "Nudge"]]), 0] : [0, 0];
+    st.emotion = q < 0.9 ? "curious" : q < 1.6 ? "confused" : q < 3.3 ? "focused" : q < 4.6 ? "proposing" : "happy";
+    if (q > 1.6 && q < 3.2) poseTo(st, q, "idle", "point", 1.6);
+    if (q >= 3.2 && q < 4.6) poseTo(st, q, "point", "present", 3.2);
+    if (q >= 4.6) { poseTo(st, q, "present", "idle", 4.6, "Settle"); hopAt(st, q, 4.75, 4); }
+    return { st, cam: { z: PX, ox: pan(u, "brief", -48, -8), oy: 0 }, ui: () => {
+      caption(v, seg(u, 0.1, 0.6, "Land"), seg(u, 0.25, 0.85, "Land"));
+      // the order arrives
+      const o = popIn(u, 0.3), oOut = seg(u, 3.0, 3.3, "Launch");
+      if (u < 3.3) D.alpha(o.a * (1 - oOut), () => D.at(UX, 400, o.s, 0, () => { D.txt("YOU", 0, -68, 24, C.mint, 700, T.font.ui, "left", 6); pill(0, 0, v.order, { size: 34 }); }));
+      // three questions, one per beat
+      v.questions.forEach((qq, i) => { const p = popIn(u, 1.5 + i * 0.32), out = seg(u, 3.0, 3.3, "Launch");
+        if (u < 3.3) D.alpha(p.a * (1 - out), () => D.at(UX + 40, 520 + i * 96, p.s, 0, () => pill(0, 0, qq, { size: 32, bg: C.pine, col: C.spark, stroke: C.spark, dot: true, dotc: C.spark }))); });
+      // three routes; the chosen one lights up
+      v.routes.forEach((r, i) => { const p = popIn(u, 3.3 + i * 0.18, 0.4), pick = i === 1 ? seg(u, 4.4, 4.7, "Pop") : 0, dim = i !== 1 ? seg(u, 4.4, 4.7) : 0;
+        const x = UX + i * 360, y = 470, w = 330, h = 300;
+        D.alpha(p.a * (1 - 0.55 * dim), () => D.at(x + w / 2, y + h / 2, p.s * (1 + 0.06 * pick), 0, () => {
+          D.rr(-w / 2, -h / 2, w, h, 26); D.fill(pick > 0.5 ? C.spark : C.sea);
+          const [tag, ...rest] = r.split(" · "), ink = pick > 0.5 ? C.ink : C.cloud;
+          D.txt(tag, -w / 2 + 34, -h / 2 + 62, 64, ink, 400, T.font.display, "left");
+          const words = rest.join(" · ").split(" "); let line = "", ly = -h / 2 + 140;
+          words.forEach((wd, j) => { const tl = line ? line + " " + wd : wd; if (D.width(tl, 34, 600) > w - 68) { D.txt(line, -w / 2 + 34, ly, 34, ink, 600, T.font.ui, "left"); line = wd; ly += 44; } else line = tl; if (j === words.length - 1) D.txt(line, -w / 2 + 34, ly, 34, ink, 600, T.font.ui, "left"); });
+        })); });
+      const cp = seg(u, 3.9, 4.4, "Cruise"), press = clamp((u - 4.4) / 0.25);
+      if (u > 3.8 && u < 5.6) D.cursor(lerp(UX + 1300, UX + 360 + 200, cp), lerp(900, 700, cp), press < 1 ? press : 0);
+    } };
+  },
+  library(u) {
+    const v = VARS.library, q = onTwos(u), st = idle(u, [3.6]), RX = 172, LX = 400;   // reverse framing: robot right, UI left
+    st.x = RX;
+    st.emotion = q < 0.5 ? "happy" : q < 2.6 ? "love" : "proud"; poseTo(st, q, "idle", q < 2.6 ? "cheer" : "idle", q < 2.6 ? 0.4 : 2.6, q < 2.6 ? "Pop" : "Settle");
+    hopAt(st, q, 0.3, 6);
+    return { st, cam: { z: PX, ox: pan(u, "library", -8, -56), oy: 0 }, extra: () => sparkles(u, 0.55, RX, GROUND - 77), ui: () => {
+      caption(v, seg(u, 0.1, 0.6, "Land"), seg(u, 0.25, 0.85, "Land"), 150, LX);
+      v.counts.forEach(([n, label], i) => { const p = popIn(u, 0.7 + i * 0.35, 0.4), c = Math.round(n * seg(u, 0.7 + i * 0.35, 1.6 + i * 0.35, "Settle")), y = 470 + i * 150;
+        D.alpha(p.a, () => { D.txt(String(c), LX + 130, y + 8, 120, C.spark, 400, T.font.display, "right"); D.txt(label, LX + 170, y + 12, 44, C.cloud, 600, T.font.ui, "left"); }); });
+    } };
+  },
+  skill(u) {
+    const v = VARS.skill, q = onTwos(u), st = idle(u, [4.6]), fx = [116, 148, 180, 212];
+    // the robot stays home and sends a pixel signal from its antenna to each folder in turn; a folder lights on arrival
+    const send = i => 0.9 + i * 0.6, FLY = 0.45, AX = 60 - 32 + 45, AY = GROUND - 83 + 3;
+    st.emotion = q < 0.8 ? "happy" : q < 3.4 ? "focused" : "proud";
+    if (q > 0.6 && q < 3.4) poseTo(st, q, "idle", "point", 0.6);
+    if (q >= 3.4) { poseTo(st, q, "point", "cheer", 3.4); hopAt(st, q, 3.45, 5); }
+    if (q >= 4.3) poseTo(st, q, "cheer", "idle", 4.3, "Settle");
+    st.pulse = Math.max(...fx.map((_, i) => pulseAt(u, send(i))));
+    const visited = i => q > send(i) + FLY;
+    // a signal: a 3 px head, a 6-pixel trail along an arc, and a full-resolution glow on the head
+    const path = (i, s) => [lerp(AX, fx[i] + 10, s), lerp(AY, GROUND - 18, s) - Math.sin(s * Math.PI) * 10];
+    const heads = fx.map((_, i) => (u - send(i)) / FLY).map((p, i) => p > 0 && p < 1 ? [i, p] : null).filter(Boolean);
+    const TRAIL = [C.spark, C.spark, C.mint, C.mint, C.sea, C.sea];
+    const signal = (L) => heads.forEach(([i, s]) => {
+      TRAIL.forEach((c, j) => { const ss = s - (j + 1) * 0.04; if (ss <= 0) return; const [x, y] = path(i, ss); L.fillStyle = c; L.fillRect(Math.round(x), Math.round(y), 1, 1); });
+      const [x, y] = path(i, s), hx = Math.round(x), hy = Math.round(y);
+      L.fillStyle = C.spark; L.fillRect(hx - 1, hy, 3, 1); L.fillRect(hx, hy - 1, 1, 3); L.fillStyle = C.cloud; L.fillRect(hx, hy, 1, 1); });
+    return { st, cam: { z: PX, ox: 0, oy: 0 }, world: (L) => { fx.forEach((x, i) => folder(x, visited(i) ? 2 : 0, visited(i))); signal(L); },
+      glows: heads.map(([i, s]) => { const [x, y] = path(i, s); return [Math.round(x) + 0.5, Math.round(y) + 0.5, 56, C.spark, 0.55]; }), ui: () => {
+      caption(v, seg(u, 0.1, 0.6, "Land"), seg(u, 0.25, 0.85, "Land"), 110);
+      D.alpha(seg(u, 0.5, 1.0, "Land"), () => D.txt(v.sub, UX, 300, 30, C.mint, 500, T.font.ui, "left"));
+      fx.forEach((x, i) => D.alpha(seg(u, 0.4 + i * 0.1, 0.8 + i * 0.1, "Land"), () => D.txt(v.folders[i], FX(x + 10), FY(GROUND + 7), 26, visited(i) ? C.spark : C.mint, 600, T.font.ui, "center")));
+      const tp = popIn(u, 3.5, 0.4), tw = 760; D.alpha(tp.a, () => D.at(UX + tw / 2, 470, tp.s, 0, () => { g.translate(-tw / 2, 0); D.rr(0, -46, tw, 92, 18); D.fill(C.ink); D.txt(v.prompt, 34, 2, 34, C.spark, 500, MONO, "left"); }));
+    } };
+  },
+  update(u) {
+    const v = VARS.update, q = onTwos(u), st = idle(u, [5.2]);
+    st.emotion = q < 1.5 ? "focused" : q < 3.4 ? "thinking" : "proud";
+    if (q > 0.5 && q < 1.6) poseTo(st, q, "idle", "point", 0.5);
+    if (q >= 1.6 && q < 3.4) poseTo(st, q, "point", "think", 1.6, "Settle");
+    if (q >= 3.4) { poseTo(st, q, "think", "cheer", 3.4); hopAt(st, q, 3.4, 6); }
+    if (q >= 4.4) poseTo(st, q, "cheer", "idle", 4.4, "Settle");
+    if (q >= 5.35) { poseTo(st, q, "idle", "wave", 5.35); st.emotion = "happy"; }   // sign-off wave on the last beats
+    st.pulse = pulseAt(u, 3.4);
+    // a closer framing (10 px world pixels) that keeps panning slowly to the last frame; the UI pushes in with it
+    const push = 1 + 0.02 * clamp(u / DUR.update);
+    return { st, cam: { z: 10, ox: pan(u, "update", -190, -250), oy: -236 }, extra: () => sparkles(u, 3.5, 60, GROUND - 77), ui: () => D.at(W / 2, H / 2, push, 0, () => { g.translate(-W / 2, -H / 2);
+      // the panel's Connect card, as in the app (grows from its centre)
+      const cp = popIn(u, 0.2, 0.45), x = UX, y = 240, w = 900, h = 300, prog = seg(u, 1.6, 3.3, "Surge"), done = u > 3.3;
+      D.alpha(cp.a, () => D.at(x + w / 2, y + h / 2, cp.s, 0, () => { g.translate(-w / 2, -h / 2);
+        D.rr(0, 0, w, h, 28); D.fill(C.sea);
+        g.beginPath(); g.arc(46, 60, 11, 0, 7); D.fill(done ? C.spark : "#8FA8A2");
+        D.txt(done ? "Motion DNA is up to date" : "Update available (new)", 74, 62, 40, C.cloud, 700, T.font.ui, "left");
+        D.txt(done ? "Restart After Effects to load it." : "Templates, characters, read_brief, the Claude skill", 74, 116, 28, C.mint, 500, T.font.ui, "left");
+        const press = clamp((u - 1.35) / 0.2), bs = 1 - 0.05 * Math.sin(press * Math.PI);
+        D.at(40 + 400, 210, bs, 0, () => { D.rr(-400, -42, 800, 84, 18); D.fill(done ? C.cloud : C.spark); D.txt(done ? v.done : v.button, 0, 2, 38, C.ink, 700, T.font.ui, "center"); });
+        if (prog > 0 && !done) { D.rr(40, 268, 820 * prog, 10, 5); D.fill(C.spark); }
+      }));
+      const cu = seg(u, 0.6, 1.3, "Cruise"); if (u > 0.5 && u < 2.0) D.cursor(lerp(x + 1000, x + 470, cu), lerp(860, y + 220, cu), clamp((u - 1.35) / 0.3));
+      const a = seg(u, 3.7, 4.2, "Land"), b = seg(u, 3.9, 4.5, "Land"), c2 = seg(u, 4.2, 4.8, "Land");
+      D.alpha(a, () => MDNA.kicker(D, v.kicker, x, 628 + 16 * (1 - a), C.spark, "left", 24));
+      D.alpha(b, () => MDNA.rich(D, v.line, x, 722 + 24 * (1 - b), 72, C.cloud, C.spark, "left"));
+      D.alpha(c2, () => D.txt(v.sub, x, 786 + 16 * (1 - c2), 32, C.mint, 500, T.font.ui, "left"));
+      const hp = seg(u, 4.6, 5.1, "Land");
+      D.alpha(hp, () => { const hw = D.width(v.help, 26, 600) + 60; D.rr(x, 836 + 12 * (1 - hp), hw, 64, 32); D.fill(C.ink); D.txt(v.help, x + 30, 869 + 12 * (1 - hp), 26, C.spark, 600, T.font.ui, "left"); });
+    }) };
+  },
+};
+
+// a pixel wipe across each cut, one-sided: 40 px blocks (5 world pixels, they divide 1920 and 1080) close over the outgoing
+// scene left to right with a little jitter in the 0.12 s before the cut, then open on the incoming one in the same order
+const CELL = 40, CW = 0.12, cellR = (i, j) => { const r = rng(i * 7919 + j * 104729 + 3); return r(); };
+function cutCover(t) {
+  for (let n = 1; n < SCENES.length; n++) { const d = t - STARTS[n]; if (d < -CW || d >= CW) continue;
+    const p = d < 0 ? (d + CW) / CW : d / CW, cols = W / CELL; g.fillStyle = C.pine;
+    for (let j = 0; j < H / CELL; j++) for (let i = 0; i < cols; i++) { const th = 0.72 * i / (cols - 1) + 0.28 * cellR(i, j);
+      if (d < 0 ? th < p : th >= p) g.fillRect(i * CELL, j * CELL, CELL, CELL); } }
+}
+
+new Promise((ok, no) => { const x = new XMLHttpRequest(); x.open("GET", "../../../library/characters/the-agent/character.json");
+  x.onload = () => ok(JSON.parse(x.responseText)); x.onerror = no; x.send(); }).then(CH => {
+  const rig = PixelRig(CH);
+  MDNA.scene({ duration: TOTAL, render(t) {
+    let i = SCENES.length - 1; while (i > 0 && t < STARTS[i]) i--;
+    const u = t - STARTS[i], sc = S[SCENES[i]](u), st = sc.st;
+    if (st.blink && st.emotion !== "love") st.emotion = "blink";
+    CAM = sc.cam || { z: PX, ox: 0, oy: 0 };
+    world(sc.world);
+    rig.shadow(lg, st.x, GROUND, st.hop);
+    lg.drawImage(rig.render(st), Math.round(st.x - rig.CX), GROUND - rig.G);
+    if (sc.extra) sc.extra();
+    g.imageSmoothingEnabled = false; g.drawImage(low, CAM.ox, CAM.oy, LW * CAM.z, LH * CAM.z);
+    // the top light: a steady 70 px halo, one 90 px pulse (Pop up, Settle down) on each beat that calls for it
+    const zs = CAM.z / PX, pu = st.pulse || 0;
+    MDNA.glow(g, FX(st.x), FY(GROUND - rig.G + 9 + st.hop), (70 + 20 * pu) * zs, "#E2402F", 0.35 + 0.25 * pu);
+    (sc.glows || []).forEach(([x, y, r, c, a]) => MDNA.glow(g, FX(x), FY(y), r, c, a));
+    if (!MDNA.NOTEXT && sc.ui) sc.ui();
+    MDNA.finish(g, t, { vignette: 0.35, grain: 0.04 });
+    cutCover(t);
+  } });
+});
+</script>

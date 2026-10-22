@@ -4,54 +4,83 @@
 <script src="../runtime/mdna.js"></script>
 <div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
 <script>
-// T07 · history timeline (archetype "a brief history of X from start to today"), v2 after the pilot review: paper
-// texture with a halftone, a giant serif year behind the action, minor ticks and a running year counter, cards with
-// illustrations that build, a "today" stamp, a slight camera tilt. Hybrid: the copy goes live in AE (--notext).
+// T07 · history timeline (archetype "a brief history of X from start to today").
+// v3 (QA): clean cloud paper, a camera that smoothly anticipates the playhead (cards dissolve at the frame edge instead
+// of leaving slivers), bigger balanced cards with a fixed illustration slot and wrapped titles, an odometer year, a
+// spark ring playhead, and a payoff: the camera pulls back to a readable overview, the title returns and it drifts out.
+// Hybrid: the copy goes live in AE (--notext).
 const VARS = { kicker: "A short history", title: "From a napkin to *the world.*",
   items: [["2019", "A sketch on a napkin", "napkin"], ["2020", "First prototype", "proto"], ["2022", "Beta with 40 teams", "people"], ["2024", "One million projects", "chart"], ["2026", "Ships worldwide", "globe"]] };
-const { T, seg, k, lerp, clamp, rng, NOTEXT, rich, kicker, finish, glow } = MDNA, C = T.color;
-const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080, GAP = 640, Y0 = 2019, Y1 = 2026;
-const halftone = (() => { const c = document.createElement("canvas"); c.width = c.height = 24; const x = c.getContext("2d"); x.fillStyle = "#0A211F"; x.beginPath(); x.arc(12, 12, 2.2, 0, 7); x.fill(); return c; })();
+const { T, seg, k, lerp, clamp, NOTEXT, rich, kicker, finish, glow } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080, GAP = 640, CW = 520, CH = 260;
+const al = (c, a) => c + Math.round(clamp(a) * 255).toString(16).padStart(2, "0");
+const halftone = (() => { const c = document.createElement("canvas"); c.width = c.height = 24; const x = c.getContext("2d"); x.fillStyle = C.pine; x.beginPath(); x.arc(12, 12, 2.2, 0, 7); x.fill(); return c; })();
+const n = VARS.items.length, at = i => 1.6 + i * 1.75, OUT = [at(n - 1) + 1.0, at(n - 1) + 2.3];   // pull-back
+const head = t => k(t, [[0, -260], ...VARS.items.flatMap((_, i) => [[at(i) - 0.9, i * GAP, i ? "Settle" : "Cruise"], [at(i) + 0.6, i * GAP]])]);
+// the camera: the playhead averaged over ±0.45 s (it anticipates every move), then a pull-back to the overview that keeps drifting
+const END = [(GAP + (n - 1) * GAP) / 2 - 60, (GAP + (n - 1) * GAP) / 2];
+function camera(t) {
+  let s = 0; for (let i = -6; i <= 6; i++) s += head(t + i * 0.075); const follow = s / 13, zo = seg(t, OUT[0], OUT[1], "Cruise");
+  const drift = lerp(END[0], END[1], clamp((t - OUT[0]) / (12 - OUT[0])));
+  return { x: lerp(follow, drift, zo), z: lerp(1, 0.72, zo) - 0.02 * clamp((t - OUT[1]) / (12 - OUT[1])), y: lerp(H / 2 + 40, 640, zo), zo };
+}
+function wrap(s, size, max) { const words = s.split(" "), lines = [""]; words.forEach(w => { const tryL = (lines[lines.length - 1] + " " + w).trim();
+  if (D.width(tryL, size, 600) > max && lines[lines.length - 1]) lines.push(w); else lines[lines.length - 1] = tryL; }); return lines; }
 
-function illo(kind, p, t) {   // small illustrations that build with p (0..1), drawn in pine and spark
+function illo(kind, p, t) {   // small illustrations that build with p (0..1), each inside a 180 px slot
   g.lineWidth = 5; g.lineCap = "round"; g.lineJoin = "round"; g.strokeStyle = C.pine;
-  if (kind === "napkin") { D.at(0, 0, 1, -0.08, () => { D.rr(-70, -55, 140, 110, 6); D.fill("#fff"); g.stroke(); g.save(); g.setLineDash([300]); g.lineDashOffset = 300 * (1 - p);
+  if (kind === "napkin") { D.at(0, 0, 1, -0.08, () => { D.rr(-70, -55, 140, 110, 6); D.fill("#ffffff"); g.stroke(); g.save(); g.setLineDash([300]); g.lineDashOffset = 300 * (1 - p);
       g.beginPath(); g.moveTo(-45, 20); g.bezierCurveTo(-20, -40, 10, 40, 45, -20); g.strokeStyle = C.coral; g.stroke(); g.restore(); }); }
   else if (kind === "proto") { D.rr(-80, -50, 160, 100, 10); D.fill(C.sea); D.rr(-68, -38, 136, 64, 6); D.fill(C.pine); for (let i = 0; i < 3; i++) { D.rr(-58, -28 + i * 18, 100 * clamp(p * 3 - i), 8, 4); D.fill(C.spark); } D.rr(-30, 50, 60, 10, 5); D.fill(C.pine); }
-  else if (kind === "people") { for (let i = 0; i < 5; i++) { const q = seg(p, i * 0.15, i * 0.15 + 0.4, "Pop"), x = -80 + i * 40; D.at(x, 10, q, 0, () => { g.beginPath(); g.arc(0, -26, 14, 0, 7); D.fill(i === 2 ? C.spark : C.pine); g.beginPath(); g.arc(0, 14, 22, Math.PI, 0); D.fill(i === 2 ? C.spark : C.pine); }); } }
-  else if (kind === "chart") { [0.3, 0.45, 0.4, 0.7, 1].forEach((v, i) => { const h = 90 * v * seg(p, i * 0.12, i * 0.12 + 0.5, "Land"); D.rr(-80 + i * 34, 45 - h, 24, h, 5); D.fill(i === 4 ? C.spark : C.pine); }); }
+  else if (kind === "people") { for (let i = 0; i < 5; i++) { const q = seg(p, i * 0.15, i * 0.15 + 0.4, "Pop"), x = -68 + i * 34; D.at(x, 12, 0.85 * q, 0, () => { g.beginPath(); g.arc(0, -26, 14, 0, 7); D.fill(i === 2 ? C.spark : C.pine); g.beginPath(); g.arc(0, 14, 22, Math.PI, 0); D.fill(i === 2 ? C.spark : C.pine); }); } }
+  else if (kind === "chart") { [0.3, 0.45, 0.4, 0.7, 1].forEach((v, i) => { const h = 90 * v * seg(p, i * 0.12, i * 0.12 + 0.5, "Land"); D.rr(-78 + i * 32, 45 - h, 24, h, 5); D.fill(i === 4 ? C.spark : C.pine); }); }
   else { g.beginPath(); g.arc(0, 0, 55, 0, 7); D.fill(C.sea); g.stroke(); g.save(); g.beginPath(); g.arc(0, 0, 55, 0, 7); g.clip(); g.strokeStyle = C.spark;
-      for (let i = -2; i <= 2; i++) { g.beginPath(); g.ellipse(((i * 30 + t * 40) % 150) - 0, 0, 14, 55, 0, 0, 7); g.stroke(); } g.beginPath(); g.moveTo(-60, 0); g.lineTo(60, 0); g.stroke(); g.restore(); }
+      for (let i = -2; i <= 2; i++) { g.beginPath(); g.ellipse(((i * 30 + t * 40) % 150), 0, 14, 55, 0, 0, 7); g.stroke(); } g.beginPath(); g.moveTo(-60, 0); g.lineTo(60, 0); g.stroke(); g.restore(); }
+}
+function odometer(v, x, y, size, a) {   // the giant year rolls digit by digit between whole years
+  const base = Math.floor(v), f = seg(v - base, 0.2, 0.8, "Cruise"), s0 = String(base), s1 = String(base + 1), w = D.width(s0, size, 400, T.font.display);
+  g.save(); g.beginPath(); g.rect(x - w, y - size * 0.42, w * 2, size * 0.8); g.clip(); let cx = x - w / 2;
+  for (let j = 0; j < s0.length; j++) { const dw = D.width(s0[j], size, 400, T.font.display), mx = cx + dw / 2;
+    D.alpha(a, () => { if (s0[j] === s1[j] || f <= 0) D.txt(s0[j], mx, y, size, C.pine, 400, T.font.display);
+      else { D.txt(s0[j], mx, y - f * size * 0.8, size, C.pine, 400, T.font.display); D.txt(s1[j], mx, y + (1 - f) * size * 0.8, size, C.pine, 400, T.font.display); } }); cx += dw; }
+  g.restore();
 }
 
 MDNA.scene({ duration: 12, background: C.cloud, render(t) {
-  D.bg("#F3F1E8");
-  g.save(); g.globalAlpha = 0.08; g.fillStyle = g.createPattern(halftone, "repeat"); g.fillRect(0, 0, W, H); g.restore();
-  const n = VARS.items.length, at = i => 1.6 + i * 1.75;
-  const head = k(t, VARS.items.flatMap((_, i) => [[at(i) - 0.9, i * GAP, i ? "Settle" : "Flat"], [at(i) + 0.6, i * GAP]]));
-  const cam = k(t, [[0, -300], [1.2, 0, "Settle"], ...VARS.items.map((_, i) => [at(i) + 0.4, i * GAP, "Settle"]), [11, (n - 1) * GAP * 0.5, "Settle"]]);
-  const zoom = k(t, [[10.0, 1], [11.2, 0.5, "Settle"]]), tilt = k(t, [[0, -0.02], [10, 0.015, "Cruise"], [11.2, 0, "Settle"]]);
+  D.bg(C.cloud);
+  g.save(); g.globalAlpha = 0.05; g.fillStyle = g.createPattern(halftone, "repeat"); g.fillRect(0, 0, W, H); g.restore();
+  const hd = head(t), cam = camera(t), sxOf = x => (x - cam.x) * cam.z + W / 2;
   // a giant serif year behind everything, following the playhead
-  const hi = clamp(head / GAP, 0, n - 1), i0 = Math.floor(Math.min(hi, n - 2)), yr = Math.round(lerp(+VARS.items[i0][0], +VARS.items[i0 + 1][0], hi - i0));   // years between milestones
-  if (!NOTEXT) D.alpha(0.07 * (1 - seg(t, 10, 10.8)), () => D.txt(String(yr), W / 2, H / 2 + 40, 640, C.pine, 400, T.font.display));
-  if (!NOTEXT) D.alpha(seg(t, 0.2, 0.67, "Land") * (1 - seg(t, 1.6, 2.0)), () => { kicker(D, VARS.kicker, W / 2, 170, C.sea); rich(D, VARS.title, W / 2, 270, 84, C.pine, C.coral); });
-  D.at(W / 2, H / 2 + 40, zoom, tilt, () => { g.translate(-cam, 0);
+  const hi = clamp(hd / GAP, 0, n - 1), i0 = Math.floor(Math.min(hi, n - 2)), yv = lerp(+VARS.items[i0][0], +VARS.items[i0 + 1][0], hi - i0);
+  if (!NOTEXT) odometer(yv, W / 2, H / 2 + 40, 640, 0.06 * (1 - seg(t, OUT[0], OUT[0] + 0.6)));
+  // the title opens the film and comes back for the payoff
+  if (!NOTEXT) { const a = seg(t, 0, 0.47, "Land") * (1 - seg(t, 1.1, 1.5)) + seg(t, OUT[1] - 0.6, OUT[1], "Land"), rise = t < 2 ? 0 : 24 * (1 - seg(t, OUT[1] - 0.6, OUT[1], "Land"));
+    D.alpha(a, () => { kicker(D, VARS.kicker, W / 2, 150 + rise, C.sea, "center", 26); rich(D, VARS.title, W / 2, 250 + rise, 84, C.pine, C.coral); }); }
+  D.at(W / 2, cam.y, cam.z, 0, () => { g.translate(-cam.x, 0);
     // axis with minor ticks, one per quarter
-    g.strokeStyle = "#0A211F22"; g.lineWidth = 8; g.lineCap = "round"; g.beginPath(); g.moveTo(-260, 0); g.lineTo((n - 1) * GAP + 260, 0); g.stroke();
-    for (let q = -4; q <= (n - 1) * 4 + 4; q++) { const x = q * GAP / 4; g.strokeStyle = q % 4 ? "#0A211F33" : "#0A211F88"; g.lineWidth = 3; g.beginPath(); g.moveTo(x, -10); g.lineTo(x, q % 4 ? 10 : 18); g.stroke(); }
-    g.strokeStyle = C.pine; g.lineWidth = 8; g.beginPath(); g.moveTo(-260, 0); g.lineTo(Math.max(-260, head), 0); g.stroke();
-    glow(g, head, 0, 60, "#D8FF85", 0.9); g.beginPath(); g.arc(head, 0, 10, 0, 7); D.fill(C.pine);
+    g.strokeStyle = al(C.pine, 0.13); g.lineWidth = 8; g.lineCap = "round"; g.beginPath(); g.moveTo(-260, 0); g.lineTo((n - 1) * GAP + 260, 0); g.stroke();
+    for (let q = -4; q <= (n - 1) * 4 + 4; q++) { const x = q * GAP / 4; g.strokeStyle = al(C.pine, q % 4 ? 0.2 : 0.5); g.lineWidth = 3; g.beginPath(); g.moveTo(x, -10); g.lineTo(x, q % 4 ? 10 : 18); g.stroke(); }
+    g.strokeStyle = C.pine; g.lineWidth = 8; g.beginPath(); g.moveTo(-260, 0); g.lineTo(Math.max(-260, hd), 0); g.stroke();
+    // the playhead: a spark ring (light-mode glow, no white smudge on paper)
+    glow(g, hd, 0, 70, C.spark, 1, true); g.beginPath(); g.arc(hd, 0, 22, 0, 7); g.strokeStyle = C.spark; g.lineWidth = 6; g.stroke(); g.beginPath(); g.arc(hd, 0, 10, 0, 7); D.fill(C.pine);
     VARS.items.forEach(([y, title, kind], i) => {
       const x = i * GAP, p = seg(t, at(i) - 0.15, at(i) + 0.3, "Pop"), c = seg(t, at(i), at(i) + 0.467, "Land"), up = i % 2 ? 1 : -1, ill = seg(t, at(i) + 0.2, at(i) + 1.2, "Cruise");
       g.beginPath(); g.arc(x, 0, 24 * p, 0, 7); D.fill(C.spark); g.lineWidth = 6; g.strokeStyle = C.pine; if (p > 0) g.stroke();
-      D.alpha(c, () => { g.save(); g.setLineDash([6, 8]); g.strokeStyle = C.pine; g.lineWidth = 3; g.beginPath(); g.moveTo(x, up * 34); g.lineTo(x, up * (34 + 70 * c)); g.stroke(); g.restore();
-        const cy = up * 250 + up * 30 * (1 - c); g.shadowColor = "#0A211F33"; g.shadowBlur = 30; g.shadowOffsetY = 12; D.rr(x - 250, cy - 120, 500, 240, 22); D.fill("#fff"); g.shadowColor = "transparent";
-        D.rr(x - 250, cy - 120, 500, 10, 5); D.fill(i === n - 1 ? C.spark : C.sea);
-        D.at(x - 150, cy + 10, 1, 0, () => illo(kind, ill, t));
-        if (!NOTEXT) { kicker(D, "Chapter " + (i + 1), x - 40, cy - 66, C.sea, "left", 18); D.txt(y, x - 40, cy - 10, 64, C.pine, 400, T.font.display, "left"); D.txt(title, x - 40, cy + 54, 28, C.pine, 600, T.font.ui, "left"); } });
-      if (i === n - 1 && !NOTEXT) { const s = seg(t, at(i) + 0.8, at(i) + 1.2, "Pop"); D.at(x + 220, -300, s, -0.2, () => { g.beginPath(); g.arc(0, 0, 70, 0, 7); D.fill(C.coral); kicker(D, "Today", 0, 2, C.cloud, "center", 22); }); }
+      const edge = Math.abs(sxOf(x) - W / 2) + CW / 2 * cam.z, vis = c * (1 - seg(edge, 850, 960, "Flat"));   // dissolve before the frame edge
+      if (vis <= 0.001) return;
+      D.alpha(vis, () => { g.save(); g.setLineDash([6, 8]); g.strokeStyle = C.pine; g.lineWidth = 3; g.beginPath(); g.moveTo(x, up * 34); g.lineTo(x, up * (34 + 86 * c)); g.stroke(); g.restore();
+        const cy = up * 250 + up * 30 * (1 - c), L = x - CW / 2; g.shadowColor = al(C.pine, 0.16); g.shadowBlur = 30; g.shadowOffsetY = 12; D.rr(L, cy - CH / 2, CW, CH, 22); D.fill("#ffffff"); g.shadowColor = "transparent";
+        D.rr(L, cy - CH / 2, CW, 10, 5); D.fill(i === n - 1 ? C.spark : C.sea);
+        D.at(L + 110, cy + 5, 1, 0, () => illo(kind, ill, t));
+        if (!NOTEXT) { const tx = L + 222, lines = wrap(title, 36, CW - 222 - 30), top = cy - 12 - (lines.length - 1) * 20;
+          D.alpha(1 - cam.zo, () => kicker(D, "Chapter " + (i + 1), tx, top - 66, C.sea, "left", 24));
+          D.txt(y, tx, top - 14, 64, C.pine, 400, T.font.display, "left");
+          lines.forEach((l, j) => D.txt(l, tx, top + 50 + j * 42, 36, C.pine, 600, T.font.ui, "left")); }
+        if (i === n - 1 && !NOTEXT && t > at(i) + 0.82) { const s = seg(t, at(i) + 0.8, at(i) + 1.2, "Pop"), lab = "Today", tw = D.width(lab.toUpperCase(), 34, 600, T.font.ui, 10.9) + 52;
+          D.at(L + CW - tw / 2, cy - CH / 2 - 44, s, 0, () => { D.rr(-tw / 2, -30, tw, 60, 30); D.fill(C.coral); kicker(D, lab, 5, 2, C.cloud, "center", 34); }); }
+      });
     });
   });
-  finish(g, t, { grain: 0.08, vignette: 0.18 });
+  finish(g, t, { grain: 0.05, light: true });
 } });
 </script>

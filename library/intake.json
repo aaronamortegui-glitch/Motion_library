@@ -43,6 +43,9 @@
     { "id": "t14_pixel_character", "kind": "template", "title": "Pixel character short", "domain": ["social", "story_short", "brand"], "on_screen": ["characters"], "needs": ["character"], "energy": [2, 4],
       "triggers": { "en": ["pixel", "8-bit", "8 bit", "retro game", "mascot", "character", "robot", "cute"], "es": ["pixel", "pixeles", "8 bits", "retro", "videojuego", "mascota", "personaje", "robot", "tierno"] }, "how": "video-templates skill, t14 with a character from library/characters" },
 
+    { "id": "t15_agent_update", "kind": "template", "title": "Announcement with our robot (what is new)", "domain": ["social", "corporate", "product_ad"], "on_screen": ["characters", "product_ui"], "needs": ["character"], "energy": [3, 4],
+      "triggers": { "en": ["announcement", "announce", "what's new", "whats new", "new version", "update", "release notes", "promo"], "es": ["anuncio", "anunciar", "novedades", "nueva version", "actualizacion", "update", "promo", "que hay de nuevo"] }, "how": "video-templates skill, t15 (route C: render, then music and sound effects in AE); ?only=<scene> for capsules" },
+
     { "id": "tech_tracked_labels", "kind": "technique", "title": "Tracked labels", "ref": "Tracked labels", "domain": ["product_ad", "social"], "on_screen": ["footage"], "needs": ["footage"], "energy": [3, 4],
       "triggers": { "en": ["label", "labels", "callout", "tracking", "track", "follow", "point out", "features on"], "es": ["etiqueta", "etiquetas", "callout", "tracking", "seguir", "senalar", "destacar en el video"] }, "how": "techniques.json: Tracked labels" },
     { "id": "tech_text_behind", "kind": "technique", "title": "Text behind people", "ref": "Text behind people", "domain": ["social", "brand"], "on_screen": ["footage", "kinetic_type"], "needs": ["footage"], "energy": [3, 5],

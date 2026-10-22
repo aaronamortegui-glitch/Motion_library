@@ -4,263 +4,309 @@
 <script src="../runtime/mdna.js"></script>
 <div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
 <script>
-// T13 · install tutorial: Claude Code installs Motion DNA (59 s of animation; Rex's shots are cut in by media/motion_dna_tutorial/make_tutorial.py). A 90s-style desktop sets the tone (drawn here, no
-// real system branding); you open the Claude app › Code, start a session in any folder, paste the repo link and Claude clones it and runs setup (CLAUDE.md,
-// "When someone asks you to install"); then the steps only you can do in After Effects, the Connect sheet, a generator
-// MCP (Krea or Flora) and a first order. The panel states are the Figma frames of motion-adn › 07 · Quick install
-// (built from the panel components and variables), exported to docs/quick-install/figma/. The manual path closes it.
+// T13 · install tutorial: Claude Code installs Motion DNA (59 s of animation; Rex's shots are cut in by
+// media/motion_dna_tutorial/make_tutorial.py at 3, 23, 49 and 55 s, so each of those moments resolves on the wallpaper).
+// One visual language: a pine wallpaper with grain, flat dark windows with the same chrome (the Claude app, the folder
+// picker, After Effects, its Preferences, the browser), a step card on the left over a soft scrim and a world camera
+// that punches in (x1.4 to x3.1) on whatever is being clicked, so UI text reads at 24 px or more at the key moments.
+// The route is CLAUDE.md "When someone asks you to install": open Claude › Code, start a session in any folder, paste the
+// repo link, Claude clones it and runs setup; then the steps only you can do in After Effects, Connect, the generator
+// connectors and a first order. The panel states are the Figma frames of motion-adn › 07 · Quick install, exported to
+// docs/quick-install/figma/. Click times and step starts are fixed: make_tutorial.py lays voice lines and clicks on them.
 const REPO = "https://github.com/aaronamortegui-glitch/Motion_library";
 const STEPS = [["Open Claude › Code", "The Claude app: pick Code at the top."], ["New session, any folder", "Any folder. Not the After Effects one."], ["Paste the repo link", "Claude clones it and runs the setup."],
                ["Allow scripts", "Once, in After Effects Preferences."], ["Open the panel", "Window › Extensions › Motion DNA."], ["Connect", "Press Connect, then Allow in the browser."], ["Ask", "Select a layer, say what you want."]];
 // step i runs SLOT[i] .. SLOT[i + 1]; the intro before (0-3 s; Rex's entrance and his intro are cut in there), the end card after.
 // Rex's lines (media/motion_dna_tutorial/audio/cloned/) start 0.3 s into each step.
 const SLOT = [3, 7.5, 14.5, 23, 28.8, 35.6, 49, 55];
+// every click (template seconds; make_tutorial.py plays a click sound on each)
+const CLICKS = [3.7, 4.05, 5.75, 8.0, 10.4, 12.3, 14.65, 24.15, 25.8, 27.2, 30.05, 31.5, 36.55, 38.15, 39.55, 45.3, 46.4, 47.5, 52.55];
 const stepAt = t => { if (t >= SLOT[7]) return 7; for (let i = SLOT.length - 2; i >= 0; i--) if (t >= SLOT[i]) return i; return -1; };
-const OFFICE = Object.assign(new Image(), { src: "../../../media/motion_dna_teaser/storyboard/bg_office_empty.jpg" });
-function office(t) {   // the teaser's empty office, blurred and dimmed, with a slow pan (as behind the teaser's UI scenes)
-  g.save(); g.filter = "blur(18px)"; const s = Math.max(W / OFFICE.width, H / OFFICE.height) * 1.12, dx = -60 * Math.sin(t * 0.05);
-  g.drawImage(OFFICE, (W - OFFICE.width * s) / 2 + dx, (H - OFFICE.height * s) / 2, OFFICE.width * s, OFFICE.height * s); g.restore();
-  g.fillStyle = "rgba(4,18,15,0.72)"; g.fillRect(0, 0, W, H);
-}
-const { T, seg, k, lerp, clamp, rng, glow, rich, kicker, finish } = MDNA, C = T.color;
+const { T, seg, k, lerp, clamp, glow, rich, kicker, finish } = MDNA, C = T.color;
 const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
-const MONO = "'JetBrains Mono', Consolas, ui-monospace, monospace", UI = { bg: "#1F2120", surface: "#262928", s2: "#2E3231", well: "#171918", line: "#3A3F3D", text: "#E3E6E1", dim: "#A3AAA6" };
+const MONO = "'JetBrains Mono', Consolas, ui-monospace, monospace";
+// the panel's neutrals (from the Figma components): every window uses them, accents are tokens
+const UI = { bg: "#1F2120", surface: "#262928", s2: "#2E3231", well: "#171918", line: "#3A3F3D", text: "#E3E6E1", dim: "#A3AAA6" };
 const img = n => Object.assign(new Image(), { src: "../../../docs/quick-install/figma/" + n });
 const P = { docked: img("panel_0_docked.png"), connect: img("panel_1_connect.png"), connected: img("panel_2_connected.png"), ready: img("panel_3_ready.png") };
-// the panel on screen: a 400 x 820 frame (exported at 2x) shown at 1.1 px per panel px
-const PX = 1360, PY = 120, PS = 1.1, pp = (x, y) => [PX + x * PS, PY + y * PS];
-const typed = (s, t, a, cps = 28) => s.slice(0, Math.max(0, Math.floor((t - a) * cps)));
-const MENU_X = {};
 const press = (t, a) => t > a && t < a + 0.35 ? seg(t, a, a + 0.35, "Flat") : 0;
 
-// ---------- the 90s-style desktop and its windows (bevelled, on the token colours)
-const BEV = { face: "#C9CCC4", light: "#F7F9F2", dark: "#5C6B66", darker: "#0A211F" };
-function bevel(x, y, w, h, inset) { g.fillStyle = BEV.face; g.fillRect(x, y, w, h);
-  g.fillStyle = inset ? BEV.dark : BEV.light; g.fillRect(x, y, w, 3); g.fillRect(x, y, 3, h);
-  g.fillStyle = inset ? BEV.light : BEV.dark; g.fillRect(x, y + h - 3, w, 3); g.fillRect(x + w - 3, y, 3, h); }
-function retroWindow(x, y, w, h, title, p, body) {   // opens from its icon with a zoom, classic bevel and title bar
-  if (p <= 0) return; const sc = lerp(0.08, 1, p);
-  g.save(); g.translate(x + w / 2, y + h / 2); g.scale(sc, sc); g.translate(-w / 2, -h / 2);
-  g.shadowColor = "#0007"; g.shadowBlur = 30; g.shadowOffsetY = 14; bevel(0, 0, w, h); g.shadowColor = "transparent";
-  const tg = g.createLinearGradient(6, 0, w - 6, 0); tg.addColorStop(0, BEV.darker); tg.addColorStop(1, "#174A46"); g.fillStyle = tg; g.fillRect(6, 6, w - 12, 34);
-  D.txt(title, 18, 24, 19, C.cloud, 700, T.font.ui, "left");
-  ["_", "□", "×"].forEach((c, i) => { bevel(w - 112 + i * 34, 10, 28, 26); D.txt(c, w - 98 + i * 34, 23, 16, BEV.darker, 800); });
-  if (p > 0.9) body();
-  g.restore();
+// ---------- camera: world point CAM.x, CAM.y sits at the anchor (the middle of the area right of the step card), scale CAM.s
+const AX = 1260, AY = 540, CAM = { x: AX, y: AY, s: 1 };
+let INCAM = false, SCRIM = 0;
+const toS = (x, y) => [AX + (x - CAM.x) * CAM.s, AY + (y - CAM.y) * CAM.s];
+function camera(t, keys) { const [x, y, s] = k(t, keys); CAM.x = x; CAM.y = y; CAM.s = s; }
+function world(a, fn) { if (a <= 0) return; D.alpha(a, () => { g.save(); g.translate(AX, AY); g.scale(CAM.s, CAM.s); g.translate(-CAM.x, -CAM.y); INCAM = true; fn(); INCAM = false; g.restore(); }); }
+// text never gets cut by the frame: near the edges (and, in the world, under the step card's scrim) it fades out
+const txt0 = D.txt;
+D.txt = function (s, x, y, size, col, w = 700, fam = T.font.ui, align = "center", track = 0, base = "middle") {
+  const m = g.getTransform(), wd = D.width(String(s), size, w, fam, track) * m.a, X = m.a * x + m.e;
+  const x0 = align === "center" ? X - wd / 2 : align === "right" ? X - wd : X, x1 = x0 + wd;
+  let a = clamp((1880 - x1) / 60 + 0.55) * clamp((x0 - 40) / 40 + 0.55);
+  if (INCAM && SCRIM > 0) a *= lerp(1, clamp((x0 - 664) / 80), SCRIM);
+  if (a <= 0.004) return;
+  D.alpha(a, () => txt0.call(D, s, x, y, size, col, w, fam, align, track, base));
+};
+function cursorPath(t, keys) {   // keys [t, x, y, ease, "s"]: world points follow the camera, "s" points are on screen
+  const at = q => q[4] === "s" ? [q[1], q[2]] : toS(q[1], q[2]);
+  if (t <= keys[0][0]) return at(keys[0]);
+  for (let i = 1; i < keys.length; i++) if (t <= keys[i][0]) { const p = seg(t, keys[i - 1][0], keys[i][0], keys[i][3] || "Cruise"), a = at(keys[i - 1]), b = at(keys[i]); return [lerp(a[0], b[0], p), lerp(a[1], b[1], p)]; }
+  return at(keys[keys.length - 1]);
 }
-function desktop(t) {
-  g.fillStyle = "#174A46"; g.fillRect(0, 0, W, H);
-  g.fillStyle = "#0A211F22"; for (let y = 0; y < H; y += 4) g.fillRect(0, y, W, 1);   // a faint CRT line texture
-  [["Claude", "term"], ["After Effects", "ae"], ["Documents", "folder"]].forEach(([label, kind], i) => { const x = 1780, y = 70 + i * 150, hot = kind === "term" && t > 4.6 && t < 6.2;
-    D.at(x, y, 1, 0, () => { if (hot) { g.fillStyle = "#0A211F99"; g.fillRect(-64, -8, 128, 120); }
-      if (kind === "term") { bevel(-32, 0, 64, 52); g.fillStyle = "#1F1F1E"; g.fillRect(-26, 6, 52, 40); D.txt("✻", 0, 27, 26, "#D97757", 800); }
-      else if (kind === "ae") { bevel(-32, 0, 64, 52); g.fillStyle = "#2E3231"; g.fillRect(-26, 6, 52, 40); D.txt("Ae", 0, 26, 22, C.mint, 800); }
-      else { g.fillStyle = "#E9D27A"; g.fillRect(-32, 8, 64, 44); g.fillRect(-32, 0, 26, 12); }
-      D.txt(label, 0, 76, 18, C.cloud, 600); }); });
-  bevel(0, H - 46, W, 46); bevel(6, H - 40, 130, 34, t > 4.4 && t < 4.9); D.txt("▣  Start", 22, H - 23, 18, BEV.darker, 800, T.font.ui, "left");
-  bevel(W - 150, H - 40, 144, 34, true); D.txt("10:42 AM", W - 78, H - 23, 16, BEV.darker, 700);
-  if (t > 4.4) { bevel(146, H - 40, 180, 34, true); D.txt("✻ Claude", 166, H - 23, 16, BEV.darker, 700, T.font.ui, "left"); }
+function wrap(s, size, w, fam, maxW) { const out = []; let line = "";
+  s.split(" ").forEach(word => { const tryL = line ? line + " " + word : word; if (line && D.width(tryL, size, w, fam) > maxW) { out.push(line); line = word; } else line = tryL; });
+  if (line) out.push(line); return out; }
+
+// ---------- the one window language: flat dark body, a 48 px chrome bar, three dots, a title; the body is clipped and drawn
+// from the first frame of the open (scale + fade on Land), and closes the same way in reverse
+function win(x, y, w, h, title, p, body, sc) {
+  if (p <= 0.001) return; const s = sc ?? lerp(0.94, 1, p);
+  D.alpha(p, () => D.at(x + w / 2, y + h / 2 + 24 * (1 - p), s, 0, () => { g.translate(-w / 2, -h / 2);
+    g.shadowColor = "#0009"; g.shadowBlur = 60; g.shadowOffsetY = 24; D.rr(0, 0, w, h, 16); D.fill(UI.bg); g.shadowColor = "transparent";
+    g.save(); D.rr(0, 0, w, h, 16); g.clip();
+    g.fillStyle = UI.surface; g.fillRect(0, 0, w, 48); g.fillStyle = UI.line; g.fillRect(0, 48, w, 2);
+    [C.coral, UI.line, UI.line].forEach((c, i) => { g.beginPath(); g.arc(26 + i * 24, 24, 7, 0, 7); D.fill(c); });
+    if (title) D.txt(title, w / 2, 25, 22, UI.dim, 600);
+    body(); g.restore();
+    D.rr(1, 1, w - 2, h - 2, 16); g.strokeStyle = UI.line; g.lineWidth = 2; g.stroke(); }));
 }
-// The Claude desktop app, Code: what you click, the folder you pick and what Claude does (the install route of CLAUDE.md)
-const APP = { x: 700, y: 96, w: 1100, h: 820, side: 270, bg: "#1F1F1E", side_bg: "#171716", line: "#33332F", text: "#ECECE8", dim: "#9A9A93", accent: "#D97757" };
+function wallpaper(t) {   // pine gradient, a slow sea light; grain comes from finish()
+  const gr = g.createRadialGradient(1480 + 80 * Math.sin(t * 0.06), 160, 60, 1260, 420, 1500);
+  gr.addColorStop(0, C.sea); gr.addColorStop(0.5, C.pine); gr.addColorStop(1, C.ink); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+  glow(g, 260 + 40 * Math.sin(t * 0.05), 1000, 760, C.sea, 0.35);
+}
+function scrim(a) { if (a <= 0) return; const gr = g.createLinearGradient(0, 0, 900, 0);
+  gr.addColorStop(0, "rgba(4,18,15,0.9)"); gr.addColorStop(0.58, "rgba(4,18,15,0.8)"); gr.addColorStop(1, "rgba(4,18,15,0)");
+  D.alpha(a, () => { g.fillStyle = gr; g.fillRect(0, 0, W, H); }); }
+
+// ---------- world A: the desktop, the Claude app (Code) and the folder picker (world = screen at scale 1)
+const ICONS = [["Claude", "claude"], ["After Effects", "ae"], ["Documents", "folder"]];
+function icons(t) {   // the desktop clears as the app opens
+  const gone = seg(t, 4.3, 4.7, "Launch"); if (gone >= 1) return;
+  ICONS.forEach(([label, kind], i) => { const inn = seg(t, -0.25 + i * 0.08, 0.35 + i * 0.08, "Land"), x = 1780, y = 110 + i * 170;
+    const hot = kind === "claude" && t > 3.7 && t < 4.6, pr = kind === "claude" ? Math.max(press(t, 3.7), press(t, 4.05)) : 0;
+    D.alpha(inn * (1 - gone), () => D.at(x, y + 48 + 16 * (1 - inn), 1 - 0.07 * Math.sin(pr * Math.PI), 0, () => { g.translate(0, -48);
+      if (hot) { D.rr(-78, -14, 156, 168, 18); D.fill("#F7F9F21c"); }
+      D.rr(-48, 0, 96, 96, 22); D.fill(kind === "ae" ? C.sea : UI.bg); g.strokeStyle = UI.line; g.lineWidth = 2; g.stroke();
+      if (kind === "claude") D.txt("✻", 0, 50, 46, C.coral, 800);
+      else if (kind === "ae") D.txt("Ae", 0, 50, 36, C.mint, 800);
+      else { g.fillStyle = C.mint; g.fillRect(-30, 30, 60, 42); g.fillRect(-30, 24, 24, 8); }
+      D.txt(label, 0, 126, 24, C.cloud, 600); })); });
+}
+const APP = { x: 700, y: 120, w: 1100, h: 800, side: 280 };
+const LOG = [["✻ Reading CLAUDE.md…", 16.9, C.coral], ["⏺ git clone github.com/aaronamortegui-glitch/Motion_library", 17.4, C.mint], ["  ⎿ Cloning into 'Motion_library'… done.", 18.0, UI.dim],
+             ["⏺ python tools/setup.py", 18.6, C.mint], ["  ⎿ ✓ Panel installed, signed (After Effects 2025, 2026)", 19.4, C.spark], ["  ⎿ ✓ Fonts · ✓ MCP motion-dna · ✓ bridge starts with AE", 19.8, C.spark],
+             ["Done. Two things only you can do in After Effects:", 20.6, UI.text], ["1. Preferences › Scripting & Expressions › Allow Scripts…", 21.0, UI.text], ["2. Restart it › Window › Extensions › Motion DNA, dock it.", 21.4, UI.text]];
 function claudeApp(t) {
-  const p = seg(t, 4.3, 4.8, "Land"); if (p <= 0) return;
-  const { x, y, w, h, side } = APP;
-  D.alpha(p, () => D.at(x + w / 2, y + h / 2 + 30 * (1 - p), lerp(0.94, 1, p), 0, () => { g.translate(-w / 2, -h / 2);
-    g.shadowColor = "#000a"; g.shadowBlur = 60; g.shadowOffsetY = 24; D.rr(0, 0, w, h, 14); D.fill(APP.bg); g.shadowColor = "transparent";
-    g.save(); D.rr(0, 0, w, h, 14); g.clip();
-    g.fillStyle = APP.side_bg; g.fillRect(0, 0, side, h); g.fillStyle = APP.line; g.fillRect(side, 0, 2, h);
-    D.txt("Claude", w / 2, 22, 16, APP.dim, 600);
-    ["#FF5F57", "#FEBC2E", "#28C840"].forEach((c, i) => { g.beginPath(); g.arc(22 + i * 22, 22, 7, 0, 7); D.fill(c); });
-    // Home | Code at the top of the sidebar
-    const code = t > 5.85; D.rr(16, 52, side - 32, 44, 10); D.fill("#262624");
-    D.rr(code ? side / 2 : 20, 56, side / 2 - 24, 36, 8); D.fill("#3A3A36");
-    D.txt("Home", 20 + (side / 2 - 24) / 2, 74, 18, code ? APP.dim : APP.text, 600); D.txt("Code", side / 2 + (side / 2 - 24) / 2, 74, 18, code ? APP.text : APP.dim, 700);
-    const items = code ? ["+  New", "Artifacts", "Customize"] : ["+  New chat", "Chats", "Projects"];
-    items.forEach((it, i) => { const hot = code && i === 0 && t > 7.9 && t < 8.6; if (hot) { D.rr(14, 112 + i * 44, side - 28, 38, 8); D.fill("#2E2E2B"); } D.txt(it, 30, 131 + i * 44, 18, APP.text, i === 0 ? 700 : 500, T.font.ui, "left"); });
-    if (t > 12.7) { D.txt("PROJECTS", 30, 270, 14, APP.dim, 700, T.font.ui, "left", 2); D.rr(14, 286, side - 28, 40, 8); D.fill("#2E2E2B"); D.txt("Install Motion DNA", 30, 306, 17, APP.text, 600, T.font.ui, "left"); }
+  win(APP.x, APP.y, APP.w, APP.h, "Claude", seg(t, 4.3, 4.8, "Land"), () => {
+    const { w, h, side } = APP, code = t > 5.8, session = t > 12.6;
+    g.fillStyle = UI.well; g.fillRect(0, 50, side, h); g.fillStyle = UI.line; g.fillRect(side, 50, 2, h);
+    // Home | Code: the knob slides on the click
+    const hw = (side - 44) / 2; D.rr(16, 64, side - 32, 52, 12); D.fill(UI.surface);
+    D.rr(lerp(22, 22 + hw, seg(t, 5.8, 6.05, "Settle")), 70, hw, 40, 9); D.fill(UI.s2);
+    D.txt("Home", 22 + hw / 2, 90, 20, code ? UI.dim : UI.text, 600); D.txt("Code", 22 + hw * 1.5, 90, 20, code ? C.coral : UI.dim, 700);
+    (code ? ["+  New session", "Artifacts", "Customize"] : ["+  New chat", "Chats", "Projects"]).forEach((it, i) => { const yy = 164 + i * 48;
+      if (code && i === 0 && t > 7.98 && t < 12.6) { D.rr(14, yy - 20, side - 28, 40, 9); D.fill(UI.s2); }
+      D.txt(it, 30, yy, 20, UI.text, i === 0 ? 700 : 500, T.font.ui, "left"); });
+    D.alpha(seg(t, 12.6, 13.0, "Land"), () => { D.txt("PROJECTS", 30, 330, 18, UI.dim, 700, T.font.ui, "left", 2);
+      D.rr(14, 352, side - 28, 44, 9); D.fill(UI.s2); D.txt("Install Motion DNA", 30, 374, 20, UI.text, 600, T.font.ui, "left"); });
     // main area
-    const mx = side + 40, mw = w - side - 80;
-    if (!code) { D.txt("Good morning, how can I help?", side + (w - side) / 2, h / 2 - 60, 34, APP.text, 400, T.font.display); }
-    else if (t < 12.7) { D.txt("Start a session in a folder", side + (w - side) / 2, h / 2 - 60, 30, APP.text, 600); D.txt("Claude works on the files of the folder you choose.", side + (w - side) / 2, h / 2 - 16, 20, APP.dim, 500); }
-    else {
-      D.txt("~/Documents/Projects", mx, 70, 17, APP.dim, 600, MONO, "left");
-      const lines = [], L = (s2, c, size, bubble) => lines.push([s2, c, size, bubble]);
-      if (t > 15.0) L(typed("Install Motion DNA from " + REPO, t, 15.0, 38), APP.text, 19, true);
-      if (t > 16.9 && t < 17.4) L("✻ Reading CLAUDE.md…", APP.accent, 17);
-      [["⏺ git clone " + REPO, 17.4, C.mint], ["  ⎿ Cloning into 'Motion_library'... done.", 18.0, APP.dim], ["⏺ python tools/setup.py", 18.6, C.mint],
-       ["  ⎿ ✓ Panel installed, signed (After Effects 2025, 2026)", 19.4, C.spark], ["  ⎿ ✓ Fonts · ✓ MCP motion-dna · ✓ the bridge starts with AE", 19.8, C.spark],
-       ["Done. Two things only you can do in After Effects:", 20.6, APP.text], ["1. Preferences › Scripting & Expressions › Allow Scripts…", 21.0, APP.text], ["2. Restart it › Window › Extensions › Motion DNA, and dock it.", 21.4, APP.text]]
-        .forEach(([s2, a, c]) => { if (t > a) L(s2, c, 16); });
-      let yy = 120; lines.forEach(([s2, c, size, bubble]) => { if (bubble) { const bw = Math.min(mw, D.width(s2, size, 500, MONO) + 40); D.rr(mx + mw - bw, yy - 22, bw, 46, 12); D.fill("#2E2E2B"); g.font = `500 ${size}px ${MONO}`; g.fillStyle = c; g.textAlign = "left"; g.textBaseline = "middle"; g.fillText(s2, mx + mw - bw + 20, yy + 1); yy += 70; }
-        else { g.font = `500 ${size}px ${MONO}`; g.fillStyle = c; g.textAlign = "left"; g.textBaseline = "middle"; g.fillText(s2, mx, yy); yy += size + 22; } });
-    }
+    const mx = side + 40, mw = w - side - 80, cxm = side + (w - side) / 2;
+    D.alpha(1 - seg(t, 5.8, 6.0), () => D.txt("Good morning. How can I help?", cxm, 380, 44, UI.text, 400, T.font.display));
+    const a1 = seg(t, 5.9, 6.3, "Land") * (1 - seg(t, 12.35, 12.6));
+    D.alpha(a1, () => { D.txt("Start a session in a folder", cxm, 360 + 16 * (1 - a1), 34, UI.text, 700); D.txt("Claude works on the files of the folder you choose.", cxm, 412 + 16 * (1 - a1), 22, UI.dim, 500); });
+    const a2 = seg(t, 12.6, 13.0, "Land");
+    if (a2 > 0) D.alpha(a2, () => {
+      D.txt("~/Documents/Projects", mx, 82, 18, UI.dim, 600, MONO, "left");
+      if (t > 15.0) {   // your message, typed across two lines (the link on its own line)
+        const L1 = "Install Motion DNA from", n = Math.floor((t - 15.0) * 38), bw = D.width(REPO, 18, 500, MONO) + 48, bx = mx + mw - bw, ba = seg(t, 15.0, 15.25, "Land");
+        D.alpha(ba, () => { D.rr(bx, 112 + 10 * (1 - ba), bw, 100, 14); D.fill(UI.s2);
+          D.txt(L1.slice(0, n), bx + 24, 146, 18, UI.text, 500, MONO, "left");
+          const s2 = REPO.slice(0, Math.max(0, n - L1.length - 1)); if (s2) D.txt(s2, bx + 24, 180, 18, C.spark, 500, MONO, "left"); });
+      }
+      LOG.forEach(([s2, at, c], i) => { const la = seg(t, at, at + 0.3, "Land"); if (la > 0) D.alpha(la, () => D.txt(s2, mx + 12 * (1 - la), 252 + i * 40, 18, c, 500, MONO, "left")); });
+    });
     if (code) {   // the prompt box
-      D.rr(mx, h - 110, mw, 74, 14); D.fill("#262624"); g.strokeStyle = t > 14.6 && t < 15.1 ? APP.accent : APP.line; g.lineWidth = 2; g.stroke();
-      D.txt(t < 12.7 ? "Choose a folder first" : (t < 15.0 ? "Ask Claude to…" : ""), mx + 24, h - 73, 18, APP.dim, 500, T.font.ui, "left");
-      D.rr(mx + mw - 54, h - 96, 40, 40, 10); D.fill(t > 15.0 ? APP.accent : "#3A3A36");
+      D.rr(mx, h - 110, mw, 74, 14); D.fill(UI.surface); g.strokeStyle = t > 14.65 && t < 15.4 ? C.coral : UI.line; g.lineWidth = 2; g.stroke();
+      const ph = t < 12.6 ? "Choose a folder first" : (t < 15.0 ? "Ask Claude to…" : ""); if (ph) D.txt(ph, mx + 24, h - 73, 20, UI.dim, 500, T.font.ui, "left");
+      D.rr(mx + mw - 56, h - 96, 44, 44, 10); D.fill(t > 15.0 ? C.coral : UI.s2);
     }
-    g.restore(); }));
+  });
 }
-function folderPicker(t) {   // "any folder for your projects, not the After Effects folder"
-  const p = seg(t, 8.5, 8.9, "Land") * (1 - seg(t, 12.5, 12.8, "Launch")); if (p <= 0) return;
-  const x = 940, y = 250, w = 720, h = 520;
-  D.alpha(p, () => D.at(x + w / 2, y + h / 2 + 20 * (1 - p), 1, 0, () => { g.translate(-w / 2, -h / 2);
-    g.shadowColor = "#000b"; g.shadowBlur = 50; D.rr(0, 0, w, h, 14); D.fill("#262624"); g.shadowColor = "transparent"; g.strokeStyle = APP.line; g.lineWidth = 2; g.stroke();
-    D.txt("Choose a folder", 28, 40, 24, APP.text, 700, T.font.ui, "left");
-    const sel = t > 10.5;
-    const rows = [["Desktop", 0, 0], ["Documents", 0, 0], ["Projects", 1, 1], ["Program Files › Adobe › After Effects", 0, 2]];
-    rows.forEach(([name, lvl, kind], i) => { const yy = 96 + i * 62;
-      if (kind === 1 && sel) { D.rr(18, yy - 24, w - 36, 50, 8); D.fill("#D977573a"); g.strokeStyle = APP.accent; g.lineWidth = 2; g.stroke(); }
-      g.fillStyle = kind === 2 ? "#5A5A55" : "#E9D27A"; g.fillRect(40 + lvl * 34, yy - 12, 30, 22); g.fillRect(40 + lvl * 34, yy - 16, 12, 6);
-      D.txt(name, 84 + lvl * 34, yy, 20, kind === 2 ? "#6E6E68" : APP.text, kind === 1 ? 700 : 500, T.font.ui, "left");
-      if (kind === 2) { D.txt("✕ not here", w - 40, yy, 18, "#FF8A80", 700, T.font.ui, "right"); } });
-    D.rr(28, h - 150, w - 56, 64, 10); D.fill("#1F1F1E"); D.txt("Any folder works: the repo lands there and stays there.", 48, h - 118, 18, C.spark, 600, T.font.ui, "left");
-    D.rr(w - 180, h - 70, 152, 48, 10); D.fill(t > 12.3 ? "#E48A6C" : APP.accent); D.txt("Open", w - 104, h - 46, 20, "#fff", 700);
-    D.rr(w - 330, h - 70, 132, 48, 10); D.fill("#3A3A36"); D.txt("Cancel", w - 264, h - 46, 20, APP.text, 600); }));
+const PK = { x: 1030, y: 230, w: 720, h: 540 };
+function folderPicker(t) {   // any folder for your projects, not the After Effects folder
+  const c = seg(t, 12.35, 12.6, "Launch");
+  win(PK.x, PK.y, PK.w, PK.h, "Choose a folder", seg(t, 8.1, 8.5, "Land") * (1 - c), () => { const { w, h } = PK, sel = t > 10.45;
+    [["Desktop", 0, 0], ["Documents", 0, 0], ["Projects", 1, 1], ["Program Files › Adobe › After Effects", 0, 2]].forEach(([name, lvl, kind], i) => { const yy = 110 + i * 64;
+      if (kind === 1 && sel) { D.rr(18, yy - 26, w - 36, 52, 10); D.fill("#FF8A6B2e"); g.strokeStyle = C.coral; g.lineWidth = 2; g.stroke(); }
+      g.fillStyle = kind === 2 ? UI.line : C.mint; g.fillRect(40 + lvl * 34, yy - 11, 32, 24); g.fillRect(40 + lvl * 34, yy - 16, 13, 7);
+      D.txt(name, 88 + lvl * 34, yy, 22, kind === 2 ? UI.dim : UI.text, kind === 1 ? 700 : 500, T.font.ui, "left");
+      if (kind === 2) D.txt("✕  not here", w - 40, yy, 22, C.coral, 700, T.font.ui, "right"); });
+    D.rr(28, 362, w - 56, 66, 12); D.fill(UI.well); D.txt("Any folder works: the repo lands there and stays there.", 48, 395, 20, C.spark, 600, T.font.ui, "left");
+    D.rr(w - 180, h - 74, 152, 50, 10); D.fill(t > 12.3 ? "#FFA88F" : C.coral); D.txt("Open", w - 104, h - 49, 22, C.ink, 700);
+    D.rr(w - 344, h - 74, 148, 50, 10); D.fill(UI.s2); D.txt("Cancel", w - 270, h - 49, 22, UI.text, 600); }, lerp(lerp(0.94, 1, seg(t, 8.1, 8.5, "Land")), 0.92, c));
 }
-function pasteCallout(t) {   // the moment that matters: the repo link
-  const p = seg(t, 14.6, 15.1, "Pop") * (1 - seg(t, 22.4, 23, "Launch"));
-  if (p > 0) D.alpha(p, () => { D.rr(580, 950, 1240, 64, 32); D.fill(C.spark); g.font = `700 22px ${MONO}`; g.fillStyle = C.pine; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("“Install Motion DNA from " + REPO + "”", 1200, 982); });
-}
+const CAM_A = [[3.0, [1260, 540, 1]], [4.3, [1290, 530, 1.04]], [5.3, [950, 290, 1.8], "Settle"], [6.3, [950, 290, 1.8]], [7.1, [1250, 520, 1.07], "Settle"], [7.4, [1250, 520, 1.07]],
+               [7.95, [950, 330, 1.8], "Settle"], [8.3, [950, 330, 1.8]], [9.0, [1390, 500, 1.55], "Settle"], [12.45, [1390, 500, 1.55]], [13.3, [1390, 520, 1.4], "Settle"], [14.1, [1390, 520, 1.4]],
+               [14.6, [1390, 560, 1.5], "Settle"], [15.1, [1390, 560, 1.5]], [15.7, [1390, 510, 1.42], "Settle"], [22.3, [1390, 500, 1.46]], [23.0, [1390, 520, 1.2], "Launch"]];
+const CUR_A = [[3.0, 1600, 1000], [3.6, 1780, 150, "Settle"], [4.2, 1780, 150], [5.4, APP.x + 199, APP.y + 90, "Settle"], [6.4, APP.x + 199, APP.y + 90], [7.85, APP.x + 70, APP.y + 164, "Settle"], [8.6, APP.x + 70, APP.y + 164],
+               [10.2, PK.x + 160, PK.y + 238, "Settle"], [11.0, PK.x + 160, PK.y + 238], [12.1, PK.x + PK.w - 104, PK.y + PK.h - 49, "Settle"], [13.0, PK.x + PK.w - 104, PK.y + PK.h - 49],
+               [14.45, APP.x + 440, APP.y + APP.h - 73, "Settle"], [15.2, APP.x + 440, APP.y + APP.h - 73], [16.5, 1700, 840, "Settle"]];
 
-// ---------- After Effects scenes (times are the scene's own clock, mapped from the slots in render)
-function windowFrame(x, y, w, h, title, p) {   // a neutral app window that lands on Land
-  D.alpha(p, () => D.at(x + w / 2, y + h / 2 + 40 * (1 - p), lerp(0.96, 1, p), 0, () => {
-    g.shadowColor = "#0009"; g.shadowBlur = 60; g.shadowOffsetY = 24; D.rr(-w / 2, -h / 2, w, h, 16); D.fill(UI.bg); g.shadowColor = "transparent";
-    g.strokeStyle = UI.line; g.lineWidth = 2; g.stroke(); D.rr(-w / 2, -h / 2, w, 52, 16); D.fill(UI.surface); g.fillRect(-w / 2, -h / 2 + 36, w, 16);
-    ["#FF9494", "#3A3F3D", "#3A3F3D"].forEach((c, i) => { g.beginPath(); g.arc(-w / 2 + 28 + i * 24, -h / 2 + 26, 7, 0, 7); D.fill(c); });
-    D.txt(title, 0, -h / 2 + 27, 20, UI.dim, 600); })); }
+// ---------- world B: After Effects (its window, Preferences, the Window menu, the docked panel and the viewer)
+const AEW = { x: 660, y: 100, w: 1200, h: 880 }, PS = 0.95, PX = AEW.x + AEW.w - 20 - 400 * PS, PY = AEW.y + 96, pp = (x, y) => [PX + x * PS, PY + y * PS];
+const MENUS = ["File", "Edit", "Composition", "Layer", "Effect", "Animation", "View", "Window", "Help"];
+const menuX = m => { let x = AEW.x + 28; for (const n of MENUS) { if (n === m) return x; x += D.width(n, 20, 600) + 34; } return x; };
+function aeWindow(t) {
+  win(AEW.x, AEW.y, AEW.w, AEW.h, "After Effects", 1, () => {
+    g.fillStyle = UI.surface; g.fillRect(0, 50, AEW.w, 42);
+    const ma = 1 - clamp((CAM.s - 1.8) / 0.6);   // the menu bar drops out of focus on the panel close-ups
+    if (ma > 0) D.alpha(ma, () => MENUS.forEach(m => D.txt(m, menuX(m) - AEW.x, 71, 20, m === "Window" && t > 30.05 && t < 31.75 ? C.spark : UI.dim, 600, T.font.ui, "left")));
+    D.rr(20, 104, 760, 470, 10); D.fill("#121313"); D.rr(80, 164, 640, 360, 6); D.fill(C.pine);   // the viewer and its comp
+    D.rr(20, 590, 760, 270, 10); D.fill(UI.surface);
+    for (let i = 0; i < 5; i++) { D.rr(40, 614 + i * 46, 300 + 90 * (i % 3), 28, 6); D.fill(i === 1 ? C.sea : UI.s2); }
+    D.rr(800, 104, 380, 756, 10); D.fill(UI.well);   // where the panel docks
+  });
+}
+const PF = { x: 700, y: 150, w: 1060, h: 760 };
 function prefs(t) {   // After Effects › Preferences › Scripting & Expressions
-  const p = seg(t, 9.9, 10.4, "Land"), x = 760, y = 160, w = 1060, h = 760; windowFrame(x, y, w, h, "After Effects · Preferences", p);
-  if (p < 0.5) return;
-  const items = ["General", "Previews", "Display", "Import", "Output", "Grids & Guides", "Labels", "Media & Disk Cache", "Video Preview", "Appearance", "New Project", "Auto-Save", "Memory & Performance", "Audio Hardware", "Type", "Scripting & Expressions"];
-  D.rr(x + 24, y + 76, 300, h - 100, 10); D.fill(UI.well);
-  const sel = seg(t, 11.0, 11.4, "Settle");
-  items.forEach((s, i) => { const yy = y + 104 + i * 38, on = i === items.length - 1 && sel > 0.5; if (on) { D.rr(x + 32, yy - 16, 284, 32, 6); D.fill(UI.s2); }
-    D.txt(s, x + 48, yy, 19, on ? C.spark : UI.dim, on ? 700 : 500, T.font.ui, "left"); });
-  D.alpha(sel, () => { D.txt("Scripting & Expressions", x + 360, y + 110, 28, UI.text, 700, T.font.ui, "left");
-    const tick = seg(t, 12.6, 12.85, "Pop");
-    D.rr(x + 360, y + 166, 30, 30, 6); D.fill(tick > 0.5 ? C.spark : UI.well); g.strokeStyle = tick > 0.5 ? C.spark : UI.line; g.lineWidth = 2; g.stroke();
-    if (tick > 0.5) D.at(x + 375, y + 181, tick, 0, () => { g.beginPath(); g.moveTo(-8, 0); g.lineTo(-2, 7); g.lineTo(9, -7); g.strokeStyle = C.pine; g.lineWidth = 4; g.lineCap = "round"; g.stroke(); });
-    D.txt("Allow Scripts to Write Files and Access Network", x + 406, y + 182, 22, UI.text, 600, T.font.ui, "left");
-    ["Enable JavaScript Debugger", "Warn User When Executing Files"].forEach((s, i) => { D.rr(x + 360, y + 226 + i * 52, 30, 30, 6); D.fill(UI.well); g.strokeStyle = UI.line; g.stroke(); D.txt(s, x + 406, y + 242 + i * 52, 22, UI.dim, 500, T.font.ui, "left"); });
-    D.rr(x + w - 200, y + h - 80, 160, 52, 10); D.fill(seg(t, 14.0, 14.2) > 0.5 ? "#E9FFB8" : C.spark); D.txt("OK", x + w - 120, y + h - 54, 22, C.pine, 700); });
-  const cx = k(t, [[10.4, 1500], [10.9, x + 200, "Settle"], [12.2, x + 200], [12.6, x + 375, "Settle"], [13.5, x + 375], [14.0, x + w - 120, "Settle"]]), cy = k(t, [[10.4, 900], [10.9, y + 104 + 15 * 38, "Settle"], [12.2, y + 104 + 15 * 38], [12.6, y + 181, "Settle"], [13.5, y + 181], [14.0, y + h - 54, "Settle"]]);
-  D.cursor(cx, cy, Math.max(press(t, 10.95), press(t, 12.6), press(t, 14.0)));
+  const c = seg(t, 27.3, 27.65, "Launch"), o = seg(t, 23.1, 23.6, "Land");
+  win(PF.x, PF.y, PF.w, PF.h, "After Effects · Preferences", o * (1 - c), () => { const { w, h } = PF;
+    const items = ["General", "Previews", "Display", "Import", "Output", "Grids & Guides", "Labels", "Media & Disk Cache", "Video Preview", "Appearance", "New Project", "Auto-Save", "Memory & Performance", "Audio Hardware", "Type", "Scripting & Expressions"];
+    D.rr(24, 72, 300, h - 96, 10); D.fill(UI.well); D.rr(340, 72, w - 364, h - 172, 10); D.fill("#1C1E1D");
+    const sel = seg(t, 24.2, 24.5, "Settle");
+    items.forEach((s, i) => { const yy = 100 + i * 38, on = i === items.length - 1 && sel > 0.5; if (on) { D.rr(32, yy - 17, 284, 34, 6); D.fill(UI.s2); }
+      D.txt(s, 48, yy, 20, on ? C.spark : UI.dim, on ? 700 : 500, T.font.ui, "left"); });
+    D.alpha(sel, () => { D.txt("Scripting & Expressions", 360, 110, 30, UI.text, 700, T.font.ui, "left");
+      const tick = seg(t, 25.8, 26.05, "Pop");
+      D.rr(360, 164, 32, 32, 6); D.fill(tick > 0.3 ? C.spark : UI.well); g.strokeStyle = tick > 0.3 ? C.spark : UI.line; g.lineWidth = 2; g.stroke();
+      if (tick > 0) D.at(376, 180, tick, 0, () => { g.beginPath(); g.moveTo(-8, 0); g.lineTo(-2, 7); g.lineTo(9, -7); g.strokeStyle = C.pine; g.lineWidth = 4; g.lineCap = "round"; g.stroke(); });
+      D.txt("Allow Scripts to Write Files and Access Network", 408, 180, 22, UI.text, 600, T.font.ui, "left");
+      ["Enable JavaScript Debugger", "Warn User When Executing Files"].forEach((s, i) => { D.rr(360, 220 + i * 56, 32, 32, 6); D.fill(UI.well); g.strokeStyle = UI.line; g.stroke(); D.txt(s, 408, 236 + i * 56, 22, UI.dim, 500, T.font.ui, "left"); });
+      D.rr(w - 200, h - 80, 160, 52, 10); D.fill(t > 27.2 ? "#E9FFB8" : C.spark); D.txt("OK", w - 120, h - 54, 24, C.pine, 700); }); }, lerp(lerp(0.94, 1, o), 0.92, c));
 }
-function aeWorkspace(t, a) {   // a calm stand-in for the After Effects window: menu bar + panels
-  const p = seg(t, a, a + 0.5, "Land"); D.alpha(p, () => {
-    D.rr(60, 120, 1800, 900, 14); D.fill("#1B1C1C"); g.strokeStyle = UI.line; g.lineWidth = 2; g.stroke();
-    D.rr(60, 120, 1800, 46, 14); D.fill(UI.surface); g.fillRect(60, 150, 1800, 16);
-    let mx0 = 100; ["File", "Edit", "Composition", "Layer", "Effect", "Animation", "View", "Window", "Help"].forEach(m => { D.txt(m, mx0, 143, 20, m === "Window" && t > a + 0.9 ? C.spark : UI.dim, 600, T.font.ui, "left"); MENU_X[m] = mx0; mx0 += D.width(m, 20, 600) + 44; });
-    [[80, 186, 380, 560], [480, 186, 820, 560], [80, 766, 1220, 236]].forEach(([x, y, w, h]) => { D.rr(x, y, w, h, 8); D.fill(UI.bg); });
-    D.rr(480, 186, 820, 560, 8); D.fill("#121313"); D.rr(640, 300, 500, 300, 6); D.fill("#0A211F");
-    for (let i = 0; i < 5; i++) { D.rr(100, 780 + i * 42, 300 + 80 * (i % 3), 26, 6); D.fill(i === 1 ? "#174A46" : "#262928"); }
-  }); }
-function panelImg(im, a = 1, dx = 0) { D.alpha(a, () => { g.save(); g.shadowColor = "#0008"; g.shadowBlur = 50; g.drawImage(im, PX + dx, PY, 400 * PS, 820 * PS); g.restore(); }); }
-function openPanel(t) {
-  aeWorkspace(t, 15.7);
-  const menu = seg(t, 16.9, 17.2, "Land") * (1 - seg(t, 18.9, 19.1));
-  if (menu > 0) D.alpha(menu, () => { const mx = (MENU_X.Window || 940) - 16, my = 166; D.rr(mx, my, 360, 330, 10); D.fill(UI.surface); g.strokeStyle = UI.line; g.stroke();
-    ["Align", "Audio", "Brushes", "Character", "Effects & Presets", "Extensions ›", "Info"].forEach((s, i) => { const on = s.startsWith("Extensions") && t > 17.6; if (on) { D.rr(mx + 8, my + 12 + i * 44, 344, 38, 6); D.fill(UI.s2); } D.txt(s, mx + 24, my + 31 + i * 44, 20, on ? C.spark : UI.text, 600, T.font.ui, "left"); });
-    if (t > 17.8) { D.rr(mx + 360, my + 228, 300, 56, 10); D.fill(UI.surface); g.strokeStyle = UI.line; g.stroke(); D.rr(mx + 368, my + 236, 284, 40, 6); D.fill(t > 18.3 ? "#D8FF8533" : UI.s2); D.txt("Motion DNA", mx + 386, my + 256, 20, C.spark, 700, T.font.ui, "left"); } });
-  const dock = seg(t, 19.0, 19.6, "Land"); if (dock > 0) panelImg(P.docked, dock, 120 * (1 - dock));
-  const wx = MENU_X.Window || 940;
-  const cx = k(t, [[15.9, 1500], [16.8, wx + 30, "Settle"], [17.5, wx + 100, "Settle"], [17.9, wx + 220, "Settle"], [18.2, wx + 420, "Settle"], [19.6, wx + 420], [20.6, 1700, "Settle"]]), cy = k(t, [[15.9, 900], [16.8, 143, "Settle"], [17.5, 166 + 31 + 5 * 44, "Settle"], [17.9, 166 + 256 - 5, "Settle"], [18.2, 166 + 256, "Settle"], [19.6, 166 + 256], [20.6, 980, "Settle"]]);
-  D.cursor(cx, cy, Math.max(press(t, 16.85), press(t, 18.3)));
-  D.alpha(seg(t, 20.3, 20.7), () => { D.rr(PX - 320, PY + 900, 300, 50, 25); D.fill("#D8FF851f"); D.txt("Dock it once: it comes back", PX - 300, PY + 925, 20, C.spark, 600, T.font.ui, "left"); });
+function windowMenu(t) {   // Window › Extensions › Motion DNA (the submenu opens to the left: no room on the right)
+  const a = seg(t, 30.1, 30.35, "Land") * (1 - seg(t, 31.55, 31.75)); if (a <= 0) return;
+  const mx = menuX("Window") - 16, my = AEW.y + 92;
+  D.alpha(a, () => { D.rr(mx, my, 360, 330, 10); D.fill(UI.surface); g.strokeStyle = UI.line; g.lineWidth = 2; g.stroke();
+    ["Align", "Audio", "Brushes", "Character", "Effects & Presets", "Extensions", "Info"].forEach((s, i) => { const on = s === "Extensions" && t > 30.65;
+      if (on) { D.rr(mx + 8, my + 12 + i * 44, 344, 40, 6); D.fill(UI.s2); }
+      D.txt(s, mx + 24, my + 32 + i * 44, 22, on ? C.spark : UI.text, 600, T.font.ui, "left"); if (s === "Extensions") D.txt("‹", mx + 330, my + 32 + i * 44, 22, UI.dim, 600, T.font.ui, "right"); });
+    const sa = seg(t, 30.75, 30.95, "Land"); if (sa > 0) D.alpha(sa, () => { D.rr(mx - 310, my + 226, 300, 56, 10); D.fill(UI.surface); g.strokeStyle = UI.line; g.stroke();
+      D.rr(mx - 302, my + 234, 284, 40, 6); D.fill(t > 31.25 ? "#D8FF8533" : UI.s2); D.txt("Motion DNA", mx - 284, my + 254, 22, C.spark, 700, T.font.ui, "left"); }); });
 }
-function connect(t) {
-  aeWorkspace(t, -10);
-  const s1 = seg(t, 23.6, 23.9), s2 = seg(t, 27.6, 27.9);
-  panelImg(P.docked, 1 - s1); if (s1 > 0) panelImg(P.connect, s1 * (1 - s2)); if (s2 > 0) panelImg(P.connected, s2);
-  const b = seg(t, 25.2, 25.7, "Land") * (1 - seg(t, 27.3, 27.7, "Launch"));   // the sign-in page that opens in the browser
-  if (b > 0) D.alpha(b, () => D.at(980, 640 + 30 * (1 - b), 1, 0, () => { g.shadowColor = "#0009"; g.shadowBlur = 50; D.rr(-300, -170, 600, 340, 18); D.fill(C.cloud); g.shadowColor = "transparent";
-    D.txt("Sign in to Claude", 0, -110, 30, C.pine, 700); D.rr(-240, -60, 480, 52, 10); D.fill("#E8EBE3"); D.txt("you@studio.example", -220, -34, 20, "#5C6B66", 500, T.font.ui, "left");
-    const ok = seg(t, 26.4, 26.7, "Pop"); D.rr(-240, 20, 480, 60, 12); D.fill(C.pine); D.txt(ok > 0.5 ? "✓ Signed in" : "Continue", 0, 50, 22, C.spark, 700);
-    D.txt("A window and your browser open once.", 0, 120, 18, "#5C6B66", 500); }));
-  const [bx, by] = pp(357, 61), [ccx, ccy] = pp(200, 266), [dx, dy] = pp(172, 22);
-  const cx = k(t, [[22.6, 1600], [23.3, bx, "Settle"], [24.2, bx], [24.9, ccx, "Settle"], [25.6, 980, "Settle"], [26.3, 980], [27.2, ccx + 120, "Settle"], [28.6, ccx + 120], [29.4, dx + 60, "Settle"]]);
-  const cy = k(t, [[22.6, 950], [23.3, by, "Settle"], [24.2, by], [24.9, ccy, "Settle"], [25.6, 690, "Settle"], [26.3, 690], [27.2, ccy + 260, "Settle"], [28.6, ccy + 260], [29.4, dy + 50, "Settle"]]);
-  D.cursor(cx, cy, Math.max(press(t, 23.35), press(t, 24.95), press(t, 26.35)));
-  const gp = seg(t, 27.9, 28.6, "Pop"); if (gp > 0 && gp < 1) glow(g, dx, dy, 80 * gp, "#D8FF85", 1 - gp);   // the dots turning green
-  D.alpha(seg(t, 28.6, 29.0, "Land"), () => { D.rr(PX - 360, PY + 90, 330, 54, 27); D.fill("#D8FF851f"); D.txt("MCP and Claude: green", PX - 340, PY + 117, 22, C.spark, 700, T.font.ui, "left"); });
+function panelImg(im, a = 1, dx = 0) { if (a <= 0) return; D.alpha(a, () => { g.save(); g.shadowColor = "#0008"; g.shadowBlur = 40; g.drawImage(im, PX + dx, PY, 400 * PS, 820 * PS); g.restore(); }); }
+function panel(t) {
+  const dock = seg(t, 31.6, 32.2, "Land"); if (dock <= 0) return;
+  const s1 = seg(t, 36.6, 36.9), s2 = seg(t, 40.5, 40.8), s3 = seg(t, 49.0, 49.3);
+  panelImg(P.docked, dock * (1 - s1), 140 * (1 - dock)); panelImg(P.connect, s1 * (1 - s2)); panelImg(P.connected, s2 * (1 - s3)); panelImg(P.ready, s3);
+  const gp = seg(t, 41.0, 41.7, "Pop"); if (gp > 0 && gp < 1) [110, 163].forEach(u => { const [x, y] = pp(u, 22); glow(g, x, y, 60 * gp, C.spark, 1 - gp); });   // the dots turn green
+  if (s3 > 0) {   // the order, typed into the panel's field
+    const [fx, fy] = pp(14, 148), order = "Animate the selected title with Land", n = Math.floor(Math.max(0, t - 50.0) * 22), s = order.slice(0, n);
+    D.alpha(s3, () => { g.fillStyle = UI.well; g.fillRect(fx, fy, 372 * PS, 126 * PS);
+      if (s) D.txt(s, fx + 12 * PS, fy + 22 * PS, 8.6 * PS, UI.text, 500, T.font.ui, "left");
+      if (t > 49.6 && t < 52.2 && Math.floor(t * 2.4) % 2 === 0) { g.fillStyle = C.spark; g.fillRect(fx + 13 * PS + D.width(s, 8.6 * PS, 500), fy + 16 * PS, 1.2, 12 * PS); }
+      if (t > 52.55 && t < 52.9) { const [sx, sy] = pp(340, 300); glow(g, sx, sy, 40, C.spark, 1 - seg(t, 52.55, 52.9)); } });
+  }
 }
-function authorize(t) {   // step 5, second half: each connector is one Allow in the browser (accounts already exist)
-  aeWorkspace(t, -10); panelImg(P.connected);
-  const cards = [["Figma", "Motion DNA wants to read your Figma files.", 0.3], ["Flora", "Claude wants to use your Flora workspace.", 1.4], ["Krea", "Claude wants to generate with your Krea account.", 2.5]];
-  cards.forEach(([name, line, a], i) => { const p = seg(t, a, a + 0.45, "Land") * (1 - seg(t, a + 1.0, a + 1.3, "Launch")); if (p <= 0) return;
-    D.alpha(p, () => D.at(980, 600 + 30 * (1 - p), 1, 0, () => { g.shadowColor = "#0009"; g.shadowBlur = 50; D.rr(-300, -150, 600, 300, 18); D.fill(C.cloud); g.shadowColor = "transparent";
-      D.txt("Connect " + name, 0, -92, 30, C.pine, 800); D.txt(line, 0, -40, 20, "#5C6B66", 500);
-      const ok = t > a + 0.75; D.rr(-240, 20, 480, 60, 12); D.fill(C.pine); D.txt(ok ? "✓ Allowed" : "Allow", 0, 50, 22, C.spark, 700); D.txt("browser · sign in once", 0, 116, 16, "#5C6B66", 500); })); });
-  const cx = k(t, [[0, 1500], [0.55, 980, "Settle"], [3.8, 980]]), cy = k(t, [[0, 980], [0.55, 650, "Settle"], [3.8, 650]]);
-  D.cursor(cx, cy, Math.max(press(t, 0.7), press(t, 1.8), press(t, 2.9)));
-  const chips = [["MCP", 1], ["Claude", 1], ["Figma", seg(t, 1.0, 1.2)], ["Flora", seg(t, 2.1, 2.3)], ["Krea", seg(t, 3.2, 3.4)]];
-  D.alpha(seg(t, 0.2, 0.6, "Land"), () => { let x = 470; chips.forEach(([c, on]) => { const w = D.width(c, 22, 700) + 64; D.rr(x, 930, w, 56, 28); D.fill("#0A211Fee"); g.beginPath(); g.arc(x + 26, 958, 8, 0, 7); D.fill(on > 0.5 ? C.spark : "#FF9494"); D.txt(c, x + 44, 958, 22, C.cloud, 700, T.font.ui, "left"); x += w + 14; }); });
-}
-function ask(t) {
-  aeWorkspace(t, -10);
-  panelImg(P.ready);
-  const [fx, fy] = pp(18, 150), order = "Animate the selected title with Land";   // typed into the panel's order field
-  D.rr(fx - 4, fy - 4, 368 * PS * 0.98, 104 * PS, 6); D.fill("#1A1C1B");
-  g.save(); g.beginPath(); g.rect(fx, fy, 360 * PS, 100 * PS); g.clip(); g.font = `500 ${13 * PS}px ${T.font.ui}`; g.fillStyle = UI.text; g.textAlign = "left"; g.textBaseline = "top";
-  g.fillText(typed(order, t, 32.4, 22), fx + 10, fy + 10); if (t < 34.6 && Math.floor(t * 2.4) % 2 === 0) { const w = g.measureText(typed(order, t, 32.4, 22)).width; g.fillStyle = C.spark; g.fillRect(fx + 12 + w, fy + 10, 2, 16 * PS); } g.restore();
-  const mp = seg(t, 32.2, 32.6, "Land") * (1 - seg(t, 35.2, 35.6, "Launch"));   // a large mirror of what is being typed
-  if (mp > 0) D.alpha(mp, () => { D.rr(560, 660, 720, 96, 48); D.fill(UI.surface); g.strokeStyle = C.spark; g.lineWidth = 2; g.stroke();
-    D.txt("“" + typed(order, t, 32.4, 22) + (t < 34.6 ? "" : "”"), 600, 708, 32, C.cloud, 600, T.font.ui, "left"); });
-  const [sx, sy] = pp(340, 300), sent = t > 35.0, land = seg(t, 35.6, 36.6, "Land");
-  g.save(); g.beginPath(); g.rect(640, 300, 500, 300); g.clip(); D.rr(640, 300, 500, 300, 6); D.fill("#0A211F");   // the viewer
-  g.strokeStyle = sent ? "#D8FF8555" : "#7FB8FF"; g.lineWidth = 2; g.setLineDash([6, 6]); g.strokeRect(700, 410, 380, 80); g.setLineDash([]);
-  D.alpha(sent ? land : 1, () => D.txt("Hello, motion.", 890 + (sent ? -260 * (1 - land) : 0), 450, 52, C.cloud, 800, T.font.ui, "center"));
+function viewer(t) {   // the comp: the title lands on the Land curve once the order is sent
+  const sent = t > 52.6, land = seg(t, 53.1, 54.1, "Land"), cx = AEW.x + 400, cy = AEW.y + 344;
+  g.save(); D.rr(AEW.x + 80, AEW.y + 164, 640, 360, 6); g.clip();
+  if (!sent && t > 49) { g.strokeStyle = C.sky; g.lineWidth = 2; g.setLineDash([6, 6]); g.strokeRect(cx - 190, cy - 40, 380, 80); g.setLineDash([]); }
+  D.alpha(sent ? land : 1, () => D.txt("Hello, motion.", cx, cy + (sent ? 60 * (1 - land) : 0), 52, C.cloud, 800));
+  const ta = seg(t, 53.9, 54.3, "Land"); if (ta > 0) D.alpha(ta, () => { D.rr(cx - 210, cy + 106 + 10 * (1 - ta), 420, 48, 24); D.fill(UI.surface); g.strokeStyle = C.spark; g.lineWidth = 2; g.stroke();
+    D.txt("✓ Fade Up · Land curve · 1 layer", cx, cy + 130 + 10 * (1 - ta), 22, C.spark, 600); });
   g.restore();
-  D.cursor(k(t, [[31.5, 1500], [32.1, fx + 120, "Settle"], [34.6, fx + 120], [34.95, sx, "Settle"], [36, sx], [37, 1300, "Settle"]]), k(t, [[31.5, 980], [32.1, fy + 50, "Settle"], [34.6, fy + 50], [34.95, sy, "Settle"], [36, sy], [37, 900, "Settle"]]), press(t, 34.95));
-  const tp = seg(t, 36.4, 36.8, "Land"); D.alpha(tp * (1 - seg(t, 39.2, 39.5)), () => { const [tx, ty] = pp(12, 760); D.rr(tx, ty, 376 * PS, 44, 8); D.fill(UI.surface); g.strokeStyle = C.spark; g.lineWidth = 2; g.stroke(); D.txt("Done: Fade Up with the Land curve on 1 layer.", tx + 16, ty + 22, 17, UI.text, 600, T.font.ui, "left"); });
 }
-
-// ---------- captions, progress and the timeline
-function captions(t) {   // left card: kicker, step title, one line
-  const si = stepAt(t); if (si < 0 || si > 6) return;
-  const p = seg(t, SLOT[si], SLOT[si] + 0.47, "Land"), x = 120, y = 300;
-  D.alpha(p, () => { D.rr(x - 30, y - 80, 580, 270, 18); D.fill("#0A211Fe6"); g.strokeStyle = "#D8FF8533"; g.lineWidth = 2; g.stroke();
-    kicker(D, `Step ${si + 1} of 7`, x, y - 30 + 20 * (1 - p), C.spark, "left", 22);
-    D.txt(STEPS[si][0], x, y + 40 + 20 * (1 - p), STEPS[si][0].length > 18 ? 44 : (STEPS[si][0].length > 15 ? 54 : 68), C.cloud, 800, T.font.ui, "left", -2);
-    D.txt(STEPS[si][1], x, y + 120 + 20 * (1 - p), 28, C.mint, 500, T.font.ui, "left"); });
+function browser(p, title, line, btn, ok, foot) {   // a browser sign-in page (screen space, over the panel)
+  win(920, 370, 680, 380, "Browser", p, () => {
+    D.txt(title, 340, 112, 32, UI.text, 800); D.txt(line, 340, 162, 24, UI.dim, 500);
+    D.rr(60, 210, 560, 64, 12); D.fill(ok ? C.mint : C.spark); D.txt(ok ? "✓ " + btn[1] : btn[0], 340, 243, 26, C.pine, 700);
+    D.txt(foot, 340, 324, 24, UI.dim, 500); });
 }
-function progress(t) { const si = stepAt(t); if (si < 0 || si > 6) return; D.alpha(seg(t, 3, 3.4), () => {
-  STEPS.forEach((_, i) => { D.rr(120 + i * 74, H - 100, 62, 6, 3); D.fill(i <= si ? C.spark : "#F7F9F233"); }); }); }
+const MX = () => menuX("Window") - 16;
+const CAM_B = t => [[23.0, [1230, 530, 0.92]], [23.5, [1230, 530, 1.1], "Land"], [24.05, [1030, 710, 1.7], "Settle"], [24.6, [1030, 710, 1.7]], [25.4, [1340, 350, 1.7], "Settle"], [26.4, [1340, 350, 1.7]],
+  [27.0, [1230, 530, 1.1], "Settle"], [27.5, [1230, 530, 1.1]], [28.4, [1260, 540, 1.0], "Settle"], [29.3, [1260, 540, 1.0]], [29.95, [MX() + 25, 350, 1.6], "Settle"], [31.6, [MX() + 25, 350, 1.6]],
+  [32.5, [1260, 540, 1.0], "Settle"], [34.9, [1270, 530, 1.03]], [36.3, [1650, 335, 3.1], "Settle"], [41.9, [1650, 335, 3.1]], [43.0, [1650, 420, 2.4], "Settle"], [48.9, [1650, 440, 2.3]],
+  [49.6, [1650, 405, 3.1], "Settle"], [52.65, [1650, 405, 3.1]], [53.4, [1060, 420, 1.55], "Settle"], [54.4, [1060, 430, 1.6]], [55.0, [1060, 450, 1.3], "Launch"]];
+const CUR_B = () => { const mx = MX(), [cbx, cby] = pp(357, 61), [ccx, ccy] = pp(200, 266), [fx, fy] = pp(120, 200), [sx, sy] = pp(340, 300);
+  return [[23.0, 1500, 950], [24.1, PF.x + 120, PF.y + 100 + 15 * 38, "Settle"], [24.9, PF.x + 120, PF.y + 670], [25.65, PF.x + 376, PF.y + 180, "Settle"], [26.6, PF.x + 376, PF.y + 180], [27.05, PF.x + PF.w - 120, PF.y + PF.h - 54, "Settle"],
+    [27.6, PF.x + PF.w - 120, PF.y + PF.h - 54], [28.4, 1500, 900, "Settle"], [29.2, 1500, 900], [29.95, mx + 46, AEW.y + 71, "Settle"], [30.3, mx + 46, AEW.y + 71], [30.7, mx + 120, AEW.y + 92 + 252, "Settle"],
+    [31.35, mx - 180, AEW.y + 92 + 254, "Settle"], [32.0, mx - 180, AEW.y + 92 + 254], [33.0, 1260, 820, "Settle"], [35.6, 1260, 820], [36.45, cbx, cby, "Settle"], [37.3, cbx, cby], [38.05, ccx, ccy, "Settle"], [38.5, ccx, ccy],
+    [39.4, 1260, 613, "Settle", "s"], [40.2, 1260, 613, 0, "s"], [41.2, ccx + 60, ccy + 40, "Settle"], [44.6, ccx + 60, ccy + 40], [45.15, 1260, 613, "Settle", "s"], [48.0, 1260, 613, 0, "s"],
+    [48.9, ccx + 60, ccy + 60, "Settle"], [49.9, fx, fy, "Settle"], [52.2, fx, fy], [52.45, sx, sy, "Settle"], [53.0, sx, sy], [53.8, 1250, 700, "Settle"]]; };
 
-MDNA.scene({ duration: 59, images: [...Object.values(P), OFFICE], render(t) {
-  if (t < SLOT[3]) {   // the desktop: the intro line, open Claude › Code, a new session in a folder, paste the link
-    desktop(t);
-    if (t < 3) { const a = seg(t, 0.3, 0.8, "Land");
-      retroWindow(460, 300, 1000, 420, "Welcome.txt", a, () => {
-        g.fillStyle = "#F7F9F2"; g.fillRect(10, 46, 980, 364);
-        kicker(D, "Motion DNA · quick install", 500, 120, "#174A46");
-        rich(D, "Installing a plugin? *A whole afternoon.*", 500, 230, 42, C.pine, "#174A46", "center", 800);
-        D.txt("Not anymore.", 500, 310, 30, "#5C6B66", 600); }); }
-    else {
-      claudeApp(t); folderPicker(t); pasteCallout(t);
-      const cx = k(t, [[3.0, 1500], [3.6, 1780, "Settle"], [4.2, 1780], [5.6, APP.x + APP.side * 0.75, "Settle"], [6.4, APP.x + APP.side * 0.75], [7.9, APP.x + 80, "Settle"], [8.6, APP.x + 80],
-                       [10.3, 1080, "Settle"], [11.0, 1080], [12.2, 1556, "Settle"], [13.0, 1556], [14.5, 1160, "Settle"], [15.2, 1160], [16.5, 1700, "Settle"]]);
-      const cy = k(t, [[3.0, 900], [3.6, 100, "Settle"], [4.2, 100], [5.6, APP.y + 74, "Settle"], [6.4, APP.y + 74], [7.9, APP.y + 131, "Settle"], [8.6, APP.y + 131],
-                       [10.3, 250 + 96 + 2 * 62, "Settle"], [11.0, 250 + 96 + 2 * 62], [12.2, 250 + 520 - 46, "Settle"], [13.0, 250 + 520 - 46], [14.5, APP.y + APP.h - 73, "Settle"], [15.2, APP.y + APP.h - 73], [16.5, 960, "Settle"]]);
-      D.cursor(cx, cy, Math.max(press(t, 3.7), press(t, 4.05), press(t, 5.75), press(t, 8.0), press(t, 10.4), press(t, 12.3), press(t, 14.65)));
-    }
+// ---------- screen overlays: the step card, its callout, the progress band
+const CARD = { x: 56, y: 200, w: 600, h: 270 };
+function stepCard(t) {
+  const vis = seg(t, 3.0, 3.5, "Land") * (1 - seg(t, 54.6, 55.0, "Launch")); if (vis <= 0) return;
+  D.alpha(vis, () => { g.save(); g.translate(-40 * (1 - vis), 0);
+    D.rr(CARD.x, CARD.y, CARD.w, CARD.h, 18); D.fill("#0A211Fe6"); g.strokeStyle = "#D8FF8533"; g.lineWidth = 2; g.stroke();
+    const si = stepAt(t); if (si >= 0 && si < 7) { const pin = seg(t, SLOT[si], SLOT[si] + 0.5, "Land"), pout = seg(t, SLOT[si + 1] - 0.3, SLOT[si + 1], "Launch"), dy = 22 * (1 - pin) - 14 * pout, x = CARD.x + 36;
+      D.alpha(pin * (1 - pout), () => {
+        kicker(D, `Step ${si + 1} of 7`, x, CARD.y + 56 + dy, C.spark, "left", 24);
+        const ts = Math.min(60, 60 * (CARD.w - 72) / D.width(STEPS[si][0], 60, 800, T.font.ui, -2));
+        D.txt(STEPS[si][0], x, CARD.y + 126 + dy, ts, C.cloud, 800, T.font.ui, "left", -2);
+        wrap(STEPS[si][1], 26, 500, T.font.ui, CARD.w - 72).forEach((l, i) => D.txt(l, x, CARD.y + 192 + i * 36 + dy, 26, C.mint, 500, T.font.ui, "left")); }); }
+    g.restore(); });
+}
+function callout(t, a0, a1, h, body) {   // the left column's second card: what to keep from this step
+  const a = seg(t, a0, a0 + 0.45, "Land") * (1 - seg(t, a1 - 0.3, a1, "Launch")); if (a <= 0) return;
+  D.alpha(a, () => { const y = CARD.y + CARD.h + 22 + 18 * (1 - a); D.rr(CARD.x, y, CARD.w, h, 18); D.fill("#0A211Fe6"); g.strokeStyle = C.spark; g.lineWidth = 2; g.stroke(); body(CARD.x + 36, y); });
+}
+function chips(x, y, list) { let cx = x, cy = y;
+  list.forEach(([c, on]) => { const w = D.width(c, 24, 700) + 66; if (cx + w > CARD.x + CARD.w - 30) { cx = x; cy += 66; }
+    D.rr(cx, cy, w, 54, 27); D.fill(UI.surface); g.beginPath(); g.arc(cx + 27, cy + 27, 8 + 3 * Math.sin(Math.PI * clamp(on)), 0, 7); D.fill(on > 0.5 ? C.spark : C.coral);
+    D.txt(c, cx + 46, cy + 28, 24, C.cloud, 700, T.font.ui, "left"); cx += w + 14; }); }
+function callouts(t) {
+  callout(t, 14.8, 22.7, 150, (x, y) => { kicker(D, "The link to paste", x, y + 40, C.spark, "left", 24);
+    D.txt("github.com/aaronamortegui-glitch", x, y + 84, 24, C.cloud, 600, MONO, "left"); D.txt("/Motion_library", x, y + 118, 24, C.cloud, 600, MONO, "left"); });
+  callout(t, 33.0, 35.3, 120, (x, y) => { kicker(D, "Dock it once", x, y + 42, C.spark, "left", 24); D.txt("It comes back every time After Effects opens.", x, y + 84, 24, C.cloud, 500, T.font.ui, "left"); });
+  callout(t, 40.9, 48.7, 220, (x, y) => { kicker(D, "Connected", x, y + 42, C.spark, "left", 24);
+    const on = a => seg(t, a, a + 0.2, "Pop");
+    chips(x, y + 72, [["MCP", on(41.2)], ["Claude", on(41.3)], ["Figma", on(45.35)], ["Flora", on(46.45)], ["Krea", on(47.55)]]); });
+}
+function progress(t) { const vis = seg(t, 3.0, 3.5, "Land") * (1 - seg(t, 54.6, 55.0, "Launch")); if (vis <= 0) return; const si = stepAt(t);
+  D.alpha(vis, () => STEPS.forEach((_, i) => { const x = CARD.x + 36 + i * 76, y = H - 43; D.rr(x, y, 64, 6, 3); D.fill("#F7F9F22e");
+    const f = i < si ? 1 : i > si ? 0 : clamp((t - SLOT[i]) / (SLOT[i + 1] - SLOT[i])); if (f > 0) { D.rr(x, y, 64 * f, 6, 3); D.fill(C.spark); } })); }
+
+MDNA.scene({ duration: 59, images: Object.values(P), render(t) {
+  wallpaper(t);
+  const steps = seg(t, 3.0, 3.5, "Land") * (1 - seg(t, 54.6, 55.0, "Launch")); SCRIM = steps;
+  if (t < 23) {   // world A: the welcome note, then the desktop and the Claude app
+    camera(t, t < 3 ? [[0, [AX, AY, 1]]] : CAM_A);
+    world(1 - seg(t, 22.4, 23.0, "Launch"), () => {
+      icons(t);
+      if (t < 3) { const o = seg(t, -0.15, 0.45, "Land"), c = seg(t, 2.55, 2.8, "Launch");
+        win(460, 300, 1000, 440, "Welcome", o * (1 - c), () => {
+          kicker(D, "Motion DNA · quick install", 500, 150, C.spark);
+          rich(D, "Installing a plugin? *A whole afternoon.*", 500, 270, 44, C.cloud, C.spark, "center", 800);
+          D.txt("Not anymore.", 500, 350, 30, C.mint, 600); }, lerp(lerp(0.94, 1, o), 0.85, c)); }
+      else { claudeApp(t); folderPicker(t); }
+    });
+  } else if (t < 55) {   // world B: After Effects
+    camera(t, CAM_B(t));
+    world(seg(t, 23.0, 23.5, "Land") * (1 - seg(t, 54.4, 55.0, "Launch")), () => { aeWindow(t); viewer(t); panel(t); prefs(t); windowMenu(t); });
   }
-  else if (t < SLOT[4]) { office(t); prefs(t - SLOT[3] + 9.8); }
-  else if (t < SLOT[5]) { office(t); openPanel(t - SLOT[4] + 15.6); }
-  else if (t < 44.6) { office(t); connect(t - SLOT[5] + 22.4); }
-  else if (t < SLOT[6]) { office(t); authorize(t - 44.6); }
-  else if (t < SLOT[7]) { office(t); ask(t - SLOT[6] + 31.4); }
-  else {   // end card: update, the manual path, remove
-    office(t); const a = seg(t, 55.1, 55.6, "Land"), b = seg(t, 55.6, 56.1, "Land");
-    D.alpha(a, () => { rich(D, "That's it. *Make it move.*", 120, 330 + 20 * (1 - a), 84, C.cloud, C.spark, "left", 800); kicker(D, "github.com/aaronamortegui-glitch/Motion_library", 124, 420, C.mint, "left", 24); });
-    D.alpha(b, () => { [["Update", "ask Claude: “update Motion DNA”"], ["By hand", "docs/quick-install/MANUAL.md"], ["Remove", "python tools/setup.py --uninstall"]].forEach(([k2, v], i) => {
-      D.txt(k2, 124, 540 + i * 64, 26, C.spark, 700, T.font.ui, "left"); g.font = `500 22px ${MONO}`; g.fillStyle = C.cloud; g.textAlign = "left"; g.textBaseline = "middle"; g.fillText(v, 290, 540 + i * 64); }); });
-    D.alpha(seg(t, 55.4, 56.0, "Land"), () => { g.save(); g.shadowColor = "#0009"; g.shadowBlur = 60; g.drawImage(P.ready, 1440, 120, 400, 820); g.restore(); });
+  scrim(steps);
+  if (t > 38 && t < 41) { const ok = t > 39.6; browser(seg(t, 38.25, 38.65, "Land") * (1 - seg(t, 40.25, 40.55, "Launch")), "Sign in to Claude", "you@studio.example", ["Continue", "Signed in"], ok, "A browser tab opens once."); }
+  [["Figma", "Motion DNA wants to read your Figma files."], ["Flora", "Claude wants to use your Flora workspace."], ["Krea", "Claude wants to generate with your Krea account."]].forEach(([n, line], i) => {
+    const c = CLICKS[15 + i]; if (t > c - 0.6 && t < c + 0.6) browser(seg(t, c - 0.6, c - 0.2, "Land") * (1 - seg(t, c + 0.35, c + 0.6, "Launch")), "Connect " + n, line, ["Allow", "Allowed"], t > c + 0.05, "Sign in once, in the browser."); });
+  stepCard(t); callouts(t); progress(t);
+  if (t >= 3 && t < 55) {   // the cursor (screen space, follows world targets through the camera)
+    const ca = t < 23 ? seg(t, 3.0, 3.3) * (1 - seg(t, 22.3, 22.7)) : seg(t, 23.2, 23.5) * (1 - seg(t, 54.2, 54.6));
+    const [x, y] = cursorPath(t, t < 23 ? CUR_A : CUR_B());
+    D.alpha(ca, () => D.cursor(x, y, Math.max(...CLICKS.map(c => press(t, c)))));
   }
-  captions(t); progress(t);
-  finish(g, t, { grain: 0.05, vignette: 0.3 });
+  if (t >= 55) {   // end card: update, the manual path, remove; a slow push to the last frame
+    const a = seg(t, 55.05, 55.6, "Land"), c = seg(t, 55.3, 56.0, "Land");
+    D.at(960, 540, lerp(1, 1.045, seg(t, 55, 59, "Coast")), 0, () => { g.translate(-960, -540);
+      D.alpha(c, () => { g.save(); g.shadowColor = "#0009"; g.shadowBlur = 60; g.drawImage(P.ready, 1380, 130 + 40 * (1 - c) - 16 * seg(t, 55, 59, "Flat"), 400, 820); g.restore(); });
+      D.alpha(a, () => { rich(D, "That's it. *Make it move.*", 124, 340 + 24 * (1 - a), 84, C.cloud, C.spark, "left", 800); kicker(D, "github.com/aaronamortegui-glitch/Motion_library", 128, 420, C.mint, "left", 24); });
+      [["Update", "ask Claude: “update Motion DNA”"], ["By hand", "docs/quick-install/MANUAL.md"], ["Remove", "python tools/setup.py --uninstall"]].forEach(([k2, v], i) => {
+        const r = seg(t, 55.6 + i * 0.12, 56.2 + i * 0.12, "Land"); D.alpha(r, () => { D.txt(k2, 128 + 20 * (1 - r), 546 + i * 68, 28, C.spark, 700, T.font.ui, "left"); D.txt(v, 300 + 20 * (1 - r), 546 + i * 68, 24, C.cloud, 500, MONO, "left"); }); });
+    });
+  }
+  finish(g, t, { grain: 0.06, vignette: 0.3 });
 } });
 </script>

@@ -7,17 +7,29 @@
 // T02 · SaaS product launch (archetype "the typical launch video people post on X": hook, the product assembles,
 // three features with a cursor, end card). Hybrid route: render with --notext to get the plate only, and set the
 // hook, feature lines and end card as live text in After Effects (Motion DNA presets) on top.
+// v2 after QA: an app window on a 32 px grid, every feature pill matches what the UI does at that moment, clicks cause
+// the change, the selected expense row morphs into the logo tile (match cut), a living end card and a finish.
 const VARS = { app: "Ledgerly", hook: ["Your books.", "Done before", "your coffee."], features: ["Auto-categorized", "Receipts by photo", "Tax-ready in May"],
                cta: "Try it free", url: "ledgerly.example" };
-const { T, seg, k, lerp, clamp, rng, NOTEXT } = MDNA, C = T.color;
+const { T, seg, k, lerp, clamp, finish, NOTEXT } = MDNA, C = T.color;
 const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
+const txt = (...a) => { if (!NOTEXT) D.txt(...a); };
+
+// layout (window space, 32 px grid): window 1440 × 840, sidebar 200, content columns 640 | 504
+const WIN = { x: -720, y: -420, w: 1440, h: 840 }, COLS = { L: -168, R: 436 }, ROWS = [["Coffee · Rome", "$4.20", "Food"], ["Train · Milan", "$38.00", "Travel"], ["Hotel · Turin", "$212.00", "Stay"]];
+const EXP = { x: COLS.R, y: 148, w: 504, h: 480 }, rowRect = i => [EXP.x - EXP.w / 2 + 24, EXP.y - EXP.h / 2 + 96 + i * 104, EXP.w - 48, 88];
+const S0 = 0.9, CAM = { x: W / 2, y: H / 2 - 40 };
+const cam = t => ({ z: S0 * k(t, [[3, 1.07], [8, 1.0, "Settle"], [9.9, 1.0], [10.85, 1.4, "Whip"]]),
+                    f: k(t, [[9.9, [0, 0]], [10.85, [EXP.x, rowRect(1)[1] + 44], "Whip"]]) });
+const toScreen = (c, x, y) => [CAM.x + c.z * (x - c.f[0]), CAM.y + c.z * (y - c.f[1])];
 
 function card(x, y, w, h, p, fn) {   // a UI card that lands from below and fades in
-  const e = clamp(p); D.alpha(e, () => D.at(x, y + 60 * (1 - e), 1, 0, () => { g.shadowColor = "#0006"; g.shadowBlur = 40; g.shadowOffsetY = 18;
-    D.rr(-w / 2, -h / 2, w, h, 28); D.fill(C.cloud); g.shadowColor = "transparent"; fn && fn(w, h); }));
+  const e = clamp(p); D.alpha(e, () => D.at(x, y + 48 * (1 - e), 1, 0, () => { g.shadowColor = "#04120F55"; g.shadowBlur = 36; g.shadowOffsetY = 14;
+    D.rr(-w / 2, -h / 2, w, h, 24); D.fill(C.cloud); g.shadowColor = "transparent"; fn && fn(w, h); }));
 }
-function bars(w, h, p, hi) { const vals = [0.4, 0.62, 0.5, 0.78, 0.66, 0.9]; vals.forEach((v, i) => { const bh = (h - 120) * v * seg(p, i * 0.08, 0.5 + i * 0.08, "Land");
-  D.rr(-w / 2 + 40 + i * (w - 80) / 6, h / 2 - 40 - bh, (w - 80) / 6 - 18, bh, 10); D.fill(i === hi ? C.spark : C.sea); }); }
+function bars(w, h, p, hi) { const vals = [0.4, 0.62, 0.5, 0.78, 0.66, 0.9], bw = (w - 80) / 6;
+  vals.forEach((v, i) => { const bh = (h - 170) * v * seg(p, i * 0.08, 0.5 + i * 0.08, "Land"), x = -w / 2 + 40 + i * bw, y = h / 2 - 40 - bh;
+    D.rr(x, y, bw - 20, bh, 10); D.fill(C.sea); if (i === 5 && hi > 0) D.alpha(hi, () => { D.rr(x, y, bw - 20, bh, 10); D.fill(C.spark); }); }); }
 
 MDNA.scene({ duration: 14, background: C.pine, render(t) {
   D.bg(C.pine);
@@ -25,36 +37,83 @@ MDNA.scene({ duration: 14, background: C.pine, render(t) {
   for (let i = 0; i < 3; i++) { const x = W * (0.25 + 0.25 * i) + 120 * Math.sin(t * 0.4 + i * 2), y = H * 0.5 + 160 * Math.cos(t * 0.3 + i);
     const gr = g.createRadialGradient(x, y, 0, x, y, 620); gr.addColorStop(0, i === 1 ? "#174A46cc" : "#174A4688"); gr.addColorStop(1, "#0A211F00"); g.fillStyle = gr; g.fillRect(0, 0, W, H); }
 
-  // 0-3 s · hook, one line per beat
-  if (t < 3.2 && !NOTEXT) VARS.hook.forEach((l, i) => { const p = seg(t, 0.2 + i * 0.5, 0.67 + i * 0.5, "Land"), o = seg(t, 2.7, 3.1, "Launch");
-    D.alpha(p * (1 - o), () => D.txt(l, W / 2, 380 + i * 150 + 40 * (1 - p) - 120 * o, 132, i === 2 ? C.spark : C.cloud, 800, T.font.ui, "center", -3)); });
+  // 0-3 s · hook, one line per beat; the block stays centred on the lines already in
+  if (t < 3.2 && !NOTEXT) { const o = seg(t, 2.7, 3.1, "Launch"), nv = seg(t, 0.62, 1.0, "Settle") + seg(t, 1.12, 1.5, "Settle");
+    VARS.hook.forEach((l, i) => { const p = seg(t, -0.1 + i * 0.5, 0.37 + i * 0.5, "Land"), y = H / 2 + (i - nv / 2) * 150;
+      D.alpha(p * (1 - o), () => D.txt(l, W / 2, y + 40 * (1 - p) - 120 * o, 132, i === 2 ? C.spark : C.cloud, 800, T.font.ui, "center", -3)); }); }
 
-  // 3-8 s · the dashboard assembles card by card, camera drifts
-  if (t >= 3 && t < 11.2) {
-    const z = k(t, [[3, 1.12], [8, 1.0, "Settle"], [9.4, 1.0], [10.6, 1.9, "Whip"]]), fx = k(t, [[8, 0], [9.4, 0], [10.6, 420, "Whip"]]);
-    const out = seg(t, 10.6, 11.1, "Launch");
-    D.alpha(1 - out, () => D.at(W / 2 - fx, H / 2, z, 0, () => {
-      card(-420, -150, 600, 380, seg(t, 3.2, 3.67, "Land"), (w, h) => { if (!NOTEXT) D.txt("Cash flow", -w / 2 + 40, -h / 2 + 50, 30, C.pine, 700, T.font.ui, "left"); bars(w, h, seg(t, 3.4, 5, "Cruise"), t > 6.2 && t < 8 ? 5 : -1); });
-      card(330, -230, 520, 220, seg(t, 3.5, 3.97, "Land"), (w, h) => { if (!NOTEXT) { D.txt("Balance", -w / 2 + 40, -40, 28, C.sea, 600, T.font.ui, "left"); D.txt("$" + Math.round(48210 * seg(t, 3.6, 5.2, "Settle")).toLocaleString("en-US"), -w / 2 + 40, 30, 72, C.pine, 800, T.font.ui, "left"); } });
-      card(330, 60, 520, 300, seg(t, 3.8, 4.27, "Land"), (w, h) => { ["Coffee · Rome", "Train · Milan", "Hotel · Turin"].forEach((r, i) => { const p = seg(t, 4.2 + i * 0.15, 4.6 + i * 0.15, "Land");
-        D.alpha(p, () => { D.rr(-w / 2 + 30, -h / 2 + 30 + i * 84, w - 60, 64, 16); D.fill(t > 7 && i === 1 ? "#D8FF8566" : "#0A211F0d"); if (!NOTEXT) D.txt(r, -w / 2 + 60, -h / 2 + 62 + i * 84, 26, C.pine, 600, T.font.ui, "left"); }); }); });
-      card(-420, 250, 600, 160, seg(t, 4.0, 4.47, "Land"), (w, h) => { const p = seg(t, 5.5, 7.5, "Cruise"); D.rr(-w / 2 + 40, -12, (w - 80), 24, 12); D.fill("#0A211F14"); D.rr(-w / 2 + 40, -12, (w - 80) * p, 24, 12); D.fill(C.spark); });
-      // cursor: tap the highlighted expense, then the progress card
-      const cx = k(t, [[4.6, 760], [6.0, 330, "Settle"], [7.6, 330], [8.6, -300, "Settle"]]), cy = k(t, [[4.6, 520], [6.0, 60, "Settle"], [7.6, 60], [8.6, 250, "Settle"]]);
-      const press = Math.max(seg(t, 6.1, 6.5, "Flat") * (t < 6.5 ? 1 : 0), seg(t, 8.7, 9.1, "Flat") * (t < 9.1 ? 1 : 0));
-      if (!NOTEXT) D.cursor(cx, cy, press);
+  // 3-11 s · the app window assembles card by card, the cursor drives each feature
+  const c = cam(t), dash = 1 - seg(t, 10.35, 10.65, "Settle"), sel = seg(t, 9.9, 10.3, "Settle");
+  const rowHi = i => i === 1 ? Math.max(seg(t, 6.9, 7.1, "Settle"), sel) : 0;
+  if (t >= 2.9 && t < 11) {
+    const win = seg(t, 2.9, 3.4, "Land");
+    g.save(); g.translate(CAM.x, CAM.y); g.scale(c.z, c.z); g.translate(-c.f[0], -c.f[1]);
+    D.alpha(win * dash, () => { D.at(0, 0, 0.96 + 0.04 * win, 0, () => {
+      // window chrome: top bar, sidebar, nav
+      g.shadowColor = "#04120F99"; g.shadowBlur = 60; g.shadowOffsetY = 24; D.rr(WIN.x, WIN.y, WIN.w, WIN.h, 28); D.fill(C.sea); g.shadowColor = "transparent";
+      g.save(); D.rr(WIN.x, WIN.y, WIN.w, WIN.h, 28); g.clip(); g.fillStyle = "#0A211F99"; g.fillRect(WIN.x, WIN.y, 200, WIN.h); g.fillStyle = C.pine; g.fillRect(WIN.x, WIN.y, WIN.w, 64); g.restore();
+      [0, 1, 2].forEach(i => { g.beginPath(); g.arc(WIN.x + 32 + i * 26, WIN.y + 32, 8, 0, 7); D.fill(i === 0 ? C.coral : "#F7F9F233"); });
+      D.rr(WIN.x + 260, WIN.y + 18, 520, 28, 14); D.fill("#F7F9F212"); txt(VARS.url + "/overview", WIN.x + 284, WIN.y + 33, 24, "#F7F9F299", 500, T.font.ui, "left");
+      ["Overview", "Expenses", "Receipts", "Taxes"].forEach((n, i) => { const y = WIN.y + 112 + i * 64, on = i === 0;
+        if (on) { D.rr(WIN.x + 16, y - 24, 168, 48, 14); D.fill("#D8FF8526"); }
+        g.beginPath(); g.arc(WIN.x + 40, y, 7, 0, 7); D.fill(on ? C.spark : "#F7F9F255"); txt(n, WIN.x + 60, y + 1, 24, on ? C.cloud : "#F7F9F2aa", on ? 700 : 500, T.font.ui, "left"); });
+      // cash flow: the bar of this week lights with the receipt click
+      card(COLS.L, -104, 640, 440, seg(t, 3.2, 3.67, "Land"), (w, h) => { txt("Cash flow", -w / 2 + 40, -h / 2 + 52, 30, C.pine, 700, T.font.ui, "left");
+        txt("+$3,240 this month", w / 2 - 40, -h / 2 + 52, 24, C.sea, 600, T.font.ui, "right");
+        bars(w, h, seg(t, 3.4, 5, "Cruise"), seg(t, 6.95, 7.2, "Settle") * (1 - seg(t, 8.4, 8.7, "Settle"))); });
+      // tax progress: fills from the 8.7 click
+      card(COLS.L, 268, 640, 240, seg(t, 4.0, 4.47, "Land"), (w, h) => { const p = lerp(0.18, 0.72, seg(t, 8.78, 9.7, "Settle"));
+        txt("Tax ready", -w / 2 + 40, -h / 2 + 56, 30, C.pine, 700, T.font.ui, "left"); txt(Math.round(p * 100) + "%", w / 2 - 40, -h / 2 + 56, 44, C.pine, 800, T.font.ui, "right");
+        D.rr(-w / 2 + 40, -6, w - 80, 28, 14); D.fill("#0A211F14"); D.rr(-w / 2 + 40, -6, (w - 80) * p, 28, 14); D.fill(C.spark);
+        txt("Q2 filing · due May 15", -w / 2 + 40, h / 2 - 52, 24, C.sea, 500, T.font.ui, "left"); });
+      // balance
+      card(COLS.R, -224, 504, 200, seg(t, 3.5, 3.97, "Land"), (w, h) => { txt("Balance", -w / 2 + 40, -40, 28, C.sea, 600, T.font.ui, "left");
+        txt("$" + Math.round(48210 * seg(t, 3.6, 5.2, "Settle")).toLocaleString("en-US"), -w / 2 + 40, 30, 72, C.pine, 800, T.font.ui, "left"); });
+      // expenses: categories pop in on their own (auto), the click on Train attaches its receipt
+      card(EXP.x, EXP.y, EXP.w, EXP.h, seg(t, 3.8, 4.27, "Land"), (w, h) => { txt("Expenses", -w / 2 + 40, -h / 2 + 52, 30, C.pine, 700, T.font.ui, "left");
+        ROWS.forEach(([n, amt, cat], i) => { const p = seg(t, 4.2 + i * 0.15, 4.6 + i * 0.15, "Land"), [rx, ry, rw, rh] = rowRect(i).map((v, j) => v - [EXP.x, EXP.y][j % 2] * (j < 2));
+          D.alpha(p, () => { D.rr(rx, ry, rw, rh, 16); D.fill("#0A211F0d"); const hi = rowHi(i); if (hi > 0) D.alpha(0.45 + 0.55 * sel, () => D.alpha(hi, () => { D.rr(rx, ry, rw, rh, 16); D.fill(C.spark); }));
+            D.alpha(1 - seg(t, 10.6, 10.75), () => { txt(n, rx + 24, ry + rh / 2, 26, C.pine, 600, T.font.ui, "left"); txt(amt, rx + rw - 24, ry + rh / 2, 26, C.pine, 800, T.font.ui, "right");
+              const cp = seg(t, 5.35 + i * 0.22, 5.65 + i * 0.22, "Pop"); if (cp > 0 && !NOTEXT) { const cw = D.width(cat, 24, 600) + 28, ax = rx + rw - 24 - D.width(amt, 26, 800) - 16 - cw;
+                D.at(ax + cw / 2, ry + rh / 2, cp, 0, () => { D.rr(-cw / 2, -18, cw, 36, 18); D.fill(i === 1 && hi > 0 ? C.pine : C.sea); D.txt(cat, 0, 1, 24, i === 1 && hi > 0 ? C.spark : C.cloud, 600); }); } });
+            if (i === 1) { const b = seg(t, 7.75, 8.0, "Pop"); if (b > 0) D.at(rx + rw - 8, ry + 8, b, 0, () => { g.beginPath(); g.arc(0, 0, 16, 0, 7); D.fill(C.pine); g.beginPath(); g.moveTo(-7, 0); g.lineTo(-2, 5); g.lineTo(7, -5); g.strokeStyle = C.spark; g.lineWidth = 4; g.lineCap = "round"; g.stroke(); }); } }); });
+        txt("3 of 24 this week", -w / 2 + 40, h / 2 - 40, 24, C.sea, 500, T.font.ui, "left"); });
+      // the receipt photo pops out of the clicked row, then docks back as a badge
+      const ro = seg(t, 7.0, 7.4, "Pop") * (1 - seg(t, 7.5, 7.8, "Launch")), [r1x, r1y, r1w] = rowRect(1);
+      if (ro > 0.001) D.at(lerp(r1x + r1w - 8, r1x - 150, ro), lerp(r1y + 8, r1y - 120, ro), ro, -0.06 * ro, () => { g.shadowColor = "#04120F55"; g.shadowBlur = 30; g.shadowOffsetY = 12;
+        D.rr(-120, -150, 240, 300, 14); D.fill("#FFFFFF"); g.shadowColor = "transparent"; for (let j = 0; j < 5; j++) { D.rr(-90, -40 + j * 30, j % 2 ? 120 : 170, 10, 5); D.fill("#174A4633"); }
+        txt("TRAIN", 0, -110, 24, C.sea, 700, T.font.ui, "center", 6); txt("$38.00", 0, -74, 36, C.pine, 800); D.rr(-90, 118, 180, 6, 3); D.fill(C.spark); });
+      // cursor: travels in while the categories fill, clicks Train (receipt), then the tax card (progress)
+      const px = k(t, [[4.6, 900], [6.7, 330, "Settle"], [7.9, 330], [8.6, -40, "Settle"], [9.4, -40], [10.0, 120, "Settle"]]), py = k(t, [[4.6, 560], [6.7, 168, "Settle"], [7.9, 168], [8.6, 290, "Settle"], [9.4, 290], [10.0, 380, "Settle"]]);
+      const press = Math.max(seg(t, 6.9, 7.25, "Flat") * (t < 7.25 ? 1 : 0), seg(t, 8.7, 9.05, "Flat") * (t < 9.05 ? 1 : 0));
+      if (!NOTEXT) D.alpha(seg(t, 4.6, 4.9) * (1 - seg(t, 9.8, 10.1)), () => D.at(px, py, 1 / c.z, 0, () => D.cursor(0, 0, press)));
+    }); });
+    g.restore();
+  }
+
+  // match cut: the selected row (full spark) leaves the zoom and becomes the logo tile
+  const tm = seg(t, 10.65, 11.25, "Settle"), LOGO = 180, ly = H / 2 - 150, flo = 6 * Math.sin((t - 11.25) * 2.4) * seg(t, 11.3, 11.8);
+  if (t >= 10.3) {
+    const c0 = cam(Math.min(t, 10.85)), [rx, ry, rw, rh] = rowRect(1), [sx, sy] = toScreen(c0, rx, ry);
+    const x = lerp(sx, W / 2 - LOGO / 2, tm), y = lerp(sy, ly - LOGO / 2 + flo, tm), w = lerp(rw * c0.z, LOGO, tm), h = lerp(rh * c0.z, LOGO, tm), r = lerp(16 * c0.z, 46, tm);
+    const end = 1 - seg(t, 13.55, 13.97, "Settle"), zs = 1 + 0.035 * seg(t, 11.25, 14, "Flat");
+    D.alpha(end * (t < 10.5 ? seg(t, 10.3, 10.5) : 1), () => D.at(W / 2, H / 2, zs, 0, () => { g.translate(-W / 2, -H / 2);
+      g.shadowColor = "#04120F88"; g.shadowBlur = 40; g.shadowOffsetY = 16; D.rr(x, y, w, h, r); D.fill(C.spark); g.shadowColor = "transparent";
+      const b = seg(t, 11.15, 11.55, "Pop"); if (b > 0) D.at(W / 2, ly + flo, b * LOGO / 140, 0, () => { g.beginPath(); g.moveTo(-30, 26); g.lineTo(-30, -26); g.lineTo(0, 6); g.lineTo(30, -26); g.lineTo(30, 26); g.lineWidth = 14; g.strokeStyle = C.pine; g.lineJoin = "round"; g.lineCap = "round"; g.stroke(); });
+      if (!NOTEXT) { const a = seg(t, 11.3, 11.77, "Land"), cc = seg(t, 11.6, 12.1, "Land"), u = seg(t, 11.8, 12.3, "Land");
+        D.alpha(a, () => D.txt(VARS.app, W / 2, H / 2 + 40 + 30 * (1 - a), 120, C.cloud, 800, T.font.ui, "center", -3));
+        D.alpha(cc, () => { const nudge = 6 * Math.max(0, Math.sin((t - 12.1) * 3.2)), cw = D.width(VARS.cta, 48, 700) + 150, y0 = H / 2 + 130 + 24 * (1 - cc);
+          D.rr(W / 2 - cw / 2, y0, cw, 96, 48); D.fill(C.spark); D.txt(VARS.cta, W / 2 - 22, y0 + 49, 48, C.pine, 700);
+          const ax = W / 2 + cw / 2 - 58 + nudge; g.beginPath(); g.moveTo(ax - 14, y0 + 48); g.lineTo(ax + 12, y0 + 48); g.moveTo(ax, y0 + 36); g.lineTo(ax + 12, y0 + 48); g.lineTo(ax, y0 + 60); g.strokeStyle = C.pine; g.lineWidth = 6; g.lineCap = "round"; g.lineJoin = "round"; g.stroke(); });
+        D.alpha(u, () => D.txt(VARS.url, W / 2, H / 2 + 300, 32, C.mint, 500, T.font.ui, "center", 1)); }
     }));
   }
 
-  // 5-10 s · feature callouts, one per beat of the story
+  // 5-10 s · feature callouts, each one names what the UI is doing right now
   if (!NOTEXT) VARS.features.forEach((f, i) => { const a = 5.2 + i * 1.5, p = seg(t, a, a + 0.47, "Land"), o = seg(t, a + 1.3, a + 1.6, "Launch");
-    if (t > a && t < a + 1.7) D.alpha(p * (1 - o), () => { const w = D.width(f, 44, 700) + 90; D.rr(W / 2 - w / 2, 900 + 30 * (1 - p), w, 84, 42); D.fill(C.spark); D.txt(f, W / 2, 943 + 30 * (1 - p), 44, C.pine, 700); }); });
+    if (t > a && t < a + 1.7) D.alpha(p * (1 - o), () => { const w = D.width(f, 44, 700) + 90, y = H - 112 + 30 * (1 - p); g.shadowColor = "#04120F66"; g.shadowBlur = 30; g.shadowOffsetY = 10;
+      D.rr(W / 2 - w / 2, y - 42, w, 84, 42); D.fill(C.spark); g.shadowColor = "transparent"; D.txt(f, W / 2, y + 1, 44, C.pine, 700); }); });
 
-  // 11-14 s · end card
-  if (t >= 10.9) { const a = seg(t, 11.0, 11.47, "Land"), b = seg(t, 11.4, 11.9, "Pop"), c = seg(t, 11.8, 12.3, "Land");
-    D.at(W / 2, H / 2 - 80, 0.7 + 0.3 * b, 0, () => { D.rr(-70, -70, 140, 140, 36); D.fill(C.spark); g.fillStyle = C.pine; g.beginPath(); g.moveTo(-30, 26); g.lineTo(-30, -26); g.lineTo(0, 6); g.lineTo(30, -26); g.lineTo(30, 26); g.lineWidth = 14; g.strokeStyle = C.pine; g.lineJoin = "round"; g.stroke(); });
-    if (!NOTEXT) { D.alpha(a, () => D.txt(VARS.app, W / 2, H / 2 + 80 + 30 * (1 - a), 96, C.cloud, 800, T.font.ui, "center", -2));
-      D.alpha(c, () => { const w = D.width(VARS.cta, 36, 700) + 80; D.rr(W / 2 - w / 2, H / 2 + 160, w, 72, 36); D.fill(C.spark); D.txt(VARS.cta, W / 2, H / 2 + 197, 36, C.pine, 700); D.txt(VARS.url, W / 2, H / 2 + 290, 28, C.mint, 500); }); }
-  }
+  finish(g, t, { grain: 0.05, vignette: 0.3 });
 } });
 </script>

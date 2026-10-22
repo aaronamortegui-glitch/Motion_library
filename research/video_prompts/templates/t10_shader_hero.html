@@ -4,38 +4,82 @@
 <script src="../runtime/mdna.js"></script>
 <div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
 <script>
-// T10 · hero object in a shader (archetype "a glossy 3D product shot written as a fragment shader"). Route A: a
-// ray-marched soft capsule-torus morph with a spark rim light on a pine studio floor, turntable + slow push.
-// Rendered frame by frame (the shader only reads uTime), exported as an MP4 plate.
-const { T } = MDNA; const cv = document.getElementById("c"), gl = cv.getContext("webgl", { preserveDrawingBuffer: true });
+// T10 · hero object in a shader (archetype "a premium 3D product shot written as a fragment shader"). Route A: a
+// ray-marched ceramic ring with a spark core on a seamless pine studio sweep. One 8 s periodic loop: a ±45° turntable
+// swing (never edge-on), and the core stretches into a bar that fuses with the ring (one smooth-min field, no tearing) into the hero
+// pose at 4 s (a Θ facing camera, camera closest), then lets go again. Soft key, fresnel sea→spark, a hint of
+// environment reflection, soft shadows, 2×2 supersampling. A pure function of uTime: frame 0 continues frame 7.967.
+const { T } = MDNA; const cv = document.getElementById("c"), gl = cv.getContext("webgl", { preserveDrawingBuffer: true, antialias: false });
 const VS = "attribute vec2 p; void main(){ gl_Position = vec4(p,0.,1.); }";
 const FS = `precision highp float; uniform float uTime; uniform vec2 uRes;
+const float TAU = 6.2831853, FY = -.36, BR = .76;          // floor height, object bounding radius
+const vec3 PINE = vec3(.039,.129,.122), SEA = vec3(.09,.29,.275), SPARK = vec3(.847,1.,.522), CLOUD = vec3(.969,.976,.949);
+const vec3 LDIR = vec3(-.4789,.6705,.5667);                 // soft key, upper left front (normalised)
+float PH, M, YAW, ROLL; vec3 C;
 mat2 rot(float a){ float c=cos(a), s=sin(a); return mat2(c,-s,s,c); }
-float sdTorus(vec3 p, vec2 t){ vec2 q = vec2(length(p.xz)-t.x, p.y); return length(q)-t.y; }
-float sdCapsule(vec3 p, float h, float r){ p.y -= clamp(p.y, -h, h); return length(p)-r; }
 float smin(float a, float b, float k){ float h = clamp(.5+.5*(b-a)/k,0.,1.); return mix(b,a,h)-k*h*(1.-h); }
-float map(vec3 p){
-  float m = .5+.5*sin(uTime*.9);                                   // breathing morph
-  vec3 q = p - vec3(0.,.15,0.); q.xz *= rot(uTime*.6); q.xy *= rot(.35);
-  float d = mix(sdTorus(q, vec2(.62,.22)), sdCapsule(q.yxz, .45, .32), m*.6);
-  d = smin(d, length(q - vec3(.0,.0,.0)) - .18, .25);
-  return min(d, p.y + .62);                                          // floor
+// two exact SDFs (ring = torus, core = capsule), morphed by their sizes and joined with smin: a valid field
+vec2 parts(vec3 p){
+  vec3 q = p - C; q.xz *= rot(YAW); q.yz *= rot(.2);
+  float ring = length(vec2(length(q.xy)-.5, q.z)) - mix(.16,.118,M);
+  vec3 c = q; c.xy *= rot(ROLL); c.x -= clamp(c.x, -.3*M, .3*M); float core = length(c) - mix(.17,.132,M);
+  return vec2(ring, core);
 }
-vec3 nrm(vec3 p){ vec2 e = vec2(.001,0.); return normalize(vec3(map(p+e.xyy)-map(p-e.xyy), map(p+e.yxy)-map(p-e.yxy), map(p+e.yyx)-map(p-e.yyx))); }
+float mapO(vec3 p){ vec2 d = parts(p); return smin(d.x, d.y, .05+.08*M); }
+vec3 nrm(vec3 p){ const vec2 e = vec2(1.,-1.)*.0007; return normalize(e.xyy*mapO(p+e.xyy)+e.yyx*mapO(p+e.yyx)+e.yxy*mapO(p+e.yxy)+e.xxx*mapO(p+e.xxx)); }
+vec2 sphere(vec3 ro, vec3 rd, float r){ vec3 oc = ro - C; float b = dot(oc,rd), h = b*b - dot(oc,oc) + r*r; if (h < 0.) return vec2(-1.); h = sqrt(h); return vec2(-b-h, -b+h); }
+// the sweep: one tone that only depends on direction, so the floor can dissolve into it with no horizon
+vec3 bg(vec3 r){
+  vec3 col = mix(SEA*.78, PINE*.82, smoothstep(-.05,.5,r.y));
+  return col + SEA*.32*exp(-r.x*r.x*5.)*exp(-(r.y-.04)*(r.y-.04)*16.);
+}
+float shadow(vec3 ro, vec3 rd){
+  vec2 b = sphere(ro, rd, BR+.25); if (b.y < 0.) return 1.;
+  float res = 1., t = max(.015, b.x);
+  for (int i=0;i<40;i++){ float d = mapO(ro+rd*t); res = min(res, 6.*d/t); t += clamp(d,.012,.12); if (res < .003 || t > b.y) break; }
+  res = clamp(res,0.,1.); return res*res*(3.-2.*res);
+}
+float ao(vec3 p, vec3 n){ float o = 0., w = 1.; for (int i=1;i<=4;i++){ float h = .03*float(i*i); o += w*(h - mapO(p+n*h)); w *= .6; } return clamp(1.-2.2*o,0.,1.); }
+vec3 env(vec3 r){
+  if (r.y < 0.) return mix(SEA*.5, bg(vec3(r.x,0.,r.z)), exp(4.*r.y));
+  return bg(r) + vec3(.95,.97,.9)*.55*smoothstep(.82,.97,dot(r,LDIR));         // the softbox
+}
+vec3 shadeObj(vec3 p, vec3 rd){
+  vec3 n = nrm(p); vec2 pr = parts(p); float core = smoothstep(.012,-.012,pr.y-pr.x);
+  vec3 alb = mix(CLOUD*.86, SPARK*.86, core);
+  float wrap = clamp((dot(n,LDIR)+.2)/1.2,0.,1.), sh = shadow(p+n*.004, LDIR), oc = ao(p,n);
+  float fre = pow(1.-clamp(dot(n,-rd),0.,1.), 3.);
+  vec3 r = reflect(rd,n);
+  vec3 col = alb*(vec3(1.,.99,.95)*1.05*wrap*mix(.25,1.,sh) + SEA*.5*oc*(.55+.45*n.y) + PINE*.5*oc*clamp(-n.y,0.,1.));
+  col += env(r)*mix(.05,.5,fre)*oc;                                           // a hint of the room in the glaze
+  col += mix(SEA, SPARK, smoothstep(.2,.85,fre))*fre*.5*oc;                     // fresnel sea → spark
+  col += pow(clamp(dot(r,LDIR),0.,1.),12.)*.4*sh;                              // soft key specular
+  return mix(col, .62+.38*(1.-exp(-(col-.62)/.38)), step(.62,col));             // soft shoulder, no clipped whites
+}
+vec3 render(vec3 ro, vec3 rd){
+  vec2 b = sphere(ro, rd, BR);
+  if (b.y > 0.) { float t = max(b.x, 0.);
+    for (int i=0;i<110;i++){ vec3 p = ro+rd*t; float d = mapO(p); if (d < .0004*t) return shadeObj(p, rd); t += d*.9; if (t > b.y) break; } }
+  if (rd.y >= 0.) return bg(rd);
+  float tf = (FY-ro.y)/rd.y; vec3 p = ro+rd*tf, base = bg(normalize(vec3(rd.x,0.,rd.z)));
+  vec2 dq = p.xz - C.xz - vec2(-.12,.1);
+  float pool = exp(-dot(dq,dq)*.9), sh = shadow(p, LDIR), cont = smoothstep(0.,.55,mapO(p));
+  vec3 fc = base*(.66 + .34*pool)*mix(.5,1.,sh)*mix(.62,1.,cont);
+  return mix(base, fc, exp(-.18*max(tf-3.2,0.)));                              // fades into the sweep, no horizon
+}
 void main(){
-  vec2 uv = (gl_FragCoord.xy - .5*uRes)/uRes.y;
-  float push = 3.2 - .5*smoothstep(0., 8., uTime);
-  vec3 ro = vec3(0., .35, push), rd = normalize(vec3(uv, -1.6));
-  float t = 0.; float d; for(int i=0;i<90;i++){ d = map(ro+rd*t); if(d<.001||t>8.) break; t += d; }
-  vec3 pine = vec3(.039,.129,.122), sea = vec3(.09,.29,.275), spark = vec3(.847,1.,.522), cloud = vec3(.97,.976,.95);
-  vec3 col = mix(pine, sea, smoothstep(-.4,.6,uv.y)) * (1. - .35*length(uv));
-  if (t < 8.) {
-    vec3 p = ro+rd*t, n = nrm(p), l = normalize(vec3(-.5,.8,.6));
-    float dif = clamp(dot(n,l),0.,1.), rim = pow(1.-clamp(dot(n,-rd),0.,1.),3.), spec = pow(clamp(dot(reflect(rd,n),l),0.,1.),40.);
-    if (p.y < -.6) { float sh = 1.; float st = .02; for(int i=0;i<30;i++){ float h = map(p+l*st); sh = min(sh, 8.*h/st); st += clamp(h,.02,.2); } col = mix(pine, sea, .35)*(.5+.5*clamp(sh,0.,1.)) + spark*.06*exp(-3.*length(p.xz)); }
-    else col = mix(vec3(.07,.2,.19), cloud, dif*.55) + spark*rim*1.1 + spec*.9;
+  PH = fract(uTime/8.); M = .5-.5*cos(TAU*PH); YAW = .78*sin(TAU*PH); ROLL = 3.14159265*PH-1.5707963; C = vec3(0., .42+.022*sin(2.*TAU*PH), 0.);
+  vec3 ro = vec3(.12*sin(TAU*PH), .8, 3.85-.3*M), ta = vec3(0., .37, 0.);
+  vec3 ww = normalize(ta-ro), uu = normalize(cross(ww, vec3(0.,1.,0.))), vv = cross(uu, ww);
+  vec3 acc = vec3(0.);
+  for (int j=0;j<4;j++){                                                         // rotated-grid 2×2 supersampling
+    vec2 o = j==0 ? vec2(.125,.375) : j==1 ? vec2(.375,-.125) : j==2 ? vec2(-.125,-.375) : vec2(-.375,.125);
+    vec2 uv = (gl_FragCoord.xy + o - .5*uRes)/uRes.y;
+    acc += render(ro, normalize(uv.x*uu + uv.y*vv + 1.75*ww));
   }
-  col = pow(col, vec3(.95)); gl_FragColor = vec4(col,1.);
+  vec2 sv = gl_FragCoord.xy/uRes - .5; vec3 col = acc*.25*(1.-.42*dot(sv,sv));
+  col += (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898,78.233)))*43758.5453)-.5)/255.;   // dither, no banding
+  gl_FragColor = vec4(col,1.);
 }`;
 function sh(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
 const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr); gl.useProgram(pr);

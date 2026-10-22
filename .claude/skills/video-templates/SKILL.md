@@ -21,9 +21,9 @@ python -m playwright install chromium
 ffmpeg must be on PATH (it already is for the rest of Motion DNA).
 
 ## Pick a template
-`research/video_prompts/templates/catalog.json` lists the 12 archetypes: id, title, uses, **route**, energy (1 calm ..
+`research/video_prompts/templates/catalog.json` lists the archetypes (15 so far): id, title, uses, **route**, energy (1 calm ..
 5 explosive), tones, duration, `vars` (the content you change) and `prompt` (our own brief for making a new version).
-Previews: `research/video_prompts/previews/<id>.gif`. Routes:
+Previews: `research/video_prompts/previews/<id>.webp` (animated, from `make_previews.py`). Routes:
 - **A · render as an asset**: 3D, shaders, particles, long camera moves, alpha overlays (t04, t09, t10, t11, t01).
 - **B · native AE**: type and a few shapes stay editable (t05, t12, t03). Map to the existing kit first (`list_kit`:
   text engine `SSTX`, solid/liquid transitions, `end_card`); `research/video_prompts/ae/route_b.jsx` shows the pattern.
@@ -55,6 +55,7 @@ Previews: `research/video_prompts/previews/<id>.gif`. Routes:
 - The source collection and the Skillry remakes are third-party: `python research/video_prompts/fetch_sources.py`
   downloads them into `source/` (git-ignored). Use them as behavioral references; never copy a prompt text into the
   repo. `build_index.py` rebuilds `index.json`/`INDEX.md`; `compare.py` makes the side-by-side test with the remakes.
-- Renders stay in `renders/` (git-ignored). A template worth keeping gets a preview GIF in `previews/` (< 500 KB) and a
-  card in `catalog.json`.
+- Renders stay in `renders/` (git-ignored). A template worth keeping gets an animated WebP preview in `previews/`
+  (`python research/video_prompts/make_previews.py <id>`, < 500 KB; set `"preview": [start, end]` in its card to show
+  its best stretch), a card in `catalog.json` and an entry in `library/intake.json`.
 - New lessons go to `docs/LEARNINGS.md` like everything else.

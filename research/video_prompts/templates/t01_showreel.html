@@ -17,8 +17,8 @@ const dotGrid = (col, a) => D.alpha(a, () => { g.fillStyle = col; for (let x = 4
 const SCENES = [
   ["Motion", 0, 2, (t, gt) => {   // bars sweep in on the beat, the word punches through
     D.bg(C.pine); dotGrid(C.cloud, 0.08);
-    for (let i = 0; i < 8; i++) { const p = seg(t, i * 0.06, i * 0.06 + 0.5, "Whip"), q = seg(t, 1.4 + i * 0.03, 1.9 + i * 0.03, "Launch"); g.fillStyle = i % 2 ? C.sea : C.spark; g.fillRect(W * q, i * H / 8, W * (p - q), H / 8 + 1);
-      D.alpha(0.5, () => D.txt(String(i + 1).padStart(2, "0"), W * p - 30, i * H / 8 + H / 16, 18, i % 2 ? C.spark : C.pine, 700, T.font.ui, "right", 3)); }
+    for (let i = 0; i < 8; i++) { const p = seg(t, -0.22 + i * 0.05, 0.3 + i * 0.05, "Land"), q = seg(t, 1.4 + i * 0.03, 1.9 + i * 0.03, "Launch"); g.fillStyle = i % 2 ? C.sea : C.spark; g.fillRect(W * q, i * H / 8, W * (p - q), H / 8 + 1);
+      const nx = Math.min(W * p - 30, W - 380); if (nx > W * q + 80) D.alpha(0.6 * (1 - q), () => D.txt(String(i + 1).padStart(2, "0"), nx, i * H / 8 + H / 16, 24, i % 2 ? C.spark : C.pine, 700, T.font.ui, "right", 3)); }
     const p = seg(t, 0.75, 1.15, "Pop"), o = seg(t, 1.5, 1.9, "Launch");
     D.at(W / 2, H / 2, lerp(0.6, 1, p) * (1 + 0.04 * beatPulse(gt)), 0, () => { D.alpha(clamp(p * 2) * (1 - o), () => { g.shadowColor = "#0008"; g.shadowBlur = 40; D.rr(-560, -150, 1120, 300, 40); D.fill(C.pine); g.shadowColor = "transparent";
       D.txt("MOTION", 0, 8, 210, C.cloud, 800, T.font.ui, "center", -6); }); });
@@ -27,7 +27,7 @@ const SCENES = [
     D.bg(C.ink); const pulse = beatPulse(gt);
     for (let i = 0; i < 4; i++) { const bt = Math.floor(t / BEAT) - i, lt = t - bt * BEAT; if (bt < 0) continue; ring(W / 2, H / 2, 80 + lt * 900, 3, C.spark, 0.6 * (1 - lt / (BEAT * 4))); }
     for (let y = 0; y < 9; y++) for (let x = 0; x < 16; x++) {
-      const d = Math.hypot(x - 7.5, y - 4) / 8.5, p = seg(t, d * 0.5, d * 0.5 + 0.45, "Land"), r = (8 + 18 * pulse * (1 - d)) * p, cx = 120 + x * 112, cy = 90 + y * 112;
+      const d = Math.hypot(x - 7.5, y - 4) / 8.5, p = seg(t, d * 0.5 - 0.15, d * 0.5 + 0.35, "Land"), r = (8 + 18 * pulse * (1 - d)) * p, cx = 120 + x * 112, cy = 90 + y * 112;
       if (d < 0.35) glow(g, cx, cy, r * 3, "#D8FF85", 0.25 * pulse); g.beginPath(); g.arc(cx, cy, Math.max(0, r), 0, 7); D.fill(d < 0.35 ? C.spark : C.sea);
     }
     D.alpha(seg(t, 0.6, 1.0, "Land"), () => rich(D, "Every cut *on the beat.*", W / 2, H - 120, 56, C.cloud, C.spark));
@@ -35,40 +35,42 @@ const SCENES = [
   ["Type", 4, 6, (t) => {   // kinetic word swap, one word per beat, with a counter and a serif subtitle
     D.bg(C.cloud); dotGrid(C.pine, 0.08);
     const i = Math.min(VARS.words.length - 1, Math.floor(t / BEAT)), lt = t - i * BEAT;
-    const pin = seg(lt, 0, 0.28, "Land"), pout = i < VARS.words.length - 1 ? seg(lt, BEAT - 0.12, BEAT, "Launch") : 0;
+    const last = VARS.words.length - 1, pout = i < last ? seg(lt, BEAT - 0.12, BEAT, "Launch") : 0;
     g.save(); g.beginPath(); g.rect(0, H / 2 - 170, W, 340); g.clip();
-    D.txt(VARS.words[i], W / 2, H / 2 + lerp(300, 0, pin) - 300 * pout, 260, C.pine, 800, T.font.ui, "center", -8);
-    if (i > 0 && lt < 0.3) D.txt(VARS.words[i - 1], W / 2, H / 2 - 300 * seg(lt, 0, 0.12, "Launch") - (lt < 0.12 ? 0 : 300), 260, C.pine, 800, T.font.ui, "center", -8); g.restore();
-    const u = seg(t, 0, 1.6, "Cruise"); g.fillStyle = C.spark; g.fillRect(W / 2 - 300 * u, H / 2 + 190, 600 * u, 14);
+    VARS.words.forEach((wd, j) => { const lj = t - j * BEAT; if (lj < -0.1 || (j < last && lj > BEAT + 0.14)) return;   // one shared curve per swap: constant 300 px spacing
+      const pi = j ? seg(lj, -0.1, 0.14, "Surge") : seg(lj, -0.14, 0.16, "Land"), po = j < last ? seg(lj, BEAT - 0.1, BEAT + 0.14, "Surge") : 0;
+      D.txt(wd, W / 2, H / 2 + lerp(300, 0, pi) - 300 * po, 260, C.pine, 800, T.font.ui, "center", -8); });
+    g.restore();
+    const u = seg(t, -0.15, 1.6, "Cruise"); g.fillStyle = C.spark; g.fillRect(W / 2 - 300 * u, H / 2 + 190, 600 * u, 14);
     kicker(D, `0${i + 1} / 0${VARS.words.length}`, W / 2, H / 2 - 230, C.sea);
-    D.alpha(seg(t, 0.2, 0.6), () => D.txt(["with intent", "with a curve", "softly"][i], W / 2, H / 2 + 270, 52, C.sea, 400, T.font.display));
+    D.alpha(seg(lt, 0.08, 0.36) * (1 - (pout > 0 ? seg(lt, BEAT - 0.14, BEAT - 0.02) : 0)), () => D.txt(["with intent", "with a curve", "softly"][i], W / 2, H / 2 + 270, 52, C.sea, 400, T.font.display));
   }],
   ["Shape", 6, 8, (t) => {   // one shape morphs: square → circle → pill, an orbit of ticks around it
     D.bg(C.sea); glow(g, W / 2, H / 2, 700, "#D8FF85", 0.18);
-    const w = k(t, [[0, 300], [0.5, 300], [1.0, 360, "Settle"], [1.5, 900, "Whip"]]), h = k(t, [[0, 300], [1.0, 360, "Settle"], [1.5, 220, "Whip"]]);
-    const r = k(t, [[0, 24], [0.5, 180, "Pop"], [1.5, 110, "Whip"]]), rot = k(t, [[0, 0], [1.0, Math.PI, "Settle"], [1.5, Math.PI, "Flat"]]);
+    const w = k(t, [[0, 300], [0.5, 300], [1.0, 360, "Settle"], [1.5, 900, "Whip"]]), h = k(t, [[0, 300], [0.5, 300], [1.0, 360, "Settle"], [1.5, 220, "Whip"]]);
+    const r = k(t, [[0, 24], [0.15, 24], [0.9, 180, "Settle"], [1.5, 110, "Whip"]]), rot = k(t, [[0, 0], [1.0, Math.PI, "Settle"], [1.5, Math.PI, "Flat"]]);
     for (let i = 0; i < 60; i++) { const a = i / 60 * Math.PI * 2 - rot * 0.5; D.alpha(i % 5 ? 0.25 : 0.7, () => { g.save(); g.translate(W / 2, H / 2); g.rotate(a); g.fillStyle = C.cloud; g.fillRect(380, -1, i % 5 ? 14 : 28, 3); g.restore(); }); }
-    D.at(W / 2, H / 2 + 30, 1, rot, () => { D.alpha(0.35, () => { D.rr(-w / 2, -h / 2, w, h, Math.min(r, h / 2)); D.fill("#00000088"); }); });
+    D.alpha(0.45, () => { g.filter = "blur(28px)"; D.at(W / 2, H / 2 + 36, 1, rot, () => { D.rr(-w / 2, -h / 2, w, h, Math.min(r, h / 2, w / 2)); D.fill(C.ink); }); g.filter = "none"; });
     D.at(W / 2, H / 2, 1, rot, () => { D.rr(-w / 2, -h / 2, w, h, Math.min(r, h / 2, w / 2)); const lg = g.createLinearGradient(0, -h / 2, 0, h / 2); lg.addColorStop(0, "#E9FFB8"); lg.addColorStop(1, C.spark); g.fillStyle = lg; g.fill(); });
     if (t > 1.4) D.alpha(seg(t, 1.4, 1.6), () => D.txt("Shape your own curve", W / 2, H / 2 + 4, 64, C.pine, 700));
-    D.alpha(seg(t, 0.2, 0.5), () => { kicker(D, "radius " + Math.round(r) + " px", W / 2 - 420, 200, C.cloud, "left"); kicker(D, "rotation " + Math.round(rot * 57.3) + "°", W / 2 + 420, 200, C.cloud, "right"); });
+    D.alpha(seg(t, 0.2, 0.5), () => { kicker(D, "radius " + Math.round(r) + " px", W / 2 - 420, 100, C.cloud, "left"); kicker(D, "rotation " + Math.round(rot * 57.3) + "°", W / 2 + 420, 100, C.cloud, "right"); });
   }],
   ["Energy", 8, 10, (t) => {   // a particle burst on the downbeat, settling into a ring
-    D.bg(C.pine); const R = rng(7); glow(g, W / 2, H / 2, 600 * seg(t, 0, 0.4, "Whip"), "#D8FF85", 0.35 * (1 - seg(t, 0.4, 1.4)));
+    D.bg(C.pine); const R = rng(7); glow(g, W / 2, H / 2, 600 * seg(t, -0.1, 0.4, "Whip"), "#D8FF85", 0.35 * (1 - seg(t, 0.4, 1.4)));
     g.save(); g.globalCompositeOperation = "lighter";
     for (let i = 0; i < 420; i++) {
-      const a = R() * Math.PI * 2, sp = 300 + R() * 600, ringR = 330 + R() * 40, p = seg(t, 0, 0.9, "Whip"), q = seg(t, 0.8, 1.8, "Settle");
+      const a = R() * Math.PI * 2, sp = 300 + R() * 600, ringR = 330 + R() * 40, p = seg(t, -0.08, 0.9, "Land"), q = seg(t, 0.8, 1.8, "Settle");
       const rad = lerp(sp * p, ringR, q), x = W / 2 + Math.cos(a + q * 0.6) * rad, y = H / 2 + Math.sin(a + q * 0.6) * rad, s = 1.5 + R() * 4;
       g.beginPath(); g.arc(x, y, s, 0, 7); g.fillStyle = R() < 0.25 ? "rgba(247,249,242,0.9)" : "rgba(216,255,133,0.85)"; g.fill();
     }
     g.restore(); ring(W / 2, H / 2, 300, 2, C.spark, 0.4 * seg(t, 1.2, 1.6));
-    D.txt("120", W / 2, H / 2 - 10, 180 * seg(t, 0.9, 1.3, "Pop"), C.cloud, 800); kicker(D, "BPM", W / 2, H / 2 + 110, C.spark, "center", 34);
+    const nb = seg(t, 0.9, 1.3, "Pop"), kb = seg(t, 1.0, 1.35, "Land"); if (nb > 0.01) D.txt(String(VARS.bpm), W / 2, H / 2 - 10, 180 * nb, C.cloud, 800); D.alpha(kb, () => kicker(D, "BPM", W / 2, H / 2 + 110 + 20 * (1 - kb), C.spark, "center", 34));
   }],
   ["Data", 10, 12, (t) => {   // a line chart draws itself with an area fill, labels and a riding value tag
     D.bg(C.cloud);
-    const pts = [0.2, 0.35, 0.3, 0.55, 0.5, 0.72, 0.68, 0.9].map((v, i) => [260 + i * 200, 860 - v * 620]), p = seg(t, 0, 1.4, "Cruise");
-    for (let i = 0; i < 5; i++) { g.strokeStyle = "#0A211F1a"; g.lineWidth = 2; g.beginPath(); g.moveTo(260, 860 - i * 155); g.lineTo(1660, 860 - i * 155); g.stroke(); D.txt(String(i * 25), 230, 860 - i * 155, 20, C.sea, 600, T.font.ui, "right"); }
-    ["Q1", "Q2", "Q3", "Q4"].forEach((q, i) => D.txt(q, 260 + i * 467, 900, 20, C.sea, 600, T.font.ui, "left", 3));
+    const pts = [0.2, 0.35, 0.3, 0.55, 0.5, 0.72, 0.68, 0.9].map((v, i) => [260 + i * 200, 860 - v * 620]), p = seg(t, -0.1, 1.4, "Cruise");
+    for (let i = 0; i < 5; i++) { g.strokeStyle = "#0A211F1a"; g.lineWidth = 2; g.beginPath(); g.moveTo(260, 860 - i * 155); g.lineTo(1660, 860 - i * 155); g.stroke(); D.txt(i ? "+" + i * 75 + "%" : "0", 230, 860 - i * 155, 24, C.sea, 600, T.font.ui, "right"); }
+    ["Q1", "Q2", "Q3", "Q4"].forEach((q, i) => D.txt(q, 260 + i * 467, 904, 24, C.sea, 600, T.font.ui, "left", 3));
     const n = p * (pts.length - 1), last = Math.floor(n), f = n - last;
     const tip = last < pts.length - 1 ? [lerp(pts[last][0], pts[last + 1][0], f), lerp(pts[last][1], pts[last + 1][1], f)] : pts[last];
     g.beginPath(); g.moveTo(pts[0][0], 860); g.lineTo(...pts[0]); for (let i = 1; i <= last; i++) g.lineTo(...pts[i]); g.lineTo(...tip); g.lineTo(tip[0], 860); g.closePath();
@@ -76,28 +78,34 @@ const SCENES = [
     g.beginPath(); g.moveTo(...pts[0]); for (let i = 1; i <= last; i++) g.lineTo(...pts[i]); g.lineTo(...tip); g.strokeStyle = C.pine; g.lineWidth = 10; g.lineJoin = "round"; g.stroke();
     for (let i = 0; i <= last; i++) { g.beginPath(); g.arc(...pts[i], 8, 0, 7); D.fill(C.pine); }
     g.beginPath(); g.arc(...tip, 22 + 8 * beatPulse(t + 10), 0, 7); D.fill(C.spark); g.lineWidth = 6; g.stroke();
-    D.rr(tip[0] - 90, tip[1] - 120, 180, 70, 35); D.fill(C.pine); D.txt("+" + Math.round(p * 248) + "%", tip[0], tip[1] - 84, 40, C.spark, 800);
+    const ta = seg(p, 0.15, 0.25, "Land"); D.alpha(ta, () => D.at(tip[0], tip[1] - 85, 0.8 + 0.2 * ta, 0, () => { D.rr(-95, -35, 190, 70, 35); D.fill(C.pine); D.txt("+" + Math.round((860 - tip[1]) / 620 * 300) + "%", 0, 1, 40, C.spark, 800); }));
   }],
   ["Outro", 12, 15, (t) => {   // end title with a serif accent
     D.bg(C.pine); dotGrid(C.cloud, 0.06); glow(g, W / 2, H / 2, 800, "#174A46", 0.9);
-    const a = seg(t, 0, 0.47, "Land"), b = seg(t, 0.25, 0.75, "Land"), c = seg(t, 0.6, 1.3, "Cruise");
+    const a = seg(t, -0.12, 0.4, "Land"), b = seg(t, 0.25, 0.75, "Land"), c = seg(t, 0.6, 1.3, "Cruise") * (1 - seg(t, 2.25, 2.7, "Whip")), fo = seg(t, 2.45, 2.97, "Settle"), zs = 1 + 0.035 * seg(t, 0, 3, "Flat");
+    g.save(); g.translate(W / 2, H / 2); g.scale(zs, zs); g.translate(-W / 2, -H / 2); g.globalAlpha = 1 - fo;
     D.alpha(b, () => kicker(D, "Motion design · " + VARS.year, W / 2, H / 2 - 190, C.mint));
     D.alpha(a, () => rich(D, VARS.title, W / 2, H / 2 + 50 + 60 * (1 - a), 220, C.cloud, C.spark, "center", 800));
     g.fillStyle = C.spark; g.fillRect(W / 2 - 380 * c, H / 2 + 120, 760 * c, 10);
     D.alpha(b, () => D.txt(VARS.by.toUpperCase(), W / 2, H / 2 + 200, 34, C.spark, 600, T.font.ui, "center", 10));
+    g.restore();
   }],
 ];
 
 MDNA.scene({ duration: 15, render(t) {
   const si = SCENES.findIndex(s => t >= s[1] && t < s[2]), s = SCENES[si < 0 ? SCENES.length - 1 : si];
   s[3](t - s[1], t);
-  if (SCENES.some(x => x[1] > 0 && Math.abs(t - x[1]) < 1 / 60)) { g.fillStyle = C.spark; g.globalAlpha = 0.3; g.fillRect(0, 0, W, H); g.globalAlpha = 1; }
+  const light = s === SCENES[2] || s === SCENES[5];
   // HUD: kicker, timecode, scene counter and progress
-  const dark = [C.cloud].includes(s === SCENES[2] || s === SCENES[5] ? C.cloud : "x"), hc = dark ? C.pine : C.cloud;
-  D.alpha(0.8, () => { kicker(D, "Showreel · " + VARS.year, 60, 60, hc, "left", 18);
-    const f = Math.floor(t * 30), tc = `00:00:${String(Math.floor(t)).padStart(2, "0")}:${String(f % 30).padStart(2, "0")}`; D.txt(tc, W - 60, 60, 20, hc, 600, "ui-monospace, Consolas, monospace", "right", 2);
-    kicker(D, `${String(SCENES.indexOf(s) + 1).padStart(2, "0")} — ${s[0]}`, 60, H - 60, hc, "left", 18);
+  const hc = light ? C.pine : C.cloud, hb = [C.pine, C.ink, C.cloud, C.sea, C.pine, C.cloud, C.pine][SCENES.indexOf(s)];
+  const pill = (x, y, w) => D.alpha(0.9, () => { D.rr(x - 18, y - 24, w + 36, 48, 24); D.fill(hb); });
+  const k1 = "SHOWREEL · " + VARS.year, k2 = `${String(SCENES.indexOf(s) + 1).padStart(2, "0")} — ${s[0]}`.toUpperCase(), tf = "ui-monospace, Consolas, monospace";
+  const f = Math.floor(t * 30), tc = `00:00:${String(Math.floor(t)).padStart(2, "0")}:${String(f % 30).padStart(2, "0")}`, tw = D.width(tc, 24, 600, tf, 2);
+  if (s === SCENES[0]) { pill(60, 60, D.width(k1, 24, 600, T.font.ui, 7.68)); pill(W - 60 - tw, 60, tw); pill(60, H - 60, D.width(k2, 24, 600, T.font.ui, 7.68)); }
+  D.alpha(0.8, () => { kicker(D, k1, 60, 60, hc, "left");
+    D.txt(tc, W - 60, 60, 24, hc, 600, tf, "right", 2);
+    kicker(D, k2, 60, H - 60, hc, "left");
     g.fillStyle = hc; g.globalAlpha *= 0.25; g.fillRect(W - 460, H - 62, 400, 4); g.globalAlpha /= 0.25; g.fillRect(W - 460, H - 62, 400 * t / 15, 4); });
-  finish(g, t, { grain: 0.06, vignette: 0.35 });
+  finish(g, t, light ? { grain: 0.05, light: true } : { grain: 0.06, vignette: 0.35 });
 } });
 </script>

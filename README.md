@@ -27,6 +27,17 @@ animate keeps a profile that **learns from each review**, and everything it make
 
 ## What's new
 
+- **Claude reads your request first:** describe the video in your own words and the Agent (or Claude Code) calls
+  `read_brief`: it asks only what is missing, proposes two or three different routes and builds the one you pick. Each
+  project remembers what it already made, so the next brief offers something else.
+- **Claude knows Motion DNA in any folder:** setup now installs the `motion-dna` and `video-templates` skills for Claude
+  Code. After updating, restart After Effects **and** Claude Code. Update won't run on an older version? Ask Claude:
+  *"Update Motion DNA from the repo. Keep my local changes."*
+- **Characters, documented:** our robot, **The Agent**, lives in one file (traits, palette, rig, 13 emotions, poses,
+  acts); its pixel version and its character sheet are drawn from it, so it never drifts. It stars in a 25 s update
+  promo (`t15`), finished in After Effects with a CC0 music bed and sound effects.
+- **Every video template, reworked:** a strict designer QA pass on all 15 templates (two redesigned: the infinite zoom
+  and the shader hero), and new animated WebP previews made from the full renders.
 - **Project comes first:** a new first tab, left of Behaviors. Step 1 connects Claude and your apps (Figma, Krea, Flora,
   Codex, Update); step 2 sets up the project folder. Then you move left to right: Behaviors, Curves, Brands, Agent.
 - **Mark AI video in Figma:** name a layer `AI · …` in Figma (any text after it is a hint for the prompt) and, when
@@ -81,7 +92,11 @@ Claude installs it and tells you the two steps only you can do. Seven steps in a
 3. **Project › Connect** (the first tab): *Connect Claude* (sign in once); optional *Connect Figma*, *Krea* or *Flora* (press Allow) and Codex. *Update* gets new versions.
 4. Once, in After Effects: *Preferences › Scripting & Expressions › Allow Scripts to Write Files and Access Network*.
 
-Update with `python tools/setup.py --update` (never over your local changes) · remove with `--uninstall`.
+Update with `python tools/setup.py --update` (never over your local changes) · remove with `--uninstall`. After an
+update, restart After Effects and Claude Code.
+
+**Update not working?** (older versions could stop on local changes) Open Claude Code in your Motion DNA folder and say:
+*"Update Motion DNA from the repo. Keep my local changes (stash them, don't delete them), then tell me the version."*
 
 **No panel needed:** setup also gives Claude Code the `motion-dna` skill in every folder, so you can ask for a video in
 your own words from any Claude Code session (add `--mcp-user` so it can drive After Effects from any folder too).
@@ -298,10 +313,10 @@ already made, so the next brief offers something else: Motion DNA is a Swiss arm
 | Techniques (tracked labels, text behind people, speed ramps, cut on the voice…) | 12 | *"put labels that follow the shoe"*, *"text behind the person"* |
 | Styles (one look for a whole comp) | 9 | *"make the whole comp feel premium"* |
 | Curves and durations (the motion tokens) | 14 + 6 | *"slower and softer"*, *"more snap"* |
-| Video templates made as code (research) | 14 | *"a 15 s launch film for our app"*, *"a data story with these numbers"* |
+| Video templates made as code (research) | 15 | *"a 15 s launch film for our app"*, *"a data story with these numbers"* |
 | Characters | 1 (The Agent, our robot) | *"a short with our robot reading the order"* |
 | Outside resources (scripts, VFX, SFX, music; licenses checked) | 166 | *"find a whoosh for this cut"* |
-| Request routes (`library/intake.json`) | 41 | *"I want a video for…"*: Claude asks, proposes, then builds |
+| Request routes (`library/intake.json`) | 42 | *"I want a video for…"*: Claude asks, proposes, then builds |
 
 **Characters** are documented like everything else: one file per character (`library/characters/<slug>/character.json`)
 with the traits that never change (pasted word for word into every brief), what it never does, its palette, its
@@ -480,20 +495,25 @@ tones, the content you change (`vars`) and our own brief for making a new versio
 | **B · native in AE** | Type and a few shapes that must stay editable | Text and shape layers on the text engine and token curves (`ae/route_b.jsx`) |
 | **C · hybrid** | Explainers, launch films, data stories | The plate rendered without text (`--notext`), the copy live in AE with Motion DNA presets |
 
-| Showreel on the beat | One shape becomes the UI | Storybook explainer |
+| Showreel on the beat | SaaS launch film | One shape becomes the UI |
 |---|---|---|
-| ![Showreel](research/video_prompts/previews/t01_showreel.gif) | ![UI morph](research/video_prompts/previews/t03_morph_ui.gif) | ![Explainer](research/video_prompts/previews/t06_storybook_explainer.gif) |
-| **Timeline** | **Data story** | **Particle world** |
-| ![Timeline](research/video_prompts/previews/t07_timeline.gif) | ![Data story](research/video_prompts/previews/t08_data_story.gif) | ![Particle world](research/video_prompts/previews/t09_particle_world.gif) |
-| **Infinite zoom** | **Shader hero** | **Logo reveal (alpha)** |
-| ![Infinite zoom](research/video_prompts/previews/t04_infinite_zoom.gif) | ![Shader hero](research/video_prompts/previews/t10_shader_hero.gif) | ![Logo reveal](research/video_prompts/previews/t12_logo_reveal.gif) |
+| ![Showreel](research/video_prompts/previews/t01_showreel.webp) | ![Launch film](research/video_prompts/previews/t02_saas_launch.webp) | ![UI morph](research/video_prompts/previews/t03_morph_ui.webp) |
+| **Storybook explainer** | **Timeline** | **Data story** |
+| ![Explainer](research/video_prompts/previews/t06_storybook_explainer.webp) | ![Timeline](research/video_prompts/previews/t07_timeline.webp) | ![Data story](research/video_prompts/previews/t08_data_story.webp) |
+| **Particle world** | **Shader hero** | **Infinite zoom** |
+| ![Particle world](research/video_prompts/previews/t09_particle_world.webp) | ![Shader hero](research/video_prompts/previews/t10_shader_hero.webp) | ![Infinite zoom](research/video_prompts/previews/t04_infinite_zoom.webp) |
+| **Kinetic type (alpha)** | **Logo reveal (alpha)** | **The Agent explains (promo)** |
+| ![Kinetic type](research/video_prompts/previews/t05_kinetic_type.webp) | ![Logo reveal](research/video_prompts/previews/t12_logo_reveal.webp) | ![The Agent explains](research/video_prompts/previews/t15_agent_update.webp) |
+
+Previews are animated WebP built from the full renders by `make_previews.py` (480 px, 15 fps, the stretch set in
+each catalog card).
 
 **Characters are documented too.** A character lives in one file, `library/characters/<slug>/character.json`:
 traits pasted word for word into every brief, what it never does, palette, emotions, poses, acts and acting rules.
 Its pixel version is drawn from that file (`runtime/pixel_rig.js`), and so is its character sheet
 (`t14_pixel_character.html?sheet`), so a character never drifts between videos. First one: **The Agent**, our robot.
 
-![The Agent, a documented pixel character](research/video_prompts/previews/t14_pixel_character.gif)
+![The Agent, a documented pixel character](research/video_prompts/previews/t14_pixel_character.webp)
 
 **Try it** (once per machine, then ask Claude, e.g. *"make a 12 s launch film for a fictional app with the SaaS template
 and put it in my comp at 4 s"*):

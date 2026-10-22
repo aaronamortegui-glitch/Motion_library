@@ -577,6 +577,24 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **Captions ran past their card in the tutorial** → `research/video_prompts/text_check.py` hooks `D.txt`/`D.rr`, samples
   the frames and lists every visible text that leaves the safe area or overflows the card under it. Run it before
   every render, with a `snap.py` sheet for centring.
+- **The templates themselves looked mediocre once someone looked closely** (a leaf's veins drawn outside the leaf, words
+  overlapping on a swap, an end card drawn over a fading dashboard, a sun glowing through the sea, a ray-marched shape
+  tearing open, a 9 px final frame) → a strict designer QA pass on every template, at 0.5 s steps plus every transition,
+  with full-size crops, then fixes. The recurring causes, now rules for every new template:
+  - draw details inside their container with `g.clip()` (veins, illustrations, glows, sun light below a horizon);
+  - text ≥ 24 px at 1080p (`kicker()` enforces it), measured masks, nothing cut by the frame unless meant;
+  - no empty first frame and no dead static hold at the end: start moving, end on a slow push and a clean resolve;
+  - a click must cause the visible change at that moment; a cursor that drags must be locked to what it drags;
+  - transitions are designed (a match, a carried wipe), never a hard branch switch; one-sided dissolves on the art's grid;
+  - mix colours in OKLab (RGB sea→cloud goes grey); `glow(…, light)` and `finish({light:true})` on light backgrounds;
+  - a mix of two signed distance fields is not a distance field: morph with `smin` or sizes inside one field;
+  - loops: drive every cycle from `t / duration` with whole cycles, and compare the last frame with the first;
+  - `text_check.py` only sees `D.txt`: check `rich()` lines by eye.
+- **The README previews looked dated and broken** (a black infinite zoom, banding on gradients, a "slideshow") while
+  the renders were fine → the GIFs had 24-40 frames for 12-15 s (about 3 fps), 320 px and a small palette, and some
+  started on an empty stretch → `make_previews.py` builds animated WebP from the full renders (480 px, 15 fps, full
+  colour, alpha laid over the pine) and each catalog card can set `"preview": [start, end]` for its best stretch; all
+  15 stay under 500 KB. GitHub shows animated WebP in a README like a GIF.
 - **A template that reads repo data hung on "MDNA_READY"** (t14 loads `library/characters/<slug>/character.json`) →
   the renderers open pages as `file://`, and `fetch` refuses that scheme even with Chromium's
   `--allow-file-access-from-files` → load data with `XMLHttpRequest` (which the flag allows); `html_to_mp4.py`,

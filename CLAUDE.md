@@ -87,4 +87,4 @@ Every item below cost a review round once; check them all, then render (details:
 | Something you learned | `docs/LEARNINGS.md`, in the matching section, as *symptom → cause → fix* |
 | A reusable script | `tools/` with a header comment (what, usage) and an entry in the README tools table |
 | A character (mascot, presenter, robot) | `library/characters/<slug>/character.json`: traits pasted verbatim into every brief, `never`, palette, styles (photoreal refs; pixel rig drawn by `research/video_prompts/runtime/pixel_rig.js`), emotions, poses, acts, acting rules; its sheet is rendered from the file (`t14_pixel_character.html?sheet`), never drawn apart |
-| A code-rendered video template (research) | `research/video_prompts/templates/` + a card in `templates/catalog.json` + a GIF in `previews/` (see the `video-templates` skill) |
+| A code-rendered video template (research) | `research/video_prompts/templates/` + a card in `templates/catalog.json` (+ `library/intake.json`) + an animated WebP in `previews/` from `make_previews.py` (see the `video-templates` skill) |

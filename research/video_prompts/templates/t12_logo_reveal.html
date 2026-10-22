@@ -5,26 +5,43 @@
 <div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
 <script>
 // T12 · logo reveal over transparency (archetype "break the mark into parts and animate the parts"). A fictional
-// mark of three primitives (disc, bar, arc) flies in on Motion DNA curves, locks with a Pop, the wordmark types on
-// and the tagline settles. Route B: each part is one AE shape layer; this HTML is the reference and an alpha asset.
+// mark of three primitives (disc, bar, arc) flies in on Motion DNA curves and locks with a Pop at the centre, then
+// slides into a measured, centred lockup while the wordmark rises letter by letter out of a baseline mask and the
+// tagline follows; it ends on the lockup with a slow push (an overlay: the editor holds or trims it). Route B: each
+// part is one AE shape layer; this HTML is the reference and an alpha asset.
 const VARS = { name: "northwind", tag: "Design that moves", mark: [MDNA.T.color.spark, MDNA.T.color.cloud, MDNA.T.color.mint] };
-const { T, seg, k, lerp, clamp } = MDNA, C = T.color;
+const { T, seg, lerp } = MDNA, C = T.color;
 const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
+// mark geometry (origin = arc centre): every part keeps an even ~28 px gap from the others
+const ARC = { r: 150, w: 34, a0: 0.15 * Math.PI, a1: 1.15 * Math.PI }, DISC = { x: -40, y: -30, r: 56 }, BAR = { x: 50, y: -150, w: 60, h: 180 };
+const BOX = { x0: -167, x1: 151, y0: -150, y1: 167 }, MW = BOX.x1 - BOX.x0, MCX = (BOX.x0 + BOX.x1) / 2, MCY = (BOX.y0 + BOX.y1) / 2;
+const WS = 150, GAP = 72, BASE = H / 2 + 18, TY = H / 2 + 80;   // wordmark baseline, tagline centre
 
 MDNA.scene({ duration: 5, alpha: true, render(t) {
   g.clearRect(0, 0, W, H);
-  const lock = seg(t, 1.25, 1.6, "Pop"), slide = seg(t, 1.9, 2.5, "Settle"), mx = W / 2 - 300 * slide, my = H / 2;
-  D.at(mx, my, lerp(1.0, 1.0 + 0.08 * Math.sin(lock * Math.PI), lock), 0, () => {
-    // disc from the top-left with Wind-up, bar from below with Whip, arc spins in with Settle
-    const dp = seg(t, 0.2, 1.2, "Wind-up"); D.at(lerp(-700, -60, dp), lerp(-500, -40, dp), 1, 0, () => { g.beginPath(); g.arc(0, 0, 70, 0, 7); D.fill(VARS.mark[0]); });
-    const bp = seg(t, 0.35, 1.1, "Whip"); D.at(70, lerp(700, 30, bp), 1, 0, () => { D.rr(-34, -110, 68, 220, 34); D.fill(VARS.mark[1]); });
-    const ap = seg(t, 0.5, 1.3, "Settle"); D.at(0, 0, 1, lerp(-Math.PI * 1.5, 0, ap), () => { g.beginPath(); g.arc(0, 0, 150, Math.PI * 0.15, Math.PI * (0.15 + 1.1 * ap)); g.lineWidth = 34; g.lineCap = "round"; g.strokeStyle = VARS.mark[2]; g.stroke(); });
+  const textW = D.width(VARS.name, WS, 800, T.font.ui, -4), total = MW + GAP + textW, left = W / 2 - total / 2;
+  const lockX = left + MW / 2, tx0 = left + MW + GAP;
+  const lock = seg(t, 1.05, 1.4, "Pop"), slide = seg(t, 1.6, 2.3, "Settle");
+  const mx = lerp(W / 2, lockX, slide), push = 1 + 0.03 * seg(t, 2.0, 5.0, "Flat");   // slow push to the last frame
+  D.at(W / 2, H / 2, push, 0, () => { g.translate(-W / 2, -H / 2);
+    D.at(mx, H / 2, 1 + 0.07 * Math.sin(lock * Math.PI), 0, () => { g.translate(-MCX, -MCY);
+      // disc from far top-left with Wind-up, bar from below with Whip, arc spins and draws on with Settle
+      const dp = seg(t, 0, 0.95, "Wind-up"); D.at(lerp(-1000, DISC.x, dp), lerp(-700, DISC.y, dp), 1, 0, () => { g.beginPath(); g.arc(0, 0, DISC.r, 0, 7); D.fill(VARS.mark[0]); });
+      const bp = seg(t, 0.08, 0.85, "Whip"); D.at(0, lerp(700, 0, bp), 1, 0, () => { D.rr(BAR.x, BAR.y, BAR.w, BAR.h, BAR.w / 2); D.fill(VARS.mark[1]); });
+      const ap = seg(t, 0.3, 1.1, "Settle");
+      if (ap > 0.01) D.at(0, 0, 1, lerp(-Math.PI * 1.5, 0, ap), () => { g.beginPath(); g.arc(0, 0, ARC.r, ARC.a0, lerp(ARC.a0, ARC.a1, ap)); g.lineWidth = ARC.w; g.lineCap = "round"; g.strokeStyle = VARS.mark[2]; g.stroke(); });
+    });
+    // wordmark: each letter rises out of its own baseline mask; the last one locks with a small Pop overshoot
+    const letters = VARS.name.split(""); let x = tx0;
+    letters.forEach((ch, i) => { const last = i === letters.length - 1, w = D.width(ch, WS, 800, T.font.ui, -4);
+      const p = seg(t, 1.9 + i * 0.055, 1.9 + i * 0.055 + (last ? 0.55 : 0.45), last ? "Pop" : "Land");
+      if (p > 0) { g.save(); g.beginPath(); g.rect(x - 12, BASE - 190, w + 24, 192 + 0.3 * WS * MDNA.clamp((p - 0.85) / 0.15)); g.clip();   // mask = baseline; descenders open at the end
+        D.txt(ch, x, BASE + 170 * (1 - p), WS, C.cloud, 800, T.font.ui, "left", -4, "alphabetic"); g.restore(); }
+      x += w; });
+    // tagline rises out of its own mask
+    const tp = seg(t, 2.65, 3.2, "Land");
+    if (tp > 0) { g.save(); g.beginPath(); g.rect(tx0 - 10, TY - 30, textW + 400, 60); g.clip();
+      D.txt(VARS.tag.toUpperCase(), tx0 + 6, TY + 56 * (1 - tp), 34, C.spark, 600, T.font.ui, "left", 10); g.restore(); }
   });
-  // wordmark types on, letter by letter, after the mark slides left
-  const letters = VARS.name.split(""), x0 = W / 2 - 60; let x = x0;
-  letters.forEach((ch, i) => { const p = seg(t, 2.2 + i * 0.06, 2.5 + i * 0.06, "Land"); const w = D.width(ch, 150, 800, T.font.ui, -4);
-    D.alpha(p, () => D.txt(ch, x, H / 2 + 8 + 40 * (1 - p), 150, C.cloud, 800, T.font.ui, "left", -4)); x += w; });
-  const tp = seg(t, 3.0, 3.5, "Land"); D.alpha(tp, () => D.txt(VARS.tag.toUpperCase(), x0 + 4, H / 2 + 120 + 16 * (1 - tp), 34, C.spark, 600, T.font.ui, "left", 10));
-  const out = seg(t, 4.5, 5.0, "Launch"); if (out > 0) { g.globalCompositeOperation = "destination-out"; g.fillStyle = `rgba(0,0,0,${out})`; g.fillRect(0, 0, W, H); g.globalCompositeOperation = "source-over"; }
 } });
 </script>

@@ -6,28 +6,59 @@
 <script>
 // T11 · transition over transparency (archetype "every cut lands on the beat with a liquid wipe"). Route A with
 // alpha: a 1.2 s ProRes 4444 overlay that covers the frame at 0.6 s (cut the two shots under it there) and uncovers
-// it by 1.2 s. Two layers: a spark leading edge and a pine body, each with a noisy, wobbling front.
+// it by 1.2 s. v3 after QA: one liquid front (the pine body) with a thin spark lip that rides it at a constant
+// 40-70 px (it stretches with speed), a cloud highlight on the leading lip, a front that ripples as it travels,
+// droplets left behind the trailing edge, and a 180° shutter (6-48 sub-frames, ~5 px apart) so the fast middle reads as motion blur.
 const VARS = { lead: MDNA.T.color.spark, body: MDNA.T.color.pine, dir: 1 };
-const { T, seg, k, lerp, clamp, noise } = MDNA;
+const { T, seg, lerp, clamp, noise, rng } = MDNA;
 const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
-function shape(L, p, seed, amp) {   // everything left of a wavy vertical edge at progress p (0 = off left, 1 = off right)
-  const x0 = lerp(-300, W + 300, p); L.beginPath(); L.moveTo(-400, -10);
-  for (let y = -10; y <= H + 10; y += 20) L.lineTo(x0 + amp * (noise(y / 140, seed) - 0.5) + amp * 0.4 * Math.sin(y / 90 + p * 9), y);
-  L.lineTo(-400, H + 10); L.closePath();
+const X0 = -380, X1 = W + 420, AMP = 200, STEP = 6, SHUTTER = 1 / 60;
+// cover on Cruise: the front enters on frame 1 and closes the frame by 0.45 s; uncover on Cruise: the back edge
+// appears at 0.66 s and clears the frame by 1.12 s (both windows run past the visible part, off screen)
+const pIn = t => seg(t, -0.2, 0.82, "Cruise"), pOut = t => seg(t, 0.52, 1.36, "Cruise");
+// the front's x at height y; it ripples as it travels (noise drifts with progress)
+const edge = (y, p, seed) => lerp(X0, X1, p) + AMP * (noise(y / 140 + p * 2.5, seed) - 0.5) + AMP * 0.35 * Math.sin(y / 90 + p * 9 + seed);
+// the spark lip: 40-70 px, stretched by the front's speed
+const speed = (fn, t) => Math.abs(fn(t + 0.01) - fn(t - 0.01)) / 0.02 * (X1 - X0);
+const lip = (y, p, v) => (40 + 30 * noise(y / 200 + p * 1.5, 3)) * (1 + v / 9000);
+function region(L, p, seed, off, v) {   // everything left of the front (+ off × lip)
+  L.beginPath(); L.moveTo(-600, -10);
+  for (let y = -10; y <= H + 10; y += STEP) L.lineTo(edge(y, p, seed) + off * lip(y, p, v), y);
+  L.lineTo(-600, H + 10); L.closePath();
 }
-const layers = []; let li = 0;
-function layer() { if (!layers[li % 2]) { const c = document.createElement("canvas"); c.width = W; c.height = H; layers[li % 2] = c.getContext("2d"); } return layers[li++ % 2]; }
+function frontLine(L, p, seed, off, v) { L.beginPath(); for (let y = -10; y <= H + 10; y += STEP) L.lineTo(edge(y, p, seed) + off * lip(y, p, v), y); }
+// droplets that peel off the trailing edge and shrink away (all gone by 1.19 s)
+const R = rng(31), drops = Array.from({ length: 5 }, (_, i) => ({ y: 120 + i * 200 + R() * 90, t0: 0.74 + i * 0.035 + R() * 0.03, r: 12 + R() * 14, lag: 0.45 + R() * 0.2 }));
+const cvs = []; const off = i => { if (!cvs[i]) { const c = document.createElement("canvas"); c.width = W; c.height = H; cvs[i] = c.getContext("2d", { willReadFrequently: i === 0 }); } return cvs[i]; };
+
+function sample(S, t) {   // one sub-frame into S
+  const pi = pIn(t), po = pOut(t), vi = speed(pIn, t), vo = speed(pOut, t);
+  const lead = off(1), body = off(2);
+  for (const L of [S, lead, body]) { L.setTransform(1, 0, 0, 1, 0, 0); L.clearRect(0, 0, W, H); if (VARS.dir < 0) { L.translate(W, 0); L.scale(-1, 1); } }
+  // spark lip: ahead of the body on the way in, behind it on the way out
+  region(lead, pi, 1, 1, vi); lead.fillStyle = VARS.lead; lead.fill();
+  if (pi < 1) { frontLine(lead, pi, 1, 1, vi); lead.strokeStyle = T.color.cloud; lead.globalAlpha = 0.85; lead.lineWidth = 3; lead.stroke(); lead.globalAlpha = 1; }
+  if (po > 0) { lead.globalCompositeOperation = "destination-out"; region(lead, po, 5, -1, vo); lead.fill(); lead.globalCompositeOperation = "source-over"; }
+  drops.forEach(d => { if (t < d.t0) return; const life = Math.min(0.3, 1.19 - d.t0), a = clamp((t - d.t0) / life); if (a >= 1) return;
+    const xs = edge(d.y, pOut(d.t0), 5) - lip(d.y, pOut(d.t0), speed(pOut, d.t0)), xn = edge(d.y, po, 5) - lip(d.y, po, vo);
+    const x = xs + (xn - xs) * d.lag, r = d.r * (1 - a * a); lead.beginPath(); lead.arc(x - r * 1.6, d.y, r, 0, 7); lead.fillStyle = VARS.lead; lead.fill(); });
+  // pine body
+  region(body, pi, 1, 0, vi); body.fillStyle = VARS.body; body.fill();
+  if (po > 0) { body.globalCompositeOperation = "destination-out"; region(body, po, 5, 0, vo); body.fill(); body.globalCompositeOperation = "source-over"; }
+  S.setTransform(1, 0, 0, 1, 0, 0); S.drawImage(lead.canvas, 0, 0); S.drawImage(body.canvas, 0, 0);
+}
+
 MDNA.scene({ duration: 1.2, alpha: true, render(t) {
   g.clearRect(0, 0, W, H);
-  // covering: both fronts sweep in (Whip); uncovering: the body's back edge follows (Launch → Land)
-  const inLead = seg(t, 0, 0.55, "Whip"), inBody = seg(t, 0.06, 0.6, "Whip"), outBody = seg(t, 0.62, 1.2, "Surge"), outLead = seg(t, 0.66, 1.2, "Surge");
-  // each layer is visible between its exit front (left) and its entry front (right): the spark leads on the way in
-  // and trails on the way out, the pine body covers the frame in between
-  [[inLead, outLead, VARS.lead, 1, 7], [inBody, outBody, VARS.body, 2, 5]].forEach(([pin, pout, col, s1, s2]) => {
-    const L = layer(); L.clearRect(0, 0, W, H); L.save(); if (VARS.dir < 0) { L.translate(W, 0); L.scale(-1, 1); }
-    shape(L, pin, s1, 260); L.fillStyle = col; L.fill();
-    if (pout > 0) { L.globalCompositeOperation = "destination-out"; shape(L, pout, s2, 200); L.fill(); L.globalCompositeOperation = "source-over"; }
-    L.restore(); g.drawImage(L.canvas, 0, 0);
-  });
+  // 180° shutter: average SUB sub-frames centred on t, in float on premultiplied colour (exact: opaque stays opaque)
+  const S = off(0), still = speed(pIn, t) + speed(pOut, t) < 1;
+  if (still) { sample(S, t); g.drawImage(S.canvas, 0, 0); return; }
+  const SUB = Math.min(48, Math.max(6, Math.ceil((speed(pIn, t) + speed(pOut, t)) * SHUTTER / 5)));
+  const acc = new Float32Array(W * H * 4);
+  for (let i = 0; i < SUB; i++) { sample(S, t + ((i + 0.5) / SUB - 0.5) * SHUTTER); const d = S.getImageData(0, 0, W, H).data;
+    for (let j = 0; j < d.length; j += 4) { const a = d[j + 3]; if (!a) continue; acc[j] += d[j] * a; acc[j + 1] += d[j + 1] * a; acc[j + 2] += d[j + 2] * a; acc[j + 3] += a; } }
+  const im = g.createImageData(W, H), o = im.data;
+  for (let j = 0; j < o.length; j += 4) { const a = acc[j + 3]; if (!a) continue; o[j] = acc[j] / a; o[j + 1] = acc[j + 1] / a; o[j + 2] = acc[j + 2] / a; o[j + 3] = Math.round(a / SUB); }
+  g.putImageData(im, 0, 0);
 } });
 </script>

@@ -27,12 +27,12 @@ new Promise((ok, no) => { const x = new XMLHttpRequest(); x.open("GET", `../../.
   const blit = (sprite, x, y, s) => { g.imageSmoothingEnabled = false; g.drawImage(sprite, Math.round(x), Math.round(y), sprite.width * s, sprite.height * s); };
 
   // ---------- the acted scene ----------
-  const X0 = -50, X1 = 92, GROUND = 118;                      // low-res x of the robot centre, floor line
-  const blinks = [1.75, 4.15, 8.4, 9.55];
+  const X0 = 6, X1 = 68, GROUND = 118;                        // low-res x of the robot centre (half in frame at 0 s), floor line
+  const blinks = [1.75, 4.15, 8.4, 9.95];
   const sparkR = rng(7), sparks = Array.from({ length: 26 }, () => ({ a: sparkR() * Math.PI * 2, v: 18 + sparkR() * 34, s: sparkR() < 0.3 ? 2 : 1, c: sparkR() < 0.55 ? C.spark : C.mint, d: sparkR() * 0.15 }));
   function state(t) {
     const q = onTwos(t);
-    const x = k(q, [[0, X0], [1.25, X1, "Land"]]);
+    const x = k(t, [[0, X0], [1.4, X1, "Settle"]]);            // travel on ones (smooth); only the body poses are on twos
     const lean = k(q, [[0, -3], [0.7, -1], [1.25, 4, "Settle"], [1.5, -2, "Settle"], [1.75, 0, "Settle"]]);
     let emotion = "neutral", pose = "idle", poseFrom = "idle", armT = 1, look = [0, 0], light = 1, sy = 1, hop = 0;
     // look around, then at the order
@@ -49,11 +49,15 @@ new Promise((ok, no) => { const x = new XMLHttpRequest(); x.open("GET", `../../.
     if (q >= 6.9 && q < 8.1) { pose = "cheer"; poseFrom = "wave"; armT = seg(q, 6.9, 7.15, "Pop"); emotion = "love"; }
     if (q >= 8.1) { pose = "idle"; poseFrom = "cheer"; armT = seg(q, 8.1, 8.45, "Settle"); emotion = "happy"; }
     if (q >= 8.9) emotion = "neutral";
+    // sign-off: a small wave goodbye, back to idle on a soft Settle at the very end
+    if (q >= 9.45) { pose = "wave"; poseFrom = "idle"; armT = seg(q, 9.45, 9.75, "Pop") * (1 - seg(q, 10.1, 10.5, "Settle")); emotion = "happy"; }
     // breathing on a 1.6 s beat once it has stopped
     if (q > 1.8 && !(q >= 4.75 && q < 5.6)) sy *= 1 - 0.022 * (Math.floor(q / 0.8) % 2);
     if (blinks.some(b => q >= b && q < b + 0.12) && emotion !== "love") emotion = "blink";
-    light = q > 4.9 && q < 5.6 ? (Math.floor(q * 12) % 2) : 0.6 + 0.4 * (Math.floor(q * 2) % 2);
-    return { x, lean, emotion, pose, poseFrom, armT, look, light, sy, hop, t: q };
+    // the top light: steady, with one pulse on the reaction (Pop up, Settle down)
+    const pulse = k(t, [[4.9, 0], [5.02, 1, "Pop"], [5.7, 0, "Settle"]]);
+    light = 1;
+    return { x, lean, emotion, pose, poseFrom, armT, look, light, pulse, sy, hop, t: q };
   }
 
   function world(t) {
@@ -65,8 +69,8 @@ new Promise((ok, no) => { const x = new XMLHttpRequest(); x.open("GET", `../../.
     lg.fillStyle = "#123A35"; for (let y = GROUND + 2; y < LH; y += 2) for (let x = (y % 4) ? 0 : 1; x < LW; x += 2 + Math.floor((y - GROUND) / 4)) lg.fillRect(x, y, 1, 1);
   }
 
-  function sparkles(t, ox, oy) {
-    const p = (t - 6.95) / 0.9; if (p <= 0 || p > 1.2) return;
+  function sparkles(t, t0, ox, oy) {
+    const p = (t - t0) / 0.9; if (p <= 0 || p > 1.2) return;
     for (const s of sparks) {
       const u = clamp((p - s.d) / 0.9); if (u <= 0 || u >= 1) continue;
       const e = 1 - (1 - u) ** 3, x = Math.round(ox + Math.cos(s.a) * s.v * e), y = Math.round(oy + Math.sin(s.a) * s.v * e * 0.8 + 10 * u * u);
@@ -81,26 +85,31 @@ new Promise((ok, no) => { const x = new XMLHttpRequest(); x.open("GET", `../../.
     rig.shadow(lg, st.x, GROUND, st.hop);
     const sp = rig.render(st);
     lg.drawImage(sp, Math.round(st.x - rig.CX), GROUND - rig.G);
-    sparkles(t, st.x, GROUND - rig.G + 9);
+    // the order pill: left edge just right of the robot, level with its screen; it bursts into sparkles at 4.9
+    const PW = D.width(VARS.order, 46, 600) + 120, PCX = (X1 + 20) * PX + PW / 2, PCY = (GROUND - 66) * PX;
+    sparkles(t, 4.9, Math.round(PCX / PX), Math.round(PCY / PX));
+    sparkles(t, 6.95, st.x, GROUND - rig.G + 9);
     g.imageSmoothingEnabled = false; g.drawImage(low, 0, 0, W, H);
-    // the top light glows on the full-resolution frame
-    if (st.light > 0.5) MDNA.glow(g, (st.x) * PX, (GROUND - rig.G + 9) * PX, st.light > 0.9 && t > 4.9 && t < 5.6 ? 150 : 70, "#E2402F", 0.35);
-    // the order: a Motion DNA prompt pill that the robot reads, then it pops into the sparkles of the reaction
-    const pin = seg(t, 3.55, 3.95, "Pop"), pout = seg(t, 4.85, 5.05, "Launch");
+    // the top light glows on the full-resolution frame: a steady 70 px halo, one 90 px pulse on the reaction
+    MDNA.glow(g, st.x * PX, (GROUND - rig.G + 9 + st.hop) * PX, 70 + 20 * st.pulse, "#E2402F", 0.35 + 0.25 * st.pulse);
+    // the order: a Motion DNA speech pill with a tail to the robot's screen; it grows from its centre and pops
+    const pin = seg(t, 3.55, 3.95, "Pop"), pup = seg(t, 4.75, 4.9, "Wind-up"), pout = seg(t, 4.86, 4.96, "Launch");
     if (pin > 0 && pout < 1) {
-      const px = (X1 + 46) * PX, py = (GROUND - 66) * PX, s = (0.6 + 0.4 * pin) * (1 + 0.25 * pout);
-      D.alpha(pin * (1 - pout), () => D.at(px, py, s, 0, () => {
-        const w = D.width(VARS.order, 46, 600) + 120; D.rr(0, -42, w, 84, 42); D.fill(C.cloud);
-        g.beginPath(); g.arc(46, 0, 14, 0, 7); D.fill(C.pine);
-        D.txt(VARS.order, 80, 2, 46, C.ink, 600, T.font.ui, "left");
+      const s = (0.6 + 0.4 * pin) * (1 + 0.12 * pup);
+      D.alpha(Math.min(1, pin * 2) * (1 - pout), () => D.at(PCX, PCY, s, 0, () => {
+        const w = PW, x0 = -w / 2;
+        D.rr(x0, -42, w, 84, 42); D.fill(C.cloud);
+        g.beginPath(); g.moveTo(x0 + 34, 18); g.lineTo(x0 - 30, 44); g.lineTo(x0 + 66, 34); g.closePath(); D.fill(C.cloud);   // tail → screen
+        g.beginPath(); g.arc(x0 + 46, 0, 14, 0, 7); D.fill(C.pine);
+        D.txt(VARS.order, x0 + 80, 2, 46, C.ink, 600, T.font.ui, "left");
       }));
     }
-    // the line
+    // the line (drifts up a few px to the end, so the last beat is a slow move, not a freeze)
     if (!MDNA.NOTEXT) {
-      const a = seg(t, 7.5, 8.1, "Land"), b = seg(t, 7.7, 8.3, "Land"), c2 = seg(t, 8.0, 8.6, "Land"), x = 1000;
-      D.alpha(a, () => MDNA.kicker(D, VARS.kicker, x, 390 + 20 * (1 - a), C.spark, "left", 24));
-      D.alpha(b, () => MDNA.rich(D, VARS.line, x, 500 + 30 * (1 - b), 66, C.cloud, C.spark, "left"));
-      D.alpha(c2, () => D.txt(VARS.sub, x, 572 + 20 * (1 - c2), 30, C.mint, 500, T.font.ui, "left"));
+      const a = seg(t, 7.5, 8.1, "Land"), b = seg(t, 7.7, 8.3, "Land"), c2 = seg(t, 8.0, 8.6, "Land"), x = 840, dr = -10 * seg(t, 8.3, 10.5, "Flat");
+      D.alpha(a, () => MDNA.kicker(D, VARS.kicker, x, 390 + 20 * (1 - a) + dr, C.spark, "left", 24));
+      D.alpha(b, () => MDNA.rich(D, VARS.line, x, 500 + 30 * (1 - b) + dr, 66, C.cloud, C.spark, "left"));
+      D.alpha(c2, () => D.txt(VARS.sub, x, 572 + 20 * (1 - c2) + dr, 30, C.mint, 500, T.font.ui, "left"));
     }
     MDNA.finish(g, t, { vignette: 0.35, grain: 0.04 });
   }

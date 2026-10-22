@@ -4,49 +4,72 @@
 <script src="../runtime/mdna.js"></script>
 <div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
 <script>
-// T08 · data story (archetype "The Pudding / 3Blue1Brown: one number shown as things you can count"), v2 after the
-// pilot review: a measured grid background, dots with a highlight and a glow, a legend, an annotation with a leader
-// line, bars with value labels and a baseline, a counter with a kicker and a rich sentence with a serif accent.
-// Hybrid: sentences and labels go live in AE (--notext).
+// T08 · data story (archetype "The Pudding / 3Blue1Brown: one number shown as things you can count"), v3 after QA:
+// dots rain into a waffle from the first frame (bottom rows land first), 37 light up, a bracket and a legend name
+// them, then every dot arcs into a weekday bar with the spark dots stacked at the bottom (each day keeps its share,
+// so the colour story survives the regroup), the chart gets a title and a baseline drawn on, the counter lands and
+// the dots fall away on a slow push. Flat dots with a soft glow (no specular). Hybrid: text goes live in AE (--notext).
 const VARS = { share: 37, groups: [["Mon", 12], ["Tue", 18], ["Wed", 22], ["Thu", 27], ["Fri", 21]],
-  lines: ["Out of *100 animations*…", "…*37* reuse the same three curves.", "Motion DNA keeps those 37 *on brand.*"], legend: [["Reuses a token curve", "spark"], ["Custom curve", "sea"]] };
-const { T, seg, k, lerp, clamp, rng, NOTEXT, rich, kicker, finish, glow } = MDNA, C = T.color;
+  lines: ["Out of *100 animations*…", "…*37* reuse the same three curves.", "Motion DNA keeps those 37 *on brand.*"], legend: [["Reuses a token curve", "spark"], ["Custom curve", "sea"]],
+  chart: "Animations per weekday", counter: "Share on a token curve" };
+const { T, seg, k, lerp, clamp, rng, NOTEXT, rich, kicker, finish } = MDNA, C = T.color;
 const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080, R = rng(21);
-const dots = Array.from({ length: 100 }, (_, i) => ({ i, sx: 300 + R() * (W - 600), sy: -100 - R() * 900, d: R() * 0.6 }));
-// bars: each day keeps its share of the highlighted dots so the colour story survives the regroup
-const order = []; VARS.groups.forEach(([_, v], gi) => { for (let j = 0; j < v; j++) order.push(gi); });
-const slots = {}; const barOf = order.map(gi => [gi, (slots[gi] = (slots[gi] || 0) + 1) - 1]);
+const N = 100, HOT = VARS.share, BW = 260, BASE = 890, DS = 44;
+// waffle: 10 × 10, rows 260…800; dots rain in from just above the frame, bottom rows first
+const dots = Array.from({ length: N }, (_, i) => { const col = i % 10, row = Math.floor(i / 10);
+  return { i, col, row, wx: W / 2 - 270 + col * 60, wy: 260 + row * 60, sx: W / 2 - 270 + col * 60 + (R() - 0.5) * 160, sy: -60 - R() * 420, d: (9 - row) * 0.045 + R() * 0.3 }; });
+// bars: each day gets its share of the spark dots (largest remainder), stacked at the bottom of its bar
+const tot = VARS.groups.reduce((a, [, v]) => a + v, 0), hc = VARS.groups.map(([, v]) => Math.floor(v * HOT / tot));
+VARS.groups.map(([, v], gi) => [v * HOT / tot - hc[gi], gi]).sort((a, b) => b[0] - a[0]).slice(0, HOT - hc.reduce((a, b) => a + b, 0)).forEach(([, gi]) => hc[gi]++);
+const hotSlots = [], coldSlots = []; VARS.groups.forEach(([, v], gi) => { for (let j = 0; j < v; j++) (j < hc[gi] ? hotSlots : coldSlots).push([gi, j]); });
+dots.forEach(d => { [d.gi, d.j] = d.i < HOT ? hotSlots[d.i] : coldSlots[d.i - HOT];
+  d.bx = W / 2 + (d.gi - 2) * BW - 66 + (d.j % 4) * DS; d.by = BASE - 30 - Math.floor(d.j / 4) * DS; });
+const DRAW = dots.slice(HOT).concat(dots.slice(0, HOT));   // spark dots drawn last, on top while they fly
+const barX = gi => W / 2 + (gi - 2) * BW, barTop = v => BASE - 30 - (Math.ceil(v / 4) - 1) * DS - 20;
 
-function dot(x, y, r, hot) { if (hot) glow(g, x, y, r * 2.6, "#D8FF85", 0.35); g.beginPath(); g.arc(x, y, r, 0, 7); D.fill(hot ? C.spark : C.sea); g.beginPath(); g.arc(x - r * 0.3, y - r * 0.35, r * 0.35, 0, 7); D.alpha(hot ? 0.6 : 0.18, () => D.fill("#ffffff")); }
+function dot(x, y, r, hot) { g.beginPath(); g.arc(x, y, r, 0, 7);
+  if (hot) { g.save(); g.shadowColor = C.spark; g.shadowBlur = 14; D.fill(C.spark); g.restore(); } else D.fill(C.sea); }
 
 MDNA.scene({ duration: 12, background: C.pine, render(t) {
   D.bg(C.pine);
   g.strokeStyle = "#F7F9F20d"; g.lineWidth = 1; for (let x = 0; x < W; x += 60) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); } for (let y = 0; y < H; y += 60) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
-  const toBarT = 6.2, chartIn = seg(t, 7.0, 7.6, "Land");
-  // baseline + value labels for the bars
-  if (t > 6.8) { D.alpha(chartIn, () => { g.strokeStyle = "#F7F9F255"; g.lineWidth = 3; g.beginPath(); g.moveTo(W / 2 - 600, 890); g.lineTo(W / 2 + 560, 890); g.stroke(); }); }
-  dots.forEach(d => {
-    const col = d.i % 10, row = Math.floor(d.i / 10), wx = W / 2 - 270 + col * 60, wy = 260 + row * 60;
-    const [gi, j] = barOf[d.i], bx = W / 2 - 520 + gi * 260 + (j % 4) * 44, by = 860 - Math.floor(j / 4) * 44;
-    const fall = seg(t, 0.3 + d.d, 1.2 + d.d, "Land"), toBar = seg(t, toBarT + d.d * 0.6, toBarT + 1 + d.d * 0.6, "Settle");
-    const x = lerp(lerp(d.sx, wx, fall), bx, toBar), y = lerp(lerp(d.sy, wy, fall), by, toBar), hot = d.i < VARS.share && t > 2.6 + d.i * 0.025;
-    dot(x, y, 20 * (hot ? lerp(1.25, 1, seg(t, 2.6 + d.i * 0.025, 2.9 + d.i * 0.025, "Pop")) : 1), hot);
+  const toBarT = 6.2, out = seg(t, 11.2, 11.55, "Cruise");
+  // a slow push from the counter to the end (camera, around the chart)
+  const push = 1 + 0.035 * seg(t, 8.4, 12, "Flat"); g.save(); g.translate(W / 2, 600); g.scale(push, push); g.translate(-W / 2, -600);
+  // baseline drawn on from the centre, spanning the bars' real extent
+  const base = seg(t, 7.0, 7.6, "Cruise") * (1 - out); if (base > 0) { const hw = (2 * BW + 66 + 20 + 34) * base;
+    g.strokeStyle = "#F7F9F266"; g.lineWidth = 3; g.beginPath(); g.moveTo(W / 2 - hw, BASE); g.lineTo(W / 2 + hw, BASE); g.stroke(); }
+  DRAW.forEach(d => {
+    const fall = seg(t, d.d - 0.25, d.d + 0.65, "Land");
+    // regroup on an arc: the spark dots first (they sit at the bottom of the bars), then the rest stack on top;
+    // within each wave staggered by bar, then by row in the bar
+    const r0 = toBarT + (d.i < HOT ? 0 : 0.55) + d.gi * 0.07 + Math.floor(d.j / 4) * 0.04 + (d.j % 4) * 0.012, tb = seg(t, r0, r0 + 0.8, "Cruise");
+    const drop = seg(t, 11.3 + d.gi * 0.05 + (d.j % 4) * 0.01, 11.85 + d.gi * 0.05, "Launch");
+    const x = lerp(lerp(d.sx, d.wx, fall), d.bx, tb), y = lerp(lerp(d.sy, d.wy, fall), d.by, tb) - 120 * Math.sin(Math.PI * tb) + drop * 700;
+    const h0 = 2.6 + d.i * 0.025, hot = d.i < HOT && t > h0;
+    dot(x, y, 20 * (hot ? lerp(1.25, 1, seg(t, h0, h0 + 0.3, "Pop")) : 1), hot);
   });
   if (!NOTEXT) {
     const line = (s, a, b, y, size = 60) => { const p = seg(t, a, a + 0.47, "Land") * (1 - seg(t, b - 0.3, b, "Launch")); D.alpha(p, () => rich(D, s, W / 2, y + 16 * (1 - p), size, C.cloud, C.spark, "center", 600)); };
-    D.alpha(seg(t, 0.4, 0.8) * (1 - seg(t, 5.6, 6.0)), () => kicker(D, "Fig. 1 · 100 animations from 12 brands", W / 2, 120, C.mint));
-    line(VARS.lines[0], 0.6, 2.5, 200); line(VARS.lines[1], 2.6, 6.0, 200);
-    // legend
-    D.alpha(seg(t, 3.2, 3.6, "Land") * (1 - seg(t, 5.6, 6.0)), () => VARS.legend.forEach(([lab, c], i) => { dot(W / 2 + 420, 420 + i * 60, 12, c === "spark"); D.txt(lab, W / 2 + 450, 422 + i * 60, 26, C.cloud, 500, T.font.ui, "left"); }));
-    // annotation with a leader line to the last highlighted dot
-    const an = seg(t, 4.0, 4.6, "Cruise") * (1 - seg(t, 5.6, 6.0)); if (an > 0) D.alpha(an, () => { const tx = W / 2 - 270 + 6 * 60, ty = 260 + 3 * 60; g.save(); g.setLineDash([400]); g.lineDashOffset = 400 * (1 - an);
-      g.beginPath(); g.moveTo(tx - 30, ty + 10); g.quadraticCurveTo(W / 2 - 520, ty + 120, W / 2 - 560, ty + 230); g.strokeStyle = C.cloud; g.lineWidth = 3; g.stroke(); g.restore();
-      D.txt("37 of 100", W / 2 - 560, ty + 270, 44, C.cloud, 400, T.font.display); });
-    if (t > 7.4) VARS.groups.forEach(([lab, v], gi) => D.alpha(seg(t, 7.4 + gi * 0.1, 7.8 + gi * 0.1, "Land"), () => { D.txt(lab, W / 2 - 454 + gi * 260, 930, 30, C.mint, 600);
-      D.txt(String(v), W / 2 - 454 + gi * 260, 860 - Math.ceil(v / 4) * 44 - 20, 30, C.cloud, 700); }));
-    const n = seg(t, 8.6, 10.2, "Settle"); D.alpha(seg(t, 8.5, 8.9, "Land"), () => { kicker(D, "Share on a token curve", W / 2, 210, C.mint); D.txt(Math.round(VARS.share * n) + "%", W / 2, 320, 180, C.spark, 800); });
-    line(VARS.lines[2], 10.0, 12.5, 470, 54);
+    D.alpha(seg(t, 0.1, 0.5) * (1 - seg(t, 5.6, 6.0)), () => kicker(D, "Fig. 1 · 100 animations from 12 brands", W / 2, 120, C.mint, "center", 26));
+    line(VARS.lines[0], 0.5, 2.5, 200); line(VARS.lines[1], 2.6, 6.0, 200);
+    // legend (right of the waffle) and a bracket naming the 37 (left of it): nothing crosses the dots
+    const lg = seg(t, 3.2, 3.6, "Land") * (1 - seg(t, 5.6, 6.0)); if (lg > 0) D.alpha(lg, () => VARS.legend.forEach(([lab, c], i) => { dot(W / 2 + 420, 420 + i * 60, 12, c === "spark"); D.txt(lab, W / 2 + 450, 422 + i * 60, 26, C.cloud, 500, T.font.ui, "left"); }));
+    const an = seg(t, 4.0, 4.6, "Cruise") * (1 - seg(t, 5.6, 6.0)); if (an > 0) { const bx = W / 2 - 320, y0 = 240, y1 = 460;
+      D.alpha(Math.min(1, an * 3), () => { g.save(); g.strokeStyle = C.spark; g.lineWidth = 3; g.lineCap = "round"; g.setLineDash([300]); g.lineDashOffset = 300 * (1 - an);
+        g.beginPath(); g.moveTo(bx + 16, y0); g.lineTo(bx, y0); g.lineTo(bx, y1); g.lineTo(bx + 16, y1); g.stroke();
+        g.beginPath(); g.moveTo(bx, (y0 + y1) / 2); g.lineTo(bx - 16, (y0 + y1) / 2); g.stroke(); g.restore(); });
+      D.alpha(seg(t, 4.3, 4.7, "Land") * (1 - seg(t, 5.6, 6.0)), () => { D.txt("37 of 100", bx - 34, (y0 + y1) / 2 - 2, 48, C.cloud, 400, T.font.display, "right"); }); }
+    // chart: title, day labels, values
+    D.alpha(seg(t, 7.2, 7.6, "Land") * (1 - seg(t, 8.1, 8.4)), () => kicker(D, VARS.chart, W / 2, 210, C.mint, "center", 26));
+    const lab = 1 - out; if (t > 7.3) VARS.groups.forEach(([l, v], gi) => { D.alpha(seg(t, 7.3 + gi * 0.08, 7.7 + gi * 0.08, "Land") * lab, () => D.txt(l, barX(gi), 930, 30, C.mint, 600));
+      // each value lands once its bar is complete
+      const vi = seg(t, 7.75 + gi * 0.08, 8.1 + gi * 0.08, "Land") * lab; D.alpha(vi, () => D.txt(String(v), barX(gi), barTop(v) - 20 + 10 * (1 - vi), 30, C.cloud, 700)); });
+    const n = seg(t, 8.5, 9.9, "Settle"), cin = seg(t, 8.4, 8.8, "Land") * (1 - seg(t, 11.4, 11.9, "Launch"));
+    D.alpha(cin, () => { kicker(D, VARS.counter, W / 2, 210, C.mint, "center", 26); D.txt(Math.round(VARS.share * n) + "%", W / 2, 320 + 14 * (1 - cin), 180, C.spark, 800); });
+    D.alpha(1 - seg(t, 11.4, 11.9, "Launch"), () => line(VARS.lines[2], 9.6, 13, 440, 54));
   }
+  g.restore();
   finish(g, t, { grain: 0.06, vignette: 0.4 });
 } });
 </script>

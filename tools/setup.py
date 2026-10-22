@@ -622,7 +622,10 @@ def main():
     if upd:
         ok = update()
         if not ok:
-            print("\nUpdate stopped: nothing was changed."); sys.exit(1)
+            print("\nUpdate stopped: nothing was changed.")
+            print("Easiest fix: open Claude Code in this folder and say:")
+            print('  "Update Motion DNA from the repo. Keep my local changes (stash them, don\'t delete them), then tell me the version."')
+            sys.exit(1)
         results.append(ok)
     results += [clean_old(), panel(), fonts(), cep(dev="--dev" in sys.argv), assets(), checks(), mcp_local()]
     if "--mcp-user" in sys.argv:

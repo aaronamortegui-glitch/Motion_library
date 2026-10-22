@@ -7,50 +7,76 @@
 // T03 · one shape, never cut (archetype "a single shape morphs into every interface component"): a pill becomes a
 // button, a toggle, a slider, a card and a progress ring, driven by a cursor. Route B: every state is a size / radius /
 // colour key, so it maps 1:1 to one AE shape layer with Motion DNA curves.
+// v2 after QA: colours mix in OKLab (no grey midpoints), every click squashes the shape and causes the next state, the
+// slider thumb sits under the cursor that drags it, content enters after each morph settles, components at 1.25×.
 const VARS = { label: "Get started", card: ["Weekly focus", "12 h 40 m"], done: "Saved" };
-const { T, seg, k, lerp, clamp, glow, kicker, rich, finish } = MDNA, C = T.color;
-const STATES = [[0, "Button"], [2.7, "Toggle"], [4.7, "Slider"], [7.0, "Card"], [9.3, "Progress"]];
+const { T, seg, k, lerp, clamp, glow, kicker, finish } = MDNA, C = T.color;
+const STATES = [[0, "Button"], [2.5, "Toggle"], [4.5, "Slider"], [6.7, "Card"], [9.0, "Progress"]];   // label switches as each morph starts
 const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
-// states: [time, w, h, radius, colour index]
+// states: [time, w, h, radius, ease into it]
 const COLS = [C.spark, C.cloud, C.sea, C.cloud, C.spark];
-const S = [[0, 80, 80, 40], [0.8, 520, 120, 60, "Pop"], [2.4, 520, 120, 60], [3.0, 220, 110, 55, "Settle"], [4.4, 220, 110, 55], [5.0, 760, 24, 12, "Whip"],
-           [6.6, 760, 24, 12], [7.3, 620, 420, 40, "Settle"], [8.9, 620, 420, 40], [9.5, 260, 260, 130, "Settle"], [12, 260, 260, 130]];
+const S = [[0, 100, 100, 50], [0.8, 650, 150, 75, "Pop"], [2.4, 650, 150, 75], [3.0, 276, 138, 69, "Settle"], [4.4, 276, 138, 69], [5.0, 950, 30, 15, "Whip"],
+           [6.6, 950, 30, 15], [7.3, 744, 504, 48, "Settle"], [8.9, 744, 504, 48], [9.5, 324, 324, 162, "Settle"], [12, 324, 324, 162]];
 const key = i => S.map(s => [s[0], s[i], s[4]]);
-const mix = (a, b, p) => { const h = x => [1, 3, 5].map(i => parseInt(x.substr(i, 2), 16)); const A = h(a), B = h(b); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], p))).join(",")})`; };
-function colorAt(t) { const stops = [[0, 0], [2.4, 0], [3.0, 1], [4.4, 1], [5.0, 2], [6.6, 2], [7.3, 3], [8.9, 3], [9.5, 4]]; for (let i = 1; i < stops.length; i++) if (t <= stops[i][0]) { const p = seg(t, stops[i - 1][0], stops[i][0], "Cruise"); return mix(COLS[stops[i - 1][1]], COLS[stops[i][1]], p); } return COLS[4]; }
+// OKLab mix: sea → cloud passes through a clean teal, not a muddy grey
+const toLin = c => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; }, toS = c => 255 * (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055);
+function oklab(hex) { const [r, gg, b] = [1, 3, 5].map(i => toLin(parseInt(hex.substr(i, 2), 16)));
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * gg + 0.0514459929 * b), m = Math.cbrt(0.2119034982 * r + 0.6806995451 * gg + 0.1073969566 * b), s = Math.cbrt(0.0883024619 * r + 0.2817188376 * gg + 0.6299787005 * b);
+  return [0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s, 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s, 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s]; }
+function mix(a, b, p) { const A = oklab(a), B = oklab(b), [L, aa, bb] = A.map((v, i) => lerp(v, B[i], clamp(p)));
+  const l = (L + 0.3963377774 * aa + 0.2158037573 * bb) ** 3, m = (L - 0.1055613458 * aa - 0.0638541728 * bb) ** 3, s = (L - 0.0894841775 * aa - 1.291485548 * bb) ** 3;
+  const rgb = [4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s, -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s, -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s];
+  return `rgb(${rgb.map(v => Math.round(clamp(toS(clamp(v)), 0, 255))).join(",")})`; }
+function colorAt(t) { const stops = [[0, 0], [2.4, 0], [3.0, 1], [4.4, 1], [5.0, 2], [6.6, 2], [7.3, 3], [8.9, 3], [9.5, 4]]; for (let i = 1; i < stops.length; i++) if (t <= stops[i][0]) { const t0 = stops[i - 1][0], p = seg(t, t0, t0 + Math.min(0.32, stops[i][0] - t0), "Settle"); return mix(COLS[stops[i - 1][1]], COLS[stops[i][1]], p); } return COLS[4]; }
+const CLICKS = [2.3, 3.6, 5.25, 9.6];   // button → toggle, toggle on, grab the slider, start the progress
 
 MDNA.scene({ duration: 12, background: C.pine, render(t) {
   D.bg(C.pine); glow(g, W / 2, H / 2, 900, "#174A46", 1);
   g.fillStyle = "#F7F9F214"; for (let x = 60; x < W; x += 60) for (let y = 60; y < H; y += 60) g.fillRect(x, y, 2, 2);
-  // the app window the shape lives in
-  D.alpha(seg(t, 0, 0.6, "Land"), () => { D.rr(360, 150, 1200, 780, 36); D.fill("#0F2B28"); g.strokeStyle = "#F7F9F21f"; g.lineWidth = 2; g.stroke();
+  // the payoff holds on a slow push-in instead of a static frame
+  const push = 1 + 0.03 * seg(t, 9.4, 12, "Flat"); g.save(); g.translate(W / 2, H / 2); g.scale(push, push); g.translate(-W / 2, -H / 2);
+  const cx = W / 2 + 80, cy = H / 2 + 40, si = STATES.findLastIndex(s => t >= s[0]), win = seg(t, -0.3, 0.45, "Land");
+  // the app window the shape lives in (window, nav, state label and step dots share its fade)
+  D.alpha(win, () => { D.rr(360, 150, 1200, 780, 36); D.fill("#0F2B28"); g.strokeStyle = "#F7F9F21f"; g.lineWidth = 2; g.stroke();
     [0, 1, 2].forEach(i => { g.beginPath(); g.arc(410 + i * 30, 195, 8, 0, 7); D.fill(i === 0 ? C.coral : "#F7F9F233"); }); D.rr(560, 183, 800, 24, 12); D.fill("#F7F9F212");
-    for (let i = 0; i < 5; i++) { D.rr(400, 260 + i * 56, 140, 18, 9); D.fill(i === STATES.findLastIndex(s => t >= s[0]) ? "#D8FF8566" : "#F7F9F214"); } });
-  const w = k(t, key(1)), h = k(t, key(2)), r = k(t, key(3)), cx = W / 2 + 80, cy = H / 2 + 20;
-  D.alpha(0.5, () => { g.filter = "blur(24px)"; D.rr(cx - w / 2, cy - h / 2 + 30, w, h, r); D.fill("#000000"); g.filter = "none"; });
-  if (t > 9.4) glow(g, cx, cy, 300, "#D8FF85", 0.4 * seg(t, 10.6, 11.2));
-  D.rr(cx - w / 2, cy - h / 2, w, h, r); const sg = g.createLinearGradient(0, cy - h / 2, 0, cy + h / 2); sg.addColorStop(0, "#ffffff22"); sg.addColorStop(1, "#00000014"); D.fill(colorAt(t)); g.fillStyle = sg; g.fill();
-  // state label with step dots
-  const si = STATES.findLastIndex(s => t >= s[0]), sl = seg(t, STATES[si][0], STATES[si][0] + 0.4, "Land");
-  D.alpha(sl, () => { kicker(D, `State 0${si + 1} — ${STATES[si][1]}`, cx, 280 - 10 * (1 - sl), C.mint); });
-  STATES.forEach((_, i) => { g.beginPath(); g.arc(cx - 48 + i * 24, 320, i === si ? 6 : 4, 0, 7); D.fill(i === si ? C.spark : "#F7F9F244"); });
-  // state content, each with its own enter/exit and a short blur
+    for (let i = 0; i < 5; i++) { D.rr(400, 260 + i * 56, 140, 18, 9); D.fill("#F7F9F214"); D.alpha(seg(t, STATES[i][0], STATES[i][0] + 0.3) * (1 - (STATES[i + 1] ? seg(t, STATES[i + 1][0], STATES[i + 1][0] + 0.3) : 0)), () => { D.rr(400, 260 + i * 56, 140, 18, 9); D.fill("#D8FF8566"); }); }
+    // state label: the old one leaves up while the new one rises in
+    STATES.forEach((s, i) => { const a = i ? seg(t, s[0], s[0] + 0.35, "Land") : 1, o = STATES[i + 1] ? seg(t, STATES[i + 1][0] - 0.22, STATES[i + 1][0], "Launch") : 0;
+      if (a * (1 - o) > 0.001) D.alpha(a * (1 - o), () => kicker(D, `State 0${i + 1} — ${s[1]}`, cx, 246 + 16 * (1 - a) - 16 * o, C.mint, "center", 26)); });
+    STATES.forEach((_, i) => { const on = seg(t, STATES[i][0], STATES[i][0] + 0.3, "Settle") * (1 - (STATES[i + 1] ? seg(t, STATES[i + 1][0], STATES[i + 1][0] + 0.3, "Settle") : 0));
+      g.beginPath(); g.arc(cx - 64 + i * 32, 288, 6 + 3 * on, 0, 7); D.fill(on > 0.5 ? C.spark : "#F7F9F244"); }); });
+  // every click squashes the shape a touch
+  let press = 0; CLICKS.forEach(c => { if (t > c && t < c + 0.4) press = seg(t, c, c + 0.4, "Flat"); });
+  const sq = 1 - 0.04 * Math.sin(press * Math.PI), w = k(t, key(1)) * sq, h = k(t, key(2)) * sq, r = k(t, key(3)) * sq;
+  D.alpha(0.5 * win, () => { g.filter = "blur(26px)"; D.rr(cx - w / 2, cy - h / 2 + 30, w, h, r); D.fill("#000000"); g.filter = "none"; });
+  if (t > 9.4) glow(g, cx, cy, 340, "#D8FF85", 0.4 * seg(t, 10.6, 11.2));
+  D.alpha(win, () => { D.rr(cx - w / 2, cy - h / 2, w, h, r); const sg = g.createLinearGradient(0, cy - h / 2, 0, cy + h / 2); sg.addColorStop(0, "#ffffff22"); sg.addColorStop(1, "#00000014"); D.fill(colorAt(t)); g.fillStyle = sg; g.fill(); });
+  // state content, each enters once its morph settles and leaves as the next morph starts
   const show = (a, b, fn) => { const p = seg(t, a, a + 0.3, "Land") * (1 - seg(t, b - 0.2, b, "Launch")); if (p > 0) { g.filter = `blur(${(1 - p) * 8}px)`; D.alpha(p, fn); g.filter = "none"; } };
-  show(1.0, 2.6, () => { D.txt(VARS.label, cx - 24, cy + 2, 46, C.pine, 700); g.beginPath(); g.moveTo(cx + 150, cy - 14); g.lineTo(cx + 172, cy); g.lineTo(cx + 150, cy + 14); g.strokeStyle = C.pine; g.lineWidth = 6; g.lineCap = "round"; g.stroke(); });
-  show(3.1, 4.6, () => { const on = seg(t, 3.6, 3.9, "Pop"); g.beginPath(); g.arc(cx - 55 + 110 * on, cy, 40, 0, 7); D.fill(on > 0.5 ? C.spark : C.sea); });
-  show(5.1, 6.8, () => { const v = k(t, [[5.3, 0.15], [6.3, 0.72, "Settle"]]); D.rr(cx - w / 2, cy - h / 2, w * v, h, r); D.fill(C.spark); g.beginPath(); g.arc(cx - w / 2 + w * v, cy, 34, 0, 7); D.fill(C.cloud); g.lineWidth = 6; g.strokeStyle = C.spark; g.stroke();
-    D.txt(Math.round(v * 100) + "%", cx - w / 2 + w * v, cy - 80, 40, C.cloud, 700); });
-  show(7.5, 9.0, () => { D.txt(VARS.card[0], cx - 250, cy - 120, 34, C.sea, 600, T.font.ui, "left"); D.txt(VARS.card[1], cx - 250, cy - 40, 86, C.pine, 800, T.font.ui, "left");
-    [0.5, 0.8, 0.35, 0.9, 0.6, 0.7, 0.45].forEach((v, i) => { const bh = 150 * v * seg(t, 7.6 + i * 0.05, 8.1 + i * 0.05, "Land"); D.rr(cx - 250 + i * 72, cy + 170 - bh, 48, bh, 10); D.fill(i === 3 ? C.spark : C.sea); }); });
-  show(9.6, 12.5, () => { const p = seg(t, 9.7, 10.9, "Settle"); g.beginPath(); g.arc(cx, cy, 100, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2); g.lineWidth = 22; g.lineCap = "round"; g.strokeStyle = C.pine; g.stroke();
-    const c = seg(t, 10.9, 11.3, "Pop"); D.at(cx, cy, c, 0, () => { g.beginPath(); g.moveTo(-36, 0); g.lineTo(-10, 26); g.lineTo(40, -28); g.lineWidth = 18; g.lineJoin = "round"; g.strokeStyle = C.pine; g.stroke(); });
-    D.alpha(seg(t, 11.1, 11.5, "Land"), () => D.txt(VARS.done, cx, cy + 210, 48, C.cloud, 700)); });
-  // the cursor drives every change
-  const px = k(t, [[0, 1500], [1.6, cx + 120, "Settle"], [2.6, cx + 120], [3.3, cx - 20, "Settle"], [4.6, cx - 20], [5.4, cx - w / 2 + 120, "Settle"], [6.3, cx + 170, "Settle"], [6.8, cx + 170], [7.6, cx + 400, "Settle"], [9.3, cx + 120, "Settle"], [12, 1600, "Launch"]]);
-  const py = k(t, [[0, 900], [1.6, cy + 20, "Settle"], [2.6, cy + 20], [3.3, cy + 10, "Settle"], [4.6, cy + 10], [5.4, cy + 10, "Settle"], [6.8, cy + 10], [7.6, cy + 260, "Settle"], [9.3, cy + 40, "Settle"], [12, 1100, "Launch"]]);
-  const clicks = [2.3, 3.6, 5.5, 9.3]; let press = 0; clicks.forEach(c => { if (t > c && t < c + 0.4) press = seg(t, c, c + 0.4, "Flat"); });
-  D.alpha(0.18, () => { g.beginPath(); g.arc(px, py, 26, 0, 7); D.fill(C.spark); });
-  D.cursor(px, py, press);
+  show(0.95, 2.6, () => { D.txt(VARS.label, cx - 30, cy + 2, 56, C.pine, 700); g.beginPath(); g.moveTo(cx + 180, cy - 17); g.lineTo(cx + 207, cy); g.lineTo(cx + 180, cy + 17); g.strokeStyle = C.pine; g.lineWidth = 7; g.lineCap = "round"; g.stroke(); });
+  show(3.1, 4.6, () => { const on = seg(t, 3.62, 3.95, "Pop"), oc = clamp(on);   // on: the track turns spark, the knob turns cloud
+    D.alpha(oc, () => { D.rr(cx - w / 2, cy - h / 2, w, h, r); D.fill(C.spark); });
+    D.alpha(0.35, () => { g.filter = "blur(6px)"; g.beginPath(); g.arc(cx - 69 + 138 * on, cy + 6, 50, 0, 7); D.fill(C.ink); g.filter = "none"; });
+    g.beginPath(); g.arc(cx - 69 + 138 * on, cy, 50, 0, 7); D.fill(mix(C.sea, C.cloud, oc)); });
+  const v = k(t, [[5.3, 0.15], [6.3, 0.72, "Settle"]]), thumbX = cx - w / 2 + w * v;
+  show(5.1, 6.8, () => { D.rr(cx - w / 2, cy - h / 2, w * v, h, r); D.fill(C.spark);
+    D.alpha(0.35, () => { g.filter = "blur(6px)"; g.beginPath(); g.arc(thumbX, cy + 6, 42, 0, 7); D.fill(C.ink); g.filter = "none"; });
+    g.beginPath(); g.arc(thumbX, cy, 42, 0, 7); D.fill(C.cloud); g.lineWidth = 7; g.strokeStyle = C.spark; g.stroke();
+    D.txt(Math.round(v * 100) + "%", thumbX, cy - 96, 48, C.cloud, 700); });
+  show(7.25, 9.05, () => { D.txt(VARS.card[0], cx - 308, cy - 170, 40, C.sea, 600, T.font.ui, "left"); D.txt(VARS.card[1], cx - 308, cy - 80, 100, C.pine, 800, T.font.ui, "left");
+    [0.5, 0.8, 0.35, 0.9, 0.6, 0.7, 0.45].forEach((b, i) => { const bh = 180 * b * seg(t, 7.35 + i * 0.05, 7.85 + i * 0.05, "Land"); D.rr(cx - 308 + i * 92, cy + 210 - bh, 64, bh, 12); D.fill(i === 3 ? C.spark : C.sea); }); });
+  show(9.65, 12.5, () => { const p = seg(t, 9.75, 10.9, "Settle"); D.alpha(0.18, () => { g.beginPath(); g.arc(cx, cy, 125, 0, 7); g.lineWidth = 28; g.strokeStyle = C.pine; g.stroke(); });
+    g.beginPath(); g.arc(cx, cy, 125, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2); g.lineWidth = 28; g.lineCap = "round"; g.strokeStyle = C.pine; g.stroke();
+    const c = seg(t, 10.9, 11.3, "Pop"); D.at(cx, cy, c * 1.25, 0, () => { g.beginPath(); g.moveTo(-36, 0); g.lineTo(-10, 26); g.lineTo(40, -28); g.lineWidth = 16; g.lineJoin = "round"; g.lineCap = "round"; g.strokeStyle = C.pine; g.stroke(); });
+    D.alpha(seg(t, 11.1, 11.5, "Land"), () => D.txt(VARS.done, cx, cy + 236 - 12 * (1 - seg(t, 11.1, 11.5, "Land")), 56, C.cloud, 700)); });
+  // the cursor drives every change; on the slider it IS the thumb's x
+  let px = k(t, [[0, 1500], [1.6, cx + 160, "Settle"], [2.6, cx + 160], [3.3, cx - 20, "Settle"], [4.6, cx - 20], [5.2, cx - 475 + 950 * 0.15, "Settle"], [6.3, cx - 475 + 950 * 0.72], [6.8, cx - 475 + 950 * 0.72],
+                 [7.6, cx + 430, "Settle"], [9.4, cx + 40, "Settle"], [9.8, cx + 40], [10.35, cx + 820, "Whip"]]);
+  const py = k(t, [[0, 900], [1.6, cy + 24, "Settle"], [2.6, cy + 24], [3.3, cy + 10, "Settle"], [4.6, cy + 10], [5.2, cy + 6, "Settle"], [6.8, cy + 6], [7.6, cy + 300, "Settle"], [9.4, cy + 40, "Settle"], [9.8, cy + 40], [10.35, cy + 520, "Whip"]]);
+  if (t >= 5.3 && t <= 6.6) px = thumbX;
+  const ca = seg(t, 0.2, 0.6) * (1 - seg(t, 10.0, 10.3));
+  if (ca > 0) D.alpha(ca, () => { D.alpha(0.18, () => { g.beginPath(); g.arc(px, py, 26, 0, 7); D.fill(C.spark); }); D.cursor(px, py, press); });
+  g.restore();
   finish(g, t, { grain: 0.05, vignette: 0.45 });
 } });
 </script>
