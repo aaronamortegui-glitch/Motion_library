@@ -176,6 +176,13 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   old paths ("No such file … library/brands/vela") → restart the session (or Claude Code) to load server changes.
 - **Engine "undefined" in host functions** → `$.evalFile` runs in the caller's scope → publish to `$.global` after loading.
 - **Old panel code after F5** → CEP caches the page's scripts → load CSS/JS with a `?v=Date.now()` query.
+- **Claude only knew Motion DNA inside the clone** (the skills lived in `.claude/skills/` of the repo) → `setup.py`
+  links them into `~/.claude/skills` as its last step (a junction on Windows: no admin; a symlink on macOS), wrapped so
+  a failure only prints a note. A link, not a copy, so updates reach the skill; a real folder of the user's own is never
+  replaced, and uninstall removes only links that point to a Motion DNA clone. Outside the repo, relative paths in a
+  skill resolve against `~/.claude/skills/<name>`, not the clone → setup writes `REPO_ROOT.txt` (git-ignored) next to
+  each SKILL.md and the skill says to read it. A non-ASCII arrow in a setup message crashed a cp1252 console in a test
+  run: keep setup output ASCII.
 - **Claude Code not found from AE** on Windows → the Store build of the desktop app keeps it under
   `%LOCALAPPDATA%\Packages\Claude_*\LocalCache\Roaming\Claude\claude-code\<version>\…\claude.exe` → search there too.
 - **A text preset over a move wiped the move; Replace wiped the layer's own rotation** (use-case tests UC01, UC02) →
@@ -564,3 +571,16 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **Captions ran past their card in the tutorial** → `research/video_prompts/text_check.py` hooks `D.txt`/`D.rr`, samples
   the frames and lists every visible text that leaves the safe area or overflows the card under it. Run it before
   every render, with a `snap.py` sheet for centring.
+- **A template that reads repo data hung on "MDNA_READY"** (t14 loads `library/characters/<slug>/character.json`) →
+  the renderers open pages as `file://`, and `fetch` refuses that scheme even with Chromium's
+  `--allow-file-access-from-files` → load data with `XMLHttpRequest` (which the flag allows); `html_to_mp4.py`,
+  `snap.py` and `text_check.py` pass the flag. In a normal browser, preview such a template through
+  `python -m http.server`.
+- **Pixel-art characters stay crisp only if nothing is anti-aliased** → `runtime/pixel_rig.js` rasterizes each
+  primitive itself (pixel-centre tests), squashes and leans the whole sprite with nearest-neighbour sampling, outlines
+  after posing, poses on twos, and the world is drawn at 240x135 then scaled x8; a preview GIF at exactly 2x (480 px,
+  `flags=neighbor`, 10 fps, 32 colours) stays under 500 KB. The `rich` serif italic runs wider than its size suggests:
+  measure the right edge of a closing line before rendering.
+- **A character drifts when its sheet is drawn apart from the videos** → the character sheet is rendered from the same
+  `character.json` the videos use (`t14_pixel_character.html?sheet`). The Figma expression sheet of the teaser robot
+  shows an older, boxier body: use it for the six expressions only; the turnaround is the canonical body.

@@ -21,7 +21,8 @@ def render(src, out=None, fps=None, scale=1.0, notext=False, mblur=1, shutter=0.
     os.makedirs(os.path.join(HERE, "renders"), exist_ok=True)
     t_start = time.time()
     with sync_playwright() as p:
-        b = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--autoplay-policy=no-user-gesture-required"])
+        b = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--autoplay-policy=no-user-gesture-required",
+                                        "--allow-file-access-from-files"])   # templates may fetch repo data (e.g. a character.json)
         pg = b.new_page(viewport={"width": 1920, "height": 1080}, device_scale_factor=scale)
         errors = []; pg.on("pageerror", lambda e: errors.append(str(e)))
         pg.goto("file:///" + src.replace("\\", "/") + "?render" + ("&notext" if notext else ""))

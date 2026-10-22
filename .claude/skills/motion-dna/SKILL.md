@@ -5,6 +5,11 @@ description: Apply, grow and document Motion DNA, a motion library for After Eff
 
 # Motion DNA
 
+**Where the repo is.** `tools/setup.py` also installs this skill for every folder (a link in `~/.claude/skills`). When
+you are not inside the Motion DNA clone, its path is in `REPO_ROOT.txt` next to this file: every path below is relative
+to it, and its `CLAUDE.md` has the rules. If the `motion-dna` MCP tools are missing in this folder, say that
+`python tools/setup.py --mcp-user` (run in the clone) lets Claude drive After Effects from any folder.
+
 Read `docs/LEARNINGS.md` before non-trivial AE work: it lists every pitfall already solved (rendering, ExtendScript, Flora, roto, layout, audio).
 
 Our own motion library for After Effects. Everything creates native keyframes/expressions (no plugins).

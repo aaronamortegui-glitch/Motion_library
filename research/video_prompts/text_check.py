@@ -28,7 +28,7 @@ HOOK = r"""
 """
 issues = {}
 with sync_playwright() as p:
-    b = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"])
+    b = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--allow-file-access-from-files"])
     pg = b.new_page(viewport={"width": 1920, "height": 1080}); pg.add_init_script(script=HOOK)
     pg.goto("file:///" + src.replace("\\", "/") + "?render"); pg.wait_for_function("window.MDNA_READY === true", timeout=30000)
     n = int(pg.evaluate("MDNA.info().duration") / step)

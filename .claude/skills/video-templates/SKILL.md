@@ -5,6 +5,9 @@ description: Make motion-graphics videos as code with Motion DNA's video templat
 
 # Motion DNA video templates (research)
 
+**Where the repo is.** Outside the Motion DNA clone (this skill is also linked into `~/.claude/skills` by
+`tools/setup.py`), the clone's path is in `REPO_ROOT.txt` next to this file; every path below is relative to it.
+
 Videos written as code: a page draws each frame as a pure function of time, a renderer screenshots it frame by frame
 into an MP4 (or a ProRes 4444 MOV with alpha), and the file goes into After Effects. It lives in
 `research/video_prompts/` and does not change the panel or the MCP. Read `research/video_prompts/REPORT.md` for what

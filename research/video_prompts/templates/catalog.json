@@ -67,6 +67,12 @@
      "energy": [2, 3], "tones": ["clear", "friendly"], "duration_s": 59, "aspect": "16:9",
      "inspired_by": [],
      "vars": {"steps": "step titles and one-line bodies", "app": "the app window being walked through (fictional or our own UI)"},
-     "prompt": "Make a {duration}s step-by-step install tutorial: a desktop app window drawn in code over a soft blurred office background, a cursor that clicks through each step, a numbered step card (STEP n OF 7, title, one line) and a progress bar; each step lands on its voice line, with gaps left for presenter clips between steps."}
+     "prompt": "Make a {duration}s step-by-step install tutorial: a desktop app window drawn in code over a soft blurred office background, a cursor that clicks through each step, a numbered step card (STEP n OF 7, title, one line) and a progress bar; each step lands on its voice line, with gaps left for presenter clips between steps."},
+    {"id": "t14_pixel_character", "file": "t14_pixel_character.html", "title": "Pixel character (documented rig)", "uses": ["character", "mascot", "explainer", "social"], "route": "A", "alpha": false,
+     "energy": [2, 4], "tones": ["playful", "retro", "friendly"], "duration_s": 10.5, "aspect": "16:9",
+     "inspired_by": ["majidmanzarpour-927543", "ClaudeAnimationBase (MIT): a rig with views, emotions and an acted mood change"],
+     "character": "library/characters/the-agent/character.json",
+     "vars": {"character": "slug of a character with a pixel style", "order": "the prompt the character reads", "line": "closing line (*italic accent*)"},
+     "prompt": "Make a {duration}s pixel-art short where a documented character acts one beat: it rolls in, looks around, reads an order, reacts (squash, hop, land) as its screen swaps emotion, waves and celebrates; poses on twos, the eyes lead the body, the world at 240x135 scaled x8, Motion DNA type on top. The character is drawn from its character.json by runtime/pixel_rig.js; ?sheet renders its character sheet from the same file."}
   ]
 }

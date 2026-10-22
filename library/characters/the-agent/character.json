@@ -1,0 +1,148 @@
+{
+  "schema": "motion-dna/character@1",
+  "slug": "the-agent",
+  "name": "The Agent",
+  "role": "Motion DNA's robot: the Agent of the panel, the one you ask. It reads the order, thinks, and makes it pop.",
+  "origin": "Motion DNA teaser (media/motion_dna_teaser, Figma motion-adn page 06). Fictional character, no real person, so no consent needed.",
+  "traits": [
+    "One capsule of cream plastic: the dome head and the body are a single shape, split by one seam at chest height.",
+    "A CRT screen on the upper front: dark green glass inside a lighter cream bezel with rounded corners.",
+    "The face lives on the screen: two bright green pixel eyes, taller than wide, with notched corners.",
+    "A small red dome light on top of the head, in a cream collar.",
+    "A thin antenna leaning to the right of the light, with a round tip.",
+    "Horizontal vent slots on the right side of the head and of the lower body.",
+    "Jointed arms on round shoulder joints, three-finger claw hands.",
+    "No legs: it stands and rolls on a round pedestal base."
+  ],
+  "variable": [
+    "What the screen shows (eyes, symbols, text, a loading bar).",
+    "Arm poses and what the hands hold (a tray, a pill, a cursor).",
+    "The red light (off, steady, pulsing, flashing).",
+    "Scale and camera."
+  ],
+  "never": [
+    "A mouth or face drawn on the plastic: the face is only ever on the screen.",
+    "Legs or feet.",
+    "A second antenna, a different screen colour, or a metallic finish.",
+    "Logos or brand marks on the body."
+  ],
+  "voice": "Rex's cloned voice in the teaser is the human presenter; the Agent itself does not speak on screen (it shows text and symbols on its screen).",
+  "consent": "not needed (fictional)",
+  "reused_in": ["Motion DNA teaser (photoreal, Seedance)", "t14 pixel character demo (pixel)"],
+
+  "palette": {
+    "outline":    { "hex": "#3A2E22", "role": "1 px outline around the silhouette" },
+    "cream_hi":   { "hex": "#F6EEDB", "role": "plastic in full light (top-left)" },
+    "cream":      { "hex": "#E6D6B3", "role": "plastic, base tone" },
+    "cream_lo":   { "hex": "#C8B48D", "role": "plastic in shade (right side)" },
+    "cream_deep": { "hex": "#9E8964", "role": "seam, vents, joints, deepest shade" },
+    "bezel":      { "hex": "#D9C9A6", "role": "screen bezel" },
+    "glass":      { "hex": "#123328", "role": "screen glass" },
+    "glass_lo":   { "hex": "#0B241C", "role": "scanlines and glass edge" },
+    "glow":       { "hex": "#2E6B4A", "role": "eye halo on the glass" },
+    "eye":        { "hex": "#8DF59A", "role": "eyes and screen symbols" },
+    "eye_hi":     { "hex": "#D9FFD9", "role": "brightest pixel of an eye" },
+    "red":        { "hex": "#E2402F", "role": "top light" },
+    "red_hi":     { "hex": "#FFB0A0", "role": "top light highlight" },
+    "shadow":     { "hex": "#061815", "role": "contact shadow on the floor" }
+  },
+
+  "styles": {
+    "photoreal": {
+      "what": "The teaser look: a 1970s office, warm light, film grain. Generated with Seedance from references; every clip gets checked against the refs.",
+      "refs": [
+        "media/motion_dna_teaser/storyboard/refs_v12/robot_agent_mode.jpg",
+        "media/motion_dna_teaser/storyboard/refs_v12/robot_closeup_old.jpg",
+        "media/motion_dna_teaser/storyboard/refs_v12/conf_rex_robot.jpg",
+        "Figma motion-adn › 05 · Video assets (4K) › characters/robot_turnaround (media/motion_dna_components/4k/characters/robot_turnaround.jpg): the canonical body, five views, a tray in its hands, dark wheels under the pedestal",
+        "Figma motion-adn › 05 · Video assets (4K) › characters/robot_expressions: an earlier, boxier body (do not use for the body); its six expressions (idle, thinking, happy, proposing an idea, confused, proud) are the canonical emotion set"
+      ],
+      "prompt_traits": "a friendly retro office robot, one cream plastic capsule body with a dome head, a CRT screen face with dark green glass and two green pixel eyes, a small red dome light and a thin antenna on top, vent slots on the side, jointed arms with round shoulder joints, rolling on a round pedestal base, no legs"
+    },
+    "pixel": {
+      "what": "Code-drawn pixel art: every part is a primitive in sprite pixels, rasterized without anti-aliasing, lit from the top-left, outlined, and animated on twos (12 fps poses inside a 30 fps video). The sheet and every video come from this data, so the character can never drift.",
+      "renderer": "research/video_prompts/runtime/pixel_rig.js",
+      "demo": "research/video_prompts/templates/t14_pixel_character.html",
+      "sprite": { "w": 64, "h": 86, "ground_y": 83, "center_x": 32 },
+      "pose_fps": 12,
+      "light": "top-left",
+      "parts": [
+        { "id": "shadow", "shape": "ellipse", "cx": 32, "cy": 83, "rx": 17, "ry": 2.4, "color": "shadow", "outline": false, "layer": 0 },
+        { "id": "base", "shape": "rrect", "x": 19, "y": 68, "w": 26, "h": 14, "r": 5, "color": "cream", "shade": "cyl", "layer": 1 },
+        { "id": "base_seam", "shape": "ellipse", "cx": 32, "cy": 72, "rx": 12.5, "ry": 1.2, "color": "cream_deep", "layer": 2 },
+        { "id": "wheels", "shape": "rrect", "x": 20, "y": 79, "w": 24, "h": 4, "r": 1.5, "color": "outline", "layer": 2 },
+        { "id": "body", "shape": "capsule", "x": 14, "y": 12, "w": 36, "h": 58, "r_top": 18, "r_bottom": 8, "color": "cream", "shade": "cyl", "squash": true, "layer": 3 },
+        { "id": "seam", "shape": "hline", "y": 47, "x0": 15, "x1": 49, "color": "cream_deep", "clip": "body", "squash": true, "layer": 4 },
+        { "id": "vents_head", "shape": "slots", "x": 46, "y": 24, "w": 3, "n": 4, "gap": 2, "color": "cream_deep", "squash": true, "layer": 4 },
+        { "id": "vents_body", "shape": "slots", "x": 43, "y": 55, "w": 4, "n": 3, "gap": 2, "color": "cream_deep", "squash": true, "layer": 4 },
+        { "id": "bezel", "shape": "rrect", "x": 18, "y": 19, "w": 28, "h": 23, "r": 6, "color": "bezel", "squash": true, "layer": 5 },
+        { "id": "glass", "shape": "rrect", "x": 20, "y": 21, "w": 24, "h": 19, "r": 5, "color": "glass", "squash": true, "screen": true, "layer": 6 },
+        { "id": "collar", "shape": "rrect", "x": 28, "y": 10, "w": 8, "h": 3, "r": 1, "color": "cream_lo", "squash": true, "layer": 2 },
+        { "id": "light", "shape": "ellipse", "cx": 32, "cy": 9, "rx": 3, "ry": 3, "color": "red", "squash": true, "light": true, "layer": 1 },
+        { "id": "antenna", "shape": "line", "x0": 40, "y0": 14, "x1": 45, "y1": 3, "width": 2, "color": "cream_lo", "squash": true, "layer": 0 },
+        { "id": "antenna_tip", "shape": "ellipse", "cx": 45, "cy": 3, "rx": 1.6, "ry": 1.6, "color": "cream", "squash": true, "layer": 0 }
+      ],
+      "arms": {
+        "shoulders": { "L": [13, 53], "R": [51, 53] },
+        "upper": 8, "fore": 7, "width": 3.6, "joint_r": 3.6,
+        "colors": { "arm": "cream", "joint": "cream_lo", "hand": "cream_lo" },
+        "note": "Angles in degrees, 0 = hanging straight down, positive = away from the body (out and up). Upper arm from the shoulder, forearm relative to the upper arm."
+      },
+      "screen": {
+        "eyes": { "L": [27, 30], "R": [37, 30] },
+        "mouth": [32, 36],
+        "scanlines": "every other row of the glass in glass_lo",
+        "halo": "1 px of glow around every lit pixel"
+      }
+    }
+  },
+
+  "emotions": {
+    "neutral":   { "eyes": [".##.", "####", "####", "####", "####", ".##."], "light": "steady", "use": "default, listening" },
+    "blink":     { "eyes": ["....", "....", "....", "####", "....", "...."], "light": "steady", "use": "every 2-4 s while idle, 2 frames" },
+    "happy":     { "eyes": ["....", ".##.", "#..#", "#..#", "....", "...."], "light": "pulse", "use": "an order understood, a job done" },
+    "excited":   { "eyes": [".##.", "####", "####", "####", "####", ".##."], "mouth": [".####.", "#....#", ".####."], "light": "flash", "use": "make it pop" },
+    "curious":   { "eyes": [".##.", "####", "####", "####", "####", ".##."], "eyes_R": ["....", "....", "####", "####", ".##.", "...."], "light": "steady", "use": "reading an order, a question" },
+    "surprised": { "eyes": [".##.", "#..#", "#..#", "#..#", "#..#", ".##."], "light": "flash", "use": "something unexpected, a take" },
+    "love":      { "eyes": [".#.#.", "#####", "#####", ".###.", "..#.."], "light": "pulse", "use": "a result it is proud of" },
+    "sad":       { "eyes": ["#...", "###.", "####", "####", ".##.", "...."], "mirror_R": true, "light": "off", "use": "an error, a blocked render" },
+    "focused":   { "eyes": ["....", "####", "####", ".##.", "....", "...."], "light": "steady", "use": "working, building the comp" },
+    "thinking":  { "eyes": [".##.", "####", "####", "####", "####", ".##."], "look": [1, -2], "mouth": "dots", "light": "pulse", "use": "waiting for Claude, rendering (Figma sheet: thinking)" },
+    "proposing": { "eyes": [".##.", "####", "####", "####", "####", ".##."], "eyes_R": ["....", "....", "....", "####", "....", "...."], "mouth": ["#....", ".###."], "light": "steady", "use": "proposing an idea, a suggestion (Figma sheet: proposing an idea)" },
+    "confused":  { "eyes": [".##.", "#..#", "#..#", "#..#", "#..#", ".##."], "eyes_R": ["....", ".##.", "####", "####", ".##.", "...."], "mark": "?", "light": "steady", "use": "an unclear order: time to ask a question (Figma sheet: confused)" },
+    "proud":     { "eyes": ["....", ".##.", "#..#", "#..#", "....", "...."], "mouth": ["#...#", ".###."], "light": "pulse", "use": "a finished result (Figma sheet: proud)" }
+  },
+
+  "poses": {
+    "idle":     { "L": [12, 8],    "R": [12, 8],    "use": "default" },
+    "wave":     { "L": [12, 8],    "R": [125, 35],  "wave": { "arm": "R", "joint": "fore", "amp": 28, "hz": 2.5 }, "use": "hello, goodbye" },
+    "point":    { "L": [12, 8],    "R": [95, 0],    "use": "showing something on screen" },
+    "cheer":    { "L": [150, 25],  "R": [150, 25],  "use": "celebrate" },
+    "think":    { "L": [12, 8],    "R": [70, 120],  "use": "hand to the screen, thinking" },
+    "present":  { "L": [60, 30],   "R": [60, 30],   "use": "offering a result" }
+  },
+
+  "acts": {
+    "roll_in":   { "what": "Rolls in on its base, leaning into the move, stops with an overshoot and settles back upright.", "curves": ["Land", "Settle"], "secs": 1.2 },
+    "idle":      { "what": "Breathes (body squash 1 px on each beat), blinks every 2-4 s, the light pulses slowly.", "curves": ["Cruise"], "loop": true },
+    "look":      { "what": "Eyes slide on the screen (never the head) toward what it looks at; one pixel overshoot.", "curves": ["Nudge"], "secs": 0.3 },
+    "read":      { "what": "Eyes scan left to right line by line, in focused or curious.", "secs": 1.0 },
+    "react":     { "what": "Squash, then a 3-6 px hop with stretch, then land squash; the screen swaps emotion under the squash.", "curves": ["Wind-up", "Pop", "Land"], "secs": 0.6 },
+    "wave":      { "what": "Pose wave: the forearm swings at 2.5 Hz while the eyes go happy.", "secs": 1.2 },
+    "celebrate": { "what": "Cheer pose, love eyes, pixel sparkles burst from the light.", "curves": ["Pop"], "secs": 1.0 }
+  },
+
+  "acting_rules": [
+    "The eyes lead: they move first, then the body follows a few frames later.",
+    "Swap an emotion under a squash or a blink, never as a cut on a still face.",
+    "Hold a key pose at least 6 frames (0.2 s) so it reads.",
+    "Never twin: the two arms do not move in sync unless the pose says cheer.",
+    "Keep it on model: proportions, colours and the screen face never change within a video."
+  ],
+
+  "shot_sizes": {
+    "wide": "the whole robot is under a third of the frame height",
+    "medium": "head to base fills about 80 % of the height",
+    "close": "the screen fills the frame; the eyes carry the scene"
+  }
+}

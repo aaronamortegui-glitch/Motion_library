@@ -7,7 +7,7 @@ from playwright.sync_api import sync_playwright
 
 src, out, times = os.path.abspath(sys.argv[1]), sys.argv[2], [float(x) for x in sys.argv[3:]]
 with sync_playwright() as p:
-    b = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"])
+    b = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--allow-file-access-from-files"])
     pg = b.new_page(viewport={"width": 1920, "height": 1080}); errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.goto("file:///" + src.replace("\\", "/") + "?render"); pg.wait_for_function("window.MDNA_READY === true", timeout=30000)
     shots = []

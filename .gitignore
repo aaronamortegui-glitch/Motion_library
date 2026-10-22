@@ -114,3 +114,6 @@ media/*/handoff_*/
 research/video_prompts/source/
 research/video_prompts/renders/
 panel/.python
+
+# written by tools/setup.py: the clone a user-level skill link points to
+.claude/skills/*/REPO_ROOT.txt

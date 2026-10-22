@@ -11,7 +11,9 @@ Install everything, library included — the panel reads the library from the re
 2. Both paths first remove what an older version left (the pre-rename "SS Motion.jsx" loader, loaders pointing to other
    clones or paths, the old MCP name `ss-motion`, stale bridge jobs when AE is closed, previews of assets that are gone),
    then install the panel in every AE version, the fonts, the local asset-pack index and previews, and check that every
-   loader points to this clone. If it warns that a loader in Program Files / Applications needs admin, tell the user to
+   loader points to this clone. Last, and never in the way of the rest, they link the repo's Claude skills
+   (`motion-dna`, `video-templates`) into `~/.claude/skills`, so Claude knows Motion DNA in any folder (a user's own
+   folder with the same name is left alone; `--uninstall` removes only our links). If it warns that a loader in Program Files / Applications needs admin, tell the user to
    delete that file (AE could load an old panel).
 3. Tell them the steps only they can do: tick *Preferences › Scripting & Expressions › Allow Scripts to Write Files and
    Access Network*; restart After Effects and open *Window › Extensions › Motion DNA* (also *File › Scripts › Motion
@@ -84,4 +86,5 @@ Every item below cost a review round once; check them all, then render (details:
 | Tags for a new preset, curve or technique | `tools/tag_library.py` → `python tools/tag_library.py` (writes `library/tags.json`) |
 | Something you learned | `docs/LEARNINGS.md`, in the matching section, as *symptom → cause → fix* |
 | A reusable script | `tools/` with a header comment (what, usage) and an entry in the README tools table |
+| A character (mascot, presenter, robot) | `library/characters/<slug>/character.json`: traits pasted verbatim into every brief, `never`, palette, styles (photoreal refs; pixel rig drawn by `research/video_prompts/runtime/pixel_rig.js`), emotions, poses, acts, acting rules; its sheet is rendered from the file (`t14_pixel_character.html?sheet`), never drawn apart |
 | A code-rendered video template (research) | `research/video_prompts/templates/` + a card in `templates/catalog.json` + a GIF in `previews/` (see the `video-templates` skill) |

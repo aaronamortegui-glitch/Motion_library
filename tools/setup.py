@@ -16,6 +16,8 @@ Install / update:
      Extensions > Motion DNA) into the user's CEP extensions folder so it also runs from this clone.
   4. If Animation Composer asset packs are installed, indexes them and builds their previews (local only, never in git).
   5. Checks the library files and the tools Claude uses, and prints the steps only the user can do in After Effects.
+  6. Links the repo's Claude skills (motion-dna, video-templates) into ~/.claude/skills, so Claude knows Motion DNA
+     in every folder; an update brings the new skills with it, --uninstall removes the links.
 """
 import os
 import pathlib
@@ -539,6 +541,54 @@ def mcp_local(remove=False):
     return r.returncode == 0
 
 
+SKILLS = ["motion-dna", "video-templates"]   # the repo's Claude skills (.claude/skills/<name>)
+
+
+def skills_dir():
+    return pathlib.Path(os.environ.get("CLAUDE_CONFIG_DIR") or pathlib.Path.home() / ".claude") / "skills"
+
+
+def is_link(p):
+    return p.is_symlink() or is_junction(p)
+
+
+def skills(remove=False):
+    """Installs the repo's Claude skills for the user (~/.claude/skills/<name>), so Claude knows Motion DNA in any
+    folder, not only inside this clone. Each one is a link to the clone (a junction on Windows, which needs no admin),
+    so an update brings the new skill with it. A real folder of the user's own with the same name is never touched.
+    The skill may run outside the repo, so REPO_ROOT.txt next to its SKILL.md names this clone (git-ignored)."""
+    print("Claude skills for every folder (" + ", ".join(SKILLS) + ")")
+    base = skills_dir(); ok = True
+    for name in SKILLS:
+        src, dst = ROOT / ".claude" / "skills" / name, base / name
+        if is_link(dst):   # ours from this or another clone, or a stale link: only links that point to a Motion DNA clone are ours
+            try:
+                target = pathlib.Path(os.path.realpath(dst))
+                ours = (target.parent.parent.parent / "tools" / "setup.py").exists() or not target.exists()
+            except OSError:
+                ours = True
+            if ours:
+                remove_ext(dst)
+        if remove:
+            (src / "REPO_ROOT.txt").unlink(missing_ok=True)
+            print(OK + f"removed {dst}" if not dst.exists() else WARN + f"{dst} is not a link to Motion DNA: left as is")
+            continue
+        if not src.exists():
+            continue
+        (src / "REPO_ROOT.txt").write_text(str(ROOT).replace("\\", "/") + "\n", encoding="utf-8")
+        if dst.exists():
+            print(WARN + f"{dst} is a folder of your own: left as is (rename it to get Motion DNA's {name} skill)"); ok = False
+            continue
+        base.mkdir(parents=True, exist_ok=True)
+        if MAC:
+            os.symlink(src, dst, target_is_directory=True); r_ok = True
+        else:
+            r_ok = run(["cmd", "/c", "mklink", "/J", str(dst), str(src)]).returncode == 0
+        print((OK if r_ok else WARN) + (f"{name} -> {dst}" if r_ok else f"could not link {dst}"))
+        ok = ok and r_ok
+    return ok
+
+
 def uninstall():
     print(f"Motion DNA uninstall · {ROOT}\n")
     for d in [x for x, _ in panel_dirs()] + scripts_dirs() + [x / "Startup" for x in scripts_dirs()]:
@@ -551,6 +601,10 @@ def uninstall():
                     print(WARN + f"cannot remove {f} (needs admin)")
     mcp_user(remove=True)
     mcp_local(remove=True)
+    try:
+        skills(remove=True)
+    except Exception as e:
+        print(WARN + f"Claude skill links not removed ({e})")
     fonts(remove=True)
     cep(remove=True)
     print("\nThe repo folder itself is untouched; delete it by hand if you want. Restart After Effects.")
@@ -573,12 +627,18 @@ def main():
     results += [clean_old(), panel(), fonts(), cep(dev="--dev" in sys.argv), assets(), checks(), mcp_local()]
     if "--mcp-user" in sys.argv:
         results.append(mcp_user())
+    try:   # last, and never in the way: the panel and After Effects are already installed; a problem here is only a note
+        skills()
+    except Exception as e:
+        print(WARN + f"Claude skills not linked ({e}); the panel and After Effects are not affected")
     print("\nLast steps in After Effects (only you can do these):")
     print("  - Restart After Effects, then open Window > Extensions > Motion DNA and dock it: it comes back every time")
     print("    After Effects starts (File > Scripts > Motion DNA opens it too).")
     pref = "Settings" if MAC else "Edit > Preferences"
     print(f"  - {pref} > Scripting & Expressions > tick 'Allow Scripts to Write Files and Access Network' (once).")
-    print("  - Claude: in the panel, Agent > Connect Claude (one sign-in). The MCP dot in its header turns green.")
+    print("  - Claude: in the panel, Project > Connect > Connect Claude (one sign-in). The MCP dot in its header turns green.")
+    print("  - Or skip the panel: Claude Code knows Motion DNA in any folder now (the motion-dna skill). Ask it for a")
+    print("    video in your own words; to let it drive After Effects from any folder, run setup again with --mcp-user.")
     print("\nDone." if all(results) else "\nDone, with warnings above.")
 
 

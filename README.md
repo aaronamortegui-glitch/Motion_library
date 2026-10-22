@@ -83,6 +83,9 @@ Claude installs it and tells you the two steps only you can do. Seven steps in a
 
 Update with `python tools/setup.py --update` (never over your local changes) · remove with `--uninstall`.
 
+**No panel needed:** setup also gives Claude Code the `motion-dna` skill in every folder, so you can ask for a video in
+your own words from any Claude Code session (add `--mcp-user` so it can drive After Effects from any folder too).
+
 <details>
 <summary>Install details: signing, developer mode, the classic panel, where things live</summary>
 
@@ -457,6 +460,13 @@ tones, the content you change (`vars`) and our own brief for making a new versio
 | ![Timeline](research/video_prompts/previews/t07_timeline.gif) | ![Data story](research/video_prompts/previews/t08_data_story.gif) | ![Particle world](research/video_prompts/previews/t09_particle_world.gif) |
 | **Infinite zoom** | **Shader hero** | **Logo reveal (alpha)** |
 | ![Infinite zoom](research/video_prompts/previews/t04_infinite_zoom.gif) | ![Shader hero](research/video_prompts/previews/t10_shader_hero.gif) | ![Logo reveal](research/video_prompts/previews/t12_logo_reveal.gif) |
+
+**Characters are documented too.** A character lives in one file, `library/characters/<slug>/character.json`:
+traits pasted word for word into every brief, what it never does, palette, emotions, poses, acts and acting rules.
+Its pixel version is drawn from that file (`runtime/pixel_rig.js`), and so is its character sheet
+(`t14_pixel_character.html?sheet`), so a character never drifts between videos. First one: **The Agent**, our robot.
+
+![The Agent, a documented pixel character](research/video_prompts/previews/t14_pixel_character.gif)
 
 **Try it** (once per machine, then ask Claude, e.g. *"make a 12 s launch film for a fictional app with the SaaS template
 and put it in my comp at 4 s"*):

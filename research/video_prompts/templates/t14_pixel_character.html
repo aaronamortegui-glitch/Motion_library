@@ -1,0 +1,140 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T14 · Pixel character</title>
+<script src="../runtime/mdna.js"></script>
+<script src="../runtime/pixel_rig.js"></script>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<script>
+// T14 · a documented character acting in pixel art. The Agent (library/characters/the-agent/character.json) is drawn by
+// runtime/pixel_rig.js from its rig, palette and emotion bitmaps: it rolls in, looks around, reads an order, reacts,
+// waves and celebrates. The world is pixel art at 240x135 (x8); Motion DNA type sits on top at full resolution.
+// ?sheet draws the character sheet from the same JSON instead (so the sheet can never drift from the videos).
+// Preview in a browser through a local server (the page fetches the JSON): python -m http.server, then open
+// /research/video_prompts/templates/t14_pixel_character.html (add ?sheet for the sheet).
+const VARS = { character: "the-agent", order: "Make it pop", line: "Characters, *documented.*",
+               kicker: "Motion DNA · characters", sub: "One file: traits, palette, rig, emotions, poses and acts." };
+const { T, seg, k, lerp, clamp, rng } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1920, H = 1080;
+const PX = 8, LW = W / PX, LH = H / PX;                       // the pixel world: 240 x 135
+const low = Object.assign(document.createElement("canvas"), { width: LW, height: LH }), lg = low.getContext("2d");
+const SHEET = /[?&]sheet\b/.test(location.search);
+const onTwos = t => Math.floor(t * 12) / 12;                  // poses on twos (12 fps) inside a 30 fps video
+
+// XHR, not fetch: fetch refuses file:// even with --allow-file-access-from-files (the renderers open pages as files)
+new Promise((ok, no) => { const x = new XMLHttpRequest(); x.open("GET", `../../../library/characters/${VARS.character}/character.json`);
+  x.onload = () => ok(JSON.parse(x.responseText)); x.onerror = no; x.send(); }).then(CH => {
+  const rig = PixelRig(CH);
+  const blit = (sprite, x, y, s) => { g.imageSmoothingEnabled = false; g.drawImage(sprite, Math.round(x), Math.round(y), sprite.width * s, sprite.height * s); };
+
+  // ---------- the acted scene ----------
+  const X0 = -50, X1 = 92, GROUND = 118;                      // low-res x of the robot centre, floor line
+  const blinks = [1.75, 4.15, 8.4, 9.55];
+  const sparkR = rng(7), sparks = Array.from({ length: 26 }, () => ({ a: sparkR() * Math.PI * 2, v: 18 + sparkR() * 34, s: sparkR() < 0.3 ? 2 : 1, c: sparkR() < 0.55 ? C.spark : C.mint, d: sparkR() * 0.15 }));
+  function state(t) {
+    const q = onTwos(t);
+    const x = k(q, [[0, X0], [1.25, X1, "Land"]]);
+    const lean = k(q, [[0, -3], [0.7, -1], [1.25, 4, "Settle"], [1.5, -2, "Settle"], [1.75, 0, "Settle"]]);
+    let emotion = "neutral", pose = "idle", poseFrom = "idle", armT = 1, look = [0, 0], light = 1, sy = 1, hop = 0;
+    // look around, then at the order
+    look = k(q, [[1.9, [0, 0]], [2.15, [-3, 0], "Nudge"], [2.6, [-3, 0]], [2.85, [3, 0], "Nudge"], [3.2, [3, 0]], [3.4, [0, 0], "Nudge"], [3.75, [0, 0]], [3.95, [3, -1], "Nudge"]]);
+    if (q >= 3.95 && q < 4.75) { emotion = q < 4.2 ? "curious" : "focused"; const r = (q - 4.2) / 0.55; look = q < 4.2 ? [3, -1] : [Math.round(-1 + 4 * (r * 2 % 1)), r < 0.5 ? -1 : 1]; }
+    // react: squash (Wind-up), swap to excited under the squash, hop with stretch (Pop), land squash, settle
+    if (q >= 4.75 && q < 5.6) {
+      sy = k(q, [[4.75, 1], [4.9, 0.86, "Wind-up"], [5.05, 1.1, "Pop"], [5.25, 1.04], [5.35, 0.9, "Land"], [5.6, 1, "Settle"]]);
+      hop = k(q, [[4.9, 0], [5.1, -7, "Pop"], [5.3, 0, "Launch"]]);
+      emotion = q < 4.9 ? "focused" : "excited";
+    }
+    if (q >= 5.6) emotion = "happy";
+    if (q >= 5.5 && q < 6.9) { pose = "wave"; poseFrom = "idle"; armT = seg(q, 5.5, 5.8, "Pop"); }
+    if (q >= 6.9 && q < 8.1) { pose = "cheer"; poseFrom = "wave"; armT = seg(q, 6.9, 7.15, "Pop"); emotion = "love"; }
+    if (q >= 8.1) { pose = "idle"; poseFrom = "cheer"; armT = seg(q, 8.1, 8.45, "Settle"); emotion = "happy"; }
+    if (q >= 8.9) emotion = "neutral";
+    // breathing on a 1.6 s beat once it has stopped
+    if (q > 1.8 && !(q >= 4.75 && q < 5.6)) sy *= 1 - 0.022 * (Math.floor(q / 0.8) % 2);
+    if (blinks.some(b => q >= b && q < b + 0.12) && emotion !== "love") emotion = "blink";
+    light = q > 4.9 && q < 5.6 ? (Math.floor(q * 12) % 2) : 0.6 + 0.4 * (Math.floor(q * 2) % 2);
+    return { x, lean, emotion, pose, poseFrom, armT, look, light, sy, hop, t: q };
+  }
+
+  function world(t) {
+    lg.fillStyle = C.pine; lg.fillRect(0, 0, LW, LH);
+    // wall: a sparse pixel dot grid; floor: one tone darker with a horizon line and dithered fade
+    lg.fillStyle = "#123A35"; for (let y = 6; y < GROUND - 4; y += 9) for (let x = 4 + (y / 9 % 2) * 4; x < LW; x += 8) lg.fillRect(x, y, 1, 1);
+    lg.fillStyle = "#0E2B27"; lg.fillRect(0, GROUND - 2, LW, LH);
+    lg.fillStyle = C.sea; lg.fillRect(0, GROUND - 2, LW, 1);
+    lg.fillStyle = "#123A35"; for (let y = GROUND + 2; y < LH; y += 2) for (let x = (y % 4) ? 0 : 1; x < LW; x += 2 + Math.floor((y - GROUND) / 4)) lg.fillRect(x, y, 1, 1);
+  }
+
+  function sparkles(t, ox, oy) {
+    const p = (t - 6.95) / 0.9; if (p <= 0 || p > 1.2) return;
+    for (const s of sparks) {
+      const u = clamp((p - s.d) / 0.9); if (u <= 0 || u >= 1) continue;
+      const e = 1 - (1 - u) ** 3, x = Math.round(ox + Math.cos(s.a) * s.v * e), y = Math.round(oy + Math.sin(s.a) * s.v * e * 0.8 + 10 * u * u);
+      lg.fillStyle = s.c; if (u > 0.75 && (Math.floor(t * 15) % 2)) continue;
+      lg.fillRect(x, y, s.s, s.s); if (s.s === 2 && u < 0.5) { lg.fillRect(x - 1, y + 0.5, 1, 1); lg.fillRect(x + 2, y + 0.5, 1, 1); }
+    }
+  }
+
+  function renderScene(t) {
+    const st = state(t);
+    world(t);
+    rig.shadow(lg, st.x, GROUND, st.hop);
+    const sp = rig.render(st);
+    lg.drawImage(sp, Math.round(st.x - rig.CX), GROUND - rig.G);
+    sparkles(t, st.x, GROUND - rig.G + 9);
+    g.imageSmoothingEnabled = false; g.drawImage(low, 0, 0, W, H);
+    // the top light glows on the full-resolution frame
+    if (st.light > 0.5) MDNA.glow(g, (st.x) * PX, (GROUND - rig.G + 9) * PX, st.light > 0.9 && t > 4.9 && t < 5.6 ? 150 : 70, "#E2402F", 0.35);
+    // the order: a Motion DNA prompt pill that the robot reads, then it pops into the sparkles of the reaction
+    const pin = seg(t, 3.55, 3.95, "Pop"), pout = seg(t, 4.85, 5.05, "Launch");
+    if (pin > 0 && pout < 1) {
+      const px = (X1 + 46) * PX, py = (GROUND - 66) * PX, s = (0.6 + 0.4 * pin) * (1 + 0.25 * pout);
+      D.alpha(pin * (1 - pout), () => D.at(px, py, s, 0, () => {
+        const w = D.width(VARS.order, 46, 600) + 120; D.rr(0, -42, w, 84, 42); D.fill(C.cloud);
+        g.beginPath(); g.arc(46, 0, 14, 0, 7); D.fill(C.pine);
+        D.txt(VARS.order, 80, 2, 46, C.ink, 600, T.font.ui, "left");
+      }));
+    }
+    // the line
+    if (!MDNA.NOTEXT) {
+      const a = seg(t, 7.5, 8.1, "Land"), b = seg(t, 7.7, 8.3, "Land"), c2 = seg(t, 8.0, 8.6, "Land"), x = 1000;
+      D.alpha(a, () => MDNA.kicker(D, VARS.kicker, x, 390 + 20 * (1 - a), C.spark, "left", 24));
+      D.alpha(b, () => MDNA.rich(D, VARS.line, x, 500 + 30 * (1 - b), 66, C.cloud, C.spark, "left"));
+      D.alpha(c2, () => D.txt(VARS.sub, x, 572 + 20 * (1 - c2), 30, C.mint, 500, T.font.ui, "left"));
+    }
+    MDNA.finish(g, t, { vignette: 0.35, grain: 0.04 });
+  }
+
+  // ---------- the character sheet, drawn from the same JSON ----------
+  function renderSheet() {
+    g.fillStyle = C.pine; g.fillRect(0, 0, W, H);
+    const pose = (o = {}) => rig.render(Object.assign({ emotion: "neutral", pose: "idle", light: 1, sy: 1, t: 0.2 }, o));
+    MDNA.kicker(D, "Character sheet · pixel", 70, 80, C.spark, "left", 22);
+    D.txt(CH.name, 70, 150, 88, C.cloud, 400, T.font.display, "left");
+    D.txt("library/characters/" + CH.slug + "/character.json", 70, 215, 22, C.mint, 500, T.font.ui, "left");
+    // hero
+    g.fillStyle = "#0E2B27"; D.rr(70, 255, 470, 600, 28); D.fill("#0E2B27");
+    blit(pose({ emotion: "happy" }), 70 + (470 - 64 * 6) / 2, 270, 6);
+    // palette
+    const pal = Object.entries(CH.palette).filter(([k]) => k !== "shadow");
+    pal.forEach(([k, v], i) => { const x = 70 + (i % 4) * 120, y = 880 + Math.floor(i / 4) * 48;
+      D.rr(x, y, 28, 28, 7); D.fill(v.hex); D.txt(v.hex.toUpperCase(), x + 36, y + 15, 15, C.cloud, 600, T.font.ui, "left"); });
+    // emotions: head close-ups (the face lives on the screen)
+    const ems = Object.keys(CH.emotions), HS = 3, HH = 46;
+    D.txt("Emotions", 620, 80, 30, C.cloud, 700, T.font.ui, "left");
+    ems.forEach((e, i) => { const col = i % 6, row = Math.floor(i / 6), x = 620 + col * 210, y = 104 + row * 196;
+      D.rr(x, y, 196, 182, 16); D.fill("#0E2B27");
+      g.imageSmoothingEnabled = false; g.drawImage(pose({ emotion: e, t: 0.6 }), 0, 0, 64, HH, x + 2, y + 4, 64 * HS, HH * HS);
+      D.txt(e, x + 98, y + 166, 20, C.spark, 600, T.font.ui, "center"); });
+    // poses
+    const ps = Object.keys(CH.poses);
+    D.txt("Poses", 620, 740, 30, C.cloud, 700, T.font.ui, "left");
+    ps.forEach((p, i) => { const x = 620 + i * 208, y = 770;
+      D.rr(x, y, 190, 230, 18); D.fill("#0E2B27");
+      blit(pose({ pose: p, emotion: p === "cheer" ? "love" : p === "wave" ? "happy" : p === "think" ? "thinking" : "neutral", t: 0.15 }), x + (190 - 128) / 2, y + 8, 2);
+      D.txt(p, x + 95, y + 212, 21, C.spark, 600, T.font.ui, "center"); });
+  }
+
+  MDNA.scene({ duration: SHEET ? 1 : 10.5, render(t) { if (SHEET) renderSheet(); else renderScene(t); } });
+});
+</script>
