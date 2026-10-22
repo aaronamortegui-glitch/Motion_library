@@ -27,12 +27,17 @@ animate keeps a profile that **learns from each review**, and everything it make
 
 ## What's new
 
+- **The chat uses the whole panel:** the conversation grows into all the free space and scrolls on its own; the chat box
+  and its tools stay at the bottom. *Open old conversation* (under the chat box) goes back to an earlier chat of the
+  project, so the Project tab is now just the setup and the folder. Rules are kept per brand or as general rules.
+- **Curves on Mac:** a press anywhere in the curve editor grabs the nearest handle, and the drag no longer depends on
+  hitting the small dot or on Retina screen maths, so the handles move on a Mac trackpad too.
 - **Show the agent an image:** paste a screenshot (Ctrl+V), drop image files on the chat or press *+ Image*. The
   images go to Claude with your order, in Safe and Full mode, and are kept in the project's `claude/attachments`.
 - **A quieter chat:** the agent answers in a few lines, with any question first. The tools it runs fold into one
   line (*▸ 4 steps*, click to open), and while it works you only see *Working…*.
 - **Tidier Agent:** *Chat · Prompt library* tabs; under the chat box, one row with *+ New conversation*, *Open in Claude
-  app*, *>_ Terminal* and *↻ Reconnect AE*. Connecting lives only in the Project tab (no Setup button in the Agent).
+  app* and *↻ Reconnect AE*, plus *Open old conversation* to go back to an earlier chat of the project. Connecting lives only in the Project tab (no Setup button in the Agent).
 - **Claude reads your request first:** describe the video in your own words and the Agent (or Claude Code) calls
   `read_brief`: it asks only what is missing, proposes two or three different routes and builds the one you pick. Each
   project remembers what it already made, so the next brief offers something else.
@@ -193,7 +198,7 @@ agent, **Copy order** takes it to Claude Code. Layers that already move keep the
 <img src="docs/screens/cep-brand-learns.gif" width="300" align="right" alt="A review note becomes a brand rule">
 
 Tell the agent what to fix ("the car bounces, make it glide"): it fixes it and proposes the note as a **rule**. One
-click keeps it in the **brand**, the **project** (only this video) or the **general** rules. *Brands › Rules* lists them
+click keeps it in the **brand** or the **general** rules. *Brands › Rules* lists them
 to add, edit or remove. From then on every order for that brand starts from them, in the panel and in Claude Code.
 
 <br clear="right">
@@ -213,9 +218,9 @@ templates do); conversations stay on each computer.
 
 A brand has its own folder and its own Claude conversation for everything about it (*Brands › Claude › Start in Claude
 app* puts it in the Claude app's sidebar). Each video is a **project** inside the brand folder (the *Project* tab, first in the bar:
-brief, references, footage, audio, AE, renders, exports), with its own conversation and rules. Continue any of them
-from the panel, the Claude app or a terminal (*Copy terminal command*, or `>_` in the chat); the panel warns if it is
-open somewhere else.
+brief, references, footage, audio, AE, renders, exports), with its own conversations. In the Agent chat, *Open old
+conversation* goes back to an earlier one and *Open in Claude app* continues the current one there; the panel warns if
+it is open somewhere else.
 
 **Where the chat is saved.** With a project open, the Agent's chat is written into the project folder as you work:
 `claude/agent-chat.md` (each order, the replies, and links to every Flora or Krea output), `claude/sessions/<id>.jsonl`

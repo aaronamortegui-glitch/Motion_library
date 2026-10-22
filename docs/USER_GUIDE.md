@@ -110,7 +110,7 @@ each layer named in the brand's timing, on the brand's own curve.
 
 **Teach it:**
 - Every review note becomes a rule: category, the rule itself, and why.
-- In the Agent, Claude proposes `RULE:` lines, and you choose where to keep each one: **Brand**, **Project** or **General**.
+- In the Agent, Claude proposes `RULE:` lines, and you choose where to keep each one: **Brand** or **General**.
 - Edit or remove rules in Brands › Rules.
 
 **Share it:**
@@ -168,8 +168,8 @@ the tests:
 >   it improvise a roto.
 > - **Say "Review vs brand"** before sending a piece out: it lists what breaks the brand's rules, without changing
 >   anything.
-> - **The `>_` button** copies the command that continues the same conversation in a terminal. *Open in Claude app*
->   continues it in the Claude app.
+> - **Under the chat box:** *Open old conversation* goes back to an earlier chat of the project, *Open in Claude app*
+>   continues this one in the Claude app, and *↻ Reconnect AE* restarts the link to After Effects.
 
 ## Techniques: workflows beyond one preset
 Each one was tested end to end (use cases UC12–UC19). The Agent knows the tool for each; by hand:

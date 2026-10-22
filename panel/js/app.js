@@ -413,13 +413,22 @@ function curves() {
     del.disabled = !isUserCurve(CV.name);
     for (const c of lib.children) c.classList.toggle("sel", c.dataset.name === CV.name);
   };
-  // dragging a handle: pointer capture keeps the drag even outside the editor; values clamp to the visible range
-  const drag = (idx) => (e) => {   // moves are followed on the whole window, so the drag survives leaving the editor
+  // Dragging a handle. A press anywhere in the editor takes the nearest handle (the dots are small, and a trackpad
+  // misses them), the position comes from the editor's box and its viewBox (getScreenCTM is off on Retina screens in
+  // CEP on macOS), mouse and pointer events both start it (a CEP build that drops one still has the other), and the
+  // pointer is captured, so the drag survives leaving the editor. Values clamp to the visible range.
+  const toCurve = (ev) => {
+    const r = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal;
+    const qx = vb.x + (ev.clientX - r.left) / r.width * vb.width, qy = vb.y + (ev.clientY - r.top) / r.height * vb.height;
+    return { x: qx / 100, y: (100 - qy) / 100 };
+  };
+  let dragging = false;
+  const drag = (idx) => (e) => {
+    if (dragging) return; dragging = true;
     e.preventDefault();
+    try { if (e.pointerId != null) svg.setPointerCapture(e.pointerId); } catch (err) {}
     const move = (ev) => {
-      const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
-      const q = pt.matrixTransform(svg.getScreenCTM().inverse());
-      let x = q.x / 100, y = (100 - q.y) / 100;
+      let { x, y } = toCurve(ev);
       if (ev.shiftKey) {   // Shift: the arm snaps to 0°, 45°, 90°… from its end of the curve, keeping its length
         const ax = idx, ay = idx, dx = x - ax, dy = y - ay, len = Math.hypot(dx, dy), a = Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4);
         x = ax + len * Math.cos(a); y = ay + len * Math.sin(a);
@@ -428,10 +437,14 @@ function curves() {
       CV.bz[idx * 2 + 1] = Math.round(Math.max(R0, Math.min(R1, y)) * 100) / 100;
       draw();
     };
-    const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); };
-    window.addEventListener("pointermove", move); window.addEventListener("pointerup", up);
+    const up = () => { dragging = false;
+      for (const [t, f] of [["pointermove", move], ["mousemove", move], ["pointerup", up], ["mouseup", up], ["pointercancel", up], ["blur", up]]) window.removeEventListener(t, f); };
+    for (const [t, f] of [["pointermove", move], ["mousemove", move], ["pointerup", up], ["mouseup", up], ["pointercancel", up], ["blur", up]]) window.addEventListener(t, f);
+    move(e);   // the handle jumps to where you pressed
   };
-  p1.addEventListener("pointerdown", drag(0)); p2.addEventListener("pointerdown", drag(1));
+  const nearest = (e) => { const { x, y } = toCurve(e), b = CV.bz; return Math.hypot(x - b[0], y - b[1]) <= Math.hypot(x - b[2], y - b[3]) ? 0 : 1; };
+  const press = (e) => { if (e.button !== undefined && e.button !== 0) return; drag(nearest(e))(e); };
+  svg.addEventListener("pointerdown", press); svg.addEventListener("mousedown", press);
   vals.addEventListener("change", () => {
     const n = (vals.value.match(/-?\d*\.?\d+/g) || []).map(Number);
     if (n.length >= 4) CV.bz = [Math.max(0, Math.min(1, n[0])), n[1], Math.max(0, Math.min(1, n[2])), n[3]];

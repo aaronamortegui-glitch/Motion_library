@@ -401,3 +401,16 @@ details.step > .card-box, details.step > .stack { margin: 0 10px 10px; }
 .chat-tools .btn { font-size: 11px; color: var(--text-dim); padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .chat-tools .btn:hover:not(:disabled) { color: var(--spark); }
 @media (max-width: 440px) { .chat-tools { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Agent chat: the project's older conversations, opened from the tools row */
+.conv-list { display: flex; flex-direction: column; gap: 2px; max-height: 220px; overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px; }
+.conv-list .conv-title { font-size: 11px; color: var(--text-dim); padding: 2px 4px 4px; }
+.conv-list .session-row { display: flex; justify-content: space-between; gap: 8px; text-align: left; background: none; border: none; color: var(--text); font: inherit; font-size: 12px; padding: 5px 6px; border-radius: 4px; cursor: pointer; }
+.conv-list .session-row:hover { background: var(--surface-2); }
+.conv-list .session-row.on { color: var(--spark); }
+.conv-list .session-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+/* Agent chat fills the panel: the conversation takes every free pixel, the box and its tools stay at the bottom */
+#sec-agent.chat-mode { height: 100%; }
+#sec-agent.chat-mode > .chat { flex: 1 1 auto; min-height: 0; }
+#sec-agent.chat-mode .agent-log { flex: 1 1 auto; max-height: none; min-height: 120px; }
+#sec-agent.chat-mode .chat-tools { margin-top: auto; }

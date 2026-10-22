@@ -695,6 +695,7 @@ function agent() {
     const where = h("button", { class: "projchip btn ghost", style: "text-align:left;padding:0", title: "Open the Project section", onclick: () => goSection("project") },
       scopeText());
     sec.append(h("div", { class: "kit-top" }, h("span", { class: "kit-title" }, "Agent"), modeSeg), tabsEl, where);
+    sec.classList.toggle("chat-mode", AG.tab !== "library");   // the chat fills the panel: the log grows, the box and its tools sit at the bottom
     if (AG.tab === "library") sec.append(libraryView());
     else sec.append(chatView());
   };
@@ -736,6 +737,9 @@ function chatView() {
   const chip = (key, label) => h("button", { class: "chip" + (AG.ctx[key] ? " on" : ""), title: `Send the ${label.toLowerCase()} with the order`,
     onclick: (e) => { AG.ctx[key] = !AG.ctx[key]; store.set("agentCtx", AG.ctx); e.currentTarget.classList.toggle("on", AG.ctx[key]); } }, label);
   const templates = h("div", { class: "chips" }, h("span", { class: "dim" }, "Try:"), ...TEMPLATES.map(([label, text]) => h("button", { class: "chip ghost", title: text, onclick: () => { input.value = text; input.focus(); } }, label)));
+  const convList = h("div", { class: "conv-list", hidden: true });
+  const convBtn = h("button", { class: "btn ghost", title: "Open an older conversation of this project (or brand)", onclick: () => {
+    convList.hidden = !convList.hidden; if (!convList.hidden) convList.replaceChildren(h("b", { class: "conv-title" }, "Older conversations"), ...conversationsList(() => { convList.hidden = true; agent.render(); })); } }, "Open old conversation");
   const newBtn = h("button", { class: "btn ghost", title: "Start a new conversation (this one stays in the project's list)", onclick: () => {
     if (AG.proc) return; setSession(null); AG.log = []; saveLog(); agent.draw(); } }, "+ New conversation");
   const ruleCard = (m) => {
@@ -747,7 +751,6 @@ function chatView() {
       m.state ? h("div", { class: "dim" }, m.state === "dismissed" ? "Not kept." : `Kept in the ${m.state} rules.`) :
         h("div", { class: "chips" }, h("span", { class: "dim" }, "Keep as a rule:"),
           btn("brand", b ? b.name : "Brand", b ? `Add to ${b.name}'s rules` : "Activate a brand first", !b),
-          btn("project", "Project", PJ ? `Add to ${PJ.p.name}'s rules` : "Open a project first", !PJ),
           btn("general", "General", "A rule for every brand: CONTRIBUTING §9 (Full mode)"),
           h("button", { class: "chip ghost", onclick: () => { m.state = "dismissed"; saveLog(); agent.draw(); } }, "Dismiss")));
   };
@@ -788,15 +791,25 @@ function chatView() {
     h("div", { class: "send-row" }, h("div", { class: "chips", title: "What the agent gets with your order (the repo's rules and the library always go)" },
       h("span", { class: "dim" }, "With:"), chip("brand", "Brand"), chip("comp", "Comp"), chip("selection", "Selection"), addBtn), send, stop),
     templates,
+    convList,
     h("div", { class: "chat-tools" },
-      newBtn,
+      newBtn, convBtn,
       h("button", { class: "btn ghost", title: "Continue this conversation in the Claude app (Code tab)", disabled: scope().kind === "repo" && !sid, onclick: () => openInClaudeApp(sessionNow()) }, sid ? "Open in Claude app" : "Start in Claude app"),
-      h("button", { class: "btn ghost", title: "Copy the command that continues this same conversation in a terminal (claude --resume …)", disabled: !sid,
-        onclick: () => { navigator.clipboard.writeText(resumeCommand(sessionNow())); toast("Command copied: paste it in a terminal to continue this conversation there."); } }, ">_ Terminal"),
       h("button", { class: "btn ghost", title: "After Effects not answering? Restart the link the agent uses (you can also type reconnect)",
         onclick: async () => { const r = await reconnectAE(); push(r.ok ? "hint" : "error", r.msg); } }, "↻ Reconnect AE")));
   agent.draw();
   return wrap;
+}
+// The conversations of the folder the agent works in (the project, else the brand), newest first: one click continues it
+function conversationsList(onPick) {
+  const sc = scope(), sid = sessionNow();
+  const known = new Map(((sc.owner && sc.owner.sessions) || []).map((s) => [s.id, s]));
+  const rows = (nodeReq() ? recentSessions(sc.dir) : []).filter((s) => s.id !== sid);   // the one open now is not "old"
+  if (!rows.length) return [h("div", { class: "dim" }, "No older conversations in this folder.")];
+  return rows.map((s) => h("button", { class: "session-row" + (s.id === sid ? " on" : ""), title: s.id, onclick: () => {
+      setSession(s.id, s.title); AG.log = [{ role: "hint", text: `Continuing “${(known.get(s.id) || s).title}”. Earlier messages are in the Claude app.` }]; saveLog();
+      toast("Continuing that conversation."); onPick(); } },
+    h("span", {}, (known.get(s.id) || s).title), h("em", { class: "dim" }, new Date(s.mtime).toLocaleDateString())));
 }
 
 // ---------- Library: Styles, Techniques and the Kit, as guides the agent applies ----------
@@ -954,11 +967,7 @@ function projectView() {
     h("div", { class: "card-box" }, h("div", { class: "kit-top" }, h("b", { class: "kit-title" }, p.name),
         h("button", { class: "btn", title: "Open the folder", onclick: () => call("mdna_open", PJ.dir) }, "Folder"),
         h("button", { class: "btn ghost", title: "Stop using this project here (nothing is deleted)", onclick: () => { PJ = null; agent.render(); } }, "Close")),
-      h("span", { class: "dim" }, PJ.dir), h("div", { class: "ctl wide" }, h("label", {}, "Brand"), brandSel)),
-    h("div", { class: "subhead" }, "Conversation ", h("span", { class: "dim" }, "· everything about this video")),
-    conversationCard(),
-    h("div", { class: "subhead" }, "Project rules ", h("span", { class: "dim" }, "· only for this piece")),
-    rulesEditor(p, saveProjectQuiet, { project: () => p.name, empty: "Notes that only apply to this piece. The agent proposes them from your review notes." }));
+      h("span", { class: "dim" }, PJ.dir), h("div", { class: "ctl wide" }, h("label", {}, "Brand"), brandSel)));
   return wrap;
 }
 
