@@ -70,8 +70,8 @@ async function boot() {
       // the After Effects side comes from the clone too (the installed host.jsx is the copy made at install time)
       if (info.root && window.__base) await evalHost(`$.evalFile(new File(${JSON.stringify(info.root + "/panel/host/host.jsx")}))`);
       if (!info.error) break;
-      if (tries >= 40 || /Repo not found/.test(info.error)) { $("#boot").textContent = "Motion DNA could not start: " + info.error + " (F5 retries)"; return; }
-      $("#boot").textContent = "Waiting for After Effects…";
+      if (tries >= 40 || /Repo not found/.test(info.error)) { bootMsg("Motion DNA could not start: " + info.error + " (F5 retries)", false); return; }
+      bootMsg("Waiting for After Effects…");
       await new Promise((r) => setTimeout(r, 1500));
     }
     S.root = info.root; S.url = fileUrl(info.root) + "/";
@@ -926,7 +926,54 @@ function kitProjects(x) {
     ...b.projects.map((p) => h("div", { class: "row-item" }, h("div", { class: "row-text" }, h("b", {}, p.name), h("span", {}, `${p.date || ""} · ${p.path || ""}`)))));
 }
 
+// The Motion DNA helix (research/loaders, "DNA helix"): two strands of dots turning around each other. One animator draws
+// every helix on screen with a shared phase: the header mark (tilted like the logo) and the Agent's "Working…" line
+// (level). It turns slowly while the panel waits and speeds up while the Agent works; a helix element that is redrawn
+// (the chat rebuilds its log) keeps turning without a jump, and one that leaves the page is dropped.
+const HELIX = { items: new Set(), ph: 0, speed: 1 / 7, last: 0, running: false };
+function helix(size, tilt = 0) {
+  const dpr = Math.max(1, window.devicePixelRatio || 1), cv = document.createElement("canvas");
+  cv.className = "helix"; cv.width = cv.height = Math.round(size * dpr); cv.style.width = cv.style.height = size + "px"; cv.setAttribute("aria-hidden", "true");
+  HELIX.items.add({ cv, size, tilt, dpr });
+  if (!HELIX.running) { HELIX.running = true; requestAnimationFrame(helixFrame); }
+  return cv;
+}
+function helixDraw(g, S, ph, tilt) {
+  g.rotate(tilt);
+  const n = S < 20 ? 5 : 6, pts = [];
+  for (let i = 0; i < n; i++) {
+    const x = (-0.84 + 1.68 * i / (n - 1)) * S / 2, a = ph + i * 0.75, y = Math.sin(a) * S * 0.2, z = Math.cos(a);
+    g.globalAlpha = 0.28; g.strokeStyle = "#9FD8C2"; g.lineWidth = 0.8; g.beginPath(); g.moveTo(x, y); g.lineTo(x, -y); g.stroke();
+    pts.push([x, y, z, "#D8FF85"], [x, -y, -z, "#9FD8C2"]);
+  }
+  const r = S / 22;
+  pts.sort((p, q) => p[2] - q[2]).forEach(([x, y, z, c]) => {
+    g.globalAlpha = 0.5 + 0.5 * (z + 1) / 2; g.fillStyle = c; g.beginPath(); g.arc(x, y, (1.1 + 0.9 * (z + 1) / 2) * r, 0, 7); g.fill(); });
+  g.globalAlpha = 1;
+}
+function helixFrame(now) {
+  const dt = HELIX.last ? Math.min(0.1, (now - HELIX.last) / 1000) : 0; HELIX.last = now;
+  const busy = typeof AG !== "undefined" && !!AG.proc;
+  HELIX.speed += ((busy ? 1 / 1.4 : 1 / 7) - HELIX.speed) * Math.min(1, dt * 3);   // ease between rest and work
+  HELIX.ph += dt * HELIX.speed * Math.PI * 2;
+  for (const it of HELIX.items) {
+    if (!it.cv.isConnected) { if (it.seen) HELIX.items.delete(it); continue; }
+    it.seen = true; const g = it.cv.getContext("2d");
+    g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, it.cv.width, it.cv.height);
+    g.setTransform(it.dpr, 0, 0, it.dpr, it.size * it.dpr / 2, it.size * it.dpr / 2); helixDraw(g, it.size, HELIX.ph, it.tilt);
+  }
+  setTimeout(() => requestAnimationFrame(helixFrame), 33);   // ~30 fps is plenty for marks this size
+}
+// anything that loads shows the helix next to its words (the boot note here; the Agent's checks in agent.js)
+function loadingLabel(text, size = 14) { return h("span", { class: "loading" }, helix(size), text); }
+function bootMsg(text, loading = true) { const b = $("#boot"); if (b) b.replaceChildren(loading ? loadingLabel(text, 18) : text); }
+(function bootLoader() { const b = $("#boot"); if (b) bootMsg(b.textContent); })();
+(function headerMark() {   // the header mark, tilted like the Motion DNA logo
+  const title = document.querySelector(".top .title"); if (!title) return;
+  const cv = helix(22, -0.72); cv.classList.add("mark"); title.parentNode.insertBefore(cv, title);
+})();
+
 // F5 / Ctrl+R reloads the panel (after an update)
 document.addEventListener("keydown", (e) => { if (e.key === "F5" || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "r")) { e.preventDefault(); location.reload(); } });
 
-boot().catch((e) => { const b = $("#boot"); if (b) b.textContent = "Motion DNA could not start: " + e.message; console.error(e); });
+boot().catch((e) => { bootMsg("Motion DNA could not start: " + e.message, false); console.error(e); });

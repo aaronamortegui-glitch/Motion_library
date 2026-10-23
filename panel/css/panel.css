@@ -19,6 +19,9 @@ input, select { font: inherit; color: var(--text); }
 /* header */
 .top { display: flex; align-items: center; gap: 8px; padding: 10px 12px 6px; flex: none; }
 .title { font-weight: 700; font-size: 14px; letter-spacing: .01em; white-space: nowrap; flex: none; }
+.helix { flex: none; }   /* the DNA helix (app.js helix()): the header mark and every loading label */
+.loading { display: inline-flex; align-items: center; gap: 6px; }
+.top .mark { margin-right: -2px; }
 .grow { flex: 1; }
 .pill {
   display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 10px 0 8px; border-radius: 11px;
@@ -253,8 +256,6 @@ select.field.big { height: 30px; font-weight: 600; border-color: rgba(216, 255, 
 .msg.error { color: var(--coral); border: 1px solid rgba(255, 148, 148, .4); }
 .msg.hint { color: var(--text-dim); }
 .msg.working { color: var(--text-dim); display: flex; align-items: center; gap: 8px; }
-.spin { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--spark); animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
 .agent-input { height: auto; min-height: 64px; padding: 6px 8px; resize: vertical; font: inherit; line-height: 1.4; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .chip { height: 22px; padding: 0 9px; border-radius: 11px; border: 1px solid var(--line); background: #171918; color: var(--text-dim); font-size: 11px; }

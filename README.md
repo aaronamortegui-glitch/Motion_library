@@ -31,6 +31,9 @@ animate keeps a profile that **learns from each review**, and everything it make
   images, not video, so the panel saves the clip in the project's `claude/attachments`, sends 8 frames spread across
   it with their times, and its length, size and frame rate; in Full mode the agent can pull more frames around a
   moment you name. On a Mac it needs ffmpeg (`brew install ffmpeg`).
+- **A living DNA helix:** the panel header has a mark of two strands of dots that turn slowly while you work and speed
+  up while the Agent is busy; the same helix is the chat's "Working…" loader. Eight loader ideas on the tokens (two with
+  our robot) are in [`research/loaders/index.html`](research/loaders/index.html).
 - **The chat uses the whole panel:** the conversation grows into all the free space and scrolls on its own; the chat box
   and its tools stay at the bottom. *Open old conversation* (under the chat box) goes back to an earlier chat of the
   project, so the Project tab is now just the setup and the folder. Rules are kept per brand or as general rules.

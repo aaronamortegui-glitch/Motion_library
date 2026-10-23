@@ -86,14 +86,14 @@ def serve():
     return srv
 
 
-def gif(frames, out, width=340, colors=112):
+def gif(frames, out, width=340, colors=112, bayer=4):
     """frames: PNG paths in order → out (its own palette, 8 fps)."""
     lst = FRAMES / (out.stem + ".txt")
     lst.write_text("".join(f"file '{f.as_posix()}'\nduration 0.125\n" for f in frames) + f"file '{frames[-1].as_posix()}'\n", encoding="utf-8")
     pal, vf = FRAMES / (out.stem + "_pal.png"), f"fps=8,scale={width}:-1:flags=lanczos"
     base = ["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(lst)]
     subprocess.run(base + ["-vf", vf + f",palettegen=max_colors={colors}", str(pal)], check=True)
-    subprocess.run(base + ["-i", str(pal), "-lavfi", vf + "[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=4", str(out)], check=True)
+    subprocess.run(base + ["-i", str(pal), "-lavfi", vf + f"[x];[x][1:v]paletteuse=dither=bayer:bayer_scale={bayer}:diff_mode=rectangle", str(out)], check=True)
     print(f"{out.relative_to(ROOT)}: {len(frames)} frames, {out.stat().st_size // 1024} KB")
 
 
@@ -128,23 +128,23 @@ def main():
 
         # 1 · Connect: Claude, then Figma, each one button
         js(go.format("agent") + "S.root = S.root || 'C:/Users/you/Documents/Projects/Motion_library'; AG.logged = false; AG.figma = 'auth'; agent.render(); agent.showSetup(); document.querySelector('#main').scrollTop = 0", wait=600, hold=8)
-        js("[...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Connect Claude').click()", wait=200, hold=3)
+        js("[...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Connect Claude')?.click()", wait=200, hold=3)
         page.wait_for_timeout(5200); shot(6)
-        js("window.__figmaWanted = true; [...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Connect Figma').click()", wait=200, hold=3)
+        js("window.__figmaWanted = true; [...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Connect Figma')?.click()", wait=200, hold=3)
         page.wait_for_timeout(7000); shot(8)
         # Krea and Flora: the same button and Allow
         js("document.querySelector('.setup').querySelectorAll('.conn')[2].scrollIntoView({ block: 'center' })", wait=300, hold=4)
-        js("window.__kreaWanted = true; [...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Connect Krea').click()", wait=200, hold=3)
+        js("window.__kreaWanted = true; [...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Connect Krea')?.click()", wait=200, hold=3)
         page.wait_for_timeout(7000); shot(5)
-        js("window.__floraWanted = true; [...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Connect Flora').click()", wait=200, hold=3)
+        js("window.__floraWanted = true; [...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Connect Flora')?.click()", wait=200, hold=3)
         page.wait_for_timeout(7000); shot(6)
         # Codex: add the Motion DNA tools; then Update
         js("document.querySelector('.setup').querySelectorAll('.conn')[4].scrollIntoView({ block: 'center' })", wait=300, hold=5)
-        js("[...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Add Motion DNA to Codex').click()", wait=900, hold=6)
+        js("[...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Add Motion DNA to Codex')?.click()", wait=900, hold=6)
         js("AG.repoSt = null; agent.showSetup(); document.querySelector('.setup').querySelectorAll('.conn')[5].scrollIntoView({ block: 'center' })", wait=900, hold=6)
-        js("[...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Update').click()", wait=200, hold=4)
+        js("[...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Update')?.click()", wait=200, hold=4)
         page.wait_for_timeout(1500)
-        js("[...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Check again').click()", wait=1500, hold=10)
+        js("[...document.querySelectorAll('.setup button')].find(b => b.textContent === 'Check again')?.click()", wait=1500, hold=10)
         section("connect")
 
         # 2 · Create / Modify / Replace
@@ -156,8 +156,8 @@ def main():
         cards.nth(4).click(); shot(2)
         js("window.__demoSel = { layers: 2, own: 0, ours: 0 }; selHint(); document.querySelector('#main').scrollTop = 99999", hold=9)
         js("window.__demoSel = { layers: 1, own: 1, ours: 0 }; selHint()", hold=9)
-        js("document.querySelector('.existing button[data-existing=replace]').click()", hold=7)
-        js("document.querySelector('.existing button[data-existing=modify]').click()", hold=3)
+        js("document.querySelector('.existing button[data-existing=replace]')?.click()", hold=7)
+        js("document.querySelector('.existing button[data-existing=modify]')?.click()", hold=3)
         section("create-modify")
 
         # 3 · Curves
@@ -178,24 +178,24 @@ def main():
         js("""push('agent', 'Done: the car keeps its keyframes and now glides in on Vela Glide over 27 frames, with no overshoot.');
               push('rule', 'The car never bounces: it glides in and settles, no overshoot', { rule: { category: 'motion', rule: 'The car never bounces: it glides in and settles, no overshoot', why: 'review: a bounce reads cheap' }, state: null });
               push('done', 'Done in 14s · 6 turns · 38k tokens · ≈ $0.12 (estimate)')""", hold=12)
-        js("[...document.querySelectorAll('.msg.rule button')].find(b => b.textContent === 'Vela').click()", wait=500, hold=8)
+        js("[...document.querySelectorAll('.msg.rule button')].find(b => b.textContent === 'Vela')?.click()", wait=500, hold=8)
         js("BR.view = 'kit'; BR.slug = 'vela'; BR.tab = 'rules';" + go.format("brands") + "brands.render(); document.querySelector('#main').scrollTop = 0", wait=400, hold=14)
         section("brand-learns")
 
         # 5 · Where it lives, share, import an update
         js("BR.tab = 'overview'; brands.render(); document.querySelector('#main').scrollTop = 0", hold=12)
-        js("[...document.querySelectorAll('#sec-brands button')].find(b => b.textContent === 'Download to share').click()", wait=500, hold=9)
-        js("[...document.querySelectorAll('#sec-brands button')].find(b => b.textContent === 'Import an update').click()", wait=900, hold=14)
+        js("[...document.querySelectorAll('#sec-brands button')].find(b => b.textContent === 'Download to share')?.click()", wait=500, hold=9)
+        js("[...document.querySelectorAll('#sec-brands button')].find(b => b.textContent === 'Import an update')?.click()", wait=900, hold=14)
         section("brand-share")
 
         # 6 · Library: a style, a technique and a kit piece, with their orders
         js(go.format("agent") + tab.format("library") + "document.querySelector('#main').scrollTop = 0", wait=500, hold=4)
         js("document.querySelectorAll('#sec-agent .lib-grid .card')[1].click(); document.querySelector('#main').scrollTop = 0", hold=8)
-        js("[...document.querySelectorAll('#sec-agent .seg button')].find(b => b.textContent === 'Techniques').click()", hold=3)
+        js("[...document.querySelectorAll('#sec-agent .seg button')].find(b => b.textContent === 'Techniques')?.click()", hold=3)
         js("document.querySelectorAll('#sec-agent .lib-grid .card')[1].click(); document.querySelector('#main').scrollTop = 0", hold=8)
         js("[...document.querySelectorAll('#sec-agent .seg button')].find(b => b.textContent === 'Kit').click(); document.querySelector('#main').scrollTop = 0", hold=6)
         js("[...document.querySelectorAll('#sec-agent .lib-grid .card')].find(c => c.dataset.key === 'kit/Liquid and ink').click(); document.querySelector('#main').scrollTop = 0", hold=8)
-        js("[...document.querySelectorAll('#sec-agent button')].find(b => b.textContent === 'Use in chat').click()", wait=500, hold=10)
+        js("[...document.querySelectorAll('#sec-agent button')].find(b => b.textContent === 'Use in chat')?.click()", wait=500, hold=10)
         section("library")
 
         # 7 · The brand's own conversation and a project per video
@@ -207,7 +207,7 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     for name, frames in parts.items():
         gif(frames, OUT / f"cep-{name}.gif")
-    gif([f for k in parts for f in parts[k][::5]], OUT / "cep-panel.gif", 260, 40)   # the tour: a third of the frames, lighter
+    gif([f for k in parts for f in parts[k][::6]], OUT / "cep-panel.gif", 260, 32, 5)   # the tour: a sixth of the frames, lighter (under 500 KB)
     if "--png" not in sys.argv:
         shutil.rmtree(FRAMES)
 

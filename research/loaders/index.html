@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Motion DNA · loaders</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  /* Motion DNA loaders: eight waiting animations on the tokens (colours, curves by name). Each loader is one function
+     draw(g, t, s) that paints a square of side s at time t (seconds): a pure function of time, so the same code runs in
+     the panel, renders to a GIF or rebuilds in AE. Open through a local server (the robot reads its character.json). */
+  @font-face { font-family: 'Inter Tight'; src: url('../../assets/fonts/InterTight[wght].ttf') format('truetype'); font-weight: 100 900; }
+  @font-face { font-family: 'Instrument Serif'; font-style: italic; src: url('../../assets/fonts/InstrumentSerif-Italic.ttf') format('truetype'); }
+  :root { --bg: #0A211F; --card: #0E2B27; --ink: #F7F9F2; --dim: #9FD8C2; --line: #174A46; }
+  body.light { --bg: #F7F9F2; --card: #FFFFFF; --ink: #0A211F; --dim: #174A46; --line: #D9E2DC; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Inter Tight', system-ui, sans-serif; }
+  header { padding: 40px 48px 8px; display: flex; align-items: end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  h1 { margin: 0; font-size: 44px; font-weight: 700; letter-spacing: -0.02em; }
+  h1 em { font-family: 'Instrument Serif', serif; font-weight: 400; color: #D8FF85; }
+  body.light h1 em { color: #174A46; }
+  header p { margin: 6px 0 0; color: var(--dim); font-size: 16px; }
+  button { font: 600 14px 'Inter Tight', sans-serif; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 10px 18px; cursor: pointer; }
+  main { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 24px 48px 48px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 18px 20px 20px; }
+  .big { display: block; margin: 6px auto 10px; }
+  .row { display: flex; align-items: center; justify-content: center; gap: 22px; padding: 10px 0 14px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .row span { font-size: 12px; color: var(--dim); }
+  .chat { display: flex; align-items: center; gap: 10px; justify-content: center; padding-top: 12px; font-size: 14px; color: var(--dim); }
+  h2 { margin: 10px 0 4px; font-size: 20px; }
+  .meta { font-size: 13px; color: var(--dim); margin: 0 0 6px; }
+  .use { font-size: 14px; margin: 0; line-height: 1.4; }
+  .num { font-size: 13px; color: var(--dim); }
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Motion DNA <em>loaders</em></h1><p>Eight waiting animations on the tokens. Big, panel size, and the size of a chat's “thinking” dots.</p></div>
+  <button id="theme">Light background</button>
+</header>
+<main id="grid"></main>
+<script src="../video_prompts/runtime/pixel_rig.js"></script>
+<script>
+// ---------- tokens ----------
+const C = { pine: "#0A211F", spark: "#D8FF85", mint: "#9FD8C2", cloud: "#F7F9F2", sea: "#174A46", coral: "#FF8A6B" };
+const CURVES = { Land: [0.12, 0.9, 0.28, 1], Pop: [0.34, 1.45, 0.64, 1], Settle: [0.3, 0, 0.1, 1], Cruise: [0.5, 0, 0.15, 1],
+                 Ramp: [0.87, 0, 0.13, 1], Whip: [0.75, 0, 0.05, 1], Snap: [0, 1.17, 0, 0.91], Launch: [0.55, 0, 0.9, 0.6] };
+function bezier(x1, y1, x2, y2) {   // cubic-bezier as y(x)
+  const A = (a, b) => 1 - 3 * b + 3 * a, B = (a, b) => 3 * b - 6 * a, Cc = a => 3 * a;
+  const f = (t, a, b) => ((A(a, b) * t + B(a, b)) * t + Cc(a)) * t, d = (t, a, b) => 3 * A(a, b) * t * t + 2 * B(a, b) * t + Cc(a);
+  return x => { if (x <= 0) return 0; if (x >= 1) return 1; let t = x;
+    for (let i = 0; i < 8; i++) { const s = d(t, x1, x2); if (Math.abs(s) < 1e-6) break; t -= (f(t, x1, x2) - x) / s; }
+    if (t < 0 || t > 1) { let lo = 0, hi = 1; for (let i = 0; i < 30; i++) { t = (lo + hi) / 2; if (f(t, x1, x2) < x) lo = t; else hi = t; } }
+    return f(t, y1, y2); };
+}
+const E = {}; for (const k in CURVES) E[k] = bezier(...CURVES[k]);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v)), lerp = (a, b, p) => a + (b - a) * p, fr = x => x - Math.floor(x);
+const seg = (t, a, b, e = "Cruise") => E[e](clamp((t - a) / (b - a)));
+const light = () => document.body.classList.contains("light");
+const ink = () => light() ? C.sea : C.spark, ink2 = () => light() ? "#3F8F78" : C.mint, faint = () => light() ? "rgba(23,74,70,.16)" : "rgba(159,216,194,.16)";
+function dot(g, x, y, r, col) { g.beginPath(); g.arc(x, y, Math.max(0.5, r), 0, 7); g.fillStyle = col; g.fill(); }
+
+// ---------- the loaders: draw(g, t, s) paints a square of side s ----------
+let RIG = null;
+const LOADERS = [
+  { name: "DNA helix", meta: "Cruise · 2.4 s loop", use: "Two strands of dots twist around each other: the name of the plugin, literally. Front dots are larger and brighter.",
+    draw(g, t, s) { const P = 2.4, n = 9, ph = t / P * Math.PI * 2, pts = [];
+      for (let i = 0; i < n; i++) { const x = lerp(-0.78, 0.78, i / (n - 1)) * s / 2, a = ph + i * 0.62, y = Math.sin(a) * s * 0.2, z = Math.cos(a);
+        g.strokeStyle = faint(); g.lineWidth = Math.max(1, s / 90); g.beginPath(); g.moveTo(x, y); g.lineTo(x, -y); g.stroke();
+        pts.push([x, y, z, ink()], [x, -y, -z, ink2()]); }
+      pts.sort((a, b) => a[2] - b[2]).forEach(([x, y, z, c]) => { g.globalAlpha = 0.45 + 0.55 * (z + 1) / 2; dot(g, x, y, s * (0.035 + 0.02 * (z + 1) / 2), c); });
+      g.globalAlpha = 1; } },
+  { name: "Three curves", meta: "Ramp, staggered · 1.6 s loop", use: "Three dots orbit on the same token curve, a beat apart: they bunch on the ease-in and spread on the ease-out, like a chat's thinking dots with our timing.",
+    draw(g, t, s) { const P = 1.6, R = s * 0.3; g.strokeStyle = faint(); g.lineWidth = Math.max(1, s / 80); g.beginPath(); g.arc(0, 0, R, 0, 7); g.stroke();
+      [[0, 0.085, ink()], [0.1, 0.07, ink2()], [0.2, 0.055, light() ? C.sea : C.cloud]].forEach(([d, r, c]) => {
+        const a = -Math.PI / 2 + Math.PI * 2 * E.Ramp(fr(t / P - d)); dot(g, Math.cos(a) * R, Math.sin(a) * R, s * r, c); }); } },
+  { name: "The Agent is thinking", meta: "Pixel rig · emotion “thinking” · blink every 2.4 s", use: "Our robot's screen, close: its eyes look up, the three dots run below, it blinks. Reads down to chat size because the face is the loader.",
+    robot: true,
+    draw(g, t, s) { if (!RIG) return; const q = Math.floor(t * 12) / 12, cyc = fr(t / 2.4), blink = cyc > 0.92 && cyc < 0.97;
+      const look = [Math.round(Math.sin(t * 1.3) * 1.5), -1];
+      const sp = RIG.render({ emotion: blink ? "blink" : "thinking", pose: "idle", light: 1, sy: 1, look, t: q });
+      // the screen and bezel only (sprite x 16..48, y 17..44): the face is the loader
+      const sx = 16, sy = 17, sw = 32, sh = 27, k = Math.floor(s / sw) || s / sw; g.imageSmoothingEnabled = false;
+      g.drawImage(sp, sx, sy, sw, sh, -sw * k / 2, -sh * k / 2, sw * k, sh * k); } },
+  { name: "Curve drawing", meta: "Land → Pop → Whip · 3.6 s loop", use: "One of our token curves draws itself, then a dot rides it with that very easing. Three curves in turn: what the Curves tab is about.",
+    draw(g, t, s) { const names = ["Land", "Pop", "Whip"], P = 1.2, i = Math.floor(t / P) % 3, u = fr(t / P), cv = CURVES[names[i]], L = s * 0.62;
+      const X = x => -L / 2 + x * L, Y = y => L / 2 - y * L * 0.8 - L * 0.05, draw = seg(u, 0.02, 0.5, "Cruise"), ride = seg(u, 0.5, 0.86, names[i]), out = seg(u, 0.88, 1);
+      g.globalAlpha = 1 - out; g.lineWidth = Math.max(1, s / 110); g.strokeStyle = faint(); g.beginPath(); g.moveTo(X(0), Y(0)); g.lineTo(X(1), Y(0)); g.stroke();
+      g.strokeStyle = ink2(); g.globalAlpha = (1 - out) * 0.7 * draw; g.beginPath(); g.moveTo(X(0), Y(0)); g.lineTo(X(cv[0]), Y(cv[1])); g.moveTo(X(1), Y(1)); g.lineTo(X(cv[2]), Y(cv[3])); g.stroke();
+      dot(g, X(cv[0]), Y(cv[1]), s * 0.025, ink2()); dot(g, X(cv[2]), Y(cv[3]), s * 0.025, ink2());
+      g.globalAlpha = 1 - out; g.strokeStyle = ink(); g.lineWidth = Math.max(1.5, s / 55); g.lineCap = "round"; g.beginPath();
+      for (let j = 0; j <= 160 * draw; j++) { const p = j / 160, x = X(p), y = Y(E[names[i]](p)); j ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke();
+      if (u > 0.5) dot(g, X(ride), Y(E[names[i]](ride)), s * 0.05, ink());
+      g.globalAlpha = 1; } },
+  { name: "Squash and stretch", meta: "Launch up · Land down · 1.0 s loop", use: "A single ball keeps bouncing: it squashes on the floor and stretches as it falls. The first principle of animation, as a wait.",
+    draw(g, t, s) { const u = fr(t / 1.0), up = u < 0.5, p = up ? E.Cruise(u / 0.5) : 1 - E.Launch((u - 0.5) / 0.5), h = s * 0.42 * (up ? 1 - Math.pow(1 - p, 2) : p);
+      const floor = s * 0.28, contact = Math.min(u, 1 - u) < 0.07, sq = contact ? 1 - 0.32 * (1 - Math.min(u, 1 - u) / 0.07) : 1, st = !contact && !up ? 1 + 0.12 * (1 - p) : 1;
+      const ry = s * 0.09 * sq * st, rx = s * 0.09 / Math.sqrt(sq * st);
+      g.fillStyle = faint(); g.beginPath(); g.ellipse(0, floor + 2, s * 0.12 * (1 - 0.5 * h / (s * 0.42)), s * 0.02, 0, 0, 7); g.fill();
+      g.fillStyle = ink(); g.beginPath(); g.ellipse(0, floor - ry - h, rx, ry, 0, 0, 7); g.fill(); } },
+  { name: "One shape", meta: "Pop between states · Settle turn · 2.4 s loop", use: "One shape is never cut: it morphs from a circle to a rounded square to a pill and back, like the panel's buttons and cards.",
+    draw(g, t, s) { const st = [[1, 1, 0.5], [0.92, 0.92, 0.2], [1.6, 0.62, 0.5]], P = 0.8, i = Math.floor(t / P) % 3, j = (i + 1) % 3, p = E.Pop(clamp((fr(t / P) - 0.5) / 0.5)), q = E.Settle(clamp((fr(t / P) - 0.5) / 0.5));   // hold, then morph
+      const A = st[i], B = st[j], m = (k) => lerp(A[k], B[k], p), u = s * 0.26;
+      const w = m(0) * u, h = m(1) * u, r = Math.min(w, h) * m(2) * 2;
+      // a quarter turn per morph, on Settle
+      g.save(); g.rotate((i + q) * Math.PI / 2); g.fillStyle = ink(); g.beginPath(); g.roundRect(-w / 2, -h / 2, w, h, Math.max(0, Math.min(r, w / 2, h / 2))); g.fill(); g.restore(); } },
+  { name: "Keyframes", meta: "Cruise playhead · Pop keys · 1.8 s loop", use: "A playhead sweeps a tiny timeline and every keyframe it crosses pops alight: the After Effects timeline, waiting with you.",
+    draw(g, t, s) { const P = 1.8, u = fr(t / P), L = s * 0.7, x0 = -L / 2, head = x0 + L * E.Cruise(clamp(u / 0.82)), fade = seg(u, 0.86, 1);
+      g.strokeStyle = faint(); g.lineWidth = Math.max(1, s / 80); g.beginPath(); g.moveTo(x0, 0); g.lineTo(-x0, 0); g.stroke();
+      [0.2, 0.5, 0.8].forEach(k => { const kx = x0 + L * k, hit = head >= kx, pp = hit ? E.Pop(clamp((head - kx) / (L * 0.12))) : 0, sz = s * 0.05 * (1 + 0.35 * Math.sin(pp * Math.PI)) * (hit ? 1 : 0.8);
+        g.save(); g.translate(kx, 0); g.rotate(Math.PI / 4); g.globalAlpha = hit ? 1 - fade * 0.7 : 0.55; g.fillStyle = hit ? ink() : ink2(); g.fillRect(-sz, -sz, sz * 2, sz * 2); g.restore(); });
+      g.globalAlpha = 1 - fade; g.strokeStyle = ink(); g.lineWidth = Math.max(1.5, s / 60); g.beginPath(); g.moveTo(head, -s * 0.16); g.lineTo(head, s * 0.16); g.stroke();
+      dot(g, head, -s * 0.16, s * 0.03, ink()); g.globalAlpha = 1; } },
+  { name: "The Agent hops", meta: "Pixel rig · Wind-up, Pop, Land · 1.6 s loop", use: "The whole robot waits on its pedestal: it breathes, then squashes, hops with a stretch, lands, and its light blinks at the top.",
+    robot: true,
+    draw(g, t, s) { if (!RIG) return; const q = Math.floor(t * 12) / 12, u = fr(q / 1.6), k = (a, b, e) => seg(u, a, b, e);
+      let sy = 1, hop = 0;
+      if (u < 0.12) sy = lerp(1, 0.86, k(0, 0.12, "Cruise"));
+      else if (u < 0.3) { sy = lerp(0.86, 1.08, k(0.12, 0.3, "Pop")); hop = -8 * k(0.12, 0.3, "Pop"); }
+      else if (u < 0.46) { sy = 1.03; hop = -8 * (1 - k(0.3, 0.46, "Launch")); }
+      else if (u < 0.6) sy = lerp(0.9, 1, k(0.46, 0.6, "Land"));
+      const sp = RIG.render({ emotion: u > 0.1 && u < 0.6 ? "happy" : "neutral", pose: "idle", light: u > 0.25 && u < 0.38 ? 1 : 0.5, sy, hop, t: q });
+      g.imageSmoothingEnabled = false;
+      if (s < 64) {   // small: the head hops (the whole body would be a few pixels)
+        const sw = 36, sh = 32, k = s / sw * 0.9; g.drawImage(sp, 14, 6, sw, sh, -sw * k / 2, -sh * k / 2 + hop * k * 0.6, sw * k, sh * k); return; }
+      const sc = Math.floor(s / 90) || s / 90, W = 64 * sc, H = 86 * sc;
+      g.drawImage(sp, -W / 2, -H / 2, W, H); } },
+];
+
+// ---------- the page: every loader at three sizes ----------
+const grid = document.getElementById("grid"), canvases = [];
+LOADERS.forEach((L, i) => {
+  const card = document.createElement("div"); card.className = "card";
+  const big = document.createElement("canvas"); big.className = "big"; card.appendChild(big);
+  const row = document.createElement("div"); row.className = "row";
+  [48, 32, 20].forEach(sz => { const c = document.createElement("canvas"); row.appendChild(c); canvases.push([c, L, sz]);
+    const lab = document.createElement("span"); lab.textContent = sz + " px"; row.appendChild(lab); });
+  card.appendChild(row);
+  const chat = document.createElement("div"); chat.className = "chat"; const cc = document.createElement("canvas"); chat.appendChild(cc); canvases.push([cc, L, 18]);
+  chat.appendChild(Object.assign(document.createElement("span"), { textContent: L.robot ? "The Agent is working…" : "Working…" })); card.appendChild(chat);
+  card.insertAdjacentHTML("beforeend", `<h2><span class="num">0${i + 1}</span> ${L.name}</h2><p class="meta">${L.meta}</p><p class="use">${L.use}</p>`);
+  grid.appendChild(card); canvases.push([big, L, 200]);
+});
+const dpr = Math.max(1, window.devicePixelRatio || 1);
+canvases.forEach(([c, L, sz]) => { c.width = c.height = Math.round(sz * dpr); c.style.width = c.style.height = sz + "px"; });
+function frame(now) {
+  const t = now / 1000;
+  for (const [c, L, sz] of canvases) { const g = c.getContext("2d"); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
+    g.setTransform(dpr, 0, 0, dpr, sz * dpr / 2, sz * dpr / 2); L.draw(g, t, sz); }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+window.LOADERS = LOADERS; window.drawAt = (t) => { for (const [c, L, sz] of canvases) { const g = c.getContext("2d"); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height); g.setTransform(dpr, 0, 0, dpr, sz * dpr / 2, sz * dpr / 2); L.draw(g, t, sz); } };
+document.getElementById("theme").onclick = e => { document.body.classList.toggle("light"); e.target.textContent = light() ? "Dark background" : "Light background"; };
+// the robot comes from its character file
+const x = new XMLHttpRequest(); x.open("GET", "../../library/characters/the-agent/character.json"); x.onload = () => { RIG = PixelRig(JSON.parse(x.responseText)); }; x.send();
+</script>
+</body>
+</html>

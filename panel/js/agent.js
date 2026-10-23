@@ -830,7 +830,7 @@ function chatView() {
       i = j;
     }
     logEl.replaceChildren(...items);
-    if (AG.proc) logEl.append(h("div", { class: "msg working" }, h("i", { class: "spin" }), "Working…"));
+    if (AG.proc) logEl.append(h("div", { class: "msg working" }, loadingLabel("Working…", 18)));   // the DNA helix (app.js)
     logEl.scrollTop = logEl.scrollHeight;
     send.hidden = !!AG.proc; stop.hidden = !AG.proc; input.disabled = !!AG.proc || AG.logged === false;
   };
@@ -949,7 +949,7 @@ function projectSection() {
   const connBox = h("div", { class: "card-box setup" });
   const conn = h("details", { class: "controls step" },
     h("summary", {}, h("span", { class: "stepn" }, "1"), "Connect Claude and your apps",
-      h("span", { class: "fsum" }, AG.logged === true ? "Claude connected" : AG.logged === false ? "Claude not connected" : "checking…")), connBox);
+      h("span", { class: "fsum" }, AG.logged === true ? "Claude connected" : AG.logged === false ? "Claude not connected" : loadingLabel("checking…", 12))), connBox);
   conn.open = AG.connectOpen || AG.logged === false;
   conn.addEventListener("toggle", () => { AG.connectOpen = conn.open; if (conn.open && AG.node) showSetup(connBox); });
   if (AG.node) { if (conn.open) showSetup(connBox); }
@@ -1199,7 +1199,7 @@ function showSetup(setup) {
           h("span", {}, st === "auth" ? lab + " needs your permission again (it asks from time to time)." : blurb[name]),
           h("span", { class: "dim" }, "Press the button and choose Allow in the " + lab + " page that opens. That's it: this turns green by itself."),
           // while its status is still being read, connecting could add a second server next to the account's connector
-          h("button", { class: "solid apply big", disabled: !AG.logged || st == null, title: !AG.logged ? "Connect Claude first" : st == null ? "Checking…" : "", onclick: () => connectService(name, redraw) }, st == null && AG.logged ? "Checking…" : "Connect " + lab)]); };
+          h("button", { class: "solid apply big", disabled: !AG.logged || st == null, title: !AG.logged ? "Connect Claude first" : st == null ? "Checking…" : "", onclick: () => connectService(name, redraw) }, st == null && AG.logged ? loadingLabel("Checking…", 14) : "Connect " + lab)]); };
   const figma = service("figma"), krea = service("krea"), flora = service("flora");
   const fig = AG.figma;
 
