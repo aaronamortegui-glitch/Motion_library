@@ -504,9 +504,13 @@ async function runAgent(prompt, images = []) {
   if (busyElsewhere(sid) && !confirm("This conversation was used in the last seconds somewhere else (the Claude app or a terminal).\nMessages from both would mix. Send anyway?")) return;
   // busy from the first moment: building the context can take seconds, and a second Enter must not start a second run
   AG.cancelled = false; AG.proc = { kill: () => { AG.cancelled = true; AG.proc = null; agent.draw(); } };
-  push("you", prompt, images.length ? { images: images.map((x) => x.thumb), files: saveAttachments(images) } : null);
+  push("you", prompt, images.length ? { images: images.map((x) => x.thumb), files: saveAttachments(images), videos: images.filter((x) => x.kind === "video").map((x) => x.dur) } : null);
+  const videoNote = images.filter((x) => x.kind === "video").map((x) => `Attached video "${x.name}": ${x.path} (${x.dur.toFixed(1)} s, ${x.w}x${x.h}, ${x.fps} fps). ` +
+    `Its frames follow in order, at ${x.frames.map((f) => f.t.toFixed(1) + " s").join(", ")}. You cannot play it: read it from these frames` +
+    (AG.mode === "full" ? "; for a closer look at a moment, extract more frames from that file with ffmpeg, or import it into After Effects as a reference layer." : ".")).join("\n");
+  images = images.flatMap((x) => x.kind === "video" ? x.frames : [x]);
   let full;
-  try { full = prompt + "\n\n---\n" + (await contextBlock()); }
+  try { full = prompt + (videoNote ? "\n\n" + videoNote : "") + "\n\n---\n" + (await contextBlock()); }
   catch (e) { AG.proc = null; push("error", "Could not read the context: " + e.message); return; }
   if (AG.cancelled) { push("error", "Stopped."); return; }
   const mcp = JSON.stringify({ mcpServers: { "motion-dna": { command: pyExe(), args: [S.root + "/tools/mcp/ss_motion_mcp.py"] } } });
@@ -586,12 +590,48 @@ async function readImage(file) {
   const full = draw(1568, type, 0.9);
   return { name: file.name || "pasted." + (type === "image/png" ? "png" : "jpg"), type, data: full.split(",")[1], thumb: draw(160, "image/jpeg", 0.8) };
 }
+function attachDir() {   // the project's (or brand's) claude/attachments, else a temp folder: never the Motion DNA repo
+  const sc = scope(), path = nodeReq()("path"), os = nodeReq()("os");
+  return sc.kind === "repo" ? path.join(os.tmpdir(), "motion-dna-attachments") : path.join(sc.dir, "claude", "attachments");
+}
+function ffBin(name) {   // ffmpeg / ffprobe: on PATH, or Homebrew's on a Mac (After Effects' PATH often lacks it)
+  if (process.platform === "win32") return name;
+  const fs = nodeReq()("fs");
+  return ["/opt/homebrew/bin/", "/usr/local/bin/"].map((d) => d + name).find((f) => fs.existsSync(f)) || name;
+}
+const ffRun = (name, args) => new Promise((ok, no) => nodeReq()("child_process").execFile(ffBin(name), args, { windowsHide: true, timeout: 60000, maxBuffer: 1 << 24 },
+  (e, out, err) => (e ? no(new Error((err || e.message).toString().split("\n").slice(-2).join(" "))) : ok(out.toString()))));
+// A video for the agent: Claude reads images, not video, so the clip is saved next to the project and 8 frames spread
+// across it (with their times) go with the order, plus its length, size and frame rate.
+async function readVideo(file) {
+  const fs = nodeReq()("fs"), path = nodeReq()("path"), os = nodeReq()("os");
+  if (file.size > 500 * 1024 * 1024) throw new Error("videos up to 500 MB");
+  const dir = attachDir(); fs.mkdirSync(dir, { recursive: true });
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+  const dest = path.join(dir, `${stamp}_${(file.name || "video.mp4").replace(/[^\w.-]+/g, "_")}`);
+  fs.writeFileSync(dest, Buffer.from(await file.arrayBuffer()));
+  const info = JSON.parse(await ffRun("ffprobe", ["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height,r_frame_rate:format=duration", "-of", "json", dest]));
+  const st = (info.streams || [])[0] || {}, dur = +((info.format || {}).duration) || 0;
+  const [fn, fd] = String(st.r_frame_rate || "0/1").split("/").map(Number), fps = fd ? Math.round(fn / fd * 100) / 100 : 0;
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "mdna-frames-")), frames = [], n = dur > 0 ? 8 : 1;
+  for (let i = 0; i < n; i++) {
+    const tt = dur > 0 ? dur * (i + 0.5) / n : 0, out = path.join(tmp, `f${i}.jpg`);
+    await ffRun("ffmpeg", ["-v", "error", "-y", "-ss", tt.toFixed(3), "-i", dest, "-frames:v", "1", "-vf", "scale='min(1024,iw)':-2", "-q:v", "4", out]);
+    if (fs.existsSync(out)) frames.push({ t: tt, type: "image/jpeg", data: fs.readFileSync(out).toString("base64") });
+  }
+  try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (e) {}
+  if (!frames.length) throw new Error("no frames could be read");
+  const small = await new Promise((ok) => { const i = new Image(); i.onload = () => { const s = 160 / Math.max(i.width, i.height), c = document.createElement("canvas");
+    c.width = Math.round(i.width * s); c.height = Math.round(i.height * s); c.getContext("2d").drawImage(i, 0, 0, c.width, c.height); ok(c.toDataURL("image/jpeg", 0.8)); }; i.src = "data:image/jpeg;base64," + frames[0].data; });
+  return { kind: "video", name: file.name || "video", path: dest.split("\\").join("/"), dur, w: st.width || 0, h: st.height || 0, fps, frames, thumb: small };
+}
 function saveAttachments(images) {
   const sc = scope(); if (sc.kind === "repo" || !nodeReq()) return [];
   try {
     const fs = nodeReq()("fs"), path = nodeReq()("path"), dir = path.join(sc.dir, "claude", "attachments"), stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
     fs.mkdirSync(dir, { recursive: true });
-    return images.map((x, i) => { const f = path.join(dir, `${stamp}_${i + 1}_${x.name.replace(/[^\w.-]+/g, "_")}`); fs.writeFileSync(f, Buffer.from(x.data, "base64")); return f.split("\\").join("/"); });
+    return images.map((x, i) => { if (x.kind === "video") return x.path;
+      const f = path.join(dir, `${stamp}_${i + 1}_${x.name.replace(/[^\w.-]+/g, "_")}`); fs.writeFileSync(f, Buffer.from(x.data, "base64")); return f.split("\\").join("/"); });
   } catch (e) { return []; }
 }
 function stepText(c) {
@@ -718,16 +758,29 @@ function chatView() {
   AG.attach = AG.attach || [];
   const tray = h("div", { class: "attach-tray" });
   const drawTray = () => { tray.hidden = !AG.attach.length; tray.replaceChildren(...AG.attach.map((x, i) => h("div", { class: "attach" },
-    h("img", { src: x.thumb, alt: "", title: x.name }), h("button", { class: "attach-x", title: "Remove", onclick: () => { AG.attach.splice(i, 1); drawTray(); } }, "✕")))); };
-  const addFiles = async (files) => { for (const f of files) if (/^image\//.test(f.type) && AG.attach.length < 8) { try { AG.attach.push(await readImage(f)); } catch (e) { toast("Could not read " + (f.name || "the image"), true); } } drawTray(); };
-  const picker = h("input", { type: "file", accept: "image/*", multiple: true, style: "display:none", onchange: (e) => { addFiles([...e.target.files]); e.target.value = ""; } });
-  const addBtn = h("button", { class: "chip ghost", title: "Add images to the order (or paste with Ctrl+V, or drop them here)", onclick: () => picker.click() }, "+ Image");
+    h("img", { src: x.thumb, alt: "", title: x.name }), x.kind === "video" ? h("span", { class: "attach-len" }, "▶ " + Math.round(x.dur) + " s") : null,
+    h("button", { class: "attach-x", title: "Remove", onclick: () => { AG.attach.splice(i, 1); drawTray(); } }, "✕")))); };
+  const isVideo = (f) => /^video\//.test(f.type) || /\.(mp4|mov|m4v|webm|avi|mkv)$/i.test(f.name || "");
+  const addFiles = async (files) => {
+    for (const f of files) {
+      if (AG.attach.length >= 8) break;
+      if (isVideo(f)) {
+        if (AG.attach.filter((x) => x.kind === "video").length >= 2) { toast("Two videos per order at most.", true); continue; }
+        if (!nodeReq()) { toast("Videos work inside After Effects.", true); continue; }
+        toast("Reading the video…");
+        try { AG.attach.push(await readVideo(f)); } catch (e) { toast("Could not read " + (f.name || "the video") + ": " + e.message, true); }
+      } else if (/^image\//.test(f.type)) { try { AG.attach.push(await readImage(f)); } catch (e) { toast("Could not read " + (f.name || "the image"), true); } }
+    }
+    drawTray();
+  };
+  const picker = h("input", { type: "file", accept: "image/*,video/*", multiple: true, style: "display:none", onchange: (e) => { addFiles([...e.target.files]); e.target.value = ""; } });
+  const addBtn = h("button", { class: "chip ghost", title: "Add images or a video to the order (or paste an image with Ctrl+V, or drop files here)", onclick: () => picker.click() }, "+ Image / video");
   input.addEventListener("paste", (e) => { const fs = [...(e.clipboardData ? e.clipboardData.items : [])].filter((x) => x.kind === "file").map((x) => x.getAsFile()).filter(Boolean); if (fs.length) { e.preventDefault(); addFiles(fs); } });
   wrap.addEventListener("dragover", (e) => { e.preventDefault(); wrap.classList.add("dropping"); });
   wrap.addEventListener("dragleave", () => wrap.classList.remove("dropping"));
   wrap.addEventListener("drop", (e) => { e.preventDefault(); wrap.classList.remove("dropping"); addFiles([...e.dataTransfer.files]); });
   const go = async () => {
-    const v = input.value.trim() || (AG.attach.length ? "Look at the attached image(s)." : ""); if (!v) return;
+    const v = input.value.trim() || (AG.attach.length ? (AG.attach.some((x) => x.kind === "video") ? "Look at the attached video." : "Look at the attached image(s).") : ""); if (!v) return;
     if (/^\/?(reconnect|reconectar)[.!]?$/i.test(v)) {   // handled here, not by Claude: works even while an order is stuck
       input.value = ""; push("you", v); const r = await reconnectAE(); push(r.ok ? "done" : "error", r.msg); return;
     }

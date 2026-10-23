@@ -414,3 +414,5 @@ details.step > .card-box, details.step > .stack { margin: 0 10px 10px; }
 #sec-agent.chat-mode > .chat { flex: 1 1 auto; min-height: 0; }
 #sec-agent.chat-mode .agent-log { flex: 1 1 auto; max-height: none; min-height: 120px; }
 #sec-agent.chat-mode .chat-tools { margin-top: auto; }
+
+.attach-len { position: absolute; left: 3px; bottom: 2px; font-size: 9px; padding: 0 4px; border-radius: 3px; background: rgba(0, 0, 0, .7); color: var(--text); }

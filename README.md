@@ -27,6 +27,10 @@ animate keeps a profile that **learns from each review**, and everything it make
 
 ## What's new
 
+- **Show the agent a video:** *+ Image / video* (or drop a file) takes an MP4, MOV or WebM as a reference. Claude reads
+  images, not video, so the panel saves the clip in the project's `claude/attachments`, sends 8 frames spread across
+  it with their times, and its length, size and frame rate; in Full mode the agent can pull more frames around a
+  moment you name. On a Mac it needs ffmpeg (`brew install ffmpeg`).
 - **The chat uses the whole panel:** the conversation grows into all the free space and scrolls on its own; the chat box
   and its tools stay at the bottom. *Open old conversation* (under the chat box) goes back to an earlier chat of the
   project, so the Project tab is now just the setup and the folder. Rules are kept per brand or as general rules.
@@ -244,11 +248,18 @@ under the chat box, or click the **MCP** dot. Requests that waited too long are 
 again. When the bridge goes quiet (a dialog was open, for example) the panel restarts it the next time you click or
 type in the panel, or while an order runs; it never restarts it on a timer into a dialog that is still open.
 
-### Show the agent an image
-Paste a screenshot into the chat box (Ctrl+V), drop image files on the chat, or press **+ Image** next to *With:*.
+### Show the agent an image or a video
+Paste a screenshot into the chat box (Ctrl+V), drop image or video files on the chat, or press **+ Image / video** next to *With:*.
 They wait in a tray above the box (✕ removes one, up to 8) and go to Claude with your order, so it sees them in Safe
 and Full mode. Large images are scaled to 1568 px. With a project or brand open each image is saved in its
 `claude/attachments` folder and linked from `agent-chat.md`; click a thumbnail in the chat to open it.
+
+A video (MP4, MOV, M4V, WebM, AVI or MKV, up to 500 MB, two per order) is saved in the same folder and shows in the
+tray with its length. Claude cannot play video, so the order carries 8 frames spread across the clip, each with its
+time, plus the clip's length, size, frame rate and path. Name the moment you mean ("the title lands at 4 s"): in Full
+mode the agent pulls more frames around it with ffmpeg, or imports the clip into After Effects as a reference layer.
+**On a Mac** the panel needs ffmpeg: install [Homebrew](https://brew.sh), run `brew install ffmpeg`, then restart
+After Effects (the panel finds it in `/opt/homebrew/bin` or `/usr/local/bin`).
 
 ### Claude Code and other agents
 Open the repo (or a brand or project folder) in Claude Code and approve the `motion-dna` server. Its tools:
