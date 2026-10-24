@@ -194,6 +194,10 @@ These came out of reviewing the Motion DNA promo; `tools/check_layout.jsx` check
 23. **Overlays stay inside their shot** (hearts, bursts, labels): clamp their outPoint to the shot end.
 24. **Nothing hides its own label:** a sticker's text sits above its disc (parent the text, keep the stacking), and
     after `copyToComp` re-check the stacking.
+25. **A reframed plate still covers the frame.** When reframing footage for a new aspect ratio, check that the layer
+    still covers every edge of the frame after any move or scale: an offset leaves a visible gap at the edge (a 20 px
+    shift to recentre a 9:16 clip in a 1:1 comp showed an orange strip down one side). `check_layout` flags it
+    ("cover": footage filling most of the frame that stops short of an edge while it is still).
 
 ## 10. Work for a brand: its profile learns
 Every brand or project gets a profile (schema: `library/brands/_schema.md`). **Client brands never go in the repo**: they

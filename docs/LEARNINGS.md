@@ -265,6 +265,14 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **Setup kept asking to connect Krea although the Claude account's Krea was connected** → `claude mcp list` lists the account's connectors (`claude.ai Krea`) separately from servers added by hand (`krea`), and its first read after a change can leave the account's connector out (74 lines, then 75 with the same setup). The panel read "missing", added a second `krea` that never finishes its login, and that one kept asking → "not connected" is believed only after another read (Setup, Connect and the Agent's context: 1 more for "needs sign-in", 2 more for "missing"; the Agent asks again after a minute, not five); a server is added only if it stays missing, and a name remembered from an earlier read is dropped once the service is gone; if the read fails, add nothing; a leftover duplicate (hand-added, our URL, not connected, with another connector of the service connected) is shown in Setup with a **Remove duplicate** button that asks `claude mcp get <name>` for its scope (local/user are removed, project `.mcp.json` is never edited). The allow and deny lists of the Agent are built from the same server names (`claude mcp list` spells them `claude.ai Krea`, tools `mcp__claude_ai_Krea__…`), so nothing is allowed without its deny rules (tokens, plans, deletes). Tests: `node tools/test_mcp_status.js` (no CLI needed; it also runs on LF and CRLF checkouts). **Copy diagnostics** in Setup › Having trouble? copies platform, `claude` path and version and the Figma / Krea / Flora lines of `mcp list` (query strings masked); every other server shows only its name and status, because `mcp list` prints their command lines and URLs, which can carry keys. The Agent's deny rules match exact tool names while the allow rule takes the whole server, so every way of writing a file (`write_files`, `_inline`, `_upload`), editing a moodboard or driving a desktop app is listed; a new tool of that kind in a connector must be added to `GEN_DENY`. The status of a connected service is only downgraded after two bad reads in a row.
 - **Update stopped with "local change(s) to tracked files" for a person who had only run the tests** → `tools/test_mcp.py`, `test_library.jsx`, `check_layout.jsx` and the mosaic tools rewrite versioned files in `research/tests` (reports and sample images) → `setup.py --update` now restores exactly those from git before the pull (`GENERATED` in `setup.py`; the fixtures are inputs and count as the person's work); any other modified tracked file still stops it with nothing touched, not even those outputs. **A fix in `setup.py` cannot help a clone that is already blocked:** the old `setup.py` on that disk runs the check before it pulls, so that person fixes it once by hand (`git checkout HEAD -- research/tests`, or commit/stash their own change) and every later update is covered. **With the person's own changes and nothing new to pull** (a developer's clone that is already up to date) `--update` no longer stops: it reinstalls the panel from the files on disk and touches none of them; if the remote has commits waiting (or cannot be reached, or there is no upstream) it still stops, and says how many are waiting. Tests: `python tools/test_setup_update.py`.
 
+- **Figma UI exported for AE came out soft when scaled up** (MCP `get_screenshot` ignores `maxDimension` above the node's native size: a 400 px panel stays 400 px) → clone the node, `rescale(2.2)` the clone (detach instances first), export the clone and place it at 1/2.2 in AE; delete the export clones afterwards (T02 tutorial, 2026-10-20).
+
+- **`importFile` failed with "undefined is not an object" on a teaser still** (`storyboard/car_sf/sf_car5.png`): the file is JPEG data with a .png extension (ffprobe: `yuvj444p`) → check the codec, not the extension; re-encode to a real .jpg/.png before importing (T05 tutorial, 2026-10-20). Also: loops such as Float are effects, `SSP.applyFx(L, "Float")`, not `SSP.apply` ("Preset not found").
+
+- **A tutorial showed Modify on a layer Motion DNA had just animated; the panel never offers it there** (review 2026-10-20) → the Modify / Replace switch shows only for keyframes Motion DNA did not make (a client's or hand animation: `mdna_sel_info` `own`); a Motion DNA move is simply redone by Create (`ours`). Check the panel code (`panel/js/app.js` `selHint`), not the Figma screen, before scripting what a button does.
+
+- **The bridge stopped answering ("No answer from After Effects") after files were moved on disk** (T05 tutorial, 2026-10-20): AE noticed footage items whose files had moved and opened a modal "Files could not be found" dialog; nothing runs behind a modal → never move or rename files the open project references; archive by copying, or remove/relink the footage items first (`it.footageMissing`, `it.usedIn.length === 0` → `it.remove()`).
+
 ## 2. Animation Composer as a behavioral reference
 - Presets are encrypted (`.mhcitem`/`.mhitemdata`). We never decrypt or modify the plugin, and we never enable CEP debug modes.
 - Architecture (observed in AE): a preset creates **no keyframes**. Properties get the expression `getAnimationComposerPresetValue()`, driven by pseudo-effects `MHAC PrCtrl <CODE> <ver>` (`AC IN`, `AC OUT`, `AC FX`) whose parameters are the recipe (offset, angle, bounces, scale; FX = frequency/range/time offset), plus `TR In`/`TR Out` markers.
@@ -298,6 +306,8 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   $0.35 each; a shot that carries a still cut-out (text behind the car) stays a still, because the car moves in the clip.
 - **lipsync** (`fal-ai/sync-lipsync/v2`, $3/min) fixed a talking-to-camera Kling shot in one pass; pad the line with
   silence to the clip's start offset.
+
+- **A generated character drifted from his design** (T03 tutorial, review 2026-10-20: "the character looks a little bit different"; Marcus was made from a teaser frame and the scared close-up) → always source the character sheets: Figma *motion-adn* › `05 · Video assets (4K)` › *Characters · turnarounds and expressions* (`characters/<name>_turnaround`, `<name>_expressions`) plus the location sheet (`locations/office_<name>_desk`), as references for the still and the clip.
 
 ## 3b. Keeping real people's likeness (The 1974 Cypher)
 - **Identity references = real photos only.** Using earlier AI shots of the same person as extra references compounds drift (the Boardroom close-ups had already made both collaborators slimmer and younger; reusing them made it worse).
@@ -450,6 +460,8 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   generated video with its own audio). Measure each line in the mix (`ebur128` over its span), set per-layer gains so
   they sit within ~1.5 LU, then `loudnorm` + `alimiter` on the master (≈ −14 LUFS).
 
+- **Stock TTS for an off-camera line did not match the character's on-camera voice** (Krea ElevenLabs stock voices scored 0.50-0.71 with resemblyzer against `dana_ref.wav`; the Seedance clip with `reference_audios` scored 0.88) → keep the speech-to-speech pass (Chatterbox HD on fal, `FAL_KEY`) for every off-camera line of a generated character. On Windows `pip install resemblyzer` fails building `webrtcvad`: install `webrtcvad-wheels`, then `resemblyzer --no-deps`, `librosa` and CPU `torch`.
+
 ## 7. Repo hygiene
 - All repo content is **English** (code, UI, docs, commits).
 - LLMs read only `library/INDEX.txt` (~1 line per preset); HTML/GIFs are for humans.
@@ -530,6 +542,7 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 | Seedance 2.5, 5 s 1080p | 6.05 (estimate said 2.48) |
 | Seedance 2.5 r2v, 15 s 720p, 6 reference images | 7.325 (quote said 7.45) |
 | Seedance 2.5 r2v, 15 s 720p, 9 reference images + 1–2 voice references (`audio_urls`) | 7.325 (quote 7.45); 12 s = 5.861 (quote 5.96); 8 s = 3.922 (quote 3.97) |
+| Seedance 2.5 r2v, 8 s **1080p**, 4 reference images (keyframes as "reference image 1-4"), ~8 min | 9.648 (quote 9.775) |
 | Nano Banana 2.1 is2i still, 2K 16:9 (teaser storyboard fixes and new close-ups) | 0.053 each (22 charged; failed runs are free) |
 | ElevenLabs v3 voice line on Flora (`t2a-elevenlabs-tts-v3`) | 0.121 each; ElevenLabs Music 0.36 |
 | fal `fal-ai/elevenlabs/tts/eleven-v3` (list price 0.10 / 1k characters) | ≈ 0.01 per short line (9 lines ≈ 0.04) |
@@ -556,6 +569,7 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   bill) → poll every batch before assuming outputs exist, stop launching once one run reports the limit, and ask the
   workspace admin to raise it; failed runs are not charged.
 | *The 1974 Boardroom* v3 total (3 stills, 3 clips, 3 mattes, 3 music tracks, 6 VO lines) | ≈ 5.24 |
+| Krea Seedance 2.5 r2v, 6 s **1080p**, start image + 1 image + 1 voice reference (T02 opening) | 2,527.2 compute units (Krea enterprise; no USD rate published) |
 
 ## 9. Code-rendered video templates (research/video_prompts)
 - **A page that animates with timers or the real clock renders differently on every machine** → templates draw each
@@ -612,3 +626,14 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **A character drifts when its sheet is drawn apart from the videos** → the character sheet is rendered from the same
   `character.json` the videos use (`t14_pixel_character.html?sheet`). The Figma expression sheet of the teaser robot
   shows an older, boxier body: use it for the six expressions only; the turnaround is the canonical body.
+- **A second slide showed behind the demo comp in the tutorials' AE viewer** (Gian: "has a green solid on top of it and
+  is duplicating the card") → the workspace PNG was exported from the Figma `TUT / AE workspace` component with its
+  teal `comp` placeholder rectangle still on → a workspace plate that frames a live comp must have an empty, solid-gray
+  viewer; hide the placeholder in the component before exporting. After replacing a footage file at the same path,
+  reload it in AE (`item.mainSource.reload()`).
+- **Tutorial screens went stale when the panel changed** (Gian, 2026-10-22: "make sure you are using the new UI") →
+  the AE builds used PNG exports of the Figma screens, which lag the code → capture the panel itself: run
+  panel/index.html in its browser preview mode with the Node stand-ins of tools/record_cep_panel.py (Playwright,
+  device_scale_factor 2.2 for the 880 px dock PNGs) and read each element's box from the DOM for the highlights.
+- **"Illegal use of reserved word" in an AE builder** → an object key named `with` (ExtendScript is ES3: reserved words
+  cannot be bare keys) → rename the key, or quote it.

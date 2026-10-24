@@ -2,6 +2,7 @@
 //   1 text never overlaps other text            4 text keeps contrast with what is behind it (or sits on a card / shadow)
 //   2 text stays inside the safe area (40 px)    5 nothing sits on a face: text, HUD dots and line ends stay off face boxes
 //   3 text is at least 32 px on screen           (faces: tools/face_boxes.py JSON, linked by "faces" in a build_scene spec)
+//   6 a plate still covers the frame: footage filling most of the frame leaves no gap at an edge (CONTRIBUTING §9.25)
 // Nested full-frame precomps are flattened, so a title in a scene is checked against the HUD inside its footage comp.
 // Usage: var QA_COMPS = ["DNA_EDIT"]; $.evalFile(".../check_layout.jsx")  or  bash tools/bridge.sh tools/check_layout.jsx
 // (default: every comp named DNA_S*). Report: research/tests/layout_report.json; returns a summary of the warnings.
@@ -84,6 +85,39 @@
         }
         return out;
     }
+    // rule 6: a reframed plate (moved or scaled for another aspect ratio) must still cover every edge.
+    // Plates = enabled, unrotated footage or precomp layers without alpha that fill 70 %+ of the frame; checked only
+    // while their transform is still (a slide or push transition passing by is not a layout problem).
+    function moving(L, t, fd) {
+        var ps = ["ADBE Anchor Point", "ADBE Position", "ADBE Scale"];
+        for (var Q = L; Q; Q = Q.parent) for (var i = 0; i < ps.length; i++) {
+            var p = tr(Q, ps[i]); if (p.numKeys < 2 && !p.expressionEnabled) continue;
+            if (String(p.valueAtTime(t, false)) !== String(p.valueAtTime(t + fd, false))) return true;
+        }
+        return false;
+    }
+    function coverGaps(comp, t) {
+        var out = [], W = comp.width, H = comp.height;
+        for (var l = 1; l <= comp.numLayers; l++) {
+            var L = comp.layer(l);
+            if (!(L instanceof AVLayer) || !L.enabled || !L.hasVideo || L.adjustmentLayer || L.nullLayer || t < L.inPoint || t >= L.outPoint) continue;
+            var src = L.source;
+            if (!(src instanceof CompItem) && !(src instanceof FootageItem && !(src.mainSource instanceof SolidSource))) continue;
+            if (src instanceof FootageItem && src.mainSource.hasAlpha) continue;   // cut-outs are meant to show what is behind
+            if (L.name.indexOf("Matte") === 0 || moving(L, t, comp.frameDuration)) continue;
+            var m = affine(L, t);
+            if (Math.abs(m[1]) > 1e-4 || Math.abs(m[2]) > 1e-4) continue;
+            var bx = rectBox(m, { left: 0, top: 0, width: src.width, height: src.height });
+            if (inter(bx, [0, 0, W, H]) < 0.7 * W * H) continue;
+            var g = [];
+            if (bx[0] > 0.5) g.push("left " + Math.round(bx[0]) + " px");
+            if (bx[1] > 0.5) g.push("top " + Math.round(bx[1]) + " px");
+            if (bx[2] < W - 0.5) g.push("right " + Math.round(W - bx[2]) + " px");
+            if (bx[3] < H - 0.5) g.push("bottom " + Math.round(H - bx[3]) + " px");
+            if (g.length) out.push(L.name + " leaves a gap at the " + g.join(", ") + " (scale it to cover or move it back)");
+        }
+        return out;
+    }
     function inter(a, b) { var w = Math.min(a[2], b[2]) - Math.max(a[0], b[0]), h = Math.min(a[3], b[3]) - Math.max(a[1], b[1]); return w > 0 && h > 0 ? w * h : 0; }
     function area(b) { return (b[2] - b[0]) * (b[3] - b[1]); }
     // luminance of the comp's plate under a box (expression sampleImage on a temporary null)
@@ -147,6 +181,8 @@
                     if (inter(I.box, fx) > 0.15 * Math.min(area(I.box), area(fx))) add("face", C.name, t, (I.str || I.name) + " sits on a face");
                 }
             }
+            var gaps = coverGaps(C, t);
+            for (var gp = 0; gp < gaps.length; gp++) add("cover", C.name, t, gaps[gp]);
         }
     }
     var f2 = new File(SS_ROOT + "/research/tests/layout_report.json"); f2.parent.create(); f2.encoding = "UTF-8"; f2.open("w");
