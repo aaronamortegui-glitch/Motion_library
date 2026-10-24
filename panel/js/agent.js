@@ -163,12 +163,38 @@ function genNamesFrom(servers) {
   for (const n of ["krea", "flora"]) if (servers && servers[n]) set.add(toolServer(servers[n]));
   return [...set];
 }
-const fullToolsFor = (names) => ["mcp__motion-dna", "mcp__figma", "mcp__claude_ai_Figma", "mcp__plugin_figma_figma", ...allowGen(names), "ToolSearch", "Read", "Write", "Edit", "Glob", "Grep", "WebFetch",
+// More apps for the Agent (Full mode). Google Drive and Slack come from the user's claude.ai connectors and are allowed
+// tool by tool: reading, plus a Drive upload and a Slack draft (never a message sent, a share or a delete). Blender
+// (Blender Lab's MCP, the one the Claude app installs) is started by the panel when it is installed.
+const DRIVE_TOOLS = ["search_files", "list_recent_files", "get_file_metadata", "read_file_content", "download_file_content", "create_file"];
+const SLACK_TOOLS = ["slack_search_public", "slack_search_public_and_private", "slack_search_channels", "slack_search_users", "slack_list_user_channels",
+  "slack_read_channel", "slack_read_thread", "slack_read_canvas", "slack_read_file", "slack_read_user_profile", "slack_get_reactions", "slack_send_message_draft"];
+const appTools = () => [...DRIVE_TOOLS.map((x) => `mcp__claude_ai_Google_Drive__${x}`),
+  ...SLACK_TOOLS.map((x) => `mcp__claude_ai_Slack__${x}`), "mcp__blender"];
+const fullToolsFor = (names) => ["mcp__motion-dna", "mcp__figma", "mcp__claude_ai_Figma", "mcp__plugin_figma_figma", ...allowGen(names), ...appTools(), "ToolSearch", "Read", "Write", "Edit", "Glob", "Grep", "WebFetch",
   "Bash(python:*)", "Bash(python3:*)", "Bash(bash tools/:*)", "Bash(ffmpeg:*)", "Bash(ffprobe:*)", "Bash(ls:*)", "Bash(mkdir:*)"];
 const neverToolsFor = (names) => ["Bash(git commit:*)", "Bash(git push:*)", "Bash(git reset:*)", "Bash(rm -rf:*)",
   "mcp__motion-dna__add_brand_note",   // in the panel the user decides where a rule goes (the proposal card)
   ...denyGen(names)];   // tokens, plans, trials, LoRA training, shares and deletes stay with the user
 // </pure>
+function blenderServer() {   // { command, args } for Blender Lab's MCP via the Claude app's own uv, or null
+  if (!nodeReq()) return null;
+  const fs = nodeReq()("fs"), path = nodeReq()("path"), os = nodeReq()("os");
+  const roots = process.platform === "win32"
+    ? (() => { const l = process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local"), out = [];
+        try { for (const d of fs.readdirSync(path.join(l, "Claude-Data"))) if (/^claude_/i.test(d)) out.push(path.join(l, "Claude-Data", d)); } catch (e) {}
+        out.push(path.join(process.env.APPDATA || "", "Claude")); return out; })()
+    : [path.join(os.homedir(), "Library", "Application Support", "Claude")];
+  for (const r of roots) {
+    const ext = path.join(r, "Claude Extensions", "ant.dir.gh.blender.blender-mcp");
+    if (!fs.existsSync(ext)) continue;
+    let uv = null;
+    try { for (const d of fs.readdirSync(path.join(r, "uv-runtime"))) { const f = path.join(r, "uv-runtime", d, process.platform === "win32" ? "uv.exe" : "uv"); if (fs.existsSync(f)) uv = f; } } catch (e) {}
+    if (!uv && process.platform !== "win32") uv = ["/opt/homebrew/bin/uv", "/usr/local/bin/uv", path.join(os.homedir(), ".local", "bin", "uv")].find((f) => fs.existsSync(f)) || null;
+    if (uv) return { command: uv, args: ["--directory", ext, "run", "blender-mcp"] };
+  }
+  return null;
+}
 async function svcStatus(name, fresh) {   // "connected" | "auth" | "missing" | "unknown"
   const { err, out } = await mcpList(fresh);
   const re = new RegExp("^(claude\\.ai |plugin:[\\w-]+:)?" + name + ":", "i");
@@ -305,7 +331,8 @@ async function contextBlock() {
       " Figma frames come in through the Figma tools (export the layers, then import_media).");
   } else lines.push("Safe mode: only the Motion DNA tools. If the order needs generated footage or Figma, say that it needs Full mode.");
   lines.push(EXISTING_ASK, RULE_ASK, BRIEF_ASK + (PJ ? ` (project_dir: ${PJ.dir})` : ""));
-  if (AG.mode === "full") lines.push(FLORA_ASK);
+  if (AG.mode === "full") lines.push(FLORA_ASK, "Other apps you can use when they are connected: Google Drive (search, read and download files; create a file only when I ask), Slack (search and read; write a draft for me to send, never send a message) and Blender (through its MCP, when Blender is open with its add-on). " +
+    "Downloaded files go in the project folder, never in the Motion DNA repo.");
   return lines.join("\n");
 }
 
@@ -513,7 +540,9 @@ async function runAgent(prompt, images = []) {
   try { full = prompt + (videoNote ? "\n\n" + videoNote : "") + "\n\n---\n" + (await contextBlock()); }
   catch (e) { AG.proc = null; push("error", "Could not read the context: " + e.message); return; }
   if (AG.cancelled) { push("error", "Stopped."); return; }
-  const mcp = JSON.stringify({ mcpServers: { "motion-dna": { command: pyExe(), args: [S.root + "/tools/mcp/ss_motion_mcp.py"] } } });
+  const servers = { "motion-dna": { command: pyExe(), args: [S.root + "/tools/mcp/ss_motion_mcp.py"] } };
+  const bl = AG.mode === "full" ? blenderServer() : null; if (bl) servers.blender = bl;
+  const mcp = JSON.stringify({ mcpServers: servers });
   // with images the order goes on stdin as one user message (text + images); without, as the -p argument
   const args = [...(images.length ? ["-p", "--input-format", "stream-json"] : ["-p", full]), "--output-format", "stream-json", "--verbose", "--mcp-config", mcp,
     "--allowedTools", ...(AG.mode === "full" ? fullTools() : SAFE_TOOLS), "--disallowedTools", ...neverTools()];

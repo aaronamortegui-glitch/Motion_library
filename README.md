@@ -27,6 +27,9 @@ animate keeps a profile that **learns from each review**, and everything it make
 
 ## What's new
 
+- **More apps for the Agent (Full mode):** Google Drive (search, read and download files; create one when you ask),
+  Slack (search and read; it writes drafts for you to send, never sends) and Blender (Blender Lab's MCP, the one the
+  Claude app installs; open Blender with its add-on). Drive and Slack come from your Claude account's connectors.
 - **Show the agent a video:** *+ Image / video* (or drop a file) takes an MP4, MOV or WebM as a reference. Claude reads
   images, not video, so the panel saves the clip in the project's `claude/attachments`, sends 8 frames spread across
   it with their times, and its length, size and frame rate; in Full mode the agent can pull more frames around a
