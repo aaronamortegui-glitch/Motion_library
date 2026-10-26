@@ -88,6 +88,31 @@ def check(src, length):
     return out
 
 
+def video_ref(src, length):
+    """A video as reference: the clip plays, then the 8 frames the panel sends to Claude lift out of it with their
+    times, with what Claude also gets (length, size, frame rate)."""
+    import json as _j
+    info = _j.loads(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration:stream=width,height,r_frame_rate", "-of", "json", str(ROOT / src)],
+                                   capture_output=True, text=True).stdout)
+    dur = float(info["format"]["duration"]); st = info["streams"][0]; fps = round(eval(st["r_frame_rate"]))
+    f = T.frames(src, 0, dur, W, H, fps=FPS); n = len(f); picks = [int(n * (k + .5) / 8) for k in range(8)]; out = []; fs = T.font(14, 700)
+    for i in range(int(length * FPS)):
+        t = i / FPS; im = T.rgba(f[min(n - 1, int(i * n / (1.6 * FPS)))]) if t < 1.6 else T.rgba(f[-1])
+        d = ImageDraw.Draw(im, "RGBA")
+        if t < 1.6: T.chip(d, 16, 16, "YOUR VIDEO · REFERENCE", 14)
+        else:
+            d.rectangle([0, 0, W, H], fill=(10, 33, 31, 225)); T.chip(d, 16, 16, "WHAT CLAUDE GETS · 8 FRAMES", 14)
+            for k, p in enumerate(picks):
+                a = T.LAND(min(1, max(0, (t - 1.7 - k * .08) / .35)))
+                if a <= 0: continue
+                th = Image.fromarray(f[p]).resize((140, 79)).convert("RGBA"); th.putalpha(int(255 * a))
+                x, y = 34 + (k % 4) * 146, 90 + (k // 4) * 112 + int((1 - a) * 20); im.alpha_composite(th, (x, y))
+                ImageDraw.Draw(im).text((x, y + 84), f"{p / FPS:.1f} s", font=fs, fill=SPARK)
+            if t > 2.6: T.chip(d, 34, 320, f"{dur:.1f} s · {st['width']}x{st['height']} · {fps} fps", 15, fill=CLOUD)
+        out.append(np.asarray(im.convert("RGB")))
+    return out
+
+
 def cut(src, start, length):
     return list(T.frames(src, start, length))
 
@@ -99,6 +124,7 @@ JOBS = {
     "figma-qa": lambda: qa("library/packs/modern.mp4", 3.4),
     "resize": lambda: resize("library/packs/playful.mp4", 3.4),
     "check": lambda: check("library/packs/dynamic.mp4", 3.4),
+    "video-ref": lambda: video_ref("media/motion_dna_teaser/video/G1_rex_entrance.mp4", 4.2),
 }
 
 if __name__ == "__main__":

@@ -82,10 +82,15 @@ def data():
         elif x["kind"] == "physics":
             fx.append(kitem(x, "physics", "Physics", f"Let these layers {x['name']} with real physics (matter.js), baked to keyframes."))
             fx[-1]["what"] = "matter.js · baked to keyframes"
-        elif x["kind"] == "gltransition":
-            fx.append(kitem(x, "gltransition", "Shader transitions", f"Join these two shots with the {x['name']} shader transition."))
-            fx[-1]["what"] = "gl-transitions · luma matte"
 
+    if (LIB / "webm/kit-webfx/turntable-3d.webm").exists():
+        fx.insert(0, dict(name="turntable 3d", group="3D in code", energy="soft", what="three.js · any glTF / GLB product", use="A product on a turntable, lit in 3D: here The Agent's head, modelled in code (assets/models).",
+                          video="webm/kit-webfx/turntable-3d.webm", poster=rel("posters/kit-webfx/turntable-3d.jpg"), ask="Put this product on a 3D turntable behind the title.", call='add_fx(fx="helix 3d", model="…glb")'))
+    for g in json.loads((LIB / "gl_transitions.json").read_text(encoding="utf-8"))["transitions"]:   # all 73 clean mattes
+        if g["kind"] not in ("wipe", "soft"): continue
+        v, po = media("kit-gltransition", slug(g["name"]))
+        if v: fx.append(dict(name=g["name"], group="Shader transitions", energy="medium", what=f"gl-transitions · {g['kind']} · {g.get('license', '')}",
+                             use=g.get("description", ""), video=v, poster=po, ask=f"Join these two shots with the {g['name']} shader transition.", call=f'gl_transition(name="{g["name"]}")'))
     toks = json.loads((ROOT / "tokens/superside_motion_tokens.json").read_text(encoding="utf-8"))
     curves = [dict(name=c["name"], b=c["bezier"], use=c.get("use", ""), group="Motion DNA") for c in toks["easings"]]
     for c in json.loads((LIB / "springs.json").read_text(encoding="utf-8"))["curves"]:   # springs and named eases, drawn the same way
@@ -117,6 +122,12 @@ def data():
                          video=f"templates/{t['id']}.webm", poster=rel(f"templates/{t['id']}.jpg"), ask=f"Make a {t['title'].lower()} video for this, with the {t['id']} template.",
                          call=f"video-templates skill · {t['id']}"))
 
+    hf = json.loads((ROOT / "research/hyperframes/catalog.json").read_text(encoding="utf-8")); hfi = {x["name"]: x for x in (hf["items"] if "items" in hf else hf)}
+    for f in sorted((LIB / "hyperframes").glob("*.webm")):
+        x = hfi.get(f.stem, {}); fam = x.get("family", "block")
+        code.append(dict(name=x.get("title", f.stem), group="HyperFrames blocks", energy="medium", what=f"HyperFrames · {fam} · {x.get('duration', '')} s",
+                         use=(x.get("description", "")[:200] + "…") if len(x.get("description", "")) > 200 else x.get("description", ""), video=f"hyperframes/{f.name}",
+                         poster=rel(f"hyperframes/{f.stem}.jpg"), ask=f"Use the HyperFrames block {f.stem} in our colours and curves.", call=f"research/hyperframes/hf.py add <project> {f.stem}"))
     SND = {"whoosh": "cuts and big moves", "swish": "medium moves", "pop": "things that scale up", "tick": "text arriving", "click": "buttons and UI",
            "hit": "a big landing, an sfx: hit marker", "riser": "the build before a reveal", "sub": "weight under a hit", "chime": "one payoff", "shimmer": "one sparkle",
            "type": "typing", "glitch": "tech, a cut that breaks"}
@@ -145,6 +156,8 @@ def data():
             A("Agent", "One conversation per brand", "Project", "Each brand and each video keeps its chat, its files and what it made.", "workspace", "Start a new project for the Vela launch video."),
             A("Agent", "Connect your apps", "Project · Connect", "Claude, Figma, Krea and Flora in one click; Drive and Slack come from your Claude account.", "connect", "Connect Figma and Flora."),
             A("Agent", "Resize to every format", "resize_comp", "16:9, 1:1, 9:16 and 4:5 from one comp.", "resize", "Resize this comp into every social format."),
+            A("Blender", "Block out a 3D scene", "Blender · Motion DNA add-on", "The Agent's head in Blender: it drops in on Pop while the camera moves on Land, the library's curves on Blender keys.", "blender", "Connect to Blender and block out this scene with a camera move."),
+            A("Agent", "Show it a video", "+ Image / video", "Drop a clip: Claude gets 8 frames with their times, its length, size and frame rate.", "video-ref", "Here is a reference video: make our intro move like it."),
             A("Agent", "Check before render", "check_layout + render_frame", "Safe area, faces, overlaps; then the key frames to look at.", "check", "Check the layout and render the key frames.")]
     apps = [a for a in apps if a["poster"]]
 
@@ -203,7 +216,8 @@ def page():
             "prompts": f"{n['prompts']} orders people use most, each with what it calls in the library.",
             "glossary": f"{n['glossary']} motion words. Use them in a prompt and the agent knows exactly what you mean.",
             "use": "Ask in the panel, in the agent's chat, or from Claude Code. The same library answers."}
-    nav = "".join(f'<li><a href="#g{gi}" data-sec="g{gi} {" ".join(c[0] for c in CATS if c[3] == gi)}">{gi + 1:02d} {g[0]}</a></li>' for gi, g in enumerate(GROUPS))
+    nav = "".join(f'<li><a href="#g{gi}" data-sec="g{gi} {" ".join(c[0] for c in CATS if c[3] == gi)}">{gi + 1:02d} {g[0]}</a>'
+                  f'<ul class="sub">{"".join(f"<li><a href=\"#{c[0]}\" data-sec=\"{c[0]}\">{c[1]}</a></li>" for c in CATS if c[3] == gi)}</ul></li>' for gi, g in enumerate(GROUPS))
     ix = ""
     for gi, g in enumerate(GROUPS):
         rows = "".join(f'<li><a href="#{c[0]}"><span class="ix-name">{c[1]}</span><span class="ix-n">{n[c[0]]}</span></a></li>' for c in CATS if c[3] == gi)

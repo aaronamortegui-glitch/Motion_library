@@ -31,6 +31,8 @@
     {"group": "Other apps", "prompt": "Grab this storyboard from Figma and animate it in an editorial style.", "uses": "Figma + Style · Editorial", "preview": "prompts/figma-storyboard.webm", "poster": "prompts/figma-storyboard.jpg"},
     {"group": "Other apps", "prompt": "QA this comp against its Figma layouts.", "uses": "Figma + check_layout", "preview": "prompts/figma-qa.webm", "poster": "prompts/figma-qa.jpg"},
     {"group": "Other apps", "prompt": "Resize this comp into every social format.", "uses": "resize_comp (16:9, 1:1, 9:16, 4:5)", "preview": "prompts/resize.webm", "poster": "prompts/resize.jpg"},
-    {"group": "Check", "prompt": "Check the layout and render the key frames before we render.", "uses": "check_layout + render_frame", "preview": "prompts/check.webm", "poster": "prompts/check.jpg"}
+    {"group": "Check", "prompt": "Check the layout and render the key frames before we render.", "uses": "check_layout + render_frame", "preview": "prompts/check.webm", "poster": "prompts/check.jpg"},
+    {"group": "Other apps", "prompt": "Connect to Blender and block out this scene with a camera move.", "uses": "Blender (Motion DNA add-on)", "preview": "prompts/blender.webm", "poster": "prompts/blender.jpg"},
+    {"group": "Other apps", "prompt": "Here is a reference video: make our intro move like it.", "uses": "+ Image / video (8 frames to Claude)", "preview": "prompts/video-ref.webm", "poster": "prompts/video-ref.jpg"}
   ]
 }

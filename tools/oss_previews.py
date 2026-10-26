@@ -131,7 +131,8 @@ def do_physics(pick):
 def do_gl(pick):
     import base64, gl_matte
     from playwright.sync_api import sync_playwright
-    names = [i["name"] for i in json.loads((ROOT / "library/kit.json").read_text(encoding="utf-8"))["items"] if i["kind"] == "gltransition" and pick(i["name"])]
+    # every clean matte (kind wipe or soft) the MCP tool gl_transition can play: the 73 of library/gl_transitions.json
+    names = [t["name"] for t in json.loads((ROOT / "library/gl_transitions.json").read_text(encoding="utf-8"))["transitions"] if t["kind"] in ("wipe", "soft") and pick(t["name"])]
     if not names: return
     def scene(st, word, col):
         im = still(st, .35); ImageDraw.Draw(im).text((W / 2, H / 2), word, font=font(140), fill=col, anchor="mm"); return im
