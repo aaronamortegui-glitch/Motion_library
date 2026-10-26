@@ -52,7 +52,7 @@ main::-webkit-scrollbar-thumb { background: #4a504d; border-radius: 5px; border:
 /* preview */
 .preview { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px; }
 .stage { aspect-ratio: 16 / 9; width: 100%; background: var(--pine); border-radius: 4px; display: grid; place-items: center; overflow: hidden; }
-.stage img { width: 100%; height: 100%; object-fit: contain; }
+.stage img, .stage video { width: 100%; height: 100%; object-fit: contain; }
 .stage .empty { color: var(--muted); }
 .sel { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
 .sel .name { flex: 1; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -97,7 +97,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--spark); }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
 .card { border: 0; padding: 0; background: none; text-align: center; color: var(--text-dim); min-width: 0; width: 100%; display: flex; flex-direction: column; }
 .card .thumb { width: 100%; align-self: stretch; aspect-ratio: 16 / 9; background: var(--pine); border: 1px solid var(--sea); border-radius: 4px; overflow: hidden; display: grid; place-items: center; }
-.card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.card .thumb img, .card .thumb video { width: 100%; height: 100%; object-fit: cover; }
 .card .label { display: block; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card:hover .thumb { border-color: var(--spark); }
 .card:hover .label { color: var(--text); }

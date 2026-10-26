@@ -20,24 +20,9 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         c.layers.addSolid(hex(PAL.pine), "BG", W, H, 1).locked = true;
         return c;
     }
-    // The neutral sample every move is shown on: a Spark arrow (assets/motion_dna/sample_shape.json), so direction and
-    // rotation read at a glance. Trim-path presets (Draw / Stroke) get its outline.
-    var ARROW = SSM.readJSON(ROOT + "assets/motion_dna/sample_shape.json").paths[0];
-    function smark(c, name, stroke) {
-        var L = c.layers.addShape(); L.name = name;
-        var g = L.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group");
-        g.property("ADBE Vector Transform Group").property("ADBE Vector Scale").setValue([34, 34]);
-        var v = g.property("ADBE Vectors Group"), sh = new Shape();
-        sh.vertices = ARROW.v; sh.inTangents = ARROW.i; sh.outTangents = ARROW.o; sh.closed = ARROW.closed;
-        v.addProperty("ADBE Vector Shape - Group").property("ADBE Vector Shape").setValue(sh);
-        if (stroke) {
-            var st = v.addProperty("ADBE Vector Graphic - Stroke");
-            st.property("ADBE Vector Stroke Color").setValue(hex(PAL.spark)); st.property("ADBE Vector Stroke Width").setValue(12);
-            st.property("ADBE Vector Stroke Line Join").setValue(2);
-        } else v.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").setValue(hex(PAL.spark));
-        L.property("ADBE Transform Group").property("ADBE Position").setValue([W / 2, H / 2]);
-        return L;
-    }
+    // The neutral sample every move is shown on: the robot head (assets/motion_dna/sample_robot.json, agreed 26 Oct),
+    // one subject for every move so moves compare. Trim-path presets (Draw / Stroke) get its one-line version.
+    function smark(c, name, stroke) { return SSM.sampleRobot(c, stroke, null, [W / 2, H / 2], name); }
     function bar(c) {
         var L = c.layers.addShape(); L.name = "bar";
         var v = L.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
@@ -87,25 +72,32 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
         else if (m[a] === "Nudge Grow") L = column(c);
         else if (m[a] === "Wordmark Reveal") { L = text(c, "Motion DNA", SSM.font("ui"), 56); L.property("ADBE Transform Group").property("ADBE Position").setValue([440, H / 2 + 20]); var mk = smark(c, "mark", false); mk.property("ADBE Transform Group").property("ADBE Position").setValue([150, H / 2]); mk.property("ADBE Transform Group").property("ADBE Scale").setValue([75, 75]); mk.moveToBeginning(); }
         else L = smark(c, m[a], /Draw|Stroke/.test(m[a]));
-        SSP.apply(L, m[a], "both", 0.2);
+        // exit-only presets play their exit, so the sample is seen before it leaves
+        SSP.apply(L, m[a], /\(exit\)/.test((SSP.presets[m[a]] || {}).use || "") ? "out" : "both", 0.2);
         made.push(c.name);
     }
     var fx = SSP.effectNames();
     for (var b = 0; b < fx.length; b++) {
         var c2 = comp("fx", fx[b], 3);
-        SSP.applyFx(smark(c2, fx[b], false), fx[b]);
+        var F = smark(c2, fx[b], false);
+        if (fx[b] === "On Twos") SSP.apply(F, "Drop Bounce", "both", 0.2);   // it steps an existing animation: give it one
+        SSP.applyFx(F, fx[b]);
+        // loops made to be subtle in a comp; the preview turns them up so their idea reads in a thumbnail
+        var boost = { "Holo Flicker": ["SS Holo · Flicker chance %", 30], "Breathe": ["SS Breathe · Scale %", 12] }[fx[b]];
+        if (boost) try { F.property("ADBE Effect Parade").property(boost[0]).property(1).setValue(boost[1]); } catch (e) {}
         made.push(c2.name);
     }
     var tx = SSP.textNames();
-    var sample = { "Chars Rise": ["Motion DNA", SSM.font("display"), 96], "Words Fade Up": ["Built for speed", SSM.font("ui"), 56],
-        "Blur Words": ["Calm and premium", SSM.font("display"), 64], "Tracking Settle": ["MOTION LAB", SSM.font("ui"), 54],
-        "Chars Pop": ["5,000", SSM.font("ui"), 110], "Typewriter": ["Hello, Motion DNA", SSM.font("ui"), 60],
-        "Scramble": ["MOTION DNA", SSM.font("ui"), 84], "Count Up": ["12,480", SSM.font("ui"), 110],
-        "Words Slam": ["Words Slam", SSM.font("display"), 80], "Chars Ramp": ["Speed Ramp", SSM.font("display"), 96],
-        "Chars Blur": ["Introducing", SSM.font("display"), 96] };
+    // the sample words (agreed 26 Oct): "DNA", "Motion DNA" where a preset works word by word; numbers where it counts
+    var sample = { "Chars Rise": ["DNA", SSM.font("display"), 130], "Words Fade Up": ["Motion DNA", SSM.font("ui"), 80],
+        "Blur Words": ["Motion DNA", SSM.font("display"), 84], "Tracking Settle": ["MOTION DNA", SSM.font("ui"), 64],
+        "Chars Pop": ["DNA", SSM.font("ui"), 130], "Typewriter": ["Motion DNA", SSM.font("ui"), 80],
+        "Scramble": ["DNA", SSM.font("ui"), 130], "Count Up": ["12,480", SSM.font("ui"), 110],
+        "Words Slam": ["Motion DNA", SSM.font("display"), 84], "Chars Ramp": ["DNA", SSM.font("display"), 130],
+        "Chars Blur": ["DNA", SSM.font("display"), 130] };
     for (var d = 0; d < tx.length; d++) {
         var c3 = comp("text", tx[d], 2.4);
-        var sm = sample[tx[d]] || [tx[d], SSM.font("ui"), 60];
+        var sm = sample[tx[d]] || ["DNA", SSM.font("ui"), 120];
         SSP.applyText(text(c3, sm[0], sm[1], sm[2]), tx[d], "both", 0.2);
         made.push(c3.name);
     }
@@ -113,11 +105,7 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var rids = SSP.recipeIds();
     for (var r = 0; r < rids.length; r++) {
         var c4 = comp("recipe", rids[r], 3);
-        var sq = c4.layers.addShape(); sq.name = rids[r];
-        var gv = sq.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
-        var rr = gv.addProperty("ADBE Vector Shape - Rect"); rr.property("ADBE Vector Rect Size").setValue([120, 120]); rr.property("ADBE Vector Rect Roundness").setValue(24);
-        gv.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").setValue(hex(PAL.spark));
-        sq.property("ADBE Transform Group").property("ADBE Position").setValue([W / 2, H / 2]);
+        var sq = smark(c4, rids[r], false);
         SSP.applyRecipe(sq, rids[r], "both");
         made.push(c4.name);
     }

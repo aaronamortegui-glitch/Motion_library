@@ -24,7 +24,7 @@
         var T = L.property("ADBE Transform Group"), isText = L instanceof TextLayer;
         var p0 = T.property("ADBE Position").valueAtTime(c.duration * 0.5, false), s0 = T.property("ADBE Scale").valueAtTime(c.duration * 0.5, false);
         // rest values = the value in the middle of the comp (presets hold there)
-        var sk = findEffect(L, "SS Skew"), skP = sk ? sk.property("ADBE Geometry2-0006") : null;
+        var sk = findEffect(L, "SS Skew"), skP = sk ? sk.property("ADBE Geometry2-0005") : null;
         var trim = null;
         try { var root = L.property("ADBE Root Vectors Group"); trim = root ? root.property("SS Trim") : null; } catch (e) {}
         var trimEnd = trim ? trim.property("ADBE Vector Trim End") : null, trimStart = trim ? trim.property("ADBE Vector Trim Start") : null;

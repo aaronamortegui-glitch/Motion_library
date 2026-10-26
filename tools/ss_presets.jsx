@@ -780,7 +780,7 @@ var SSP = (function () {
     function skewProp(L) {
         var fx = L.property("ADBE Effect Parade"), e = fx.property("SS Skew") || fx.addProperty("ADBE Geometry2");
         e.name = "SS Skew";
-        return e.property("ADBE Geometry2-0006");   // Skew
+        return e.property("ADBE Geometry2-0005");   // Skew (0006 is Skew Axis)
     }
     function playCss(L, def, t0, reverse) {
         var dur = def.dur * (SSM.speed || 1), R = L.sourceRectAtTime(REF(L), false), bw = R.width || 100, bh = R.height || 100;
@@ -813,15 +813,16 @@ var SSP = (function () {
             var dx = (st.tx || 0) + (st.txp || 0) / 100 * bw, dy = (st.ty || 0) + (st.typ || 0) / 100 * bh;
             return add(p0, [dx, dy]);
         }, function (st) { return tf(st) || st.p === 0 || st.p === 1; });
-        chain(T(L, "ADBE Scale"), function (st) {
-            var k = st.s !== undefined ? st.s : 1;
-            return [s0[0] * (st.sx !== undefined ? st.sx : k), s0[1] * (st.sy !== undefined ? st.sy : k), 100];
-        }, function (st) { return sc(st); });
         var hasS = false, hasR = false, hasO = false, hasRX = false, hasK = false;
         for (var q = 0; q < stops.length; q++) {
             if (sc(stops[q])) hasS = true; if (stops[q].r !== undefined) hasR = true; if (stops[q].o !== undefined) hasO = true;
             if (stops[q].rx !== undefined) hasRX = true; if (stops[q].skx !== undefined) hasK = true;
         }
+        // like CSS, a stop at 0 % or 100 % that leaves the scale out is at scale 1 (zoomOut starts full size)
+        if (hasS) chain(T(L, "ADBE Scale"), function (st) {
+            var k = st.s !== undefined ? st.s : 1;
+            return [s0[0] * (st.sx !== undefined ? st.sx : k), s0[1] * (st.sy !== undefined ? st.sy : k), 100];
+        }, function (st) { return sc(st) || st.p === 0 || st.p === 1; });
         if (hasR) chain(T(L, "ADBE Rotate Z"), function (st) { return r0 + (st.r || 0); }, function (st) { return st.r !== undefined || st.p === 0 || st.p === 1; });
         if (hasO) chain(T(L, "ADBE Opacity"), function (st) { return o0 * st.o; }, function (st) { return st.o !== undefined; });
         if (hasRX) { L.threeDLayer = true; chain(T(L, "ADBE Rotate X"), function (st) { return st.rx || 0; }, function (st) { return st.rx !== undefined || st.p === 1; }); }

@@ -53,25 +53,29 @@ function ktext(c, str, serif, size, col, x, y, name) {{
   d.fontSize = size; d.fillColor = hx(col); d.applyFill = true; d.justification = ParagraphJustification.LEFT_JUSTIFY; p.setValue(d);
   var r = L.sourceRectAtTime(0, false); L.property("ADBE Transform Group").property("ADBE Position").setValue([x - r.left - r.width / 2, y - r.top - r.height / 2]);
   if (name) L.name = name; return L; }}
+// a still from our tutorials behind a piece (empty rooms, so nothing covers a person), dimmed so the piece reads
+function kstill(c, file) {{
+  var f = new File(SS_ROOT + "/library/packs/stills/" + file), it = null;
+  for (var i = 1; i <= app.project.numItems; i++) {{ var x = app.project.item(i); if (x instanceof FootageItem && x.file && x.file.fsName === f.fsName) it = x; }}
+  if (!it) it = app.project.importFile(new ImportOptions(f));
+  var L = c.layers.add(it), k = Math.max(KW / it.width, KH / it.height) * 100; L.property("ADBE Transform Group").property("ADBE Scale").setValue([k, k]);
+  L.property("ADBE Transform Group").property("ADBE Position").setValue([KW / 2, KH / 2]); L.moveToEnd();
+  var bg = null; for (var j = 1; j <= c.numLayers; j++) if (c.layer(j).name === "BG") bg = c.layer(j);
+  if (bg) {{ bg.locked = false; L.moveBefore(bg); bg.locked = true; }}   // above the flat background, under everything else
+  L.locked = true;
+  var D = c.layers.addSolid(hx("#04120F"), "Dim", KW, KH, 1); D.property("ADBE Transform Group").property("ADBE Opacity").setValue(45); D.moveBefore(L); D.locked = true;
+  return L; }}
 function kcard(c, w, h, col, name) {{
   var L = c.layers.addShape(); L.name = name || "Card";
   var v = L.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
   var r = v.addProperty("ADBE Vector Shape - Rect"); r.property("ADBE Vector Rect Size").setValue([w, h]); r.property("ADBE Vector Rect Roundness").setValue(28);
   v.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").setValue(hx(col));
   L.property("ADBE Transform Group").property("ADBE Position").setValue([KW / 2, KH / 2]); return L; }}
-// our mark (assets/brand/motion_dna_mark.json) as the sample subject, centred, h px high
-function kmark(c, h, name) {{
-  var jf = new File(SS_ROOT + "/assets/brand/motion_dna_mark.json"); jf.encoding = "UTF-8"; jf.open("r"); var D = eval("(" + jf.read() + ")"); jf.close();
-  var L = c.layers.addShape(); L.name = name || "Card";
-  var v = L.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
-  for (var i = 0; i < D.paths.length; i++) {{ var P = D.paths[i], sh = new Shape(); sh.vertices = P.v; sh.inTangents = P.i; sh.outTangents = P.o; sh.closed = true;
-    v.addProperty("ADBE Vector Shape - Group").property("ADBE Vector Shape").setValue(sh); }}
-  var f = v.addProperty("ADBE Vector Graphic - Fill"); f.property("ADBE Vector Fill Rule").setValue(2); f.property("ADBE Vector Fill Color").setValue(hx("#D8FF85"));
-  var k = h / D.height * 100; L.property("ADBE Transform Group").property("ADBE Scale").setValue([k, k]);
-  L.property("ADBE Transform Group").property("ADBE Position").setValue([KW / 2, KH / 2]); return L; }}
-function kscene(name, bg, word, col, serif) {{
+// the neutral sample subject: the robot head (assets/motion_dna/sample_robot.json), centred, h px high
+function krobot(c, h, name) {{ return SSM.sampleRobot(c, false, h, [KW / 2, KH / 2], name || "Card"); }}
+function kscene(name, bg, word, col, serif, still) {{   // a scene for transitions: a room from the tutorials and a word
   for (var i = 1; i <= app.project.numItems; i++) if (app.project.item(i).name === name) return app.project.item(i);
-  var c = kcomp(name, 10, bg); ktext(c, word, serif, 150, col, KW / 2, KH / 2); return c; }}
+  var c = kcomp(name, 10, bg); if (still) kstill(c, still); ktext(c, word, serif, 150, col, KW / 2, KH / 2); return c; }}
 """
 
 
@@ -89,7 +93,15 @@ def setup(kind, name, dur, bg=PINE, extra=""):
 
 
 SAMPLE = f'ktext(c, "Motion DNA", false, 120, "{CLOUD}", KW / 2, KH / 2, "Sample");'
-CARD = f'kcard(c, 340, 190, "{SPARK}", "Card");'
+CARD = 'krobot(c, 330, "Card");'   # moves and layer behaviours play on the robot head, like the presets
+ROOMS = ["modern.jpg", "elegant.jpg", "tech.jpg"]   # empty rooms from the tutorials
+
+
+def photo(name):
+    """JSX: a dimmed room behind the piece, the same room for the same piece."""
+    return f'kstill(c, "{ROOMS[sum(map(ord, name)) % len(ROOMS)]}");'
+
+
 MESH = 'SSL.background(c, "mesh", {colors: ["#0A211F", "#174A46", "#2E8B80", "#0F302C", "#174A46", "#9FD9C4"]});'
 
 ELEMENTS = {
@@ -121,15 +133,16 @@ def build_one(kind, name, rows):
     """Creates the preview comp for one piece and applies it. Returns (comp name, answer)."""
     if kind == "element":
         bg_extra = (MESH if name == "glass_card" else "") + (SAMPLE.replace("120", "110") if name in ("underline", "highlight") else "")
-        cn = setup(kind, name, 4.0 if name == "end_card" else 3.5, None if name == "glass_card" else PINE, bg_extra)
+        cn = setup(kind, name, 4.0 if name == "end_card" else 3.5, None if name == "glass_card" else PINE, (photo(name) if name != "glass_card" else "") + bg_extra)
         args = dict(ELEMENTS.get(name, {}))
         cols = [PINE, SPARK, CLOUD]
         if name in ("label", "sticker"): cols = [SPARK, PINE, PINE]
         if name in ("title", "scale_title", "media"): cols = [CLOUD, SPARK, PINE]   # boxless: the text takes the Box colour
+        if name != "end_card": args["out"] = 2.5   # in, hold, out: the preview moves from start to end
         return cn, m.t_add_element(kind=name, comp=cn, t=0.2, colors=cols, **args)
     if kind == "shape":
         cn = setup(kind, name, 2.6)
-        return cn, m.t_add_shape(kind=name, comp=cn, t=0.15, position=[W / 2, H / 2], size=320, colors=[SPARK, CLOUD])
+        return cn, m.t_add_shape(kind=name, comp=cn, t=0.15, out=1.6, position=[W / 2, H / 2], size=320, colors=[SPARK, CLOUD])
     if kind == "move":
         cn = setup(kind, name, 2.2, PINE, CARD)
         return cn, m.t_move(move=name, layers=["Card"], comp=cn, phase="in", t=0.2)
@@ -138,8 +151,8 @@ def build_one(kind, name, rows):
             cn = setup(kind, name, 3.0)
             words = [{"w": w, "s": 0.2 + i * 0.35, "e": 0.55 + i * 0.35} for i, w in enumerate("Motion with its own DNA".split())]
             return cn, m.t_add_captions(words=words, comp=cn, style="highlight", colors=[PINE, SPARK, CLOUD])
-        cn = setup(kind, name, 2.6, PINE, SAMPLE)
-        return cn, m.t_animate_text(layers=["Sample"], comp=cn, t=0.2, **TEXT[name])
+        cn = setup(kind, name, 2.6, PINE, photo(name) + SAMPLE)
+        return cn, m.t_animate_text(layers=["Sample"], comp=cn, t=0.2, **dict(dict(phase="both"), **TEXT[name]))
     if kind == "background":
         cn = setup(kind, name, 3.0, None)
         return cn, m.t_add_look(kind=name, comp=cn, colors=[PINE, SEA, TEAL, MINT, SPARK, CLOUD])
@@ -160,7 +173,7 @@ def build_one(kind, name, rows):
         return cn, m.t_add_behavior(behavior=name, target=tg, comp=cn, t=0.15, colors=[SPARK, MINT, TEAL, CLOUD], **extra)
     if kind == "transition":
         row = rows[name]
-        ab = 'var A = kscene("KIT scene A", "#0A211F", "MOTION", "#F7F9F2", false), B = kscene("KIT scene B", "#174A46", "DNA", "#D8FF85", false);\n' \
+        ab = 'var A = kscene("KIT room A", "#0A211F", "MOTION", "#F7F9F2", false, "tech.jpg"), B = kscene("KIT room B", "#174A46", "DNA", "#D8FF85", false, "elegant.jpg");\n' \
              'var LA = c.layers.add(A); LA.name = "A"; LA.outPoint = 1.25; var LB = c.layers.add(B); LB.name = "B"; LB.startTime = 0; LB.inPoint = 1.25; LB.moveToBeginning();'
         cn = setup(kind, name, 2.5, None, ab)
         clip = row["type"] in CLIP_TYPES
@@ -201,7 +214,7 @@ def build():
 
 def render():
     """Queues every listed comp without an MP4 and renders in AE (render_queue.jsx with the kit list)."""
-    m.run_jsx(f'$.global.SS_GIF_LIST = {json.dumps(LIST.as_posix())}; $.evalFile(new File(SS_ROOT + "/tools/render_queue.jsx")); return "queued";', includes=())
+    m.run_jsx(f'$.global.SS_GIF_LIST = {json.dumps(LIST.as_posix())}; $.evalFile(new File(SS_ROOT + "/tools/render_queue.jsx")); $.global.SS_GIF_LIST = undefined; return "queued";', includes=())
     names = [l for l in LIST.read_text(encoding="utf-8").splitlines() if l]
     want = [ROOT / "library/mp4" / n.split("__")[1] / (slug("__".join(n.split("__")[2:])) + ".mp4") for n in names]
     t0 = time.time()

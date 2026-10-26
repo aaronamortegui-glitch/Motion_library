@@ -450,6 +450,20 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **Patching big JSX files from Python:** the files are CRLF; detect the newline (`chr(13) + chr(10)`) and replace
   with it. Never write the patch through a bash heredoc that contains `\n` / `\r` escapes meant for Python: write the
   `.py` with an editor tool instead (a heredoc turned them into real line breaks and broke the script).
+- **Text over a photo covered the people.** Symptom: "muchas veces cortamos las caras, o el texto se sale del box…
+  que las personas no se corten o no las ocultemos" (style previews, 26 Oct 2026). Cause: the text block and its panel
+  had a fixed place. Fix: `tools/subjects.py` finds faces (Haar) and bodies (U2-Net) and `frame_people()` picks the
+  left column, right column or bottom band that hides nobody, zooming and sliding the still if needed (never cutting a
+  head); `tools/style_scenes.py` builds every style scene that way. Detectors take mugs and hands for faces: list them in
+  `DROP` after looking at the overlay (`--overlay DIR`).
+- **A shape layer whose path is in comp pixels landed off screen.** Cause: a new shape layer sits at the comp centre,
+  so path points are offset by half the comp. Fix: set its Position to [0, 0] when the path is in comp pixels.
+- **aerender's 15 Mbps H.264 is heavy for photo scenes** (1.2–6.9 MB for a 3.5 s style preview). Re-encode with x264
+  CRF 30 (50–200 KB); for the web, VP9 WebM at 640 px (`tools/make_webm.py`) is a quarter of the GIFs' weight and keeps
+  the photo's colours.
+- **Figma (html_to_figma) drops CSS `clip-path` and elliptic `border-radius`:** slanted or round shapes come in as
+  rectangles. Draw them as SVG paths (viewBox equal to the size). Figma's fonts also run a little wider: leave ~16 px
+  of slack in pills and strips, and check texts against their painted frames after import.
 
 ## 6. Audio
 - Target about **−16 LUFS integrated** for web (measure: `ffmpeg -i out.mp4 -af ebur128 -f null -`).

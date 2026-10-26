@@ -40,8 +40,10 @@ Windows or macOS · After Effects 2025/2026 · Python 3 (`numpy`, `opencv-python
    python tools/readme_catalog.py      # docs/CATALOG.md
    ```
    If the poster of your preset catches an empty frame, adjust its time in `tools/make_previews_stills.sh`.
-   Never use a brand logo as the sample: the library is neutral. Every non-text preview uses the Spark arrow
-   (`assets/motion_dna/sample_shape.json`), so direction and rotation read at a glance.
+   Never use a brand logo as the sample: the library is neutral. Every non-text preview plays on the robot head
+   (`assets/motion_dna/sample_robot.json`, drawn by `SSM.sampleRobot`): one subject for every move, so moves compare;
+   line presets (Draw, Stroke) draw its one-line version. Text previews say "DNA", or "Motion DNA" when a preset works
+   word by word (agreed 26 Oct 2026).
 6. **Look at the GIF** before committing. If the thumbnail does not show the idea, fix the preset or the sample in `tools/gif_comps.jsx`.
 
 ## 2. Add effects from an open-source project
@@ -66,8 +68,10 @@ Windows or macOS · After Effects 2025/2026 · Python 3 (`numpy`, `opencv-python
 `stagger` in frames, an optional `delay` and an optional `fx` loop per role. It is **tagged like the presets** —
 `tones`, `energy_range` [1–5], `energy` word — and can carry its own `curve` (a token easing that re-eases every move
 of the style), the `transition` preset it uses between scenes, and its `source` (`handmade` or `reference:<slug>`).
-`SSP.applyPack(comp, name)` classifies the layers and applies them. Its preview is a **2×2 grid** (title · text ·
-shapes · media): `bash tools/rebuild_previews.sh` renders it (`tools/pack_demos.jsx`) and makes the panel stills.
+`SSP.applyPack(comp, name)` classifies the layers and applies them. Its preview is a **scene**: a still from our
+tutorials full-bleed with the style's own type, line, pills and shape in the side nobody stands in, all animated by the
+style (`tools/style_scenes.py`, which keeps faces and bodies clear with `tools/subjects.py`). Give a new style its line,
+pills and still in `STYLE` there (the still in `library/packs/stills/`), then `bash tools/rebuild_previews.sh`.
 
 ## 4. Add a case study (a test video)
 1. **Folder** `media/<case>/`:

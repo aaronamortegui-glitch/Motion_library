@@ -217,6 +217,39 @@ var SSM = (function () {
             return Folder("~/Library/Application Support/MisterHorse/ProductManager/AssetPacks/").fsName + "/";
         },
         isMac: function () { return $.os.indexOf("Windows") < 0; },
+        // The neutral preview subject (assets/motion_dna/sample_robot.json): the robot head, or its one-line version
+        // (line = true, for Draw / Stroke presets). One shape layer centred at `at`, `h` px high (default 166).
+        sampleRobot: function (comp, line, h, at, name) {
+            var root = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).parent.parent.fsName.split("\\").join("/");
+            var D = readJSON(root + "/assets/motion_dna/sample_robot.json"), pal = readJSON(root + "/assets/figma_essentials/palette.json").colors;
+            function rgb(n) { var x = (pal[n] || n).replace("#", ""); return [parseInt(x.substr(0, 2), 16) / 255, parseInt(x.substr(2, 2), 16) / 255, parseInt(x.substr(4, 2), 16) / 255]; }
+            var parts = line ? D.line : D.vector, L = comp.layers.addShape(); L.name = name || (line ? "Robot · line" : "Robot");
+            var vecs = L.property("ADBE Root Vectors Group");
+            for (var i = parts.length - 1; i >= 0; i--) {   // AE draws the first group on top: add the front part first
+                var P = parts[i], g = vecs.addProperty("ADBE Vector Group"); g.name = P.name;
+                var v = g.property("ADBE Vectors Group");
+                if (P.rect) {
+                    var r = v.addProperty("ADBE Vector Shape - Rect"); r.property("ADBE Vector Rect Size").setValue(P.rect.size);
+                    r.property("ADBE Vector Rect Position").setValue(P.rect.center); r.property("ADBE Vector Rect Roundness").setValue(P.rect.round);
+                } else if (P.ellipse) {
+                    var e = v.addProperty("ADBE Vector Shape - Ellipse"); e.property("ADBE Vector Ellipse Size").setValue(P.ellipse.size);
+                    e.property("ADBE Vector Ellipse Position").setValue(P.ellipse.center);
+                } else {
+                    var sh = new Shape(); sh.vertices = P.path.v; sh.inTangents = P.path.i; sh.outTangents = P.path.o; sh.closed = P.path.closed;
+                    v.addProperty("ADBE Vector Shape - Group").property("ADBE Vector Shape").setValue(sh);
+                }
+                if (P.stroke) {
+                    var st = v.addProperty("ADBE Vector Graphic - Stroke");
+                    st.property("ADBE Vector Stroke Color").setValue(rgb(P.stroke)); st.property("ADBE Vector Stroke Width").setValue(P.width);
+                    st.property("ADBE Vector Stroke Line Cap").setValue(2); st.property("ADBE Vector Stroke Line Join").setValue(2);
+                }
+                if (P.fill) v.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").setValue(rgb(P.fill));
+            }
+            var k = (h || D.height) / D.height * 100, T = L.property("ADBE Transform Group");
+            T.property("ADBE Scale").setValue([k, k]);
+            T.property("ADBE Position").setValue(at || [comp.width / 2, comp.height / 2]);
+            return L;
+        },
         readJSON: readJSON
     };
 })();

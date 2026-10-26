@@ -1,0 +1,483 @@
+{
+ "name": "Motion DNA sample robot head",
+ "note": "The neutral subject of every preview (agreed 26 Oct 2026): one robot head for every move, so moves compare; 'line' is the one-line version that line presets (Draw, Stroke) draw. Colours are palette names (assets/figma_essentials/palette.json); sizes in px at 100 % scale, centred on the layer's anchor.",
+ "height": 166.0,
+ "width": 148.0,
+ "vector": [
+  {
+   "name": "Antenna",
+   "path": {
+    "v": [
+     [
+      42.0,
+      -41.0
+     ],
+     [
+      42.0,
+      -77.0
+     ]
+    ],
+    "i": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "o": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "closed": false
+   },
+   "stroke": "grey",
+   "width": 6.0
+  },
+  {
+   "name": "Antenna tip",
+   "ellipse": {
+    "center": [
+     42.0,
+     -77.0
+    ],
+    "size": [
+     12.0,
+     12.0
+    ]
+   },
+   "fill": "coral"
+  },
+  {
+   "name": "Top",
+   "rect": {
+    "center": [
+     -10.0,
+     -52.0
+    ],
+    "size": [
+     24.0,
+     18.0
+    ],
+    "round": 6.0
+   },
+   "fill": "coral"
+  },
+  {
+   "name": "Head",
+   "rect": {
+    "center": [
+     0.0,
+     19.0
+    ],
+    "size": [
+     148.0,
+     128.0
+    ],
+    "round": 20.0
+   },
+   "fill": "cloud"
+  },
+  {
+   "name": "Screen",
+   "rect": {
+    "center": [
+     0.0,
+     17.0
+    ],
+    "size": [
+     112.0,
+     88.0
+    ],
+    "round": 14.0
+   },
+   "fill": "pine"
+  },
+  {
+   "name": "Eye L",
+   "path": {
+    "v": [
+     [
+      -36.0,
+      11.0
+     ],
+     [
+      -25.0,
+      0.0
+     ],
+     [
+      -14.0,
+      11.0
+     ]
+    ],
+    "i": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "o": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "closed": false
+   },
+   "stroke": "spark",
+   "width": 7.2
+  },
+  {
+   "name": "Eye R",
+   "path": {
+    "v": [
+     [
+      14.0,
+      11.0
+     ],
+     [
+      25.0,
+      0.0
+     ],
+     [
+      36.0,
+      11.0
+     ]
+    ],
+    "i": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "o": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "closed": false
+   },
+   "stroke": "spark",
+   "width": 7.2
+  },
+  {
+   "name": "Smile",
+   "path": {
+    "v": [
+     [
+      -18.0,
+      33.0
+     ],
+     [
+      18.0,
+      33.0
+     ]
+    ],
+    "i": [
+     [
+      0,
+      0
+     ],
+     [
+      -12.0,
+      9.33
+     ]
+    ],
+    "o": [
+     [
+      12.0,
+      9.33
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "closed": false
+   },
+   "stroke": "spark",
+   "width": 7.2
+  },
+  {
+   "name": "Ear",
+   "rect": {
+    "center": [
+     64.0,
+     15.0
+    ],
+    "size": [
+     8.0,
+     36.0
+    ],
+    "round": 4.0
+   },
+   "fill": "grey"
+  }
+ ],
+ "line": [
+  {
+   "name": "Head",
+   "rect": {
+    "center": [
+     0.0,
+     19.0
+    ],
+    "size": [
+     144.0,
+     124.0
+    ],
+    "round": 18.0
+   },
+   "stroke": "spark",
+   "width": 6.0
+  },
+  {
+   "name": "Screen",
+   "rect": {
+    "center": [
+     0.0,
+     17.0
+    ],
+    "size": [
+     108.0,
+     84.0
+    ],
+    "round": 12.0
+   },
+   "stroke": "spark",
+   "width": 6.0
+  },
+  {
+   "name": "Antenna",
+   "path": {
+    "v": [
+     [
+      42.0,
+      -43.0
+     ],
+     [
+      42.0,
+      -75.0
+     ]
+    ],
+    "i": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "o": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "closed": false
+   },
+   "stroke": "spark",
+   "width": 6.0
+  },
+  {
+   "name": "Top",
+   "ellipse": {
+    "center": [
+     -10.0,
+     -55.0
+    ],
+    "size": [
+     16.0,
+     16.0
+    ]
+   },
+   "stroke": "spark",
+   "width": 6.0
+  },
+  {
+   "name": "Eye L",
+   "path": {
+    "v": [
+     [
+      -34.0,
+      7.0
+     ],
+     [
+      -24.0,
+      -3.0
+     ],
+     [
+      -14.0,
+      7.0
+     ]
+    ],
+    "i": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "o": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "closed": false
+   },
+   "stroke": "spark",
+   "width": 6.0
+  },
+  {
+   "name": "Eye R",
+   "path": {
+    "v": [
+     [
+      14.0,
+      7.0
+     ],
+     [
+      24.0,
+      -3.0
+     ],
+     [
+      34.0,
+      7.0
+     ]
+    ],
+    "i": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "o": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "closed": false
+   },
+   "stroke": "spark",
+   "width": 6.0
+  },
+  {
+   "name": "Smile",
+   "path": {
+    "v": [
+     [
+      -16.0,
+      29.0
+     ],
+     [
+      16.0,
+      29.0
+     ]
+    ],
+    "i": [
+     [
+      0,
+      0
+     ],
+     [
+      -10.67,
+      8.0
+     ]
+    ],
+    "o": [
+     [
+      10.67,
+      8.0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "closed": false
+   },
+   "stroke": "spark",
+   "width": 6.0
+  }
+ ]
+}

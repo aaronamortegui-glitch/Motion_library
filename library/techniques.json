@@ -96,7 +96,7 @@
    "what": "Every finished animation gets its sound effects, made in code (Tone.js) so they are ours to ship: a whoosh on cuts and big moves, a swish on medium moves, a pop when something scales in, a soft tick when text arrives, and whatever a marker 'sfx: <name>' asks for. Each lands one frame after its picture, a repeated sound rotates takes, and it all arrives as one audio layer, Motion DNA sound.",
    "how": "MCP add_sound (auto: reads the comp through tools/sound_events.jsx; or cues [{t, sfx}]); tools/sound_kit.py renders the WAV in headless Chrome. Hear the kit: tools/sound/kit.html. Run it when the animation is final and again after retiming; real music goes in with add_asset.",
    "ask": "Give this comp its sound effects.",
-   "image": "techniques/sound-pass_card.png"
+   "image": "techniques/sound-pass.png"
   }
  ]
 }

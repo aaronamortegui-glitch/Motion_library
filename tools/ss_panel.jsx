@@ -6,7 +6,7 @@
 // tools/install_panel.sh (macOS). Or run it directly: File > Scripts > Run Script File… > tools/ss_panel.jsx.
 // The installed loader sets SS_ROOT (repo path) and SS_PANEL_HOST (the dockable panel) before evaluating this file.
 // Previews: ScriptUI cannot play GIFs, so the panel redraws the preset's real motion, sampled into
-// library/preview_curves.json by tools/sample_previews.jsx, on the neutral sample arrow.
+// library/preview_curves.json by tools/sample_previews.jsx, on the neutral sample (the robot head).
 #include "ss_presets.jsx"
 #include "ss_assets.jsx"
 
@@ -278,27 +278,57 @@ var SS_ROOT = (typeof SS_ROOT !== "undefined" && SS_ROOT) || File($.fileName).pa
     var CUR = null, FRAME = 0;   // CUR = { key, kind, name } of the selected preset
     var PREV_IMG = null;          // still shown in the preview for styles, techniques and assets
     function setPreview(path) { PREV_IMG = null; try { var f = new File(SS_ROOT + path); if (f.exists) PREV_IMG = ScriptUI.newImage(f); } catch (e) {} }
-    // the neutral sample: a Spark arrow (assets/motion_dna/sample_shape.json), so direction and rotation read at a glance
-    var ARROW = (function () {
-        var pts = [[-330, -55], [60, -55], [60, -160], [330, 0], [60, 160], [60, 55], [-330, 55]];
-        try { pts = SSM.readJSON(SS_ROOT + "/assets/motion_dna/sample_shape.json").paths[0].v; } catch (e) {}
-        var out = []; for (var i = 0; i < pts.length; i++) out.push([pts[i][0] / 660, pts[i][1] / 660]);
-        return out;
+    // the neutral sample: the robot head (assets/motion_dna/sample_robot.json), the same subject as the GIFs; line
+    // presets draw its one-line version. Each part becomes a polygon (curves sampled), sized to the robot's height.
+    var ROBOT = (function () {
+        var D = null; try { D = SSM.readJSON(SS_ROOT + "/assets/motion_dna/sample_robot.json"); } catch (e) {}
+        if (!D) return null;
+        var pal = { pine: C.pine, spark: C.spark, cloud: C.cloud, coral: C.coral, grey: C.muted, sea: C.sea };
+        function rrect(cx, cy, w, h, r) {   // a rounded rectangle, 4 points per corner
+            var pts = [], q = [[w / 2 - r, -h / 2 + r, -90], [w / 2 - r, h / 2 - r, 0], [-w / 2 + r, h / 2 - r, 90], [-w / 2 + r, -h / 2 + r, 180]];
+            for (var k = 0; k < 4; k++) for (var j = 0; j <= 3; j++) { var t = (q[k][2] + j * 30) * Math.PI / 180; pts.push([cx + q[k][0] + r * Math.cos(t), cy + q[k][1] + r * Math.sin(t)]); }
+            return pts;
+        }
+        function part(P) {
+            var pts = [], closed = true;
+            if (P.rect) pts = rrect(P.rect.center[0], P.rect.center[1], P.rect.size[0], P.rect.size[1], Math.min(P.rect.round, P.rect.size[0] / 2, P.rect.size[1] / 2));
+            else if (P.ellipse) { for (var j = 0; j < 12; j++) { var t = j * Math.PI / 6; pts.push([P.ellipse.center[0] + P.ellipse.size[0] / 2 * Math.cos(t), P.ellipse.center[1] + P.ellipse.size[1] / 2 * Math.sin(t)]); } }
+            else {
+                var v = P.path.v, o = P.path.o, n = P.path.i; closed = P.path.closed;
+                for (var s2 = 0; s2 < v.length - 1; s2++) for (var u = 0; u < 6; u++) {   // cubic segment, 6 samples
+                    var tt = u / 6, a0 = v[s2], a1 = [v[s2][0] + o[s2][0], v[s2][1] + o[s2][1]], a2 = [v[s2 + 1][0] + n[s2 + 1][0], v[s2 + 1][1] + n[s2 + 1][1]], a3 = v[s2 + 1], m = 1 - tt;
+                    pts.push([m * m * m * a0[0] + 3 * m * m * tt * a1[0] + 3 * m * tt * tt * a2[0] + tt * tt * tt * a3[0], m * m * m * a0[1] + 3 * m * m * tt * a1[1] + 3 * m * tt * tt * a2[1] + tt * tt * tt * a3[1]]);
+                }
+                pts.push(v[v.length - 1]);
+            }
+            for (var i = 0; i < pts.length; i++) pts[i] = [pts[i][0] / D.height, pts[i][1] / D.height];
+            return { pts: pts, closed: closed, fill: P.fill ? pal[P.fill] : null, stroke: P.stroke ? pal[P.stroke] : null, width: (P.width || 0) / D.height };
+        }
+        var R = { vector: [], line: [] };
+        for (var i = 0; i < D.vector.length; i++) R.vector.push(part(D.vector[i]));
+        for (var j2 = 0; j2 < D.line.length; j2++) R.line.push(part(D.line[j2]));
+        return R;
     })();
-    function arrow(g, W, H, it, f) {
+    function arrow(g, W, H, it, f) {   // draws the sample (the robot) at this frame of the preset's sampled motion
+        if (!ROBOT) return;
         var dx = f[0] * W, dy = f[1] * H, sx = f[2], sy = f[3] * Math.cos((f[6] || 0) * Math.PI / 180), rot = f[4] * Math.PI / 180;
         var op = Math.max(0, Math.min(1, f[5])), sk = Math.tan((f[7] || 0) * Math.PI / 180), trim = f[8];
-        var size = 150 * Math.min(W / PW, H / PH), c = Math.cos(rot), s = Math.sin(rot), pts = ARROW.concat([ARROW[0]]);
-        var stroke = it.shape === "stroke", last = stroke ? Math.max(2, Math.round(pts.length * trim)) : ARROW.length;
-        g.newPath();
-        for (var p = 0; p < last; p++) {
-            var x = pts[p][0] * size * sx, y = pts[p][1] * size * sy; x += sk * y;
-            var xr = x * c - y * s + W / 2 + dx, yr = x * s + y * c + H / 2 + dy;
-            if (p === 0) g.moveTo(xr, yr); else g.lineTo(xr, yr);
+        var size = 80 * Math.min(W / PW, H / PH), c = Math.cos(rot), s = Math.sin(rot);
+        var stroke = it.shape === "stroke", parts = stroke ? ROBOT.line : ROBOT.vector, total = 0, k;
+        for (k = 0; k < parts.length; k++) total += parts[k].pts.length;
+        var budget = stroke ? Math.round(total * Math.max(0, Math.min(1, trim))) : total;   // the draw-on: points in order
+        for (k = 0; k < parts.length && budget > 1; k++) {
+            var P = parts[k], pts = P.closed && stroke ? P.pts.concat([P.pts[0]]) : P.pts, last = Math.min(pts.length, budget);
+            budget -= pts.length;
+            g.newPath();
+            for (var q = 0; q < last; q++) {
+                var x = pts[q][0] * size * sx, y = pts[q][1] * size * sy; x += sk * y;
+                var xr = x * c - y * s + W / 2 + dx, yr = x * s + y * c + H / 2 + dy;
+                if (q === 0) g.moveTo(xr, yr); else g.lineTo(xr, yr);
+            }
+            if (P.fill && !stroke) { g.closePath(); g.fillPath(g.newBrush(g.BrushType.SOLID_COLOR, [P.fill[0], P.fill[1], P.fill[2], op])); }
+            else if (P.stroke) g.strokePath(g.newPen(g.PenType.SOLID_COLOR, [P.stroke[0], P.stroke[1], P.stroke[2], op], Math.max(1, Math.round(P.width * size))));
         }
-        var col = [C.spark[0], C.spark[1], C.spark[2], op];
-        if (stroke) g.strokePath(g.newPen(g.PenType.SOLID_COLOR, col, 3));
-        else { g.closePath(); g.fillPath(g.newBrush(g.BrushType.SOLID_COLOR, col)); }
     }
     view.onDraw = function () {
         var g = this.graphics, W = this.size.width, H = this.size.height;

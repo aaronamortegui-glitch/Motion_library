@@ -26,10 +26,27 @@ function safeImg(srcs, label, attrs = {}) {
   img.rest = img.src;
   return img;
 }
+// the WebM next to a preview GIF (tools/make_webm.py): lighter and true to the photos; the GIF stays the fallback
+function webmOf(gif) { return gif && /\.gif($|\?)/.test(gif) ? gif.replace("/library/gifs/", "/library/webm/").replace(/\.gif/, ".webm") : ""; }
+function clip(gif, attrs = {}) {   // a looping, muted video of the preview; falls back to the GIF if there is no WebM
+  const v = h("video", Object.assign({ muted: "", loop: "", autoplay: "", playsinline: "" }, attrs));
+  v.muted = true; v.addEventListener("error", () => v.replaceWith(h("img", Object.assign({ src: gif, alt: "" }, attrs))), { once: true });
+  v.src = webmOf(gif); return v;
+}
 function hoverPlay(card, img, gif) {
-  let on = false;
-  card.addEventListener("mouseenter", () => { on = true; const t = new Image(); t.onload = () => { if (on && img.isConnected) img.src = t.src; }; t.src = gif + "?t=" + Date.now(); card.classList.add("playing"); });
-  card.addEventListener("mouseleave", () => { on = false; if (img.isConnected && img.src !== img.rest) img.src = img.rest; card.classList.remove("playing"); });
+  let on = false, v = null;
+  card.addEventListener("mouseenter", () => {   // hover plays the preview from the start, over the still
+    on = true; card.classList.add("playing");
+    if (!webmOf(gif)) { const t = new Image(); t.onload = () => { if (on && img.isConnected) img.src = t.src; }; t.src = gif + "?t=" + Date.now(); return; }
+    v = clip(gif, { class: img.className }); v.hidden = true;
+    v.addEventListener("playing", () => { if (on && img.isConnected) { img.hidden = true; v.hidden = false; } }, { once: true });
+    img.after(v);
+  });
+  card.addEventListener("mouseleave", () => {
+    on = false; card.classList.remove("playing");
+    if (v) { v.remove(); v = null; img.hidden = false; }
+    if (img.isConnected && img.src !== img.rest) img.src = img.rest;
+  });
 }
 const store = {   // per-user conveniences (section, filters, favorites); the panel works without it
   get(k, d) { try { const v = localStorage.getItem("mdna." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
@@ -201,7 +218,7 @@ function clearSelection(sec) {
 function showPreview(sec, it) {
   const p = PV[sec]; if (!p) return;
   if (p.bar) { p.bar.classList.add("picked"); p.bar.title = [it.channels, it.use].filter(Boolean).join(" — "); if (p.clear) p.clear.hidden = false; }
-  if (p.stage) p.stage.replaceChildren(it.img ? h("img", { src: it.img, alt: "" }) : h("span", { class: "empty" }, "(no preview)"));
+  if (p.stage) p.stage.replaceChildren(it.img ? clip(it.img) : h("span", { class: "empty" }, "(no preview)"));
   p.name.textContent = it.title || it.name; p.energy.textContent = it.energy ? "· " + it.energy : "";
   p.info.textContent = [it.channels, it.use].filter(Boolean).join(" — ");
   p.fav.hidden = !it.favKey; p.fav.classList.toggle("on", S.favs.has(it.favKey)); p.fav.textContent = S.favs.has(it.favKey) ? "★" : "☆";
