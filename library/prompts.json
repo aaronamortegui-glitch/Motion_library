@@ -18,12 +18,11 @@
     {"group": "Edit & sound", "prompt": "Cut this edit to the voiceover's word times.", "uses": "Technique · Cut on the voice", "preview": "techniques/cut-on-the-voice.webm", "poster": "techniques/cut-on-the-voice_clip.jpg"},
     {"group": "Edit & sound", "prompt": "Give this comp its sound effects.", "uses": "Technique · Sound pass (add_sound)", "preview": "techniques/sound-pass.webm", "poster": "techniques/sound-pass_clip.jpg"},
     {"group": "Edit & sound", "prompt": "Join these two scenes with a clean wipe.", "uses": "Kit · Transition, Clean Wipe (solid_transition)", "preview": "webm/kit-transition/clean-wipe.webm", "poster": "posters/kit-transition/clean-wipe.jpg"},
-    {"group": "Brand", "prompt": "Use our brand's curves and timing on this comp.", "uses": "Brand profile (apply_brand)", "preview": "guide/panel-agent.webm", "poster": "guide/panel-agent.jpg"},
-    {"group": "Brand", "prompt": "Remember: titles never bounce for this client.", "uses": "Brand note, a new rule (add_brand_note)", "preview": "guide/panel-agent.webm", "poster": "guide/panel-agent.jpg"},
-    {"group": "Other apps", "prompt": "Grab this storyboard from Figma and animate it in an editorial style.", "uses": "Figma + Style · Editorial", "preview": "packs/editorial.webm", "poster": "packs/editorial.png"},
-    {"group": "Other apps", "prompt": "QA this comp against its Figma layouts.", "uses": "Figma + check_layout", "preview": "guide/panel-agent.webm", "poster": "guide/panel-agent.jpg"},
-    {"group": "Other apps", "prompt": "Resize this comp into every social format.", "uses": "resize_comp (16:9, 1:1, 9:16, 4:5)", "preview": "packs/modern.webm", "poster": "packs/modern.png"},
-    {"group": "Other apps", "prompt": "Connect to Blender and block out this scene with a camera move.", "uses": "Blender (Motion DNA add-on)", "preview": "guide/panel-agent.webm", "poster": "guide/panel-agent.jpg"},
-    {"group": "Check", "prompt": "Check the layout and render the key frames before we render.", "uses": "check_layout + render_frame", "preview": "guide/panel-agent.webm", "poster": "guide/panel-agent.jpg"}
+    {"group": "Brand", "prompt": "Use our brand's curves and timing on this comp.", "uses": "Brand profile (apply_brand)", "preview": "prompts/brand-curves.webm", "poster": "prompts/brand-curves.jpg"},
+    {"group": "Brand", "prompt": "Remember: titles never bounce for this client.", "uses": "Brand note, a new rule (add_brand_note)", "preview": "prompts/brand-note.webm", "poster": "prompts/brand-note.jpg"},
+    {"group": "Other apps", "prompt": "Grab this storyboard from Figma and animate it in an editorial style.", "uses": "Figma + Style · Editorial", "preview": "prompts/figma-storyboard.webm", "poster": "prompts/figma-storyboard.jpg"},
+    {"group": "Other apps", "prompt": "QA this comp against its Figma layouts.", "uses": "Figma + check_layout", "preview": "prompts/figma-qa.webm", "poster": "prompts/figma-qa.jpg"},
+    {"group": "Other apps", "prompt": "Resize this comp into every social format.", "uses": "resize_comp (16:9, 1:1, 9:16, 4:5)", "preview": "prompts/resize.webm", "poster": "prompts/resize.jpg"},
+    {"group": "Check", "prompt": "Check the layout and render the key frames before we render.", "uses": "check_layout + render_frame", "preview": "prompts/check.webm", "poster": "prompts/check.jpg"}
   ]
 }
