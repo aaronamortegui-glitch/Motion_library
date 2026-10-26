@@ -33,7 +33,7 @@ animate keeps a profile that **learns from each review**, and everything it make
   marker `sfx: hit` asks for. Each lands one frame after its picture, repeats rotate takes, and it all arrives as one
   layer, *Motion DNA sound*. Hear the kit in `tools/sound/kit.html`.
 - **Twenty open-source engines, put to work** ([the list](docs/OPEN_SOURCE.md)): real springs and wobble from
-  react-spring and anime.js (`apply_spring`), 2D physics from matter.js (`physics`: fall, drop in, burst), 74 shader
+  react-spring and anime.js (`apply_spring`), 2D physics from matter.js (`physics`: fall, drop in, burst), 73 shader
   transitions from gl-transitions (`gl_transition`), and `add_fx` for confetti and fireworks (tsParticles), sparks
   (PixiJS), hand-drawn annotations (paper.js), generative backgrounds (p5.js, OGL), the DNA helix and product turntables
   in 3D (three.js) and 3D shapes that pile up (Rapier). Screen recordings from OBS (`record_screen`), faster word timings
@@ -365,7 +365,7 @@ already made, so the next brief offers something else: Motion DNA is a Swiss arm
 | Outside resources (scripts, engines, VFX, SFX, music; licenses checked) | 180 | *"find a whoosh for this cut"* |
 | Sound effects made in code (`add_sound`, on by default) | 12 sounds + 3 beds | *"give it sound"*, or nothing: it comes with every finished piece |
 | Springs and named eases (react-spring, anime.js) | 16 | *"make it wobble"*, *"a real spring"* |
-| Shader transitions (gl-transitions) | 74 | *"a heart wipe between these clips"* |
+| Shader transitions (gl-transitions) | 73 | *"a heart wipe between these clips"* |
 | Web FX (confetti, fireworks, sparks, annotations, generative backgrounds, 3D) | 8 | *"confetti when the logo lands"*, *"circle the price"* |
 | Physics (2D baked to keys; 3D shapes) | 3 + 1 | *"let the icons fall and pile up"* |
 | Request routes (`library/intake.json`) | 54 | *"I want a video for…"*: Claude asks, proposes, then builds |
@@ -396,7 +396,7 @@ movement uses the token curves (acceleration and deceleration, overshoot when th
 | **Looks** (finishing layers) | `tritone`, `duotone`, `vignette`, `grain`, `scanlines`, `letterbox`, `dust`, `embers`, `snow`, `long_shadow`, `glitch` | `add_look` |
 | **Text engine** (per char, word or line) | `Chars Pop Rise`, `Words Decode`, `Lines Mask Rise`, `Chars 3D Flip`, `Chars Wiggly Scale`, `Words Tracking Blur`, `Chars Skew Slide`, `Words Colour Pop`, `Typewriter Cursor`, `Captions`; channels fade, rise, drop, slide, scale, rotate, 3D, skew, tracking, blur, decode, colour | `animate_text`, `add_captions` |
 | **Moves** (2D/3D entrances and exits) | `flip`, `hinge`, `orbit`, `fly`, `tumble`, `grow_edge`, `squash` | `move` |
-| **Shader transitions** (12 here, 74 with `gl_transition`; gl-transitions shaders as luma mattes, clip to clip) | `HeartWipe`, `StarWipe`, `FlowerWipe`, `Pinwheel`, `ClockWipe`, `PolkaDotsCurtain`, `Crosshatch`, `WindowBlinds`, `RadialWipe`, `PerlinDissolve`, `DoomMelt`, `UndulatingBurnOut` | `gl_transition` |
+| **Shader transitions** (12 here, 73 with `gl_transition`; gl-transitions shaders as luma mattes, clip to clip) | `HeartWipe`, `StarWipe`, `FlowerWipe`, `Pinwheel`, `ClockWipe`, `PolkaDotsCurtain`, `Crosshatch`, `WindowBlinds`, `RadialWipe`, `PerlinDissolve`, `DoomMelt`, `UndulatingBurnOut` | `gl_transition` |
 | **Springs and eases** (react-spring 10, anime.js 4; beyond the tokens' ~8 % overshoot) | `react-spring default`, `react-spring gentle`, `react-spring wobbly`, `react-spring stiff`, `react-spring slow`, `react-spring molasses`, `anime spring default`, `anime spring bounce 0 · 500 ms`, `anime spring bounce 0.25 · 600 ms`, `anime spring bounce 0.5 · 628 ms`, `anime spring bounce 0.7 · 800 ms`, `anime outBack`, `anime outElastic`, `anime outBounce`, `anime outExpo`, `anime inOutCirc` | `apply_spring` |
 | **Physics** (matter.js, baked to keys) | `fall`, `drop in`, `burst` | `physics` |
 | **Web FX** (rendered with alpha from open-source libraries; [list](docs/OPEN_SOURCE.md)) | `confetti cannons`, `particle fireworks`, `sparks`, `scribble`, `flow field`, `living gradient`, `helix 3d`, `drop 3d` | `add_fx` |

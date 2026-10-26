@@ -17,6 +17,7 @@ from PIL import Image
 from playwright.sync_api import sync_playwright
 
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
+EXCLUDE = {"LeafWipe": "the shape is a cannabis leaf: not for brand work"}   # never offered, whatever the survey says
 HOST = os.path.join(HERE, "gl_transitions", "matte.html")
 CACHE = os.path.join(ROOT, "renders", "gl_mattes")
 
@@ -59,6 +60,7 @@ def survey():
     with sync_playwright() as p:
         b, pg = _page(p); items = pg.evaluate("LIST()"); out = []
         for it in items:
+            if it["name"] in EXCLUDE: out.append({**it, "kind": "excluded", "why": EXCLUDE[it["name"]]}); continue
             if it["textures"]: out.append({**it, "kind": "needs_textures"}); continue
             try: urls = pg.evaluate("a => MATTE(a[0], 192, 108, [0.2, 0.35, 0.5, 0.65, 0.8])", [it["name"]])
             except Exception as e: out.append({**it, "kind": "error", "error": str(e)[:120]}); continue

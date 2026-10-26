@@ -279,7 +279,7 @@
   {
    "category": "Clip transitions",
    "name": "Shader wipes",
-   "desc": "Shapes, patterns and noise reveal the next shot (gl-transitions shaders as luma mattes; 74 in all with gl_transition).",
+   "desc": "Shapes, patterns and noise reveal the next shot (gl-transitions shaders as luma mattes; 73 in all with gl_transition).",
    "members": [
     {
      "kind": "gltransition",

@@ -3,7 +3,7 @@
   "tool": "ae_status",
   "ok": true,
   "args": {},
-  "answer": "AE 26.5x89 · project: unsaved · active: none · panel: loaded (legacy Window > Motion DNA.jsx) · fonts ok"
+  "answer": "AE 26.5x89 · project: Untitled%20Project.aep · active: none · panel: loaded (legacy Window > Motion DNA.jsx) · fonts ok"
  },
  {
   "tool": "list_presets",
@@ -119,7 +119,7 @@
    "comp": "_MCP_TEST · 9x16",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1793025361646.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1793026194798.png (open it to look at the frame)"
  },
  {
   "tool": "apply_preset",
@@ -165,7 +165,7 @@
    "comp": "_MCP_TEST",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1793025366284.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1793026200578.png (open it to look at the frame)"
  },
  {
   "tool": "check_layout",
@@ -711,32 +711,32 @@
   "tool": "import_media",
   "ok": true,
   "args": {
-   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261026-103553\\product_car_side.jpg",
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261026-104944\\product_car_side.jpg",
    "comp": "_MCP_TEST",
    "time_s": 0.5,
    "name": "imported_photo"
   },
-  "answer": "file D:/motion category ai library/research/_mcp_test/20261026-103553/product_car_side.jpg\nimported imported_photo as layer 1 in _MCP_TEST at 0.50 s"
+  "answer": "file D:/motion category ai library/research/_mcp_test/20261026-104944/product_car_side.jpg\nimported imported_photo as layer 1 in _MCP_TEST at 0.50 s"
  },
  {
   "tool": "import_media",
   "ok": true,
   "args": {
    "source": "https://raw.githubusercontent.com/aaronamortegui-glitch/Motion_library/main/library/packs/calm-modern.png",
-   "dest": "D:\\motion category ai library\\research\\_mcp_test\\20261026-103553\\generated",
+   "dest": "D:\\motion category ai library\\research\\_mcp_test\\20261026-104944\\generated",
    "comp": "_MCP_TEST",
    "fit": false
   },
-  "answer": "saved D:/motion category ai library/research/_mcp_test/20261026-103553/generated/calm-modern.png\nimported calm-modern.png as layer 1 in _MCP_TEST at 0.00 s"
+  "answer": "saved D:/motion category ai library/research/_mcp_test/20261026-104944/generated/calm-modern.png\nimported calm-modern.png as layer 1 in _MCP_TEST at 0.00 s"
  },
  {
   "tool": "import_media",
   "ok": true,
   "args": {
-   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261026-103553\\missing.png",
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261026-104944\\missing.png",
    "comp": "_MCP_TEST"
   },
-  "answer": "not found: D:\\motion category ai library\\research\\_mcp_test\\20261026-103553\\missing.png"
+  "answer": "not found: D:\\motion category ai library\\research\\_mcp_test\\20261026-104944\\missing.png"
  },
  {
   "tool": "add_asset",
@@ -759,16 +759,16 @@
    "category": "motion",
    "why": "test"
   },
-  "answer": "saved rule 1 (motion) in D:/motion category ai library/research/_mcp_test/20261026-103553/brand/brand.json: Product shots glide in, never pop"
+  "answer": "saved rule 1 (motion) in D:/motion category ai library/research/_mcp_test/20261026-104944/brand/brand.json: Product shots glide in, never pop"
  },
  {
   "tool": "matte",
   "ok": true,
   "args": {
-   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261026-103553\\product_car_side.jpg",
-   "out": "D:\\motion category ai library\\research\\_mcp_test\\20261026-103553\\product_cutout.png"
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261026-104944\\product_car_side.jpg",
+   "out": "D:\\motion category ai library\\research\\_mcp_test\\20261026-104944\\product_cutout.png"
   },
-  "answer": "matte: D:/motion category ai library/research/_mcp_test/20261026-103553/product_cutout.png"
+  "answer": "matte: D:/motion category ai library/research/_mcp_test/20261026-104944/product_cutout.png"
  },
  {
   "tool": "run_jsx",
@@ -882,7 +882,7 @@
   "args": {
    "comp": "_MCP_TEST"
   },
-  "answer": "Motion DNA sound in _MCP_TEST: 7 cues, layer 78, D:/motion category ai library/renders/sound/_MCP_TEST_mdna_sound.wav\n0.13 s  tick  · EL · end card 1 tagline arrives\n0.23 s  whoosh  · cut to FX · scribble · Title\n0.53 s  whoosh (take 2)  · cut to imported_photo\n1.28 s  pop  · TR · behavior 1 · 1 1 p"
+  "answer": "Motion DNA sound in _MCP_TEST: 7 cues, layer 78, D:/Motion DNA projects/sound/_MCP_TEST_mdna_sound.wav\n0.13 s  tick  · EL · end card 1 tagline arrives\n0.23 s  whoosh  · cut to FX · scribble · Title\n0.53 s  whoosh (take 2)  · cut to imported_photo\n1.28 s  pop  · TR · behavior 1 · 1 1 pops in\n1.78 s  "
  },
  {
   "tool": "record_screen",
