@@ -82,7 +82,9 @@ def data():
         return dict(name=t["name"], use=re.sub(r"\s+", " ", t["what"]).strip(), ask=t.get("ask", ""), image=t.get("image", ""), poster=f"techniques/{s}_clip.jpg" if (LIB / f"techniques/{s}_clip.jpg").exists() else t.get("image", ""),
                     video=v if (LIB / v).exists() else "", sound=bool(technique_clips.JOBS.get(s, (0, 0, 0, 0, False))[4]))
     tech = [tclip(t) for t in techs if slug(t["name"]) not in technique_clips.HIDDEN | technique_clips.DUPLICATES]   # left out: not on every machine, or shown elsewhere
-    return dict(moves=moves, text=text, kit=kitems, curves=curves, styles=styles, tech=tech)
+    prompts = [dict(name=x["prompt"], group=x["group"], what=x["uses"], use=x["uses"], video=x["preview"], poster=x["poster"], ask=x["prompt"], call=x["uses"])
+               for x in json.loads((LIB / "prompts.json").read_text(encoding="utf-8"))["prompts"]]
+    return dict(moves=moves, text=text, kit=kitems, curves=curves, styles=styles, tech=tech, prompts=prompts)
 
 
 def logo():
@@ -99,18 +101,20 @@ CATS = [("moves", "Moves", "Moves that", "feel made", "office.jpg", "g-cloud", "
         ("styles", "Styles", "One click,", "a whole feel", "dana-robot.jpg", "g-earth", "Coast"),
         ("tech", "Techniques", "Whole", "workflows", "office.jpg", "g-sea", "Whip"),
         ("kit", "Kit", "The pieces", "Claude builds", "studio.jpg", "g-cloud", "Pop"),
+        ("prompts", "Prompts", "Just", "ask for it", "dana-robot.jpg", "g-leaf", "Land"),
         ("use", "Use it", "Three ways", "to ask", "robot.jpg", "g-mint", "Land")]
 
 
 def page():
     D = data()
-    n = {"moves": len(D["moves"]), "text": len(D["text"]), "curves": len(D["curves"]), "styles": len(D["styles"]), "tech": len(D["tech"]), "kit": len(D["kit"])}
+    n = {"prompts": len(D["prompts"]), "moves": len(D["moves"]), "text": len(D["text"]), "curves": len(D["curves"]), "styles": len(D["styles"]), "tech": len(D["tech"]), "kit": len(D["kit"])}
     lede = {"moves": f"{n['moves']} moves and loops on the brand curves, as native keyframes. Pick one by its energy.",
             "text": f"{n['text']} ways to bring words in: by character, word or line, typed, decoded or counted.",
             "curves": f"{n['curves']} easing curves. Every move in the library runs on one of them; the dot shows its speed.",
             "styles": f"{n['styles']} styles. Each gives every layer of a comp its role and its move, on its own curve.",
             "tech": f"{n['tech']} techniques: multi-step workflows the agent runs for you, start to finish.",
             "kit": f"{n['kit']} pieces Claude builds in your comp: transitions, elements, shapes, looks and behaviours.",
+            "prompts": f"{len(D['prompts'])} prompts people use most in Agent mode, each with what it calls in the library. Copy one, change the words.",
             "use": "Ask in the panel, in the agent's chat, or from Claude Code. The same library answers."}
     nav = "".join(f'<li><a href="#{k}" data-sec="i-{k} {k}">{i + 1:02d} {t}</a></li>' for i, (k, t, *_r) in enumerate(CATS))
     rows = "".join(
@@ -125,7 +129,7 @@ def page():
         head = (f'<p class="abs eyebrow r r-fade" style="--x:50;--y:116">{i + 1:02d} · {t}</p>'
                 f'<h2 class="abs h80" style="--x:50;--y:150;--w:1100" data-split>{a} {b}</h2>'
                 f'<p class="abs t27 r r-up wrap" style="--x:50;--y:248;--w:1500;--d:350ms">{html.escape(lede[k])}</p>')
-        if k in ("moves", "text", "kit"):
+        if k in ("moves", "text", "kit", "prompts"):
             body = (f'<div class="abs filters r r-fade" style="--x:50;--y:300;--w:1400;--d:500ms" data-for="{k}"></div>'
                     f'<div class="abs grid" style="--x:50;--y:362;--w:1660" data-grid="{k}"></div>'
                     f'<div class="abs pager r r-fade" style="--x:1490;--y:292;--w:320;--d:700ms" data-pager="{k}"><button class="pg prev" aria-label="Previous page">‹</button><span class="pgn">1 / 1</span><button class="pg next" aria-label="Next page">›</button></div>')
@@ -155,7 +159,7 @@ def page():
              + f'</div><p class="abs t21 hint r r-fade" style="--x:50;--y:960;--d:2600ms"><kbd>↓</kbd> Scroll or use the arrow keys</p></div></section>')
     index = (f'<section class="slide g-stone" id="index" data-label="Index" data-curve="Settle" data-dur="Stage 1100 ms"><div class="stage">'
              f'<p class="abs eyebrow r r-fade" style="--x:50;--y:116">Index</p><h2 class="abs h80" style="--x:50;--y:150;--w:1200" data-split>What’s inside</h2>'
-             f'<ul class="abs ixlist" style="--x:50;--y:290;--w:1820">{rows}</ul></div></section>')
+             f'<ul class="abs ixlist" style="--x:50;--y:250;--w:1820">{rows}</ul></div></section>')
     closing = (f'<section class="slide g-leaf" id="end" data-label="End" data-curve="Land" data-dur="Stage 1100 ms"><div class="bg zoom"><img class="drift" src="guide/dana-robot.jpg" alt=""></div>'
                f'<div class="scrim" style="background:linear-gradient(20deg,rgba(42,78,69,.97) 0,rgba(42,78,69,.86) 30%,rgba(42,78,69,0) 56%)"></div>'
                f'<div class="stage">{logo().replace("<svg class=\"mark\"", "<svg class=\"mark abs\" style=\"--x:50;--y:560;--w:120\"")}'

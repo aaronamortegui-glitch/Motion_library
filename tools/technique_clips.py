@@ -461,20 +461,11 @@ def robot_parts(d, cx, cy, hpx, frac, filled):
 
 def stroke(_src, start, length):
     """Stroke build, framed (960 x 540): the robot head, large and centred, draws itself part by part along its lines,
-    then fills in with a small pop and settles; a quiet line at the bottom names the step."""
-    w_, h_ = 960, 540; out = []; fsm = font(17, 600); RH = 330   # the robot is 330 px of 540: it fills the frame
+    then holds."""
+    w_, h_ = 960, 540; out = []; RH = 330   # the robot is 330 px of 540: it fills the frame
     for i in range(int(length * FPS)):
         t = i / FPS; im = Image.new("RGBA", (w_, h_), PINE + (255,))
-        line = Image.new("RGBA", (w_, h_), (0, 0, 0, 0)); robot_parts(ImageDraw.Draw(line), w_ / 2, h_ / 2 - 6, RH, SURGE(min(1, t / 1.8)), False)
-        if t < 1.9: im.alpha_composite(line)
-        else:
-            k = min(1, (t - 1.9) / .35); s_ = .94 + .06 * POP(min(1, (t - 1.9) / .45))
-            fill = Image.new("RGBA", (w_, h_), (0, 0, 0, 0)); robot_parts(ImageDraw.Draw(fill), w_ / 2, h_ / 2 - 6, RH * s_, 1, True)
-            line.putalpha(Image.fromarray((np.asarray(line.split()[3]) * (1 - k)).astype(np.uint8))); im.alpha_composite(line)
-            fill.putalpha(Image.fromarray((np.asarray(fill.split()[3]) * k).astype(np.uint8))); im.alpha_composite(fill)
-        d = ImageDraw.Draw(im, "RGBA"); cur = 0 if t < 1.9 else 1; x = w_ / 2 - 80
-        for k2, lab in enumerate(("Lines draw on", "Shape fills in")):
-            d.text((x, h_ - 52), lab, font=fsm, fill=SPARK if k2 == cur else (247, 249, 242, 110)); x += d.textlength(lab, font=fsm) + 26
+        robot_parts(ImageDraw.Draw(im), w_ / 2, h_ / 2, RH, SURGE(min(1, t / 2.2)), False)
         out.append(np.asarray(im.convert("RGB")))
     return out
 

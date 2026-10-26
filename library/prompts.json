@@ -1,0 +1,29 @@
+{
+  "note": "Prompts people use most in Agent mode, by need, each with the library piece it calls (its reference) and a preview from the library. Shown in the library guide (library/guide.html, Prompts). Keep each prompt in plain words, the way a designer would say it.",
+  "prompts": [
+    {"group": "Animate", "prompt": "Animate the selected layers in a calm, modern style.", "uses": "Style · Calm Modern (apply_pack)", "preview": "packs/calm-modern.webm", "poster": "packs/calm-modern.png"},
+    {"group": "Animate", "prompt": "Make the whole comp feel playful and show me a frame.", "uses": "Style · Playful + render_frame", "preview": "packs/playful.webm", "poster": "packs/playful.png"},
+    {"group": "Animate", "prompt": "Pop this logo in, hold it, then let it leave quietly.", "uses": "Move · Scale Pop, in and out", "preview": "webm/motion/scale-pop.webm", "poster": "posters/motion/scale-pop.png"},
+    {"group": "Animate", "prompt": "Slide these cards in one after another on the Land curve.", "uses": "Move · Slide Land, staggered", "preview": "webm/motion/slide-land.webm", "poster": "posters/motion/slide-land.png"},
+    {"group": "Animate", "prompt": "Draw this icon on like it's being sketched.", "uses": "Move · Organic Draw (trim paths)", "preview": "webm/motion/organic-draw.webm", "poster": "posters/motion/organic-draw.png"},
+    {"group": "Text", "prompt": "Bring this headline in word by word, soft and premium.", "uses": "Text · Blur Words", "preview": "webm/text/blur-words.webm", "poster": "posters/text/blur-words.png"},
+    {"group": "Text", "prompt": "Count this stat up to 12,480.", "uses": "Text · Count Up", "preview": "webm/text/count-up.webm", "poster": "posters/text/count-up.png"},
+    {"group": "Text", "prompt": "Add captions from the voiceover, highlighted word by word.", "uses": "Kit · Captions (add_captions)", "preview": "webm/kit-text/captions.webm", "poster": "posters/kit-text/captions.jpg"},
+    {"group": "Text", "prompt": "Type this line in with a blinking cursor.", "uses": "Kit · Typewriter Cursor", "preview": "webm/kit-text/typewriter-cursor.webm", "poster": "posters/kit-text/typewriter-cursor.jpg"},
+    {"group": "Footage", "prompt": "Track the car in this shot and add a label that follows it.", "uses": "Technique · Tracked labels", "preview": "techniques/tracked-labels.webm", "poster": "techniques/tracked-labels_clip.jpg"},
+    {"group": "Footage", "prompt": "Put a giant YES! behind the two people in this shot.", "uses": "Technique · Text behind people (text_behind)", "preview": "techniques/text-behind-people.webm", "poster": "techniques/text-behind-people_clip.jpg"},
+    {"group": "Footage", "prompt": "Freeze on her close-up and slam three words in beside her.", "uses": "Technique · Freeze frame + kinetic type", "preview": "techniques/freeze-frame-kinetic-type.webm", "poster": "techniques/freeze-frame-kinetic-type_clip.jpg"},
+    {"group": "Footage", "prompt": "Speed-ramp the splash: fast in, slow on the hit, fast out.", "uses": "Technique · Speed ramps (Ramp curve)", "preview": "techniques/speed-ramps.webm", "poster": "techniques/speed-ramps_clip.jpg"},
+    {"group": "Footage", "prompt": "Add HUD chips that lock onto the robot's screen.", "uses": "Technique · HUD overlays", "preview": "techniques/hud-overlays.webm", "poster": "techniques/hud-overlays_clip.jpg"},
+    {"group": "Edit & sound", "prompt": "Cut this edit to the voiceover's word times.", "uses": "Technique · Cut on the voice", "preview": "techniques/cut-on-the-voice.webm", "poster": "techniques/cut-on-the-voice_clip.jpg"},
+    {"group": "Edit & sound", "prompt": "Give this comp its sound effects.", "uses": "Technique · Sound pass (add_sound)", "preview": "techniques/sound-pass.webm", "poster": "techniques/sound-pass_clip.jpg"},
+    {"group": "Edit & sound", "prompt": "Join these two scenes with a clean wipe.", "uses": "Kit · Transition, Clean Wipe (solid_transition)", "preview": "webm/kit-transition/clean-wipe.webm", "poster": "posters/kit-transition/clean-wipe.jpg"},
+    {"group": "Brand", "prompt": "Use our brand's curves and timing on this comp.", "uses": "Brand profile (apply_brand)", "preview": "guide/panel-agent.webm", "poster": "guide/panel-agent.jpg"},
+    {"group": "Brand", "prompt": "Remember: titles never bounce for this client.", "uses": "Brand note, a new rule (add_brand_note)", "preview": "guide/panel-agent.webm", "poster": "guide/panel-agent.jpg"},
+    {"group": "Other apps", "prompt": "Grab this storyboard from Figma and animate it in an editorial style.", "uses": "Figma + Style · Editorial", "preview": "packs/editorial.webm", "poster": "packs/editorial.png"},
+    {"group": "Other apps", "prompt": "QA this comp against its Figma layouts.", "uses": "Figma + check_layout", "preview": "guide/panel-agent.webm", "poster": "guide/panel-agent.jpg"},
+    {"group": "Other apps", "prompt": "Resize this comp into every social format.", "uses": "resize_comp (16:9, 1:1, 9:16, 4:5)", "preview": "packs/modern.webm", "poster": "packs/modern.png"},
+    {"group": "Other apps", "prompt": "Connect to Blender and block out this scene with a camera move.", "uses": "Blender (Motion DNA add-on)", "preview": "guide/panel-agent.webm", "poster": "guide/panel-agent.jpg"},
+    {"group": "Check", "prompt": "Check the layout and render the key frames before we render.", "uses": "check_layout + render_frame", "preview": "guide/panel-agent.webm", "poster": "guide/panel-agent.jpg"}
+  ]
+}
