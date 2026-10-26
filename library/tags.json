@@ -2185,18 +2185,6 @@
    ]
   },
   {
-   "name": "Face refinement",
-   "energy": [
-    1,
-    5
-   ],
-   "tones": [],
-   "needs": [
-    "footage",
-    "real people"
-   ]
-  },
-  {
    "name": "Stroke build",
    "energy": [
     2,

@@ -314,7 +314,6 @@ technique|Shape-wipe transitions|3-5|bold/modern/playful|
 technique|Marker timing|1-5||
 technique|Styles|1-5||
 technique|Cut on the voice|1-5||voiceover
-technique|Face refinement|1-5||footage/real people
 technique|Stroke build|2-3|modern/elegant/technical|a filled logo or shape (SVG)
 technique|Sound pass|1-5||
 # brands: slug|name|style|curve|energy|tones|rules  (read one with get_brand before animating for it; save notes with add_brand_note)

@@ -73,7 +73,7 @@ Every item below cost a review round once; check them all, then render (details:
 |---|---|
 | A preset (our own) | `tools/ss_presets.jsx` (motion `P`, text `TX`, loops `FX`) + run the library pipeline |
 | A kit piece (transition, element, shape, background, look, text animation, move, behaviour) | its builder `tools/ss_<family>.jsx` + `library/kit.json` or `library/transitions.json` + the MCP tool + `tools/kit_gifs.py` preview — the full route is CONTRIBUTING §11 |
-| A technique | `tools/` scripts + `library/techniques.json` + `TECH` in `tools/tag_library.py` + its card (CONTRIBUTING §11) |
+| A technique | `tools/` scripts + `library/techniques.json` + `TECH` in `tools/tag_library.py` + its card + its moving example (`tools/technique_clips.py`: cut it from footage that shows it, or make it) (CONTRIBUTING §11) |
 | Our logo or its use | `assets/brand/` (`tools/logo_to_shape.py`, `tools/logo_parts.py`); manual in Figma *motion-adn › 01 · Foundations › logo*; it only closes Motion DNA's own videos |
 | An effect translated from an open-source project | `library/css_presets.json` (or a new data file of the same shape) with source, version and license |
 | A style pack | `library/packs.json` + a demo (`tools/pack_demos.jsx` → `library/packs/<slug>.gif/.png/_sm.png`) |

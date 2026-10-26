@@ -224,6 +224,8 @@ button{font:inherit;color:inherit}
   transition:opacity var(--arrive) var(--settle),transform var(--sweep) var(--land)}
 .pask.out{opacity:0;transform:translateY(20px)}
 .pask span{flex:1;min-width:0}
+.snd{position:absolute;top:calc(22 * var(--s));right:calc(22 * var(--s));z-index:3;border:0;border-radius:999px;background:rgba(10,33,31,.85);color:var(--cloud);padding:.45em 1em;font-size:calc(20 * var(--s));font-weight:600;cursor:pointer;transition:transform var(--arrive) var(--pop),background var(--glide)}
+.snd:hover{transform:scale(1.06)} .snd.on{background:var(--spark);color:var(--pine)}
 .copy{flex:none;border:0;border-radius:999px;background:var(--spark);color:var(--pine);padding:.45em 1em;font-size:calc(20 * var(--s));font-weight:600;cursor:pointer;transition:transform var(--arrive) var(--pop)}
 .copy:hover{transform:scale(1.06)}
 
@@ -443,6 +445,10 @@ button{font:inherit;color:inherit}
       el.classList.add('enter'); box.append(el); if (el.tagName === 'VIDEO') { el.src = el.dataset.src; el.play().catch(() => {}); }
       requestAnimationFrame(() => requestAnimationFrame(() => { el.classList.remove('enter'); if (el.tagName === 'IMG') el.classList.add('zoomin'); }));
       [...box.querySelectorAll('video,img')].slice(0, -1).forEach(o => setTimeout(() => o.remove(), 1200));
+      // a technique about sound or timing carries its sound: one button turns it on for the clip on screen
+      box.querySelectorAll('.snd').forEach(b => b.remove());
+      if (it.sound && el.tagName === 'VIDEO') { const b = h('button', {class: 'snd', type: 'button', 'aria-label': 'Sound on'}, '🔊 Sound');
+        b.onclick = () => { el.muted = !el.muted; b.textContent = el.muted ? '🔊 Sound' : '🔇 Mute'; b.classList.toggle('on', !el.muted); if (!el.muted) { el.currentTime = 0; el.play().catch(() => {}); } }; box.append(b); }
       ask.classList.add('out'); setTimeout(() => { ask.firstChild.textContent = '“' + it.ask + '”'; ask.lastChild.onclick = () => copy(it.ask); ask.classList.remove('out'); }, 350);
       box.append(ask);
       clearTimeout(timer); if (running) timer = setTimeout(() => go(cur + 1), per + (user ? 3000 : 0));

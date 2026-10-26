@@ -131,7 +131,6 @@ TECH = {
     "Marker timing": ([1, 5], [], []),
     "Styles": ([1, 5], [], []),
     "Cut on the voice": ([1, 5], [], ["voiceover"]),
-    "Face refinement": ([1, 5], [], ["footage", "real people"]),
     "Stroke build": ([2, 3], ["modern", "elegant", "technical"], ["a filled logo or shape (SVG)"]),
     "Sound pass": ([1, 5], [], []),
 }

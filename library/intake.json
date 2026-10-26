@@ -64,8 +64,6 @@
       "triggers": { "en": ["transitions", "between scenes", "cuts", "wipes"], "es": ["transiciones", "entre escenas", "cortes", "barridos"] }, "how": "solid_transition / apply_transition" },
     { "id": "tech_stroke_build", "kind": "technique", "title": "Stroke build", "ref": "Stroke build", "domain": ["brand"], "on_screen": ["shapes"], "needs": ["logo"], "energy": [2, 3],
       "triggers": { "en": ["draw the logo", "line drawing", "draws itself", "assemble", "build the logo"], "es": ["dibujar el logo", "se dibuja", "trazo", "armar el logo", "construir el logo"] }, "how": "techniques.json: Stroke build" },
-    { "id": "tech_face_refine", "kind": "technique", "title": "Face refinement (real people in AI video)", "ref": "Face refinement", "domain": ["story_short", "product_ad"], "on_screen": ["footage"], "needs": ["footage", "consent"], "energy": [1, 5],
-      "triggers": { "en": ["my face", "real person", "our team", "employee", "ai video of", "likeness"], "es": ["mi cara", "persona real", "nuestro equipo", "empleado", "video con ia de", "parecido"] }, "how": "techniques.json: Face refinement (consent first)" },
     { "id": "tech_styles", "kind": "technique", "title": "Styles (one click for a whole comp)", "ref": "Styles", "domain": ["brand", "social", "corporate"], "on_screen": ["kinetic_type", "shapes"], "needs": [], "energy": [1, 5],
       "triggers": { "en": ["animate everything", "whole comp", "all layers", "style", "look and feel", "make it pop"], "es": ["animar todo", "toda la comp", "todas las capas", "estilo", "look", "que se vea bien", "dale vida"] }, "how": "apply_pack" },
 

@@ -10,8 +10,10 @@ import html
 import json
 import pathlib
 import re
+import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "tools"))
 LIB = ROOT / "library"
 OUT = LIB / "guide.html"
 
@@ -34,6 +36,9 @@ WORD = {1: "calm", 2: "soft", 3: "medium", 4: "dynamic", 5: "explosive"}
 def energy(e):
     if isinstance(e, list): return WORD.get(round(sum(e) / len(e)), "medium")
     return e if isinstance(e, str) else WORD.get(e, "medium")
+
+
+GUIDE_SKIP = {"Springs", "Shader transitions", "Physics"}   # react-spring / anime.js curves, Shot A/B shader wipes, sparse physics
 
 
 def data():
@@ -61,6 +66,8 @@ def data():
                     use=x.get("use", ""), video=v, poster=po, ask=f"Add the {x['name'].replace('_', ' ')} {group.lower().rstrip('s')} from the Motion DNA kit to the open comp.",
                     call=x.get("call", ""))
     kitems = [kitem(x, "transition", "Transitions") for x in trs] + [kitem(x, x["kind"], FAM.get(x["kind"], x["kind"])) for x in kit]
+    # curated: what reads as a developer test or a placeholder stays out of the guide (the agent still has it)
+    kitems = [k for k in kitems if k["group"] not in GUIDE_SKIP]
     text += [k for k in kitems if k["group"] == "Text animations"]
     kitems = [k for k in kitems if k["group"] != "Text animations"]
     toks = json.loads((ROOT / "tokens/superside_motion_tokens.json").read_text(encoding="utf-8"))
@@ -69,7 +76,12 @@ def data():
     styles = [dict(name=p["name"], energy=p.get("energy", ""), use=p.get("desc", ""), video=f"packs/{p['slug']}.webm", poster=f"packs/{p['slug']}.png",
                    ask=f"Make the whole comp feel {p['name'].lower()}: apply the {p['name']} style.", tones=p.get("tones", [])) for p in packs]
     techs = json.loads((LIB / "techniques.json").read_text(encoding="utf-8"))["techniques"]
-    tech = [dict(name=t["name"], use=re.sub(r"\s+", " ", t["what"]).strip(), ask=t.get("ask", ""), image=t.get("image", "")) for t in techs]
+    import technique_clips
+    def tclip(t):
+        s = slug(t["name"]); v = f"techniques/{s}.webm"
+        return dict(name=t["name"], use=re.sub(r"\s+", " ", t["what"]).strip(), ask=t.get("ask", ""), image=t.get("image", ""), poster=f"techniques/{s}_clip.jpg" if (LIB / f"techniques/{s}_clip.jpg").exists() else t.get("image", ""),
+                    video=v if (LIB / v).exists() else "", sound=bool(technique_clips.JOBS.get(s, (0, 0, 0, 0, False))[4]))
+    tech = [tclip(t) for t in techs if slug(t["name"]) not in technique_clips.HIDDEN | technique_clips.DUPLICATES]   # left out: not on every machine, or shown elsewhere
     return dict(moves=moves, text=text, kit=kitems, curves=curves, styles=styles, tech=tech)
 
 
