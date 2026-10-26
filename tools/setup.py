@@ -18,6 +18,8 @@ Install / update:
   5. Checks the library files and the tools Claude uses, and prints the steps only the user can do in After Effects.
   6. Links the repo's Claude skills (motion-dna, video-templates) into ~/.claude/skills, so Claude knows Motion DNA
      in every folder; an update brings the new skills with it, --uninstall removes the links.
+  7. Sound kit (MCP add_sound): makes sure Python has Playwright, which renders the sounds in the installed Chrome or
+     Edge. Last, like 6: a problem here is a note, never a stop.
 """
 import os
 import pathlib
@@ -508,6 +510,27 @@ def checks():
     return good and not wrong
 
 
+def sound():
+    """The sound kit (tools/sound_kit.py) renders Tone.js in a browser through Playwright: the package is small, and the
+    browser is the installed Chrome or Edge, so nothing big is downloaded."""
+    print("Sound kit (add_sound: sound effects made in code)")
+    try:
+        import playwright  # noqa: F401
+    except ImportError:
+        r = subprocess.run([sys.executable, "-m", "pip", "install", "--user", "--quiet", "playwright"], capture_output=True, text=True)
+        if r.returncode:
+            print(WARN + "could not install Playwright (" + (r.stderr.strip().splitlines() or ["pip failed"])[-1] + "): run  " + sys.executable + " -m pip install playwright")
+            return False
+    browsers = [shutil.which(b) for b in ("chrome", "google-chrome", "msedge")] + [p for p in (
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe", r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+        "/Applications/Google Chrome.app", "/Applications/Microsoft Edge.app") if os.path.exists(p)]
+    if not any(browsers):
+        print(WARN + "no Chrome or Edge found: install Chrome, or run  " + sys.executable + " -m playwright install chromium")
+        return False
+    print(OK + "Playwright and a browser for the sound kit")
+    return True
+
+
 def claude_cli():
     """Claude Code's command: on PATH, else the native installer's ~/.local/bin (often not on PATH on Windows), else the
     newest copy the desktop app keeps (AppData/Local/Claude-Data/claude_*/claude-code/<ver>/<hash>, or the Store
@@ -655,6 +678,10 @@ def main():
         skills()
     except Exception as e:
         print(WARN + f"Claude skills not linked ({e}); the panel and After Effects are not affected")
+    try:   # same: optional, and never in the way
+        sound()
+    except Exception as e:
+        print(WARN + f"sound kit not checked ({e}); everything else is installed")
     print("\nLast steps in After Effects (only you can do these):")
     print("  - Restart After Effects, then open Window > Extensions > Motion DNA and dock it: it comes back every time")
     print("    After Effects starts (File > Scripts > Motion DNA opens it too).")

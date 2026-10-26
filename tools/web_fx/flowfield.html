@@ -1,0 +1,28 @@
+<!doctype html>
+<!-- Motion DNA web FX · flow field (p5.js 2.3.4, LGPL-2.1: loaded unmodified from the CDN, never copied into the
+     repo). Thin lines drift along a noise field and leave trails: a calm generative background. Options (location.hash
+     JSON): colors, count (lines), speed, bg (a colour to paint under it, or none for alpha), seed.
+     Rendered by tools/web_capture.py on a virtual clock. -->
+<meta charset="utf-8"><title>flowfield</title>
+<style>html, body { margin: 0; background: transparent; overflow: hidden; } #stage { position: relative; } canvas { display: block; }</style>
+<div id="stage"></div>
+<script src="https://cdn.jsdelivr.net/npm/p5@2.3.4/lib/p5.min.js"></script>
+<script>
+const PAL = ["#D8FF85", "#9FD8C2", "#F7F9F2"], o = JSON.parse(decodeURIComponent(location.hash.slice(1) || "{}")), st = document.getElementById("stage");
+st.style.width = o.w + "px"; st.style.height = o.h + "px";
+window.FX_START = () => new p5(p => {
+  let pts = [];
+  p.setup = () => { const c = p.createCanvas(o.w, o.h); c.parent(st); p.pixelDensity(1); p.noiseSeed(o.seed ?? 7); p.randomSeed(o.seed ?? 7);
+    if (o.bg) p.background(o.bg); else p.clear();
+    for (let i = 0; i < (o.count ?? 900); i++) pts.push({ x: p.random(o.w), y: p.random(o.h), c: (o.colors || PAL)[i % (o.colors || PAL).length] }); };
+  p.draw = () => {
+    if (!o.bg) { p.drawingContext.globalCompositeOperation = "destination-out"; p.fill(0, 0, 0, 14); p.noStroke(); p.rect(0, 0, o.w, o.h); p.drawingContext.globalCompositeOperation = "source-over"; }
+    else { p.fill(p.color(o.bg + "10")); p.noStroke(); p.rect(0, 0, o.w, o.h); }
+    p.strokeWeight(1.6);
+    for (const q of pts) { const a = p.noise(q.x * 0.0016, q.y * 0.0016, p.millis() * 0.00008) * p.TWO_PI * 2.2, sp = o.speed ?? 2.2;
+      const nx = q.x + Math.cos(a) * sp, ny = q.y + Math.sin(a) * sp; const col = p.color(q.c); col.setAlpha(150); p.stroke(col); p.line(q.x, q.y, nx, ny);
+      q.x = nx; q.y = ny; if (q.x < 0 || q.x > o.w || q.y < 0 || q.y > o.h) { q.x = p.random(o.w); q.y = p.random(o.h); } }
+  };
+});
+window.FX_READY = true;
+</script>

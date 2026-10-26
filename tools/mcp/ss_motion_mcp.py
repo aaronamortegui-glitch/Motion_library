@@ -9,6 +9,7 @@ the server starts it the same way tools/bridge.sh does.
 Registered for Claude Code in .mcp.json at the repo root. Manual run (for debugging): python tools/mcp/ss_motion_mcp.py
 """
 import json
+import math
 import os
 import pathlib
 import subprocess
@@ -417,7 +418,7 @@ def t_list_kit(kind=None, energy=None, tone=None, query=None):
             if tone and tone not in x["tones"]: continue
             if query and query.lower() not in json.dumps(x).lower(): continue
             rows.append(f"[transition] {x['name']} ({x['type']}, energy {x['energy'][0]}-{x['energy'][1]}, {'/'.join(x['tones'])}): {x['use']} -> solid_transition(look=\"{x['name']}\")")
-    return "\n".join(rows) if rows else "no match · kinds: element, shape, move, text, look, background, transition"
+    return "\n".join(rows) if rows else "no match · kinds: element, shape, move, text, look, background, behavior, transition, gltransition, spring, physics, webfx"
 
 
 def _tags():
@@ -890,6 +891,171 @@ return "imported " + it.name + " as layer " + L.index + " in " + c.name + " at "
     return ("saved " if src.lower().startswith("http") else "file ") + path.as_posix() + "\n" + run_jsx(COMP_JS + body, includes=())
 
 
+def t_apply_spring(name=None, layers=None, comp=None, props=None):
+    """Springs and named eases from react-spring and anime.js (library/springs.json) as expressions on keyed properties."""
+    curves = json.loads((ROOT / "library" / "springs.json").read_text(encoding="utf-8"))["curves"]
+    if not name:
+        return "\n".join(f"{c['name']}: {c['kind']}, overshoot {c['overshoot_pct']} %" + (f", settles in {c['settle_s']} s" if c.get("settle_s") else "") +
+                         f", closest token {c['nearest_token']['name']}" for c in curves if c.get("ae_expression"))
+    hit = [c for c in curves if c["name"].lower() == name.lower()] or [c for c in curves if name.lower() in c["name"].lower()]
+    if not hit or not hit[0].get("ae_expression"):
+        return f"no spring or ease named {name}: call apply_spring with no name to list them"
+    c = hit[0]; match = {"position": "ADBE Position", "scale": "ADBE Scale", "rotation": "ADBE Rotate Z", "opacity": "ADBE Opacity"}
+    ms = [match.get(p.lower(), p) for p in (props or ["position", "scale", "rotation"])]
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), Ls = findLayers(c, {js(layers or [])}), ms = {js(ms)}, n = 0, names = [];
+app.beginUndoGroup("Motion DNA spring (MCP)");
+try {{ for (var i = 0; i < Ls.length; i++) for (var j = 0; j < ms.length; j++) {{
+  var p = Ls[i].property("ADBE Transform Group").property(ms[j]);
+  if (p && p.numKeys >= 2 && p.canSetExpression) {{ p.expression = {js(c['ae_expression'])}; n++; names.push(Ls[i].name + " " + p.name); }} }}
+}} finally {{ app.endUndoGroup(); }}
+return n ? {js(c['name'])} + " on " + names.join(", ") + ". The move now takes the spring's curve between keys 1 and 2: space those keys about {c.get('settle_s', 0.7)} s apart for its natural timing." : "no keyed property found (needs 2+ keys on " + ms.join(", ") + ")";""", includes=())
+
+
+def t_physics(mode="fall", layers=None, comp=None, t=None, duration=3.0, gravity=1.0, bounce=0.25, stagger=0.12, circles=None, every=1):
+    """Real 2D physics (matter.js) for layers, baked to Position and Rotation keyframes."""
+    sys.path.insert(0, str(ROOT / "tools")); import physics_bake
+    info = run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), Ls = findLayers(c, {js(layers or [])}), t = {js(t)} === null ? c.time : {js(t)}, out = [c.width + "|" + c.height + "|" + c.frameRate + "|" + t];
+for (var i = 0; i < Ls.length; i++) {{ var L = Ls[i], tg = L.property("ADBE Transform Group");
+  if (L.threeDLayer || L.parent) throw new Error(L.name + ": physics works on 2D layers without a parent");
+  var r = L.sourceRectAtTime(t, false), p = tg.property("ADBE Position").valueAtTime(t, false), a = tg.property("ADBE Anchor Point").valueAtTime(t, false), s = tg.property("ADBE Scale").valueAtTime(t, false);
+  out.push([L.index, L.name.replace(/\\|/g, "/"), p[0], p[1], a[0], a[1], s[0] / 100, s[1] / 100, tg.property("ADBE Rotate Z").valueAtTime(t, false), r.left, r.top, r.width, r.height].join("|")); }}
+return out.join("\\n");""", includes=())
+    head, *rows = info.strip().split("\n"); W, H, fps, t0 = map(float, head.split("|"))
+    ls, geo = [], {}
+    for r in rows:
+        idx, name, px, py, ax, ay, sx, sy, rot, left, top, rw, rh = r.split("|"); px, py, ax, ay, sx, sy, rot, left, top, rw, rh = map(float, (px, py, ax, ay, sx, sy, rot, left, top, rw, rh))
+        ox, oy = (left + rw / 2 - ax) * sx, (top + rh / 2 - ay) * sy   # anchor -> centre of the visible content, in comp px
+        cr, sr = math.cos(math.radians(rot)), math.sin(math.radians(rot))
+        cx, cy = px + ox * cr - oy * sr, py + ox * sr + oy * cr
+        geo[idx] = (ox, oy, name)
+        ls.append({"id": idx, "cx": cx, "cy": cy, "w": rw * abs(sx), "h": rh * abs(sy), "angle_deg": rot, "circle": bool(circles and name in circles)})
+    paths = physics_bake.simulate(physics_bake.spec_for(ls, {"w": W, "h": H, "fps": fps}, mode, duration, gravity, bounce, stagger))
+    keys = {}
+    for idx, path in paths.items():   # body centre + angle -> the layer's position (its anchor) and rotation
+        ox, oy, _ = geo[idx]; ts, ps, rs = [], [], []
+        for f, (x, y, ang) in enumerate(path):
+            if f % max(1, int(every)) and f != len(path) - 1: continue
+            c_, s_ = math.cos(ang), math.sin(ang)
+            ts.append(round(t0 + f / fps, 5)); ps.append([round(x - (ox * c_ - oy * s_), 2), round(y - (ox * s_ + oy * c_), 2)]); rs.append(round(math.degrees(ang), 3))
+        keys[idx] = (ts, ps, rs)
+    body = "".join(f"""apply(c.layer({idx}), {json.dumps(ts)}, {json.dumps(ps)}, {json.dumps(rs)});\n""" for idx, (ts, ps, rs) in keys.items())
+    res = run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), n = 0;
+function apply(L, ts, ps, rs) {{ var tg = L.property("ADBE Transform Group"), P = tg.property("ADBE Position"), R = tg.property("ADBE Rotate Z");
+  if (P.dimensionsSeparated) P.dimensionsSeparated = false;
+  for (var k = P.numKeys; k >= 1; k--) P.removeKey(k); for (var k = R.numKeys; k >= 1; k--) R.removeKey(k);
+  var p3 = []; for (var i = 0; i < ps.length; i++) p3.push([ps[i][0], ps[i][1], P.value.length > 2 ? P.value[2] : 0].slice(0, P.value.length));
+  P.setValuesAtTimes(ts, p3); R.setValuesAtTimes(ts, rs); n++; }}
+app.beginUndoGroup("Motion DNA physics (MCP): {mode}");
+try {{ {body} }} finally {{ app.endUndoGroup(); }}
+return n;""", includes=())
+    return (f"physics {mode} on {res} layers from {t0:.2f} s for {duration} s (matter.js, gravity {gravity}, bounce {bounce}): Position and Rotation baked, "
+            f"one key every {max(1, int(every))} frame(s); their old keys on those two properties were replaced. Look at it with render_frame, then add_sound (impacts read better with a hit).")
+
+
+def t_gl_transition(name=None, outgoing=None, incoming=None, comp=None, at_s=None, duration=0.8, ease="Cruise", kind=None):
+    """A gl-transitions shader as a luma matte between two layers (tools/gl_matte.py)."""
+    lib = json.loads((ROOT / "library" / "gl_transitions.json").read_text(encoding="utf-8"))["transitions"]
+    clean = [t for t in lib if t["kind"] in ("wipe", "soft")]
+    if not name:
+        pick = [t for t in clean if not kind or t["kind"] == kind]
+        return f"{len(pick)} transitions (wipe = hard edge, soft = with greys):\n" + "\n".join(f"{t['name']} ({t['kind']}): {t.get('description') or ', '.join(t.get('tags') or [])}" for t in pick)
+    hit = [t for t in lib if t["name"].lower() == name.lower()]
+    if not hit: return f"no transition {name}: call gl_transition with no name to list them"
+    if hit[0]["kind"] not in ("wipe", "soft"): return f"{name} is a '{hit[0]['kind']}' shader: as a matte it would only be a dissolve. Pick a wipe or soft one (call with no name)."
+    if not (outgoing and incoming): return "give outgoing and incoming (layer names)"
+    sys.path.insert(0, str(ROOT / "tools")); import gl_matte
+    w, h, fps, at = run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), B = findLayers(c, [{js(incoming)}])[0]; return [c.width, c.height, c.frameRate, {js(at_s)} === null ? (c.time > B.inPoint ? c.time : B.inPoint) : {js(at_s)}].join("|");""", includes=()).split("|")
+    mov = gl_matte.render(hit[0]["name"], int(float(w)), int(float(h)), float(fps), float(duration), ease)
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), A = findLayers(c, [{js(outgoing)}])[0], B = findLayers(c, [{js(incoming)}])[0], at = {float(at)}, d = {float(duration)};
+app.beginUndoGroup("Motion DNA gl transition (MCP): {hit[0]['name']}");
+try {{
+  if (B.index > A.index) B.moveBefore(A);   // the incoming clip sits above the outgoing one
+  if (A.outPoint < at + d) A.outPoint = at + d;
+  B.inPoint = at;
+  var it = app.project.importFile(new ImportOptions(new File({js(pathlib.Path(mov).as_posix())}))), M = c.layers.add(it);
+  M.name = "GL · {hit[0]['name']} · " + B.name; M.moveBefore(B); M.startTime = at;
+  M.timeRemapEnabled = true; M.outPoint = Math.max(B.outPoint, at + d);   // the last (white) frame holds for the rest of the clip
+  if (typeof B.setTrackMatte === "function") {{ B.setTrackMatte(M, TrackMatteType.LUMA); M.enabled = false; }}
+  else B.trackMatteType = TrackMatteType.LUMA;
+}} finally {{ app.endUndoGroup(); }}
+return "{hit[0]['name']} ({hit[0]['license']}, by {hit[0].get('author', '?')}) from " + A.name + " to " + B.name + " at " + at.toFixed(2) + " s over " + d + " s on " + {js(ease)} + ": luma matte layer " + M.name;""", includes=())
+
+
+def t_add_fx(kind=None, comp=None, at_s=None, duration=None, target=None, opts=None, colors=None, brand=None):
+    """Effects made with open-source web libraries (library/web_fx.json), rendered with alpha and placed in the comp."""
+    lib = json.loads((ROOT / "library" / "web_fx.json").read_text(encoding="utf-8"))["fx"]
+    if not kind:
+        return "\n".join(f"{f['name']} ({f['lib']}, energy {f['energy'][0]}-{f['energy'][1]}): {f['use']}" for f in lib)
+    fx = next((f for f in lib if kind.lower() in (f["name"], f.get("page"))), None)
+    if not fx: return f"no fx {kind}: call add_fx with no kind to list them"
+    sys.path.insert(0, str(ROOT / "tools")); import web_capture
+    info = run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), t = {js(at_s)} === null ? c.time : {js(at_s)}, box = "";
+var tn = {js(target)}; if (tn) {{ var L = c.layer(tn); if (!L) throw new Error("Layer not found: " + tn);
+  var r = L.sourceRectAtTime(t, false), p = L.property("ADBE Transform Group").property("ADBE Position").valueAtTime(t, false), an = L.property("ADBE Transform Group").property("ADBE Anchor Point").valueAtTime(t, false), s = L.property("ADBE Transform Group").property("ADBE Scale").valueAtTime(t, false);
+  box = [p[0] + (r.left - an[0]) * s[0] / 100, p[1] + (r.top - an[1]) * s[1] / 100, r.width * s[0] / 100, r.height * s[1] / 100].join(","); }}
+return [c.width, c.height, c.frameRate, t, box].join("|");""", includes=())
+    w, h, fps, t, box = info.split("|"); w, h, fps, t = int(float(w)), int(float(h)), float(fps), float(t)
+    o = dict(opts or {})
+    if brand and not colors: colors = _brand_colors(brand)
+    if colors: o["colors"] = colors
+    if box:
+        bx, by, bw, bh = map(float, box.split(","))
+        if fx["page"] == "scribble": o.setdefault("box", [bx, by, bw, bh])
+        if fx["page"] in ("sparks", "confetti") and "bursts" not in o:
+            o["bursts"] = [{"t": 0, "x": (bx + bw / 2) / w * 100, "y": (by + bh / 2) / h * 100}] + ([] if kind == "sparks" else [])
+    dur = float(duration or fx["dur"])
+    page = fx.get("page", fx["name"]); mov = web_capture.capture(page, o, w, h, fps, dur, fx["alpha"], warmup=fx.get("warmup", 0))
+    place = "L.moveToEnd();" if fx["place"] == "bottom" else ""
+    blend = 'L.blendingMode = BlendingMode.ADD;' if fx.get("blend") == "add" else ""
+    return run_jsx(COMP_JS + f"""var c = findComp({js(comp)});
+app.beginUndoGroup("Motion DNA fx (MCP): {fx['name']}");
+try {{ var it = app.project.importFile(new ImportOptions(new File({js(pathlib.Path(mov).as_posix())}))), L = c.layers.add(it);
+  L.name = "FX · {fx['name']}" + ({js(target)} ? " · " + {js(target)} : ""); L.startTime = {t}; {place} {blend}
+}} finally {{ app.endUndoGroup(); }}
+return L.name + " at " + {t}.toFixed(2) + " s for {dur} s ({fx['lib']}), layer " + L.index;""", includes=()) + f"\nRendered {mov}. Look at it with render_frame; add_sound gives it its sound."
+
+
+def t_record_screen(action="status", scene=None, comp=None, time_s=None):
+    """OBS Studio through obs-websocket (tools/obs_record.py): start or stop a screen recording; stop imports it."""
+    sys.path.insert(0, str(ROOT / "tools")); import obs_record
+    try:
+        if scene: obs_record.run("scene", scene)
+        out = obs_record.run(action)
+    except (ConnectionRefusedError, OSError) as e:
+        return f"OBS is not reachable ({e}): open OBS Studio and enable Tools > WebSocket Server Settings (port 4455; a password goes in OBS_WS_PASSWORD)"
+    if action == "stop" and out:
+        return f"recording saved: {out}\n" + t_import_media(out, comp=comp, time_s=time_s, fit=True)
+    return out
+
+
+def t_add_sound(cues=None, comp=None, auto=True, bed=None, gain_db=0, density="few", replace=True):
+    """Sound effects made in code (tools/sound_kit.py, Tone.js) under a comp, as one audio layer 'Motion DNA sound'."""
+    sys.path.insert(0, str(ROOT / "tools")); import sound_kit
+    head, *rows = run_jsx(f"$.global.SOUND_COMP = {js(comp or '')}; return $.evalFile(new File({js((ROOT / 'tools' / 'sound_events.jsx').as_posix())}));",
+                          includes=()).strip().split("\n")
+    name, dur, fps, w, folder = head.split("|", 4)
+    events = [dict(zip(("t", "kind", "value", "layer"), r.split("|", 4)[1:])) for r in rows if r.startswith("E|")]
+    seen = sound_kit.cues_from_events(events, float(w), float(fps), density) if auto else []
+    track = list(cues) + [c for c in seen if c["why"].startswith("marker")] if cues else seen
+    if not track and not bed:
+        return f"{name}: nothing on screen calls for a sound (no cuts, moves, pops, text or 'sfx:' markers). Pass cues to place them by hand."
+    for c in track: c["gain"] = c.get("gain", 0) + float(gain_db or 0)
+    out_dir = (pathlib.Path(folder) if folder else ROOT / "renders") / "sound"; out_dir.mkdir(parents=True, exist_ok=True)
+    wav = out_dir / (_safe_name(name) + "_mdna_sound.wav")
+    sound_kit.render({"duration": float(dur), "cues": track, **({"bed": bed} if bed else {})}, str(wav))
+    res = run_jsx(COMP_JS + f"""var c = findComp({js(comp)});
+app.beginUndoGroup("Motion DNA sound (MCP)");
+try {{
+  if ({'true' if replace else 'false'}) for (var i = c.numLayers; i >= 1; i--) if (c.layer(i).name === "Motion DNA sound") {{ var src = c.layer(i).source; c.layer(i).remove(); if (src && src.usedIn.length === 0) src.remove(); }}
+  var it = app.project.importFile(new ImportOptions(new File({js(wav.as_posix())}))), L = c.layers.add(it);
+  L.name = "Motion DNA sound"; L.startTime = 0; L.moveToEnd();
+}} finally {{ app.endUndoGroup(); }}
+return "layer " + L.index;""", includes=())
+    lines = [f"{c['t']:.2f} s  {c['sfx']}" + (f" (take {c['take'] + 1})" if c.get("take") else "") + (f"  · {c['why']}" if c.get("why") else "") for c in track]
+    return (f"Motion DNA sound in {name}: {len(track)} cues" + (f" + a {bed.get('mood', 'pulse')} bed" if bed else "") + f", {res}, {wav.as_posix()}\n" + "\n".join(lines) +
+            "\nTo change it, call add_sound again with cues (edit this list), or put a layer or comp marker 'sfx: hit' on a moment.")
+
+
 FLORA_JS = f'if (typeof mdna_flora_list !== "function") $.evalFile(new File({json.dumps((ROOT / "panel/host/host.jsx").as_posix())}));\n'
 
 
@@ -939,8 +1105,8 @@ TOOLS_DEF = [
       "count": {"type": "integer"}, "angle": {"type": "number"}, "stagger": {"type": "number"},
       "order": {"type": "string", "enum": ["index", "reverse", "center", "edges", "random", "diagonal"]},
       "cols": {"type": "integer"}, "outgoing": {"type": "string"}, "incoming": {"type": "string"}, "energy": {"type": "integer"}, "tone": {"type": "string"}}),
-    ("list_kit", t_list_kit, "List the building blocks beyond presets, each with energy, tones, use and the call to make: element (self-sizing titles, callouts, counters, social…), shape (primitives, lines, impacts, fireworks, glitter…), move (2D/3D entrances), text (per-unit text animation, typewriter, captions), look (finishing looks), background, transition. Filter by kind, energy 1-5, tone or a word.",
-     {"kind": {"type": "string", "enum": ["element", "shape", "move", "text", "look", "background", "transition"]}, "energy": {"type": "integer"}, "tone": {"type": "string"}, "query": {"type": "string"}}),
+    ("list_kit", t_list_kit, "List the building blocks beyond presets, each with energy, tones, use and the call to make: element (self-sizing titles, callouts, counters, social…), shape (primitives, lines, impacts, fireworks, glitter…), move (2D/3D entrances), text (per-unit text animation, typewriter, captions), look (finishing looks), background, behavior, transition (solid and clip), gltransition (shader wipes, gl_transition), spring (react-spring / anime.js, apply_spring), physics (matter.js), webfx (web libraries: confetti, sparks, scribble, 3D…, add_fx). Filter by kind, energy 1-5, tone or a word.",
+     {"kind": {"type": "string", "enum": ["element", "shape", "move", "text", "look", "background", "behavior", "transition", "gltransition", "spring", "physics", "webfx"]}, "energy": {"type": "integer"}, "tone": {"type": "string"}, "query": {"type": "string"}}),
     ("add_shape", t_add_shape, "Animated shape on its own layer, keyed with token curves (Reveal, Size, Stroke, Color 1/2 on the layer): primitives (circle, ring, square, frame, triangle, diamond, pentagon, hexagon, star, sparkle, badge, heart, shield), lines (line, wave, zigzag, arrow, curved_arrow, chevrons, brackets, spiral, infinity, brush, speed_lines), marks (cross, plus, check, dots, loader, rings) and Shape-Elements families (burst, impact with spread/mirror, pops, shape_row, fireworks, glitter, swoosh, confetti), blob (liquid shape that keeps breathing); lines draw on and, with out or hold, travel off. anim: draw | pop | spin | burst | pulse; loop keeps it moving.",
      {"kind": {"type": "string"}, "comp": {"type": "string"}, "t": {"type": "number"}, "out": {"type": "number"}, "position": {"type": "array", "items": {"type": "number"}},
       "size": {"type": "number"}, "stroke": {"type": "number"}, "style": {"type": "string", "enum": ["fill", "outline", "dotted"]}, "anim": {"type": "string", "enum": ["draw", "pop", "spin", "burst", "pulse"]}, "hold": {"type": "number", "description": "seconds on screen before it leaves (lines travel off)"},
@@ -994,6 +1160,23 @@ TOOLS_DEF = [
     ("add_asset", t_add_asset, "Place an asset by exact name from list_assets in a comp at a time (default: playhead): sfx or music (audio, gain_db), overlay (full frame, looped, blend + opacity), or vfx (a free CC0 image sequence with alpha: fire, smoke, explosion; blend default add, scale %).",
      {"name": {"type": "string"}, "type": {"type": "string", "enum": ["sfx", "music", "overlay", "vfx"]}, "time_s": {"type": "number"}, "gain_db": {"type": "number"},
       "opacity": {"type": "number"}, "blend": {"type": "string"}, "scale": {"type": "number"}, "comp": {"type": "string"}}, ["name"]),
+    ("apply_spring", t_apply_spring, "Springs and named eases from open-source motion libraries (react-spring 10 presets default, gentle, wobbly, stiff, slow, molasses; anime.js 4 springs by bounce and its outBack, outElastic, outBounce, outExpo, inOutCirc), applied as an expression that plays the curve between a property's first two keyframes. Use it when a brief asks for a real spring, wobble, elastic or bounce, which the token curves do not reach (they overshoot about 8 % at most). Call with no name to list them with overshoot, settle time and the closest token. props default position, scale, rotation (2+ keys each).",
+     {"name": {"type": "string"}, "layers": {"type": "array", "items": {"type": "string"}}, "comp": {"type": "string"}, "props": {"type": "array", "items": {"type": "string"}}}),
+    ("physics", t_physics, "Real 2D physics for layers (matter.js, simulated then baked to Position and Rotation keyframes, so the comp needs nothing to play): mode fall (the layers fall from where they are and pile on the floor, the comp's bottom edge), drop_in (they start above the frame one after another and land in a pile), burst (they fly out from the group's centre, spinning, and fall out of frame). Each layer is a box the size of its visible content (circles: names to treat as circles). t = start (default playhead), duration s, gravity (1 = Earth-like at 1080p), bounce 0-1, stagger s between drops, every = key every N frames. Replaces the layers' Position and Rotation keys; 2D layers without a parent.",
+     {"mode": {"type": "string", "enum": ["fall", "drop_in", "burst"]}, "layers": {"type": "array", "items": {"type": "string"}}, "comp": {"type": "string"}, "t": {"type": "number"},
+      "duration": {"type": "number"}, "gravity": {"type": "number"}, "bounce": {"type": "number"}, "stagger": {"type": "number"},
+      "circles": {"type": "array", "items": {"type": "string"}}, "every": {"type": "integer"}}),
+    ("gl_transition", t_gl_transition, "74 shader transitions from gl-transitions (MIT/BSD per shader) between two layers, as a luma matte rendered on this machine: wipes, irises, hearts, stars, pinwheels, blinds, checkers, noise and burn dissolves, page curls. The incoming layer is matted by the shader's mix (black = outgoing, white = incoming), timed on a token curve (ease, default Cruise) over duration s from at_s (default: the playhead, or the incoming layer's in point). Call with no name to list them (kind wipe = hard edge, soft = with greys). Shaders that warp or recolour the pictures themselves are not offered (as a matte they would be a plain dissolve).",
+     {"name": {"type": "string"}, "outgoing": {"type": "string"}, "incoming": {"type": "string"}, "comp": {"type": "string"}, "at_s": {"type": "number"},
+      "duration": {"type": "number"}, "ease": {"type": "string"}, "kind": {"type": "string", "enum": ["wipe", "soft"]}}),
+    ("add_fx", t_add_fx, "Effects made with open-source web libraries, rendered on this machine frame by frame (with alpha) and placed in the comp: confetti cannons and particle fireworks (tsParticles; add_shape confetti / fireworks are the native, editable versions), sparks (PixiJS), scribble (paper.js hand-drawn circle/underline/cross/arrow/box around a target layer), flow field (p5.js generative lines, background), living gradient (OGL, background), helix 3d (three.js: the DNA helix in 3D, or a glTF product turntable with opts.model), drop 3d (three.js + Rapier: 3D shapes rain and pile up). target = a layer the effect aims at (scribble draws around it, sparks and confetti burst from it). opts = the page's options (see the list), colors or brand for colours. Call with no kind to list them. Renders are cached, so the same call is instant the second time.",
+     {"kind": {"type": "string"}, "comp": {"type": "string"}, "at_s": {"type": "number"}, "duration": {"type": "number"}, "target": {"type": "string"},
+      "opts": {"type": "object"}, "colors": {"type": "array", "items": {"type": "string"}}, "brand": {"type": "string"}}),
+    ("record_screen", t_record_screen, "Record the screen with OBS Studio (it must be open with Tools > WebSocket Server Settings enabled): action status | start | stop | scenes; scene switches the OBS scene first. stop saves the recording and imports it into the comp (default: active) at time_s, for UI demos and tutorials.",
+     {"action": {"type": "string", "enum": ["status", "start", "stop", "scenes"]}, "scene": {"type": "string"}, "comp": {"type": "string"}, "time_s": {"type": "number"}}),
+    ("add_sound", t_add_sound, "Sound effects for a comp, made in code with Motion DNA's sound kit (Tone.js; whoosh, swish, pop, tick, click, hit, riser, sub, chime, shimmer, type, glitch), so they are ours to ship. Default (auto): it reads the comp and gives each visible action its sound, few and exact: a cut or a large fast move whooshes, a medium move swishes, a scale-up pops, a text arriving ticks, and a layer or comp marker 'sfx: <name>' is obeyed; a cue lands one frame after its picture and a repeated sound rotates takes. Or pass cues [{t, sfx, dur, gain, pitch, pan}] (t = the moment it lands). bed {bpm, mood: pulse|tick|ambient} is only a temp bed: real music goes in with add_asset. Writes one WAV next to the project (sound/) and adds it as the layer 'Motion DNA sound', replacing the last one. Run it when the animation is final and again after any retiming; chime and shimmer read as synthetic, keep them for a single payoff.",
+     {"cues": {"type": "array", "items": {"type": "object"}}, "comp": {"type": "string"}, "auto": {"type": "boolean"}, "bed": {"type": "object"},
+      "gain_db": {"type": "number"}, "density": {"type": "string", "enum": ["few", "all"]}, "replace": {"type": "boolean"}}),
     ("show_in_panel", t_show_in_panel, "Select a preset in the open Motion DNA panel so the user sees its live preview.",
      {"kind": {"type": "string"}, "name": {"type": "string"}}, ["kind", "name"]),
     ("render_frame", t_render_frame, "Save one frame of a comp as PNG (default: active comp at the playhead) and return its path, to check the result visually.",
@@ -1059,7 +1242,7 @@ def handle(req):
                                 "video placed in an energy range and tones, e.g. calm + modern), run match_reference: build what fits from existing "
                                 "presets and CREATE what is missing (moves, curves, transitions, techniques), tag it, render its samples and add a style "
                                 "(CONTRIBUTING.md section 8). Apply with apply_preset (duration, intensity, direction, ease), apply_pack, add_asset; undo "
-                                "with remove_animation; check with render_frame and, before calling a build done, check_layout. Never save the AE project unless asked. Working for a brand or a project? Read it first with get_brand and "
+                                "with remove_animation; check with render_frame and, before calling a build done, check_layout; then add_sound (sound effects made in code, by default unless silence is asked for). Never save the AE project unless asked. Working for a brand or a project? Read it first with get_brand and "
                                 "save every review note with add_brand_note: each brand profile learns and keeps its own rules. "
                                 "Read CLAUDE.md in the repo for the rules."}
     if method == "tools/list":

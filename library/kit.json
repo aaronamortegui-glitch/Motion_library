@@ -1750,6 +1750,560 @@
     "outlined shapes, drawn lines, grow, rope",
     "the Boil preset (jitters the whole layer) for extra texture"
    ]
+  },
+  {
+   "kind": "webfx",
+   "name": "confetti cannons",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "Celebration burst: two cannons from the lower corners (bursts [{t, x, y, angle, spread, count}], shapes, scalar). (tsParticles 4.5.0)",
+   "call": "add_fx(kind=\"confetti cannons\", …)"
+  },
+  {
+   "kind": "webfx",
+   "name": "particle fireworks",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "playful",
+    "cinematic"
+   ],
+   "use": "Rockets and bursts over a dark scene (rate, gravity, speed). (tsParticles 4.5.0)",
+   "call": "add_fx(kind=\"particle fireworks\", …)"
+  },
+  {
+   "kind": "webfx",
+   "name": "sparks",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "technical"
+   ],
+   "use": "A burst of glowing streaks from a point (x, y in %, or the target layer's centre): hits, impacts, a product landing. (PixiJS 8.22.0)",
+   "call": "add_fx(kind=\"sparks\", …)"
+  },
+  {
+   "kind": "webfx",
+   "name": "scribble",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "handmade",
+    "playful",
+    "editorial"
+   ],
+   "use": "Hand-drawn marker annotation around a layer: shape circle | underline | cross | arrow | box, drawn on like a pen, boiling on twos. (paper.js 0.16.0)",
+   "call": "add_fx(kind=\"scribble\", …)"
+  },
+  {
+   "kind": "webfx",
+   "name": "flow field",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "calm",
+    "organic",
+    "technical"
+   ],
+   "use": "Calm generative background: thin lines drifting on a noise field (count, speed, bg for opaque). (p5.js 2.3.4 (LGPL, CDN))",
+   "call": "add_fx(kind=\"flow field\", …)"
+  },
+  {
+   "kind": "webfx",
+   "name": "living gradient",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "calm",
+    "luxury",
+    "modern"
+   ],
+   "use": "Living mesh gradient in four token colours with grain, loops cleanly every `loop` s. (OGL 1.0.11)",
+   "call": "add_fx(kind=\"living gradient\", …)"
+  },
+  {
+   "kind": "webfx",
+   "name": "helix 3d",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "technical",
+    "elegant"
+   ],
+   "use": "The DNA helix in real 3D (spheres, soft light, a slow turn), or a glTF/GLB product on a turntable (model). (three.js r186)",
+   "call": "add_fx(kind=\"helix 3d\", …)"
+  },
+  {
+   "kind": "webfx",
+   "name": "drop 3d",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "friendly",
+    "bold"
+   ],
+   "use": "3D physics: rounded cubes, spheres and pills in token colours rain down and pile up, with soft shadows (count, shapes, size, rate). (three.js r186 + Rapier 0.21.0)",
+   "call": "add_fx(kind=\"drop 3d\", …)"
+  },
+  {
+   "kind": "spring",
+   "name": "react-spring default",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "calm",
+    "elegant"
+   ],
+   "use": "Spring from react-spring 10.1.2: overshoot 0.0 %, settles in 0.76 s, closest token Nudge.",
+   "call": "apply_spring(name=\"react-spring default\", layers=[…])"
+  },
+  {
+   "kind": "spring",
+   "name": "react-spring gentle",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "friendly",
+    "modern"
+   ],
+   "use": "Spring from react-spring 10.1.2: overshoot 7.3 %, settles in 0.97 s, closest token Pop.",
+   "call": "apply_spring(name=\"react-spring gentle\", layers=[…])"
+  },
+  {
+   "kind": "spring",
+   "name": "react-spring wobbly",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "friendly"
+   ],
+   "use": "Spring from react-spring 10.1.2: overshoot 20.7 %, settles in 1.17 s, closest token Land.",
+   "call": "apply_spring(name=\"react-spring wobbly\", layers=[…])"
+  },
+  {
+   "kind": "spring",
+   "name": "react-spring stiff",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "friendly",
+    "modern"
+   ],
+   "use": "Spring from react-spring 10.1.2: overshoot 5.0 %, settles in 0.75 s, closest token Pop.",
+   "call": "apply_spring(name=\"react-spring stiff\", layers=[…])"
+  },
+  {
+   "kind": "spring",
+   "name": "react-spring slow",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "calm",
+    "elegant"
+   ],
+   "use": "Spring from react-spring 10.1.2: overshoot 0.0 %, settles in 1.51 s, closest token Land.",
+   "call": "apply_spring(name=\"react-spring slow\", layers=[…])"
+  },
+  {
+   "kind": "spring",
+   "name": "react-spring molasses",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "calm",
+    "elegant"
+   ],
+   "use": "Spring from react-spring 10.1.2: overshoot 0.0 %, settles in 3.20 s, closest token Land.",
+   "call": "apply_spring(name=\"react-spring molasses\", layers=[…])"
+  },
+  {
+   "kind": "spring",
+   "name": "anime spring default",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "friendly"
+   ],
+   "use": "Spring from anime.js 4.5.0: overshoot 16.3 %, settles in 1.54 s, closest token Land.",
+   "call": "apply_spring(name=\"anime spring default\", layers=[…])"
+  },
+  {
+   "kind": "spring",
+   "name": "anime spring bounce 0 · 500 ms",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "calm",
+    "elegant"
+   ],
+   "use": "Spring from anime.js 4.5.0: overshoot 0.0 %, settles in 0.79 s, closest token Nudge.",
+   "call": "apply_spring(name=\"anime spring bounce 0 · 500 ms\", layers=[…])"
+  },
+  {
+   "kind": "spring",
+   "name": "anime spring bounce 0.25 · 600 ms",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "friendly",
+    "modern"
+   ],
+   "use": "Spring from anime.js 4.5.0: overshoot 2.8 %, settles in 1.02 s, closest token Pop.",
+   "call": "apply_spring(name=\"anime spring bounce 0.25 · 600 ms\", layers=[…])"
+  },
+  {
+   "kind": "spring",
+   "name": "anime spring bounce 0.5 · 628 ms",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "friendly"
+   ],
+   "use": "Spring from anime.js 4.5.0: overshoot 16.3 %, settles in 1.54 s, closest token Land.",
+   "call": "apply_spring(name=\"anime spring bounce 0.5 · 628 ms\", layers=[…])"
+  },
+  {
+   "kind": "spring",
+   "name": "anime spring bounce 0.7 · 800 ms",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "Spring from anime.js 4.5.0: overshoot 37.2 %, settles in 3.08 s, closest token Snap.",
+   "call": "apply_spring(name=\"anime spring bounce 0.7 · 800 ms\", layers=[…])"
+  },
+  {
+   "kind": "spring",
+   "name": "anime outBack",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "friendly"
+   ],
+   "use": "Ease from anime.js 4.5.0: overshoot 10.0 %, a named ease, closest token Pop.",
+   "call": "apply_spring(name=\"anime outBack\", layers=[…])"
+  },
+  {
+   "kind": "spring",
+   "name": "anime outElastic",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "Ease from anime.js 4.5.0: overshoot 37.3 %, a named ease, closest token Snap.",
+   "call": "apply_spring(name=\"anime outElastic\", layers=[…])"
+  },
+  {
+   "kind": "spring",
+   "name": "anime outBounce",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "calm",
+    "elegant"
+   ],
+   "use": "Ease from anime.js 4.5.0: overshoot 0.0 %, a named ease, closest token Settle.",
+   "call": "apply_spring(name=\"anime outBounce\", layers=[…])"
+  },
+  {
+   "kind": "spring",
+   "name": "anime outExpo",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "calm",
+    "elegant"
+   ],
+   "use": "Ease from anime.js 4.5.0: overshoot 0.0 %, a named ease, closest token Land.",
+   "call": "apply_spring(name=\"anime outExpo\", layers=[…])"
+  },
+  {
+   "kind": "spring",
+   "name": "anime inOutCirc",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "calm",
+    "elegant"
+   ],
+   "use": "Ease from anime.js 4.5.0: overshoot 0.0 %, a named ease, closest token Surge.",
+   "call": "apply_spring(name=\"anime inOutCirc\", layers=[…])"
+  },
+  {
+   "kind": "physics",
+   "name": "fall",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "friendly"
+   ],
+   "use": "The layers fall from where they are and pile up on the floor (the comp's bottom edge). Real 2D physics (matter.js 0.20.0), baked to Position and Rotation keys.",
+   "call": "physics(mode=\"fall\", layers=[…])"
+  },
+  {
+   "kind": "physics",
+   "name": "drop in",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "The layers start above the frame, one after another, and land in a pile. Real 2D physics (matter.js 0.20.0), baked to Position and Rotation keys.",
+   "call": "physics(mode=\"drop_in\", layers=[…])"
+  },
+  {
+   "kind": "physics",
+   "name": "burst",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "playful"
+   ],
+   "use": "The layers fly out from the group's centre, spinning, and fall out of frame. Real 2D physics (matter.js 0.20.0), baked to Position and Rotation keys.",
+   "call": "physics(mode=\"burst\", layers=[…])"
+  },
+  {
+   "kind": "gltransition",
+   "name": "HeartWipe",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "friendly"
+   ],
+   "use": "A heart shape grows from the center to reveal the incoming image (gl-transitions shader by gre, MIT; a luma matte between two layers).",
+   "call": "gl_transition(name=\"HeartWipe\", outgoing=\"…\", incoming=\"…\")"
+  },
+  {
+   "kind": "gltransition",
+   "name": "StarWipe",
+   "energy": [
+    3,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "use": "A growing star reveals the incoming image (gl-transitions shader by Ben Lucas, MIT; a luma matte between two layers).",
+   "call": "gl_transition(name=\"StarWipe\", outgoing=\"…\", incoming=\"…\")"
+  },
+  {
+   "kind": "gltransition",
+   "name": "FlowerWipe",
+   "energy": [
+    2,
+    4
+   ],
+   "tones": [
+    "playful",
+    "organic"
+   ],
+   "use": "A flower shape with several petals grows to reveal the incoming image (gl-transitions shader by Fernando Kuteken, MIT; a luma matte between two layers).",
+   "call": "gl_transition(name=\"FlowerWipe\", outgoing=\"…\", incoming=\"…\")"
+  },
+  {
+   "kind": "gltransition",
+   "name": "Pinwheel",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "playful",
+    "retro"
+   ],
+   "use": "A spinning pinwheel reveals the incoming image (gl-transitions shader by Mr Speaker, MIT; a luma matte between two layers).",
+   "call": "gl_transition(name=\"Pinwheel\", outgoing=\"…\", incoming=\"…\")"
+  },
+  {
+   "kind": "gltransition",
+   "name": "ClockWipe",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "corporate"
+   ],
+   "use": "A wipe that sweeps around the center from a starting angle (gl-transitions shader by Fernando Kuteken, MIT; a luma matte between two layers).",
+   "call": "gl_transition(name=\"ClockWipe\", outgoing=\"…\", incoming=\"…\")"
+  },
+  {
+   "kind": "gltransition",
+   "name": "PolkaDotsCurtain",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "retro"
+   ],
+   "use": "The incoming image appears through growing polka dots (gl-transitions shader by bobylito, MIT; a luma matte between two layers).",
+   "call": "gl_transition(name=\"PolkaDotsCurtain\", outgoing=\"…\", incoming=\"…\")"
+  },
+  {
+   "kind": "gltransition",
+   "name": "Crosshatch",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "technical",
+    "retro"
+   ],
+   "use": "The incoming image appears through a crosshatch of lines spreading from the center (gl-transitions shader by pthrasher, MIT; a luma matte between two layers).",
+   "call": "gl_transition(name=\"Crosshatch\", outgoing=\"…\", incoming=\"…\")"
+  },
+  {
+   "kind": "gltransition",
+   "name": "WindowBlinds",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "corporate",
+    "editorial"
+   ],
+   "use": "A crossfade through horizontal window blinds (gl-transitions shader by Fabien Benetou, MIT; a luma matte between two layers).",
+   "call": "gl_transition(name=\"WindowBlinds\", outgoing=\"…\", incoming=\"…\")"
+  },
+  {
+   "kind": "gltransition",
+   "name": "RadialWipe",
+   "energy": [
+    2,
+    4
+   ],
+   "tones": [
+    "modern",
+    "cinematic"
+   ],
+   "use": "A radial wipe that sweeps around the center like a clock hand (gl-transitions shader by Xaychru, MIT; a luma matte between two layers).",
+   "call": "gl_transition(name=\"RadialWipe\", outgoing=\"…\", incoming=\"…\")"
+  },
+  {
+   "kind": "gltransition",
+   "name": "PerlinDissolve",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "organic",
+    "cinematic"
+   ],
+   "use": "The incoming image appears through blobs of Perlin noise (gl-transitions shader by Rich Harris, MIT; a luma matte between two layers).",
+   "call": "gl_transition(name=\"PerlinDissolve\", outgoing=\"…\", incoming=\"…\")"
+  },
+  {
+   "kind": "gltransition",
+   "name": "DoomMelt",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "retro",
+    "bold"
+   ],
+   "use": "The outgoing image melts down in uneven columns, like the Doom screen wipe (gl-transitions shader by Zeh Fernando, MIT; a luma matte between two layers).",
+   "call": "gl_transition(name=\"DoomMelt\", outgoing=\"…\", incoming=\"…\")"
+  },
+  {
+   "kind": "gltransition",
+   "name": "UndulatingBurnOut",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "cinematic",
+    "organic"
+   ],
+   "use": "A circle with a wavy edge burns out from the center to reveal the incoming image (gl-transitions shader by pthrasher, MIT; a luma matte between two layers).",
+   "call": "gl_transition(name=\"UndulatingBurnOut\", outgoing=\"…\", incoming=\"…\")"
   }
  ]
 }

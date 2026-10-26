@@ -1,0 +1,48 @@
+<!doctype html>
+<!-- Motion DNA web FX · 3D drop (three.js r186, MIT + Rapier 3D 0.21.0, Apache-2.0): rounded cubes, spheres and
+     pills in token colours rain onto an invisible floor and pile up with real 3D physics (shadows on a catcher, so it
+     composites over anything). Options (location.hash JSON): colors, count, shapes (cube|sphere|pill list), size,
+     rate (bodies per second). Transparent background. Rendered by tools/web_capture.py on a virtual clock. -->
+<meta charset="utf-8"><title>drop3d</title>
+<style>html, body { margin: 0; background: transparent; overflow: hidden; } #stage { position: relative; } canvas { display: block; }</style>
+<div id="stage"></div>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/" } }</script>
+<script type="module">
+import * as THREE from "three";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import RAPIER from "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.21.0/+esm";
+await RAPIER.init();
+const o = JSON.parse(decodeURIComponent(location.hash.slice(1) || "{}")), st = document.getElementById("stage");
+st.style.width = o.w + "px"; st.style.height = o.h + "px";
+const R = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); R.setPixelRatio(1); R.setSize(o.w, o.h);
+R.outputColorSpace = THREE.SRGBColorSpace; R.toneMapping = THREE.NeutralToneMapping; /* keeps the token colours: ACES washes the spark out */ R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFSoftShadowMap; st.appendChild(R.domElement);
+const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(32, o.w / o.h, 0.1, 100); cam.position.set(0, 4.2, 14); cam.lookAt(0, 1.2, 0);
+scene.environment = new THREE.PMREMGenerator(R).fromScene(new RoomEnvironment(), 0.04).texture;
+const sun = new THREE.DirectionalLight(0xffffff, 2.4); sun.position.set(4, 10, 6); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9 }); scene.add(sun, new THREE.AmbientLight(0xffffff, 0.2));
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.ShadowMaterial({ opacity: 0.28 })); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+const world = new RAPIER.World({ x: 0, y: -9.81 * (o.gravity ?? 1.4), z: 0 });
+world.createCollider(RAPIER.ColliderDesc.cuboid(20, 0.1, 20).setTranslation(0, -0.1, 0).setFriction(0.8));
+for (const [x, z, sx, sz] of [[-6.5, 0, 0.1, 6], [6.5, 0, 0.1, 6], [0, -3, 6.5, 0.1], [0, 3, 6.5, 0.1]]) world.createCollider(RAPIER.ColliderDesc.cuboid(sx, 6, sz).setTranslation(x, 6, z));
+const cols = o.colors || ["#D8FF85", "#9FD8C2", "#FF8A6B", "#F7F9F2"], shapes = o.shapes || ["cube", "sphere", "pill"], S = o.size ?? 0.55;
+const geo = { cube: new RoundedBoxGeometry(S * 2, S * 2, S * 2, 4, S * 0.25), sphere: new THREE.SphereGeometry(S, 32, 20), pill: new THREE.CapsuleGeometry(S * 0.6, S * 1.3, 8, 20) };
+const bodies = [], N = o.count ?? 36, rate = o.rate ?? 14;
+function spawn(i) {
+  const kind = shapes[i % shapes.length], m = new THREE.Mesh(geo[kind], new THREE.MeshPhysicalMaterial({ color: cols[i % cols.length], roughness: 0.32, clearcoat: 0.5 }));
+  m.castShadow = true; scene.add(m);
+  const b = world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation((Math.random() - 0.5) * 7, 9 + Math.random() * 2, (Math.random() - 0.5) * 3)
+    .setRotation(new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.random() * 3, Math.random() * 3, Math.random() * 3))).setAngvel({ x: Math.random() * 4 - 2, y: Math.random() * 4 - 2, z: Math.random() * 4 - 2 }));
+  const desc = kind === "cube" ? RAPIER.ColliderDesc.roundCuboid(S * 0.75, S * 0.75, S * 0.75, S * 0.25) : kind === "sphere" ? RAPIER.ColliderDesc.ball(S) : RAPIER.ColliderDesc.capsule(S * 0.65, S * 0.6);
+  world.createCollider(desc.setRestitution(0.3).setFriction(0.6), b);   // set on the desc: a Collider's setters return nothing
+  bodies.push([m, b]);
+}
+window.FX_START = () => { const t0 = performance.now(); let last = t0, acc = 0, made = 0;
+  const f = () => { const now = performance.now(), t = (now - t0) / 1000; acc += Math.min(0.1, (now - last) / 1000); last = now;
+    while (made < N && made < t * rate) spawn(made++);
+    while (acc >= 1 / 120) { world.timestep = 1 / 120; world.step(); acc -= 1 / 120; }
+    for (const [m, b] of bodies) { const p = b.translation(), q = b.rotation(); m.position.set(p.x, p.y, p.z); m.quaternion.set(q.x, q.y, q.z, q.w); }
+    R.render(scene, cam); requestAnimationFrame(f); }; f(); };
+window.FX_READY = true;
+</script>

@@ -124,7 +124,21 @@ checks = [
 var L = c.layers.add(app.project.importFile(new ImportOptions(new File({json.dumps(PHOTO.as_posix())})))); L.name = "Product"; L.moveToEnd();
 c.layer("Title").moveToBeginning(); return "photo ok";'''}, lambda t: "photo ok" in t),
     ("text_behind", {"subject": "Product", "text": "Title", "comp": COMP}, lambda t: "is behind Product" in t or NO_GPU in t),
-    ("run_jsx", {"code": f'for (var i = app.project.numItems; i >= 1; i--) {{ var it = app.project.item(i); if (it.name === "{COMP}" || it.name.indexOf("{COMP} · ") === 0 || (it instanceof FootageItem && it.file && (it.file.fsName.indexOf("_mcp_test") >= 0 || it.file.fsName.indexOf("assets.free") >= 0)) || (it instanceof FootageItem && /^(TR · |BG · |LK · )/.test(it.name))) it.remove(); }} return "removed";'}, lambda t: "removed" in t),
+    # open-source engines (docs/OPEN_SOURCE.md): the lists, then each tool on the test comp
+    ("list_kit", {"kind": "spring"}, lambda t: "react-spring wobbly" in t),
+    ("apply_spring", {}, lambda t: "react-spring wobbly" in t and "anime outElastic" in t),
+    ("gl_transition", {}, lambda t: "HeartWipe" in t and "LeafWipe" not in t),
+    ("add_fx", {}, lambda t: "confetti" in t and "drop 3d" in t),
+    ("run_jsx", {"code": f'''var c = null; for (var i = 1; i <= app.project.numItems; i++) if (app.project.item(i).name === "{COMP}") c = app.project.item(i);
+var s = c.layers.addShape(); s.name = "Box"; var v = s.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
+v.addProperty("ADBE Vector Shape - Rect"); v.addProperty("ADBE Vector Graphic - Fill"); return "box ok";'''}, lambda t: "box ok" in t),   # a free layer: physics takes no parented ones
+    ("physics", {"mode": "fall", "layers": ["Box"], "comp": COMP, "duration": 1.0, "every": 2}, lambda t: "physics fall on 1 layers" in t),
+    ("apply_spring", {"name": "react-spring wobbly", "layers": ["Box"], "comp": COMP, "props": ["position"]}, lambda t: "react-spring wobbly on Box" in t),
+    ("gl_transition", {"name": "HeartWipe", "outgoing": "Chip", "incoming": "Title", "comp": COMP, "at_s": 1.0, "duration": 0.5}, lambda t: "HeartWipe (MIT" in t),
+    ("add_fx", {"kind": "scribble", "target": "Title", "comp": COMP, "at_s": 0.2, "duration": 1.0}, lambda t: "FX · scribble · Title" in t),
+    ("add_sound", {"comp": COMP}, lambda t: f"Motion DNA sound in {COMP}" in t or "nothing on screen calls for a sound" in t),
+    ("record_screen", {}, lambda t: "recording" in t or "not reachable" in t),   # OBS closed: says how to open it
+    ("run_jsx", {"code": f'for (var i = app.project.numItems; i >= 1; i--) {{ var it = app.project.item(i); if (it.name === "{COMP}" || it.name.indexOf("{COMP} · ") === 0 || (it instanceof FootageItem && it.file && (it.file.fsName.indexOf("_mcp_test") >= 0 || it.file.fsName.indexOf("assets.free") >= 0 || it.file.fsName.indexOf("gl_mattes") >= 0 || it.file.fsName.indexOf("web_fx") >= 0 || it.file.fsName.indexOf("{COMP}_mdna_sound") >= 0)) || (it instanceof FootageItem && /^(TR · |BG · |LK · )/.test(it.name))) it.remove(); }} return "removed";'}, lambda t: "removed" in t),
 ]
 report, ok_n = [], 0
 for name, args, check in checks:

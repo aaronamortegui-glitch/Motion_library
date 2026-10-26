@@ -3,7 +3,7 @@
   "tool": "ae_status",
   "ok": true,
   "args": {},
-  "answer": "AE 26.5x89 · project: unsaved · active: none · panel: loaded (Window > Extensions > Motion DNA) · fonts ok"
+  "answer": "AE 26.5x89 · project: unsaved · active: none · panel: loaded (legacy Window > Motion DNA.jsx) · fonts ok"
  },
  {
   "tool": "list_presets",
@@ -119,7 +119,7 @@
    "comp": "_MCP_TEST · 9x16",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1792438342769.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1793025361646.png (open it to look at the frame)"
  },
  {
   "tool": "apply_preset",
@@ -156,7 +156,7 @@
    "kind": "motion",
    "name": "Surge Rise"
   },
-  "answer": "The Motion DNA panel (Window > Extensions > Motion DNA) cannot be driven from a script yet: tell the user which preset to pick."
+  "answer": "selected motion/Surge Rise"
  },
  {
   "tool": "render_frame",
@@ -165,7 +165,7 @@
    "comp": "_MCP_TEST",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1792438346741.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1793025366284.png (open it to look at the frame)"
  },
  {
   "tool": "check_layout",
@@ -711,32 +711,32 @@
   "tool": "import_media",
   "ok": true,
   "args": {
-   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261019-153213\\product_car_side.jpg",
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261026-103553\\product_car_side.jpg",
    "comp": "_MCP_TEST",
    "time_s": 0.5,
    "name": "imported_photo"
   },
-  "answer": "file D:/motion category ai library/research/_mcp_test/20261019-153213/product_car_side.jpg\nimported imported_photo as layer 1 in _MCP_TEST at 0.50 s"
+  "answer": "file D:/motion category ai library/research/_mcp_test/20261026-103553/product_car_side.jpg\nimported imported_photo as layer 1 in _MCP_TEST at 0.50 s"
  },
  {
   "tool": "import_media",
   "ok": true,
   "args": {
    "source": "https://raw.githubusercontent.com/aaronamortegui-glitch/Motion_library/main/library/packs/calm-modern.png",
-   "dest": "D:\\motion category ai library\\research\\_mcp_test\\20261019-153213\\generated",
+   "dest": "D:\\motion category ai library\\research\\_mcp_test\\20261026-103553\\generated",
    "comp": "_MCP_TEST",
    "fit": false
   },
-  "answer": "saved D:/motion category ai library/research/_mcp_test/20261019-153213/generated/calm-modern.png\nimported calm-modern.png as layer 1 in _MCP_TEST at 0.00 s"
+  "answer": "saved D:/motion category ai library/research/_mcp_test/20261026-103553/generated/calm-modern.png\nimported calm-modern.png as layer 1 in _MCP_TEST at 0.00 s"
  },
  {
   "tool": "import_media",
   "ok": true,
   "args": {
-   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261019-153213\\missing.png",
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261026-103553\\missing.png",
    "comp": "_MCP_TEST"
   },
-  "answer": "not found: D:\\motion category ai library\\research\\_mcp_test\\20261019-153213\\missing.png"
+  "answer": "not found: D:\\motion category ai library\\research\\_mcp_test\\20261026-103553\\missing.png"
  },
  {
   "tool": "add_asset",
@@ -759,16 +759,16 @@
    "category": "motion",
    "why": "test"
   },
-  "answer": "saved rule 1 (motion) in D:/motion category ai library/research/_mcp_test/20261019-153213/brand/brand.json: Product shots glide in, never pop"
+  "answer": "saved rule 1 (motion) in D:/motion category ai library/research/_mcp_test/20261026-103553/brand/brand.json: Product shots glide in, never pop"
  },
  {
   "tool": "matte",
   "ok": true,
   "args": {
-   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261019-153213\\product_car_side.jpg",
-   "out": "D:\\motion category ai library\\research\\_mcp_test\\20261019-153213\\product_cutout.png"
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261026-103553\\product_car_side.jpg",
+   "out": "D:\\motion category ai library\\research\\_mcp_test\\20261026-103553\\product_cutout.png"
   },
-  "answer": "matte: D:/motion category ai library/research/_mcp_test/20261019-153213/product_cutout.png"
+  "answer": "matte: D:/motion category ai library/research/_mcp_test/20261026-103553/product_cutout.png"
  },
  {
   "tool": "run_jsx",
@@ -787,6 +787,108 @@
    "comp": "_MCP_TEST"
   },
   "answer": "Title is behind Product: cut-out layer 1 (Product cut-out), parented to the subject. Check a frame where they overlap."
+ },
+ {
+  "tool": "list_kit",
+  "ok": true,
+  "args": {
+   "kind": "spring"
+  },
+  "answer": "[spring] react-spring default (energy 1-2, calm/elegant): Spring from react-spring 10.1.2: overshoot 0.0 %, settles in 0.76 s, closest token Nudge. -> apply_spring(name=\"react-spring default\", layers=[…])\n[spring] react-spring gentle (energy 2-3, friendly/modern): Spring from react-spring 10.1.2: ov"
+ },
+ {
+  "tool": "apply_spring",
+  "ok": true,
+  "args": {},
+  "answer": "react-spring default: spring, overshoot 0.0 %, settles in 0.758 s, closest token Nudge\nreact-spring gentle: spring, overshoot 7.3 %, settles in 0.972 s, closest token Pop\nreact-spring wobbly: spring, overshoot 20.7 %, settles in 1.172 s, closest token Land\nreact-spring stiff: spring, overshoot 5.0 %"
+ },
+ {
+  "tool": "gl_transition",
+  "ok": true,
+  "args": {},
+  "answer": "73 transitions (wipe = hard edge, soft = with greys):\nBlockDissolve (wipe): The incoming image appears in small random blocks\nBookFlip (soft): The outgoing image turns like a book page from right to left, revealing the incoming one\nBowTie (wipe): A bow-tie wipe with an adjustable shape that can run "
+ },
+ {
+  "tool": "add_fx",
+  "ok": true,
+  "args": {},
+  "answer": "confetti cannons (tsParticles 4.5.0, energy 4-5): Celebration burst: two cannons from the lower corners (bursts [{t, x, y, angle, spread, count}], shapes, scalar).\nparticle fireworks (tsParticles 4.5.0, energy 4-5): Rockets and bursts over a dark scene (rate, gravity, speed).\nsparks (PixiJS 8.22.0, "
+ },
+ {
+  "tool": "run_jsx",
+  "ok": true,
+  "args": {
+   "code": "…"
+  },
+  "answer": "box ok"
+ },
+ {
+  "tool": "physics",
+  "ok": true,
+  "args": {
+   "mode": "fall",
+   "layers": [
+    "Box"
+   ],
+   "comp": "_MCP_TEST",
+   "duration": 1.0,
+   "every": 2
+  },
+  "answer": "physics fall on 1 layers from 0.00 s for 1.0 s (matter.js, gravity 1.0, bounce 0.25): Position and Rotation baked, one key every 2 frame(s); their old keys on those two properties were replaced. Look at it with render_frame, then add_sound (impacts read better with a hit)."
+ },
+ {
+  "tool": "apply_spring",
+  "ok": true,
+  "args": {
+   "name": "react-spring wobbly",
+   "layers": [
+    "Box"
+   ],
+   "comp": "_MCP_TEST",
+   "props": [
+    "position"
+   ]
+  },
+  "answer": "react-spring wobbly on Box Position. The move now takes the spring's curve between keys 1 and 2: space those keys about 1.172 s apart for its natural timing."
+ },
+ {
+  "tool": "gl_transition",
+  "ok": true,
+  "args": {
+   "name": "HeartWipe",
+   "outgoing": "Chip",
+   "incoming": "Title",
+   "comp": "_MCP_TEST",
+   "at_s": 1.0,
+   "duration": 0.5
+  },
+  "answer": "HeartWipe (MIT, by gre) from Chip to Title at 1.00 s over 0.5 s on Cruise: luma matte layer GL · HeartWipe · Title"
+ },
+ {
+  "tool": "add_fx",
+  "ok": true,
+  "args": {
+   "kind": "scribble",
+   "target": "Title",
+   "comp": "_MCP_TEST",
+   "at_s": 0.2,
+   "duration": 1.0
+  },
+  "answer": "FX · scribble · Title at 0.20 s for 1.0 s (paper.js 0.16.0), layer 1\nRendered D:\\motion category ai library\\renders\\web_fx\\scribble_e2998b9aa5.mov. Look at it with render_frame; add_sound gives it its sound."
+ },
+ {
+  "tool": "add_sound",
+  "ok": true,
+  "args": {
+   "comp": "_MCP_TEST"
+  },
+  "answer": "Motion DNA sound in _MCP_TEST: 7 cues, layer 78, D:/motion category ai library/renders/sound/_MCP_TEST_mdna_sound.wav\n0.13 s  tick  · EL · end card 1 tagline arrives\n0.23 s  whoosh  · cut to FX · scribble · Title\n0.53 s  whoosh (take 2)  · cut to imported_photo\n1.28 s  pop  · TR · behavior 1 · 1 1 p"
+ },
+ {
+  "tool": "record_screen",
+  "ok": true,
+  "args": {},
+  "answer": "OBS is not reachable ([WinError 10061] No connection could be made because the target machine actively refused it): open OBS Studio and enable Tools > WebSocket Server Settings (port 4455; a password goes in OBS_WS_PASSWORD)"
  },
  {
   "tool": "run_jsx",

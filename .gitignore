@@ -117,3 +117,7 @@ panel/.python
 
 # written by tools/setup.py: the clone a user-level skill link points to
 .claude/skills/*/REPO_ROOT.txt
+
+# HyperFrames bridge (research/hyperframes): the pinned install and the projects made with it
+research/hyperframes/node_modules/
+research/hyperframes/projects/

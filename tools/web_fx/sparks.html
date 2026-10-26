@@ -1,0 +1,31 @@
+<!doctype html>
+<!-- Motion DNA web FX · sparks (PixiJS 8.22.0, MIT): a burst of glowing streaks from a point, slowing on drag and
+     falling on gravity, additive so they glow over anything. Options (location.hash JSON): colors, x, y (% of the
+     frame), count, speed, at (s), bursts [{t, x, y}]. Transparent. Rendered by tools/web_capture.py on a virtual clock. -->
+<meta charset="utf-8"><title>sparks</title>
+<style>html, body { margin: 0; background: transparent; overflow: hidden; } #stage { position: relative; } canvas { display: block; }</style>
+<div id="stage"></div>
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@8.22.0/dist/pixi.min.js"></script>
+<script>
+(async () => {
+  const o = JSON.parse(decodeURIComponent(location.hash.slice(1) || "{}")), st = document.getElementById("stage");
+  st.style.width = o.w + "px"; st.style.height = o.h + "px";
+  const app = new PIXI.Application(); await app.init({ width: o.w, height: o.h, backgroundAlpha: 0, antialias: true, preserveDrawingBuffer: true, autoStart: false, resolution: 1 });
+  st.appendChild(app.canvas);
+  const cols = (o.colors || ["#D8FF85", "#F7F9F2"]).map(c => new PIXI.Color(c).toNumber()), parts = [];
+  const tex = (() => { const g = new PIXI.Graphics().roundRect(0, 0, 64, 8, 4).fill(0xffffff); return app.renderer.generateTexture(g); })();
+  const layer = new PIXI.Container(); layer.blendMode = "add"; app.stage.addChild(layer);
+  function burst(x, y) { for (let i = 0; i < (o.count ?? 160); i++) { const s = new PIXI.Sprite(tex); s.anchor.set(0.5); s.tint = cols[i % cols.length];
+      const a = Math.random() * Math.PI * 2, v = (o.speed ?? 1400) * (0.35 + Math.random() * 0.75); layer.addChild(s);
+      parts.push({ s, x: x / 100 * o.w, y: y / 100 * o.h, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 250, life: 0.7 + Math.random() * 0.9, age: 0, k: 0.6 + Math.random() * 0.9 }); } }
+  window.FX_START = () => {
+    (o.bursts || [{ t: o.at ?? 0, x: o.x ?? 50, y: o.y ?? 50 }]).forEach(b => setTimeout(() => burst(b.x ?? 50, b.y ?? 50), (b.t || 0) * 1000));
+    let last = performance.now();
+    const f = () => { const now = performance.now(), dt = Math.min(0.05, (now - last) / 1000); last = now;
+      for (const p of parts) { if (p.age > p.life) { p.s.visible = false; continue; } p.age += dt; p.vx *= Math.pow(0.12, dt); p.vy = p.vy * Math.pow(0.12, dt) + 1300 * dt;
+        p.x += p.vx * dt; p.y += p.vy * dt; const sp = Math.hypot(p.vx, p.vy), fade = 1 - p.age / p.life;
+        Object.assign(p.s, { x: p.x, y: p.y, rotation: Math.atan2(p.vy, p.vx), alpha: Math.max(0, fade) }); p.s.scale.set(Math.max(0.15, sp / 900) * p.k, p.k * 0.9); }
+      app.render(); requestAnimationFrame(f); }; f(); };
+  window.FX_READY = true;
+})();
+</script>

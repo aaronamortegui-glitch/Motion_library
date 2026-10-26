@@ -1,0 +1,16 @@
+<!doctype html>
+<!-- Motion DNA web FX · fireworks (tsParticles fireworks 4.5.0, MIT). Options (location.hash JSON): colors, scale (3), rate
+     (launches per second), gravity, speed. Transparent background. Rendered by tools/web_capture.py on a virtual clock. -->
+<meta charset="utf-8"><title>fireworks</title>
+<style>html, body { margin: 0; background: transparent; overflow: hidden; } #stage { position: relative; } canvas { display: block; }</style>
+<div id="stage"><div id="small"><canvas id="c"></canvas></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@tsparticles/fireworks@4.5.0/tsparticles.fireworks.bundle.min.js"></script>
+<script>
+const o = JSON.parse(decodeURIComponent(location.hash.slice(1) || "{}")), cv = document.getElementById("c"), st = document.getElementById("stage");
+const k = o.scale ?? 3, sm = document.getElementById("small");   // the bundle sizes particles for a screen and its canvas to the container:
+st.style.width = o.w + "px"; st.style.height = o.h + "px";            // a container 1/k the size, scaled up k times, makes them read at 1080p
+Object.assign(sm.style, { width: o.w / k + "px", height: o.h / k + "px", transform: `scale(${k})`, transformOrigin: "0 0", position: "absolute" });
+window.FX_START = () => fireworks.create(cv, { colors: o.colors || ["#D8FF85", "#9FD8C2", "#FF8A6B", "#F7F9F2"], rate: o.rate ?? 4, gravity: o.gravity ?? 6, background: "transparent", sounds: false,
+  brightness: 0, saturation: 0, minHeight: o.minHeight ?? 30, speed: o.speed ?? { min: 12, max: 22 }, splitCount: o.splitCount ?? { min: 60, max: 110 } });
+window.FX_READY = true;
+</script>

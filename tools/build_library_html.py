@@ -33,7 +33,8 @@ for t in techs:
 kit = json.loads((ROOT / "library/kit.json").read_text(encoding="utf-8"))["items"]
 trs = json.loads((ROOT / "library/transitions.json").read_text(encoding="utf-8"))["transitions"]
 CLIP = {"zoom", "spin", "stretch", "slide", "flash", "dip", "shake", "twirl", "slices", "glitch"}
-GROUP = {"element": "Elements", "shape": "Shapes", "background": "Backgrounds", "look": "Looks", "text": "Text engine", "move": "Moves", "behavior": "Behaviours"}
+GROUP = {"element": "Elements", "shape": "Shapes", "background": "Backgrounds", "look": "Looks", "text": "Text engine", "move": "Moves", "behavior": "Behaviours",
+         "webfx": "Web FX", "spring": "Springs and eases", "physics": "Physics", "gltransition": "Shader transitions"}
 def kslug(n): return re.sub(r"[^a-z0-9]+", "-", n.lower()).strip("-")
 KIT = [{"group": "Clip transitions" if x["type"] in CLIP else "Solid transitions", "kind": "transition", "name": x["name"], "energy": x["energy"],
         "tones": x["tones"], "use": x["use"], "call": f'solid_transition(look="{x["name"]}")', "gif": f"gifs/kit-transition/{kslug(x['name'])}.gif"} for x in trs]

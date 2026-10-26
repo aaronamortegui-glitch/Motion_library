@@ -90,7 +90,8 @@ async function boot() {
   S.lib = lib.presets; S.tags = tags; S.packs = packs.packs; S.techniques = tech.techniques;
   // the kit Claude builds through MCP (transitions, elements, shapes, backgrounds, looks, text, moves, behaviours)
   const CLIP = ["zoom", "spin", "stretch", "slide", "flash", "dip", "shake", "twirl", "slices", "glitch"];
-  const GROUP = { element: "Elements", shape: "Shapes", background: "Backgrounds", look: "Looks", text: "Text engine", move: "Moves", behavior: "Behaviours" };
+  const GROUP = { element: "Elements", shape: "Shapes", background: "Backgrounds", look: "Looks", text: "Text engine", move: "Moves", behavior: "Behaviours",
+    webfx: "Web FX", spring: "Springs and eases", physics: "Physics", gltransition: "Shader transitions" };
   S.kit = trs.transitions.map((x) => ({ kind: "transition", group: CLIP.includes(x.type) ? "Clip transitions" : "Solid transitions", name: x.name, energy: x.energy, use: x.use, call: `solid_transition(look="${x.name}")` }))
     .concat(kit.items.map((x) => ({ kind: x.kind, group: GROUP[x.kind] || x.kind, name: x.name, energy: x.energy, use: x.use, call: x.call })));
   // one card per family (library/kit_groups.json); its variants are listed as text in the detail

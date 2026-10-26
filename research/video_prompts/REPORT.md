@@ -60,8 +60,10 @@ no longer sits on the dot, and T05's last line no longer runs past the 10 s end.
   was rendered; assembling a C template in AE is the next step.
 
 ## Limits found
-- **No audio yet.** Many source prompts are about music and cuts on the beat. The templates take a BPM, but there is
-  no beat map from a real track yet (next: read beats from the audio with our audio tools and pass them in).
+- **Sound effects: yes (2026-10-26); a beat map from a real track: not yet.** A template can declare `sound` in
+  `MDNA.scene` (cues read from its own timing, as `t05_kinetic_type` does) and `python tools/sound_kit.py --template
+  <t> --mux <render>` lays the Tone.js kit under the render. Cutting on the beats of a real track is still to do
+  (HyperFrames' `beats` command does it; see research/hyperframes).
 - **No real brands or screenshots.** The source prompts often pull a real product's assets; our templates draw the UI
   as shapes and use fictional names, per the repo rules.
 - Heavier three.js scenes would run slowly on the CPU renderer; if needed, render with the GPU.

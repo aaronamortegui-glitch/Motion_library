@@ -1,0 +1,22 @@
+<!doctype html>
+<!-- Motion DNA web FX · confetti (tsParticles confetti 4.5.0, MIT). Options in location.hash (JSON):
+     bursts [{t, x, y, count, angle, spread, velocity}] (x, y in % of the frame; t in s), colors, scalar, gravity,
+     shapes (square, circle, star...). Rendered by tools/web_capture.py on a virtual clock. -->
+<meta charset="utf-8"><title>confetti</title>
+<style>html, body { margin: 0; background: transparent; overflow: hidden; } #stage { position: relative; } canvas { display: block; }</style>
+<div id="stage"><canvas id="c"></canvas></div>
+<script src="https://cdn.jsdelivr.net/npm/@tsparticles/confetti@4.5.0/tsparticles.confetti.bundle.min.js"></script>
+<script>
+(async () => {
+  const o = JSON.parse(decodeURIComponent(location.hash.slice(1) || "{}")), cv = document.getElementById("c");
+  const st = document.getElementById("stage"); st.style.width = o.w + "px"; st.style.height = o.h + "px"; cv.width = o.w; cv.height = o.h;
+  cv.style.width = o.w + "px"; cv.style.height = o.h + "px";
+  const fire = await confetti.create(cv, { disableForReducedMotion: false });
+  const bursts = o.bursts || [{ t: 0, x: 30, y: 75, angle: 60, spread: 55, count: 90 }, { t: 0.08, x: 70, y: 75, angle: 120, spread: 55, count: 90 }];
+  window.FX_START = () => bursts.forEach(b => setTimeout(() => fire({
+    count: b.count || 140, angle: b.angle ?? 90, spread: b.spread ?? 60, startVelocity: b.velocity ?? 75, position: { x: b.x ?? 50, y: b.y ?? 70 },
+    colors: o.colors || ["#D8FF85", "#9FD8C2", "#FF8A6B", "#F7F9F2", "#7FB8FF"], shapes: o.shapes || ["square", "circle"], scalar: o.scalar ?? 3.2, gravity: o.gravity ?? 1, ticks: o.ticks ?? 260,
+    decay: 0.91, disableForReducedMotion: false, zIndex: 0 }), (b.t || 0) * 1000));
+  window.FX_READY = true;
+})().catch(e => { window.FX_ERROR = String(e); throw e; });
+</script>

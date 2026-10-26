@@ -125,6 +125,6 @@
   TOKENS.fps = 30;
   window.MDNA = { T: TOKENS, EASE, clamp, lerp, seg, k, rng, noise, scene, draw, NOTEXT, finish, glow, rich, kicker,
                   // used by html_to_mp4.py
-                  info: () => SCENE && { w: SCENE.w, h: SCENE.h, fps: SCENE.fps, duration: SCENE.duration, alpha: SCENE.alpha },
+                  info: () => SCENE && { w: SCENE.w, h: SCENE.h, fps: SCENE.fps, duration: SCENE.duration, alpha: SCENE.alpha, sound: SCENE.sound },
                   frame: t => SCENE.render(t) };
 })();

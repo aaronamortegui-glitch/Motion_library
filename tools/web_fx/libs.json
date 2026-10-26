@@ -1,0 +1,13 @@
+{
+ "note": "Open-source web libraries the web FX pages (tools/web_fx/*.html) load, pinned. They load from jsdelivr at render time (Chrome caches them), so nothing of theirs is in the repo; tools/web_capture.py renders the pages on a virtual clock. Sound (Tone.js) and 2D physics (matter.js) are vendored instead, in tools/sound and tools/physics.",
+ "libs": [
+  {"name": "tsParticles confetti", "version": "4.5.0", "license": "MIT", "repo": "https://github.com/tsparticles/tsparticles", "url": "https://cdn.jsdelivr.net/npm/@tsparticles/confetti@4.5.0/tsparticles.confetti.bundle.min.js", "pages": ["confetti"]},
+  {"name": "tsParticles fireworks", "version": "4.5.0", "license": "MIT", "repo": "https://github.com/tsparticles/tsparticles", "url": "https://cdn.jsdelivr.net/npm/@tsparticles/fireworks@4.5.0/tsparticles.fireworks.bundle.min.js", "pages": ["fireworks"]},
+  {"name": "paper.js", "version": "0.16.0", "license": "MIT", "repo": "https://github.com/paperjs/paper.js", "url": "https://cdn.jsdelivr.net/npm/paper@0.16.0/dist/paper-core.min.js", "pages": ["scribble"]},
+  {"name": "p5.js", "version": "2.3.4", "license": "LGPL-2.1 (used unmodified, loaded from the CDN, never copied into the repo)", "repo": "https://github.com/processing/p5.js", "url": "https://cdn.jsdelivr.net/npm/p5@2.3.4/lib/p5.min.js", "pages": ["flowfield"]},
+  {"name": "OGL", "version": "1.0.11", "license": "Unlicense", "repo": "https://github.com/oframe/ogl", "url": "https://cdn.jsdelivr.net/npm/ogl@1.0.11/+esm", "pages": ["gradient"]},
+  {"name": "three.js", "version": "0.186.1 (r186)", "license": "MIT", "repo": "https://github.com/mrdoob/three.js", "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/+esm", "pages": ["helix3d", "drop3d"]},
+  {"name": "Rapier 3D", "version": "0.21.0", "license": "Apache-2.0", "repo": "https://github.com/dimforge/rapier", "url": "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.21.0/+esm", "pages": ["drop3d"]},
+  {"name": "PixiJS", "version": "8.22.0", "license": "MIT", "repo": "https://github.com/pixijs/pixijs", "url": "https://cdn.jsdelivr.net/npm/pixi.js@8.22.0/dist/pixi.min.js", "pages": ["sparks"]}
+ ]
+}

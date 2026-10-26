@@ -90,6 +90,13 @@
    "how": "python tools/logo_to_shape.py logo_traced.svg assets/brand/<name> (clean curves), then python tools/logo_parts.py assets/brand/<name>.json (pieces + centre strokes); MCP add_element(kind=\"end_card\", logo=\"assets/brand/<name>.json\", text=…, sub=…, style=\"horizontal\" for the side lockup) or SSE.endCard(comp, {logo, text, tagline, layout, grain}). Manual: Figma \"Motion DNA — Logo & Library\".",
    "ask": "Close the video on our logo: build the mark stroke by stroke, then MOTION / DNA rising under it.",
    "image": "techniques/stroke-build.png"
+  },
+  {
+   "name": "Sound pass",
+   "what": "Every finished animation gets its sound effects, made in code (Tone.js) so they are ours to ship: a whoosh on cuts and big moves, a swish on medium moves, a pop when something scales in, a soft tick when text arrives, and whatever a marker 'sfx: <name>' asks for. Each lands one frame after its picture, a repeated sound rotates takes, and it all arrives as one audio layer, Motion DNA sound.",
+   "how": "MCP add_sound (auto: reads the comp through tools/sound_events.jsx; or cues [{t, sfx}]); tools/sound_kit.py renders the WAV in headless Chrome. Hear the kit: tools/sound/kit.html. Run it when the animation is final and again after retiming; real music goes in with add_asset.",
+   "ask": "Give this comp its sound effects.",
+   "image": "techniques/sound-pass_card.png"
   }
  ]
 }

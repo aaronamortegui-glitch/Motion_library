@@ -278,6 +278,8 @@ in `tools/test_mcp.py`. A new tool goes in `TOOLS_DEF` and the README tools tabl
 ### Step 6 · Preview it
 `NAMES="<name>" python tools/kit_gifs.py all` builds its preview comp through the same MCP call, renders it and writes
 `library/gifs/kit-<kind>/<slug>.gif` and `_md.png`. Look at the GIF: it is what people pick from.
+Pieces made by the open-source engines (kinds `webfx`, `spring`, `physics`, `gltransition`; docs/OPEN_SOURCE.md) are
+previewed without After Effects by their own engine: `NAMES="<name>" python tools/oss_previews.py <kind>`.
 
 ### Step 7 · Publish it
 - `README.md`: its name in the kit table (and in *What's new* when it matters).

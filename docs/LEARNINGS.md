@@ -462,6 +462,20 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 
 - **Stock TTS for an off-camera line did not match the character's on-camera voice** (Krea ElevenLabs stock voices scored 0.50-0.71 with resemblyzer against `dana_ref.wav`; the Seedance clip with `reference_audios` scored 0.88) → keep the speech-to-speech pass (Chatterbox HD on fal, `FAL_KEY`) for every off-camera line of a generated character. On Windows `pip install resemblyzer` fails building `webrtcvad`: install `webrtcvad-wheels`, then `resemblyzer --no-deps`, `librosa` and CPU `torch`.
 
+- **Sound made in code (Tone.js, `add_sound`), 2026-10-26.** Rendered offline in headless Chrome, two runs match to
+  within 1 bit (float rounding), so a track is reproducible from its cue list. Rules borrowed from HyperFrames' sound
+  reference: every effect has a cause on screen, few and exact; a sound lands one frame after its picture (light
+  arrives first); the same whoosh on every cut is the first thing that reads as a template, so repeats rotate takes;
+  synthesised chimes and dings read as synthetic, keep them for one payoff. A sparse SFX-only track can't reach
+  −14 LUFS under a −1 dBTP limit: the peak wins, so the mux prints what it measured.
+- **faster-whisper failed twice before it ran:** `open() got an unexpected keyword argument 'metadata_errors'` (a PyAV
+  that does not match it) → decode with ffmpeg to 16 kHz mono and pass the array; then `cublas64_12.dll is not found`
+  on an NVIDIA card without CUDA 12 libraries → retry on the CPU (a VO line takes seconds there).
+- **Local Chatterbox on an RTX 50xx:** Chatterbox pins torch 2.6, which has no sm_120 kernels → its own environment
+  (`research/voice/voice_setup.py`) with torch 2.7.1 cu128 and Chatterbox installed `--no-deps`; never inside ComfyUI's Python.
+  Kept out of the plugin (team rule, 2026-10-26): nothing that needs a GPU-specific install goes in the plugin, because
+  most of the team works on Macs.
+
 ## 7. Repo hygiene
 - All repo content is **English** (code, UI, docs, commits).
 - LLMs read only `library/INDEX.txt` (~1 line per preset); HTML/GIFs are for humans.
@@ -520,6 +534,27 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **`tools/record_cep_panel.py` stand-ins are JS inside a Python string:** a `'\n'` became a real newline and broke the
   injected script silently (the sheet never rendered) → write `'\\n'` in the Python source, and check the page console
   when a recorded scene comes out blank.
+
+### Open-source web libraries rendered as video (tools/web_capture.py, 2026-10-26)
+- **Real-time libraries (tsParticles, Pixi, p5, three.js) rendered frame by frame:** Playwright's clock: `install`
+  before loading, `pause_at` once the page is ready, then `run_for(1000 / fps)` per frame, with `Math.random` seeded
+  by an init script. Two traps: `wait_for_function("window.MATTE")` CALLS the function when the expression is one (use
+  `typeof window.X === 'function'`), and `evaluate("window.FX_START()")` waits for the promise it returns, which never
+  settles while the clock is paused (call it inside an arrow that returns nothing).
+- **tsParticles sizes its particles for a screen:** at 1080p confetti read as dust (scalar 3.2) and fireworks as
+  specks (draw the canvas at 1/3 and let CSS scale it up).
+- **three.js ACES tone mapping washed the spark green to cream** → `NeutralToneMapping` keeps the token colours.
+- **Rapier: `world.createCollider(desc, body).setRestitution(…)` throws** (a Collider's setters return nothing) → set
+  restitution and friction on the `ColliderDesc` before creating it.
+- **gl-transitions as AE mattes:** render each shader from a black texture to a white one; the frame is the mix map.
+  Of 125 shaders, 49 give a hard-edged wipe and 25 a soft one; 41 are only a dissolve as a matte (they warp or recolour
+  the pictures), 10 need the images or extra textures. A matte layer that ends turns the matted layer invisible:
+  time-remap it so its last (white) frame holds.
+- **HyperFrames registry components are timed in three places:** the root's `data-composition-duration`, the template
+  root's `data-duration` and the inner `.clip`'s `data-duration`. Retiming only the first two left the inner clip at
+  1.2 s and the incoming scene blank → change all three (or place the host at the transition's time and keep the
+  component's own length). Their `check` also reports craft issues ours does not yet: a line on screen for less than
+  0.5 s + 0.3 s a word.
 
 ## 8. Costs observed (Flora, USD)
 | Item | Cost |

@@ -25,6 +25,9 @@ def step(title, cmd, timeout=1800):
 
 
 def main():
+    for s in (sys.stdout, sys.stderr):   # a Windows console (cp1252) must not crash on a test's output
+        try: s.reconfigure(encoding="utf-8", errors="replace")
+        except Exception: pass
     res = {
         "engine": step("Engine: every preset", [BASH, "tools/bridge.sh", "tools/test_library.jsx", "900"]),
         "panel": step("Panel: categories, filters, hooks", [BASH, "tools/bridge.sh", "tools/test_panel.jsx", "120"]),

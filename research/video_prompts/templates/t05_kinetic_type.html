@@ -40,7 +40,15 @@ function layout(li) {   // words with x, baseline, size, font
   return rows;
 }
 
-MDNA.scene({ duration: 10, alpha: true, render(t) {
+// sound (tools/sound/mdna_audio.js, rendered by tools/sound_kit.py --template): a soft tick on every word, a pop on each
+// key word, a hit and a sub on "DNA.", a swish for "moves" and a whoosh on the closing wipe, all read from TIM
+const SOUND = { bed: { bpm: Math.round(60 / VARS.beat), mood: "ambient", gain: -4 }, cues: SHOTS.flatMap((sh, li) => {
+  const tm = TIM[li], words = VARS.lines[li], c = words.map((w, i) => ({ t: Math.max(0.02, tm.start + i * tm.b + 0.12), sfx: isHot(w) ? (sh.slide ? "swish" : "pop") : "tick", gain: isHot(w) ? 0 : -3 }));
+  if (sh.underline) c.push({ t: tm.start + 0.12, sfx: "hit" }, { t: tm.start + 0.12, sfx: "sub", gain: -4 }, { t: tm.start + 0.6, sfx: "swish", gain: -6 });
+  if (sh.last) c.push({ t: tm.out + 0.25, sfx: "whoosh", dur: 0.5 }, { t: tm.out + 0.5, sfx: "shimmer", gain: -2 });
+  return c; }) };
+
+MDNA.scene({ duration: 10, alpha: true, sound: SOUND, render(t) {
   g.clearRect(0, 0, W, H);
   SHOTS.forEach((sh, li) => {
     const tm = TIM[li], n = VARS.lines[li].length; if (t < tm.start - 0.05 || t > tm.out + 0.6) return;

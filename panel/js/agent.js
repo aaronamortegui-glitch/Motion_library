@@ -290,7 +290,7 @@ const RULE_ASK = "When I give you a review note or a correction, apply it, then 
   "effects, color, audio, edit, process. Do not save rules yourself: the panel asks me where to keep them.";
 
 async function contextBlock() {
-  const lines = [`[Motion DNA panel · Agent. Motion DNA (library, tools, rules): ${S.root}; follow its CLAUDE.md. Keep replies short: what changed and what needs my decision (put a question first), in one to three sentences; no step-by-step narration or tool output, the panel shows the steps. Ask before any paid generation. Never save the After Effects project unless I ask. Before you call a build done, run check_layout and fix its warnings (or say why one stays).]`];
+  const lines = [`[Motion DNA panel · Agent. Motion DNA (library, tools, rules): ${S.root}; follow its CLAUDE.md. Keep replies short: what changed and what needs my decision (put a question first), in one to three sentences; no step-by-step narration or tool output, the panel shows the steps. Ask before any paid generation. Never save the After Effects project unless I ask. Before you call a build done, run check_layout and fix its warnings (or say why one stays), then add_sound for its sound effects unless I asked for silence or it plays muted.]`];
   if (!PJ && scope().kind === "brand") lines.push(`You are in the folder of the brand ${scope().name} (${scope().dir}): this conversation is for everything about that brand.`);
   if (PJ) {
     lines.push(`Project: ${PJ.p.name}, folder ${PJ.dir} (your working folder: put what you make in its subfolders, never in the Motion DNA repo).`);

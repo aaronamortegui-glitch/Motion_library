@@ -59,3 +59,11 @@ Previews: `research/video_prompts/previews/<id>.webp` (animated, from `make_prev
   (`python research/video_prompts/make_previews.py <id>`, < 500 KB; set `"preview": [start, end]` in its card to show
   its best stretch), a card in `catalog.json` and an entry in `library/intake.json`.
 - New lessons go to `docs/LEARNINGS.md` like everything else.
+
+## Sound and other engines
+- A template's sound: declare `sound: { cues: [{ t, sfx }], bed }` in `MDNA.scene` (kit and rules in
+  `tools/sound/mdna_audio.js`), then `python tools/sound_kit.py --template <t> --mux <render>`.
+- HyperFrames (Apache-2.0) is the other code-video engine, in our tokens: `python research/hyperframes/hf.py new |
+  add | render`, with `hf.py find <words>` over its 448 registry blocks.
+- Effects from web libraries (confetti, sparks, annotations, generative backgrounds, 3D) render with alpha through
+  `tools/web_capture.py`; the list and licenses are in `docs/OPEN_SOURCE.md`.

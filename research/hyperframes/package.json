@@ -1,0 +1,6 @@
+{
+  "name": "motion-dna-hyperframes",
+  "private": true,
+  "description": "Motion DNA bridge to HyperFrames (Apache-2.0, heygen-com/hyperframes), pinned. node_modules is git-ignored.",
+  "devDependencies": { "hyperframes": "0.8.203" }
+}

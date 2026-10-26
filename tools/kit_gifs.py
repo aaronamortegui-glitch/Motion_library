@@ -172,7 +172,8 @@ def build_one(kind, name, rows):
 def pieces():
     kit = json.loads((ROOT / "library/kit.json").read_text(encoding="utf-8"))["items"]
     tr = json.loads((ROOT / "library/transitions.json").read_text(encoding="utf-8"))["transitions"]
-    out = [(x["kind"], x["name"], x) for x in kit] + [("transition", x["name"], x) for x in tr]
+    OSS = {"webfx", "spring", "physics", "gltransition"}   # previewed without AE by tools/oss_previews.py, by their own engines
+    out = [(x["kind"], x["name"], x) for x in kit if x["kind"] not in OSS] + [("transition", x["name"], x) for x in tr]
     only = [k for k in os.environ.get("ONLY", "").split(",") if k]
     names = [k for k in os.environ.get("NAMES", "").split(",") if k]   # e.g. NAMES=glitch,spring (rebuild a few pieces)
     return [p for p in out if (not only or p[0] in only) and (not names or p[1] in names)]

@@ -133,6 +133,7 @@ TECH = {
     "Cut on the voice": ([1, 5], [], ["voiceover"]),
     "Face refinement": ([1, 5], [], ["footage", "real people"]),
     "Stroke build": ([2, 3], ["modern", "elegant", "technical"], ["a filled logo or shape (SVG)"]),
+    "Sound pass": ([1, 5], [], []),
 }
 
 CHANNELS = [("opacity", r"fade|opacity"), ("position", r"position"), ("scale", r"scale|zoom|squash"), ("rotation", r"rotat|spin"),

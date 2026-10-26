@@ -2210,6 +2210,15 @@
    "needs": [
     "a filled logo or shape (SVG)"
    ]
+  },
+  {
+   "name": "Sound pass",
+   "energy": [
+    1,
+    5
+   ],
+   "tones": [],
+   "needs": []
   }
  ]
 }

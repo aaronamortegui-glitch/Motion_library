@@ -1,0 +1,46 @@
+<!doctype html>
+<!-- Motion DNA: renders a gl-transitions shader (gl-transitions.json, MIT/BSD per shader) as a luma matte, black
+     (outgoing) to white (incoming), one PNG per frame. Host for tools/gl_matte.py (MCP gl_transition). -->
+<meta charset="utf-8"><title>gl-transitions matte</title>
+<canvas id="c"></canvas>
+<script>
+let LIB = null;
+async function lib() { return LIB || (LIB = (await (await fetch("gl-transitions.json")).json()).transitions); }
+
+function program(gl, frag) {
+  const vs = "attribute vec2 _p; varying vec2 _uv; void main() { gl_Position = vec4(_p, 0.0, 1.0); _uv = vec2(0.5, 0.5) * (_p + vec2(1.0, 1.0)); }";
+  const head = "precision highp float;\nvarying vec2 _uv;\nuniform sampler2D from, to;\nuniform float progress, ratio, _fromR, _toR;\n" +
+    "vec4 getFromColor(vec2 uv) { return texture2D(from, uv); }\nvec4 getToColor(vec2 uv) { return texture2D(to, uv); }\n";
+  const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+  const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, head + frag + "\nvoid main() { gl_FragColor = transition(_uv); }"));
+  gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p;
+}
+
+function tex(gl, v) { const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 2, 2, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(16).fill(v).map((x, i) => i % 4 === 3 ? 255 : x));
+  for (const [k, m] of [[gl.TEXTURE_MIN_FILTER, gl.NEAREST], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, m);
+  return t; }
+
+// name, w, h, progresses[] -> PNG data URLs (one per progress)
+window.MATTE = async function (name, w, h, progresses, params) {
+  const T = (await lib()).find(t => t.name.toLowerCase() === name.toLowerCase()); if (!T) throw new Error("no transition " + name);
+  const cv = document.getElementById("c"); cv.width = w; cv.height = h;
+  const gl = cv.getContext("webgl", { preserveDrawingBuffer: true, premultipliedAlpha: false }), p = program(gl, T.glsl);
+  gl.useProgram(p); gl.viewport(0, 0, w, h);
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(p, "_p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex(gl, 0)); gl.uniform1i(gl.getUniformLocation(p, "from"), 0);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, tex(gl, 255)); gl.uniform1i(gl.getUniformLocation(p, "to"), 1);
+  gl.uniform1f(gl.getUniformLocation(p, "ratio"), w / h); gl.uniform1f(gl.getUniformLocation(p, "_fromR"), w / h); gl.uniform1f(gl.getUniformLocation(p, "_toR"), w / h);
+  const vals = Object.assign({}, T.defaultParams || {}, params || {}), types = T.paramsTypes || {};
+  for (const k in vals) { const u = gl.getUniformLocation(p, k), v = vals[k], ty = types[k] || "float"; if (!u) continue;
+    if (ty === "bool" || ty === "int") gl.uniform1i(u, +v); else if (ty === "ivec2") gl.uniform2iv(u, v);
+    else if (ty === "vec2") gl.uniform2fv(u, v); else if (ty === "vec3") gl.uniform3fv(u, v); else if (ty === "vec4") gl.uniform4fv(u, v); else gl.uniform1f(u, v); }
+  const pu = gl.getUniformLocation(p, "progress"), out = [];
+  for (const pr of progresses) { gl.uniform1f(pu, pr); gl.drawArrays(gl.TRIANGLES, 0, 6); out.push(cv.toDataURL("image/png")); }
+  return out;
+};
+window.LIST = async () => (await lib()).map(t => ({ name: t.name, author: t.author, license: t.license, description: t.description, tags: t.tags,
+  textures: /uniform\s+sampler2D\s+(?!from\b|to\b)/.test(t.glsl) }));
+</script>

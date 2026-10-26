@@ -1,0 +1,43 @@
+<!doctype html>
+<!-- Motion DNA web FX · the DNA helix in 3D (three.js r186, MIT): the panel's dots helix as real spheres with depth,
+     soft light and a slow turn; or any glTF/GLB product on a turntable (option model: a path or URL, prepare it with
+     tools/gltf_prep.py). Options (location.hash JSON): colors, model, turns (per loop), loop (s), pairs, tilt (deg).
+     Transparent background. Rendered by tools/web_capture.py on a virtual clock. -->
+<meta charset="utf-8"><title>helix3d</title>
+<style>html, body { margin: 0; background: transparent; overflow: hidden; } #stage { position: relative; } canvas { display: block; }</style>
+<div id="stage"></div>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/" } }</script>
+<script type="module">
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+const o = JSON.parse(decodeURIComponent(location.hash.slice(1) || "{}")), st = document.getElementById("stage");
+st.style.width = o.w + "px"; st.style.height = o.h + "px";
+const R = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); R.setPixelRatio(1); R.setSize(o.w, o.h);
+R.outputColorSpace = THREE.SRGBColorSpace; R.toneMapping = THREE.NeutralToneMapping; /* keeps the token colours: ACES washes the spark out */ st.appendChild(R.domElement);
+const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(30, o.w / o.h, 0.1, 100); cam.position.set(0, 0, 11);
+scene.environment = new THREE.PMREMGenerator(R).fromScene(new RoomEnvironment(), 0.04).texture;
+const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(3, 4, 5); scene.add(key, new THREE.AmbientLight(0xffffff, 0.25));
+const root = new THREE.Group(); root.rotation.z = THREE.MathUtils.degToRad(o.tilt ?? -38); scene.add(root);
+const cols = o.colors || ["#D8FF85", "#9FD8C2"];
+if (o.model) {
+  const g = await new GLTFLoader().loadAsync(o.model), box = new THREE.Box3().setFromObject(g.scene), s = 3.6 / Math.max(...box.getSize(new THREE.Vector3()).toArray());
+  g.scene.scale.setScalar(s); g.scene.position.sub(box.getCenter(new THREE.Vector3()).multiplyScalar(s)); root.rotation.z = 0; root.add(g.scene);
+} else {
+  const n = o.pairs ?? 9, mat = c => new THREE.MeshPhysicalMaterial({ color: c, roughness: 0.28, clearcoat: 0.6, clearcoatRoughness: 0.2 });
+  const ball = new THREE.SphereGeometry(0.2, 40, 24), rung = new THREE.CylinderGeometry(0.035, 0.035, 1, 12);
+  for (let i = 0; i < n; i++) {
+    const y = (i - (n - 1) / 2) * 0.62, a = i * 0.72, p1 = new THREE.Vector3(Math.cos(a) * 1.1, y, Math.sin(a) * 1.1), p2 = p1.clone().multiply(new THREE.Vector3(-1, 1, -1));
+    const b1 = new THREE.Mesh(ball, mat(cols[0])), b2 = new THREE.Mesh(ball, mat(cols[1 % cols.length]));
+    b1.position.copy(p1); b2.position.copy(p2); root.add(b1, b2);
+    const r = new THREE.Mesh(rung, new THREE.MeshStandardMaterial({ color: cols[1 % cols.length], transparent: true, opacity: 0.35 }));
+    r.position.copy(p1.clone().add(p2).multiplyScalar(0.5)); r.scale.y = p1.distanceTo(p2); r.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), p2.clone().sub(p1).normalize()); root.add(r);
+  }
+}
+window.FX_START = () => { const t0 = performance.now(), L = o.loop ?? 6, turns = o.turns ?? 1, tilt = THREE.MathUtils.degToRad(o.model ? 0 : o.tilt ?? -38);
+  const f = () => { const a = (performance.now() - t0) / 1000 / L * turns * Math.PI * 2;
+    root.quaternion.setFromEuler(new THREE.Euler(0, a, tilt, "ZYX"));   // turn about its own axis, then lean
+    R.render(scene, cam); requestAnimationFrame(f); }; f(); };
+window.FX_READY = true;
+</script>

@@ -1,0 +1,35 @@
+<!doctype html>
+<!-- Motion DNA physics: runs a matter.js 0.20.0 (MIT) world headless and returns every body's path, frame by frame.
+     Host for tools/physics_bake.py (MCP physics). Fixed time step, no clock: the same spec gives the same paths. -->
+<meta charset="utf-8"><title>Motion DNA physics</title>
+<script src="matter-0.20.0/matter.min.js"></script>
+<script>
+// spec: { fps, duration, w, h, gravity: 1, floor: y | null, walls: bool, substeps: 4,
+//         bodies: [{ id, x, y, w, h, angle, shape: "rect"|"circle", static, restitution, friction, density, vx, vy, va, delay }] }
+// returns { id: [[x, y, angle], ...] } with one entry per frame (angle in radians), centres in comp pixels.
+window.SIM = function (spec) {
+  const { Engine, Bodies, Body, Composite } = Matter;
+  const fps = spec.fps || 30, n = Math.round((spec.duration || 3) * fps), sub = spec.substeps || 4, dt = 1000 / fps / sub;
+  const engine = Engine.create({ gravity: { x: 0, y: spec.gravity ?? 1 } }), world = engine.world, T = 4000;
+  if (spec.floor != null) Composite.add(world, Bodies.rectangle(spec.w / 2, spec.floor + T / 2, spec.w * 6, T, { isStatic: true, friction: 0.8 }));
+  if (spec.walls) Composite.add(world, [Bodies.rectangle(-T / 2, spec.h / 2, T, spec.h * 6, { isStatic: true }), Bodies.rectangle(spec.w + T / 2, spec.h / 2, T, spec.h * 6, { isStatic: true })]);
+  const bodies = spec.bodies.map(b => {
+    const o = { restitution: b.restitution ?? 0.25, friction: b.friction ?? 0.5, density: b.density ?? 0.001, angle: b.angle || 0, isStatic: !!b.static, frictionAir: b.air ?? 0.01 };
+    const B = b.shape === "circle" ? Bodies.circle(b.x, b.y, Math.max(b.w, b.h) / 2, o) : Bodies.rectangle(b.x, b.y, b.w, b.h, o);
+    B.plugin = { id: b.id, delay: Math.round((b.delay || 0) * fps), v: [b.vx || 0, b.vy || 0, b.va || 0], held: true };
+    Body.setStatic(B, true);   // every body waits for its delay, held where it starts
+    return B;
+  });
+  Composite.add(world, bodies);
+  const out = {}; bodies.forEach(B => out[B.plugin.id] = []);
+  for (let f = 0; f < n; f++) {
+    for (const B of bodies) if (B.plugin.held && f >= B.plugin.delay && !spec.bodies.find(b => b.id === B.plugin.id).static) {
+      Body.setStatic(B, false); B.plugin.held = false;
+      Body.setVelocity(B, { x: B.plugin.v[0] / 60, y: B.plugin.v[1] / 60 }); Body.setAngularVelocity(B, B.plugin.v[2] / 60);   // px/s, rad/s -> per 60 Hz base step
+    }
+    for (const B of bodies) out[B.plugin.id].push([+B.position.x.toFixed(2), +B.position.y.toFixed(2), +B.angle.toFixed(5)]);
+    for (let s = 0; s < sub; s++) Engine.update(engine, dt);
+  }
+  return out;
+};
+</script>

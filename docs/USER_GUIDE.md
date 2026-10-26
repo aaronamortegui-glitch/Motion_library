@@ -220,10 +220,15 @@ When you drive After Effects for a person (MCP server `motion-dna`):
    - `add_asset` (local licensed packs); `import_media` for any file or https URL (generated stills and clips, Figma exports); `list_resources` for outside scripts, VFX, sound effects and music, each with its license (ask before downloading);
    - `keyframes` to re-time what is already there (stagger, mirror_out, sequence, loop, bake, copy_to…) and `anchor_point`;
    - `matte` (still or video cut-out on the local GPU) and `text_behind` (text behind a subject, in one call);
-   - `run_jsx` only for what no tool covers.
+   - `run_jsx` only for what no tool covers;
+   - **sound, by default:** when the animation is final, `add_sound`. It reads the comp and gives each visible action
+     a sound made in code (whoosh on cuts and big moves, swish, pop, tick, `sfx: <name>` markers), as one layer
+     *Motion DNA sound*. Skip it only when the person asks for silence or the piece plays muted (a looping background,
+     an autoplay feed). Run it again after any retiming. Real music goes in with `add_asset`.
 4. **Check before you call it done:**
    - `render_frame` at the key moments, and look at the PNG;
-   - `check_layout` (overlaps, safe area, size, contrast). Fix each warning or say why it stays.
+   - `check_layout` (overlaps, safe area, size, contrast). Fix each warning or say why it stays;
+   - the sound was measured, not heard: say so, and list its cues so the person can move or drop one.
 5. **Report briefly.**
    - Do not save the project unless asked.
    - Quote USD before any paid generation.

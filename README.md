@@ -27,6 +27,17 @@ animate keeps a profile that **learns from each review**, and everything it make
 
 ## What's new
 
+- **Sound by default:** every finished animation gets its sound effects, made in code with
+  [Tone.js](https://github.com/Tonejs/Tone.js), so they are ours to ship. `add_sound` reads the comp and gives each
+  visible action its sound, few and exact: a whoosh on cuts and big moves, a swish, a pop, a soft tick for text, or what a
+  marker `sfx: hit` asks for. Each lands one frame after its picture, repeats rotate takes, and it all arrives as one
+  layer, *Motion DNA sound*. Hear the kit in `tools/sound/kit.html`.
+- **Twenty open-source engines, put to work** ([the list](docs/OPEN_SOURCE.md)): real springs and wobble from
+  react-spring and anime.js (`apply_spring`), 2D physics from matter.js (`physics`: fall, drop in, burst), 74 shader
+  transitions from gl-transitions (`gl_transition`), and `add_fx` for confetti and fireworks (tsParticles), sparks
+  (PixiJS), hand-drawn annotations (paper.js), generative backgrounds (p5.js, OGL), the DNA helix and product turntables
+  in 3D (three.js) and 3D shapes that pile up (Rapier). Screen recordings from OBS (`record_screen`), faster word timings
+  (faster-whisper), and, in research, HyperFrames' 450 blocks in our colours and curves and free local voices (Chatterbox, NVIDIA only).
 - **More apps for the Agent (Full mode):** Google Drive (search, read and download files; create one when you ask),
   Slack (search and read; it writes drafts for you to send, never sends) and Blender (Blender Lab's MCP, the one the
   Claude app installs; open Blender with its add-on). Drive and Slack come from your Claude account's connectors.
@@ -96,7 +107,7 @@ animate keeps a profile that **learns from each review**, and everything it make
 - **Keyframe tools** like Animation Composer's helpers: ease every key with a token, copy an ease, reverse, mirror an
   entrance into an exit, stagger, randomize, sequence, distribute, loop, bake, and a 9-point anchor mover (`keyframes`,
   `anchor_point`).
-- **Outside resources, license checked:** 166 scripts, expression libraries, VFX, sound effects and music tracks
+- **Outside resources, license checked:** 180 scripts, libraries, engines, VFX, sound effects and music tracks
   (`list_resources`); `python tools/fetch_free_assets.py` downloads the CC0 packs Claude can drop in (`add_asset`).
 
 ## Get started
@@ -277,6 +288,7 @@ Open the repo (or a brand or project folder) in Claude Code and approve the `mot
 | Act in After Effects | `apply_preset` · `apply_pack` · `apply_brand` (`existing` = modify / replace) · `apply_transition` · `add_asset` · `import_media` (a file or an https URL, e.g. a Krea/Flora generation: downloaded, imported, placed) · `remove_animation` |
 | Build what AC packs ship (by behavior, on our tokens) | `solid_transition` (46 named looks: solid/mask wipes, iris, fan, dots, liquid, ink, bubbles, shatter, flash, glitch, twirl, slices…) · `add_element` (27 self-sizing kinds: titles, callouts, counters, timers, social, quotes, lists, chat, rating, cinematic, glass card, our logo end card…) · `add_shape` (39 animated shapes, lines, impacts, fireworks, glitter…) · `move` (3D flip, hinge, orbit, fly…) · `animate_text` (per char/word/line, decode, mask, typewriter) · `add_captions` · `add_look` (backgrounds incl. plexus, blobs, mesh and frosted glass, tones, grain, letterbox, particles, long shadow, glitch) · `add_behavior` (9 behaviours by family, each drawn into shapes, backgrounds, text mattes, element boxes or transitions: bubbles, blob, voronoi, grow, flow, flock, spring, rope, and the hand-drawn `line_boil`) · `list_kit` |
 | Deliver | `resize_comp` (social resizes 9:16 · 1:1 · 4:5 or any WxH: every keyframe kept, content reframed inside the title-safe area, then the layout QA on each) · `render_comp` |
+| Open-source engines ([list](docs/OPEN_SOURCE.md)) | `add_sound` (sound effects made in code from what moves on screen, by default) · `apply_spring` (react-spring and anime.js springs and eases) · `physics` (matter.js: fall, drop_in, burst, baked to keys) · `gl_transition` (74 shader transitions as luma mattes) · `add_fx` (confetti, fireworks, sparks, scribble, flowfield, gradient, helix3d, drop3d) · `record_screen` (OBS) |
 | Edit keyframes | `keyframes` (reverse, mirror_out, stagger, shift, to_playhead, sequence, distribute, loop, bake, stretch, copy_to) · `anchor_point` |
 | Run techniques | `matte` (a cut-out on the local GPU) · `text_behind` |
 | AI video marked in Figma | `flora_mark` (Figma layers named `AI · …` become placeholders marked for AI video; the mark lives in the layer, with the Flora label colour) · `flora_queue` (the marked layers of the comp). Nothing is sent to Flora from the marks yet |
@@ -286,7 +298,7 @@ The order of work and recipes that worked: [User guide › For Claude](docs/USER
 LLM reads `library/INDEX.txt` and runs `.jsx` jobs with `bash tools/bridge.sh`.
 
 **Background resources for Claude** (not in the panel):
-- `library/resources.json` catalogs 166 outside scripts, expression libraries, VFX, sound effects and music. Each entry has its license checked, whether it needs credit, and whether it can live in the repo.
+- `library/resources.json` catalogs 180 outside scripts, expression libraries, VFX, sound effects and music. Each entry has its license checked, whether it needs credit, and whether it can live in the repo.
 - `python tools/fetch_free_assets.py` downloads the free CC0 packs (fire, smoke and explosion sequences, particles, SFX, jingles, music tracks) into `assets.free/`.
 - `vendor/` holds small open-source code (json2, eKeys, aefunctions) with its licenses.
 - Behavior maps: [Animation Composer](docs/animation-composer-map.md) and [paid AE tools vs open source](docs/ae-tools-map.md).
@@ -350,8 +362,13 @@ already made, so the next brief offers something else: Motion DNA is a Swiss arm
 | Curves and durations (the motion tokens) | 14 + 6 | *"slower and softer"*, *"more snap"* |
 | Video templates made as code (research) | 15 | *"a 15 s launch film for our app"*, *"a data story with these numbers"* |
 | Characters | 1 (The Agent, our robot) | *"a short with our robot reading the order"* |
-| Outside resources (scripts, VFX, SFX, music; licenses checked) | 166 | *"find a whoosh for this cut"* |
-| Request routes (`library/intake.json`) | 42 | *"I want a video for…"*: Claude asks, proposes, then builds |
+| Outside resources (scripts, engines, VFX, SFX, music; licenses checked) | 180 | *"find a whoosh for this cut"* |
+| Sound effects made in code (`add_sound`, on by default) | 12 sounds + 3 beds | *"give it sound"*, or nothing: it comes with every finished piece |
+| Springs and named eases (react-spring, anime.js) | 16 | *"make it wobble"*, *"a real spring"* |
+| Shader transitions (gl-transitions) | 74 | *"a heart wipe between these clips"* |
+| Web FX (confetti, fireworks, sparks, annotations, generative backgrounds, 3D) | 8 | *"confetti when the logo lands"*, *"circle the price"* |
+| Physics (2D baked to keys; 3D shapes) | 3 + 1 | *"let the icons fall and pile up"* |
+| Request routes (`library/intake.json`) | 54 | *"I want a video for…"*: Claude asks, proposes, then builds |
 
 **Characters** are documented like everything else: one file per character (`library/characters/<slug>/character.json`)
 with the traits that never change (pasted word for word into every brief), what it never does, its palette, its
@@ -379,6 +396,10 @@ movement uses the token curves (acceleration and deceleration, overshoot when th
 | **Looks** (finishing layers) | `tritone`, `duotone`, `vignette`, `grain`, `scanlines`, `letterbox`, `dust`, `embers`, `snow`, `long_shadow`, `glitch` | `add_look` |
 | **Text engine** (per char, word or line) | `Chars Pop Rise`, `Words Decode`, `Lines Mask Rise`, `Chars 3D Flip`, `Chars Wiggly Scale`, `Words Tracking Blur`, `Chars Skew Slide`, `Words Colour Pop`, `Typewriter Cursor`, `Captions`; channels fade, rise, drop, slide, scale, rotate, 3D, skew, tracking, blur, decode, colour | `animate_text`, `add_captions` |
 | **Moves** (2D/3D entrances and exits) | `flip`, `hinge`, `orbit`, `fly`, `tumble`, `grow_edge`, `squash` | `move` |
+| **Shader transitions** (12 here, 74 with `gl_transition`; gl-transitions shaders as luma mattes, clip to clip) | `HeartWipe`, `StarWipe`, `FlowerWipe`, `Pinwheel`, `ClockWipe`, `PolkaDotsCurtain`, `Crosshatch`, `WindowBlinds`, `RadialWipe`, `PerlinDissolve`, `DoomMelt`, `UndulatingBurnOut` | `gl_transition` |
+| **Springs and eases** (react-spring 10, anime.js 4; beyond the tokens' ~8 % overshoot) | `react-spring default`, `react-spring gentle`, `react-spring wobbly`, `react-spring stiff`, `react-spring slow`, `react-spring molasses`, `anime spring default`, `anime spring bounce 0 · 500 ms`, `anime spring bounce 0.25 · 600 ms`, `anime spring bounce 0.5 · 628 ms`, `anime spring bounce 0.7 · 800 ms`, `anime outBack`, `anime outElastic`, `anime outBounce`, `anime outExpo`, `anime inOutCirc` | `apply_spring` |
+| **Physics** (matter.js, baked to keys) | `fall`, `drop in`, `burst` | `physics` |
+| **Web FX** (rendered with alpha from open-source libraries; [list](docs/OPEN_SOURCE.md)) | `confetti cannons`, `particle fireworks`, `sparks`, `scribble`, `flow field`, `living gradient`, `helix 3d`, `drop 3d` | `add_fx` |
 | **Keyframe tools** | `ease`, `copy_ease`, `reverse`, `mirror_out`, `stagger`, `randomize`, `shift`, `to_playhead`, `sequence`, `distribute`, `loop`, `copy_to`, `bake`, `stretch`, anchor point (9 positions) | `keyframes`, `anchor_point` |
 | **Resources** (outside, licensed) | CC0 SFX, music, VFX sequences, textures, open-source scripts | `list_resources`, `add_asset` |
 

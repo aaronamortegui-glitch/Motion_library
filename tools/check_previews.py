@@ -74,6 +74,8 @@ HOW = {"tags": "add it to TECH and run python tools/tag_library.py", "kit": "NAM
        "style": "tools/pack_demos.jsx (CONTRIBUTING §3)", "technique": "python tools/technique_cards.py"}
 
 if __name__ == "__main__":
+    try: sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # a Windows console (cp1252) cannot print the arrow
+    except Exception: pass
     miss = missing()
     if not miss:
         print("OK every preset, recipe, style, technique and kit piece has its preview and its registration")

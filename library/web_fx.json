@@ -1,0 +1,150 @@
+{
+ "note": "Effects made with open-source web libraries, rendered on this machine by tools/web_capture.py (virtual clock, alpha) and placed in AE by MCP add_fx. Pages in tools/web_fx/, library versions and licenses in tools/web_fx/libs.json.",
+ "fx": [
+  {
+   "name": "confetti cannons",
+   "lib": "tsParticles 4.5.0",
+   "alpha": true,
+   "place": "top",
+   "dur": 3.5,
+   "use": "Celebration burst: two cannons from the lower corners (bursts [{t, x, y, angle, spread, count}], shapes, scalar).",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold"
+   ],
+   "page": "confetti"
+  },
+  {
+   "name": "particle fireworks",
+   "lib": "tsParticles 4.5.0",
+   "alpha": true,
+   "place": "top",
+   "dur": 5,
+   "warmup": 0.6,
+   "use": "Rockets and bursts over a dark scene (rate, gravity, speed).",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "playful",
+    "cinematic"
+   ],
+   "page": "fireworks"
+  },
+  {
+   "name": "sparks",
+   "lib": "PixiJS 8.22.0",
+   "alpha": true,
+   "place": "top",
+   "blend": "add",
+   "dur": 2,
+   "use": "A burst of glowing streaks from a point (x, y in %, or the target layer's centre): hits, impacts, a product landing.",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "bold",
+    "technical"
+   ],
+   "page": "sparks"
+  },
+  {
+   "name": "scribble",
+   "lib": "paper.js 0.16.0",
+   "alpha": true,
+   "place": "top",
+   "dur": 2.5,
+   "use": "Hand-drawn marker annotation around a layer: shape circle | underline | cross | arrow | box, drawn on like a pen, boiling on twos.",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "handmade",
+    "playful",
+    "editorial"
+   ],
+   "page": "scribble"
+  },
+  {
+   "name": "flow field",
+   "lib": "p5.js 2.3.4 (LGPL, CDN)",
+   "alpha": true,
+   "place": "bottom",
+   "dur": 8,
+   "warmup": 2,
+   "use": "Calm generative background: thin lines drifting on a noise field (count, speed, bg for opaque).",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "calm",
+    "organic",
+    "technical"
+   ],
+   "page": "flowfield"
+  },
+  {
+   "name": "living gradient",
+   "lib": "OGL 1.0.11",
+   "alpha": false,
+   "place": "bottom",
+   "dur": 8,
+   "use": "Living mesh gradient in four token colours with grain, loops cleanly every `loop` s.",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "calm",
+    "luxury",
+    "modern"
+   ],
+   "page": "gradient"
+  },
+  {
+   "name": "helix 3d",
+   "lib": "three.js r186",
+   "alpha": true,
+   "place": "top",
+   "dur": 6,
+   "use": "The DNA helix in real 3D (spheres, soft light, a slow turn), or a glTF/GLB product on a turntable (model).",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "modern",
+    "technical",
+    "elegant"
+   ],
+   "page": "helix3d"
+  },
+  {
+   "name": "drop 3d",
+   "lib": "three.js r186 + Rapier 0.21.0",
+   "alpha": true,
+   "place": "top",
+   "dur": 5,
+   "use": "3D physics: rounded cubes, spheres and pills in token colours rain down and pile up, with soft shadows (count, shapes, size, rate).",
+   "energy": [
+    3,
+    4
+   ],
+   "tones": [
+    "playful",
+    "friendly",
+    "bold"
+   ],
+   "page": "drop3d"
+  }
+ ]
+}

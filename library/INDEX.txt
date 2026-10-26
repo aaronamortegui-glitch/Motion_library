@@ -254,6 +254,45 @@ kit|Behaviours|flock|2-3|organic/calm/cinematic|add_behavior(behavior="flock", t
 kit|Behaviours|spring|3-4|playful/friendly/bold|add_behavior(behavior="spring", target="box", …)|Jelly box: a rounded rectangle on the token curve whose edges lag and wobble like damped springs driven by the curve's speed, then settle.
 kit|Behaviours|rope|2-3|playful/handmade|add_behavior(behavior="rope", target="shape", …)|Verlet rope: pinned at one end, the other carried into place on the token curve; it pays out, sags, swings and settles (an underline under a layer).
 kit|Behaviours|line_boil|2-4|handmade/retro/playful/organic|add_behavior(behavior="line_boil", target="layer", …)|Hand-drawn line boil on any existing layer: outlines tremble as if redrawn on 3s (three drawings cycling). Shapes get Wiggle Paths, everything else a fine Turbulent Displace. The Collage style applies it.
+kit|Web FX|confetti cannons|4-5|playful/bold|add_fx(kind="confetti cannons", …)|Celebration burst: two cannons from the lower corners (bursts [{t, x, y, angle, spread, count}], shapes, scalar). (tsParticles 4.5.0)
+kit|Web FX|particle fireworks|4-5|bold/playful/cinematic|add_fx(kind="particle fireworks", …)|Rockets and bursts over a dark scene (rate, gravity, speed). (tsParticles 4.5.0)
+kit|Web FX|sparks|4-5|bold/technical|add_fx(kind="sparks", …)|A burst of glowing streaks from a point (x, y in %, or the target layer's centre): hits, impacts, a product landing. (PixiJS 8.22.0)
+kit|Web FX|scribble|2-3|handmade/playful/editorial|add_fx(kind="scribble", …)|Hand-drawn marker annotation around a layer: shape circle | underline | cross | arrow | box, drawn on like a pen, boiling on twos. (paper.js 0.16.0)
+kit|Web FX|flow field|1-2|calm/organic/technical|add_fx(kind="flow field", …)|Calm generative background: thin lines drifting on a noise field (count, speed, bg for opaque). (p5.js 2.3.4 (LGPL, CDN))
+kit|Web FX|living gradient|1-2|calm/luxury/modern|add_fx(kind="living gradient", …)|Living mesh gradient in four token colours with grain, loops cleanly every `loop` s. (OGL 1.0.11)
+kit|Web FX|helix 3d|2-3|modern/technical/elegant|add_fx(kind="helix 3d", …)|The DNA helix in real 3D (spheres, soft light, a slow turn), or a glTF/GLB product on a turntable (model). (three.js r186)
+kit|Web FX|drop 3d|3-4|playful/friendly/bold|add_fx(kind="drop 3d", …)|3D physics: rounded cubes, spheres and pills in token colours rain down and pile up, with soft shadows (count, shapes, size, rate). (three.js r186 + Rapier 0.21.0)
+kit|Springs and eases|react-spring default|1-2|calm/elegant|apply_spring(name="react-spring default", layers=[…])|Spring from react-spring 10.1.2: overshoot 0.0 %, settles in 0.76 s, closest token Nudge.
+kit|Springs and eases|react-spring gentle|2-3|friendly/modern|apply_spring(name="react-spring gentle", layers=[…])|Spring from react-spring 10.1.2: overshoot 7.3 %, settles in 0.97 s, closest token Pop.
+kit|Springs and eases|react-spring wobbly|3-4|playful/friendly|apply_spring(name="react-spring wobbly", layers=[…])|Spring from react-spring 10.1.2: overshoot 20.7 %, settles in 1.17 s, closest token Land.
+kit|Springs and eases|react-spring stiff|2-3|friendly/modern|apply_spring(name="react-spring stiff", layers=[…])|Spring from react-spring 10.1.2: overshoot 5.0 %, settles in 0.75 s, closest token Pop.
+kit|Springs and eases|react-spring slow|1-2|calm/elegant|apply_spring(name="react-spring slow", layers=[…])|Spring from react-spring 10.1.2: overshoot 0.0 %, settles in 1.51 s, closest token Land.
+kit|Springs and eases|react-spring molasses|1-2|calm/elegant|apply_spring(name="react-spring molasses", layers=[…])|Spring from react-spring 10.1.2: overshoot 0.0 %, settles in 3.20 s, closest token Land.
+kit|Springs and eases|anime spring default|3-4|playful/friendly|apply_spring(name="anime spring default", layers=[…])|Spring from anime.js 4.5.0: overshoot 16.3 %, settles in 1.54 s, closest token Land.
+kit|Springs and eases|anime spring bounce 0 · 500 ms|1-2|calm/elegant|apply_spring(name="anime spring bounce 0 · 500 ms", layers=[…])|Spring from anime.js 4.5.0: overshoot 0.0 %, settles in 0.79 s, closest token Nudge.
+kit|Springs and eases|anime spring bounce 0.25 · 600 ms|2-3|friendly/modern|apply_spring(name="anime spring bounce 0.25 · 600 ms", layers=[…])|Spring from anime.js 4.5.0: overshoot 2.8 %, settles in 1.02 s, closest token Pop.
+kit|Springs and eases|anime spring bounce 0.5 · 628 ms|3-4|playful/friendly|apply_spring(name="anime spring bounce 0.5 · 628 ms", layers=[…])|Spring from anime.js 4.5.0: overshoot 16.3 %, settles in 1.54 s, closest token Land.
+kit|Springs and eases|anime spring bounce 0.7 · 800 ms|4-5|playful/bold|apply_spring(name="anime spring bounce 0.7 · 800 ms", layers=[…])|Spring from anime.js 4.5.0: overshoot 37.2 %, settles in 3.08 s, closest token Snap.
+kit|Springs and eases|anime outBack|3-4|playful/friendly|apply_spring(name="anime outBack", layers=[…])|Ease from anime.js 4.5.0: overshoot 10.0 %, a named ease, closest token Pop.
+kit|Springs and eases|anime outElastic|4-5|playful/bold|apply_spring(name="anime outElastic", layers=[…])|Ease from anime.js 4.5.0: overshoot 37.3 %, a named ease, closest token Snap.
+kit|Springs and eases|anime outBounce|1-2|calm/elegant|apply_spring(name="anime outBounce", layers=[…])|Ease from anime.js 4.5.0: overshoot 0.0 %, a named ease, closest token Settle.
+kit|Springs and eases|anime outExpo|1-2|calm/elegant|apply_spring(name="anime outExpo", layers=[…])|Ease from anime.js 4.5.0: overshoot 0.0 %, a named ease, closest token Land.
+kit|Springs and eases|anime inOutCirc|1-2|calm/elegant|apply_spring(name="anime inOutCirc", layers=[…])|Ease from anime.js 4.5.0: overshoot 0.0 %, a named ease, closest token Surge.
+kit|Physics|fall|3-4|playful/friendly|physics(mode="fall", layers=[…])|The layers fall from where they are and pile up on the floor (the comp's bottom edge). Real 2D physics (matter.js 0.20.0), baked to Position and Rotation keys.
+kit|Physics|drop in|3-4|playful/bold|physics(mode="drop_in", layers=[…])|The layers start above the frame, one after another, and land in a pile. Real 2D physics (matter.js 0.20.0), baked to Position and Rotation keys.
+kit|Physics|burst|4-5|bold/playful|physics(mode="burst", layers=[…])|The layers fly out from the group's centre, spinning, and fall out of frame. Real 2D physics (matter.js 0.20.0), baked to Position and Rotation keys.
+kit|Shader transitions|HeartWipe|3-4|playful/friendly|gl_transition(name="HeartWipe", outgoing="…", incoming="…")|A heart shape grows from the center to reveal the incoming image (gl-transitions shader by gre, MIT; a luma matte between two layers).
+kit|Shader transitions|StarWipe|3-5|playful/bold|gl_transition(name="StarWipe", outgoing="…", incoming="…")|A growing star reveals the incoming image (gl-transitions shader by Ben Lucas, MIT; a luma matte between two layers).
+kit|Shader transitions|FlowerWipe|2-4|playful/organic|gl_transition(name="FlowerWipe", outgoing="…", incoming="…")|A flower shape with several petals grows to reveal the incoming image (gl-transitions shader by Fernando Kuteken, MIT; a luma matte between two layers).
+kit|Shader transitions|Pinwheel|4-5|bold/playful/retro|gl_transition(name="Pinwheel", outgoing="…", incoming="…")|A spinning pinwheel reveals the incoming image (gl-transitions shader by Mr Speaker, MIT; a luma matte between two layers).
+kit|Shader transitions|ClockWipe|2-3|modern/corporate|gl_transition(name="ClockWipe", outgoing="…", incoming="…")|A wipe that sweeps around the center from a starting angle (gl-transitions shader by Fernando Kuteken, MIT; a luma matte between two layers).
+kit|Shader transitions|PolkaDotsCurtain|3-4|playful/retro|gl_transition(name="PolkaDotsCurtain", outgoing="…", incoming="…")|The incoming image appears through growing polka dots (gl-transitions shader by bobylito, MIT; a luma matte between two layers).
+kit|Shader transitions|Crosshatch|3-4|technical/retro|gl_transition(name="Crosshatch", outgoing="…", incoming="…")|The incoming image appears through a crosshatch of lines spreading from the center (gl-transitions shader by pthrasher, MIT; a luma matte between two layers).
+kit|Shader transitions|WindowBlinds|2-3|modern/corporate/editorial|gl_transition(name="WindowBlinds", outgoing="…", incoming="…")|A crossfade through horizontal window blinds (gl-transitions shader by Fabien Benetou, MIT; a luma matte between two layers).
+kit|Shader transitions|RadialWipe|2-4|modern/cinematic|gl_transition(name="RadialWipe", outgoing="…", incoming="…")|A radial wipe that sweeps around the center like a clock hand (gl-transitions shader by Xaychru, MIT; a luma matte between two layers).
+kit|Shader transitions|PerlinDissolve|2-3|organic/cinematic|gl_transition(name="PerlinDissolve", outgoing="…", incoming="…")|The incoming image appears through blobs of Perlin noise (gl-transitions shader by Rich Harris, MIT; a luma matte between two layers).
+kit|Shader transitions|DoomMelt|4-5|retro/bold|gl_transition(name="DoomMelt", outgoing="…", incoming="…")|The outgoing image melts down in uneven columns, like the Doom screen wipe (gl-transitions shader by Zeh Fernando, MIT; a luma matte between two layers).
+kit|Shader transitions|UndulatingBurnOut|3-4|cinematic/organic|gl_transition(name="UndulatingBurnOut", outgoing="…", incoming="…")|A circle with a wavy edge burns out from the center to reveal the incoming image (gl-transitions shader by pthrasher, MIT; a luma matte between two layers).
 # styles: name|energy range|tones|curve|transition|title,subtitle,body,shape,media,logo
 style|Dynamic|4-5|bold/playful/cinematic|-|Whip Pan|Words Slam,Scramble,Chars Pop,Spin Pop,Whip Pan,Ramp Zoom
 style|Elegant|1-2|elegant/luxury/cinematic|Surge|Ramp Slide|Blur Words,Tracking Settle,Words Fade Up,Blur In,Surge Rise,Fade Up
@@ -277,5 +316,6 @@ technique|Styles|1-5||
 technique|Cut on the voice|1-5||voiceover
 technique|Face refinement|1-5||footage/real people
 technique|Stroke build|2-3|modern/elegant/technical|a filled logo or shape (SVG)
+technique|Sound pass|1-5||
 # brands: slug|name|style|curve|energy|tones|rules  (read one with get_brand before animating for it; save notes with add_brand_note)
 brand|motion-dna|Motion DNA|Playful|Snap|3-4|playful/retro/bold|22

@@ -1,0 +1,30 @@
+<!doctype html>
+<!-- Motion DNA sound kit: audition page (open in a browser and click) and the host tools/sound_kit.py renders in. -->
+<html><head><meta charset="utf-8"><title>Motion DNA sound kit</title>
+<style>
+  body { margin: 0; padding: 32px; background: #0A211F; color: #F7F9F2; font: 15px 'Inter Tight', Arial, sans-serif; }
+  h1 { font-weight: 600; font-size: 22px; margin: 0 0 6px; } p { color: #9FD8C2; margin: 0 0 24px; }
+  .kit { display: flex; flex-wrap: wrap; gap: 10px; }
+  button { background: #174A46; color: #F7F9F2; border: 0; border-radius: 10px; padding: 12px 18px; font: inherit; cursor: pointer; }
+  button:hover { background: #D8FF85; color: #0A211F; }
+</style></head>
+<body>
+<h1>Motion DNA sound kit</h1><p>Synthesised with Tone.js, so every sound is ours. Click to hear a cue as it lands at t = 0.6 s.</p>
+<div class="kit" id="kit"></div><h1 style="margin-top:28px">Beds</h1><div class="kit" id="beds"></div>
+<script src="tone-15.1.22/Tone.js"></script>
+<script src="mdna_audio.js"></script>
+<script>
+  async function play(track) {
+    await Tone.start();
+    const r = await MDNA_AUDIO.render(track), ctx = Tone.getContext().rawContext;
+    const b = ctx.createBuffer(2, r.ch[0].length, r.sr); b.copyToChannel(r.ch[0], 0); b.copyToChannel(r.ch[1], 1);
+    const s = ctx.createBufferSource(); s.buffer = b; s.connect(ctx.destination); s.start();
+  }
+  if (!/[?&]render\b/.test(location.search)) {
+    for (const k of Object.keys(MDNA_AUDIO.KIT)) document.getElementById("kit").append(Object.assign(document.createElement("button"),
+      { textContent: k, onclick: () => play({ duration: 2.4, cues: [{ t: k === "riser" ? 2 : 0.6, sfx: k }] }) }));
+    for (const m of ["pulse", "tick", "ambient"]) document.getElementById("beds").append(Object.assign(document.createElement("button"),
+      { textContent: m + " · 100 bpm", onclick: () => play({ duration: 9.6, bed: { bpm: 100, mood: m } }) }));
+  }
+</script>
+</body></html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<!-- Motion DNA web FX · hand-drawn annotations (paper.js 0.16.0, MIT): a marker circles, underlines, crosses out or
+     points at a box, drawn on like a pen and boiling slightly on twos. Options (location.hash JSON):
+     shape circle | underline | cross | arrow | box, box [x, y, w, h] in px, color, width (stroke px), draw (s to draw),
+     hold (s before it boils), boil (px of wobble), at (s of delay). Rendered by tools/web_capture.py. -->
+<meta charset="utf-8"><title>scribble</title>
+<style>html, body { margin: 0; background: transparent; overflow: hidden; } #stage { position: relative; } canvas { display: block; }</style>
+<div id="stage"><canvas id="c"></canvas></div>
+<script src="https://cdn.jsdelivr.net/npm/paper@0.16.0/dist/paper-core.min.js"></script>
+<script>
+const o = JSON.parse(decodeURIComponent(location.hash.slice(1) || "{}")), cv = document.getElementById("c"), st = document.getElementById("stage");
+st.style.width = cv.style.width = o.w + "px"; st.style.height = cv.style.height = o.h + "px"; cv.width = o.w; cv.height = o.h;
+paper.setup(cv); paper.view.viewSize = new paper.Size(o.w, o.h);
+const [bx, by, bw, bh] = o.box || [o.w * 0.3, o.h * 0.38, o.w * 0.4, o.h * 0.24], col = o.color || (o.colors || ["#D8FF85"])[0];
+const W = o.width || 9, DRAW = o.draw ?? 0.7, AT = o.at ?? 0, BOIL = o.boil ?? 2.2, shape = o.shape || "circle";
+const rnd = (a, b) => a + Math.random() * (b - a), cx = bx + bw / 2, cy = by + bh / 2;
+function points(seed) {   // the stroke's points, slightly different per boil frame (hand-drawn, never a perfect ellipse)
+  const r = () => rnd(-BOIL, BOIL), pts = [];
+  if (shape === "circle") { const turns = 1.12, n = 48; for (let i = 0; i <= n; i++) { const a = -Math.PI * 0.62 + i / n * turns * 2 * Math.PI, k = 1 + 0.04 * Math.sin(i * 0.7);
+      pts.push([[cx + Math.cos(a) * (bw / 2 * 1.12 + 26) * k + r(), cy + Math.sin(a) * (bh / 2 * 1.42 + 20) * k + r()]]); } }   // an ellipse around a box needs ~1.4x its half-height to clear the corners
+  else if (shape === "underline") { for (let i = 0; i <= 16; i++) pts.push([[bx - 10 + i / 16 * (bw + 20) + r(), by + bh + 18 + Math.sin(i * 0.9) * 4 + r()]]); }
+  else if (shape === "cross") { for (let i = 0; i <= 10; i++) pts.push([[bx + i / 10 * bw + r(), by + i / 10 * bh + r()]]); pts.push(null);
+      for (let i = 0; i <= 10; i++) pts.push([[bx + bw - i / 10 * bw + r(), by + i / 10 * bh + r()]]); }
+  else if (shape === "box") { const c = [[bx - 16, by - 14], [bx + bw + 16, by - 18], [bx + bw + 12, by + bh + 16], [bx - 14, by + bh + 12], [bx - 10, by - 20]];
+      c.forEach(([x, y]) => pts.push([[x + r() * 2, y + r() * 2]])); }
+  else { const tx = bx - 40, ty = cy, sx = tx - 320, sy = ty + 170; for (let i = 0; i <= 14; i++) { const t = i / 14; pts.push([[sx + (tx - sx) * t + Math.sin(t * 3) * 30 + r(), sy + (ty - sy) * t - Math.sin(t * Math.PI) * 60 + r()]]); }
+      pts.push(null); pts.push([[tx - 46 + r(), ty - 22 + r()]]); pts.push([[tx + r(), ty + r()]]); pts.push([[tx - 30 + r(), ty + 40 + r()]]); }
+  return pts;
+}
+let group = new paper.Group(), t0 = null;
+function draw(t) {
+  group.removeChildren(); const step = Math.floor(Math.max(0, t - AT) * 12);   // boil on twos (12 drawings a second)
+  const pts = points(step), segs = [[]]; pts.forEach(p => p ? segs[segs.length - 1].push(p[0]) : segs.push([]));
+  const total = segs.reduce((a, s) => a + s.length, 0), shown = Math.min(1, Math.max(0, (t - AT) / DRAW));
+  const ease = x => 1 - Math.pow(1 - x, 3); let left = ease(shown) * total;
+  for (const s of segs) { if (left <= 1) break; const n = Math.min(s.length, Math.ceil(left)); left -= s.length;
+    const path = new paper.Path({ segments: s.slice(0, n), strokeColor: col, strokeWidth: W, strokeCap: "round", strokeJoin: "round", parent: group }); path.smooth({ type: "catmull-rom" }); }
+  paper.view.update();
+}
+window.FX_START = () => { const start = performance.now(); const loop = () => { draw((performance.now() - start) / 1000); requestAnimationFrame(loop); }; loop(); };
+window.FX_READY = true;
+</script>

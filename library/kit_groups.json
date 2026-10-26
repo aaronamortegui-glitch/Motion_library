@@ -277,6 +277,61 @@
    ]
   },
   {
+   "category": "Clip transitions",
+   "name": "Shader wipes",
+   "desc": "Shapes, patterns and noise reveal the next shot (gl-transitions shaders as luma mattes; 74 in all with gl_transition).",
+   "members": [
+    {
+     "kind": "gltransition",
+     "name": "HeartWipe"
+    },
+    {
+     "kind": "gltransition",
+     "name": "StarWipe"
+    },
+    {
+     "kind": "gltransition",
+     "name": "FlowerWipe"
+    },
+    {
+     "kind": "gltransition",
+     "name": "Pinwheel"
+    },
+    {
+     "kind": "gltransition",
+     "name": "ClockWipe"
+    },
+    {
+     "kind": "gltransition",
+     "name": "PolkaDotsCurtain"
+    },
+    {
+     "kind": "gltransition",
+     "name": "Crosshatch"
+    },
+    {
+     "kind": "gltransition",
+     "name": "WindowBlinds"
+    },
+    {
+     "kind": "gltransition",
+     "name": "RadialWipe"
+    },
+    {
+     "kind": "gltransition",
+     "name": "PerlinDissolve"
+    },
+    {
+     "kind": "gltransition",
+     "name": "DoomMelt"
+    },
+    {
+     "kind": "gltransition",
+     "name": "UndulatingBurnOut"
+    }
+   ]
+  },
+  {
    "category": "Elements",
    "name": "Titles",
    "desc": "Titles that size themselves: plain, scaled, cinematic, kinetic, on tiles.",
@@ -411,6 +466,10 @@
     {
      "kind": "element",
      "name": "highlight"
+    },
+    {
+     "kind": "webfx",
+     "name": "scribble"
     }
    ]
   },
@@ -601,6 +660,18 @@
     {
      "kind": "shape",
      "name": "swoosh"
+    },
+    {
+     "kind": "webfx",
+     "name": "particle fireworks"
+    },
+    {
+     "kind": "webfx",
+     "name": "confetti cannons"
+    },
+    {
+     "kind": "webfx",
+     "name": "sparks"
     }
    ]
   },
@@ -684,6 +755,10 @@
     {
      "kind": "background",
      "name": "mesh"
+    },
+    {
+     "kind": "webfx",
+     "name": "living gradient"
     }
    ]
   },
@@ -703,6 +778,10 @@
     {
      "kind": "background",
      "name": "glass"
+    },
+    {
+     "kind": "webfx",
+     "name": "flow field"
     }
    ]
   },
@@ -910,6 +989,92 @@
    ]
   },
   {
+   "category": "Moves",
+   "name": "Springs and eases",
+   "desc": "Real springs, wobble, elastic and bounce from react-spring and anime.js, on any keyed move (apply_spring).",
+   "members": [
+    {
+     "kind": "spring",
+     "name": "react-spring default"
+    },
+    {
+     "kind": "spring",
+     "name": "react-spring gentle"
+    },
+    {
+     "kind": "spring",
+     "name": "react-spring wobbly"
+    },
+    {
+     "kind": "spring",
+     "name": "react-spring stiff"
+    },
+    {
+     "kind": "spring",
+     "name": "react-spring slow"
+    },
+    {
+     "kind": "spring",
+     "name": "react-spring molasses"
+    },
+    {
+     "kind": "spring",
+     "name": "anime spring default"
+    },
+    {
+     "kind": "spring",
+     "name": "anime spring bounce 0 · 500 ms"
+    },
+    {
+     "kind": "spring",
+     "name": "anime spring bounce 0.25 · 600 ms"
+    },
+    {
+     "kind": "spring",
+     "name": "anime spring bounce 0.5 · 628 ms"
+    },
+    {
+     "kind": "spring",
+     "name": "anime spring bounce 0.7 · 800 ms"
+    },
+    {
+     "kind": "spring",
+     "name": "anime outBack"
+    },
+    {
+     "kind": "spring",
+     "name": "anime outElastic"
+    },
+    {
+     "kind": "spring",
+     "name": "anime outBounce"
+    },
+    {
+     "kind": "spring",
+     "name": "anime outExpo"
+    },
+    {
+     "kind": "spring",
+     "name": "anime inOutCirc"
+    }
+   ]
+  },
+  {
+   "category": "Moves",
+   "name": "3D scenes",
+   "desc": "Rendered 3D with alpha: the DNA helix or a product turntable (three.js), shapes that rain and pile up (Rapier).",
+   "members": [
+    {
+     "kind": "webfx",
+     "name": "helix 3d"
+    },
+    {
+     "kind": "webfx",
+     "name": "drop 3d"
+    }
+   ]
+  },
+  {
    "category": "Behaviours",
    "name": "Fill",
    "desc": "Bubbles, blob, voronoi cells and growth fill an area.",
@@ -959,6 +1124,18 @@
     {
      "kind": "behavior",
      "name": "rope"
+    },
+    {
+     "kind": "physics",
+     "name": "fall"
+    },
+    {
+     "kind": "physics",
+     "name": "drop in"
+    },
+    {
+     "kind": "physics",
+     "name": "burst"
     }
    ]
   },

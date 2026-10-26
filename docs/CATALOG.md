@@ -74,7 +74,7 @@ One click gives a whole comp an identity: each layer gets the preset of its role
 | <img src="../library/packs/tech.gif" width="260"><br>**Tech** · `medium`<br><sub>Data, AI, fintech, HUDs: decoding text, line draws and holographic flicker.</sub> | <img src="../library/packs/calm-modern.gif" width="260"><br>**Calm Modern** · `soft`<br><sub>Product and brand pieces: small travel, word-by-word text, quiet exits, no bounce.</sub> | <img src="../library/packs/editorial.gif" width="260"><br>**Editorial** · `medium`<br><sub>Brand systems, tech launches, type-led films: typing, snaps on the action, construction lines, clean ease-outs (Motion Style Map: Editorial).</sub> | <img src="../library/packs/storybook.gif" width="260"><br>**Storybook** · `soft`<br><sub>Warm product launches and character explainers: line-by-line rises, soft 3% overshoots, circular reveals (Motion Style Map: Warm editorial, Character).</sub> |
 | <img src="../library/packs/collage.gif" width="260"><br>**Collage** · `dynamic`<br><sub>Mixed media, cut-outs, archive and texture: whips through layers, hand-made boil on 3s, decoding type (Motion Style Map: Mixed media).</sub> |   |   |   |
 
-## The kit (159 pieces in 48 families)
+## The kit (198 pieces in 51 families)
 
 Built by Claude on the open comp through the MCP server, on the same token curves. One row per family: a still of its first piece and every variant by name (ask for any of them in the chat; `list_kit` shows energy and tones). Moving previews: hover a card in `library/index.html` or open *Agent › Library › Kit* in the panel.
 
@@ -92,7 +92,7 @@ Built by Claude on the open comp through the MCP server, on the same token curve
 | <img src="../library/gifs/kit-transition/bubble-wipe_md.png" width="160"> | **Bubbles**<br><sub>Bubbles that melt into each other cover the cut.</sub><br><sub>`solid_transition(look="Bubble Wipe")`</sub> | `Bubble Wipe` · `Bubble Rise` |
 | <img src="../library/gifs/kit-transition/shatter_md.png" width="160"> | **Shards**<br><sub>Voronoi shards break and sweep away.</sub><br><sub>`solid_transition(look="Shatter")`</sub> | `Shatter` · `Shard Sweep` |
 
-### Clip transitions (12)
+### Clip transitions (24)
 
 | | Family | Variants (ask for them by name) |
 |---|---|---|
@@ -100,8 +100,9 @@ Built by Claude on the open comp through the MCP server, on the same token curve
 | <img src="../library/gifs/kit-transition/whip-slide_md.png" width="160"> | **Slides**<br><sub>Push and whip from one shot to the next.</sub><br><sub>`solid_transition(look="Whip Slide")`</sub> | `Whip Slide` · `Vertical Whip` · `Stretch Slide` |
 | <img src="../library/gifs/kit-transition/flash-cut_md.png" width="160"> | **Flash and dip**<br><sub>A flash or a dip to a colour between shots.</sub><br><sub>`solid_transition(look="Flash Cut")`</sub> | `Flash Cut` · `Dip to Black` |
 | <img src="../library/gifs/kit-transition/camera-shake_md.png" width="160"> | **Shake, slices and glitch**<br><sub>Camera shake, sliced frames and an RGB glitch.</sub><br><sub>`solid_transition(look="Camera Shake")`</sub> | `Camera Shake` · `Slice Cut` · `Glitch Cut` |
+| <img src="../library/gifs/kit-gltransition/heartwipe_md.png" width="160"> | **Shader wipes**<br><sub>Shapes, patterns and noise reveal the next shot (gl-transitions shaders as luma mattes; 74 in all with gl_transition).</sub><br><sub>`gl_transition(name="HeartWipe", outgoing="…", incoming="…")`</sub> | `HeartWipe` · `StarWipe` · `FlowerWipe` · `Pinwheel` · `ClockWipe` · `PolkaDotsCurtain` · `Crosshatch` · `WindowBlinds` · `RadialWipe` · `PerlinDissolve` · `DoomMelt` · `UndulatingBurnOut` |
 
-### Elements (27)
+### Elements (28)
 
 | | Family | Variants (ask for them by name) |
 |---|---|---|
@@ -110,29 +111,29 @@ Built by Claude on the open comp through the MCP server, on the same token curve
 | <img src="../library/gifs/kit-element/callout_md.png" width="160"> | **Callouts and chat**<br><sub>Pointers, speech bubbles and chat messages.</sub><br><sub>`add_element(kind="callout", …)`</sub> | `callout` · `bubble` · `chat` |
 | <img src="../library/gifs/kit-element/counter_md.png" width="160"> | **Data**<br><sub>Counters, timers, progress bars, rings and ratings.</sub><br><sub>`add_element(kind="counter", …)`</sub> | `counter` · `timer` · `progress` · `ring` · `rating` |
 | <img src="../library/gifs/kit-element/lower-third_md.png" width="160"> | **Text blocks**<br><sub>Lower thirds, quotes, text boxes and lists.</sub><br><sub>`add_element(kind="lower_third", …)`</sub> | `lower_third` · `quote` · `text_box` · `list` |
-| <img src="../library/gifs/kit-element/underline_md.png" width="160"> | **Marks on text**<br><sub>Underline or highlight an existing text layer.</sub><br><sub>`add_element(kind="underline", …)`</sub> | `underline` · `highlight` |
+| <img src="../library/gifs/kit-element/underline_md.png" width="160"> | **Marks on text**<br><sub>Underline or highlight an existing text layer.</sub><br><sub>`add_element(kind="underline", …)`</sub> | `underline` · `highlight` · `scribble` |
 | <img src="../library/gifs/kit-element/media_md.png" width="160"> | **Media slot**<br><sub>A rounded slot that fits an image or a clip.</sub><br><sub>`add_element(kind="media", …)`</sub> | `media` |
 | <img src="../library/gifs/kit-element/glass-card_md.png" width="160"> | **Glass card**<br><sub>A smoky frosted card over a moving background.</sub><br><sub>`add_element(kind="glass_card", text=…, sub=…)`</sub> | `glass_card` |
 | <img src="../library/gifs/kit-element/end-card_md.png" width="160"> | **Logo close**<br><sub>Our logo built stroke by stroke (Motion DNA videos only).</sub><br><sub>`add_element(kind="end_card", text="Motion DNA", sub=tagline, style="horizontal"?)`</sub> | `end_card` |
 
-### Shapes (39)
+### Shapes (42)
 
 | | Family | Variants (ask for them by name) |
 |---|---|---|
 | <img src="../library/gifs/kit-shape/circle_md.png" width="160"> | **Primitives**<br><sub>Circles, polygons, stars, badges, hearts, checks.</sub><br><sub>`add_shape(kind="circle", …)`</sub> | `circle` · `ring` · `square` · `frame` · `triangle` · `diamond` · `pentagon` · `hexagon` · `star` · `sparkle` · `badge` · `heart` · `shield` · `cross` · `plus` · `check` |
 | <img src="../library/gifs/kit-shape/line_md.png" width="160"> | **Lines and arrows**<br><sub>Lines that draw on and travel off: waves, arrows, brackets, spirals, brush strokes.</sub><br><sub>`add_shape(kind="line", …)`</sub> | `line` · `wave` · `zigzag` · `arrow` · `curved_arrow` · `chevrons` · `brackets` · `spiral` · `infinity` · `brush` · `speed_lines` |
-| <img src="../library/gifs/kit-shape/burst_md.png" width="160"> | **Bursts**<br><sub>Impacts, shockwave rings, pops, fireworks, confetti and swooshes.</sub><br><sub>`add_shape(kind="burst", …)`</sub> | `burst` · `impact` · `rings` · `pops` · `fireworks` · `confetti` · `swoosh` |
+| <img src="../library/gifs/kit-shape/burst_md.png" width="160"> | **Bursts**<br><sub>Impacts, shockwave rings, pops, fireworks, confetti and swooshes.</sub><br><sub>`add_shape(kind="burst", …)`</sub> | `burst` · `impact` · `rings` · `pops` · `fireworks` · `confetti` · `swoosh` · `particle fireworks` · `confetti cannons` · `sparks` |
 | <img src="../library/gifs/kit-shape/glitter_md.png" width="160"> | **Sparkles**<br><sub>Four-point sparkles that pop, twinkle and fade.</sub><br><sub>`add_shape(kind="glitter", …)`</sub> | `glitter` |
 | <img src="../library/gifs/kit-shape/shape-row_md.png" width="160"> | **Rows and loaders**<br><sub>Rows of shapes, dot rows and a loader.</sub><br><sub>`add_shape(kind="shape_row", …)`</sub> | `shape_row` · `dots` · `loader` |
 | <img src="../library/gifs/kit-shape/blob_md.png" width="160"> | **Blob**<br><sub>A liquid blob that keeps breathing.</sub><br><sub>`add_shape(kind="blob", …)`</sub> | `blob` |
 
-### Backgrounds (10)
+### Backgrounds (12)
 
 | | Family | Variants (ask for them by name) |
 |---|---|---|
 | <img src="../library/gifs/kit-background/stripes_md.png" width="160"> | **Patterns**<br><sub>Stripes, dots, grids and topographic lines.</sub><br><sub>`add_look(kind="stripes", …)`</sub> | `stripes` · `dots` · `grid` · `topo` |
-| <img src="../library/gifs/kit-background/gradient_md.png" width="160"> | **Gradients**<br><sub>Moving gradients: four-colour, liquid and mesh.</sub><br><sub>`add_look(kind="gradient", …)`</sub> | `gradient` · `liquid` · `mesh` |
-| <img src="../library/gifs/kit-background/network_md.png" width="160"> | **Organic**<br><sub>A plexus network, breathing blobs and frosted glass.</sub><br><sub>`add_look(kind="network", …)`</sub> | `network` · `blobs` · `glass` |
+| <img src="../library/gifs/kit-background/gradient_md.png" width="160"> | **Gradients**<br><sub>Moving gradients: four-colour, liquid and mesh.</sub><br><sub>`add_look(kind="gradient", …)`</sub> | `gradient` · `liquid` · `mesh` · `living gradient` |
+| <img src="../library/gifs/kit-background/network_md.png" width="160"> | **Organic**<br><sub>A plexus network, breathing blobs and frosted glass.</sub><br><sub>`add_look(kind="network", …)`</sub> | `network` · `blobs` · `glass` · `flow field` |
 
 ### Looks (11)
 
@@ -154,20 +155,22 @@ Built by Claude on the open comp through the MCP server, on the same token curve
 | <img src="../library/gifs/kit-text/words-decode_md.png" width="160"> | **Typing**<br><sub>Decode and a typewriter with its cursor.</sub><br><sub>`animate_text(unit="words", channels=["decode","fade"], mode="flicker")`</sub> | `Words Decode` · `Typewriter Cursor` |
 | <img src="../library/gifs/kit-text/captions_md.png" width="160"> | **Captions**<br><sub>Word-timed captions: highlight, karaoke, build, pop.</sub><br><sub>`add_captions(words_path=…, style="highlight")`</sub> | `Captions` |
 
-### Moves (7)
+### Moves (25)
 
 | | Family | Variants (ask for them by name) |
 |---|---|---|
 | <img src="../library/gifs/kit-move/flip_md.png" width="160"> | **Flips and hinges**<br><sub>3D entrances that turn in.</sub><br><sub>`move(move="flip", layers=[…])`</sub> | `flip` · `hinge` · `tumble` |
 | <img src="../library/gifs/kit-move/fly_md.png" width="160"> | **Fly and orbit**<br><sub>Travel in from depth or around a pivot.</sub><br><sub>`move(move="fly", layers=[…])`</sub> | `fly` · `orbit` |
 | <img src="../library/gifs/kit-move/grow-edge_md.png" width="160"> | **Grow and squash**<br><sub>Grow from an edge, squash and stretch.</sub><br><sub>`move(move="grow_edge", layers=[…])`</sub> | `grow_edge` · `squash` |
+| <img src="../library/gifs/kit-spring/react-spring-default_md.png" width="160"> | **Springs and eases**<br><sub>Real springs, wobble, elastic and bounce from react-spring and anime.js, on any keyed move (apply_spring).</sub><br><sub>`apply_spring(name="react-spring default", layers=[…])`</sub> | `react-spring default` · `react-spring gentle` · `react-spring wobbly` · `react-spring stiff` · `react-spring slow` · `react-spring molasses` · `anime spring default` · `anime spring bounce 0 · 500 ms` · `anime spring bounce 0.25 · 600 ms` · `anime spring bounce 0.5 · 628 ms` · `anime spring bounce 0.7 · 800 ms` · `anime outBack` · `anime outElastic` · `anime outBounce` · `anime outExpo` · `anime inOutCirc` |
+| <img src="../library/gifs/kit-webfx/helix-3d_md.png" width="160"> | **3D scenes**<br><sub>Rendered 3D with alpha: the DNA helix or a product turntable (three.js), shapes that rain and pile up (Rapier).</sub><br><sub>`add_fx(kind="helix 3d", …)`</sub> | `helix 3d` · `drop 3d` |
 
-### Behaviours (9)
+### Behaviours (12)
 
 | | Family | Variants (ask for them by name) |
 |---|---|---|
 | <img src="../library/gifs/kit-behavior/bubbles_md.png" width="160"> | **Fill**<br><sub>Bubbles, blob, voronoi cells and growth fill an area.</sub><br><sub>`add_behavior(behavior="bubbles", target="shape", …)`</sub> | `bubbles` · `blob` · `voronoi` · `grow` |
 | <img src="../library/gifs/kit-behavior/flow_md.png" width="160"> | **Swarm**<br><sub>Flow fields and flocks move in a loop.</sub><br><sub>`add_behavior(behavior="flow", target="background", …)`</sub> | `flow` · `flock` |
-| <img src="../library/gifs/kit-behavior/spring_md.png" width="160"> | **Physics**<br><sub>Springs and ropes react to the curve.</sub><br><sub>`add_behavior(behavior="spring", target="box", …)`</sub> | `spring` · `rope` |
+| <img src="../library/gifs/kit-behavior/spring_md.png" width="160"> | **Physics**<br><sub>Springs and ropes react to the curve.</sub><br><sub>`add_behavior(behavior="spring", target="box", …)`</sub> | `spring` · `rope` · `fall` · `drop in` · `burst` |
 | <img src="../library/gifs/kit-behavior/line-boil_md.png" width="160"> | **Modifier**<br><sub>Line boil: any layer drawn on 3s.</sub><br><sub>`add_behavior(behavior="line_boil", target="layer", …)`</sub> | `line_boil` |
 <!-- catalog:end -->

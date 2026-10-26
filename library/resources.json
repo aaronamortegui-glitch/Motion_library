@@ -1824,9 +1824,9 @@
     "js"
    ],
    "size": "~400 KB",
-   "status": "ok",
+   "status": "recommended",
    "reason": "",
-   "claude_use": "Boolean ops and path math in Node before building AE shapes."
+   "claude_use": "In use: tools/web_fx/scribble.html (hand-drawn annotations, MCP add_fx scribble)."
   },
   {
    "name": "paperjs-offset",
@@ -1971,16 +1971,16 @@
    "category": "audio_tools",
    "tags": [],
    "license": "MIT (GitHub API)",
-   "version": "25.9k stars",
+   "version": "1.2.1",
    "attribution_required": false,
    "commercial_ok": true,
    "vendor_in_repo": false,
    "access": "pip",
    "formats": [],
    "size": "small",
-   "status": "reference_only",
+   "status": "recommended",
    "reason": "An AI model that runs outside After Effects; the plugin stays AE-only unless the user asks (scope note 2026-10-14).",
-   "claude_use": "Faster whisper backend for long VOs.",
+   "claude_use": "In use: tools/vo_words.py (default engine, openai-whisper as fallback).",
    "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
   },
   {
@@ -2477,9 +2477,9 @@
    "access": "git",
    "formats": [],
    "size": "small",
-   "status": "ok",
+   "status": "recommended",
    "reason": "Check each shader's license header.",
-   "claude_use": "Large GLSL transition collection: run through ISF4AE, or bake luma mattes offline as transition references.",
+   "claude_use": "In use: tools/gl_matte.py renders 74 shaders as luma mattes (MCP gl_transition); vendored in tools/gl_transitions/.",
    "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
   },
   {
@@ -3531,7 +3531,7 @@
    "size": "small",
    "status": "recommended",
    "reason": "",
-   "claude_use": "2D physics simulated offline in Node, baked to per-frame keys (drop, stack, collide layers).",
+   "claude_use": "In use: tools/physics_bake.py (vendored 0.20.0 in tools/physics/), MCP physics bakes fall / drop_in / burst to keys.",
    "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
   },
   {
@@ -3750,9 +3750,9 @@
     "png sequence via headless browser"
    ],
    "size": "npm",
-   "status": "ok",
+   "status": "recommended",
    "reason": "",
-   "claude_use": "Confetti, fireworks, sparks rendered headless (Playwright, like record_cep_panel.py) to transparent PNG sequences."
+   "claude_use": "In use: tools/web_fx/confetti.html and fireworks.html (4.5.0 from the CDN), MCP add_fx."
   },
   {
    "name": "tweak_shader_ae_plugin",
@@ -3812,6 +3812,298 @@
    "reason": "Brand new.",
    "claude_use": "Reference for a bake-to-keyframes physics flow.",
    "found_via": "aescripts.com taxonomy (docs/ae-tools-map.md)"
+  },
+  {
+   "name": "Tone.js",
+   "url": "https://github.com/Tonejs/Tone.js",
+   "category": "audio_tools",
+   "tags": [
+    "sfx",
+    "synthesis",
+    "sound design"
+   ],
+   "license": "MIT (LICENSE.md)",
+   "version": "15.1.22",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": true,
+   "access": "npm",
+   "formats": [],
+   "size": "npm",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "In use: the Motion DNA sound kit (tools/sound/, tools/sound_kit.py), MCP add_sound gives every finished piece its sound effects."
+  },
+  {
+   "name": "react-spring",
+   "url": "https://github.com/pmndrs/react-spring",
+   "category": "easing_math",
+   "tags": [
+    "spring",
+    "physics",
+    "ease"
+   ],
+   "license": "MIT",
+   "version": "10.1.2",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "values",
+   "formats": [],
+   "size": "values",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Its six config presets are in library/springs.json (tools/springs.py); MCP apply_spring."
+  },
+  {
+   "name": "anime.js",
+   "url": "https://github.com/juliangarnier/anime",
+   "category": "easing_math",
+   "tags": [
+    "spring",
+    "elastic",
+    "bounce",
+    "ease"
+   ],
+   "license": "MIT",
+   "version": "4.5.0",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "values",
+   "formats": [],
+   "size": "values",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "Its spring (bounce + duration) and named eases are in library/springs.json; MCP apply_spring."
+  },
+  {
+   "name": "three.js",
+   "url": "https://github.com/mrdoob/three.js",
+   "category": "generator",
+   "tags": [
+    "3d",
+    "webgl",
+    "turntable"
+   ],
+   "license": "MIT",
+   "version": "r186 (0.186.1)",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "cdn",
+   "formats": [
+    "ProRes 4444 with alpha via tools/web_capture.py"
+   ],
+   "size": "cdn",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "tools/web_fx/helix3d.html and drop3d.html (CDN, pinned), MCP add_fx."
+  },
+  {
+   "name": "Rapier 3D",
+   "url": "https://github.com/dimforge/rapier",
+   "category": "generator",
+   "tags": [
+    "physics",
+    "3d"
+   ],
+   "license": "Apache-2.0",
+   "version": "0.21.0 (rapier3d-compat)",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "cdn",
+   "formats": [],
+   "size": "cdn",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "tools/web_fx/drop3d.html: 3D shapes that rain and pile up, MCP add_fx drop3d."
+  },
+  {
+   "name": "OGL",
+   "url": "https://github.com/oframe/ogl",
+   "category": "generator",
+   "tags": [
+    "webgl",
+    "gradient",
+    "background"
+   ],
+   "license": "Unlicense",
+   "version": "1.0.11",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "cdn",
+   "formats": [],
+   "size": "cdn",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "tools/web_fx/gradient.html: living mesh gradient, MCP add_fx gradient."
+  },
+  {
+   "name": "PixiJS",
+   "url": "https://github.com/pixijs/pixijs",
+   "category": "generator",
+   "tags": [
+    "particles",
+    "sparks",
+    "2d webgl"
+   ],
+   "license": "MIT",
+   "version": "8.22.0",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "cdn",
+   "formats": [],
+   "size": "cdn",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "tools/web_fx/sparks.html, MCP add_fx sparks."
+  },
+  {
+   "name": "p5.js",
+   "url": "https://github.com/processing/p5.js",
+   "category": "generator",
+   "tags": [
+    "generative",
+    "flow field"
+   ],
+   "license": "LGPL-2.1",
+   "version": "2.3.4",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "cdn",
+   "formats": [],
+   "size": "cdn",
+   "status": "ok",
+   "reason": "LGPL: used unmodified from the CDN only.",
+   "claude_use": "tools/web_fx/flowfield.html loads it unmodified from the CDN (never copied into the repo), MCP add_fx flowfield."
+  },
+  {
+   "name": "glTF-Transform",
+   "url": "https://github.com/donmccurdy/glTF-Transform",
+   "category": "import_export",
+   "tags": [
+    "gltf",
+    "glb",
+    "3d",
+    "optimize"
+   ],
+   "license": "MIT",
+   "version": "4.5.1 (@gltf-transform/cli)",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "npx",
+   "formats": [],
+   "size": "npx",
+   "status": "recommended",
+   "reason": "",
+   "claude_use": "tools/gltf_prep.py inspect / prep a product GLB for the 3D turntable."
+  },
+  {
+   "name": "HyperFrames",
+   "url": "https://github.com/heygen-com/hyperframes",
+   "category": "render_automation",
+   "tags": [
+    "html video",
+    "registry",
+    "gsap"
+   ],
+   "license": "Apache-2.0",
+   "version": "0.8.203",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "npm",
+   "formats": [],
+   "size": "npm",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "research/hyperframes/hf.py: projects in our tokens, curves and sound; 448 registry blocks indexed in research/hyperframes/catalog.json."
+  },
+  {
+   "name": "Chatterbox",
+   "url": "https://github.com/resemble-ai/chatterbox",
+   "category": "audio_tools",
+   "tags": [
+    "tts",
+    "voice conversion",
+    "voice clone"
+   ],
+   "license": "MIT",
+   "version": "0.1.7 (git master)",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "pip",
+   "formats": [],
+   "size": "pip",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "Research only (research/voice/): free local TTS and speech-to-speech, NVIDIA GPU only, so not in the plugin. Consent for real voices; output watermarked (Perth)."
+  },
+  {
+   "name": "OBS Studio",
+   "url": "https://github.com/obsproject/obs-studio",
+   "category": "render_automation",
+   "tags": [
+    "screen recording",
+    "ui demo"
+   ],
+   "license": "GPL-2.0 (the app; driven over its websocket, never linked)",
+   "version": "33.0.0",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "app",
+   "formats": [],
+   "size": "app",
+   "status": "ok",
+   "reason": "",
+   "claude_use": "tools/obs_record.py, MCP record_screen: record the screen for UI demos and import the file."
+  },
+  {
+   "name": "Remotion",
+   "url": "https://github.com/remotion-dev/remotion",
+   "category": "render_automation",
+   "tags": [
+    "react video"
+   ],
+   "license": "Remotion License (not open source): free for individuals and companies up to 3 people; companies need a license",
+   "version": "4.0.539",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "npm",
+   "formats": [],
+   "size": "npm",
+   "status": "excluded",
+   "reason": "Superside needs a company license, internal use included. HyperFrames covers the same ground.",
+   "claude_use": ""
+  },
+  {
+   "name": "OpenCut",
+   "url": "https://github.com/OpenCut-app/OpenCut",
+   "category": "render_automation",
+   "tags": [
+    "editor",
+    "captions"
+   ],
+   "license": "MIT",
+   "version": "0.3.0",
+   "attribution_required": false,
+   "commercial_ok": true,
+   "vendor_in_repo": false,
+   "access": "app",
+   "formats": [],
+   "size": "app",
+   "status": "reference_only",
+   "reason": "A CapCut-style editor; we edit in After Effects.",
+   "claude_use": "Reference for caption and timeline UX only."
   }
  ]
 }
