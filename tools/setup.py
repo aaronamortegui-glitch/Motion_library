@@ -654,6 +654,16 @@ def uninstall():
     print("\nThe repo folder itself is untouched; delete it by hand if you want. Restart After Effects.")
 
 
+def guide():
+    """The library guide (library/guide.html): every move, curve, style, technique and kit piece with its preview."""
+    r = run([sys.executable, str(ROOT / "tools/build_library_guide.py")])
+    page = ROOT / "library" / "guide.html"
+    if r.returncode == 0 and page.exists():
+        print(OK + f"library guide: {page} (open it in a browser)")
+    else:
+        print(WARN + "library guide not built: python tools/build_library_guide.py")
+
+
 def main():
     for s in (sys.stdout, sys.stderr):   # a Windows console (cp1252) must not crash on a tool's output
         try: s.reconfigure(encoding="utf-8", errors="replace")
@@ -682,6 +692,10 @@ def main():
         sound()
     except Exception as e:
         print(WARN + f"sound kit not checked ({e}); everything else is installed")
+    try:   # the downloadable library: built from this clone's data, so it always matches the version installed
+        guide()
+    except Exception as e:
+        print(WARN + f"library guide not built ({e}); everything else is installed")
     print("\nLast steps in After Effects (only you can do these):")
     print("  - Restart After Effects, then open Window > Extensions > Motion DNA and dock it: it comes back every time")
     print("    After Effects starts (File > Scripts > Motion DNA opens it too).")

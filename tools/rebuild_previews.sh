@@ -13,5 +13,6 @@ SKIP_RENDER=1 bash tools/render_gifs.sh | tail -1
 PYTHONUTF8=1 python tools/style_scenes.py all | tail -1
 bash tools/make_previews_stills.sh
 python tools/make_webm.py
+python tools/build_library_guide.py
 PYTHONUTF8=1 python tools/build_library_html.py | tail -1
 PYTHONUTF8=1 python tools/readme_catalog.py | tail -1
