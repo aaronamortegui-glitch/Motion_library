@@ -28,7 +28,7 @@ FONT = ROOT / "assets/fonts/InterTight[wght].ttf"
 # slug: (how, source, start s, length s, sound). "cut" is a plain cut; the others are made below.
 JOBS = {
     "tracked-labels": ("tracked", V + "R4_car3_kling.mp4", 0, 5.0, False),
-    "text-behind-people": ("cut", TEASER, 88.4, 1.85, True),
+    "text-behind-people": ("behind", [V + "A_yes_k3_cut.mp4", V + "A_yes_k3_matte.mov"], 0, 2.2, False),
     "roto-breakdown": ("roto", [V + "A_yes_k3_cut.mp4", V + "A_yes_k3_matte.mov"], 0, 2.2, False),
     "hud-overlays": ("hud", V + "G5_robot_closeup.mp4", 0.3, 4.4, False),
     "speed-ramps": ("ramp", TEASER, 32.9, 2.9, False),
@@ -196,18 +196,35 @@ def roto(srcs, start, length):
 
 
 def ramp(src, start, length):
-    """Speed ramp on a clip generated in slow motion: fast where nothing happens, back to its own slow motion for the
-    moment that matters (the splash), fast again out. The speed and its curve are shown."""
-    f = frames(src, start, length); out, pos = [], 0.0
-    def speed(p): return 2.5 if p < .2 else 1 if p < .72 else 3   # p: where we are in the source
-    while pos < len(f) - 1:
-        p = pos / len(f); sp = speed(p); im = rgba(f[int(pos)]); d = ImageDraw.Draw(im, "RGBA")
-        chip(d, 16, 16, {2.5: "2.5x SPED UP", 1: "1x  ITS OWN SLOW MOTION", 3: "3x SPED UP"}[sp], 20)
-        d.rectangle([0, H - 40, W, H], fill=(4, 18, 15, 200))
-        pts = [(16 + (W - 32) * u / 100, H - 14 - 18 * {2.5: .8, 1: .15, 3: 1}[speed(u / 100)]) for u in range(101)]
-        d.line(pts, fill=(247, 249, 242, 120), width=2); q = min(100, int(p * 100))
-        d.ellipse([pts[q][0] - 6, pts[q][1] - 6, pts[q][0] + 6, pts[q][1] + 6], fill=SPARK)
-        out.append(flat(im)); pos += sp
+    """Speed ramp, the effect itself, on a clip generated in slow motion: it starts fast (4x), the speed eases down
+    smoothly into a slower-than-shot slow motion (0.4x) for the splash, then eases back up to 4x. Speed changes
+    continuously on the Ramp curve, frames are blended (motion blur when fast, smooth when slow), and the speed
+    reads live on a gauge with its curve."""
+    f = frames(src, start, length, fps=FPS * 2).astype(np.float32)   # 2x the frames: room to slow down
+    n = len(f); RAMP = bez(.87, 0, .13, 1)
+    hit = .55   # where the splash is in the source (0-1)
+
+    def speed(p):   # speed in source-frames per output frame (2 = real time of the generated slow motion)
+        lo, hi = .8, 8.0   # 0.4x and 4x
+        d = abs(p - hit) / .35
+        return lo + (hi - lo) * RAMP(min(1, d))
+
+    out, pos, hist = [], 0.0, []
+    while pos < n - 1:
+        p = pos / n; sp = speed(p)
+        taps = max(1, int(sp / 2))   # motion blur: average the source frames this output frame crosses
+        acc = sum(f[min(n - 1, int(pos + k * sp / taps))] for k in range(taps)) / taps
+        a, b = int(pos), min(n - 1, int(pos) + 1); k = pos - int(pos)
+        if taps == 1: acc = (1 - k) * f[a] + k * f[b]
+        im = Image.fromarray(acc.clip(0, 255).astype(np.uint8)).convert("RGBA"); d = ImageDraw.Draw(im, "RGBA")
+        x = sp / 2; hist.append(x)
+        chip(d, 16, 16, f"{x:.1f}x", 26)
+        d.rectangle([0, H - 46, W, H], fill=(4, 18, 15, 205))   # the speed curve over the whole clip, the dot where we are
+        pts = [(16 + (W - 32) * u / 100, H - 12 - 26 * (speed(u / 100) - .8) / 7.2) for u in range(101)]
+        d.line(pts, fill=(247, 249, 242, 110), width=2)
+        q = min(100, int(p * 100)); d.ellipse([pts[q][0] - 6, pts[q][1] - 6, pts[q][0] + 6, pts[q][1] + 6], fill=SPARK)
+        d.text((16, H - 44), "SPEED", font=font(12, 700), fill=(247, 249, 242, 160))
+        out.append(np.asarray(im.convert("RGB"))); pos += sp
     return out
 
 
@@ -340,6 +357,27 @@ def hud(src, start, length):
     return out
 
 
+def behind(srcs, start, length):
+    """Text behind people: on the clean plate, a giant YES! rises from below and passes behind the two people (their AI
+    matte stays on top); halfway, a quick flash of the matte shows how it is done."""
+    plate, m = frames(srcs[0], 0, length), alpha(srcs[1], length); n = min(len(plate), len(m)); out = []
+    total = int(3.2 * FPS); fw = font(250, 900)
+    for i in range(total):
+        j = min(n - 1, int(i * n / total)); t = i / FPS   # the shot plays a little slower so the move reads
+        im = rgba(plate[j]); k = LAND(min(1, max(0, (t - .3) / .9)))
+        word = Image.new("RGBA", (W, H), (0, 0, 0, 0)); ImageDraw.Draw(word).text((W / 2, H * .42 + (1 - k) * 260), "YES!", font=fw, fill=SPARK + (255,), anchor="mm")
+        im.alpha_composite(word)
+        person = rgba(plate[j]); person.putalpha(Image.fromarray(m[j])); im.alpha_composite(person)
+        d = ImageDraw.Draw(im, "RGBA")
+        if 1.5 < t < 2.1:   # the matte, briefly: white people over Pine, so the trick is seen
+            a = min(1, (t - 1.5) / .12, (2.1 - t) / .12); ov = Image.new("RGBA", (W, H), PINE + (int(200 * a),))
+            wm = Image.new("RGBA", (W, H), CLOUD + (0,)); wm.putalpha(Image.fromarray((m[j] * .85 * a).astype(np.uint8)))
+            im.alpha_composite(ov); im.alpha_composite(wm); d = ImageDraw.Draw(im, "RGBA")
+        chip(d, 16, 16, "1 · TEXT IN" if t < 1.5 else "2 · AI MATTE" if t < 2.1 else "3 · TEXT BEHIND THEM", 16)
+        out.append(flat(im))
+    return out
+
+
 def wipe(srcs, start, length):
     """Shape wipe: Spark and Sea bars cross the frame and carry the cut from the office to the car spot."""
     a, b = frames(srcs[0], start, length), frames(srcs[1], 0, length); out = []; mid = length / 2
@@ -467,7 +505,7 @@ def cut(src, start, length):
     return list(frames(src, start, length))
 
 
-MAKERS = dict(cut=cut, hud=hud, tracked=tracked, roto=roto, ramp=ramp, freeze=freeze, wipe=wipe, markers=markers, voice=voice, stroke=stroke, sound=sound, grid=grid)
+MAKERS = dict(cut=cut, behind=behind, hud=hud, tracked=tracked, roto=roto, ramp=ramp, freeze=freeze, wipe=wipe, markers=markers, voice=voice, stroke=stroke, sound=sound, grid=grid)
 
 
 def make(slug):
