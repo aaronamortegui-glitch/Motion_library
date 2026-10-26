@@ -84,7 +84,8 @@ def data():
     tech = [tclip(t) for t in techs if slug(t["name"]) not in technique_clips.HIDDEN | technique_clips.DUPLICATES]   # left out: not on every machine, or shown elsewhere
     prompts = [dict(name=x["prompt"], group=x["group"], what=x["uses"], use=x["uses"], video=x["preview"], poster=x["poster"], ask=x["prompt"], call=x["uses"])
                for x in json.loads((LIB / "prompts.json").read_text(encoding="utf-8"))["prompts"]]
-    return dict(moves=moves, text=text, kit=kitems, curves=curves, styles=styles, tech=tech, prompts=prompts)
+    glossary = json.loads((LIB / "glossary.json").read_text(encoding="utf-8"))["categories"]
+    return dict(moves=moves, text=text, kit=kitems, curves=curves, styles=styles, tech=tech, prompts=prompts, glossary=glossary)
 
 
 def logo():
@@ -102,12 +103,13 @@ CATS = [("moves", "Moves", "Moves that", "feel made", "office.jpg", "g-cloud", "
         ("tech", "Techniques", "Whole", "workflows", "office.jpg", "g-sea", "Whip"),
         ("kit", "Kit", "The pieces", "Claude builds", "studio.jpg", "g-cloud", "Pop"),
         ("prompts", "Prompts", "Just", "ask for it", "dana-robot.jpg", "g-leaf", "Land"),
+        ("glossary", "Glossary", "Words that", "move better", "studio.jpg", "g-pine", "Coast"),
         ("use", "Use it", "Three ways", "to ask", "robot.jpg", "g-mint", "Land")]
 
 
 def page():
     D = data()
-    n = {"prompts": len(D["prompts"]), "moves": len(D["moves"]), "text": len(D["text"]), "curves": len(D["curves"]), "styles": len(D["styles"]), "tech": len(D["tech"]), "kit": len(D["kit"])}
+    n = {"glossary": sum(len(c["terms"]) for c in D["glossary"]), "prompts": len(D["prompts"]), "moves": len(D["moves"]), "text": len(D["text"]), "curves": len(D["curves"]), "styles": len(D["styles"]), "tech": len(D["tech"]), "kit": len(D["kit"])}
     lede = {"moves": f"{n['moves']} moves and loops on the brand curves, as native keyframes. Pick one by its energy.",
             "text": f"{n['text']} ways to bring words in: by character, word or line, typed, decoded or counted.",
             "curves": f"{n['curves']} easing curves. Every move in the library runs on one of them; the dot shows its speed.",
@@ -115,6 +117,7 @@ def page():
             "tech": f"{n['tech']} techniques: multi-step workflows the agent runs for you, start to finish.",
             "kit": f"{n['kit']} pieces Claude builds in your comp: transitions, elements, shapes, looks and behaviours.",
             "prompts": f"{len(D['prompts'])} prompts people use most in Agent mode, each with what it calls in the library. Copy one, change the words.",
+            "glossary": f"{sum(len(c['terms']) for c in D['glossary'])} motion words in {len(D['glossary'])} groups. Use them in a prompt and the agent knows exactly what you mean.",
             "use": "Ask in the panel, in the agent's chat, or from Claude Code. The same library answers."}
     nav = "".join(f'<li><a href="#{k}" data-sec="i-{k} {k}">{i + 1:02d} {t}</a></li>' for i, (k, t, *_r) in enumerate(CATS))
     rows = "".join(
@@ -133,6 +136,10 @@ def page():
             body = (f'<div class="abs filters r r-fade" style="--x:50;--y:300;--w:1400;--d:500ms" data-for="{k}"></div>'
                     f'<div class="abs grid" style="--x:50;--y:362;--w:1660" data-grid="{k}"></div>'
                     f'<div class="abs pager r r-fade" style="--x:1490;--y:292;--w:320;--d:700ms" data-pager="{k}"><button class="pg prev" aria-label="Previous page">‹</button><span class="pgn">1 / 1</span><button class="pg next" aria-label="Next page">›</button></div>')
+        elif k == "glossary":
+            body = ('<div class="gbg" id="gbg"></div><div class="gscrim"></div>'
+                    '<div class="abs gtabs r r-fade" style="--x:50;--y:300;--w:1820;--d:400ms" id="gtabs"></div>'
+                    '<div class="abs ggrid" style="--x:50;--y:375;--w:1820" id="ggrid"></div>')
         elif k == "curves":
             body = f'<div class="abs curvegrid" style="--x:50;--y:300;--w:1560" id="curvegrid"></div>'
         elif k in ("styles", "tech"):
@@ -144,7 +151,10 @@ def page():
                     '<li class="rule r r-up" style="--d:250ms"><span class="q">1</span><span class="ptext"><b>In the panel</b><span class="ghost">Pick a move, a style or a curve and Apply it to the selected layers.</span><span data-type="Pick a move, a style or a curve and Apply it to the selected layers.">Pick a move, a style or a curve and Apply it to the selected layers.</span></span><span class="chip c-spark r r-pop" style="--d:1500ms">Behaviors</span></li>'
                     '<li class="rule r r-up" style="--d:350ms"><span class="q">2</span><span class="ptext"><b>In the agent’s chat</b><span class="ghost">“Make the whole comp feel playful and add a sound to every click.”</span><span data-type="“Make the whole comp feel playful and add a sound to every click.”">“Make the whole comp feel playful and add a sound to every click.”</span></span><span class="chip c-mint r r-pop" style="--d:3300ms">Agent</span></li>'
                     '<li class="rule r r-up" style="--d:450ms"><span class="q">3</span><span class="ptext"><b>From Claude Code</b><span class="ghost">Every card here has its order: copy it and paste it into Claude.</span><span data-type="Every card here has its order: copy it and paste it into Claude.">Every card here has its order: copy it and paste it into Claude.</span></span><span class="chip c-lav r r-pop" style="--d:5200ms">MCP</span></li></ul>')
-        content = (f'<section class="slide {g} cover-up" id="{k}" data-label="{t}" data-curve="{curve}" data-dur="Arrive 467 ms" data-rad="0">'
+        if k == "glossary":
+            bg, body = body.split('<div class="abs gtabs', 1)[0], '<div class="abs gtabs' + body.split('<div class="abs gtabs', 1)[1]
+        else: bg = ""
+        content = (f'<section class="slide {g} cover-up" id="{k}" data-label="{t}" data-curve="{curve}" data-dur="Arrive 467 ms" data-rad="0">{bg}'
                    f'<div class="stage">{head if k != "use" else head.replace("--x:50;", "--x:783;", 3)}{body}</div></section>')
         sec.append(f'<div class="hold">{inter}{content}</div>')
     cover = (f'<section class="slide g-pine" id="cover" data-label="Motion DNA Library" data-curve="Land" data-dur="Stage 1100 ms">'

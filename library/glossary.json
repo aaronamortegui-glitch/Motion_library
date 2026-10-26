@@ -1,0 +1,53 @@
+{
+  "note": "Motion words that make a prompt better, by category. Each term: what it means, a way to say it to the agent, and the demo the library guide plays for it (tools/library_guide.html, .demo[data-demo]). Easing names are the library's own curves.",
+  "categories": [
+    {"name": "Timing", "photo": "guide/office.jpg", "terms": [
+      {"term": "Stagger", "means": "The same move starts on each layer a few frames after the last.", "say": "Stagger the cards by 3 frames.", "demo": "stagger"},
+      {"term": "Overlap", "means": "The next move starts before the last one ends, so the motion flows.", "say": "Let the title overlap the subtitle a little.", "demo": "overlap"},
+      {"term": "Hold", "means": "A pause where nothing moves, so the eye can read.", "say": "Hold the logo for a second before it leaves.", "demo": "hold"},
+      {"term": "Beat", "means": "A moment the motion lands on: a word, a hit in the music, a cut.", "say": "Land every title on the beat.", "demo": "beat"},
+      {"term": "Duration", "means": "How long a move takes. The library's are Glide, Arrive, Sweep and Stage.", "say": "Make the entrances Arrive, the exits Glide.", "demo": "duration"},
+      {"term": "Offset", "means": "A delay between two things on purpose, so they don't move as one block.", "say": "Offset the icon from its label by 4 frames.", "demo": "offset"}
+    ]},
+    {"name": "Easing", "photo": "guide/studio.jpg", "terms": [
+      {"term": "Ease out", "means": "Fast start, soft stop. The Land curve: things arriving.", "say": "Bring it in on Land.", "demo": "move", "ease": ".12,.9,.28,1"},
+      {"term": "Ease in", "means": "Slow start, fast end. The Launch curve: things leaving.", "say": "Send it out on Launch.", "demo": "move", "ease": ".55,0,.9,.6"},
+      {"term": "Overshoot", "means": "It goes past its place and comes back. The Pop curve.", "say": "Pop the badge in with a little overshoot.", "demo": "pop"},
+      {"term": "Anticipation", "means": "A small move back before the real one. The Wind-up curve.", "say": "Add a wind-up before it slides.", "demo": "move", "ease": ".55,-0.35,.2,1"},
+      {"term": "Snap", "means": "Almost all the change at once, then a tiny settle. Editorial cuts.", "say": "Snap the shapes on the action.", "demo": "move", "ease": "0,.92,.2,1"},
+      {"term": "Linear", "means": "The same speed all the way. The Flat curve: for opacity and loops, rarely for moves.", "say": "Keep the rotation linear.", "demo": "move", "ease": "0,0,1,1"}
+    ]},
+    {"name": "Movement", "photo": "guide/robot.jpg", "terms": [
+      {"term": "Squash & stretch", "means": "A shape flattens when it lands and stretches when it's fast. It feels alive.", "say": "Give the bounce some squash and stretch.", "demo": "squash"},
+      {"term": "Follow-through", "means": "Parts keep moving a moment after the body stops.", "say": "Let the antenna follow through.", "demo": "follow"},
+      {"term": "Whip", "means": "A very fast move with motion blur, like a camera snapping.", "say": "Whip the next card in.", "demo": "whip"},
+      {"term": "Parallax", "means": "Near layers move more than far ones: depth without 3D.", "say": "Add parallax between the background and the type.", "demo": "parallax"},
+      {"term": "Float", "means": "A slow loop up and down, so a still thing looks alive.", "say": "Let the icons float while the VO plays.", "demo": "float"},
+      {"term": "Shake", "means": "A short jitter that dies out: an impact, a bass hit.", "say": "Shake the frame on the hit.", "demo": "shake"}
+    ]},
+    {"name": "Text", "photo": "packs/stills/editorial.jpg", "terms": [
+      {"term": "By character", "means": "Each letter animates on its own, one after another.", "say": "Bring the title in by character.", "demo": "chars"},
+      {"term": "Mask reveal", "means": "Words rise from behind an invisible edge, as if cut from the line.", "say": "Mask-reveal each line from below.", "demo": "mask"},
+      {"term": "Tracking", "means": "The space between letters. Opening it slowly feels premium.", "say": "Let the tracking settle in.", "demo": "tracking"},
+      {"term": "Slam", "means": "Words hit the frame from big to their size, with a kick.", "say": "Slam the three words in.", "demo": "slam"},
+      {"term": "Typewriter", "means": "Letters appear one at a time with a cursor.", "say": "Type the line in with a cursor.", "demo": "type"},
+      {"term": "Kinetic type", "means": "Type that moves with the voice or the music, as the main show.", "say": "Make this quote kinetic type on the VO.", "demo": "kinetic"}
+    ]},
+    {"name": "Camera & footage", "photo": "packs/stills/dynamic.jpg", "terms": [
+      {"term": "Punch-in", "means": "A quick zoom into the shot to make a moment hit harder.", "say": "Punch in on her line.", "demo": "punch"},
+      {"term": "Speed ramp", "means": "The clip speeds up, slows down for the moment, speeds up again.", "say": "Ramp it: fast in, slow on the hit, fast out.", "demo": "ramp"},
+      {"term": "Freeze frame", "means": "The shot stops on one frame while graphics play over it.", "say": "Freeze on her close-up and add the title.", "demo": "freeze"},
+      {"term": "Track", "means": "A graphic follows something moving in the shot.", "say": "Track the car and pin a label to it.", "demo": "track"},
+      {"term": "Matte", "means": "A cut-out of the people, so text can go behind them.", "say": "Matte the two of them and put YES! behind.", "demo": "matte"},
+      {"term": "Push-through", "means": "The camera flies into a word or a logo and through it.", "say": "Push through the logo into the next scene.", "demo": "push"}
+    ]},
+    {"name": "Transitions & feel", "photo": "packs/stills/playful.jpg", "terms": [
+      {"term": "Wipe", "means": "A shape or colour crosses the frame and carries the change.", "say": "Join the scenes with a two-colour wipe.", "demo": "wipe"},
+      {"term": "Cut on action", "means": "The cut happens in the middle of a move, so it feels invisible.", "say": "Cut on the action, not after it.", "demo": "cutaction"},
+      {"term": "Energy", "means": "How much and how fast things move: 1 calm to 5 explosive.", "say": "Keep the energy at 2, calm and soft.", "demo": "energy"},
+      {"term": "Tone", "means": "The feel words: modern, elegant, playful, editorial, technical, warm.", "say": "Make it modern and a little playful.", "demo": "tone"},
+      {"term": "Breathing room", "means": "Space and pauses between moves, so nothing fights for the eye.", "say": "Give it more breathing room between beats.", "demo": "room"},
+      {"term": "Restraint", "means": "Fewer, better moves. One hero move per scene.", "say": "Only the title moves big; keep the rest quiet.", "demo": "restraint"}
+    ]}
+  ]
+}

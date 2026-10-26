@@ -50,7 +50,7 @@ button{font:inherit;color:inherit}
 .chrome .row,.foot .row{width:calc(1920 * var(--s));margin-inline:auto;padding-inline:max(var(--gut), calc(50 * var(--s)));display:flex;gap:16px}
 .chrome .row{padding-top:calc(46 * var(--s));align-items:flex-start}
 .foot .row{padding-bottom:calc(30 * var(--s));align-items:center;font-size:max(.72rem, calc(21 * var(--s)))}
-.navlist{display:grid;grid-template-columns:repeat(8, calc(182 * var(--s)));list-style:none;padding:0;pointer-events:auto;transition:opacity var(--arrive) var(--settle),transform var(--arrive) var(--land)}
+.navlist{display:grid;grid-template-columns:repeat(9, calc(166 * var(--s)));list-style:none;padding:0;pointer-events:auto;transition:opacity var(--arrive) var(--settle),transform var(--arrive) var(--land)}
 .navlist a{color:inherit;text-decoration:none;font-size:max(.72rem, calc(21 * var(--s)));line-height:1;opacity:.72;position:relative;padding-bottom:6px;display:inline-block;transition:opacity var(--glide) var(--settle)}
 .navlist a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform var(--arrive) var(--land)}
 .navlist a:hover,.navlist a.on{opacity:1;font-weight:600}
@@ -230,6 +230,63 @@ button{font:inherit;color:inherit}
 .snd:hover{transform:scale(1.06)} .snd.on{background:var(--spark);color:var(--pine)}
 .copy{flex:none;border:0;border-radius:999px;background:var(--spark);color:var(--pine);padding:.45em 1em;font-size:calc(20 * var(--s));font-weight:600;cursor:pointer;transition:transform var(--arrive) var(--pop)}
 .copy:hover{transform:scale(1.06)}
+
+
+/* glossary: a full-bleed photo per group under a Pine scrim, numbered tabs, glass cards that each play their word */
+.gbg{position:absolute;inset:0;z-index:0;overflow:hidden}
+.gbg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.08);transition:opacity 900ms var(--settle),transform 6s var(--coast)}
+.gbg img.on{opacity:1;transform:scale(1)}
+.gscrim{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(10,33,31,.95) 0,rgba(10,33,31,.7) 32%,rgba(10,33,31,.55) 70%,rgba(10,33,31,.85) 100%)}
+.gtabs{display:flex;gap:calc(34 * var(--s));align-items:baseline}
+.gtab{background:none;border:0;padding:0 0 calc(8 * var(--s));cursor:pointer;color:var(--cloud);opacity:.5;display:flex;align-items:baseline;gap:calc(10 * var(--s));position:relative;transition:opacity var(--glide)}
+.gtab i{font-family:var(--serif);font-size:calc(34 * var(--s));color:var(--spark);font-style:italic}
+.gtab b{font-size:calc(26 * var(--s));font-weight:600}
+.gtab::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--spark);transform:scaleX(0);transform-origin:left;transition:transform var(--arrive) var(--land)}
+.gtab.on{opacity:1}.gtab.on::after{transform:scaleX(1)}.gtab:hover{opacity:.9}
+.ggrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:calc(26 * var(--s))}
+.gcard{background:rgba(10,33,31,.62);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:calc(22 * var(--s));box-shadow:inset 0 0 0 1.5px rgba(247,249,242,.14);
+  padding:calc(16 * var(--s));display:grid;grid-template-columns:calc(240 * var(--s)) minmax(0,1fr);gap:calc(22 * var(--s));align-items:center;min-height:calc(250 * var(--s));
+  transition:opacity var(--arrive) var(--settle) var(--d,0ms),transform var(--sweep) var(--land) var(--d,0ms)}
+.gcard.out{opacity:0;transform:translateY(40px)}
+.gcard h4{margin:0;font-family:var(--serif);font-style:italic;font-weight:400;font-size:calc(46 * var(--s));line-height:1;color:var(--spark)}
+.gcard p{font-size:calc(19 * var(--s));line-height:1.3;margin:calc(8 * var(--s)) 0 calc(12 * var(--s));opacity:.88}
+.gsay{display:inline-block;background:var(--cloud);color:var(--pine);border:0;border-radius:calc(12 * var(--s));padding:.45em .8em;font:500 calc(18 * var(--s))/1.25 var(--sans);text-align:left;cursor:pointer;transition:transform var(--arrive) var(--pop),background var(--glide)}
+.gsay:hover{transform:scale(1.03);background:var(--spark)}
+.gsay::before{content:"Say  ";font-weight:700;opacity:.55}
+/* the demos: one subject (the robot head) or simple marks, on the library's curves */
+.demo{position:relative;aspect-ratio:1/1;border-radius:calc(14 * var(--s));overflow:hidden;background:#0B2724;--e:cubic-bezier(.12,.9,.28,1);--T:2.4s}
+.demo .bot{position:absolute;width:34%;aspect-ratio:1;top:50%;left:8%;translate:0 -50%}
+.demo .bar,.demo .dot,.demo .blk{position:absolute;background:var(--spark);border-radius:6px}
+.demo .tx{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:.04em;font:800 calc(40 * var(--s)) var(--sans);color:var(--cloud);letter-spacing:-.02em}
+.demo .ph{position:absolute;inset:0;background-size:cover;background-position:center}
+@keyframes lane{0%,10%{left:30%}70%,100%{left:86%}}
+@keyframes mv{0%,10%{left:6%}70%,100%{left:60%}}
+@keyframes popk{0%,12%{transform:scale(0)}50%,100%{transform:scale(1)}}
+@keyframes rise{0%,10%{transform:translateY(120%);opacity:0}45%,100%{transform:none;opacity:1}}
+@keyframes holdk{0%{left:8%}28%,62%{left:38%}90%,100%{left:68%}}
+@keyframes beatk{0%,100%{transform:scale(1)}8%{transform:scale(1.25)}30%{transform:scale(1)}}
+@keyframes ring{0%{transform:scale(.6);opacity:.9}40%,100%{transform:scale(1.8);opacity:0}}
+@keyframes squash{0%,100%{top:18%;transform:scaleY(1.15) scaleX(.9)}45%{top:62%;transform:none}50%{top:64%;transform:scaleY(.65) scaleX(1.3)}56%{top:58%;transform:scaleY(1.1) scaleX(.92)}}
+@keyframes whip{0%,30%{left:8%;filter:none}45%{filter:blur(6px)}55%,100%{left:68%;filter:none}}
+@keyframes par1{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes floatk{0%,100%{translate:0 -62%}50%{translate:0 -38%}}
+@keyframes shakek{0%,40%,100%{transform:none}42%{transform:translate(-6px,3px)}44%{transform:translate(6px,-3px)}46%{transform:translate(-4px,2px)}48%{transform:translate(3px,-1px)}50%{transform:none}}
+@keyframes track{0%,100%{tracking:0;letter-spacing:.6em;opacity:0}40%,85%{letter-spacing:.02em;opacity:1}}
+@keyframes slam{0%,15%{transform:scale(3);opacity:0}32%{transform:scale(.94);opacity:1}40%,100%{transform:scale(1)}}
+@keyframes typek{0%,10%{width:0}60%,100%{width:3.2ch}}
+@keyframes blink{50%{opacity:0}}
+@keyframes punch{0%,30%{transform:scale(1)}40%{transform:scale(1.32)}46%,85%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes ramp{0%{left:6%}18%{left:34%}62%{left:46%}80%,100%{left:72%}}
+@keyframes flash{0%,49%{opacity:0}50%{opacity:.9}62%,100%{opacity:0}}
+@keyframes freezek{0%{left:6%}50%,100%{left:42%}}
+@keyframes trackk{0%{left:10%;top:60%}50%{left:50%;top:38%}100%{left:76%;top:56%}}
+@keyframes pushk{0%,20%{transform:scale(1);opacity:1}75%{transform:scale(9);opacity:0}100%{transform:scale(1);opacity:0}}
+@keyframes wipek{0%,20%{transform:translateX(-120%) skewX(-14deg)}60%,100%{transform:translateX(120%) skewX(-14deg)}}
+@keyframes swapbg{0%,49%{background:#19546E}50%,100%{background:#2A4E45}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(var(--a) * -1))}}
+@keyframes tone{0%,20%{opacity:0;transform:translateY(10px)}30%,80%{opacity:1;transform:none}90%,100%{opacity:0}}
+.demo .bot,.demo .dot,.demo .bar,.demo .blk,.demo .tx span,.demo .w2,.demo .ph{animation-duration:var(--T);animation-iteration-count:infinite;animation-play-state:paused}
+.in .demo *{animation-play-state:running!important}
 
 /* use it: the agent's panel and three ways to ask */
 .panel{position:absolute;top:calc(100 * var(--s));width:calc(431 * var(--s));height:calc(880 * var(--s));background:#1F2121;overflow:hidden;
@@ -432,6 +489,64 @@ button{font:inherit;color:inherit}
       card.style.setProperty('--d', (200 + i * 50) + 'ms'); card.style.setProperty('--e', e); svg.querySelector('.cp').style.setProperty('--d', (400 + i * 50) + 'ms');
       g.append(card);
     });
+  })();
+
+
+  // glossary: tabs per group, the group's photo crossfades behind, cards rise in with a demo that plays the word
+  (() => {
+    const tabs = document.getElementById('gtabs'), grid = document.getElementById('ggrid'), bg = document.getElementById('gbg'); if (!tabs) return;
+    const BOT = '<svg class="bot" viewBox="0 0 100 100"><path d="M71 25 V7" stroke="#E2D6C0" stroke-width="3" stroke-linecap="round"/><circle cx="71" cy="7" r="3" fill="#FF8A6B"/><rect x="39" y="15" width="12" height="9" rx="3" fill="#FF8A6B"/><rect x="13" y="23" width="74" height="64" rx="10" fill="#F7F9F2"/><rect x="22" y="32" width="56" height="44" rx="7" fill="#04120F"/><g fill="none" stroke="#D8FF85" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M32 51 l5.5 -5.5 l5.5 5.5"/><path d="M57 51 l5.5 -5.5 l5.5 5.5"/><path d="M41 62 q9 7 18 0"/></g></svg>';
+    const A = (name, extra = '') => `animation-name:${name};${extra}`;
+    const photo = p => `background-image:url(${p})`;
+    const DEMO = {
+      move: t => BOT.replace('class="bot"', `class="bot" style="${A('mv', `animation-timing-function:cubic-bezier(${t.ease})`)}"`),
+      pop: () => BOT.replace('class="bot"', `class="bot" style="left:38%;${A('popk', 'animation-timing-function:var(--pop)')}"`),
+      stagger: () => [0, 1, 2, 3].map(i => `<i class="bar" style="left:${14 + i * 19}%;bottom:18%;width:12%;height:52%;${A('rise', `animation-timing-function:var(--land);animation-delay:${i * .12}s`)}"></i>`).join(''),
+      overlap: () => `<i class="blk" style="left:10%;top:22%;width:46%;height:22%;${A('rise', 'animation-timing-function:var(--land)')}"></i><i class="blk" style="left:30%;top:54%;width:56%;height:22%;background:#8DFDBA;${A('rise', 'animation-timing-function:var(--land);animation-delay:.28s')}"></i>`,
+      hold: () => BOT.replace('class="bot"', `class="bot" style="${A('holdk', 'animation-timing-function:var(--land)')}"`),
+      beat: () => `<i class="dot" style="left:43%;top:36%;width:14%;aspect-ratio:1;border-radius:50%;background:none;box-shadow:0 0 0 3px #D8FF85;${A('ring', 'animation-duration:1.2s')}"></i>` + BOT.replace('class="bot"', `class="bot" style="left:38%;${A('beatk', 'animation-duration:1.2s')}"`),
+      duration: () => [['Glide', .3], ['Arrive', .47], ['Sweep', .7], ['Stage', 1.1]].map(([n, d], i) => `<span style="position:absolute;left:4%;top:${10 + i * 22}%;font:600 calc(15 * var(--s)) var(--sans);color:#F7F9F2;opacity:.7">${n}</span><i class="dot" style="left:30%;top:${12 + i * 22}%;width:7%;aspect-ratio:1;border-radius:50%;--T:${d * 2.6}s;${A('lane', 'animation-timing-function:var(--land)')}"></i>`).join(''),
+      offset: () => `<i class="blk" style="left:14%;top:38%;width:16%;aspect-ratio:1;${A('rise', 'animation-timing-function:var(--land)')}"></i><i class="blk" style="left:36%;top:44%;width:46%;height:12%;background:#F7F9F2;${A('rise', 'animation-timing-function:var(--land);animation-delay:.18s')}"></i>`,
+      squash: () => `<i class="dot" style="left:42%;width:16%;aspect-ratio:1;border-radius:50%;transform-origin:50% 100%;${A('squash', 'animation-timing-function:ease-in-out;animation-duration:1.1s')}"></i><i style="position:absolute;left:20%;right:20%;bottom:18%;height:2px;background:rgba(247,249,242,.3)"></i>`,
+      follow: () => BOT.replace('class="bot"', `class="bot" style="${A('mv', 'animation-timing-function:var(--land)')}"`) + `<i class="dot" style="top:20%;width:6%;aspect-ratio:1;border-radius:50%;${A('mv', 'animation-timing-function:var(--pop);animation-delay:.12s')}"></i>`,
+      whip: () => BOT.replace('class="bot"', `class="bot" style="${A('whip', 'animation-timing-function:var(--whip)')}"`),
+      parallax: () => `<div style="position:absolute;inset:0;width:200%;${A('par1', 'animation-timing-function:linear;animation-duration:9s;animation-iteration-count:infinite;animation-play-state:paused')}" class="w2">${Array.from({length: 16}, (_, i) => `<i style="position:absolute;left:${i * 6.25}%;top:22%;width:2%;height:8%;background:rgba(247,249,242,.25);border-radius:4px"></i>`).join('')}</div><div class="w2" style="position:absolute;inset:0;width:200%;${A('par1', 'animation-timing-function:linear;animation-duration:3.5s;animation-iteration-count:infinite;animation-play-state:paused')}">${Array.from({length: 8}, (_, i) => `<i style="position:absolute;left:${i * 12.5}%;top:56%;width:6%;height:22%;background:#D8FF85;border-radius:6px"></i>`).join('')}</div>`,
+      float: () => BOT.replace('class="bot"', `class="bot" style="left:38%;${A('floatk', 'animation-timing-function:ease-in-out;animation-duration:2.8s')}"`),
+      shake: () => BOT.replace('class="bot"', `class="bot" style="left:38%;${A('shakek', 'animation-duration:1.4s')}"`),
+      chars: () => `<div class="tx">${[...'DNA'].map((c, i) => `<span style="display:inline-block;${A('rise', `animation-timing-function:var(--land);animation-delay:${i * .1}s`)}">${c}</span>`).join('')}</div>`,
+      mask: () => `<div class="tx"><span style="display:inline-block;overflow:hidden"><span style="display:inline-block;${A('rise', 'animation-timing-function:var(--land)')}">Motion DNA</span></span></div>`,
+      tracking: () => `<div class="tx"><span style="display:inline-block;${A('track', 'animation-timing-function:var(--settle)')}">DNA</span></div>`,
+      slam: () => `<div class="tx"><span style="display:inline-block;color:#D8FF85;${A('slam', 'animation-timing-function:var(--pop)')}">TIME.</span></div>`,
+      type: () => `<div class="tx"><span style="display:inline-block;overflow:hidden;white-space:nowrap;font-family:var(--sans);${A('typek', 'animation-timing-function:steps(3)')}">DNA</span><span style="display:inline-block;width:3px;height:1em;background:#D8FF85;margin-left:4px;${A('blink', 'animation-duration:.8s;animation-timing-function:steps(1)')}"></span></div>`,
+      kinetic: () => `<div class="tx" style="gap:.25em;font-size:calc(24 * var(--s))">${['Move', 'with', 'intent'].map((w, i) => `<span style="display:inline-block;${i === 2 ? 'color:#D8FF85;' : ''}${A('slam', `animation-timing-function:var(--pop);animation-delay:${i * .22}s`)}">${w}</span>`).join('')}</div>`,
+      punch: () => `<div class="ph" style="${photo('guide/dana-robot.jpg')};${A('punch', 'animation-timing-function:var(--pop)')}"></div>`,
+      ramp: () => BOT.replace('class="bot"', `class="bot" style="${A('ramp', 'animation-timing-function:linear')}"`),
+      freeze: () => `<div class="ph" style="${photo('guide/office.jpg')};opacity:.55"></div>` + BOT.replace('class="bot"', `class="bot" style="${A('freezek', 'animation-timing-function:linear')}"`) + `<i style="position:absolute;inset:0;background:#fff;${A('flash')};animation-iteration-count:infinite;animation-duration:var(--T);animation-play-state:paused" class="w2"></i>`,
+      track: () => `<div class="ph" style="${photo('packs/stills/collage-b.jpg')};opacity:.5"></div><i class="dot" style="width:14%;aspect-ratio:1;background:none;border:2px solid #D8FF85;border-radius:4px;translate:-50% -50%;${A('trackk', 'animation-timing-function:ease-in-out;animation-direction:alternate')}"></i>`,
+      matte: () => `<div class="tx" style="color:#D8FF85;font-size:calc(70 * var(--s))">YES!</div><svg viewBox="0 0 160 100" style="position:absolute;inset:0;width:100%;height:100%"><path d="M40 100 V70 Q40 52 56 50 Q46 44 46 34 A12 12 0 1 1 70 34 Q70 44 60 50 Q76 52 76 70 V100Z M86 100 V68 Q86 50 102 48 Q92 42 92 32 A12 12 0 1 1 116 32 Q116 42 106 48 Q122 50 122 68 V100Z" fill="#19546E"/></svg>`,
+      push: () => `<div class="tx"><span style="display:inline-block;${A('pushk', 'animation-timing-function:var(--surge)')}">DNA</span></div>`,
+      wipe: () => `<div class="ph" style="${A('swapbg', 'animation-timing-function:steps(1)')}"></div><i class="blk" style="inset:0 30%;border-radius:0;${A('wipek', 'animation-timing-function:var(--whip)')}"></i><i class="blk" style="inset:0 38%;border-radius:0;background:#19546E;${A('wipek', 'animation-timing-function:var(--whip);animation-delay:.08s')}"></i>`,
+      cutaction: () => `<div class="ph" style="${A('swapbg', 'animation-timing-function:steps(1)')}"></div>` + BOT.replace('class="bot"', `class="bot" style="${A('mv', 'animation-timing-function:var(--land)')}"`),
+      energy: () => [1, 2, 3, 4, 5].map(i => `<i class="dot" style="left:${8 + (i - 1) * 18}%;bottom:16%;width:10%;aspect-ratio:1;border-radius:50%;opacity:${.4 + i * .12};--a:${i * 12}px;${A('bounce', `animation-timing-function:ease-in-out;animation-duration:${1.6 / i}s`)}"></i>`).join(''),
+      tone: () => ['modern', 'elegant', 'playful'].map((w, i) => `<span style="position:absolute;left:10%;top:${16 + i * 26}%;padding:.3em .8em;border-radius:999px;background:${['#D8FF85', '#A1D4FF', '#FF9595'][i]};color:#0A211F;font:600 calc(17 * var(--s)) var(--sans);${A('tone', `animation-delay:${i * .25}s`)};animation-iteration-count:infinite;animation-duration:var(--T);animation-play-state:paused" class="w2">${w}</span>`).join(''),
+      room: () => [0, 1, 2].map(i => `<i class="blk" style="left:${10 + i * 30}%;top:40%;width:18%;height:20%;${A('rise', `animation-timing-function:var(--land);animation-delay:${i * .5}s`)}"></i>`).join(''),
+      restraint: () => [0, 1, 2, 3, 4].map(i => `<i class="dot" style="left:${10 + i * 8}%;top:78%;width:3%;aspect-ratio:1;border-radius:50%;background:rgba(247,249,242,.35)"></i>`).join('') + BOT.replace('class="bot"', `class="bot" style="width:30%;${A('mv', 'animation-timing-function:var(--land)')}"`),
+    };
+    const imgs = D.glossary.map(c => { const im = h('img', {src: c.photo, alt: ''}); bg.append(im); return im; });
+    let cur = -1;
+    const show = (i, anim) => {
+      if (i === cur) return; cur = i; const g = D.glossary[i];
+      [...tabs.children].forEach((b, k) => b.classList.toggle('on', k === i)); imgs.forEach((im, k) => im.classList.toggle('on', k === i));
+      const make = () => { grid.replaceChildren(...g.terms.map((tm, j) => {
+        const demo = h('div', {class: 'demo'}); demo.innerHTML = (DEMO[tm.demo] || DEMO.move)(tm);
+        const say = h('button', {class: 'gsay', type: 'button', title: 'Copy'}, tm.say); say.onclick = () => copy(tm.say);
+        const c = h('div', {class: 'gcard' + (anim ? ' out' : '')}, demo, h('div', {}, h('h4', {}, tm.term), h('p', {}, tm.means), say));
+        c.style.setProperty('--d', (j * 60) + 'ms'); return c; }));
+        if (anim) requestAnimationFrame(() => requestAnimationFrame(() => grid.querySelectorAll('.gcard').forEach(c => c.classList.remove('out')))); };
+      if (anim && grid.children.length && !reduce) { grid.querySelectorAll('.gcard').forEach((c, j) => { c.style.setProperty('--d', (j * 30) + 'ms'); c.classList.add('out'); }); setTimeout(make, 380); } else make();
+    };
+    tabs.replaceChildren(...D.glossary.map((g, i) => { const b = h('button', {class: 'gtab', type: 'button'}, h('i', {}, String(i + 1).padStart(2, '0')), h('b', {}, g.name)); b.onclick = () => show(i, true); return b; }));
+    show(0, false);
   })();
 
   // players: styles and techniques step by themselves; click to jump; the order to copy sits on the preview
