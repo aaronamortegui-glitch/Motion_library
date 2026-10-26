@@ -929,14 +929,16 @@ function kitProjects(x) {
 
 // The Motion DNA helix (research/loaders, "DNA helix"): two strands of dots turning around each other. One animator draws
 // every helix on screen with a shared phase: the header mark (tilted like the logo) and the Agent's "Working…" line
-// (level). It turns slowly while the panel waits and speeds up while the Agent works; a helix element that is redrawn
-// (the chat rebuilds its log) keeps turning without a jump, and one that leaves the page is dropped.
+// (level). The header mark is drawn once and stays still: a loop that never stops keeps a CEP panel repainting and After
+// Effects' interface busy. Loading labels turn (faster while the Agent works) and the loop stops by itself when none is
+// on screen; a helix element that is redrawn (the chat rebuilds its log) keeps turning without a jump.
 const HELIX = { items: new Set(), ph: 0, speed: 1 / 7, last: 0, running: false };
-function helix(size, tilt = 0) {
+function helix(size, tilt = 0, still = false) {
   const dpr = Math.max(1, window.devicePixelRatio || 1), cv = document.createElement("canvas");
   cv.className = "helix"; cv.width = cv.height = Math.round(size * dpr); cv.style.width = cv.style.height = size + "px"; cv.setAttribute("aria-hidden", "true");
-  HELIX.items.add({ cv, size, tilt, dpr });
-  if (!HELIX.running) { HELIX.running = true; requestAnimationFrame(helixFrame); }
+  if (still) { const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, size * dpr / 2, size * dpr / 2); helixDraw(g, size, 0.6, tilt); return cv; }
+  HELIX.items.add({ cv, size, tilt, dpr, born: performance.now() });
+  if (!HELIX.running) { HELIX.running = true; HELIX.last = 0; requestAnimationFrame(helixFrame); }
   return cv;
 }
 function helixDraw(g, S, ph, tilt) {
@@ -957,13 +959,18 @@ function helixFrame(now) {
   const busy = typeof AG !== "undefined" && !!AG.proc;
   HELIX.speed += ((busy ? 1 / 1.4 : 1 / 7) - HELIX.speed) * Math.min(1, dt * 3);   // ease between rest and work
   HELIX.ph += dt * HELIX.speed * Math.PI * 2;
+  let shown = 0;
   for (const it of HELIX.items) {
-    if (!it.cv.isConnected) { if (it.seen) HELIX.items.delete(it); continue; }
+    if (!it.cv.isConnected) { if (it.seen || now - it.born > 2000) HELIX.items.delete(it); continue; }   // gone, or never placed
+    it.seen = true;
+    if (it.cv.offsetParent === null) continue;   // on a tab that is not showing: not drawn
+    shown++;
     it.seen = true; const g = it.cv.getContext("2d");
     g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, it.cv.width, it.cv.height);
     g.setTransform(it.dpr, 0, 0, it.dpr, it.size * it.dpr / 2, it.size * it.dpr / 2); helixDraw(g, it.size, HELIX.ph, it.tilt);
   }
-  setTimeout(() => requestAnimationFrame(helixFrame), 33);   // ~30 fps is plenty for marks this size
+  if (!HELIX.items.size) { HELIX.running = false; return; }   // nothing loading: stop until the next loading label
+  setTimeout(() => requestAnimationFrame(helixFrame), shown ? 33 : 500);   // ~30 fps for marks this size; idle while hidden
 }
 // anything that loads shows the helix next to its words (the boot note here; the Agent's checks in agent.js)
 function loadingLabel(text, size = 14) { return h("span", { class: "loading" }, helix(size), text); }
@@ -971,7 +978,7 @@ function bootMsg(text, loading = true) { const b = $("#boot"); if (b) b.replaceC
 (function bootLoader() { const b = $("#boot"); if (b) bootMsg(b.textContent); })();
 (function headerMark() {   // the header mark, tilted like the Motion DNA logo
   const title = document.querySelector(".top .title"); if (!title) return;
-  const cv = helix(22, -0.72); cv.classList.add("mark"); title.parentNode.insertBefore(cv, title);
+  const cv = helix(22, -0.72, true); cv.classList.add("mark"); title.parentNode.insertBefore(cv, title);   // still
 })();
 
 // F5 / Ctrl+R reloads the panel (after an update)
