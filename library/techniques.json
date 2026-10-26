@@ -78,13 +78,6 @@
    "image": "techniques/cut-on-the-voice.png"
   },
   {
-   "name": "Face refinement",
-   "what": "For clips with real people: puts their real face back on generated video, keeping wardrobe and camera.",
-   "how": "media/faceswap/jobs.json + python tools/faceswap_refine.py (MiniMax H3, local GPU), then tools/faceswap_apply.py.",
-   "ask": "Check Dana's face in the new clips against her reference sheet and refine it before we edit.",
-   "image": "techniques/face-refinement.png"
-  },
-  {
    "name": "Stroke build",
    "what": "A filled logo or shape assembles piece by piece: it is split into its pieces (thick strands, thin lines, the arrow), each drawn by a stroke along its centre line (Trim Paths on token curves) under a matte of its own outline, while the edges dissolve into fine grain that settles clean as the last piece lands. Our end card closes every Motion DNA demo with it.",
    "how": "python tools/logo_to_shape.py logo_traced.svg assets/brand/<name> (clean curves), then python tools/logo_parts.py assets/brand/<name>.json (pieces + centre strokes); MCP add_element(kind=\"end_card\", logo=\"assets/brand/<name>.json\", text=…, sub=…, style=\"horizontal\" for the side lockup) or SSE.endCard(comp, {logo, text, tagline, layout, grain}). Manual: Figma \"Motion DNA — Logo & Library\".",
