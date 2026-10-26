@@ -144,5 +144,17 @@
     "wide": "the whole robot is under a third of the frame height",
     "medium": "head to base fills about 80 % of the height",
     "close": "the screen fills the frame; the eyes carry the scene"
+  },
+  "visemes": {
+    "note": "Mouth shapes on the screen for lipsync (tools/character_kit.py), the Rhubarb set: A-H, X at rest. The face stays on the screen.",
+    "X": null,
+    "A": ["######"],
+    "B": [".####.", ".####."],
+    "C": [".####.", "#....#", ".####."],
+    "D": [".####.", "#....#", "#....#", ".####."],
+    "E": ["..##..", ".#..#.", "..##.."],
+    "F": [".##.", ".##."],
+    "G": ["#....#", ".####."],
+    "H": [".####.", "#....#", ".####."]
   }
 }

@@ -1,0 +1,32 @@
+{
+ "slug": "the-agent",
+ "name": "The Agent",
+ "w": 64,
+ "h": 86,
+ "emotions": [
+  "neutral",
+  "blink",
+  "happy",
+  "excited",
+  "curious",
+  "surprised",
+  "love",
+  "sad",
+  "focused",
+  "thinking",
+  "proposing",
+  "confused",
+  "proud"
+ ],
+ "visemes": [
+  "X",
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "G",
+  "H"
+ ]
+}

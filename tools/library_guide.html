@@ -50,7 +50,7 @@ button{font:inherit;color:inherit}
 .chrome .row,.foot .row{width:calc(1920 * var(--s));margin-inline:auto;padding-inline:max(var(--gut), calc(50 * var(--s)));display:flex;gap:16px}
 .chrome .row{padding-top:calc(46 * var(--s));align-items:flex-start}
 .foot .row{padding-bottom:calc(30 * var(--s));align-items:center;font-size:max(.72rem, calc(21 * var(--s)))}
-.navlist{display:grid;grid-template-columns:repeat(9, calc(166 * var(--s)));list-style:none;padding:0;pointer-events:auto;transition:opacity var(--arrive) var(--settle),transform var(--arrive) var(--land)}
+.navlist{display:grid;grid-template-columns:repeat(4, calc(260 * var(--s)));list-style:none;padding:0;pointer-events:auto;transition:opacity var(--arrive) var(--settle),transform var(--arrive) var(--land)}
 .navlist a{color:inherit;text-decoration:none;font-size:max(.72rem, calc(21 * var(--s)));line-height:1;opacity:.72;position:relative;padding-bottom:6px;display:inline-block;transition:opacity var(--glide) var(--settle)}
 .navlist a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform var(--arrive) var(--land)}
 .navlist a:hover,.navlist a.on{opacity:1;font-weight:600}
@@ -129,6 +129,14 @@ button{font:inherit;color:inherit}
 #end .mark path{fill:var(--mint)}
 
 /* index */
+.ixgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:calc(40 * var(--s))}
+.ixh{display:flex;align-items:baseline;gap:calc(14 * var(--s));font-size:calc(40 * var(--s));font-weight:600;letter-spacing:-.01em;padding-bottom:calc(14 * var(--s));border-bottom:1.5px solid var(--rule)}
+.ixh .q{font-family:var(--serif);font-style:italic;font-size:calc(56 * var(--s));line-height:.8}
+.ixg ul{list-style:none;padding:0;margin:0}
+.ixg a{display:flex;justify-content:space-between;align-items:baseline;padding-block:calc(14 * var(--s));border-bottom:1px solid rgba(10,33,31,.18);color:inherit;text-decoration:none;font-size:calc(30 * var(--s));transition:padding var(--arrive) var(--land)}
+.ixg a:hover{padding-left:calc(12 * var(--s))}
+.ixg .ix-n{font-family:var(--serif);font-style:italic;font-size:calc(40 * var(--s))}
+.isub{margin-top:calc(28 * var(--s));font-size:calc(28 * var(--s));letter-spacing:.04em;opacity:.85}
 .ixlist{list-style:none;padding:0}
 .ixlist a{display:grid;grid-template-columns:calc(110 * var(--s)) calc(430 * var(--s)) minmax(0,1fr) calc(160 * var(--s));align-items:center;gap:calc(20 * var(--s));padding-block:calc(13 * var(--s));color:inherit;text-decoration:none}
 .ixlist .q{font-family:var(--serif);font-style:italic;font-size:calc(64 * var(--s));line-height:.8;transition:transform var(--arrive) var(--pop)}
@@ -158,7 +166,8 @@ button{font:inherit;color:inherit}
 .fchip:hover{opacity:1}
 .fchip.on{background:var(--accent);color:var(--cbg,var(--cloud));border-color:var(--accent);opacity:1}
 .g-cloud .fchip.on,.g-stone .fchip.on{--cbg:var(--cloud)} .g-pine .fchip.on{--cbg:var(--pine)}
-.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:calc(30 * var(--s)) calc(28 * var(--s))}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:calc(26 * var(--s)) calc(22 * var(--s))}
+.grid[data-grid=prompts]{grid-template-columns:repeat(4,minmax(0,1fr));gap:calc(28 * var(--s)) calc(26 * var(--s))}
 .card{display:block;text-align:left;background:none;border:0;padding:0;cursor:pointer;color:inherit;
   transition:opacity var(--arrive) var(--settle) var(--d,0ms),transform var(--sweep) var(--land) var(--d,0ms)}
 .card.out{opacity:0;transform:translateY(40px)}
@@ -288,6 +297,40 @@ button{font:inherit;color:inherit}
 .demo .bot,.demo .dot,.demo .bar,.demo .blk,.demo .tx span,.demo .w2,.demo .ph{animation-duration:var(--T);animation-iteration-count:infinite;animation-play-state:paused}
 .in .demo *{animation-play-state:running!important}
 
+/* characters: the lipsync clip, the faces, how it is made */
+.cvid{aspect-ratio:16/9;border-radius:calc(26 * var(--s));overflow:hidden;background:#000;position:relative;box-shadow:0 calc(28 * var(--s)) calc(70 * var(--s)) rgba(0,0,0,.32)}
+.cvid video{width:100%;height:100%;object-fit:cover;display:block}
+.cemo{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:calc(12 * var(--s))}
+.emo{background:rgba(247,249,242,.08);border-radius:calc(14 * var(--s));padding:calc(8 * var(--s)) calc(6 * var(--s));text-align:center;transition:opacity var(--arrive) var(--settle) var(--d,0ms),transform var(--sweep) var(--pop) var(--d,0ms);cursor:default}
+.armed:not(.in) .emo{opacity:0;transform:translateY(30px) scale(.9)}
+.emo img{width:70%;image-rendering:pixelated;display:block;margin:0 auto;animation:bob 1.8s ease-in-out infinite;animation-delay:var(--b,0s)}
+.emo span{display:block;font-size:calc(16 * var(--s));opacity:.85;margin-top:calc(4 * var(--s))}
+.emo:hover{background:rgba(216,255,133,.18)}
+@keyframes bob{50%{transform:translateY(-4%)}}
+.vis{grid-column:1/-1;display:flex;gap:calc(8 * var(--s));align-items:center;margin-top:calc(6 * var(--s));font-size:calc(17 * var(--s))}
+.vis b{font-weight:600;opacity:.8;margin-right:calc(6 * var(--s))}
+.vis i{font-style:normal;background:var(--spark);color:var(--pine);border-radius:999px;padding:.15em .6em;font-weight:700}
+.csteps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:calc(22 * var(--s))}
+.cstep{display:flex;gap:calc(16 * var(--s));align-items:center;background:rgba(247,249,242,.08);border-radius:calc(16 * var(--s));padding:calc(12 * var(--s))}
+.cstep img{width:calc(120 * var(--s));aspect-ratio:16/10;object-fit:cover;border-radius:calc(10 * var(--s))}
+.cstep .fn{font-family:var(--serif);font-style:italic;font-size:calc(40 * var(--s));color:var(--spark);line-height:1}
+.cstep b{display:block;font-size:calc(22 * var(--s))}
+.cstep span{font-size:calc(16 * var(--s));opacity:.8}
+/* sound: tiles that play */
+.sgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:calc(20 * var(--s))}
+.stile{position:relative;text-align:left;border:0;cursor:pointer;color:var(--cloud);background:rgba(247,249,242,.08);border-radius:calc(18 * var(--s));padding:calc(18 * var(--s));height:calc(176 * var(--s));overflow:hidden;
+  transition:opacity var(--arrive) var(--settle) var(--d,0ms),transform var(--sweep) var(--land) var(--d,0ms),background var(--glide)}
+.armed:not(.in) .stile{opacity:0;transform:translateY(30px)}
+.stile:hover{background:rgba(216,255,133,.16)}
+.stile b{display:block;font-family:var(--serif);font-style:italic;font-weight:400;font-size:calc(46 * var(--s));line-height:1;color:var(--spark)}
+.stile span{display:block;font-size:calc(17 * var(--s));opacity:.85;margin-top:calc(6 * var(--s))}
+.stile .wav{position:absolute;left:calc(18 * var(--s));right:calc(18 * var(--s));bottom:calc(16 * var(--s));height:calc(40 * var(--s));display:flex;align-items:center;gap:3px}
+.stile .wav i{flex:1;background:rgba(247,249,242,.35);border-radius:2px;height:20%;transition:height 120ms}
+.stile.play{background:var(--spark);color:var(--pine)} .stile.play b{color:var(--pine)}
+.stile.play .wav i{background:var(--pine);animation:wv .5s ease-in-out infinite alternate;animation-delay:var(--w)}
+@keyframes wv{from{height:15%}to{height:100%}}
+.stile.bed b{color:var(--mint)}
+
 /* use it: the agent's panel and three ways to ask */
 .panel{position:absolute;top:calc(100 * var(--s));width:calc(431 * var(--s));height:calc(880 * var(--s));background:#1F2121;overflow:hidden;
   box-shadow:0 calc(28 * var(--s)) calc(70 * var(--s)) rgba(10,33,31,.32),0 calc(6 * var(--s)) calc(18 * var(--s)) rgba(10,33,31,.18)}
@@ -347,6 +390,9 @@ button{font:inherit;color:inherit}
   .filters{justify-content:flex-start} .fchip{font-size:.8rem}
   .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 12px} .card b{font-size:1rem} .card .what{font-size:.75rem} .card .cap{margin-top:8px} .en{font-size:.7rem}
   .pager{justify-content:flex-start;font-size:1rem} .pg{width:44px;height:44px;font-size:1.3rem}
+  .ixgrid{grid-template-columns:1fr;gap:20px} .ixh{font-size:1.4rem} .ixh .q{font-size:1.4rem} .ixg a{font-size:1rem} .ixg .ix-n{font-size:1.1rem}
+  .cemo{grid-template-columns:repeat(4,minmax(0,1fr))} .csteps{grid-template-columns:1fr} .sgrid{grid-template-columns:repeat(2,minmax(0,1fr))} .stile{height:auto;min-height:120px} .stile b{font-size:1.6rem} .stile span{font-size:.8rem}
+  .grid[data-grid=prompts],.grid[data-grid=apps]{grid-template-columns:repeat(2,minmax(0,1fr))}
   .curvegrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px} .cv b{font-size:1.6rem} .cv span{font-size:.8rem}
   .pitem{grid-template-columns:40px minmax(0,1fr)} .pitem .fn{font-size:1.6rem} .pitem h3{font-size:1.05rem} .pitem p{font-size:.9rem}
   .pmedia{border-radius:16px} .pask{font-size:.85rem;position:relative;left:auto;right:auto;bottom:auto;border-radius:0} .copy{font-size:.8rem}
@@ -440,13 +486,13 @@ button{font:inherit;color:inherit}
   addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 
   // browse: filter chips, a page of cards that rise in on the slide's curve, a pager
-  const BROWSE = {moves: {items: D.moves, by: 'energy'}, text: {items: D.text, by: 'group'}, kit: {items: D.kit, by: 'group'}, prompts: {items: D.prompts, by: 'group', quote: true}};
+  const BROWSE = {moves: {items: D.moves, by: 'energy'}, text: {items: D.text, by: 'group'}, kit: {items: D.kit, by: 'group'}, fx: {items: D.fx, by: 'group'}, code: {items: D.code, by: 'group'}, apps: {items: D.apps, by: 'group'}, prompts: {items: D.prompts, by: 'group', quote: true, four: true}};
   const ORDER = ['calm', 'soft', 'medium', 'dynamic', 'explosive'];
   Object.entries(BROWSE).forEach(([key, B]) => {
     const grid = document.querySelector(`[data-grid="${key}"]`), pager = document.querySelector(`[data-pager="${key}"]`), fbox = document.querySelector(`[data-for="${key}"]`);
     if (!grid) return;
     let vals = [...new Set(B.items.map(i => i[B.by]))]; if (B.by === 'energy') vals.sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
-    const st = {f: 'All', page: 0}; const per = () => wide() ? 8 : 6;
+    const st = {f: 'All', page: 0}; const per = () => wide() ? (B.four ? 8 : 10) : 6;
     const list = () => st.f === 'All' ? B.items : B.items.filter(i => i[B.by] === st.f);
     const chips = ['All', ...vals].map(v => { const b = h('button', {class: 'fchip' + (v === 'All' ? ' on' : ''), type: 'button'}, v === 'All' ? `All ${B.items.length}` : v);
       b.onclick = () => { st.f = v; st.page = 0; chips.forEach(c => c.classList.toggle('on', c === b)); draw(true); }; return b; });
@@ -472,25 +518,60 @@ button{font:inherit;color:inherit}
     draw(false); B.redraw = () => draw(true);
   });
 
-  // curves: each drawn in its square, handles shown, a dot riding it and a spacing dot
+  // curves: each drawn in its square, a dot riding it and a spacing dot; springs and named eases from their samples
   (() => {
-    const g = document.getElementById('curvegrid'); if (!g) return;
-    D.curves.forEach((c, i) => {
-      const [x1, y1, x2, y2] = c.b, lo = Math.min(0, y1, y2), hi = Math.max(1, y1, y2), Y = v => 100 - (v - lo) / (hi - lo) * 100;
-      const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 100 100'); svg.setAttribute('preserveAspectRatio', 'none');
-      svg.innerHTML = `<path class="ax" d="M0 ${Y(0)} H100 M0 ${Y(1)} H100"/><line class="h" x1="0" y1="${Y(0)}" x2="${x1 * 100}" y2="${Y(y1)}"/><line class="h" x1="100" y1="${Y(1)}" x2="${x2 * 100}" y2="${Y(y2)}"/>`
-        + `<circle class="hd" cx="${x1 * 100}" cy="${Y(y1)}" r="2.6"/><circle class="hd" cx="${x2 * 100}" cy="${Y(y2)}" r="2.6"/>`
-        + `<path class="cp" pathLength="1" stroke-dasharray="1 1" d="M0 ${Y(0)} C${x1 * 100} ${Y(y1)} ${x2 * 100} ${Y(y2)} 100 ${Y(1)}"/>`;
-      const e = `cubic-bezier(${c.b.join(',')})`;
-      // the rider's y spans the graph's value range: an overshooting curve is drawn inside, so the dot stays on it
+    const g = document.getElementById('curvegrid'), fb = document.getElementById('cfilters'); if (!g) return;
+    const card = (c, i) => {
+      let pts, lo, hi, e, extra = '';
+      if (c.b) { const [x1, y1, x2, y2] = c.b; lo = Math.min(0, y1, y2); hi = Math.max(1, y1, y2); e = `cubic-bezier(${c.b.join(',')})`;
+        const Y = v => 100 - (v - lo) / (hi - lo) * 100; pts = `M0 ${Y(0)} C${x1 * 100} ${Y(y1)} ${x2 * 100} ${Y(y2)} 100 ${Y(1)}`;
+        extra = `<line class="h" x1="0" y1="${Y(0)}" x2="${x1 * 100}" y2="${Y(y1)}"/><line class="h" x1="100" y1="${Y(1)}" x2="${x2 * 100}" y2="${Y(y2)}"/><circle class="hd" cx="${x1 * 100}" cy="${Y(y1)}" r="2.6"/><circle class="hd" cx="${x2 * 100}" cy="${Y(y2)}" r="2.6"/>`;
+        c._Y = Y; }
+      else { const s = c.s; lo = Math.min(0, ...s); hi = Math.max(1, ...s); const Y = v => 100 - (v - lo) / (hi - lo) * 100;
+        pts = 'M' + s.map((v, k) => `${(k / (s.length - 1) * 100).toFixed(2)} ${Y(v).toFixed(2)}`).join(' L');
+        const step = Math.max(1, Math.floor(s.length / 40)); e = 'linear(' + s.filter((_, k) => k % step === 0 || k === s.length - 1).map(v => v.toFixed(3)).join(',') + ')'; c._Y = Y; }
+      const Y = c._Y, svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 100 100'); svg.setAttribute('preserveAspectRatio', 'none');
+      svg.innerHTML = `<path class="ax" d="M0 ${Y(0)} H100 M0 ${Y(1)} H100"/>${extra}<path class="cp" pathLength="1" stroke-dasharray="1 1" d="${pts}"/>`;
       const rx = h('div', {class: 'rx'}, h('i', {}, h('b')));
       rx.style.cssText = `bottom:${12 + 76 * (0 - lo) / (hi - lo)}%;height:${76 / (hi - lo)}%`;
-      const card = h('div', {class: 'cv'}, h('div', {class: 'box'}, svg, rx), h('div', {class: 'track'}, h('i')), h('b', {}, c.name), h('span', {}, c.use));
-      card.style.setProperty('--d', (200 + i * 50) + 'ms'); card.style.setProperty('--e', e); svg.querySelector('.cp').style.setProperty('--d', (400 + i * 50) + 'ms');
-      g.append(card);
-    });
+      const el = h('div', {class: 'cv'}, h('div', {class: 'box'}, svg, rx), h('div', {class: 'track'}, h('i')), h('b', {}, c.name), h('span', {}, c.use));
+      el.style.setProperty('--d', (100 + i * 40) + 'ms'); el.style.setProperty('--e', e); svg.querySelector('.cp').style.setProperty('--d', (300 + i * 40) + 'ms');
+      return el;
+    };
+    const groups = [...new Set(D.curves.map(c => c.group))];
+    const show = (grp) => { g.replaceChildren(...D.curves.filter(c => c.group === grp).map(card)); [...fb.children].forEach(b => b.classList.toggle('on', b.dataset.g === grp)); };
+    fb.replaceChildren(...groups.map(grp => { const b = h('button', {class: 'fchip', type: 'button', 'data-g': grp}, `${grp} ${D.curves.filter(c => c.group === grp).length}`); b.onclick = () => show(grp); return b; }));
+    show(groups[0]);
   })();
 
+  // characters: the lipsync clip (sound on a click), the faces bobbing, how it is made
+  (() => {
+    const box = document.getElementById('cvid'); if (!box) return; const C = D.character;
+    const v = h('video', {src: C.video, poster: C.poster, muted: '', loop: '', playsinline: '', preload: 'none'}); v.muted = true; box.append(v); watch(v); v.dataset.src = C.video;
+    const b = h('button', {class: 'snd', type: 'button'}, '🔊 Sound'); b.onclick = () => { v.muted = !v.muted; b.textContent = v.muted ? '🔊 Sound' : '🔇 Mute'; b.classList.toggle('on', !v.muted); if (!v.muted) { v.currentTime = 0; v.play().catch(() => {}); } }; box.append(b);
+    const em = document.getElementById('cemo');
+    em.replaceChildren(...C.emotions.filter(e => e.src).map((e, i) => { const d = h('div', {class: 'emo', title: e.use}, h('img', {src: e.src, alt: e.name}), h('span', {}, e.name)); d.style.setProperty('--d', (200 + i * 50) + 'ms'); d.style.setProperty('--b', (i * .13) + 's'); return d; }),
+      h('div', {class: 'vis'}, h('b', {}, 'Mouth shapes'), ...C.visemes.map(x => h('i', {}, x))));
+    const st = document.getElementById('csteps');
+    const step = (n, img, t, s, ask) => { const d = h('div', {class: 'cstep'}, img ? h('img', {src: img, alt: ''}) : h('span', {class: 'fn'}, n), h('div', {}, h('b', {}, `${n} · ${t}`), h('span', {}, s)));
+      d.style.cursor = 'pointer'; d.title = 'Copy: ' + ask; d.onclick = () => copy(ask); return d; };
+    st.replaceChildren(step('1', C.figma, 'Drawn in Figma', 'Every face and mouth as editable pixel art.', 'Draw The Agent as a pixel kit in Figma.'),
+      step('2', 'characters/the-agent/kit/body_happy.png', 'Built in After Effects', 'One crisp layer per face and mouth: add_character.', 'Add The Agent to this comp, happy.'),
+      step('3', C.poster, 'Lipsynced to a voice', 'Its mouth keyed from the line: lipsync.', 'Make The Agent say this voice line, with lipsync.'));
+    st.querySelector('.cstep:nth-child(2) img').style.imageRendering = 'pixelated'; st.querySelector('.cstep:nth-child(2) img').style.objectFit = 'contain';
+  })();
+
+  // sound: each tile plays its sound and its waveform dances while it plays
+  (() => {
+    const g = document.getElementById('sgrid'); if (!g) return; let cur = null;
+    const tile = (s, i, bed) => { const t = h('button', {class: 'stile' + (bed ? ' bed' : ''), type: 'button', 'aria-label': 'Play ' + s.name}, h('b', {}, s.name), h('span', {}, s.use),
+        h('span', {class: 'wav'}, ...Array.from({length: 18}, (_, k) => { const x = h('i'); x.style.setProperty('--w', (k * 37 % 11) * .04 + 's'); return x; })));
+      t.style.setProperty('--d', (150 + i * 40) + 'ms');
+      t.onclick = () => { if (cur) { cur[0].pause(); cur[1].classList.remove('play'); } const a = new Audio(s.src); a.play().catch(() => {}); t.classList.add('play'); cur = [a, t];
+        a.onended = () => t.classList.remove('play'); };
+      return t; };
+    g.replaceChildren(...D.sound.map((s, i) => tile(s, i, false)), ...D.beds.map((s, i) => tile(s, D.sound.length + i, true)));
+  })();
 
   // glossary: tabs per group, the group's photo crossfades behind, cards rise in with a demo that plays the word
   (() => {

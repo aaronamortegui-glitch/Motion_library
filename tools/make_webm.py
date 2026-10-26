@@ -30,7 +30,7 @@ def main():
         n += 1; size += out.stat().st_size
         if src.parent.name.startswith("kit-"):   # a poster mid-animation (a transition shows both scenes), for the library guide
             poster = ROOT / "library/posters" / src.parent.name / (src.stem + ".jpg"); poster.parent.mkdir(parents=True, exist_ok=True)
-            subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", "1.25" if src.parent.name == "kit-transition" else "1.3", "-i", str(src),
+            subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", "1.42" if src.parent.name == "kit-transition" else "1.3", "-i", str(src),
                             "-frames:v", "1", "-vf", "scale=480:-2", "-q:v", "4", str(poster)], check=True)
     print(f"webm: {n} made, {size // 1024} KB")
 

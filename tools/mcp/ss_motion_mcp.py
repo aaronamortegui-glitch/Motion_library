@@ -1029,6 +1029,20 @@ def t_record_screen(action="status", scene=None, comp=None, time_s=None):
     return out
 
 
+def t_add_character(slug="the-agent", emotion="neutral", audio=None, text="", scale=6):
+    """A pixel character built in After Effects from its file (tools/character_kit.py): one body layer per emotion,
+    mouth layers keyed to a voice line when audio is given (lipsync)."""
+    sys.path.insert(0, str(ROOT / "tools")); import character_kit
+    return character_kit.ae(slug, emotion, audio, text, scale)
+
+
+def t_lipsync(audio, text="", slug="the-agent"):
+    """Mouth shapes over time for a voice line (Rhubarb set A-H, X at rest) from its word timings; returns the keys."""
+    sys.path.insert(0, str(ROOT / "tools")); import character_kit
+    v = character_kit.lipsync(pathlib.Path(audio).resolve(), text)
+    return f"{len(v)} mouth keys: " + " ".join(f"{k['t']:.2f}:{k['v']}" for k in v[:40]) + (" …" if len(v) > 40 else "")
+
+
 def t_add_sound(cues=None, comp=None, auto=True, bed=None, gain_db=0, density="few", replace=True):
     """Sound effects made in code (tools/sound_kit.py, Tone.js) under a comp, as one audio layer 'Motion DNA sound'."""
     sys.path.insert(0, str(ROOT / "tools")); import sound_kit
@@ -1175,6 +1189,10 @@ TOOLS_DEF = [
       "opts": {"type": "object"}, "colors": {"type": "array", "items": {"type": "string"}}, "brand": {"type": "string"}}),
     ("record_screen", t_record_screen, "Record the screen with OBS Studio, only when the user asks for a recording (OBS must be open with Tools > WebSocket Server Settings enabled): action status | start | stop | scenes; scene switches the OBS scene first. stop saves the recording and imports it into the comp (default: active) at time_s, for UI demos and tutorials.",
      {"action": {"type": "string", "enum": ["status", "start", "stop", "scenes"]}, "scene": {"type": "string"}, "comp": {"type": "string"}, "time_s": {"type": "number"}}),
+    ("add_character", t_add_character, "A pixel character, ready to animate, built in After Effects from its file (library/characters/<slug>/character.json; default the-agent, The Agent robot): one crisp layer per emotion (neutral, happy, excited, curious, surprised, love, sad, focused, thinking, proposing, confused, proud, blink; the one asked for is on) and one per mouth shape. Give audio (a voice line, any format) and it is lipsynced: the mouth layers are keyed from the line's word timings (Rhubarb shapes A-H, X at rest) and the voice is added. The same character is drawn as editable pixel art in Figma (motion-adn, 11 · Characters; python tools/character_kit.py figma <slug>). Builds comp CHAR__<slug>; put it in a scene with a precomp layer.",
+     {"slug": {"type": "string"}, "emotion": {"type": "string"}, "audio": {"type": "string"}, "text": {"type": "string"}, "scale": {"type": "number"}}),
+    ("lipsync", t_lipsync, "Mouth shapes over time for a voice line, from its word timings (faster-whisper), Rhubarb set A-H and X at rest, held 2 frames or more. add_character with audio uses it; call it alone to time another rig.",
+     {"audio": {"type": "string"}, "text": {"type": "string"}, "slug": {"type": "string"}}, ["audio"]),
     ("add_sound", t_add_sound, "Sound effects for a comp, made in code with Motion DNA's sound kit (Tone.js; whoosh, swish, pop, tick, click, hit, riser, sub, chime, shimmer, type, glitch), so they are ours to ship. Default (auto): it reads the comp and gives each visible action its sound, few and exact: a cut or a large fast move whooshes, a medium move swishes, a scale-up pops, a text arriving ticks, and a layer or comp marker 'sfx: <name>' is obeyed; a cue lands one frame after its picture and a repeated sound rotates takes. Or pass cues [{t, sfx, dur, gain, pitch, pan}] (t = the moment it lands). bed {bpm, mood: pulse|tick|ambient} is only a temp bed: real music goes in with add_asset. Writes one WAV next to the project (sound/) and adds it as the layer 'Motion DNA sound', replacing the last one. Run it when the animation is final and again after any retiming; chime and shimmer read as synthetic, keep them for a single payoff.",
      {"cues": {"type": "array", "items": {"type": "object"}}, "comp": {"type": "string"}, "auto": {"type": "boolean"}, "bed": {"type": "object"},
       "gain_db": {"type": "number"}, "density": {"type": "string", "enum": ["few", "all"]}, "replace": {"type": "boolean"}}),

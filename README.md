@@ -27,6 +27,13 @@ animate keeps a profile that **learns from each review**, and everything it make
 
 ## What's new
 
+- **The library guide shows everything:** `library/guide.html`, in the deck's language and gallery first, in four groups:
+  *Library* (moves, text, curves with the springs, styles, kit), *Create* (effects and 3D from the open-source engines,
+  characters, whole videos made in code, the sound kit you can play), *Workflows* (techniques, apps and the panel) and
+  *Ask* (31 prompts, a 36-word glossary with live demos). Every piece plays an example from our own material.
+- **Characters that talk:** a pixel character from its file, drawn in Figma as editable pixel art (motion-adn ›
+  11 · Characters), built in After Effects with crisp pixels (`add_character`) and lipsynced to any voice line
+  (`lipsync`: word timings to mouth shapes A-H). `python tools/character_kit.py`; no GPU, nothing to install.
 - **Sound by default:** every finished animation gets its sound effects, made in code with
   [Tone.js](https://github.com/Tonejs/Tone.js), so they are ours to ship. `add_sound` reads the comp and gives each
   visible action its sound, few and exact: a whoosh on cuts and big moves, a swish, a pop, a soft tick for text, or what a

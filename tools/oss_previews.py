@@ -9,7 +9,16 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent; sys.path.insert(0, str(ROOT / "tools"))
 PINE, SEA, SPARK, CLOUD, MINT, CORAL, INK = "#0A211F", "#174A46", "#D8FF85", "#F7F9F2", "#9FD8C2", "#FF8A6B", "#04120F"
-W, H, N = 480, 270, 30
+W, H, N = 960, 540, 30
+STILLS = ROOT / "library/packs/stills"
+
+
+def still(name, dim=.45, blur=0):
+    """A tutorial still as the ground of an effect (the effects are After Effects assets: they sit over footage)."""
+    from PIL import ImageFilter
+    im = Image.open(STILLS / name).convert("RGB").resize((W, H), Image.LANCZOS)
+    if blur: im = im.filter(ImageFilter.GaussianBlur(blur))
+    return Image.blend(im, Image.new("RGB", (W, H), PINE), dim)
 FONT = str(ROOT / "assets/fonts/InterTight[wght].ttf")
 
 
@@ -23,7 +32,13 @@ def font(px):
 
 def save(kind, name, frames, key=None, colors=64):
     out = ROOT / "library/gifs" / f"kit-{kind}"; out.mkdir(parents=True, exist_ok=True); s = slug(name)
-    (frames[key if key is not None else len(frames) * 2 // 3]).save(out / f"{s}_md.png")
+    (frames[key if key is not None else len(frames) * 2 // 3]).resize((480, 270), Image.LANCZOS).save(out / f"{s}_md.png")
+    poster = ROOT / "library/posters" / f"kit-{kind}"; poster.mkdir(parents=True, exist_ok=True)
+    (frames[key if key is not None else len(frames) * 2 // 3]).resize((480, 270), Image.LANCZOS).save(poster / f"{s}.jpg", quality=84)
+    webm = ROOT / "library/webm" / f"kit-{kind}"; webm.mkdir(parents=True, exist_ok=True)   # the guide plays this one
+    raw = b"".join(f.convert("RGB").resize((W, H)).tobytes() for f in frames)
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", "12.5", "-i", "-",
+                    "-vf", "scale=640:-2", "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "34", "-pix_fmt", "yuv420p", str(webm / f"{s}.webm")], input=raw, check=True)
     small = [f.resize((240, 135), Image.LANCZOS).convert("P", palette=Image.ADAPTIVE, colors=colors) for f in frames]
     small[0].save(out / f"{s}.gif", save_all=True, append_images=small[1:], duration=80, loop=0, optimize=True, disposal=1)
     print(f"kit-{kind}/{s}.gif ({len(frames)} frames)")
@@ -35,6 +50,9 @@ def card(text, bg, fg, size=(W, H), px=46):
 
 
 # ---------------------------------------------------------------- fx: the web FX pages, over pine
+GROUND = {"confetti": "playful.jpg", "fireworks": "elegant.jpg", "sparks": "dynamic.jpg", "helix3d": None, "drop3d": None, "flowfield": None, "gradient": None}
+
+
 def fx_frames(page, opts, dur):
     import web_capture
     mov = web_capture.capture(page, opts, 960, 540, 12.5, dur, page != "gradient", warmup={"fireworks": 0.8, "flowfield": 2.0}.get(page, 0))
@@ -42,12 +60,13 @@ def fx_frames(page, opts, dur):
         subprocess.run(["ffmpeg", "-v", "error", "-i", mov, "-vf", f"scale={W}:{H}", os.path.join(tmp, "f%03d.png")], check=True)
         out = []
         for f in sorted(os.listdir(tmp)):
-            im = Image.open(os.path.join(tmp, f)).convert("RGBA"); bg = Image.new("RGBA", (W, H), PINE); bg.alpha_composite(im); out.append(bg.convert("RGB"))
+            g = GROUND.get(page); bg = (still(g, .5) if g else Image.new("RGB", (W, H), PINE)).convert("RGBA")
+            im = Image.open(os.path.join(tmp, f)).convert("RGBA"); bg.alpha_composite(im); out.append(bg.convert("RGB"))
     return out
 
 
 def scribble_frames():   # the annotation around a word, as it is used
-    base = card("Motion DNA", PINE, CLOUD, (960, 540), 92)
+    base = still("modern.jpg", .55, 3); ImageDraw.Draw(base).text((480, 270), "Motion DNA", font=font(92), fill=CLOUD, anchor="mm")
     import web_capture
     x0, y0, x1, y1 = ImageDraw.Draw(base).textbbox((480, 270), "Motion DNA", font=font(92), anchor="mm")   # around the word, measured
     mov = web_capture.capture("scribble", {"box": [x0, y0, x1 - x0, y1 - y0], "width": 10}, 960, 540, 12.5, 2.4)
@@ -55,7 +74,7 @@ def scribble_frames():   # the annotation around a word, as it is used
         subprocess.run(["ffmpeg", "-v", "error", "-i", mov, os.path.join(tmp, "f%03d.png")], check=True)
         out = []
         for f in sorted(os.listdir(tmp)):
-            im = base.convert("RGBA"); im.alpha_composite(Image.open(os.path.join(tmp, f)).convert("RGBA")); out.append(im.convert("RGB").resize((W, H), Image.LANCZOS))
+            im = base.convert("RGBA"); im.alpha_composite(Image.open(os.path.join(tmp, f)).convert("RGBA").resize((W, H))); out.append(im.convert("RGB"))
     return out
 
 
@@ -89,20 +108,22 @@ def do_spring(pick):
 # ---------------------------------------------------------------- physics: six cards, baked by matter.js
 def do_physics(pick):
     import physics_bake
-    layers = [{"id": str(i), "cx": 560 + i * 160, "cy": 430 + (i % 2) * 60, "w": 140 if i % 3 else 200, "h": 110, "circle": i == 4} for i in range(6)]
-    cols = [SPARK, MINT, CORAL, CLOUD, SPARK, MINT]
+    layers = [{"id": str(i), "cx": 420 + i * 220, "cy": 380 + (i % 2) * 90, "w": 300 if i % 3 else 380, "h": 210, "circle": False} for i in range(6)]
+    tiles = ["calm-modern.jpg", "dynamic.jpg", "playful.jpg", "editorial.jpg", "storybook.jpg", "tech.jpg"]
     for name, mode in (("fall", "fall"), ("drop in", "drop_in"), ("burst", "burst")):
         if not pick(name): continue
         paths = physics_bake.simulate(physics_bake.spec_for(layers, {"w": 1920, "h": 1080, "fps": 12.5}, mode, 2.4))
-        frames = []
+        frames = []; ground = still("modern.jpg", .62, 6); k = W / 1920
+        def tile(t, l):
+            w, h = int(l["w"] * k), int(l["h"] * k); im = Image.open(STILLS / t).convert("RGBA").resize((w, h), Image.LANCZOS)
+            m = Image.new("L", (w, h), 0); ImageDraw.Draw(m).rounded_rectangle([0, 0, w - 1, h - 1], 10 if not l["circle"] else w // 2, fill=255); im.putalpha(m); return im
+        T = [tile(t, l) for t, l in zip(tiles, layers)]
         for f in range(N):
-            im = Image.new("RGB", (W, H), PINE); d = ImageDraw.Draw(im); k = W / 1920
-            for l, col in zip(layers, cols):
+            im = ground.convert("RGBA")
+            for l, tl in zip(layers, T):
                 x, y, a = paths[l["id"]][min(f, len(paths[l["id"]]) - 1)]
-                if l["circle"]: r = l["w"] / 2 * k; d.ellipse([x * k - r, y * k - r, x * k + r, y * k + r], fill=col); continue
-                hw, hh = l["w"] / 2 * k, l["h"] / 2 * k; ca, sa = math.cos(a), math.sin(a)
-                d.polygon([(x * k + dx * ca - dy * sa, y * k + dx * sa + dy * ca) for dx, dy in ((-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh))], fill=col)
-            frames.append(im)
+                r = tl.rotate(-math.degrees(a), expand=True, resample=Image.BICUBIC); im.alpha_composite(r, (int(x * k - r.width / 2), int(y * k - r.height / 2)))
+            frames.append(im.convert("RGB"))
         save("physics", name, frames, {"fall": 24, "drop in": 26, "burst": 9}[name])
 
 
@@ -112,14 +133,16 @@ def do_gl(pick):
     from playwright.sync_api import sync_playwright
     names = [i["name"] for i in json.loads((ROOT / "library/kit.json").read_text(encoding="utf-8"))["items"] if i["kind"] == "gltransition" and pick(i["name"])]
     if not names: return
-    A, B = card("Shot A", SEA, CLOUD), card("Shot B", SPARK, PINE); ease = gl_matte._ease("Cruise")
+    def scene(st, word, col):
+        im = still(st, .35); ImageDraw.Draw(im).text((W / 2, H / 2), word, font=font(140), fill=col, anchor="mm"); return im
+    A, B = scene("tech.jpg", "MOTION", CLOUD), scene("elegant.jpg", "DNA", SPARK); ease = gl_matte._ease("Cruise")
     prog = [0] * 5 + [ease(i / 19) for i in range(20)] + [1] * 5
     with sync_playwright() as p:
         b, pg = gl_matte._page(p)
         for n in names:
             urls = pg.evaluate("a => MATTE(a[0], a[1], a[2], a[3])", [n, W, H, prog])
             frames = [Image.composite(B, A, Image.open(io.BytesIO(base64.b64decode(u.split(",", 1)[1]))).convert("L")) for u in urls]
-            save("gltransition", n, frames, 14)
+            save("gltransition", n, frames, 11)   # the poster mid-transition: both rooms show
         b.close()
 
 

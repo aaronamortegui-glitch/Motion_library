@@ -461,6 +461,11 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **aerender's 15 Mbps H.264 is heavy for photo scenes** (1.2–6.9 MB for a 3.5 s style preview). Re-encode with x264
   CRF 30 (50–200 KB); for the web, VP9 WebM at 640 px (`tools/make_webm.py`) is a quarter of the GIFs' weight and keeps
   the photo's colours.
+- **A rebuilt comp vanished from the scenes that used it.** Cause: a builder removed the comp by name and made a new
+  one, and removing a comp removes its layers in every comp that nests it. Fix: rebuild in place (clear its layers,
+  keep the item), as `tools/character_kit.py` does for `CHAR__<slug>`.
+- **A pixel character scaled in After Effects goes soft.** Fix: set the layer's quality to Draft
+  (`LayerQuality.DRAFT`), which samples nearest-neighbour, and collapse transformations on the precomp layer.
 - **Figma (html_to_figma) drops CSS `clip-path` and elliptic `border-radius`:** slanted or round shapes come in as
   rectangles. Draw them as SVG paths (viewBox equal to the size). Figma's fonts also run a little wider: leave ~16 px
   of slack in pills and strips, and check texts against their painted frames after import.

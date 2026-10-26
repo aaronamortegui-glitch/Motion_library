@@ -3,7 +3,7 @@
 // whole sprite is squashed / leaned / lifted with nearest-neighbour sampling and outlined, so a pose is always clean
 // pixel art. The face is a bitmap on the screen (emotions in the JSON). Pure function of its state: no timers.
 //   const rig = PixelRig(characterJson);
-//   const sprite = rig.render({ emotion, pose, armT, light, sy, lean, hop, look, t });   // an offscreen canvas
+//   const sprite = rig.render({ emotion, pose, armT, light, sy, lean, hop, look, t, mouth });   // an offscreen canvas; mouth: a viseme bitmap or null
 //   rig.shadow(g, x, groundY, hop)   // contact shadow on a low-res scene canvas
 (function () {
   const MARKS = {   // small symbols an emotion can show on the screen next to the eyes
@@ -108,7 +108,8 @@
       const dx = Math.round(look[0] + el[0]), dy = Math.round(look[1] + el[1]);
       stamp(E.eyes, sc.eyes.L[0] + dx, sc.eyes.L[1] + dy, false);
       stamp(E.eyes_R || E.eyes, sc.eyes.R[0] + dx, sc.eyes.R[1] + dy, !!E.mirror_R);
-      if (E.mouth === "dots") { const ph = Math.floor((st.t || 0) * 4) % 4; for (let i = 0; i < 3; i++) if (i < ph) { const x = sc.mouth[0] - 2 + i * 2, y = sc.mouth[1] + 1; if (mask[y * W + x]) lit[y * W + x] = 1; } }
+      if (st.mouth !== undefined) { if (st.mouth) stamp(st.mouth, sc.mouth[0] + dx, sc.mouth[1] + 1 + dy, false); }   // a viseme for lipsync (null: no mouth)
+      else if (E.mouth === "dots") { const ph = Math.floor((st.t || 0) * 4) % 4; for (let i = 0; i < 3; i++) if (i < ph) { const x = sc.mouth[0] - 2 + i * 2, y = sc.mouth[1] + 1; if (mask[y * W + x]) lit[y * W + x] = 1; } }
       else if (E.mouth) stamp(E.mouth, sc.mouth[0] + dx, sc.mouth[1] + 1 + dy, false);
       if (E.mark && MARKS[E.mark]) stamp(MARKS[E.mark], sc.mark ? sc.mark[0] : sc.eyes.R[0] + 5, sc.mark ? sc.mark[1] : sc.eyes.R[1] - 3, false);
       for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
