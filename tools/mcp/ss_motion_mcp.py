@@ -231,7 +231,7 @@ def t_add_element(kind, text=None, sub=None, layer=None, point=None, comp=None, 
         f = b.get("identity", {}).get("fonts") or {}
     o = {k: v for k, v in dict(t=t, out=out, colors=cols or None, size=size, position=position, padding=padding, radius=radius,
                                textPreset=text_preset, style=style, mode=mode, outline=outline, slot=slot, click=click, prefix=prefix,
-                               suffix=suffix, decimals=decimals, width=width, pressedBox=pressed_box, logo=str((ROOT / logo).as_posix()) if logo and not pathlib.Path(logo).is_absolute() else logo, layer=layer if kind == "media" else None).items() if v is not None}
+                               suffix=suffix, decimals=decimals, width=width, pressedBox=pressed_box, items=items if kind == "cursor" else None, sub=sub if kind == "selection" else None, logo=str((ROOT / logo).as_posix()) if logo and not pathlib.Path(logo).is_absolute() else logo, layer=layer if kind == "media" else None).items() if v is not None}
     if brand and colors is None:
         fonts = {k: [f[k]] for k in ("title", "text") if f.get(k)}
         if f.get("accent"): fonts["display"] = [f["accent"]]
@@ -253,6 +253,7 @@ def t_add_element(kind, text=None, sub=None, layer=None, point=None, comp=None, 
              "scale_title": f"SSE.scaleTitle(c, {js(text)}, {js(sub)}, {o_js})", "cinematic": f"SSE.cinematic(c, {js(text)}, {o_js})",
              "chat": f"SSE.chat(c, {js(text)}, {o_js})", "rating": f"SSE.rating(c, {js(value if value is not None else 5)}, {o_js})",
              "ring": f"SSE.ring(c, {js(value if value is not None else 70)}, {o_js})",
+             "cursor": f"SSE.cursor(c, {js(text or 'Dana')}, {o_js})", "selection": f"SSE.selection(c, {js(text or 'Frame 1')}, {o_js})",
              "end_card": f"SSE.endCard(c, {end_o})",
              "glass_card": f"{{name: SSL.glassCard(c, {js(text)}, {js(sub)}, {o_js}), inPoint: c.time, outPoint: c.duration}}"}
     if kind not in calls:
@@ -294,9 +295,13 @@ return r.join("\\n");""", includes=("ss_presets.jsx", "ss_keyframes.jsx", "ss_mo
 
 
 def t_animate_text(layers=None, comp=None, unit="chars", channels=None, mode=None, order=None, phase="in", t=None, dur=None, ease=None,
-                   spread=None, amount=None, color=None, mask=None, typewriter=None, cps=None, cursor=None):
-    """Per-character / word / line text animation on token curves (tools/ss_text.jsx), or a typewriter with a cursor."""
-    if typewriter:
+                   spread=None, amount=None, color=None, mask=None, typewriter=None, cps=None, cursor=None, font_swap=None,
+                   settle=None, stagger=None, step=None, fonts=None):
+    """Per-character / word / line text animation on token curves (tools/ss_text.jsx), a typewriter with a cursor, or a font swap."""
+    if font_swap:
+        o = {k: v for k, v in dict(t=t, settle=settle, stagger=stagger, step=step, fonts=fonts, mode="idle" if font_swap == "idle" else None).items() if v is not None}
+        call = f"SSTX.fontSwap(ls[i], {js(o)})"
+    elif typewriter:
         o = {k: v for k, v in dict(t=t, cps=cps, cursor=cursor).items() if v is not None}
         call = f"SSTX.typewriter(ls[i], {js(o)})"
     else:
@@ -722,6 +727,56 @@ return "imported as layer " + L.index + " (" + L.name + ") in " + c.name;""")
     return msg
 
 
+def t_audio_markers(layer, mode="beats", comp=None, duck=None, duck_db=-9.0, every=1, threshold_db=-40.0, limit=64, replace=True):
+    """Markers from sound (tools/audio_markers.py): beats (a steady grid with the tempo), hits (strong accents) or phrases
+    (spoken spans of a voice-over). duck = a music layer to lower under the phrases."""
+    import audio_markers as am
+    info = run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), L = findLayers(c, [{js(layer)}])[0];
+if (!(L.source instanceof FootageItem) || !L.source.file) throw new Error(L.name + " is not a sound or video file");
+return L.source.file.fsName.split("\\\\").join("/") + "|" + L.startTime + "|" + L.stretch + "|" + L.inPoint + "|" + Math.min(L.outPoint, c.duration);""", includes=())
+    if "|" not in info:
+        return info
+    path, start, stretch, tin, tout = info.strip().split("|")[:5]
+    start, k, tin, tout = float(start), float(stretch) / 100, float(tin), float(tout)
+    y = am.load(path); bpm = None
+    if mode == "phrases":
+        spans = am.phrases(y, threshold_db=threshold_db)
+    elif mode == "hits":
+        spans = [[t, t] for t in am.hits(y, limit=limit)]
+    else:
+        bpm, b = am.beats(y); spans = [[t, t] for t in b[::max(1, int(every))]]
+    spans = [[start + a * k, start + e * k] for a, e in spans]
+    spans = [sp for sp in spans if tin - 0.001 <= sp[0] <= tout][:max(1, int(limit)) if mode != "beats" else 2000]
+    if not spans:
+        return f"No {mode} found in {layer} (try another mode, or threshold_db for a quiet voice)"
+    label = {"beats": "beat", "hits": "hit", "phrases": "phrase"}.get(mode, mode)
+    res = run_jsx(COMP_JS + f"""var c = findComp({js(comp)}), L = findLayers(c, [{js(layer)}])[0], S = {js(spans)}, M = L.property("ADBE Marker");
+app.beginUndoGroup("Motion DNA audio markers");
+try {{
+  if ({js(bool(replace))}) for (var i = M.numKeys; i >= 1; i--) if (/^(beat|hit|phrase) /.test(M.keyValue(i).comment)) M.removeKey(i);
+  for (var j = 0; j < S.length; j++) {{ var mv = new MarkerValue({js(label)} + " " + (j + 1)); if (S[j][1] > S[j][0]) mv.duration = S[j][1] - S[j][0]; M.setValueAtTime(S[j][0], mv); }}
+  var msg = S.length + " {label} markers on " + L.name;
+  var D = {js(duck or "")};
+  if (D) {{
+    var A = c.layer(D); if (!A) throw new Error("Layer not found: " + D);
+    var lv = A.property("ADBE Audio Group").property("ADBE Audio Levels"), base = lv.numKeys ? lv.keyValue(1) : lv.value, low = [base[0] + {float(duck_db)}, base[1] + {float(duck_db)}];
+    while (lv.numKeys) lv.removeKey(1);
+    var G = [];   // phrases closer than 0.6 s stay ducked between them
+    for (var g = 0; g < S.length; g++) {{ if (G.length && S[g][0] - G[G.length - 1][1] < 0.6) G[G.length - 1][1] = S[g][1]; else G.push([S[g][0], S[g][1]]); }}
+    for (var h = 0; h < G.length; h++) {{
+      lv.setValueAtTime(Math.max(G[h][0] - 0.12, 0), base); lv.setValueAtTime(G[h][0], low);
+      lv.setValueAtTime(G[h][1], low); lv.setValueAtTime(G[h][1] + 0.35, base); }}
+    msg += "; " + A.name + " ducked " + {float(duck_db)} + " dB under " + G.length + " spans";
+  }}
+}} finally {{ app.endUndoGroup(); }}
+return msg;""", includes=())
+    head = f"{res}" + (f" · {bpm} BPM" if bpm else "")
+    if mode == "phrases":
+        rows = "\n".join(f"  {i + 1:>2}  {a:7.2f} – {e:7.2f} s" for i, (a, e) in enumerate(spans[:40]))
+        return head + "\nTiming table (comp time):\n" + rows + "\nLand each cut and word reveal on these; the markers sit on the layer."
+    return head + "\nFirst: " + ", ".join(f"{a:.2f}" for a, _ in spans[:12]) + (" …" if len(spans) > 12 else "") + " s (comp time). Snap cuts and key moves to the markers."
+
+
 def t_text_behind(subject, text, comp=None):
     """Text behind a person or product: mattes the subject's footage, then puts the cut-out above the text, parented to
     the subject so it follows its moves (still or video)."""
@@ -1138,11 +1193,12 @@ TOOLS_DEF = [
      {"move": {"type": "string", "enum": ["flip", "hinge", "orbit", "fly", "tumble", "grow_edge", "squash"]}, "layers": {"type": "array", "items": {"type": "string"}}, "comp": {"type": "string"},
       "phase": {"type": "string", "enum": ["in", "out", "both"]}, "t": {"type": "number"}, "dur": {"type": "string"}, "ease": {"type": "string"}, "axis": {"type": "string"}, "edge": {"type": "string"},
       "direction": {"type": "string"}, "origin": {"type": "string"}, "distance": {"type": "number"}, "angle": {"type": "number"}, "fade": {"type": "boolean"}, "uniform": {"type": "boolean"}}, ["move"]),
-    ("animate_text", t_animate_text, "Animate named or selected text layers per unit (chars | words | lines) on token curves, overshoot per letter included (AC Text Presets): channels fade, rise, drop, slide, scale, rotate, rotate3d, skew, tracking, blur, decode, color; mode ease | flicker | wiggly; order forward | reverse | center | edges | random; mask = slide up from behind the text box. typewriter = true types the text with a blinking cursor (cps).",
+    ("animate_text", t_animate_text, "Animate named or selected text layers per unit (chars | words | lines) on token curves, overshoot per letter included (AC Text Presets): channels fade, rise, drop, slide, scale, rotate, rotate3d, skew, tracking, blur, decode, color; mode ease | flicker | wiggly; order forward | reverse | center | edges | random; mask = slide up from behind the text box. typewriter = true types the text with a blinking cursor (cps). font_swap = true (or idle, which keeps a letter swapping now and then) flicks each letter through clean display faces and settles them on the layer's font left to right with a pop (settle, stagger, step in s; fonts = PostScript names; After Effects 2025+).",
      {"layers": {"type": "array", "items": {"type": "string"}}, "comp": {"type": "string"}, "unit": {"type": "string", "enum": ["chars", "words", "lines"]},
       "channels": {"type": "array", "items": {"type": "string"}}, "mode": {"type": "string", "enum": ["ease", "flicker", "wiggly"]}, "order": {"type": "string"},
       "phase": {"type": "string", "enum": ["in", "out", "both"]}, "t": {"type": "number"}, "dur": {"type": "string"}, "ease": {"type": "string"}, "spread": {"type": "number"},
-      "amount": {"type": "number"}, "color": {"type": "string"}, "mask": {"type": "boolean"}, "typewriter": {"type": "boolean"}, "cps": {"type": "number"}, "cursor": {"type": "string"}}),
+      "amount": {"type": "number"}, "color": {"type": "string"}, "mask": {"type": "boolean"}, "typewriter": {"type": "boolean"}, "cps": {"type": "number"}, "cursor": {"type": "string"},
+      "font_swap": {"type": ["boolean", "string"]}, "settle": {"type": "number"}, "stagger": {"type": "number"}, "step": {"type": "number"}, "fonts": {"type": "array", "items": {"type": "string"}}}),
     ("add_look", t_add_look, "Backgrounds and finishing looks from native effects (AC Backgrounds / Overlays / Mixed): backgrounds stripes | dots | grid | gradient | liquid | topo | network (plexus: drifting points joined by lines that fade with distance) | blobs (liquid shapes breathing) | mesh (blurred colour mesh gradient) | glass (mesh behind frosted panes) (at the bottom, looping); looks tritone | duotone | vignette | grain | scanlines | letterbox | dust | embers | snow (on top; for light leaks use real footage with add_asset); long_shadow and glitch on a named layer. Colours from a list or brand.",
      {"kind": {"type": "string"}, "comp": {"type": "string"}, "layer": {"type": "string"}, "t": {"type": "number"}, "dur": {"type": "number"}, "colors": {"type": "array", "items": {"type": "string"}},
       "brand": {"type": "string"}, "amount": {"type": "number"}, "length": {"type": "number"}, "angle": {"type": "number"}, "color": {"type": "string"}, "ratio": {"type": "number"},
@@ -1151,10 +1207,10 @@ TOOLS_DEF = [
      {"words": {"type": "array", "items": {"type": "object"}}, "words_path": {"type": "string"}, "srt_path": {"type": "string"}, "comp": {"type": "string"},
       "style": {"type": "string", "enum": ["highlight", "karaoke", "build", "pop", "word"]}, "size": {"type": "number"}, "position": {"type": "array", "items": {"type": "number"}},
       "colors": {"type": "array", "items": {"type": "string"}}, "brand": {"type": "string"}, "box": {"type": "boolean"}, "stroke": {"type": "boolean"}, "max_chars": {"type": "integer"}}),
-    ("add_element", t_add_element, "Semi-finished graphic element that sizes itself to its text (like Animation Composer's titles, callouts, social and counters): label (chip), lower_third (text = name, sub = role), title (text + sub, accent rule), underline / highlight (layer = an existing text layer), callout (point = [x, y]), counter (start → value, prefix/suffix/decimals), timer (value = countdown s, 0 counts up), price_tag (text = price, sub = label), handle (@name pill), bubble, chat (typing dots then text), sticker (tilted outlined word), quote (text, sub = author), text_box (text = title, sub = body), list (items), progress / ring (value %), rating (value of 5), button (text, pressed, click time; a cursor clicks; pressed_box Box on light scenes), kinetic (items = lines), tiles (letters on 3D tiles), media (slot [w, h] + optional layer to fit), scale_title (mode push|drop), cinematic (style neon|blur|kerning), glass_card (text, sub: a smoky frosted pane that blurs what is behind it; size [w, h]), end_card (the Motion DNA logo close, as in the logo manual: the helix mark grows up its diagonal with overshoot, the arrow kicks, MOTION / DNA rise into place below it; style horizontal for the side-by-side lockup; text = wordmark, sub = tagline, size = mark height; close every Motion DNA demo with it). outline = true draws boxes as outlines. list_kit shows them all with energy and tones. One controller per element (Reveal, Padding, Radius, Gap, Box/Accent/Text colours). Colours: [box, accent, text] hex, or brand = slug (its colours and fonts). t = in (s, default playhead), out = exit (s, optional).",
+    ("add_element", t_add_element, "Semi-finished graphic element that sizes itself to its text (like Animation Composer's titles, callouts, social and counters): label (chip), lower_third (text = name, sub = role), title (text + sub, accent rule), underline / highlight (layer = an existing text layer), callout (point = [x, y]), counter (start → value, prefix/suffix/decimals), timer (value = countdown s, 0 counts up), price_tag (text = price, sub = label), handle (@name pill), bubble, chat (typing dots then text), sticker (tilted outlined word), quote (text, sub = author), text_box (text = title, sub = body), list (items), progress / ring (value %), rating (value of 5), button (text, pressed, click time; a cursor clicks; pressed_box Box on light scenes), kinetic (items = lines), tiles (letters on 3D tiles), media (slot [w, h] + optional layer to fit), scale_title (mode push|drop), cinematic (style neon|blur|kerning), glass_card (text, sub: a smoky frosted pane that blurs what is behind it; size [w, h]), end_card (the Motion DNA logo close, as in the logo manual: the helix mark grows up its diagonal with overshoot, the arrow kicks, MOTION / DNA rise into place below it; style horizontal for the side-by-side lockup; text = wordmark, sub = tagline, size = mark height; close every Motion DNA demo with it), cursor (text = the collaborator's name: a design-tool cursor with a name tag enters from the edge, travels on arcs to each items point, clicks there with a ripple, trails when fast and leaves), selection (text = frame name, slot = [w, h] at position: a cursor drags a selection marquee open from its corner, handles pop, the tag and the live size show; sub = the size line). outline = true draws boxes as outlines. list_kit shows them all with energy and tones. One controller per element (Reveal, Padding, Radius, Gap, Box/Accent/Text colours). Colours: [box, accent, text] hex, or brand = slug (its colours and fonts). t = in (s, default playhead), out = exit (s, optional).",
      {"kind": {"type": "string", "enum": ["label", "lower_third", "title", "underline", "highlight", "callout", "counter", "timer", "price_tag", "handle", "bubble", "sticker",
-                                          "quote", "list", "progress", "button", "kinetic", "tiles", "text_box", "media", "scale_title", "cinematic", "chat", "rating", "ring", "glass_card", "end_card"]},
-      "items": {"type": "array", "items": {"type": "string"}}, "value": {"type": "number"}, "start": {"type": "number"}, "style": {"type": "string"}, "mode": {"type": "string"},
+                                          "quote", "list", "progress", "button", "kinetic", "tiles", "text_box", "media", "scale_title", "cinematic", "chat", "rating", "ring", "glass_card", "end_card", "cursor", "selection"]},
+      "items": {"type": "array", "description": "list / kinetic: strings; cursor: click points [[x, y], …]"}, "value": {"type": "number"}, "start": {"type": "number"}, "style": {"type": "string"}, "mode": {"type": "string"},
       "outline": {"type": "boolean"}, "slot": {"type": "array", "items": {"type": "number"}}, "click": {"type": "number"}, "pressed": {"type": "string"}, "prefix": {"type": "string"},
       "suffix": {"type": "string"}, "decimals": {"type": "integer"}, "width": {"type": "number"}, "text": {"type": "string"}, "sub": {"type": "string"}, "pressed_box": {"type": "string", "enum": ["Text", "Box"]}, "logo": {"type": "string", "description": "end_card: a mark JSON from tools/logo_to_shape.py + tools/logo_strokes.py (default: the Motion DNA mark)"},
       "layer": {"type": "string"}, "point": {"type": "array", "items": {"type": "number"}}, "comp": {"type": "string"}, "t": {"type": "number"}, "out": {"type": "number"},
@@ -1216,6 +1272,9 @@ TOOLS_DEF = [
       "duration": {"type": "number"}, "intensity": {"type": "number"}}, ["preset", "outgoing", "incoming"]),
     ("matte", t_matte, "Cut the subject (person, product, car) out of a still or a video on this computer's GPU (InSPyReNet, no cost): a still gives a PNG with alpha (<name>_cutout.png), a video a ProRes 4444 .mov with alpha (<name>_matte.mov). import_to_comp: a comp name to add it to as a layer, fitted to the frame. Use it for text behind a subject, product cutouts, and contour strokes.",
      {"source": {"type": "string"}, "out": {"type": "string"}, "size": {"type": "string"}, "fps": {"type": "number"}, "import_to_comp": {"type": "string"}}, ["source"]),
+    ("audio_markers", t_audio_markers, "Timing from sound, so cuts and keys land on it: reads the file of an audio or video layer and puts markers on it. mode beats = a steady beat grid with the tempo (every = 2 or 4 for every 2nd or 4th beat), hits = the strong accents, phrases = the spoken spans of a voice-over (markers with their length, and a timing table). duck = a music layer to lower duck_db (default -9) under the phrases, with a short attack and a 0.35 s release. Runs on any computer (ffmpeg + numpy).",
+     {"layer": {"type": "string"}, "mode": {"type": "string", "enum": ["beats", "hits", "phrases"]}, "comp": {"type": "string"}, "duck": {"type": "string"},
+      "duck_db": {"type": "number"}, "every": {"type": "integer"}, "threshold_db": {"type": "number"}, "limit": {"type": "integer"}, "replace": {"type": "boolean"}}, ["layer"]),
     ("text_behind", t_text_behind, "Technique 'Text behind people': puts a text layer behind the person or product of a footage layer (still or video). It mattes the subject on this computer's GPU (matte), adds the cut-out above the text, parented to the subject so it follows its moves. Animate the text as usual; render a frame to check.",
      {"subject": {"type": "string"}, "text": {"type": "string"}, "comp": {"type": "string"}}, ["subject", "text"]),
     ("check_layout", t_check_layout, "Layout QA on built comps (default: the active comp), before you report a build as done: text overlapping text, text outside the 40 px safe area, text under 32 px, low contrast, graphics on faces, substituted fonts. Fix every warning or say why it stays.",

@@ -387,6 +387,21 @@
   },
   {
    "category": "Elements",
+   "name": "Cursors and selection",
+   "desc": "Named collaborator cursors that click on arcs, and a selection marquee dragged open.",
+   "members": [
+    {
+     "kind": "element",
+     "name": "cursor"
+    },
+    {
+     "kind": "element",
+     "name": "selection"
+    }
+   ]
+  },
+  {
+   "category": "Elements",
    "name": "Callouts and chat",
    "desc": "Pointers, speech bubbles and chat messages.",
    "members": [
@@ -916,7 +931,7 @@
   {
    "category": "Text engine",
    "name": "Typing",
-   "desc": "Decode and a typewriter with its cursor.",
+   "desc": "Decode, a typewriter with its cursor and a font swap.",
    "members": [
     {
      "kind": "text",
@@ -925,6 +940,10 @@
     {
      "kind": "text",
      "name": "Typewriter Cursor"
+    },
+    {
+     "kind": "text",
+     "name": "Font Swap"
     }
    ]
   },

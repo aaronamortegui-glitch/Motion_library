@@ -48,6 +48,22 @@
       {"term": "Tone", "means": "The feel words: modern, elegant, playful, editorial, technical, warm.", "say": "Make it modern and a little playful.", "demo": "tone"},
       {"term": "Breathing room", "means": "Space and pauses between moves, so nothing fights for the eye.", "say": "Give it more breathing room between beats.", "demo": "room"},
       {"term": "Restraint", "means": "Fewer, better moves. One hero move per scene.", "say": "Only the title moves big; keep the rest quiet.", "demo": "restraint"}
+    ]},
+    {"name": "Principles", "photo": "packs/stills/elegant.jpg", "terms": [
+      {"term": "Arcs", "means": "Things travel on curves, the way a hand or a ball does, not on rails.", "say": "Move the cursor on an arc, not a straight line.", "demo": "arcs"},
+      {"term": "Secondary action", "means": "A small move that answers the main one: a ripple on a click, a float, a settle. Never louder than the hero.", "say": "Add a ripple when it clicks.", "demo": "secondary"},
+      {"term": "Staging", "means": "One idea per frame, so the eye knows where to look.", "say": "Stage it: only the price comes forward, dim the rest.", "demo": "staging"},
+      {"term": "Pose to pose", "means": "Design the end frames first, then the moves between them.", "say": "Show me the end pose of each scene before you animate.", "demo": "pose"},
+      {"term": "Exaggeration", "means": "Push the key move a little past real so it reads small, and stop before it turns theatrical.", "say": "Push the pop a bit more, then settle.", "demo": "exaggerate"},
+      {"term": "Weight", "means": "Timing tells how heavy a thing is: light things move fast and land soft, heavy ones take longer and settle.", "say": "Make the card feel heavier: slower in, firmer landing.", "demo": "weight"}
+    ]},
+    {"name": "Interface & sound", "photo": "packs/stills/tech.jpg", "terms": [
+      {"term": "Font swap", "means": "Letters flick through display faces and settle on the brand font, one after another.", "say": "Swap fonts on the wordmark, then let it settle left to right.", "demo": "fontswap"},
+      {"term": "Collaborator cursor", "means": "A named cursor that does the actions on screen: travels, clicks, drags, then leaves.", "say": "Add Dana's cursor clicking the two cards.", "demo": "cursor"},
+      {"term": "Marquee", "means": "A selection box dragged open from a corner, with handles and the frame's size.", "say": "Draw a selection around the hero card.", "demo": "marquee"},
+      {"term": "On the beat", "means": "Cuts and key moves land on the music's beats, found from the track itself.", "say": "Put markers on the music's beats and cut on every second one.", "demo": "onbeat"},
+      {"term": "Duck", "means": "The music dips under the voice and comes back between lines.", "say": "Duck the music 9 dB under the voice-over.", "demo": "duck"},
+      {"term": "Timing lock", "means": "The voice is timed first; every scene, cut and word follows its phrases.", "say": "Lock the timing to the voice-over, then build the scenes.", "demo": "lock"}
     ]}
   ]
 }

@@ -157,6 +157,8 @@ kit|Elements|quote|1-2|elegant/editorial/warm|add_element(kind="quote", …)|Quo
 kit|Elements|list|2-3|corporate/friendly|add_element(kind="list", …)|Bullet list, lines staggered.
 kit|Elements|progress|2-3|technical/corporate|add_element(kind="progress", …)|Bar filling to a value with a counting %.
 kit|Elements|button|3-4|friendly/playful|add_element(kind="button", …)|Button that a cursor clicks; swaps label and colours.
+kit|Elements|cursor|2-4|friendly/technical/modern|add_element(kind="cursor", text="Dana", items=[[700, 400], [1200, 620]])|A named collaborator cursor that travels on arcs, clicks with a ripple and trails when fast: product demos and 'we built it together' moments.
+kit|Elements|selection|2-3|technical/modern|add_element(kind="selection", text="Frame 1", slot=[800, 450])|A cursor drags a selection marquee open, the handles pop and the frame's name and live size show: design-tool and UI stories.
 kit|Elements|kinetic|4-5|bold/playful|add_element(kind="kinetic", …)|Lines fitted to one width sliding in from alternate sides.
 kit|Elements|tiles|3-4|playful/bold/retro|add_element(kind="tiles", …)|Each letter on a tile flipping in (3D).
 kit|Elements|text_box|1-2|corporate/editorial|add_element(kind="text_box", …)|Title over a paragraph on a box.
@@ -220,6 +222,7 @@ kit|Text engine|Words Tracking Blur|1-2|elegant/luxury/cinematic|animate_text(un
 kit|Text engine|Chars Skew Slide|3-4|bold/modern|animate_text(unit="chars", channels=["skew","slide","fade"], ease="Whip")|Letters whip in skewed.
 kit|Text engine|Words Colour Pop|3-4|playful/bold|animate_text(unit="words", channels=["color","scale"], ease="Pop")|Words pop through the accent colour.
 kit|Text engine|Typewriter Cursor|2-3|technical/retro|animate_text(typewriter=true, cps=18)|Types with a blinking cursor.
+kit|Text engine|Font Swap|3-5|editorial/playful/bold|animate_text(font_swap="idle", settle=0.6, stagger=0.07)|Each letter flicks through clean display faces, then settles on the brand font left to right with a pop; idle keeps a letter swapping now and then.
 kit|Text engine|Captions|2-3|friendly/modern|add_captions(words_path=…, style="highlight")|Word-timed captions (highlight, karaoke, build, pop, word).
 kit|Looks|tritone|1-3|cinematic/editorial|add_look(kind="tritone", …)|Three-colour tone over everything.
 kit|Looks|duotone|1-3|editorial/retro|add_look(kind="duotone", …)|Two-colour tone.

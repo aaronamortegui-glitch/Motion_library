@@ -74,7 +74,7 @@ One click gives a whole comp an identity: each layer gets the preset of its role
 | <img src="../library/packs/tech.gif" width="260"><br>**Tech** · `medium`<br><sub>Data, AI, fintech, HUDs: decoding text, line draws and holographic flicker.</sub> | <img src="../library/packs/calm-modern.gif" width="260"><br>**Calm Modern** · `soft`<br><sub>Product and brand pieces: small travel, word-by-word text, quiet exits, no bounce.</sub> | <img src="../library/packs/editorial.gif" width="260"><br>**Editorial** · `medium`<br><sub>Brand systems, tech launches, type-led films: typing, snaps on the action, construction lines, clean ease-outs (Motion Style Map: Editorial).</sub> | <img src="../library/packs/storybook.gif" width="260"><br>**Storybook** · `soft`<br><sub>Warm product launches and character explainers: line-by-line rises, soft 3% overshoots, circular reveals (Motion Style Map: Warm editorial, Character).</sub> |
 | <img src="../library/packs/collage.gif" width="260"><br>**Collage** · `dynamic`<br><sub>Mixed media, cut-outs, archive and texture: whips through layers, hand-made boil on 3s, decoding type (Motion Style Map: Mixed media).</sub> |   |   |   |
 
-## The kit (198 pieces in 51 families)
+## The kit (201 pieces in 52 families)
 
 Built by Claude on the open comp through the MCP server, on the same token curves. One row per family: a still of its first piece and every variant by name (ask for any of them in the chat; `list_kit` shows energy and tones). Moving previews: hover a card in `library/index.html` or open *Agent › Library › Kit* in the panel.
 
@@ -102,12 +102,13 @@ Built by Claude on the open comp through the MCP server, on the same token curve
 | <img src="../library/gifs/kit-transition/camera-shake_md.png" width="160"> | **Shake, slices and glitch**<br><sub>Camera shake, sliced frames and an RGB glitch.</sub><br><sub>`solid_transition(look="Camera Shake")`</sub> | `Camera Shake` · `Slice Cut` · `Glitch Cut` |
 | <img src="../library/gifs/kit-gltransition/heartwipe_md.png" width="160"> | **Shader wipes**<br><sub>Shapes, patterns and noise reveal the next shot (gl-transitions shaders as luma mattes; 73 in all with gl_transition).</sub><br><sub>`gl_transition(name="HeartWipe", outgoing="…", incoming="…")`</sub> | `HeartWipe` · `StarWipe` · `FlowerWipe` · `Pinwheel` · `ClockWipe` · `PolkaDotsCurtain` · `Crosshatch` · `WindowBlinds` · `RadialWipe` · `PerlinDissolve` · `DoomMelt` · `UndulatingBurnOut` |
 
-### Elements (28)
+### Elements (30)
 
 | | Family | Variants (ask for them by name) |
 |---|---|---|
 | <img src="../library/gifs/kit-element/title_md.png" width="160"> | **Titles**<br><sub>Titles that size themselves: plain, scaled, cinematic, kinetic, on tiles.</sub><br><sub>`add_element(kind="title", …)`</sub> | `title` · `scale_title` · `cinematic` · `kinetic` · `tiles` |
 | <img src="../library/gifs/kit-element/label_md.png" width="160"> | **Labels and tags**<br><sub>Chips, handles, stickers, price tags and buttons.</sub><br><sub>`add_element(kind="label", …)`</sub> | `label` · `handle` · `sticker` · `price_tag` · `button` |
+| <img src="../library/gifs/kit-element/cursor_md.png" width="160"> | **Cursors and selection**<br><sub>Named collaborator cursors that click on arcs, and a selection marquee dragged open.</sub><br><sub>`add_element(kind="cursor", text="Dana", items=[[700, 400], [1200, 620]])`</sub> | `cursor` · `selection` |
 | <img src="../library/gifs/kit-element/callout_md.png" width="160"> | **Callouts and chat**<br><sub>Pointers, speech bubbles and chat messages.</sub><br><sub>`add_element(kind="callout", …)`</sub> | `callout` · `bubble` · `chat` |
 | <img src="../library/gifs/kit-element/counter_md.png" width="160"> | **Data**<br><sub>Counters, timers, progress bars, rings and ratings.</sub><br><sub>`add_element(kind="counter", …)`</sub> | `counter` · `timer` · `progress` · `ring` · `rating` |
 | <img src="../library/gifs/kit-element/lower-third_md.png" width="160"> | **Text blocks**<br><sub>Lower thirds, quotes, text boxes and lists.</sub><br><sub>`add_element(kind="lower_third", …)`</sub> | `lower_third` · `quote` · `text_box` · `list` |
@@ -146,13 +147,13 @@ Built by Claude on the open comp through the MCP server, on the same token curve
 | <img src="../library/gifs/kit-look/long-shadow_md.png" width="160"> | **Long shadow**<br><sub>A long flat shadow behind a layer.</sub><br><sub>`add_look(kind="long_shadow", …)`</sub> | `long_shadow` |
 | <img src="../library/gifs/kit-look/glitch_md.png" width="160"> | **Glitch**<br><sub>An RGB glitch burst on a layer.</sub><br><sub>`add_look(kind="glitch", …)`</sub> | `glitch` |
 
-### Text engine (10)
+### Text engine (11)
 
 | | Family | Variants (ask for them by name) |
 |---|---|---|
 | <img src="../library/gifs/kit-text/chars-pop-rise_md.png" width="160"> | **Reveals**<br><sub>Per character, word or line: rise, mask, tracking, skew.</sub><br><sub>`animate_text(unit="chars", channels=["fade","rise"], ease="Pop")`</sub> | `Chars Pop Rise` · `Lines Mask Rise` · `Words Tracking Blur` · `Chars Skew Slide` |
 | <img src="../library/gifs/kit-text/chars-3d-flip_md.png" width="160"> | **Playful**<br><sub>3D flips, wiggly scale and colour pops.</sub><br><sub>`animate_text(unit="chars", channels=["rotate3d","fade"], order="center", ease="Nudge")`</sub> | `Chars 3D Flip` · `Chars Wiggly Scale` · `Words Colour Pop` |
-| <img src="../library/gifs/kit-text/words-decode_md.png" width="160"> | **Typing**<br><sub>Decode and a typewriter with its cursor.</sub><br><sub>`animate_text(unit="words", channels=["decode","fade"], mode="flicker")`</sub> | `Words Decode` · `Typewriter Cursor` |
+| <img src="../library/gifs/kit-text/words-decode_md.png" width="160"> | **Typing**<br><sub>Decode, a typewriter with its cursor and a font swap.</sub><br><sub>`animate_text(unit="words", channels=["decode","fade"], mode="flicker")`</sub> | `Words Decode` · `Typewriter Cursor` · `Font Swap` |
 | <img src="../library/gifs/kit-text/captions_md.png" width="160"> | **Captions**<br><sub>Word-timed captions: highlight, karaoke, build, pop.</sub><br><sub>`add_captions(words_path=…, style="highlight")`</sub> | `Captions` |
 
 ### Moves (25)

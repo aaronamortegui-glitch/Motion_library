@@ -117,6 +117,81 @@ def cut(src, start, length):
     return list(T.frames(src, start, length))
 
 
+def _env(path, start, length, n):
+    """Peak envelope of a sound span in n columns (0..1), for the lanes."""
+    import audio_markers as am
+    y = am.load(ROOT / path)[int(start * am.SR):int((start + length) * am.SR)]
+    col = np.abs(y[:len(y) // n * n]).reshape(n, -1).max(axis=1); return col / (col.max() + 1e-9)
+
+
+def onbeat(music, sources, start, length):
+    """Cuts on the beat: audio_markers finds the music's beats; the shot changes on every second one, the beat ticks
+    light up under a playhead, and the clip plays the music it was cut to."""
+    import audio_markers as am
+    bpm, b = am.beats(am.load(ROOT / music)); b = [t - start for t in b if start <= t < start + length]
+    cuts = b[::2]; clips = [T.frames(s, 0.4, length) for s in sources]; out = []; fs = T.font(13, 700)
+    env = _env(music, start, length, 160); lane = (34, H - 62, W - 34, H - 22)
+    for i in range(int(length * FPS)):
+        t = i / FPS; shot = sum(1 for c in cuts if c <= t) - 1
+        cl = clips[max(shot, 0) % len(clips)]; im = T.rgba(cl[i % len(cl)]); d = ImageDraw.Draw(im, "RGBA")
+        since = min([t - c for c in cuts if c <= t] or [9])
+        if since < .1: d.rectangle([0, 0, W, H], fill=(247, 249, 242, int(90 * (1 - since / .1))))
+        d.rounded_rectangle([lane[0] - 12, lane[1] - 44, lane[2] + 12, lane[3] + 10], 12, fill=(10, 33, 31, 225))
+        x0, x1, mid = lane[0], lane[2], (lane[1] + lane[3]) / 2
+        for k, v in enumerate(env):
+            x = x0 + (x1 - x0) * k / len(env); hh = max(1, v * (lane[3] - lane[1]) / 2)
+            d.line([x, mid - hh, x, mid + hh], fill=(141, 253, 186, 150), width=2)
+        for j, bt in enumerate(b):   # the markers as After Effects draws them, above the wave; the cut ones in Spark
+            x = x0 + (x1 - x0) * bt / length; on = bt in cuts; lit = 0 <= t - bt < .3; r = 7 if on else 4
+            col = (SPARK + (255,)) if on else (CLOUD + (120,))
+            d.polygon([(x - r, lane[1] - 12), (x + r, lane[1] - 12), (x, lane[1] - 12 + r * 1.3)], fill=col)
+            if lit and on: d.line([x, lane[1] - 4, x, lane[3] + 4], fill=SPARK + (255,), width=3)
+        px = x0 + (x1 - x0) * t / length; d.line([px, lane[1] - 8, px, lane[3] + 6], fill=CORAL, width=2)
+        d.text((x0, lane[1] - 40), f"MUSIC · {bpm:g} BPM · a cut on every second beat", font=fs, fill=CLOUD)
+        T.chip(d, 16, 16, "audio_markers · beats", 14)
+        out.append(np.asarray(im.convert("RGB")))
+    return out
+
+
+def duck(vo, music, length, vo_at=0.6, duck_db=-9):
+    """The music ducks under the voice: two lanes, the phrases audio_markers found, the music dipping under each one
+    and coming back, and the timing table; it plays the mix it shows."""
+    import audio_markers as am
+    v = am.load(ROOT / vo); m = am.load(ROOT / music)[:int(length * am.SR)]; ph = [[a + vo_at, e + vo_at] for a, e in am.phrases(v)]
+    g = np.ones(len(m), np.float32)
+    for a, e in ph:   # same shape as the AE keys: 0.12 s attack, hold, 0.35 s release
+        t = np.arange(len(m)) / am.SR; low = 10 ** (duck_db / 20)
+        k = np.clip(np.minimum((t - (a - .12)) / .12, 1 - (t - e) / .35), 0, 1); g = np.minimum(g, 1 - k * (1 - low))
+    mix = m * .5 * g; s = int(vo_at * am.SR); mix[s:s + len(v)] += v[:len(mix) - s] * .9
+    wav = ROOT / "research" / "mcp" / "_duck_mix.wav"; wav.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "f32le", "-ar", str(am.SR), "-ac", "1", "-i", "-", str(wav)], input=(mix / max(1e-9, np.abs(mix).max()) * .9).astype(np.float32).tobytes(), check=True)
+    n = 150; venv = np.zeros(n); ve = _env(vo, 0, length, n); sh = int(vo_at / length * n); venv[sh:] = ve[:n - sh]
+    menv = np.convolve(_env(music, 0, length, n), np.ones(5) / 5, mode="same"); menv = .35 + .65 * menv / menv.max()   # its level, not its spikes
+    gm = g[np.linspace(0, len(g) - 1, n).astype(int)]
+    out = []; fs, fb = T.font(13, 700), T.font(15, 600); x0, x1 = 34, W - 210
+    lanes = [("VOICE", venv, (216, 255, 133), 96), ("MUSIC", menv * gm, (141, 253, 186), 196)]
+    for i in range(int(length * FPS)):
+        t = i / FPS; im = Image.new("RGBA", (W, H), PINE + (255,)); d = ImageDraw.Draw(im, "RGBA")
+        T.chip(d, 16, 16, "audio_markers · phrases · duck", 14)
+        for name, env, col, y in lanes:
+            d.text((x0, y - 46), name, font=fs, fill=CLOUD)
+            for k in range(n):
+                x = x0 + (x1 - x0) * k / n; hh = max(1, env[k] * 34); a = 255 if k / n <= t / length else 70
+                d.line([x, y - hh, x, y + hh], fill=col + (a,), width=2)
+        lv = [(x0 + (x1 - x0) * k / n, 238 - 24 * (1 - (20 * np.log10(max(gm[k], 1e-4)) / duck_db))) for k in range(n)]   # the music's level line
+        d.line(lv, fill=(161, 212, 255, 230), width=2); d.text((x1 + 8, 206), "0 dB", font=fs, fill=(161, 212, 255)); d.text((x1 + 8, 230), f"{duck_db} dB", font=fs, fill=(161, 212, 255))
+        for j, (a, e) in enumerate(ph):   # phrase markers with their length, as on the layer
+            xa, xe = x0 + (x1 - x0) * a / length, x0 + (x1 - x0) * e / length
+            d.rounded_rectangle([xa, 136, xe, 146], 4, fill=(216, 255, 133, 220)); d.text((xa, 150), f"phrase {j + 1}", font=fs, fill=SPARK)
+        d.text((x0, 292), f"Music {duck_db} dB under the voice, back in 0.35 s", font=fb, fill=CLOUD)
+        px = x0 + (x1 - x0) * t / length; d.line([px, 40, px, 270], fill=CORAL, width=2)
+        tx = W - 180; d.text((tx, 52), "TIMING TABLE", font=fs, fill=SPARK)
+        for j, (a, e) in enumerate(ph):
+            on = a <= t <= e; d.text((tx, 80 + j * 26), f"{j + 1}   {a:5.2f} – {e:5.2f} s", font=fb, fill=SPARK if on else CLOUD)
+        out.append(np.asarray(im.convert("RGB")))
+    return out, wav
+
+
 JOBS = {
     "brand-curves": lambda: panel("docs/screens/cep-brand-share.gif", "Your brand, applied", ["Its curves, timings and rules", "on every move in this comp."], 4.4),
     "brand-note": lambda: panel("docs/screens/cep-brand-learns.gif", "A note becomes a rule", ["Say it once in review:", "every next project follows it."], 5.6),
@@ -125,10 +200,16 @@ JOBS = {
     "resize": lambda: resize("library/packs/playful.mp4", 3.4),
     "check": lambda: check("library/packs/dynamic.mp4", 3.4),
     "video-ref": lambda: video_ref("media/motion_dna_teaser/video/G1_rex_entrance.mp4", 4.2),
+    "on-beat": lambda: (onbeat("media/motion_dna_teaser/audio/music_teaser_v1.mp3", ["media/motion_dna_teaser/video/G1_rex_entrance.mp4", "media/motion_dna_teaser/video/G5_robot_closeup.mp4", "media/motion_dna_teaser/video/G6_dana_curious.mp4", "media/motion_dna_teaser/video/G4_binder_desk.mp4"], 1.6, 4.4),
+                        ("media/motion_dna_teaser/audio/music_teaser_v1.mp3", 1.6, 4.4)),
+    "duck": lambda: duck("media/motion_dna_teaser/audio/vo_dana_every.mp3", "media/motion_dna_teaser/audio/music_teaser_v1.mp3", 4.2),
 }
 
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     for s in sys.argv[1:] or list(JOBS):
-        fr = JOBS[s](); T.encode(fr, OUT / f"{s}.webm"); Image.fromarray(fr[int(len(fr) * .7)]).save(OUT / f"{s}.jpg", quality=84)
+        fr = JOBS[s](); snd = None
+        if isinstance(fr, tuple):   # (frames, sound): a (file, start, length) span, or a mixed file
+            fr, snd = fr; snd = snd if isinstance(snd, tuple) else (str(snd), 0, len(fr) / FPS)
+        T.encode(fr, OUT / f"{s}.webm", sound=snd); Image.fromarray(fr[int(len(fr) * .7)]).save(OUT / f"{s}.jpg", quality=84)
         print(f"library/prompts/{s}.webm", (OUT / f"{s}.webm").stat().st_size // 1024, "KB")

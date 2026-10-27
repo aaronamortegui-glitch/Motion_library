@@ -24,6 +24,12 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - Shape modifier match names are not what the UI says: *Wiggle Paths* = `ADBE Vector Filter - Roughen`; `ADBE Vector Filter - Wiggler` is *Wiggle Transform*. Probe unknown match names with a throwaway comp (see `harvest_lib.jsx` style loops).
 - `rq.render()` does nothing inside a scheduled task (the bridge) → schedule it with `app.scheduleTask("app.project.renderQueue.render()", 200, false)` and wait for the files (`tools/wait_files.sh`).
 - A locked layer can't be reordered (`moveToEnd`) → lock at the very end.
+- **A different font per letter needs no layer per letter** (AE 2025+): a Source Text expression can style one character
+  at a time, `text.sourceText.style.setFont(name, i, 1)`, chained per index (`SSTX.fontSwap`). The kit we reviewed
+  (MotionMaxxing) split the word into a layer per letter and keyed Source Text; one layer stays editable and retimable.
+- `setTemporalEaseAtKey` / `setSpatialTangentsAtKey` need as many values as the property has: Scale is always 3
+  (`[100, 100, 100]`), a Position tangent is 3 long when the value is → pad 2D values with a 0 before calling.
+- Source Text keyframes hold the first key's value before it: key the start style at the start too, or drive it by expression.
 - `Property.setValueAtTime(t, v)` takes **composition time**, not layer time. Offset keys by `layer.startTime` (this broke freeze frames on every shot except the first).
 - Time remap: enabling it resets the layer out point, and removing *all* its keys hides the property ("parent property is hidden"). Set your keys first, then delete AE's default keys that aren't yours.
 - Font names must be PostScript names; AE only sees newly installed fonts after a restart. Use `SSM.font(role)`.
@@ -494,6 +500,12 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   (`research/voice/voice_setup.py`) with torch 2.7.1 cu128 and Chatterbox installed `--no-deps`; never inside ComfyUI's Python.
   Kept out of the plugin (team rule, 2026-10-26): nothing that needs a GPU-specific install goes in the plugin, because
   most of the team works on Macs.
+
+- **Beats and phrases without librosa** (`tools/audio_markers.py`, 2026-10-26). Spectral flux on a log spectrogram, the
+  tempo from its autocorrelation with the peak refined between frames (a plain frame lag read our 100 BPM bed as 99.4;
+  refined, 99.8, so a grid does not drift over a minute), and the phase that lands on the most onset energy. Phrases:
+  silence below −40 dB relative to the loudest 10 ms for 0.12 s (silencedetect's rule, relative so a quiet take still
+  splits). Ducking in AE: Audio Levels keys −9 dB, 0.12 s attack, 0.35 s release, phrases closer than 0.6 s stay ducked.
 
 ## 7. Repo hygiene
 - All repo content is **English** (code, UI, docs, commits).

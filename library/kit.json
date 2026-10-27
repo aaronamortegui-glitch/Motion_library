@@ -233,6 +233,35 @@
   },
   {
    "kind": "element",
+   "name": "cursor",
+   "energy": [
+    2,
+    4
+   ],
+   "tones": [
+    "friendly",
+    "technical",
+    "modern"
+   ],
+   "use": "A named collaborator cursor that travels on arcs, clicks with a ripple and trails when fast: product demos and 'we built it together' moments.",
+   "call": "add_element(kind=\"cursor\", text=\"Dana\", items=[[700, 400], [1200, 620]])"
+  },
+  {
+   "kind": "element",
+   "name": "selection",
+   "energy": [
+    2,
+    3
+   ],
+   "tones": [
+    "technical",
+    "modern"
+   ],
+   "use": "A cursor drags a selection marquee open, the handles pop and the frame's name and live size show: design-tool and UI stories.",
+   "call": "add_element(kind=\"selection\", text=\"Frame 1\", slot=[800, 450])"
+  },
+  {
+   "kind": "element",
    "name": "kinetic",
    "energy": [
     4,
@@ -1110,6 +1139,21 @@
    ],
    "use": "Types with a blinking cursor.",
    "call": "animate_text(typewriter=true, cps=18)"
+  },
+  {
+   "kind": "text",
+   "name": "Font Swap",
+   "energy": [
+    3,
+    5
+   ],
+   "tones": [
+    "editorial",
+    "playful",
+    "bold"
+   ],
+   "use": "Each letter flicks through clean display faces, then settles on the brand font left to right with a pop; idle keeps a letter swapping now and then.",
+   "call": "animate_text(font_swap=\"idle\", settle=0.6, stagger=0.07)"
   },
   {
    "kind": "text",

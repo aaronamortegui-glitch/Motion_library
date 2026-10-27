@@ -741,9 +741,171 @@ var SSE = (function () {
         return finish(comp, ctrl, layers, o);
     }
 
+    // A named collaborator cursor (the Figma kind: arrow plus a name tag) as one shape layer with its tip at the anchor,
+    // and the name parented to it. Returns [shape, name].
+    function arrowLayer(comp, n, who, o) {
+        var A = shapeLayer(comp, n + " cursor"), v = A.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
+        var s = new Shape(), k = 2.1, P = [[0, 0], [0, 23], [6.2, 17.2], [10.4, 26.4], [14.2, 24.8], [10.1, 15.8], [18.4, 15.8]], vs = [];
+        for (var i = 0; i < P.length; i++) vs.push([P[i][0] * k, P[i][1] * k]);
+        s.vertices = vs; s.closed = true;
+        v.addProperty("ADBE Vector Shape - Group").property("ADBE Vector Shape").setValue(s);
+        var st = v.addProperty("ADBE Vector Graphic - Stroke");
+        st.property("ADBE Vector Stroke Color").expression = 'thisComp.layer(' + q(n) + ').effect("Box")("Color")';
+        st.property("ADBE Vector Stroke Width").setValue(3.5); st.property("ADBE Vector Stroke Line Join").setValue(2);
+        v.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").expression = 'thisComp.layer(' + q(n) + ').effect("Accent")("Color")';
+        var T = text(comp, who, n, { size: o.size || 26, fonts: o.fonts, textColor: "Box" }, "title"); T.name = n + " name";
+        var r = T.sourceRectAtTime(0, false), tw = Math.ceil(r.width + 28), th = Math.ceil(r.height + 20), tx = 30, ty = 58;
+        var g = A.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group"), gv = g.property("ADBE Vectors Group");
+        var rc = gv.addProperty("ADBE Vector Shape - Rect");
+        rc.property("ADBE Vector Rect Size").setValue([tw, th]); rc.property("ADBE Vector Rect Position").setValue([tx + tw / 2, ty + th / 2]);
+        rc.property("ADBE Vector Rect Roundness").setValue(12);
+        gv.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").expression = 'thisComp.layer(' + q(n) + ').effect("Accent")("Color")';
+        g.moveTo(2);   // the tag sits under the arrow
+        var sh = A.property("ADBE Effect Parade").addProperty("ADBE Drop Shadow");
+        sh.property("ADBE Drop Shadow-0002").setValue(70); sh.property("ADBE Drop Shadow-0004").setValue(5); sh.property("ADBE Drop Shadow-0005").setValue(12);
+        T.parent = A;
+        T.property("ADBE Transform Group").property("ADBE Position").setValue([tx + 14 - r.left, ty + th / 2 - r.top - r.height / 2]);
+        A.motionBlur = true; T.motionBlur = true;
+        return [A, T];
+    }
+    // Click feedback at a comp point: a ring that grows and fades.
+    function ripple(comp, n, p, t) {
+        var R = shapeLayer(comp, n + " click " + (Math.round(t * 100) / 100)), v = R.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
+        v.addProperty("ADBE Vector Shape - Ellipse").property("ADBE Vector Ellipse Size").setValue([110, 110]);
+        var st = v.addProperty("ADBE Vector Graphic - Stroke");
+        st.property("ADBE Vector Stroke Color").expression = 'thisComp.layer(' + q(n) + ').effect("Accent")("Color")'; st.property("ADBE Vector Stroke Width").setValue(5);
+        var TT = R.property("ADBE Transform Group");
+        TT.property("ADBE Position").setValue(p);
+        SSM.animate(TT.property("ADBE Scale"), t, [10, 10, 100], [100, 100, 100], "Arrive", "Land");
+        SSM.animate(TT.property("ADBE Opacity"), t, 90, 0, "Arrive", "Flat");
+        R.inPoint = t; R.outPoint = t + SSM.seconds("Arrive") + 0.05;
+        return R;
+    }
+    // Collaborator cursor: a named cursor enters from the edge, travels on arcs to each point, clicks there (squash and
+    // a ripple), and leaves through the edge; a tapered trail follows fast moves. items: [[x, y], …] click points.
+    function cursor(comp, who, o) {
+        o = o || {};
+        var ctrl = controller(comp, "cursor", { t: o.t, colors: o.colors }), n = ctrl.name, W = comp.width, H = comp.height;
+        var pts = o.items && o.items.length ? o.items : [[W * 0.4, H * 0.42], [W * 0.62, H * 0.6]];
+        var AT = arrowLayer(comp, n, who || "Dana", o), A = AT[0], TR = A.property("ADBE Transform Group"), P = TR.property("ADBE Position");
+        var t = o.t || 0, mv = SSM.seconds(o.dur || "Sweep"), hold = o.hold === undefined ? 0.45 : o.hold;
+        var from = o.from || [W + 90, H * 0.9], to = o.exit || [W + 90, H * 0.2], prev = from, layers = [A, AT[1]], rings = [], i;
+        for (i = 0; i < pts.length; i++) {
+            var tc = SSM.animate(P, t, prev, pts[i], o.dur || "Sweep", o.ease || "Land");
+            SSM.animate(TR.property("ADBE Scale"), tc + 0.06, [100, 100, 100], [84, 84, 100], "Tick", "Flat");
+            SSM.animate(TR.property("ADBE Scale"), tc + 0.06 + SSM.seconds("Tick"), [84, 84, 100], [100, 100, 100], "Glide", "Land");
+            if (o.click !== false) rings.push(ripple(comp, n, pts[i], tc + 0.08));   // own in/out points: kept out of finish()
+            prev = pts[i]; t = tc + hold;
+        }
+        var tOut = o.out || t;
+        SSM.animate(P, tOut, prev, to, o.dur || "Sweep", "Launch");
+        // arcs: every move bends a little, alternating sides, like a hand
+        for (var k = 1; k < P.numKeys; k++) {
+            var a = P.keyValue(k), b = P.keyValue(k + 1), dx = b[0] - a[0], dy = b[1] - a[1], len = Math.sqrt(dx * dx + dy * dy);
+            if (len < 1) continue;
+            var bend = len * 0.16 * (k % 2 ? 1 : -1), nx = -dy / len * bend, ny = dx / len * bend;
+            P.setSpatialAutoBezierAtKey(k, false); P.setSpatialAutoBezierAtKey(k + 1, false);
+            P.setSpatialContinuousAtKey(k, false); P.setSpatialContinuousAtKey(k + 1, false);
+            var oA = [dx / 3 + nx, dy / 3 + ny], iB = [-dx / 3 + nx, -dy / 3 + ny];
+            if (a.length === 3) { oA.push(0); iB.push(0); }
+            P.setSpatialTangentsAtKey(k, P.keyInSpatialTangent(k), oA);
+            P.setSpatialTangentsAtKey(k + 1, iB, P.keyOutSpatialTangent(k + 1));
+        }
+        if (o.trail !== false) {   // the trail samples the tip's recent path; it shows only while the cursor is fast
+            var L = shapeLayer(comp, n + " trail"), g = L.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
+            g.addProperty("ADBE Vector Shape - Group").property("ADBE Vector Shape").expression =
+                'var L = thisComp.layer(' + q(A.name) + '), pts = [];\nfor (var i = 0; i < 16; i++) { var p = L.toComp([0, 0], time - 0.28 * i / 15); pts.push([p[0], p[1]]); }\ncreatePath(pts, [], [], false);';
+            var st = g.addProperty("ADBE Vector Graphic - Stroke");
+            st.property("ADBE Vector Stroke Color").expression = 'thisComp.layer(' + q(n) + ').effect("Accent")("Color")';
+            st.property("ADBE Vector Stroke Width").setValue(8); st.property("ADBE Vector Stroke Line Cap").setValue(2);
+            try { var tp = st.property("ADBE Vector Stroke Taper"); tp.property("ADBE Vector Taper Start Width").setValue(100); tp.property("ADBE Vector Taper End Width").setValue(0); tp.property("ADBE Vector Taper End Length").setValue(100); } catch (e) {}
+            st.property("ADBE Vector Stroke Opacity").expression =
+                'var L = thisComp.layer(' + q(A.name) + '), v = length(L.toComp([0, 0], time), L.toComp([0, 0], time - 0.05)) / 0.05;\nlinear(v, 150, 1400, 0, 70);';
+            L.moveAfter(A); layers.push(L);
+        }
+        A.moveToBeginning(); AT[1].moveBefore(A);
+        var r = finish(comp, ctrl, layers, { t: o.t || 0 });
+        var end = tOut + mv + 0.05; for (i = 0; i < layers.length; i++) if (layers[i].outPoint > end) layers[i].outPoint = end;
+        for (i = 0; i < rings.length; i++) rings[i].comment = "SS element: " + n;
+        ctrl.outPoint = end;
+        return r;
+    }
+    // Selection marquee (the design-tool kind): a cursor drags a box open from one corner, the handles pop and a tag
+    // names the frame. position = the box centre, size = [w, h], text = the tag ("Frame 1"), sub = the size line.
+    function selection(comp, str, o) {
+        o = o || {};
+        var ctrl = controller(comp, "selection", { t: o.t, colors: o.colors }), n = ctrl.name, W = comp.width, H = comp.height;
+        var c = o.position || [W / 2, H / 2], sz = o.slot || o.size || [W * 0.42, H * 0.42], t = o.t || 0, layers = [];
+        var tl = [c[0] - sz[0] / 2, c[1] - sz[1] / 2], br = [c[0] + sz[0] / 2, c[1] + sz[1] / 2];
+        control(ctrl, "ADBE Slider Control", "Drag");
+        var drag = ctrl.property("ADBE Effect Parade").property("Drag").property(1), mv = SSM.seconds("Sweep");
+        var t0 = t + mv + 0.1, t1 = SSM.animate(drag, t0, 0, 100, o.dur || "Stage", o.ease || "Land");
+        var D = 'var C = thisComp.layer(' + q(n) + '), d = C.effect("Drag")("Slider") / 100, a = [' + tl.join(", ") + '], b = [' + br.join(", ") + '];\n' +
+                'var p = [a[0] + (b[0] - a[0]) * d, a[1] + (b[1] - a[1]) * d];\n';
+        var S = shapeLayer(comp, n + " box"), g = S.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
+        var rc = g.addProperty("ADBE Vector Shape - Rect");
+        rc.property("ADBE Vector Rect Size").expression = D + '[Math.max(p[0] - a[0], 1), Math.max(p[1] - a[1], 1)];';
+        rc.property("ADBE Vector Rect Position").expression = D + '[(a[0] + p[0]) / 2, (a[1] + p[1]) / 2];';
+        var st = g.addProperty("ADBE Vector Graphic - Stroke");
+        st.property("ADBE Vector Stroke Color").expression = 'thisComp.layer(' + q(n) + ').effect("Accent")("Color")'; st.property("ADBE Vector Stroke Width").setValue(3);
+        var fl = g.addProperty("ADBE Vector Graphic - Fill");
+        fl.property("ADBE Vector Fill Color").expression = 'thisComp.layer(' + q(n) + ').effect("Accent")("Color")';
+        fl.property("ADBE Vector Fill Opacity").expression = 'var d = thisComp.layer(' + q(n) + ').effect("Drag")("Slider"); d > 0 && d < 99.5 ? 14 : 6;';
+        S.property("ADBE Transform Group").property("ADBE Opacity").expression = 'thisComp.layer(' + q(n) + ').effect("Drag")("Slider") > 0.5 ? 100 : 0;';
+        layers.push(S);
+        // the four handles land with a pop once the box is open
+        var corners = [tl, [br[0], tl[1]], [tl[0], br[1]], br];
+        for (var i = 0; i < 4; i++) {
+            var Hd = shapeLayer(comp, n + " handle " + (i + 1)), hv = Hd.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
+            hv.addProperty("ADBE Vector Shape - Rect").property("ADBE Vector Rect Size").setValue([18, 18]);
+            var hs = hv.addProperty("ADBE Vector Graphic - Stroke");
+            hs.property("ADBE Vector Stroke Color").expression = 'thisComp.layer(' + q(n) + ').effect("Accent")("Color")'; hs.property("ADBE Vector Stroke Width").setValue(3);
+            hv.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").expression = 'thisComp.layer(' + q(n) + ').effect("Text")("Color")';
+            var HT = Hd.property("ADBE Transform Group");
+            HT.property("ADBE Anchor Point").setValue([0, 0]); HT.property("ADBE Position").setValue(corners[i]);
+            SSM.animate(HT.property("ADBE Scale"), t1 - 0.05 + i * 0.04, [0, 0, 100], [100, 100, 100], "Arrive", "Pop");
+            layers.push(Hd);
+        }
+        // the tag above the top-left corner: name in the accent, size line after it
+        var T = text(comp, str || "Frame 1", n, { size: o.size && !(o.size instanceof Array) ? o.size : 26, fonts: o.fonts, textColor: "Box" }, "title"); T.name = n + " text";
+        var r = T.sourceRectAtTime(0, false), th = Math.ceil(r.height + 18), tw = Math.ceil(r.width + 26);
+        var Tg = shapeLayer(comp, n + " tag"), tv = Tg.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");
+        var tr = tv.addProperty("ADBE Vector Shape - Rect"); tr.property("ADBE Vector Rect Size").setValue([tw, th]);
+        tr.property("ADBE Vector Rect Position").setValue([tl[0] + tw / 2, tl[1] - 14 - th / 2]); tr.property("ADBE Vector Rect Roundness").setValue(6);
+        tv.addProperty("ADBE Vector Graphic - Fill").property("ADBE Vector Fill Color").expression = 'thisComp.layer(' + q(n) + ').effect("Accent")("Color")';
+        T.property("ADBE Transform Group").property("ADBE Position").setValue([tl[0] + 13 - r.left, tl[1] - 14 - th / 2 - r.top - r.height / 2]);
+        SSM.animate(Tg.property("ADBE Transform Group").property("ADBE Opacity"), t1 - 0.1, 0, 100, "Blink", "Flat");
+        SSM.animate(T.property("ADBE Transform Group").property("ADBE Opacity"), t1 - 0.1, 0, 100, "Blink", "Flat");
+        T.moveBefore(Tg);   // the name over its tag
+        layers.push(Tg, T);
+        if (o.sub !== false) {   // the size, the way a design tool shows it under the box
+            var Z = text(comp, o.sub || (Math.round(sz[0]) + " × " + Math.round(sz[1])), n, { size: 22, fonts: o.fonts, textColor: "Accent" }, "text"); Z.name = n + " size";
+            var rz = Z.sourceRectAtTime(0, false);
+            Z.property("ADBE Transform Group").property("ADBE Position").setValue([c[0] - rz.left - rz.width / 2, br[1] + 16 - rz.top]);
+            Z.property("ADBE Text Properties").property("ADBE Text Document").expression = 'var d = thisComp.layer(' + q(n) + ').effect("Drag")("Slider") / 100; Math.round(' + sz[0] + ' * d) + " × " + Math.round(' + sz[1] + ' * d);';
+            Z.property("ADBE Transform Group").property("ADBE Opacity").expression = 'thisComp.layer(' + q(n) + ').effect("Drag")("Slider") > 0.5 ? 100 : 0;';
+            layers.push(Z);
+        }
+        if (o.click !== false) {   // the cursor that drags it: arrives at the corner, presses, drags, lets go and leaves
+            var AT = arrowLayer(comp, n, o.who || "Dana", o), A = AT[0], AP = A.property("ADBE Transform Group").property("ADBE Position");
+            var tin = SSM.animate(AP, t, [W + 90, H * 0.85], tl, "Sweep", "Land");
+            AP.setValueAtTime(t0, tl);
+            AP.expression = D + 'time >= ' + t0 + ' && time <= ' + t1 + ' ? p : value;';
+            AP.setValueAtTime(t1, br);
+            SSM.animate(AP, t1 + 0.35, br, [W + 90, br[1] + 120], "Sweep", "Launch");
+            var AS = A.property("ADBE Transform Group").property("ADBE Scale");
+            SSM.animate(AS, t0 - 0.08, [100, 100, 100], [86, 86, 100], "Tick", "Flat"); SSM.animate(AS, t1 + 0.05, [86, 86, 100], [100, 100, 100], "Glide", "Land");
+            layers.push(A, AT[1]);
+            A.moveToBeginning(); AT[1].moveBefore(A);
+        }
+        var out = finish(comp, ctrl, layers, o);
+        return out;
+    }
+
     return {
         kinds: ["label", "lower_third", "title", "underline", "highlight", "callout", "counter", "timer", "price_tag", "handle", "bubble",
-                "sticker", "quote", "list", "progress", "button", "kinetic", "tiles", "text_box", "media", "scale_title", "cinematic", "chat", "rating", "ring", "end_card"],
+                "sticker", "quote", "list", "progress", "button", "kinetic", "tiles", "text_box", "media", "scale_title", "cinematic", "chat", "rating", "ring", "end_card", "cursor", "selection"],
+        cursor: cursor, selection: selection,
         label: label, lowerThird: lowerThird, title: title, callout: callout, counter: counter, timer: timer, priceTag: priceTag,
         handle: handle, bubble: bubble, sticker: sticker, quote: quote, list: list, progress: progress, button: button,
         kinetic: kinetic, tiles: tiles, textbox: textbox, media: media, scaleTitle: scaleTitle, cinematic: cinematic, chat: chat, rating: rating, ring: ring, endCard: endCard,

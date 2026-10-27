@@ -115,6 +115,7 @@ ELEMENTS = {
     "scale_title": dict(text="Scale title", mode="push"), "cinematic": dict(text="Cinema", style="blur"), "chat": dict(text="Did you see the new kit?"),
     "rating": dict(value=5), "ring": dict(value=72), "glass_card": dict(text="Glass card", sub="Frosted and smoky"),
     "end_card": dict(text="Motion DNA", sub="The motion library for After Effects"),
+    "cursor": dict(text="Dana", items=[[520, 300], [860, 420], [640, 520]]), "selection": dict(text="Frame 1", slot=[560, 300], position=[480, 290]),
 }
 TEXT = {
     "Chars Pop Rise": dict(unit="chars", channels=["fade", "rise"], ease="Pop"),
@@ -126,6 +127,7 @@ TEXT = {
     "Chars Skew Slide": dict(unit="chars", channels=["skew", "slide", "fade"], ease="Whip"),
     "Words Colour Pop": dict(unit="words", channels=["color", "scale"], ease="Pop"),
     "Typewriter Cursor": dict(typewriter=True, cps=14),
+    "Font Swap": dict(font_swap="idle", settle=0.5, stagger=0.06),
 }
 
 
@@ -133,12 +135,12 @@ def build_one(kind, name, rows):
     """Creates the preview comp for one piece and applies it. Returns (comp name, answer)."""
     if kind == "element":
         bg_extra = (MESH if name == "glass_card" else "") + (SAMPLE.replace("120", "110") if name in ("underline", "highlight") else "")
-        cn = setup(kind, name, 4.0 if name == "end_card" else 3.5, None if name == "glass_card" else PINE, (photo(name) if name != "glass_card" else "") + bg_extra)
+        cn = setup(kind, name, {"end_card": 4.0, "cursor": 4.6, "selection": 3.8}.get(name, 3.5), None if name == "glass_card" else PINE, (photo(name) if name != "glass_card" else "") + bg_extra)
         args = dict(ELEMENTS.get(name, {}))
         cols = [PINE, SPARK, CLOUD]
         if name in ("label", "sticker"): cols = [SPARK, PINE, PINE]
         if name in ("title", "scale_title", "media"): cols = [CLOUD, SPARK, PINE]   # boxless: the text takes the Box colour
-        if name != "end_card": args["out"] = 2.5   # in, hold, out: the preview moves from start to end
+        if name not in ("end_card", "cursor", "selection"): args["out"] = 2.5   # in, hold, out: the preview moves from start to end
         return cn, m.t_add_element(kind=name, comp=cn, t=0.2, colors=cols, **args)
     if kind == "shape":
         cn = setup(kind, name, 2.6)

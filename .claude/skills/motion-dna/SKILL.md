@@ -123,6 +123,23 @@ Animation Composer's asset packs (≈300 SFX, light leaks, grain, film burns, VH
 - Layout rules (CONTRIBUTING §9, checked by `tools/check_layout.jsx`): no text on text, 40 px safe area, labels that do not fit sideways stack into up to 3 lines (`wrap`, `label` arrays, `labelSide`), ≥ 32 px, contrast or a `"card": true`, nothing on faces (anchor callouts on the torso; `tools/face_boxes.py` → `"faces"`), no cut inside a word, audio tails past cuts, key moments on the beat.
 - Techniques by script: people mattes `tools/video_matte.py` (InSPyReNet, local GPU), head/body tracks from a matte `tools/matte_points.py`, planar (2.5D) tracks `tools/planar_track.py` → `planar` items, HUD `rays` (halo) and `burst` (action lines), freeze `mono` + `split` (person in colour, name on both sides), `screen` (corner-pin a comp or clip onto a screen) and `pixels` (pixel art) in `build_explainer.jsx`.
 
+## Timing, notes and review (a piece with a voice or a beat)
+- **Sound first.** Time the voice before the scenes: `audio_markers(layer=<VO>, mode="phrases")` puts a marker per
+  spoken phrase and returns the timing table; `audio_markers(layer=<music>, mode="beats", every=2)` gives the beat grid.
+  Cuts, word reveals and hero moves land on those markers; `duck=<music>` lowers the music under the voice. Keep a voice
+  near 2 to 2.5 words per second and start the first word around 1 s in.
+- **End poses first.** Agree on the last frame of each scene (Figma storyboard, or `render_frame`) before animating
+  the moves between them. Every final pose holds at least 1 s.
+- **Timing on the tokens.** Entrances Arrive or Sweep, exits Glide, micro-moves Tick or Blink, staggers 2 to 4 frames
+  per word; Stage for a camera or a big reveal. Tech feels crisp (Arrive), lifestyle calm (Sweep, Stage).
+- **Notes by scene and second.** Ask for and write notes as "S03, 12.3 s, the cursor is too slow", not "more dynamic".
+  Turn a vague note into a principle (`library/glossary.json`, Principles): more travel (exaggeration), an answer to the
+  main move (secondary action), an arc, firmer timing (weight). One kind of change per round, then look again.
+- **Interface stories.** `add_element(kind="cursor")` is a named collaborator cursor that clicks on arcs and leaves;
+  `kind="selection"` drags a marquee open; `animate_text(font_swap=True)` swaps display faces per letter and settles on
+  the brand font (After Effects 2025+). Two cursors with two names read as people working together; never leave a
+  cursor parked on screen.
+
 ## Typography
 Use `SSM.font("display" | "ui" | "ui_regular")`: returns Instrument Serif / Inter Tight when installed (files in `assets/fonts/`, OFL), otherwise Georgia / Arial. Never hard-code font names.
 

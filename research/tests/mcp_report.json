@@ -119,7 +119,7 @@
    "comp": "_MCP_TEST · 9x16",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1793045670179.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1793065262880.png (open it to look at the frame)"
  },
  {
   "tool": "apply_preset",
@@ -165,7 +165,7 @@
    "comp": "_MCP_TEST",
    "time_s": 0.5
   },
-  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1793045675441.png (open it to look at the frame)"
+  "answer": "Saved D:\\motion category ai library\\research\\mcp\\frame_1793065267491.png (open it to look at the frame)"
  },
  {
   "tool": "check_layout",
@@ -711,32 +711,32 @@
   "tool": "import_media",
   "ok": true,
   "args": {
-   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261026-161421\\product_car_side.jpg",
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261026-214053\\product_car_side.jpg",
    "comp": "_MCP_TEST",
    "time_s": 0.5,
    "name": "imported_photo"
   },
-  "answer": "file D:/motion category ai library/research/_mcp_test/20261026-161421/product_car_side.jpg\nimported imported_photo as layer 1 in _MCP_TEST at 0.50 s"
+  "answer": "file D:/motion category ai library/research/_mcp_test/20261026-214053/product_car_side.jpg\nimported imported_photo as layer 1 in _MCP_TEST at 0.50 s"
  },
  {
   "tool": "import_media",
   "ok": true,
   "args": {
    "source": "https://raw.githubusercontent.com/aaronamortegui-glitch/Motion_library/main/library/packs/calm-modern.png",
-   "dest": "D:\\motion category ai library\\research\\_mcp_test\\20261026-161421\\generated",
+   "dest": "D:\\motion category ai library\\research\\_mcp_test\\20261026-214053\\generated",
    "comp": "_MCP_TEST",
    "fit": false
   },
-  "answer": "saved D:/motion category ai library/research/_mcp_test/20261026-161421/generated/calm-modern.png\nimported calm-modern.png as layer 1 in _MCP_TEST at 0.00 s"
+  "answer": "saved D:/motion category ai library/research/_mcp_test/20261026-214053/generated/calm-modern.png\nimported calm-modern.png as layer 1 in _MCP_TEST at 0.00 s"
  },
  {
   "tool": "import_media",
   "ok": true,
   "args": {
-   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261026-161421\\missing.png",
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261026-214053\\missing.png",
    "comp": "_MCP_TEST"
   },
-  "answer": "not found: D:\\motion category ai library\\research\\_mcp_test\\20261026-161421\\missing.png"
+  "answer": "not found: D:\\motion category ai library\\research\\_mcp_test\\20261026-214053\\missing.png"
  },
  {
   "tool": "add_asset",
@@ -759,16 +759,16 @@
    "category": "motion",
    "why": "test"
   },
-  "answer": "saved rule 1 (motion) in D:/motion category ai library/research/_mcp_test/20261026-161421/brand/brand.json: Product shots glide in, never pop"
+  "answer": "saved rule 1 (motion) in D:/motion category ai library/research/_mcp_test/20261026-214053/brand/brand.json: Product shots glide in, never pop"
  },
  {
   "tool": "matte",
   "ok": true,
   "args": {
-   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261026-161421\\product_car_side.jpg",
-   "out": "D:\\motion category ai library\\research\\_mcp_test\\20261026-161421\\product_cutout.png"
+   "source": "D:\\motion category ai library\\research\\_mcp_test\\20261026-214053\\product_car_side.jpg",
+   "out": "D:\\motion category ai library\\research\\_mcp_test\\20261026-214053\\product_cutout.png"
   },
-  "answer": "matte: D:/motion category ai library/research/_mcp_test/20261026-161421/product_cutout.png"
+  "answer": "matte: D:/motion category ai library/research/_mcp_test/20261026-214053/product_cutout.png"
  },
  {
   "tool": "run_jsx",
@@ -877,12 +877,79 @@
   "answer": "FX · scribble · Title at 0.20 s for 1.0 s (paper.js 0.16.0), layer 1\nRendered D:\\motion category ai library\\renders\\web_fx\\scribble_e2998b9aa5.mov. Look at it with render_frame; add_sound gives it its sound."
  },
  {
+  "tool": "add_element",
+  "ok": true,
+  "args": {
+   "kind": "cursor",
+   "text": "Dana",
+   "items": [
+    [
+     500,
+     300
+    ],
+    [
+     900,
+     500
+    ]
+   ],
+   "comp": "_MCP_TEST",
+   "t": 0.2
+  },
+  "answer": "EL · cursor 1 built (0.20-3.25 s). Restyle it on the controller: Reveal, Padding X/Y, Radius, Gap, Box/Accent/Text colours.\nCheck it with render_frame and check_layout (text must not touch other objects)."
+ },
+ {
+  "tool": "add_element",
+  "ok": true,
+  "args": {
+   "kind": "selection",
+   "text": "Frame 1",
+   "slot": [
+    400,
+    240
+   ],
+   "comp": "_MCP_TEST",
+   "t": 0.2
+  },
+  "answer": "EL · selection 1 built (0.20-4.00 s). Restyle it on the controller: Reveal, Padding X/Y, Radius, Gap, Box/Accent/Text colours.\nCheck it with render_frame and check_layout (text must not touch other objects)."
+ },
+ {
+  "tool": "animate_text",
+  "ok": true,
+  "args": {
+   "layers": [
+    "Title"
+   ],
+   "comp": "_MCP_TEST",
+   "font_swap": true,
+   "t": 0.2
+  },
+  "answer": "Title: font swap through 9 faces, settled by 1.5 s"
+ },
+ {
+  "tool": "run_jsx",
+  "ok": true,
+  "args": {
+   "code": "…"
+  },
+  "answer": "bed ok"
+ },
+ {
+  "tool": "audio_markers",
+  "ok": true,
+  "args": {
+   "layer": "Bed",
+   "mode": "beats",
+   "comp": "_MCP_TEST"
+  },
+  "answer": "7 beat markers on Bed · 99.8 BPM\nFirst: 0.28, 0.88, 1.48, 2.08, 2.68, 3.28, 3.88 s (comp time). Snap cuts and key moves to the markers."
+ },
+ {
   "tool": "add_sound",
   "ok": true,
   "args": {
    "comp": "_MCP_TEST"
   },
-  "answer": "Motion DNA sound in _MCP_TEST: 7 cues, layer 78, D:/motion category ai library/renders/sound/_MCP_TEST_mdna_sound.wav\n0.13 s  tick  · EL · end card 1 tagline arrives\n0.23 s  whoosh  · cut to FX · scribble · Title\n0.53 s  whoosh (take 2)  · cut to imported_photo\n1.28 s  pop  · TR · behavior 1 · 1 1 p"
+  "answer": "Motion DNA sound in _MCP_TEST: 12 cues, layer 96, D:/motion category ai library/renders/sound/_MCP_TEST_mdna_sound.wav\n0.13 s  tick  · EL · end card 1 tagline arrives\n0.23 s  whoosh  · cut to FX · scribble · Title\n0.53 s  whoosh (take 2)  · cut to imported_photo\n0.93 s  whoosh (take 3)  · EL · selec"
  },
  {
   "tool": "record_screen",

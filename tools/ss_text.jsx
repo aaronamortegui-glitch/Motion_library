@@ -9,6 +9,7 @@
 //        SSTX.animate(layer, {unit: "words", channels: ["decode", "fade"], mode: "flicker"});
 //        SSTX.animate(layer, {unit: "lines", channels: ["rise"], mask: true});          // lines slide up from a mask
 //        SSTX.typewriter(layer, {t: 0.5, cps: 18, cursor: "|"});
+//        SSTX.fontSwap(layer, {t: 0.3, settle: 0.6, stagger: 0.07, mode: "idle"});   // letters flick through faces, then settle
 // Options: unit chars|words|lines · channels fade, rise, drop, slide, scale, rotate, rotate3d, skew, tracking, blur,
 //          decode, color · mode ease|flicker|wiggly · order forward|reverse|center|edges|random · phase in|out|both
 //          t (s) · dur (token per unit, default Arrive) · ease (curve token, default Settle in / Launch out)
@@ -128,6 +129,45 @@ var SSTX = (function () {
         return L.name + ": typewriter";
     }
 
+    // Font swap: from t each letter flicks through clean display faces (one swap every `step` s) and settles on the
+    // layer's own font left to right (`settle` s, then one letter every `stagger` s) with a small scale pop. mode
+    // "idle" keeps it alive afterwards: every `every` s one letter borrows a face for `step` s. One layer, per-character
+    // style from a Source Text expression (After Effects 2025+). Only clean faces: script or grunge fonts read as a bug.
+    var SWAP = ["Georgia-BoldItalic", "Impact", "CourierNewPS-BoldMT", "TimesNewRomanPS-BoldItalicMT", "Didot-Bold", "Futura-Bold",
+                "Rockwell-Bold", "GillSans-UltraBold", "Baskerville-BoldItalic", "HelveticaNeue-CondensedBlack", "InstrumentSerif-Italic",
+                "InterTight-Thin", "InterTight-Black", "Bahnschrift", "Verdana-Bold", "Optima-ExtraBlack", "AvenirNext-HeavyItalic"];
+    function fontSwap(L, o) {
+        o = o || {};
+        var bad = {}, fonts = [], list = o.fonts || SWAP, i;
+        try { var m = app.fonts.missingOrSubstitutedFonts; for (i = 0; i < m.length; i++) bad[m[i].postScriptName] = true; } catch (e0) {}
+        for (i = 0; i < list.length; i++) { var ok = true; try { ok = app.fonts.getFontsByPostScriptName(list[i]).length > 0; } catch (e1) {} if (ok && !bad[list[i]]) fonts.push(list[i]); }
+        if (fonts.length < 3) return L.name + ": font swap needs 3 installed display fonts (found " + fonts.length + ")";
+        var t = o.t === undefined ? L.inPoint : o.t, step = o.step || 0.12, settle = o.settle === undefined ? 0.6 : o.settle,
+            stagger = o.stagger === undefined ? 0.07 : o.stagger, every = o.every || 0.5, idle = o.mode === "idle";
+        var fl = []; for (i = 0; i < fonts.length; i++) fl.push('"' + fonts[i] + '"');
+        var P = L.property("ADBE Text Properties").property("ADBE Text Document");
+        P.expression =
+            'var F = [' + fl.join(", ") + '], t0 = ' + t + ', st = ' + step + ', se = ' + settle + ', sg = ' + stagger + ';\n' +
+            'var s = text.sourceText.style, txt = text.sourceText.toString(), n = txt.length, k = Math.floor((time - t0) / st);\n' +
+            'for (var i = 0; i < n; i++) { if (txt.charAt(i) === " ") continue;\n' +
+            '  var swap = time >= t0 && time < t0 + se + i * sg;\n' +
+            (idle ? '  if (!swap && time >= t0 + se + n * sg) { var j = Math.floor((time - t0) / ' + every + '); seedRandom(j * 7 + 3, true); swap = Math.floor(random(n)) === i && (time - t0) % ' + every + ' < st; }\n' : '') +
+            '  if (swap) { seedRandom(i * 101 + k * 17 + 5, true); s = s.setFont(F[Math.floor(random(F.length))], i, 1); } }\n' +
+            's;';
+        if (P.expressionError) { P.expression = ""; return L.name + ": font swap needs After Effects 2025 or later (" + P.expressionError + ")"; }
+        // each letter pops as it lands on its own font
+        var an = L.property("ADBE Text Properties").property("ADBE Text Animators").addProperty("ADBE Text Animator");
+        an.name = "SS font swap pop";
+        an.property("ADBE Text Animator Properties").addProperty("ADBE Text Scale 3D").setValue([116, 116, 100]);
+        var sel = an.property("ADBE Text Selectors").addProperty("ADBE Text Expressible Selector");
+        sel.property("ADBE Text Range Type2").setValue(1);
+        sel.property("ADBE Text Expressible Amount").expression =
+            'var d = time - (' + t + ' + ' + settle + ' + (textIndex - 1) * ' + stagger + '), u = d / 0.22;\n' +
+            'var a = (d < 0 || u >= 1) ? 0 : 100 * Math.pow(1 - u, 3); [a, a, a];';
+        L.comment = (L.comment ? L.comment + " | " : "") + "SS text: font swap" + (idle ? " (idle)" : "");
+        return L.name + ": font swap through " + fonts.length + " faces, settled by " + (Math.round((t + settle + L.property("ADBE Text Properties").property("ADBE Text Document").value.text.length * stagger) * 100) / 100) + " s";
+    }
+
     // Captions from word timings [{w, s, e}] (tools/vo_words.py) or cues: lines grouped by length and pauses, one text
     // layer per line. style: highlight (the spoken word in the accent colour) | karaoke (spoken words stay coloured)
     // | build (words appear as spoken) | pop (the spoken word grows and takes the accent) | word (one word at a time).
@@ -192,5 +232,5 @@ var SSTX = (function () {
         return lines.length + " caption lines (" + style + ")";
     }
     function JSON_ARR(a) { var o = []; for (var i = 0; i < a.length; i++) o.push('"' + String(a[i]).replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"'); return "[" + o.join(",") + "]"; }
-    return { animate: animate, typewriter: typewriter, captions: captions, channels: ["fade", "rise", "drop", "slide", "scale", "rotate", "rotate3d", "skew", "tracking", "blur", "decode", "color"] };
+    return { animate: animate, typewriter: typewriter, fontSwap: fontSwap, captions: captions, channels: ["fade", "rise", "drop", "slide", "scale", "rotate", "rotate3d", "skew", "tracking", "blur", "decode", "color"] };
 })();
