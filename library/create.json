@@ -1,0 +1,307 @@
+{
+ "note": "Built by tools/build_library_guide.py for the panel (Agent › Library › Create).",
+ "items": [
+  {
+   "name": "Coverflow",
+   "sub": "Carousel · 3D",
+   "desc": "The centre card faces you, the others turn away in depth (Swiper's coverflow).",
+   "thumb": "library/carousels/coverflow.jpg",
+   "img": "library/carousels/coverflow.webm",
+   "order": "Animate this carousel post in the coverflow style. Use the video-templates skill, template t16_carousel."
+  },
+  {
+   "name": "Cube",
+   "sub": "Carousel · 3D",
+   "desc": "Each slide is a face of a cube that turns to the next.",
+   "thumb": "library/carousels/cube.jpg",
+   "img": "library/carousels/cube.webm",
+   "order": "Animate this carousel post in the cube style. Use the video-templates skill, template t16_carousel."
+  },
+  {
+   "name": "Cylinder",
+   "sub": "Carousel · 3D",
+   "desc": "Cards around a ring that spins in depth.",
+   "thumb": "library/carousels/cylinder.jpg",
+   "img": "library/carousels/cylinder.webm",
+   "order": "Animate this carousel post in the cylinder style. Use the video-templates skill, template t16_carousel."
+  },
+  {
+   "name": "Orbit",
+   "sub": "Carousel · 3D",
+   "desc": "Cards orbit on a tilted ellipse, the near ones brighter.",
+   "thumb": "library/carousels/orbit.jpg",
+   "img": "library/carousels/orbit.webm",
+   "order": "Animate this carousel post in the orbit style. Use the video-templates skill, template t16_carousel."
+  },
+  {
+   "name": "Tilted strip",
+   "sub": "Carousel · 3D",
+   "desc": "An endless strip of cards on a tilted plane.",
+   "thumb": "library/carousels/strip.jpg",
+   "img": "library/carousels/strip.webm",
+   "order": "Animate this carousel post in the tilted strip style. Use the video-templates skill, template t16_carousel."
+  },
+  {
+   "name": "Depth push",
+   "sub": "Carousel · 3D",
+   "desc": "The front card flies at you and fades; the next rises from the depth.",
+   "thumb": "library/carousels/depth.jpg",
+   "img": "library/carousels/depth.webm",
+   "order": "Animate this carousel post in the depth push style. Use the video-templates skill, template t16_carousel."
+  },
+  {
+   "name": "Card stack",
+   "sub": "Carousel · Swipe",
+   "desc": "A deck: the top card is flicked away, the next one rises (Swiper's cards).",
+   "thumb": "library/carousels/stack.jpg",
+   "img": "library/carousels/stack.webm",
+   "order": "Animate this carousel post in the card stack style. Use the video-templates skill, template t16_carousel."
+  },
+  {
+   "name": "Flip",
+   "sub": "Carousel · Swipe",
+   "desc": "The card turns over to the next slide.",
+   "thumb": "library/carousels/flip.jpg",
+   "img": "library/carousels/flip.webm",
+   "order": "Animate this carousel post in the flip style. Use the video-templates skill, template t16_carousel."
+  },
+  {
+   "name": "Fan",
+   "sub": "Carousel · Swipe",
+   "desc": "Cards fanned like a hand; the next one swings to the front.",
+   "thumb": "library/carousels/fan.jpg",
+   "img": "library/carousels/fan.webm",
+   "order": "Animate this carousel post in the fan style. Use the video-templates skill, template t16_carousel."
+  },
+  {
+   "name": "Parallax swipe",
+   "sub": "Carousel · Swipe",
+   "desc": "Slides push across, the picture inside moves slower: depth in 2D.",
+   "thumb": "library/carousels/swipe.jpg",
+   "img": "library/carousels/swipe.webm",
+   "order": "Animate this carousel post in the parallax swipe style. Use the video-templates skill, template t16_carousel."
+  },
+  {
+   "name": "Seamless panorama",
+   "sub": "Carousel · Swipe",
+   "desc": "One wide picture across the slides, Instagram's seamless carousel.",
+   "thumb": "library/carousels/panorama.jpg",
+   "img": "library/carousels/panorama.webm",
+   "order": "Animate this carousel post in the seamless panorama style. Use the video-templates skill, template t16_carousel."
+  },
+  {
+   "name": "The Agent talks",
+   "sub": "Character · lipsync",
+   "desc": "A pixel character from its file: drawn in Figma, built in After Effects, its mouth keyed to a voice line.",
+   "thumb": "library/characters/the-agent/examples/lipsync.jpg",
+   "img": "library/characters/the-agent/examples/lipsync.webm",
+   "order": "Add The Agent to this comp and make it say this voice line, with lipsync (MCP add_character with audio)."
+  },
+  {
+   "name": "Showreel on the beat",
+   "sub": "Made in code · Rendered",
+   "desc": "Make a {duration}s motion-design showreel at {bpm} BPM: 6-7 scenes, each one formal idea (bars sweeping, a breathing dot grid, a kinetic word swap, one shape morphing, a particle burst settling into a ring, a chart drawi…",
+   "thumb": "library/templates/t01_showreel.jpg",
+   "img": "library/templates/t01_showreel.webm",
+   "order": "Make a showreel on the beat video for this, with the t01_showreel template."
+  },
+  {
+   "name": "SaaS launch",
+   "sub": "Made in code · Rendered",
+   "desc": "Make a {duration}s launch film for {app} (fictional): a three-line hook, then its dashboard assembles card by card (a chart, a counting balance, a list, a progress bar) while a cursor taps the key element; three feature …",
+   "thumb": "library/templates/t02_saas_launch.jpg",
+   "img": "library/templates/t02_saas_launch.webm",
+   "order": "Make a saas launch video for this, with the t02_saas_launch template."
+  },
+  {
+   "name": "One shape becomes the UI",
+   "sub": "Made in code · Rebuilt in AE",
+   "desc": "Make a {duration}s UI film where one shape is never cut: it morphs by size, radius and colour into a button, a toggle, a slider, a stats card and a progress ring that ends in a check. A cursor drives every change with cl…",
+   "thumb": "library/templates/t03_morph_ui.jpg",
+   "img": "library/templates/t03_morph_ui.webm",
+   "order": "Make a one shape becomes the ui video for this, with the t03_morph_ui template."
+  },
+  {
+   "name": "Infinite zoom",
+   "sub": "Made in code · Rendered",
+   "desc": "Make a {duration}s single continuous camera where every change of scale is a match: open already moving on a live data point and pull out to a finished product desktop (charts with area fills and labels, positions, watch…",
+   "thumb": "library/templates/t04_infinite_zoom.jpg",
+   "img": "library/templates/t04_infinite_zoom.webm",
+   "order": "Make a infinite zoom video for this, with the t04_infinite_zoom template."
+  },
+  {
+   "name": "Kinetic typography",
+   "sub": "Made in code · Rebuilt in AE",
+   "desc": "Make a {duration}s kinetic-typography overlay on transparency: a manifesto read word by word, one line per shot, words rising into a mask on Land, the key word of each line in spark with a Pop, a one-word line set huge w…",
+   "thumb": "library/templates/t05_kinetic_type.jpg",
+   "img": "library/templates/t05_kinetic_type.webm",
+   "order": "Make a kinetic typography video for this, with the t05_kinetic_type template."
+  },
+  {
+   "name": "Storybook explainer",
+   "sub": "Made in code · Rendered",
+   "desc": "Make a {duration}s explainer told by a character with a personality (eyes, blinks, moods) across three worlds stacked like a camera tilting down (space, weather, ground), each handed over by a cloud bank the character di…",
+   "thumb": "library/templates/t06_storybook_explainer.jpg",
+   "img": "library/templates/t06_storybook_explainer.webm",
+   "order": "Make a storybook explainer video for this, with the t06_storybook_explainer template."
+  },
+  {
+   "name": "Timeline explainer",
+   "sub": "Made in code · Rendered",
+   "desc": "Make a {duration}s timeline: a line draws with the playhead (a spark ring), cards pop above and below per milestone with an illustration in a fixed slot, a year odometer rolls behind, the camera follows the playhead smoo…",
+   "thumb": "library/templates/t07_timeline.jpg",
+   "img": "library/templates/t07_timeline.webm",
+   "order": "Make a timeline explainer video for this, with the t07_timeline template."
+  },
+  {
+   "name": "Data story",
+   "sub": "Made in code · Rendered",
+   "desc": "Make a {duration}s data story about one number: 100 dots fall into a 10x10 waffle, the {share} that matter light up in spark one by one, the same dots regroup into labelled bars, then the headline percentage counts up an…",
+   "thumb": "library/templates/t08_data_story.jpg",
+   "img": "library/templates/t08_data_story.webm",
+   "order": "Make a data story video for this, with the t08_data_story template."
+  },
+  {
+   "name": "Particle world",
+   "sub": "Made in code · Rendered",
+   "desc": "Make a seamless {duration}s loop of a 3D place drawn with thousands of glowing specks (no solid fills): rolling waves of particles, a sun made of particles, a slow camera sway, the light going from day to dusk and back s…",
+   "thumb": "library/templates/t09_particle_world.jpg",
+   "img": "library/templates/t09_particle_world.webm",
+   "order": "Make a particle world video for this, with the t09_particle_world template."
+  },
+  {
+   "name": "Shader hero object",
+   "sub": "Made in code · Rendered",
+   "desc": "Make a {duration}s hero product plate as one fragment shader: a ray-marched glossy object (a torus that breathes into a capsule) on a studio floor with soft shadow, spark rim light, slow turntable and push-in. The shader…",
+   "thumb": "library/templates/t10_shader_hero.jpg",
+   "img": "library/templates/t10_shader_hero.webm",
+   "order": "Make a shader hero object video for this, with the t10_shader_hero template."
+  },
+  {
+   "name": "Liquid wipe",
+   "sub": "Made in code · Rendered",
+   "desc": "Make a {duration}s transition overlay on transparency: a spark leading edge and a pine body sweep across with wobbling noisy fronts (Whip), fully cover the frame at the midpoint (cut the shots there), then uncover with t…",
+   "thumb": "",
+   "img": "library/templates/t11_liquid_transition.webm",
+   "order": "Make a liquid wipe video for this, with the t11_liquid_transition template."
+  },
+  {
+   "name": "Logo reveal",
+   "sub": "Made in code · Rebuilt in AE",
+   "desc": "Make a {duration}s logo reveal on transparency for a fictional mark built from three primitives (disc, bar, arc): each part flies in on its own curve (Wind-up, Whip, Settle), they lock with a Pop, the mark slides left, t…",
+   "thumb": "library/templates/t12_logo_reveal.jpg",
+   "img": "library/templates/t12_logo_reveal.webm",
+   "order": "Make a logo reveal video for this, with the t12_logo_reveal template."
+  },
+  {
+   "name": "Install tutorial (app walkthrough)",
+   "sub": "Made in code · Rendered",
+   "desc": "Make a {duration}s step-by-step install tutorial on a pine gradient wallpaper: one flat dark window style for every app, a cursor that clicks through each step while the camera pushes in on what is clicked (so UI text re…",
+   "thumb": "library/templates/t13_install_tutorial.jpg",
+   "img": "library/templates/t13_install_tutorial.webm",
+   "order": "Make a install tutorial (app walkthrough) video for this, with the t13_install_tutorial template."
+  },
+  {
+   "name": "Pixel character (documented rig)",
+   "sub": "Made in code · Rendered",
+   "desc": "Make a {duration}s pixel-art short where a documented character acts one beat: it rolls in, looks around, reads an order, reacts (squash, hop, land) as its screen swaps emotion, waves and celebrates; poses on twos, the e…",
+   "thumb": "library/templates/t14_pixel_character.jpg",
+   "img": "library/templates/t14_pixel_character.webm",
+   "order": "Make a pixel character (documented rig) video for this, with the t14_pixel_character template."
+  },
+  {
+   "name": "The Agent explains (promo + capsules)",
+   "sub": "Made in code · Rendered",
+   "desc": "Make a {duration}s announcement where a documented character presents what is new, one short scene per feature, each cut on the beat of the music bed (scene lengths in beats): a hook, each feature acted by the character …",
+   "thumb": "library/templates/t15_agent_update.jpg",
+   "img": "library/templates/t15_agent_update.webm",
+   "order": "Make a the agent explains (promo + capsules) video for this, with the t15_agent_update template."
+  },
+  {
+   "name": "AI Answer Rank",
+   "sub": "Made in code · HyperFrames blocks",
+   "desc": "Is your brand in the AI answer? A question types into a chat card, the assistant answers with a ranked list of three picks, then re-ranks: the promoted brand slides into its slot, the picks below step…",
+   "thumb": "library/hyperframes/ai-answer-rank.jpg",
+   "img": "library/hyperframes/ai-answer-rank.webm",
+   "order": "Use the HyperFrames block ai-answer-rank in our colours and curves."
+  },
+  {
+   "name": "App Showcase",
+   "sub": "Made in code · HyperFrames blocks",
+   "desc": "Fitness app product showcase with three floating smartphone screens",
+   "thumb": "library/hyperframes/app-showcase.jpg",
+   "img": "library/hyperframes/app-showcase.webm",
+   "order": "Use the HyperFrames block app-showcase in our colours and curves."
+  },
+  {
+   "name": "Bar Chart Race",
+   "sub": "Made in code · HyperFrames blocks",
+   "desc": "Ranked bars grow and overtake each other as a time series advances, with the axis rescaling as values climb and the accent handing over to whoever leads",
+   "thumb": "library/hyperframes/bar-chart-race.jpg",
+   "img": "library/hyperframes/bar-chart-race.webm",
+   "order": "Use the HyperFrames block bar-chart-race in our colours and curves."
+  },
+  {
+   "name": "Data Chart",
+   "sub": "Made in code · HyperFrames blocks",
+   "desc": "Animated bar + line chart with staggered reveal, NYT-style typography, and value labels",
+   "thumb": "library/hyperframes/data-chart.jpg",
+   "img": "library/hyperframes/data-chart.webm",
+   "order": "Use the HyperFrames block data-chart in our colours and curves."
+  },
+  {
+   "name": "Speech Bubble",
+   "sub": "Made in code · HyperFrames blocks",
+   "desc": "Hand-drawn speech bubble with a positionable tail: outline draws on, paper fill fades in, handwritten text types per character; boils",
+   "thumb": "library/hyperframes/hw-text-cloud.jpg",
+   "img": "library/hyperframes/hw-text-cloud.webm",
+   "order": "Use the HyperFrames block hw-text-cloud in our colours and curves."
+  },
+  {
+   "name": "Minimal Line Graph",
+   "sub": "Made in code · HyperFrames blocks",
+   "desc": "One or two SVG series draw on with dots popping and value labels riding the draw front; dim baseline axis, x-labels, color-dot legend",
+   "thumb": "library/hyperframes/mk-line-graph.jpg",
+   "img": "library/hyperframes/mk-line-graph.webm",
+   "order": "Use the HyperFrames block mk-line-graph in our colours and curves."
+  },
+  {
+   "name": "turntable 3d",
+   "sub": "3D in code",
+   "desc": "A product on a turntable, lit in 3D: here The Agent's head, modelled in code (assets/models).",
+   "thumb": "library/posters/kit-webfx/turntable-3d.jpg",
+   "img": "library/webm/kit-webfx/turntable-3d.webm",
+   "order": "Put this product on a 3D turntable behind the title."
+  },
+  {
+   "name": "helix 3d",
+   "sub": "3D in code",
+   "desc": "The DNA helix in real 3D (spheres, soft light, a slow turn), or a glTF/GLB product on a turntable (model). (three.js r186)",
+   "thumb": "library/posters/kit-webfx/helix-3d.jpg",
+   "img": "library/webm/kit-webfx/helix-3d.webm",
+   "order": "Add helix 3d (three.js r186) over the selected layer, rendered as an After Effects layer."
+  },
+  {
+   "name": "drop 3d",
+   "sub": "3D in code",
+   "desc": "3D physics: rounded cubes, spheres and pills in token colours rain down and pile up, with soft shadows (count, shapes, size, rate). (three.js r186 + Rapier 0.21.0)",
+   "thumb": "library/posters/kit-webfx/drop-3d.jpg",
+   "img": "library/webm/kit-webfx/drop-3d.webm",
+   "order": "Add drop 3d (three.js r186 + Rapier 0.21.0) over the selected layer, rendered as an After Effects layer."
+  }
+ ],
+ "technique_clips": [
+  "cut-on-the-voice",
+  "freeze-frame-kinetic-type",
+  "hud-overlays",
+  "marker-timing",
+  "roto-breakdown",
+  "shape-wipe-transitions",
+  "sound-pass",
+  "speed-ramps",
+  "stroke-build",
+  "styles",
+  "text-behind-people",
+  "tracked-labels"
+ ]
+}

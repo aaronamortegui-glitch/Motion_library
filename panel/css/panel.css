@@ -98,6 +98,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--spark); }
 .card { border: 0; padding: 0; background: none; text-align: center; color: var(--text-dim); min-width: 0; width: 100%; display: flex; flex-direction: column; }
 .card .thumb { width: 100%; align-self: stretch; aspect-ratio: 16 / 9; background: var(--pine); border: 1px solid var(--sea); border-radius: 4px; overflow: hidden; display: grid; place-items: center; }
 .card .thumb img, .card .thumb video { width: 100%; height: 100%; object-fit: cover; }
+.card.tall .thumb img, .card.tall .thumb video { object-fit: contain; background: var(--pine); }
 .card .label { display: block; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card:hover .thumb { border-color: var(--spark); }
 .card:hover .label { color: var(--text); }
@@ -300,6 +301,7 @@ select.field.big { height: 30px; font-weight: 600; border-color: rgba(216, 255, 
 .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .lib-detail { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
 .lib-detail img { width: 100%; border-radius: 4px; background: var(--pine); aspect-ratio: 16 / 9; object-fit: cover; }
+.lib-detail video.lib-clip { width: 100%; border-radius: 4px; background: var(--pine); aspect-ratio: 16 / 9; object-fit: contain; display: block; }
 .lib-detail img.small { width: auto; max-width: min(240px, 100%); align-self: center; }   /* kit previews are 240 px: never upscale them */
 .lib-variants { display: flex; flex-wrap: wrap; gap: 4px; }
 .lib-variants .chip { font-size: 10px; padding: 0 8px; }

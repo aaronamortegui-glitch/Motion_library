@@ -309,6 +309,22 @@ def page():
 
 TEMPLATE = (ROOT / "tools" / "library_guide.html").read_text(encoding="utf-8") if (ROOT / "tools" / "library_guide.html").exists() else ""
 
+def panel_create():
+    """library/create.json for the panel's Agent › Library › Create tab: the new things, each with its clip and order,
+    and the techniques that have a moving example (the panel plays it on hover)."""
+    D = data(); items = []
+    for x in D["carousel"]: items.append(dict(name=x["name"], sub="Carousel · " + x["group"], desc=x["use"], thumb="library/" + x["poster"], img="library/" + x["video"], order=x["ask"] + " Use the video-templates skill, template t16_carousel."))
+    c = D["character"]
+    items.append(dict(name=c["name"] + " talks", sub="Character · lipsync", desc="A pixel character from its file: drawn in Figma, built in After Effects, its mouth keyed to a voice line.",
+                      thumb="library/" + c["poster"], img="library/" + c["video"], order="Add The Agent to this comp and make it say this voice line, with lipsync (MCP add_character with audio)."))
+    for x in D["code"]: items.append(dict(name=x["name"], sub="Made in code · " + x["group"], desc=x["use"], thumb="library/" + x["poster"] if x["poster"] else "", img="library/" + x["video"], order=x["ask"]))
+    for x in D["fx"]:
+        if x["group"] in ("3D in code",): items.append(dict(name=x["name"], sub="3D in code", desc=x["use"], thumb="library/" + x["poster"], img="library/" + x["video"], order=x["ask"]))
+    clips = sorted(p.stem for p in (LIB / "techniques").glob("*.webm"))
+    return {"note": "Built by tools/build_library_guide.py for the panel (Agent › Library › Create).", "items": items, "technique_clips": clips}
+
+
 if __name__ == "__main__":
+    (LIB / "create.json").write_text(json.dumps(panel_create(), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     OUT.write_text(page(), encoding="utf-8")
     print(OUT.relative_to(ROOT), f"{OUT.stat().st_size // 1024} KB")

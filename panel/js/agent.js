@@ -905,6 +905,8 @@ function libItems() {
     });
     return Object.assign({}, variants[0], { key: "kit/" + f.name, name: f.name, sub: f.category + " · " + (variants.length > 1 ? variants.length + " variants" : "1 piece"), family: f.desc, variants });
   });
+  if (AG.libKind === "create") return (S.create || []).filter((x) => !q || (x.name + " " + x.sub + " " + x.desc).toLowerCase().includes(q)).map((x) => ({
+    key: "create/" + x.name, name: x.name, sub: x.sub, desc: x.desc, thumb: x.thumb ? asset(x.thumb) : "", img: asset(x.img), order: x.order }));
   if (AG.libKind === "styles") return S.packs.filter((pk) => !q || (pk.name + " " + pk.desc + " " + (pk.tones || []).join(" ")).toLowerCase().includes(q)).map((pk) => ({
     key: "style/" + pk.name, name: pk.name, sub: `${pk.energy}${pk.energy_range ? " " + pk.energy_range.join("–") : ""}`, desc: pk.desc,
     thumb: asset(`library/packs/${pk.slug}_md.png`), img: asset(`library/packs/${pk.slug}.gif`),
@@ -912,7 +914,8 @@ function libItems() {
   return S.techniques.filter((t) => !q || (t.name + " " + t.what).toLowerCase().includes(q)).map((t) => {
     const s = slug(t.name);
     return { key: "technique/" + t.name, name: t.name, sub: "technique", desc: t.what, how: t.how,
-      thumb: asset(`library/techniques/${s}_card.png`), fallback: asset(`library/techniques/${s}_md.png`), img: asset(`library/techniques/${s}.png`),   // the detail shows the 480 px frame
+      thumb: asset(`library/techniques/${s}_card.png`), fallback: asset(`library/techniques/${s}_md.png`),
+      img: S.techClips && S.techClips.has(s) ? asset(`library/techniques/${s}.webm`) : asset(`library/techniques/${s}.png`),   // its moving example when it has one
       order: `${t.ask} Use the Motion DNA technique "${t.name}"${t.tool ? ` (MCP tool: ${t.tool})` : ""}. If the layers already have animation, build on it instead of replacing it.` };
   });
 }
@@ -935,7 +938,8 @@ function libraryView() {
     const v = it.variants ? it.variants[Math.min(vi || 0, it.variants.length - 1)] : it;
     const chips = it.variants && it.variants.length > 1 ? h("div", { class: "lib-variants" }, ...it.variants.map((x, i) =>
       h("button", { class: "chip" + (x === v ? " on" : ""), title: x.desc, onclick: () => show(it, i) }, x.name))) : null;
-    detail.replaceChildren(...kids(safeImg([v.img, v.thumb, v.fallback], v.name, it.variants ? { class: "small" } : {}),
+    const media = /\.webm$/.test(v.img || "") ? clip(v.img, { class: "lib-clip" }) : safeImg([v.img, v.thumb, v.fallback], v.name, it.variants ? { class: "small" } : {});
+    detail.replaceChildren(...kids(media,
       h("b", {}, it.variants ? it.name + (it.variants.length > 1 ? " · " + v.name : "") : it.name), it.family ? h("p", { class: "dim" }, it.family) : null, chips,
       h("p", {}, v.desc), v.how ? h("p", { class: "dim" }, "Under the hood: " + v.how) : null,
       h("div", { class: "order" }, v.order),
@@ -952,15 +956,16 @@ function libraryView() {
       const img = safeImg([it.thumb, it.fallback], it.name, { loading: "lazy" });
       const c = h("button", { class: "card" + (AG.libSel === it.key ? " sel" : ""), title: it.desc }, h("span", { class: "thumb" }, img), h("span", { class: "label" }, it.name), AG.libKind !== "techniques" ? h("span", { class: "label dim" }, it.sub) : null);   // a technique's card says its name; "technique" under each one says nothing
       c.dataset.key = it.key;
-      if (AG.libKind !== "techniques") hoverPlay(c, img, it.img);
+      if (/^Carousel/.test(it.sub || "")) c.classList.add("tall");   // a 4:5 post: shown whole, never cropped
+      if (AG.libKind !== "techniques" || /\.webm$/.test(it.img || "")) hoverPlay(c, img, it.img);
       c.onclick = () => show(it);
       return c;
     }));
     const sel = items.find((x) => x.key === AG.libSel); if (sel) show(sel); else detail.hidden = true;
   };
-  const kind = h("div", { class: "seg" }, ...[["styles", "Styles"], ["techniques", "Techniques"], ["kit", "Kit"]].map(([k, l]) => h("button", { class: AG.libKind === k ? "on" : "",
+  const kind = h("div", { class: "seg" }, ...[["styles", "Styles"], ["techniques", "Techniques"], ["kit", "Kit"], ["create", "Create"]].map(([k, l]) => h("button", { class: AG.libKind === k ? "on" : "",
     onclick: (e) => { AG.libKind = k; store.set("agentLib", k); AG.libSel = null; for (const b of kind.children) b.classList.toggle("on", b === e.currentTarget); draw(); } }, l)));
-  const search = h("input", { class: "field", type: "search", placeholder: "Search styles, techniques and the kit", value: AG.libQ, oninput: (e) => { AG.libQ = e.target.value.toLowerCase(); draw(); } });
+  const search = h("input", { class: "field", type: "search", placeholder: "Search styles, techniques, the kit and Create", value: AG.libQ, oninput: (e) => { AG.libQ = e.target.value.toLowerCase(); draw(); } });
   wrap.append(kind, h("div", { class: "note", style: "padding:0" }, "A guide to what the agent can do for you: pick one, read what it does, then send its order to the agent (or copy it into Claude Code). The agent applies it to your comps."),
     energyNote, search, detail, grid);
   draw();

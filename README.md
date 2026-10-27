@@ -27,6 +27,7 @@ animate keeps a profile that **learns from each review**, and everything it make
 
 ## What's new
 
+- **The panel shows the new work:** *Agent › Library* has a **Create** tab (the 11 social carousels, The Agent talking, the videos made in code, the 3D turntable), each playing its clip with its order; techniques play their moving example on hover. Data in `library/create.json`, built with the library guide.
 - **The library guide shows everything:** `library/guide.html`, in the deck's language and gallery first, in four groups:
   *Library* (moves, text, curves with the springs, styles, kit), *Create* (effects and 3D from the open-source engines,
   characters, whole videos made in code, the sound kit you can play), *Workflows* (techniques, apps and the panel) and

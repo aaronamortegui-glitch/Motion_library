@@ -27,7 +27,8 @@ function safeImg(srcs, label, attrs = {}) {
   return img;
 }
 // the WebM next to a preview GIF (tools/make_webm.py): lighter and true to the photos; the GIF stays the fallback
-function webmOf(gif) { return gif && /\.gif($|\?)/.test(gif) ? gif.replace("/library/gifs/", "/library/webm/").replace(/\.gif/, ".webm") : ""; }
+function webmOf(gif) { if (gif && /\.webm($|\?)/.test(gif)) return gif;   // already a clip (techniques, the Create tab)
+  return gif && /\.gif($|\?)/.test(gif) ? gif.replace("/library/gifs/", "/library/webm/").replace(/\.gif/, ".webm") : ""; }
 function clip(gif, attrs = {}) {   // a looping, muted video of the preview; falls back to the GIF if there is no WebM
   const v = h("video", Object.assign({ muted: "", loop: "", autoplay: "", playsinline: "" }, attrs));
   v.muted = true; v.addEventListener("error", () => v.replaceWith(h("img", Object.assign({ src: gif, alt: "" }, attrs))), { once: true });
@@ -97,14 +98,16 @@ async function boot() {
   } else {
     S.url = new URL("../", location.href).href;
   }
-  const [lib, tags, rec, packs, tech, kit, trs, fam] = await Promise.all([
+  const [lib, tags, rec, packs, tech, kit, trs, fam, create] = await Promise.all([
     readJSON(asset("library/library.json")), readJSON(asset("library/tags.json")).catch(() => ({ presets: [], tones: [] })),
     readJSON(asset("library/recipes.json")).catch(() => ({ recipes: [] })), readJSON(asset("library/packs.json")).catch(() => ({ packs: [] })),
     readJSON(asset("library/techniques.json")).catch(() => ({ techniques: [] })),
     readJSON(asset("library/kit.json")).catch(() => ({ items: [] })), readJSON(asset("library/transitions.json")).catch(() => ({ transitions: [] })),
     readJSON(asset("library/kit_groups.json")).catch(() => ({ groups: [] })),
+    readJSON(asset("library/create.json")).catch(() => ({ items: [], technique_clips: [] })),
   ]);
   S.lib = lib.presets; S.tags = tags; S.packs = packs.packs; S.techniques = tech.techniques;
+  S.create = create.items || []; S.techClips = new Set(create.technique_clips || []);
   // the kit Claude builds through MCP (transitions, elements, shapes, backgrounds, looks, text, moves, behaviours)
   const CLIP = ["zoom", "spin", "stretch", "slide", "flash", "dip", "shake", "twirl", "slices", "glitch"];
   const GROUP = { element: "Elements", shape: "Shapes", background: "Backgrounds", look: "Looks", text: "Text engine", move: "Moves", behavior: "Behaviours",
