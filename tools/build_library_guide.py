@@ -164,7 +164,20 @@ def data():
     prompts = [dict(name=x["prompt"], group=x["group"], what=x["uses"], use=x["uses"], video=x["preview"], poster=x["poster"], ask=x["prompt"], call=x["uses"])
                for x in json.loads((LIB / "prompts.json").read_text(encoding="utf-8"))["prompts"]]
     glossary = json.loads((LIB / "glossary.json").read_text(encoding="utf-8"))["categories"]
-    return dict(moves=moves, text=text, kit=kitems, fx=fx, curves=curves, styles=styles, tech=tech, code=code, sound=sound, beds=beds,
+    CAR = {"coverflow": ("Coverflow", "3D", "The centre card faces you, the others turn away in depth (Swiper's coverflow)."),
+           "cube": ("Cube", "3D", "Each slide is a face of a cube that turns to the next."),
+           "cylinder": ("Cylinder", "3D", "Cards around a ring that spins in depth."),
+           "orbit": ("Orbit", "3D", "Cards orbit on a tilted ellipse, the near ones brighter."),
+           "strip": ("Tilted strip", "3D", "An endless strip of cards on a tilted plane."),
+           "depth": ("Depth push", "3D", "The front card flies at you and fades; the next rises from the depth."),
+           "stack": ("Card stack", "Swipe", "A deck: the top card is flicked away, the next one rises (Swiper's cards)."),
+           "flip": ("Flip", "Swipe", "The card turns over to the next slide."),
+           "fan": ("Fan", "Swipe", "Cards fanned like a hand; the next one swings to the front."),
+           "swipe": ("Parallax swipe", "Swipe", "Slides push across, the picture inside moves slower: depth in 2D."),
+           "panorama": ("Seamless panorama", "Swipe", "One wide picture across the slides, Instagram's seamless carousel.")}
+    carousel = [dict(name=v[0], group=v[1], energy="medium", what=f"4:5 · {v[1].lower()}", use=v[2], video=f"carousels/{k}.webm", poster=rel(f"carousels/{k}.jpg"),
+                     ask=f"Animate this carousel post in the {v[0].lower()} style.", call=f"video template t16 · style {k}") for k, v in CAR.items() if (LIB / f"carousels/{k}.webm").exists()]
+    return dict(carousel=carousel, moves=moves, text=text, kit=kitems, fx=fx, curves=curves, styles=styles, tech=tech, code=code, sound=sound, beds=beds,
                 character=character, apps=apps, prompts=prompts, glossary=glossary)
 
 
@@ -186,6 +199,7 @@ CATS = [("moves", "Moves", "Moves that feel made", 0, "g-cloud", "Pop"),
         ("styles", "Styles", "One click, a whole feel", 0, "g-earth", "Coast"),
         ("kit", "Kit", "The pieces Claude builds", 0, "g-cloud", "Pop"),
         ("fx", "Effects & 3D", "Code engines, as layers", 1, "g-pine", "Whip"),
+        ("carousel", "Carousels", "Carousels for social", 1, "g-earth", "Land"),
         ("character", "Characters", "Characters that talk", 1, "g-sea", "Pop"),
         ("code", "Made in code", "Whole videos, written", 1, "g-stone", "Surge"),
         ("sound", "Sound", "Every move sounds", 1, "g-leaf", "Land"),
@@ -194,12 +208,12 @@ CATS = [("moves", "Moves", "Moves that feel made", 0, "g-cloud", "Pop"),
         ("prompts", "Prompts", "What people ask", 3, "g-leaf", "Land"),
         ("glossary", "Glossary", "Words that move better", 3, "g-pine", "Coast"),
         ("use", "Use it", "Three ways to ask", 3, "g-mint", "Land")]
-BROWSE = ("moves", "text", "kit", "fx", "code", "apps", "prompts")
+BROWSE = ("moves", "text", "kit", "fx", "carousel", "code", "apps", "prompts")
 
 
 def page():
     D = data()
-    n = dict(moves=len(D["moves"]), text=len(D["text"]), curves=len(D["curves"]), styles=len(D["styles"]), kit=len(D["kit"]), fx=len(D["fx"]),
+    n = dict(carousel=len(D["carousel"]), moves=len(D["moves"]), text=len(D["text"]), curves=len(D["curves"]), styles=len(D["styles"]), kit=len(D["kit"]), fx=len(D["fx"]),
              character=len(D["character"]["emotions"]), code=len(D["code"]), sound=len(D["sound"]) + len(D["beds"]), tech=len(D["tech"]), apps=len(D["apps"]),
              prompts=len(D["prompts"]), glossary=sum(len(c["terms"]) for c in D["glossary"]), use=3)
     lede = {"moves": f"{n['moves']} moves and loops on the brand curves, as native keyframes.",
@@ -208,6 +222,7 @@ def page():
             "styles": f"{n['styles']} styles. Each gives every layer of a comp its role and its move, on its own curve.",
             "kit": f"{n['kit']} pieces Claude builds in your comp: transitions, elements, shapes, looks, backgrounds, behaviours.",
             "fx": f"{n['fx']} effects from open-source engines, rendered on your machine into After Effects as layers.",
+            "carousel": f"{len(D['carousel'])} carousel styles for a social post (4:5), from the most used ones: coverflow, cube, stack, panorama.",
             "character": "A pixel character from one file: drawn in Figma, built in After Effects, lipsynced to any voice line.",
             "code": f"{n['code']} whole videos written as code, rendered to MP4 or rebuilt in After Effects.",
             "sound": f"{n['sound']} sounds made in code, ours to ship: the agent gives every move its sound. Click to listen.",
@@ -216,8 +231,7 @@ def page():
             "prompts": f"{n['prompts']} orders people use most, each with what it calls in the library.",
             "glossary": f"{n['glossary']} motion words. Use them in a prompt and the agent knows exactly what you mean.",
             "use": "Ask in the panel, in the agent's chat, or from Claude Code. The same library answers."}
-    nav = "".join(f'<li><a href="#g{gi}" data-sec="g{gi} {" ".join(c[0] for c in CATS if c[3] == gi)}">{gi + 1:02d} {g[0]}</a>'
-                  f'<ul class="sub">{"".join(f"<li><a href=\"#{c[0]}\" data-sec=\"{c[0]}\">{c[1]}</a></li>" for c in CATS if c[3] == gi)}</ul></li>' for gi, g in enumerate(GROUPS))
+    nav = "".join(f'<li><a href="#{c[0]}" data-sec="{c[0]}{(" g" + str(c[3])) if c is next(x for x in CATS if x[3] == c[3]) else ""}">{i + 1:02d} {c[1]}</a></li>' for i, c in enumerate(CATS))
     ix = ""
     for gi, g in enumerate(GROUPS):
         rows = "".join(f'<li><a href="#{c[0]}"><span class="ix-name">{c[1]}</span><span class="ix-n">{n[c[0]]}</span></a></li>' for c in CATS if c[3] == gi)

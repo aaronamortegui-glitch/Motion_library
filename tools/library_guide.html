@@ -50,8 +50,8 @@ button{font:inherit;color:inherit}
 .chrome .row,.foot .row{width:calc(1920 * var(--s));margin-inline:auto;padding-inline:max(var(--gut), calc(50 * var(--s)));display:flex;gap:16px}
 .chrome .row{padding-top:calc(46 * var(--s));align-items:flex-start}
 .foot .row{padding-bottom:calc(30 * var(--s));align-items:center;font-size:max(.72rem, calc(21 * var(--s)))}
-.navlist{display:grid;grid-template-columns:repeat(4, calc(260 * var(--s)));list-style:none;padding:0;pointer-events:auto;transition:opacity var(--arrive) var(--settle),transform var(--arrive) var(--land)}
-.navlist a{color:inherit;text-decoration:none;font-size:max(.72rem, calc(21 * var(--s)));line-height:1;opacity:.72;position:relative;padding-bottom:6px;display:inline-block;transition:opacity var(--glide) var(--settle)}
+.navlist{display:flex;flex-wrap:wrap;column-gap:calc(19 * var(--s));row-gap:6px;max-width:calc(1640 * var(--s));list-style:none;padding:0;pointer-events:auto;transition:opacity var(--arrive) var(--settle),transform var(--arrive) var(--land)}
+.navlist a{color:inherit;text-decoration:none;font-size:max(.64rem, calc(17 * var(--s)));white-space:nowrap;line-height:1;opacity:.72;position:relative;padding-bottom:6px;display:inline-block;transition:opacity var(--glide) var(--settle)}
 .navlist a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform var(--arrive) var(--land)}
 .navlist a:hover,.navlist a.on{opacity:1;font-weight:600}
 .navlist a.on::after{transform:scaleX(1)}
@@ -175,6 +175,9 @@ button{font:inherit;color:inherit}
 .fchip.on{background:var(--accent);color:var(--cbg,var(--cloud));border-color:var(--accent);opacity:1}
 .g-cloud .fchip.on,.g-stone .fchip.on{--cbg:var(--cloud)} .g-pine .fchip.on{--cbg:var(--pine)}
 .grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:calc(26 * var(--s)) calc(22 * var(--s))}
+.grid[data-grid=carousel]{grid-template-columns:repeat(7,minmax(0,1fr))}
+.grid[data-grid=carousel] .vid{aspect-ratio:4/5}
+.grid[data-grid=carousel] .vid video,.grid[data-grid=carousel] .vid img{object-fit:contain}   /* the whole post, never cropped or stretched */
 .grid[data-grid=prompts]{grid-template-columns:repeat(4,minmax(0,1fr));gap:calc(28 * var(--s)) calc(26 * var(--s))}
 .card{display:block;text-align:left;background:none;border:0;padding:0;cursor:pointer;color:inherit;
   transition:opacity var(--arrive) var(--settle) var(--d,0ms),transform var(--sweep) var(--land) var(--d,0ms)}
@@ -494,13 +497,13 @@ button{font:inherit;color:inherit}
   addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 
   // browse: filter chips, a page of cards that rise in on the slide's curve, a pager
-  const BROWSE = {moves: {items: D.moves, by: 'energy'}, text: {items: D.text, by: 'group'}, kit: {items: D.kit, by: 'group'}, fx: {items: D.fx, by: 'group'}, code: {items: D.code, by: 'group'}, apps: {items: D.apps, by: 'group'}, prompts: {items: D.prompts, by: 'group', quote: true, four: true}};
+  const BROWSE = {moves: {items: D.moves, by: 'energy'}, text: {items: D.text, by: 'group'}, kit: {items: D.kit, by: 'group'}, fx: {items: D.fx, by: 'group'}, carousel: {items: D.carousel, by: 'group', tall: true}, code: {items: D.code, by: 'group'}, apps: {items: D.apps, by: 'group'}, prompts: {items: D.prompts, by: 'group', quote: true, four: true}};
   const ORDER = ['calm', 'soft', 'medium', 'dynamic', 'explosive'];
   Object.entries(BROWSE).forEach(([key, B]) => {
     const grid = document.querySelector(`[data-grid="${key}"]`), pager = document.querySelector(`[data-pager="${key}"]`), fbox = document.querySelector(`[data-for="${key}"]`);
     if (!grid) return;
     let vals = [...new Set(B.items.map(i => i[B.by]))]; if (B.by === 'energy') vals.sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
-    const st = {f: 'All', page: 0}; const per = () => wide() ? (B.four ? 8 : 10) : 6;
+    const st = {f: 'All', page: 0}; const per = () => wide() ? (B.tall ? 7 : B.four ? 8 : 10) : 6;
     const list = () => st.f === 'All' ? B.items : B.items.filter(i => i[B.by] === st.f);
     const chips = ['All', ...vals].map(v => { const b = h('button', {class: 'fchip' + (v === 'All' ? ' on' : ''), type: 'button'}, v === 'All' ? `All ${B.items.length}` : v);
       b.onclick = () => { st.f = v; st.page = 0; chips.forEach(c => c.classList.toggle('on', c === b)); draw(true); }; return b; });
@@ -718,7 +721,7 @@ button{font:inherit;color:inherit}
     [chrome, foot, dotsEl].forEach(n => n.style.setProperty('--chrome', ink)); chrome.style.setProperty('--logo', logo); progress.style.setProperty('--bar', bar);
     document.documentElement.style.setProperty('--ground', bg);
     chrome.dataset.hide = (i === 0 || i === slides.length - 1) ? '1' : '0';
-    navLinks.forEach(a => a.classList.toggle('on', a.dataset.sec.split(' ').includes(s.id))); document.querySelectorAll('#navlist > li').forEach(li => li.classList.toggle('open', li.firstElementChild.classList.contains('on')));
+    navLinks.forEach(a => a.classList.toggle('on', a.dataset.sec.split(' ').includes(s.id)));
     const pg = pageOf(i); dots.forEach((d, k) => d.classList.toggle('on', k === pg));
     document.getElementById('pageno').textContent = String(pg + 1).padStart(2, '0') + ' / ' + String(numbered.length).padStart(2, '0'); setCurve(s); };
   const onScroll = () => { const mid = innerHeight * .5; let idx = 0;

@@ -16,7 +16,7 @@ STILLS = ROOT / "library/packs/stills"
 def still(name, dim=.45, blur=0):
     """A tutorial still as the ground of an effect (the effects are After Effects assets: they sit over footage)."""
     from PIL import ImageFilter
-    im = Image.open(STILLS / name).convert("RGB").resize((W, H), Image.LANCZOS)
+    from PIL import ImageOps; im = ImageOps.fit(Image.open(STILLS / name).convert("RGB"), (W, H), Image.LANCZOS)   # cropped, never stretched
     if blur: im = im.filter(ImageFilter.GaussianBlur(blur))
     return Image.blend(im, Image.new("RGB", (W, H), PINE), dim)
 FONT = str(ROOT / "assets/fonts/InterTight[wght].ttf")
@@ -115,7 +115,7 @@ def do_physics(pick):
         paths = physics_bake.simulate(physics_bake.spec_for(layers, {"w": 1920, "h": 1080, "fps": 12.5}, mode, 2.4))
         frames = []; ground = still("modern.jpg", .62, 6); k = W / 1920
         def tile(t, l):
-            w, h = int(l["w"] * k), int(l["h"] * k); im = Image.open(STILLS / t).convert("RGBA").resize((w, h), Image.LANCZOS)
+            w, h = int(l["w"] * k), int(l["h"] * k); from PIL import ImageOps; im = ImageOps.fit(Image.open(STILLS / t).convert("RGBA"), (w, h), Image.LANCZOS)   # cropped, never stretched
             m = Image.new("L", (w, h), 0); ImageDraw.Draw(m).rounded_rectangle([0, 0, w - 1, h - 1], 10 if not l["circle"] else w // 2, fill=255); im.putalpha(m); return im
         T = [tile(t, l) for t, l in zip(tiles, layers)]
         for f in range(N):

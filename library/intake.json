@@ -43,6 +43,8 @@
     { "id": "t14_pixel_character", "kind": "template", "title": "Pixel character short", "domain": ["social", "story_short", "brand"], "on_screen": ["characters"], "needs": ["character"], "energy": [2, 4],
       "triggers": { "en": ["pixel", "8-bit", "8 bit", "retro game", "mascot", "character", "robot", "cute"], "es": ["pixel", "pixeles", "8 bits", "retro", "videojuego", "mascota", "personaje", "robot", "tierno"] }, "how": "video-templates skill, t14 with a character from library/characters" },
 
+    { "id": "t16_carousel", "kind": "template", "title": "Social carousel post (11 styles: coverflow, cube, stack, panorama...)", "domain": ["social", "product_ad"], "on_screen": ["photos", "kinetic_type"], "needs": [], "energy": [2, 4],
+      "triggers": { "en": ["carousel", "instagram carousel", "linkedin carousel", "slides post", "swipe post", "coverflow"], "es": ["carrusel", "carousel", "post de instagram", "deslizar", "slides"] }, "how": "video-templates skill, t16 (VARS.style; research/video_prompts/carousels.py renders every style)" },
     { "id": "t15_agent_update", "kind": "template", "title": "Announcement with our robot (what is new)", "domain": ["social", "corporate", "product_ad"], "on_screen": ["characters", "product_ui"], "needs": ["character"], "energy": [3, 4],
       "triggers": { "en": ["announcement", "announce", "what's new", "whats new", "new version", "update", "release notes", "promo"], "es": ["anuncio", "anunciar", "novedades", "nueva version", "actualizacion", "update", "promo", "que hay de nuevo"] }, "how": "video-templates skill, t15 (route C: render, then music and sound effects in AE); ?only=<scene> for capsules" },
 

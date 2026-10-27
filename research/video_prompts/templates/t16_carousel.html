@@ -1,0 +1,108 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T16 · Social carousel</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"></div>
+<style>
+  #stage { position: relative; overflow: hidden; font-family: "Inter Tight", sans-serif; }
+  .scene3d { position: absolute; inset: 0; perspective: 1700px; perspective-origin: 50% 46%; }
+  .rig { position: absolute; left: 50%; top: 46%; width: 0; height: 0; transform-style: preserve-3d; }
+  .card { position: absolute; width: 600px; height: 750px; left: -300px; top: -375px; border-radius: 34px; overflow: hidden;
+          background: #0A211F; backface-visibility: hidden; box-shadow: 0 40px 90px rgba(0,0,0,.45); }
+  .card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .card .band { position: absolute; left: 0; right: 0; bottom: 0; padding: 34px 36px 38px; background: linear-gradient(0deg, rgba(10,33,31,.96) 0%, rgba(10,33,31,.86) 62%, rgba(10,33,31,0)); }
+  .card .no { font: 600 22px "Inter Tight"; letter-spacing: .14em; color: #D8FF85; }
+  .card .ti { font: 700 52px/1 "Inter Tight"; letter-spacing: -.02em; color: #F7F9F2; margin-top: 10px; }
+  .card .ti i { font: italic 400 58px/1 "Instrument Serif"; color: #D8FF85; letter-spacing: 0; }
+  .ui { position: absolute; left: 0; right: 0; }
+  .dots { bottom: 92px; display: flex; justify-content: center; gap: 12px; }
+  .dots b { width: 12px; height: 12px; border-radius: 999px; background: rgba(247,249,242,.3); transition: none; }
+  .dots b.on { background: #D8FF85; width: 34px; }
+  .head { top: 76px; text-align: center; }
+  .head .k { font: 600 24px "Inter Tight"; letter-spacing: .16em; color: #9FD8C2; text-transform: uppercase; }
+  .head .h { font: 700 64px/1 "Inter Tight"; letter-spacing: -.025em; color: #F7F9F2; margin-top: 12px; }
+  .head .h i { font: italic 400 72px "Instrument Serif"; color: #D8FF85; letter-spacing: 0; }
+  .touch { position: absolute; width: 74px; height: 74px; margin: -37px 0 0 -37px; border-radius: 50%; background: rgba(247,249,242,.35); border: 3px solid #F7F9F2; opacity: 0; }
+  .pano { position: absolute; top: 300px; height: 750px; display: flex; gap: 0; }
+  .pano .slot { position: relative; width: 600px; height: 750px; flex: none; overflow: hidden; outline: 3px solid rgba(10,33,31,.95); }
+  .pano .slot img { position: absolute; top: 0; height: 100%; }
+</style>
+<script>
+// T16 · Social carousel (archetype "a 3D carousel for a social post"): the same five slides shown in one of ten carousel
+// styles researched from the web's common ones (Swiper's coverflow, cube, cards, flip; cylinder and orbit galleries;
+// Instagram's seamless panorama; fan, tilted strip, swipe, depth stack), on Motion DNA's curves and type. 4:5 (1080x1350).
+// Built with CSS 3D (real perspective); every frame is a pure function of t. VARS.style picks the style.
+const VARS = { style: "coverflow", kicker: "Motion DNA", head: "Five ways to *move.*",
+  slides: [["01", "Moves that *land.*", "calm-modern"], ["02", "Curves you *feel.*", "dynamic"], ["03", "Styles in *one click.*", "playful"],
+           ["04", "Whole *workflows.*", "editorial"], ["05", "Just *ask.*", "tech"]] };
+const STY = (location.search.match(/style=([a-z-]+)/) || [])[1] || VARS.style;
+const { seg, k, clamp, lerp } = MDNA, W = 1080, H = 1350, N = VARS.slides.length, DUR = 7.5;
+const imgs = VARS.slides.map(s => Object.assign(new Image(), { src: `../../../library/packs/stills/${s[2]}.jpg` }));
+const rich = s => s.replace(/\*(.+?)\*/g, "<i>$1</i>");
+let rig, cards = [], dots = [], touch, head, pano;
+
+// the step clock: the carousel moves to slide i at STEP(i), easing on a token curve; between steps it holds
+const STEP = i => 0.9 + i * 1.35, MOVE = 0.75;
+function pos(t, curve = "Land") {   // a continuous index: 0 .. N-1, eased step to step
+  let p = 0; for (let i = 1; i < N; i++) p += seg(t, STEP(i) - MOVE, STEP(i), curve); return p;
+}
+
+MDNA.scene({ w: W, h: H, duration: DUR, background: "#0A211F", images: imgs, setup(stage) {
+  const sc = document.createElement("div"); sc.className = "scene3d"; stage.appendChild(sc);
+  rig = document.createElement("div"); rig.className = "rig"; sc.appendChild(rig);
+  if (STY === "panorama") {
+    pano = document.createElement("div"); pano.className = "pano"; stage.appendChild(pano);
+    for (let i = 0; i < N; i++) { const s = document.createElement("div"); s.className = "slot"; const im = imgs[0].cloneNode();
+      im.src = "../../../library/packs/stills/playful.jpg"; im.style.left = (-i * 600) + "px"; im.style.width = (N * 600) + "px"; im.style.objectFit = "cover"; s.appendChild(im); pano.appendChild(s); }
+  } else {
+    cards = VARS.slides.map((s, i) => { const c = document.createElement("div"); c.className = "card";
+      c.innerHTML = `<img src="${imgs[i].src}"><div class="band"><div class="no">${s[0]} / 0${N}</div><div class="ti">${rich(s[1])}</div></div>`; rig.appendChild(c); return c; });
+  }
+  head = document.createElement("div"); head.className = "ui head"; head.innerHTML = `<div class="k">${VARS.kicker}</div><div class="h">${rich(VARS.head)}</div>`; stage.appendChild(head);
+  const d = document.createElement("div"); d.className = "ui dots"; dots = VARS.slides.map(() => d.appendChild(document.createElement("b"))); stage.appendChild(d);
+  touch = document.createElement("div"); touch.className = "touch"; stage.appendChild(touch);
+}, render(t) {
+  const p = pos(t, { cube: "Surge", flip: "Whip", stack: "Pop", cylinder: "Coast", fan: "Pop" }[STY] || "Land"), cur = Math.round(p);
+  dots.forEach((b, i) => b.classList.toggle("on", i === cur));
+  const intro = seg(t, 0, 0.7, "Land");
+  head.style.opacity = intro; head.style.transform = `translateY(${(1 - intro) * 30}px)`;
+  // a finger on the screen for the swipe styles: it presses, drags left with the move, lifts
+  const fingerStyles = { swipe: 1, panorama: 1, stack: 1, depth: 1 };
+  if (fingerStyles[STY]) { let a = 0, x = 0; for (let i = 1; i < N; i++) { const q = seg(t, STEP(i) - MOVE - 0.15, STEP(i) - 0.1); if (q > 0 && q < 1) { a = Math.sin(q * Math.PI); x = lerp(760, 320, q); } }
+    touch.style.opacity = a * .9; touch.style.left = x + "px"; touch.style.top = "720px"; }
+  F[STY](t, p);
+} });
+
+const T3 = (c, s) => c.style.transform = s, Z = (c, z) => c.style.zIndex = Math.round(z);
+const F = {
+  coverflow(t, p) { cards.forEach((c, i) => { const d = i - p, a = clamp(Math.abs(d), 0, 2);
+    T3(c, `translateX(${d * 380}px) translateZ(${-a * 260}px) rotateY(${-Math.sign(d) * Math.min(1, Math.abs(d)) * 52}deg) scale(${1 - a * .06})`);
+    c.style.filter = `brightness(${1 - a * .28})`; Z(c, 100 - a * 10); }); },
+  cube(t, p) { rig.style.transform = `translateZ(${-300 - 120 * Math.sin((p % 1) * Math.PI)}px) rotateY(${-p * 90}deg)`;
+    cards.forEach((c, i) => { T3(c, `rotateY(${i * 90}deg) translateZ(300px)`); c.style.borderRadius = "10px"; c.style.visibility = Math.abs(i - p) < 1.2 ? "visible" : "hidden"; }); },
+  cylinder(t, p) { const R = 640, step = 360 / 7, spin = p + seg(t, 0, DUR, "Flat") * .5;
+    rig.style.transform = `translateZ(${-R}px) rotateX(-6deg) rotateY(${-spin * step}deg)`;
+    cards.forEach((c, i) => { T3(c, `rotateY(${i * step}deg) translateZ(${R}px) scale(.74)`); c.style.backfaceVisibility = "visible"; }); },
+  stack(t, p) { cards.forEach((c, i) => { const d = i - p;
+    if (d < -0.001) { const q = clamp(-d); T3(c, `translateX(${-q * 900}px) translateY(${q * 60}px) rotate(${-q * 24}deg)`); c.style.opacity = 1 - q * .4; Z(c, 200); }
+    else { const n = Math.min(d, 3); T3(c, `translateX(${n * 40}px) translateY(${n * 18}px) translateZ(${-n * 120}px) rotate(${n * 5}deg) scale(${1 - n * .05})`); c.style.opacity = d > 3 ? 0 : 1; c.style.filter = `brightness(${1 - n * .18})`; Z(c, 100 - d * 10); } }); },
+  flip(t, p) { const i0 = Math.floor(p), f = p - i0;
+    cards.forEach((c, i) => { c.style.visibility = (i === i0 || i === i0 + 1) ? "visible" : "hidden";
+      if (i === i0) T3(c, `rotateY(${-f * 180}deg) scale(${1 - .1 * Math.sin(f * Math.PI)})`);
+      if (i === i0 + 1) T3(c, `rotateY(${180 - f * 180}deg) scale(${1 - .1 * Math.sin(f * Math.PI)})`); }); },
+  panorama(t, p) { pano.style.left = (240 - p * 600) + "px"; },
+  orbit(t, p) { const spin = p * (360 / N) + seg(t, 0, DUR, "Flat") * 20;
+    cards.forEach((c, i) => { const a = (i * 360 / N - spin) * Math.PI / 180, x = Math.sin(a) * 430, z = Math.cos(a) * 430, y = -Math.cos(a) * 90 + 60;
+      T3(c, `translate3d(${x}px, ${y}px, ${z - 300}px) scale(.58)`); c.style.filter = `brightness(${.55 + .45 * (z + 430) / 860})`; Z(c, z + 500); }); },
+  fan(t, p) { cards.forEach((c, i) => { const d = i - p, a = clamp(Math.abs(d), 0, 3);
+    c.style.transformOrigin = "50% 160%"; T3(c, `rotate(${d * 14}deg) translateZ(${-a * 60}px) scale(${.86 - a * .03})`); c.style.filter = `brightness(${1 - a * .22})`; Z(c, 100 - a * 10); }); },
+  strip(t, p) { rig.style.transform = `rotateX(52deg) rotateZ(-24deg) translateZ(-80px)`;
+    const run = seg(t, 0, DUR, "Flat") * 2.2 + p * .9;
+    cards.forEach((c, i) => { let x = ((i - run) % N + N) % N - 1.5; T3(c, `translateX(${x * 640}px) scale(.85)`); c.style.backfaceVisibility = "visible"; }); },
+  swipe(t, p) { cards.forEach((c, i) => { const d = i - p; T3(c, `translateX(${d * 680}px) scale(${1 - Math.min(1, Math.abs(d)) * .08})`);
+    c.querySelector("img").style.transform = `translateX(${-d * 160}px) scale(1.2)`; }); },   // parallax inside the card
+  depth(t, p) { cards.forEach((c, i) => { const d = i - p;
+    if (d < 0) { const q = clamp(-d); T3(c, `translateZ(${q * 900}px)`); c.style.opacity = 1 - q; Z(c, 300); }
+    else { T3(c, `translateY(${-d * 70}px) translateZ(${-d * 260}px)`); c.style.opacity = d > 3 ? 0 : 1; c.style.filter = `brightness(${1 - Math.min(d, 3) * .2})`; Z(c, 100 - d * 10); } }); },
+};
+</script>
