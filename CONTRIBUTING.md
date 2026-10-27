@@ -242,7 +242,7 @@ for a brand (§10: that stays in the brand, unless it is useful for everyone), o
 | A mascot, presenter or robot | a **character** | `library/characters/<slug>/character.json` (traits, never, palette, styles, emotions, poses, acts) |
 | A whole video made as code | a **video template** | `research/video_prompts/templates/` + `templates/catalog.json` |
 
-**So the Agent can propose it:** every template, technique, style and character also gets an entry in
+**So the Agent can propose it:** every template, technique, style, character, kit piece people ask for by name (a cursor, a font swap…) and tool (beats, lipsync, Blender…) also gets an entry in
 `library/intake.json` (the words that point to it in English and Spanish, its domain, what is on screen, what it needs
 and its energy range). `read_brief` reads requests against it; `python tools/test_intake.py` checks that no template or
 character is missing.
