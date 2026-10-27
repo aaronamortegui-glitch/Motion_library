@@ -938,7 +938,7 @@ function libraryView() {
     const v = it.variants ? it.variants[Math.min(vi || 0, it.variants.length - 1)] : it;
     const chips = it.variants && it.variants.length > 1 ? h("div", { class: "lib-variants" }, ...it.variants.map((x, i) =>
       h("button", { class: "chip" + (x === v ? " on" : ""), title: x.desc, onclick: () => show(it, i) }, x.name))) : null;
-    const media = /\.webm$/.test(v.img || "") ? clip(v.img, Object.assign({ class: "lib-clip" }, v.thumb ? { poster: v.thumb } : {})) : safeImg([v.img, v.thumb, v.fallback], v.name, it.variants ? { class: "small" } : {});
+    const media = /\.webm$/.test(v.img || "") ? clip(v.img, Object.assign({ class: "lib-clip" + (/^Carousel/.test(v.sub || it.sub || "") ? " post" : "") }, v.thumb ? { poster: v.thumb } : {})) : safeImg([v.img, v.thumb, v.fallback], v.name, it.variants ? { class: "small" } : {});
     for (const old of detail.querySelectorAll("video")) { old.pause(); old.removeAttribute("src"); old.load(); }   // one decoder at a time
     detail.replaceChildren(...kids(media,
       h("b", {}, it.variants ? it.name + (it.variants.length > 1 ? " · " + v.name : "") : it.name), it.family ? h("p", { class: "dim" }, it.family) : null, chips,
@@ -957,7 +957,8 @@ function libraryView() {
       const img = safeImg([it.thumb, it.fallback], it.name, { loading: "lazy" });
       const c = h("button", { class: "card" + (AG.libSel === it.key ? " sel" : ""), title: it.desc }, h("span", { class: "thumb" }, img), h("span", { class: "label" }, it.name), AG.libKind !== "techniques" ? h("span", { class: "label dim" }, it.sub) : null);   // a technique's card says its name; "technique" under each one says nothing
       c.dataset.key = it.key;
-      if (/^Carousel/.test(it.sub || "") || AG.libKind === "create") c.classList.add("tall");   // 4:5 posts and square clips: shown whole, never cropped
+      if (/^Carousel/.test(it.sub || "")) c.classList.add("tall");   // a 4:5 post: a 4:5 card, shown whole
+      else if (AG.libKind === "create") c.classList.add("fit");   // square or wide clips: shown whole, never cropped
       if (AG.libKind !== "techniques" || /\.webm$/.test(it.img || "")) hoverPlay(c, img, it.img);
       c.onclick = () => show(it);
       return c;

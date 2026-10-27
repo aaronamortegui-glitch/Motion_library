@@ -98,8 +98,10 @@ input[type=checkbox], input[type=radio] { accent-color: var(--spark); }
 .card { border: 0; padding: 0; background: none; text-align: center; color: var(--text-dim); min-width: 0; width: 100%; display: flex; flex-direction: column; }
 .card .thumb { width: 100%; align-self: stretch; aspect-ratio: 16 / 9; background: var(--pine); border: 1px solid var(--sea); border-radius: 4px; overflow: hidden; display: grid; place-items: center; }
 .card .thumb img, .card .thumb video { width: 100%; height: 100%; object-fit: cover; }
-.card.tall .thumb img, .card.tall .thumb video { object-fit: contain; background: var(--pine); }
-.card .thumb > * { grid-area: 1 / 1; }   /* the hover clip sits over the still */
+.card.tall .thumb { aspect-ratio: 4 / 5; }   /* social posts (4:5) get a card of their own shape: nothing cut */
+.card.tall .thumb img, .card.tall .thumb video, .card.fit .thumb img, .card.fit .thumb video { object-fit: contain; background: var(--pine); }
+.card .thumb { grid-template: 100% / 100%; }   /* a fixed cell, so height: 100% is the card's height (not the image's) */
+.card .thumb > * { grid-area: 1 / 1; min-width: 0; min-height: 0; }   /* the hover clip sits over the still */
 .card .thumb video.hoverclip { opacity: 0; }   /* shown only once its first frame is painted (no black flash) */
 .card .thumb video.hoverclip.on { opacity: 1; }
 .card .label { display: block; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -304,7 +306,8 @@ select.field.big { height: 30px; font-weight: 600; border-color: rgba(216, 255, 
 .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .lib-detail { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
 .lib-detail img { width: 100%; border-radius: 4px; background: var(--pine); aspect-ratio: 16 / 9; object-fit: cover; }
-.lib-detail video.lib-clip { width: 100%; border-radius: 4px; background: var(--pine); aspect-ratio: 16 / 9; object-fit: contain; display: block; }
+.lib-detail video.lib-clip { width: 100%; max-height: 420px; border-radius: 4px; background: var(--pine); aspect-ratio: 16 / 9; object-fit: contain; display: block; }
+.lib-detail video.lib-clip.post { aspect-ratio: 4 / 5; width: auto; height: min(420px, 110vw); max-width: 100%; align-self: center; }   /* a 4:5 post plays at its own shape, not shrunk into 16:9 */
 .lib-detail img.small { width: auto; max-width: min(240px, 100%); align-self: center; }   /* kit previews are 240 px: never upscale them */
 .lib-variants { display: flex; flex-wrap: wrap; gap: 4px; }
 .lib-variants .chip { font-size: 10px; padding: 0 8px; }
