@@ -354,7 +354,9 @@ Motion DNA it tests, shows the result, and leaves a tip. What broke and how it w
 **The library guide, `library/guide.html`:** the whole library in the deck's language: a cover, a numbered index, and
 per category an interlude that the section covers, with every move, text, curve, style, technique and kit piece
 playing its own preview and the order to copy for the agent. Open it from your clone in any browser; `setup.py` builds
-it at install (`python tools/build_library_guide.py` rebuilds it).
+it at install (`python tools/build_library_guide.py` rebuilds it). To send it to someone without the repo, run
+`python tools/pack_library_guide.py --single`: one HTML with every preview inside (`guide.html` alone opens empty;
+without `--single` it makes a zip).
 
 Full catalog with live thumbnails, kit included: **[docs/CATALOG.md](docs/CATALOG.md)** · filterable: `library/index.html` · for LLMs:
 `library/INDEX.txt` · tags: `library/tags.json`. All timing comes from the motion tokens: presets ask for `Arrive` +

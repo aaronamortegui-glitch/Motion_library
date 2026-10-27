@@ -121,3 +121,6 @@ panel/.python
 # HyperFrames bridge (research/hyperframes): the pinned install and the projects made with it
 research/hyperframes/node_modules/
 research/hyperframes/projects/
+
+# shareable builds (tools/pack_library_guide.py)
+dist/
