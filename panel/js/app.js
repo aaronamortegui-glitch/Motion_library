@@ -27,27 +27,43 @@ function safeImg(srcs, label, attrs = {}) {
   return img;
 }
 // the WebM next to a preview GIF (tools/make_webm.py): lighter and true to the photos; the GIF stays the fallback
-function webmOf(gif) { if (gif && /\.webm($|\?)/.test(gif)) return gif;   // already a clip (techniques, the Create tab)
+function webmOf(gif) { if (gif && /\.webm($|\?)/.test(gif)) return gif;   // already a clip (techniques, the Web Motion tab)
   return gif && /\.gif($|\?)/.test(gif) ? gif.replace("/library/gifs/", "/library/webm/").replace(/\.gif/, ".webm") : ""; }
 function clip(gif, attrs = {}) {   // a looping, muted video of the preview; falls back to the GIF if there is no WebM
   const v = h("video", Object.assign({ muted: "", loop: "", autoplay: "", playsinline: "" }, attrs));
   v.muted = true; v.addEventListener("error", () => v.replaceWith(h("img", Object.assign({ src: gif, alt: "" }, attrs))), { once: true });
   v.src = webmOf(gif); return v;
 }
+// Only one preview plays at a time: a hover stops the previous hover and pauses the big preview (it resumes when the
+// mouse leaves); a click stops the hover, so the big preview is the only one playing. The still stays on screen until
+// the clip has painted its first frame, so a card never flashes black while the clip loads.
+let hoverStop = null;
+function stopHover() { if (hoverStop) hoverStop(); }
+function bigClips() { return document.querySelectorAll(".lib-detail video"); }
+function shown(v, cb) {   // cb runs once a real frame is on screen ("playing" can fire before anything is painted)
+  if (v.requestVideoFrameCallback) { v.requestVideoFrameCallback(() => cb()); return; }
+  const t = () => { if (v.currentTime > 0.04) { v.removeEventListener("timeupdate", t); cb(); } };
+  v.addEventListener("timeupdate", t);
+}
 function hoverPlay(card, img, gif) {
   let on = false, v = null;
-  card.addEventListener("mouseenter", () => {   // hover plays the preview from the start, over the still
-    on = true; card.classList.add("playing");
-    if (!webmOf(gif)) { const t = new Image(); t.onload = () => { if (on && img.isConnected) img.src = t.src; }; t.src = gif + "?t=" + Date.now(); return; }
-    v = clip(gif, { class: img.className }); v.hidden = true;
-    v.addEventListener("playing", () => { if (on && img.isConnected) { img.hidden = true; v.hidden = false; } }, { once: true });
-    img.after(v);
-  });
-  card.addEventListener("mouseleave", () => {
-    on = false; card.classList.remove("playing");
-    if (v) { v.remove(); v = null; img.hidden = false; }
+  const stop = () => {
+    if (!on) return;
+    on = false; card.classList.remove("playing"); if (hoverStop === stop) hoverStop = null;
+    if (v) { v.pause(); v.removeAttribute("src"); v.load(); v.remove(); v = null; }   // free the decoder right away
     if (img.isConnected && img.src !== img.rest) img.src = img.rest;
+  };
+  card.addEventListener("mouseenter", () => {   // hover plays the preview from the start, over the still
+    stopHover(); on = true; hoverStop = stop; card.classList.add("playing");
+    if (card.classList.contains("sel")) { on = false; hoverStop = null; card.classList.remove("playing"); return; }   // already playing above
+    for (const b of bigClips()) b.pause();
+    if (!webmOf(gif)) { const t = new Image(); t.onload = () => { if (on && img.isConnected) img.src = t.src; }; t.src = gif + "?t=" + Date.now(); return; }
+    const mine = v = clip(gif, { class: img.className + " hoverclip", preload: "auto" });
+    shown(mine, () => { if (v === mine) mine.classList.add("on"); });
+    img.after(mine);
   });
+  card.addEventListener("mouseleave", () => { stop(); for (const b of bigClips()) b.play().catch(() => {}); });
+  card.addEventListener("click", stop, true);   // a click opens the big preview: the small one stops
 }
 const store = {   // per-user conveniences (section, filters, favorites); the panel works without it
   get(k, d) { try { const v = localStorage.getItem("mdna." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },

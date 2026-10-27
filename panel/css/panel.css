@@ -99,6 +99,9 @@ input[type=checkbox], input[type=radio] { accent-color: var(--spark); }
 .card .thumb { width: 100%; align-self: stretch; aspect-ratio: 16 / 9; background: var(--pine); border: 1px solid var(--sea); border-radius: 4px; overflow: hidden; display: grid; place-items: center; }
 .card .thumb img, .card .thumb video { width: 100%; height: 100%; object-fit: cover; }
 .card.tall .thumb img, .card.tall .thumb video { object-fit: contain; background: var(--pine); }
+.card .thumb > * { grid-area: 1 / 1; }   /* the hover clip sits over the still */
+.card .thumb video.hoverclip { opacity: 0; }   /* shown only once its first frame is painted (no black flash) */
+.card .thumb video.hoverclip.on { opacity: 1; }
 .card .label { display: block; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card:hover .thumb { border-color: var(--spark); }
 .card:hover .label { color: var(--text); }

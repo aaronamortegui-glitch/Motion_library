@@ -310,7 +310,7 @@ def page():
 TEMPLATE = (ROOT / "tools" / "library_guide.html").read_text(encoding="utf-8") if (ROOT / "tools" / "library_guide.html").exists() else ""
 
 def panel_create():
-    """library/create.json for the panel's Agent › Library › Create tab: the new things, each with its clip and order,
+    """library/create.json for the panel's Agent › Library › Web Motion tab: the new things, each with its clip and order,
     and the techniques that have a moving example (the panel plays it on hover)."""
     D = data(); items = []
     for x in D["carousel"]: items.append(dict(name=x["name"], sub="Carousel · " + x["group"], desc=x["use"], thumb="library/" + x["poster"], img="library/" + x["video"], order=x["ask"] + " Use the video-templates skill, template t16_carousel."))
@@ -321,7 +321,7 @@ def panel_create():
     for x in D["fx"]:
         if x["group"] in ("3D in code",): items.append(dict(name=x["name"], sub="3D in code", desc=x["use"], thumb="library/" + x["poster"], img="library/" + x["video"], order=x["ask"]))
     clips = sorted(p.stem for p in (LIB / "techniques").glob("*.webm"))
-    return {"note": "Built by tools/build_library_guide.py for the panel (Agent › Library › Create).", "items": items, "technique_clips": clips}
+    return {"note": "Built by tools/build_library_guide.py for the panel (Agent › Library › Web Motion).", "items": items, "technique_clips": clips}
 
 
 if __name__ == "__main__":

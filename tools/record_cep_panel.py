@@ -8,7 +8,7 @@ answer for Claude Code), with a fictional demo brand (Vela), so the GIFs are the
   cep-curves.gif         Curves: drag a handle, pick a curve from the library
   cep-brand-learns.gif   a review note in the chat → a rule proposal → one click → the brand's rules
   cep-brand-share.gif    where the brand lives, Download to share, Import an update (rules merge, shown as new)
-  cep-library.gif        Agent > Library: a style, a technique and a kit piece, its order, Use in chat
+  cep-library.gif        Agent > Library: a style, a technique, a kit piece and a Web Motion clip, its order, Use in chat
   cep-workspace.gif      the brand's own conversation (Start in Claude app) and a new project for a video
   cep-panel.gif          the tour: all of the above
 Needs Playwright (pip install playwright) and Chrome or Edge.
@@ -195,7 +195,9 @@ def main():
         js("document.querySelectorAll('#sec-agent .lib-grid .card')[1].click(); document.querySelector('#main').scrollTop = 0", hold=8)
         js("[...document.querySelectorAll('#sec-agent .seg button')].find(b => b.textContent === 'Kit').click(); document.querySelector('#main').scrollTop = 0", hold=6)
         js("[...document.querySelectorAll('#sec-agent .lib-grid .card')].find(c => c.dataset.key === 'kit/Liquid and ink').click(); document.querySelector('#main').scrollTop = 0", hold=8)
-        js("[...document.querySelectorAll('#sec-agent button')].find(b => b.textContent === 'Use in chat')?.click()", wait=500, hold=10)
+        js("[...document.querySelectorAll('#sec-agent .seg button')].find(b => b.textContent === 'Web Motion').click(); document.querySelector('#main').scrollTop = 0", wait=600, hold=3)
+        js("document.querySelectorAll('#sec-agent .lib-grid .card')[1].click(); document.querySelector('#main').scrollTop = 0", wait=600, hold=5)
+        js("[...document.querySelectorAll('#sec-agent button')].find(b => b.textContent === 'Use in chat')?.click()", wait=500, hold=6)
         section("library")
 
         # 7 · The brand's own conversation and a project per video
@@ -206,8 +208,8 @@ def main():
     srv.shutdown()
     OUT.mkdir(parents=True, exist_ok=True)
     for name, frames in parts.items():
-        gif(frames, OUT / f"cep-{name}.gif")
-    gif([f for k in parts for f in parts[k][::6]], OUT / "cep-panel.gif", 260, 32, 5)   # the tour: a sixth of the frames, lighter (under 500 KB)
+        gif(frames, OUT / f"cep-{name}.gif", colors=80 if name == "library" else 112)   # the library plays clips: fewer colours keep it under 500 KB
+    gif([f for k in parts for f in parts[k][::6]], OUT / "cep-panel.gif", 250, 32, 5)   # the tour: a sixth of the frames, lighter (under 500 KB)
     if "--png" not in sys.argv:
         shutil.rmtree(FRAMES)
 
