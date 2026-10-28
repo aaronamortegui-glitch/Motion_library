@@ -51,7 +51,7 @@ animate keeps a profile that **learns from each review**, and everything it make
   Slack (search and read; it writes drafts for you to send, never sends) and Blender (Blender Lab's MCP, the one the
   Claude app installs; open Blender with its add-on). Drive and Slack come from your Claude account's connectors.
 - **Show the agent a video:** *+ Image / video* (or drop a file) takes an MP4, MOV or WebM as a reference. Claude reads
-  images, not video, so the panel saves the clip in the project's `claude/attachments`, sends 8 frames spread across
+  images, not video, so the panel saves the clip in the project's `Claude/attachments`, sends 8 frames spread across
   it with their times, and its length, size and frame rate; in Full mode the agent can pull more frames around a
   moment you name. On a Mac it needs ffmpeg (`brew install ffmpeg`).
 - **A living DNA helix:** the panel header has a mark of two strands of dots that turn slowly while you work and speed
@@ -63,7 +63,7 @@ animate keeps a profile that **learns from each review**, and everything it make
 - **Curves on Mac:** a press anywhere in the curve editor grabs the nearest handle, and the drag no longer depends on
   hitting the small dot or on Retina screen maths, so the handles move on a Mac trackpad too.
 - **Show the agent an image:** paste a screenshot (Ctrl+V), drop image files on the chat or press *+ Image*. The
-  images go to Claude with your order, in Safe and Full mode, and are kept in the project's `claude/attachments`.
+  images go to Claude with your order, in Safe and Full mode, and are kept in the project's `Claude/attachments`.
 - **A quieter chat:** the agent answers in a few lines, with any question first. The tools it runs fold into one
   line (*▸ 4 steps*, click to open), and while it works you only see *Working…*.
 - **Tidier Agent:** *Chat · Prompt library* tabs; under the chat box, one row with *+ New conversation*, *Open in Claude
@@ -89,7 +89,7 @@ animate keeps a profile that **learns from each review**, and everything it make
   outputs side by side (click to open full size), like Flora's widget in the Claude app. Motion DNA's own check frames
   show the same way.
 - **The chat lives with the project:** each project (or brand) shows its own conversation, and keeps it in its folder:
-  `claude/agent-chat.md` (readable, with links to every output) and `claude/sessions/` (the full transcripts).
+  `Claude/agent-chat.md` (readable, with links to every output) and `Claude/sessions/` (the full transcripts).
 - **When After Effects stops answering:** type `reconnect` in the chat, press *↻ Reconnect AE* under the chat box or
   click the MCP dot. The bridge also restarts by itself when you use the panel, and an open dialog no longer makes
   After Effects repeat "Cannot run a script while a modal dialog is waiting".
@@ -253,8 +253,8 @@ conversation* goes back to an earlier one and *Open in Claude app* continues the
 it is open somewhere else.
 
 **Where the chat is saved.** With a project open, the Agent's chat is written into the project folder as you work:
-`claude/agent-chat.md` (each order, the replies, and links to every Flora or Krea output), `claude/sessions/<id>.jsonl`
-(Claude Code's full transcript of each conversation) and `claude/usage.csv` (time and cost of each order). The panel
+`Claude/agent-chat.md` (each order, the replies, and links to every Flora or Krea output), `Claude/sessions/<id>.jsonl`
+(Claude Code's full transcript of each conversation) and `Claude/usage.csv` (time and cost of each order). The panel
 finds the project from where the `.aep` is saved, so keep *Save the open AE project in it* ticked when you create it and
 always save the `.aep` inside the project folder. Each project shows its own chat; with no project or brand open the
 chat stays in the panel only.
@@ -278,7 +278,7 @@ type in the panel, or while an order runs; it never restarts it on a timer into 
 Paste a screenshot into the chat box (Ctrl+V), drop image or video files on the chat, or press **+ Image / video** next to *With:*.
 They wait in a tray above the box (✕ removes one, up to 8) and go to Claude with your order, so it sees them in Safe
 and Full mode. Large images are scaled to 1568 px. With a project or brand open each image is saved in its
-`claude/attachments` folder and linked from `agent-chat.md`; click a thumbnail in the chat to open it.
+`Claude/attachments` folder and linked from `agent-chat.md`; click a thumbnail in the chat to open it.
 
 A video (MP4, MOV, M4V, WebM, AVI or MKV, up to 500 MB, two per order) is saved in the same folder and shows in the
 tray with its length. Claude cannot play video, so the order carries 8 frames spread across the clip, each with its
@@ -330,7 +330,7 @@ Motion DNA it tests, shows the result, and leaves a tip. What broke and how it w
 | **UC07** · Fashion | Agent › Prompt library › Styles | <img src="docs/use-cases/img/uc07.jpg" width="360" alt="UC07"> | No layers selected means the whole comp. |
 | **UC08** · Fashion | Agent › Prompt library › Techniques (text behind) | <img src="docs/use-cases/img/uc08.jpg" width="360" alt="UC08"> | Cut-outs with `matte` / `text_behind`; watch the contrast. |
 | **UC09** · Cars | Agent (Full): Figma → After Effects, brand timing | <img src="docs/use-cases/img/uc09.jpg" width="360" alt="UC09"> | Put numbers in the brand's timing: `apply_brand` follows them. |
-| **UC10** · All | Project | <img src="docs/use-cases/img/uc10.jpg" width="360" alt="UC10"> | Keep the `.aep` in the project's `05_ae`. |
+| **UC10** · All | Project | <img src="docs/use-cases/img/uc10.jpg" width="360" alt="UC10"> | Keep the `.aep` in the project's `05_AE`. |
 | **UC11** · All | Claude Code (MCP: every tool, 27/27) + layout QA | <img src="docs/use-cases/img/uc11.jpg" width="360" alt="UC11"> | Before calling it done: `render_frame`, then `check_layout`. |
 | **UC12** · Cars | Technique: tracked labels + HUD | <img src="docs/use-cases/img/uc12.jpg" width="360" alt="UC12"> | On a moving shot, point callouts inward and give them a card on light plates. |
 | **UC13** · Cars | Technique: speed ramp | <img src="docs/use-cases/img/uc13.jpg" width="360" alt="UC13"> | Give the ramp a plate 2.5× longer than the rushed part. |

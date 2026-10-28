@@ -92,6 +92,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--spark); }
 .solid.remove { background: var(--coral); }
 .solid:hover { filter: brightness(1.08); }
 .solid:active { filter: brightness(.9); }
+.solid:disabled { color: var(--pine); opacity: .7; cursor: default; filter: none; }   /* a waiting button keeps its dark label (e.g. Checking… in Connect) */
 
 /* gallery */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }

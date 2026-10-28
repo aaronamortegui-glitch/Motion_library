@@ -37,7 +37,7 @@
           <Type>Panel</Type>
           <Menu>Motion DNA</Menu>
           <Geometry>
-            <Size><Height>760</Height><Width>380</Width></Size>
+            <Size><Height>560</Height><Width>380</Width></Size>
             <MinSize><Height>280</Height><Width>240</Width></MinSize>
             <MaxSize><Height>4000</Height><Width>2400</Width></MaxSize>
           </Geometry>

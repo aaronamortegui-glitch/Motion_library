@@ -152,7 +152,7 @@ rule plus a curve and a timing entry, which `apply_brand` now applies by itself.
 - **Techniques:** workflows. Text behind people, tracked labels, speed ramps, shape wipes…
 - *Use in chat* puts a ready order in the field, so you can edit it before sending. It names the technique's tool.
 
-**Costs:** each order's estimate appears when it ends and is logged in `<project>/claude/usage.csv`. Typical costs from
+**Costs:** each order's estimate appears when it ends and is logged in `<project>/Claude/usage.csv`. Typical costs from
 the tests:
 
 | Order | Time | Cost |
@@ -188,13 +188,13 @@ Each one was tested end to end (use cases UC12–UC19). The Agent knows the tool
 ## Projects: one folder and one conversation per piece
 **Project** (the first tab) › 2 Project folder › **New project**:
 - name it, pick where, and choose its brand;
-- tick the folders: `01_brief` … `07_exports`, `claude`;
+- tick the folders: `01_Brief` … `07_Exports`, `Claude` (made on disk and as matching bins in the After Effects project);
 - optionally save the open After Effects project in it.
 
 The project gets its own conversation. Continue it from the panel, the Claude app or a terminal. The project can also
 keep rules of its own, next to the brand's.
 
-> **Tip:** keep the `.aep` inside the project's `05_ae`. The agent then knows which file belongs to the piece and asks
+> **Tip:** keep the `.aep` inside the project's `05_AE`. The agent then knows which file belongs to the piece and asks
 > before building somewhere else.
 
 ## For Claude
@@ -265,6 +265,7 @@ Recipes that worked in the tests:
 | Symptom | Fix |
 |---|---|
 | The panel shows old screens | Close and reopen it. If `index.html` changed, run `python tools/setup.py --update`. |
+| The floating panel opened with its top bar hidden (under the macOS menu bar or off screen), so it cannot be dragged or docked | *Window › Extensions › Motion DNA* to close it, then *Window › Workspace › Reset "<your workspace>" to Saved Layout*, then *Window › Extensions › Motion DNA* again: it opens with its bar visible; drag it by its tab into a dock. On Windows, double-clicking the panel edge or resizing it also brings it back. |
 | "Waiting for After Effects…" | After Effects is still starting. It retries for a minute; F5 retries too. |
 | The MCP dot is red | Open the panel once: it starts the bridge. Check the scripting preference in Install step 2. |
 | A card shows "no preview" | Its image is missing. Run `python tools/check_previews.py`, which says how to make it. |

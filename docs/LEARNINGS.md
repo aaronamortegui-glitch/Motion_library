@@ -110,6 +110,11 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
 - **License drift in open-source sources:** animate.css moved from MIT to the Hippocratic License after 4.1.1; pin the last permissive version and record it next to the data.
 
 ### Panels: ScriptUI and CEP
+- **The floating panel opened with its title bar under the macOS menu bar** (the Mac user could not drag or dock it)
+  → the manifest's opening size was 760 px tall, more than a laptop's space under the menu bar, and After Effects
+  keeps that floating position → the opening height is now 560 px (`panel/CSXS/manifest.xml`, applied by
+  `setup.py --update`); to free a stuck panel: close it (*Window › Extensions*), reset the workspace to its saved
+  layout, reopen it, and dock it by its tab.
 - **ScriptUI panel crashes AE 2026** (access violation in `dvaui.dll` `UI_DispatchDrawToChild`) → custom-drawn controls
   repainted with `hide()/show()` inside a mouse event, or a control removed by its own click handler → defer rebuilds and
   repaints to a timer; in the end the panel moved to CEP (HTML), which also gives mouse-wheel scrolling.

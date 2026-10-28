@@ -19,7 +19,8 @@ const AG = {
 };
 let PJ = null;   // the open project: {dir, p} (p = motion-dna.project.json)
 const nodeReq = () => window.require || (window.cep_node && window.cep_node.require) || null;
-const PROJECT_FOLDERS = ["01_brief", "02_references", "03_footage", "04_audio", "05_ae", "06_renders", "07_exports", "claude"];
+// the folders of a new project, made on disk and as bins in the After Effects project (host.jsx mdna_project_new)
+const PROJECT_FOLDERS = ["01_Brief", "02_References", "03_Footage", "04_Audio", "05_AE", "06_Renders", "07_Exports", "Claude"];
 
 // macOS apps start with a bare PATH (/usr/bin:/bin…): add Homebrew, ~/.local/bin and npm's folder so claude, codex,
 // node, git and python3 resolve the same way they do in a terminal
@@ -350,7 +351,7 @@ function push(role, text, extra) {
 function writeChat(m) {   // the readable copy in the project's (or brand's) folder
   const sc = scope(); if (sc.kind === "repo" || !nodeReq()) return;
   try {
-    const fs = nodeReq()("fs"), path = nodeReq()("path"), file = path.join(sc.dir, "claude", "agent-chat.md");
+    const fs = nodeReq()("fs"), path = nodeReq()("path"), file = path.join(sc.dir, "Claude", "agent-chat.md");
     fs.mkdirSync(path.dirname(file), { recursive: true });
     if (!fs.existsSync(file)) fs.writeFileSync(file, `# ${sc.name} · Agent conversation\n\nWritten by the Motion DNA panel. The full transcript of each conversation is in sessions/.\n`);
     const t = new Date().toISOString().replace("T", " ").slice(0, 16);
@@ -362,7 +363,7 @@ function writeChat(m) {   // the readable copy in the project's (or brand's) fol
 function keepTranscript(id) {   // after each order: Claude Code's transcript copied next to the project
   const sc = scope(); if (!id || sc.kind === "repo" || !nodeReq()) return;
   try {
-    const fs = nodeReq()("fs"), path = nodeReq()("path"), src = sessionFile(id, sc.dir), dir = path.join(sc.dir, "claude", "sessions");
+    const fs = nodeReq()("fs"), path = nodeReq()("path"), src = sessionFile(id, sc.dir), dir = path.join(sc.dir, "Claude", "sessions");
     if (!fs.existsSync(src)) return;
     fs.mkdirSync(dir, { recursive: true }); fs.copyFileSync(src, path.join(dir, id + ".jsonl"));
   } catch (e) {}
@@ -506,7 +507,7 @@ function busyElsewhere(id) {   // the conversation file changed in the last 20 s
 function logUsage(row) {
   try {
     const fs = nodeReq()("fs"), path = nodeReq()("path");
-    const file = PJ ? path.join(PJ.dir, "claude", "usage.csv") : path.join(S.root, "bridge", "usage.local.csv");
+    const file = PJ ? path.join(PJ.dir, "Claude", "usage.csv") : path.join(S.root, "bridge", "usage.local.csv");
     fs.mkdirSync(path.dirname(file), { recursive: true });
     if (!fs.existsSync(file)) fs.writeFileSync(file, "date,session,seconds,turns,cost_usd_estimate,tokens,mode,order\n");
     fs.appendFileSync(file, row.map((v) => /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : v).join(",") + "\n");
@@ -621,7 +622,7 @@ async function readImage(file) {
 }
 function attachDir() {   // the project's (or brand's) claude/attachments, else a temp folder: never the Motion DNA repo
   const sc = scope(), path = nodeReq()("path"), os = nodeReq()("os");
-  return sc.kind === "repo" ? path.join(os.tmpdir(), "motion-dna-attachments") : path.join(sc.dir, "claude", "attachments");
+  return sc.kind === "repo" ? path.join(os.tmpdir(), "motion-dna-attachments") : path.join(sc.dir, "Claude", "attachments");
 }
 function ffBin(name) {   // ffmpeg / ffprobe: on PATH, or Homebrew's on a Mac (After Effects' PATH often lacks it)
   if (process.platform === "win32") return name;
@@ -657,7 +658,7 @@ async function readVideo(file) {
 function saveAttachments(images) {
   const sc = scope(); if (sc.kind === "repo" || !nodeReq()) return [];
   try {
-    const fs = nodeReq()("fs"), path = nodeReq()("path"), dir = path.join(sc.dir, "claude", "attachments"), stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    const fs = nodeReq()("fs"), path = nodeReq()("path"), dir = path.join(sc.dir, "Claude", "attachments"), stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
     fs.mkdirSync(dir, { recursive: true });
     return images.map((x, i) => { if (x.kind === "video") return x.path;
       const f = path.join(dir, `${stamp}_${i + 1}_${x.name.replace(/[^\w.-]+/g, "_")}`); fs.writeFileSync(f, Buffer.from(x.data, "base64")); return f.split("\\").join("/"); });
@@ -995,7 +996,7 @@ function projectSection() {
   proj.open = AG.projOpen !== undefined ? AG.projOpen : connected;
   proj.addEventListener("toggle", () => { AG.projOpen = proj.open; });
   sec.replaceChildren(
-    h("div", { class: "kit-top" }, h("span", { class: "kit-title" }, "Project"), h("span", { class: "dim" }, "Step 1: set up, then move left to right")),
+    h("div", { class: "kit-top" }, h("span", { class: "kit-title" }, "Project")),
     conn, proj);
 }
 
@@ -1029,7 +1030,7 @@ function projectView() {
         const bx2 = brandOf(p.brand);   // the brand lists its videos
         if (bx2) { bx2.b.projects = bx2.b.projects || []; bx2.b.projects.push({ name: nm, path: res.dir, date: today() }); await saveBrand(bx2); }
       }
-      toast(`Project created in ${res.dir}` + (res.aep ? " and the After Effects project saved there." : "."));
+      toast(`Project created in ${res.dir}` + (res.bins ? `, with the same ${res.bins} folders in the After Effects project` : "") + (res.aep ? ", and the After Effects project saved there." : "."));
       agent.render();
     };
     const openExisting = async () => {
@@ -1235,7 +1236,7 @@ function showSetup(setup) {
           h("span", {}, st === "auth" ? lab + " needs your permission again (it asks from time to time)." : blurb[name]),
           h("span", { class: "dim" }, "Press the button and choose Allow in the " + lab + " page that opens. That's it: this turns green by itself."),
           // while its status is still being read, connecting could add a second server next to the account's connector
-          h("button", { class: "solid apply big", disabled: !AG.logged || st == null, title: !AG.logged ? "Connect Claude first" : st == null ? "Checking…" : "", onclick: () => connectService(name, redraw) }, st == null && AG.logged ? loadingLabel("Checking…", 14) : "Connect " + lab)]); };
+          h("button", { class: "solid apply big", disabled: !AG.logged || st == null, title: !AG.logged ? "Connect Claude first" : st == null ? "Checking…" : "", onclick: () => connectService(name, redraw) }, st == null && AG.logged ? "Checking…" : "Connect " + lab)]); };
   const figma = service("figma"), krea = service("krea"), flora = service("flora");
   const fig = AG.figma;
 

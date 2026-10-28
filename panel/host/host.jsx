@@ -424,13 +424,25 @@ function mdna_project_new(s) {   // s = {parent, name, slug, brand, folders:[...
         mdna_write_text(dir.fsName + "/" + MDNA_PROJECT, a.text);
         mdna_write_text(dir.fsName + "/CLAUDE.md", a.claude);
         mdna_write_text(dir.fsName + "/.mcp.json", a.mcp);
+        // the same folders as bins in the After Effects project, so the Project panel matches the folder on disk
+        var bins = [];
+        app.beginUndoGroup("Motion DNA: project folders");
+        try {
+            for (var j = 0; j < a.folders.length; j++) {
+                var have = null;
+                for (var k = 1; k <= app.project.numItems; k++) { var it = app.project.item(k); if (it instanceof FolderItem && it.parentFolder === app.project.rootFolder && it.name === a.folders[j]) { have = it; break; } }
+                if (!have) { app.project.items.addFolder(a.folders[j]); bins.push(a.folders[j]); }
+            }
+        } catch (eb) {}
+        app.endUndoGroup();
         var aep = "";
         if (a.saveAep) {
-            var sub = a.folders.length > 4 ? a.folders[4] : "";   // 05_ae
+            var sub = "";   // the AE folder (05_AE), whatever its case
+            for (var m = 0; m < a.folders.length; m++) if (/^05_/i.test(a.folders[m])) sub = a.folders[m];
             var file = new File(dir.fsName + (sub ? "/" + sub : "") + "/" + a.slug + ".aep");
             if (!file.exists) { app.project.save(file); aep = file.fsName.split("\\").join("/"); }
         }
-        return mdna_json({ dir: dir.fsName.split("\\").join("/"), aep: aep });
+        return mdna_json({ dir: dir.fsName.split("\\").join("/"), aep: aep, bins: bins.length });
     } catch (e) { return "ERR " + e.toString(); }
 }
 
