@@ -1,0 +1,142 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T26 · Line tip number</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"><canvas id="c" width="1080" height="1920"></canvas></div>
+<script>
+// T26 · a minimal 9:16 stat graphic: ONE line and ONE big number. The gridlines draw in from the left (0.45 s each,
+// 0.06 s apart), the axis labels fade in one after another, then a single smoothed line (Catmull-Rom through the points)
+// draws left to right on Cruise. The big number above the chart always shows the value under the line's moving tip, so
+// it counts with the curve (slow while the line is flat, fast where it climbs) and lands exactly on the last point.
+// On landing the number turns spark with a small Pop, a halo grows around the end point (Land) and a thin dashed drop
+// line falls to the axis; afterwards the halo keeps breathing and the graph drifts, so the last frame never freezes.
+// Unlike t08 (dots you can count, regrouped into bars, 16:9), this is a single line whose number rides its tip.
+// The number's size is fixed from the final value and shrinks to fit: min(180, available width / em).
+// Behaviour (timings, the count under the tip, halo and drop line) from claude-animation-skills, skills/graph
+// (github.com/artemnovitckii/claude-animation-skills, MIT, 5dbea55); look, curves and type are ours.
+// Text stays in the reel safe area (220 px from the top, above 1500 px, 100 px from the sides). Data is fictional.
+const VARS = { kicker: "Fig. 2 · Fictional data", title: "Orbit Notes, *year one*", unit: "paying teams", prefix: "",
+               decimals: 0,
+               points: [120, 180, 240, 310, 420, 560, 820, 1180, 1690, 2380, 3270, 4415],
+               labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] };
+const { T, seg, k, clamp, lerp } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1080, H = 1920;
+const P = VARS.points, N = P.length;
+// chart box: plot from X0 to X1, baseline at Y0, top gridline at Y1 (x labels at 1440, all above 1500 px)
+const SIDE = 124, X0 = 150, X1 = 930, Y0 = 1360, Y1 = 860, GRID = 4;   // SIDE: text 24 px inside the 100 px safe margin
+// a "nice" top for the axis: 3 steps of 1, 1.5, 2, 2.5, 3, 4, 5, 6 or 8 × 10^n that cover the highest point
+const STEP = (() => { const raw = Math.max(...P, 1e-9) / (GRID - 1), m = 10 ** Math.floor(Math.log10(raw));
+  return [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].map(f => f * m).find(s => s >= raw); })(), TOP = STEP * (GRID - 1);
+const px = i => X0 + (X1 - X0) * i / (N - 1), py = v => Y0 - (Y0 - Y1) * v / TOP;
+const pts = P.map((v, i) => [px(i), py(v)]);
+// uniform Catmull-Rom; with evenly spaced x, x is linear in u, so the tip's x moves at constant speed and y is the curve
+function curve(u) {
+  const i = Math.min(N - 2, Math.max(0, Math.floor(u))), s = u - i;
+  const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(N - 1, i + 2)];
+  const h = (a, b, c, d) => { const m1 = (c - a) / 2, m2 = (d - b) / 2, s2 = s * s, s3 = s2 * s;
+    return (2 * s3 - 3 * s2 + 1) * b + (s3 - 2 * s2 + s) * m1 + (-2 * s3 + 3 * s2) * c + (s3 - s2) * m2; };
+  return [h(p0[0], p1[0], p2[0], p3[0]), Math.min(Y0, h(p0[1], p1[1], p2[1], p3[1]))];   // never dips under the axis
+}
+const short = v => v >= 1e6 ? +(v / 1e6).toFixed(1) + "M" : v >= 1e3 ? +(v / 1e3).toFixed(1) + "K" : String(+v.toFixed(2));
+// timing
+const T0 = 0.6, TD = 2.3, TE = T0 + TD, DUR = TE + 1.4;
+// the number: an odometer in fixed digit cells, sized from the final value (min(180, width / em)) so it never jumps;
+// it is right-aligned to where the final value ends, and each digit place rolls in when the one below it carries
+const NUM_Y = 640, NUM_W = W - 2 * SIDE, DEC = VARS.decimals, FIN = Math.round(P[N - 1] * 10 ** DEC);
+const ND = Math.max(DEC + 1, String(FIN).length);
+const cells = []; for (let p = 0; p < ND; p++) { if (p === DEC && DEC > 0) cells.unshift({ sep: "." });
+  if (p > DEC && (p - DEC) % 3 === 0) cells.unshift({ sep: ",", place: p }); cells.unshift({ place: p }); }
+const em = s => D.width(s, 100, 800, T.font.ui) / 100, CW = Math.max(...[..."0123456789"].map(em)), SW = { ",": em(","), ".": em(".") };
+const EMW = em(VARS.prefix) + cells.reduce((a, c) => a + (c.sep ? SW[c.sep] : CW), 0);
+const SIZE = Math.min(180, NUM_W / EMW);
+// continuous digit at place p for value v (in units of the last decimal): the last digit ticks (it changes every frame
+// anyway), the tens and hundreds roll over the last quarter / sixth of their carry and the thousands and up over the
+// last third (the line is fast there), so a big digit never swaps in one frame
+function digit(v, p) { const b = Math.floor(v / 10 ** p), m = 10 ** p;
+  const w = p === 1 ? 0.25 : p === 2 ? 0.15 : 0.35, roll = p === 0 ? 0 : clamp((v % m - (1 - w) * m) / (w * m)); return { b, c: (b % 10) + roll }; }
+function number(v, col, rolling) {   // draws the odometer with its right edge at SIDE + full width, baseline at 0
+  if (!rolling) v = Math.round(v);
+  let x = (EMW - em(VARS.prefix)) * SIZE; const lh = SIZE * 0.95;
+  g.save(); g.beginPath(); g.rect(-20, -SIZE * 0.78, EMW * SIZE + 40, SIZE * 0.82); g.clip();
+  g.font = `800 ${SIZE}px ${T.font.ui}`; g.fillStyle = col; g.textAlign = "center"; g.textBaseline = "alphabetic";
+  const seps = [];
+  for (let i = cells.length - 1; i >= 0; i--) { const c = cells[i];
+    if (c.sep) { x -= SW[c.sep] * SIZE; const d = digit(v, c.place); const a = c.place <= DEC ? 1 : clamp(d.b + (d.c - (d.b % 10)));
+      seps.push([c.sep, x + SW[c.sep] * SIZE / 2, a]); continue; }
+    x -= CW * SIZE; const d = digit(v, c.place), cx = x + CW * SIZE / 2;
+    // a leading place stays blank until it rolls in from 0 to 1
+    const a = c.place <= DEC ? 1 : d.b >= 1 ? 1 : clamp(d.c); if (a <= 0) continue;
+    const lo = Math.floor(d.c), f = d.c - lo;
+    const blank = c.place > DEC && d.b < 1;   // a leading place rolls in from blank, not from a 0
+    D.alpha(a, () => { if (!blank) g.fillText(String(lo % 10), cx, -f * lh); if (f > 0) g.fillText(String((lo + 1) % 10), cx, (1 - f) * lh); });
+  }
+  g.restore();
+  g.font = `800 ${SIZE}px ${T.font.ui}`; g.fillStyle = col; g.textAlign = "center"; g.textBaseline = "alphabetic";
+  for (const [ch, sx, a] of seps) D.alpha(a, () => g.fillText(ch, sx, 0));   // separators outside the clip: commas keep their tail
+  if (VARS.prefix) D.txt(VARS.prefix, 0, 0, SIZE, col, 800, T.font.ui, "left", 0, "alphabetic");
+}
+const every = N > 8 ? 2 : 1;   // more than 8 points: label every other one, counted back from the last
+
+function render(t) {
+  g.fillStyle = C.pine; g.fillRect(0, 0, W, H);
+  const drift = 5 * Math.sin(t * 0.9) * seg(t, 0, 0.6, "Settle");   // a slow breath on the chart; it never freezes
+  // header (left-aligned, below 220 px)
+  const hA = seg(t, 0.05, 0.5, "Land"), hB = seg(t, 0.15, 0.65, "Land");
+  if (!MDNA.NOTEXT) {
+    D.alpha(hA, () => MDNA.kicker(D, VARS.kicker, SIDE, 330 + 16 * (1 - hA), C.mint, "left", 28));
+    D.alpha(hB, () => MDNA.rich(D, VARS.title, SIDE, 440 + 24 * (1 - hB), 80, C.cloud, C.spark, "left"));
+  }
+  g.save(); g.translate(0, drift);
+  // gridlines draw in from the left, bottom one (the axis) first; values sit just above each line
+  for (let j = 0; j < GRID; j++) {
+    const y = Y0 - (Y0 - Y1) * j / (GRID - 1), p = seg(t, 0.1 + j * 0.06, 0.55 + j * 0.06, "Land");
+    if (p > 0) { g.strokeStyle = j === 0 ? "#F7F9F259" : "#F7F9F21f"; g.lineWidth = j === 0 ? 3 : 2;
+      g.beginPath(); g.moveTo(SIDE, y); g.lineTo(SIDE + (W - 2 * SIDE) * p, y); g.stroke(); }
+    const la = seg(t, 0.25 + j * 0.04, 0.55 + j * 0.04, "Settle");
+    if (j > 0 && !MDNA.NOTEXT) D.alpha(la, () => D.txt(VARS.prefix + short(STEP * j), SIDE, y - 22, 24, C.mint, 500, T.font.ui, "left"));
+  }
+  if (!MDNA.NOTEXT) VARS.labels.forEach((s, i) => { if ((N - 1 - i) % every) return;
+    const la = seg(t, 0.35 + i * 0.03, 0.65 + i * 0.03, "Settle");
+    D.alpha(la * (i === N - 1 ? 1 : 0.85), () => D.txt(s, px(i), Y0 + 70 + 8 * (1 - la), 26, C.mint, 500, T.font.ui, "center"));
+  });
+  // the line: drawn up to u on Cruise; a soft sea area under the drawn part
+  const u = (N - 1) * seg(t, T0, TE, "Cruise"), tip = curve(u), done = t >= TE;
+  if (t >= T0) {
+    const path = []; for (let v = 0; v < u; v += 0.04) path.push(curve(v)); path.push(tip);
+    const area = g.createLinearGradient(0, Y1, 0, Y0); area.addColorStop(0, "#174A46cc"); area.addColorStop(1, "#174A4600");
+    g.beginPath(); g.moveTo(path[0][0], Y0); path.forEach(p => g.lineTo(p[0], p[1])); g.lineTo(tip[0], Y0); g.closePath(); g.fillStyle = area; g.fill();
+    g.beginPath(); path.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
+    g.strokeStyle = C.spark; g.lineWidth = 6; g.lineJoin = g.lineCap = "round"; g.stroke();
+  }
+  // landing: a halo grows from the end point (Land), then keeps breathing; a dashed drop line falls to the axis
+  if (done) {
+    const hp = seg(t, TE, TE + 0.7, "Land");
+    g.beginPath(); g.arc(tip[0], tip[1], lerp(13, 60, hp), 0, 7); g.fillStyle = C.spark; D.alpha(0.22 * (1 - hp), () => g.fill());
+    const br = seg(t, TE + 0.3, TE + 0.8, "Settle"), r = 26 + 5 * Math.sin((t - TE) * 3.2);
+    D.alpha(br, () => { g.beginPath(); g.arc(tip[0], tip[1], r, 0, 7); g.strokeStyle = C.spark; g.lineWidth = 2; D.alpha(0.55, () => g.stroke()); });
+    const dp = seg(t, TE + 0.05, TE + 0.5, "Settle");
+    if (dp > 0) { g.save(); g.setLineDash([3, 10]); g.lineCap = "round"; g.strokeStyle = C.cloud; g.lineWidth = 2; g.globalAlpha = 0.7;
+      g.beginPath(); g.moveTo(tip[0], tip[1] + 22); g.lineTo(tip[0], lerp(tip[1] + 22, Y0, dp)); g.stroke(); g.restore(); }
+  }
+  // the tip: a dot with a glow, on the line from the moment it starts
+  const ta = seg(t, T0 - 0.05, T0 + 0.1, "Flat");
+  if (ta > 0) D.alpha(ta, () => { MDNA.glow(g, tip[0], tip[1], 60, C.spark, 0.35);
+    const pop = done ? k(t, [[TE, 1], [TE + 0.12, 1.35, "Cruise"], [TE + 0.4, 1, "Pop"]]) : 1;
+    g.beginPath(); g.arc(tip[0], tip[1], 11 * pop, 0, 7); g.fillStyle = C.spark; g.fill(); g.lineWidth = 4; g.strokeStyle = C.pine; g.stroke(); });
+  g.restore();
+  // the big number: the value under the tip (exactly the last point once the line lands), then spark with a small Pop
+  if (!MDNA.NOTEXT) {
+    const na = seg(t, T0 - 0.15, T0 + 0.2, "Land");
+    const val = (t < T0 ? P[0] : done ? P[N - 1] : Math.max(0, TOP * (Y0 - tip[1]) / (Y0 - Y1))) * 10 ** DEC;
+    const land = seg(t, TE, TE + 0.25, "Flat"), s = done ? k(t, [[TE, 1], [TE + 0.12, 1.05, "Cruise"], [TE + 0.42, 1, "Pop"]]) : 1;
+    D.alpha(na, () => D.at(SIDE, NUM_Y + 20 * (1 - na), s, 0, () => {
+      number(val, land >= 1 ? C.spark : C.cloud, !done);
+      if (land > 0 && land < 1) D.alpha(land, () => number(val, C.spark, false));
+    }));
+    D.alpha(seg(t, T0, T0 + 0.4, "Land"), () => D.txt(VARS.unit, SIDE, NUM_Y + 56, 32, C.mint, 600, T.font.ui, "left", 0, "alphabetic"));
+  }
+  MDNA.finish(g, t, { vignette: 0.3, grain: 0.03 });
+}
+
+MDNA.scene({ w: W, h: H, duration: DUR, fps: 30, render });
+</script>

@@ -1,0 +1,81 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T23 · Hop steps</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"><canvas id="c" width="1080" height="1920"></canvas></div>
+<script>
+// T23 · a minimal 9:16 reel graphic: a process in a few steps. A dot pops in on the first step and hops to each next one
+// with squash and stretch (squash before the jump, stretch in the air, squash on landing, recover with a small overshoot);
+// every landing lights its step and writes its label; on the last step the dot rings it and sparks fly, then the payoff
+// line lands. Length = the last landing + 1.6 s, so it grows with the steps.
+// Squash/stretch numbers from claude-animation-skills (minimalistic-graphics, MIT, 5dbea55); look, curves and type are ours.
+// Text stays in the Instagram safe area (220 px from the top, above 1500 px, 100 px from the sides).
+const VARS = { kicker: "How it works", title: "From brief to *film*", steps: ["Brief", "Storyboard", "Animate", "Ship"],
+               payoff: "Four steps. *One* flow." };
+const { T, seg, k, clamp, rng } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1080, H = 1920;
+const N = VARS.steps.length, X0 = 190, X1 = W - 190, Y = 960, R = 22;
+const xs = VARS.steps.map((_, i) => X0 + (X1 - X0) * i / (N - 1));
+const APPEAR = 0.45, HOP = 0.62, FIRST = 1.0;                 // the dot pops in, then one hop every 0.62 s
+const land = i => i === 0 ? APPEAR + 0.42 : FIRST + (i - 1) * HOP + 0.35;   // when the dot settles on step i
+const PAY = land(N - 1), DUR = PAY + 1.6;
+const sr = rng(5), sparks = Array.from({ length: 22 }, () => ({ a: sr() * Math.PI * 2, v: 90 + sr() * 110, s: 6 + sr() * 8, c: sr() < 0.6 ? C.spark : C.mint }));
+
+function dot(t) {                                             // position, scale x/y of the dot at time t
+  if (t < APPEAR) return null;
+  if (t < FIRST) {                                            // pop in: 0 → 2.1 in 0.16 s, settle to 1 in 0.26 s
+    const s = k(t, [[APPEAR, 0], [APPEAR + 0.16, 2.1, "Cruise"], [APPEAR + 0.42, 1, "Land"]]);
+    return { x: xs[0], y: Y, sx: s, sy: s };
+  }
+  const i = Math.min(N - 2, Math.floor((t - FIRST) / HOP)), t0 = FIRST + i * HOP, u = t - t0;
+  if (i >= N - 1 || t >= FIRST + (N - 1) * HOP) return { x: xs[N - 1], y: Y, sx: 1, sy: 1 };
+  // squash 0.05 s → stretch in the air (rise 0.15 s, fall 0.15 s) → squash on landing → recover 0.18 s with overshoot
+  // squash 0.05 s before take-off; stretch 0.1 s and back to round 0.1 s later; land squashed 0.05 s; recover 0.18 s with overshoot
+  const sy = k(u, [[0, 1], [0.05, 0.78, "Settle"], [0.15, 1.12, "Settle"], [0.25, 1, "Cruise"], [0.35, 1], [0.4, 0.74, "Settle"], [0.58, 1, "Pop"]]);
+  const sx = k(u, [[0, 1], [0.05, 1.18, "Settle"], [0.15, 0.9, "Settle"], [0.25, 1, "Cruise"], [0.35, 1], [0.4, 1.22, "Settle"], [0.58, 1, "Pop"]]);
+  const f = clamp((u - 0.05) / 0.3), x = xs[i] + (xs[i + 1] - xs[i]) * f;   // constant speed across; the arc gives the ease
+  const h = f < 0.5 ? 1 - (1 - f * 2) ** 2 : 1 - ((f - 0.5) * 2) ** 2;   // rise eases out, fall eases in
+  return { x, y: Y - 150 * h, sx, sy };
+}
+
+function render(t) {
+  g.fillStyle = C.pine; g.fillRect(0, 0, W, H);
+  const drift = 6 * Math.sin(t * 0.9);                        // the frame never freezes: a slow breath on the whole graphic
+  // header (safe area: below 220 px)
+  const hA = seg(t, 0.05, 0.5, "Land"), hB = seg(t, 0.15, 0.65, "Land");
+  D.alpha(hA, () => MDNA.kicker(D, VARS.kicker, W / 2, 470 + 20 * (1 - hA), C.spark, "center", 30));
+  D.alpha(hB, () => MDNA.rich(D, VARS.title, W / 2, 570 + 30 * (1 - hB), 96, C.cloud, C.spark, "center"));
+  // the rail and the steps
+  const rail = seg(t, 0.2, 0.9, "Settle");
+  g.strokeStyle = C.sea; g.lineWidth = 4; g.beginPath(); g.moveTo(X0, Y + drift); g.lineTo(X0 + (X1 - X0) * rail, Y + drift); g.stroke();
+  VARS.steps.forEach((s, i) => {
+    const on = t >= land(i), a = seg(t, 0.25 + i * 0.06, 0.6 + i * 0.06, "Land"), lit = seg(t, land(i) - 0.04, land(i) + 0.2, "Pop");
+    D.alpha(a, () => { g.beginPath(); g.arc(xs[i], Y + drift, R + 6 * lit, 0, 7); g.fillStyle = on ? C.mint : "#123A35"; g.fill();
+      g.lineWidth = 4; g.strokeStyle = on ? C.mint : C.sea; g.stroke(); });
+    const la = seg(t, land(i), land(i) + 0.35, "Land");
+    if (la > 0) D.alpha(la, () => {
+      D.txt(String(i + 1).padStart(2, "0"), xs[i], Y + 90 + drift + 16 * (1 - la), 26, C.spark, 600, T.font.ui, "center");
+      D.txt(s, xs[i], Y + 136 + drift + 16 * (1 - la), 34, C.cloud, 600, T.font.ui, "center");
+    });
+  });
+  // payoff: a ring draws around the last step, sparks fly
+  const ring = seg(t, PAY, PAY + 0.58, "Settle");
+  if (ring > 0) { g.strokeStyle = C.spark; g.lineWidth = 5; g.beginPath(); g.arc(xs[N - 1], Y + drift, 62, -Math.PI / 2, -Math.PI / 2 + ring * Math.PI * 2); g.stroke(); }
+  const sp = (t - PAY) / 0.5;
+  if (sp > 0 && sp < 1.4) for (const s of sparks) { const u = clamp(sp), e = 1 - (1 - u) ** 3, x = xs[N - 1] + Math.cos(s.a) * s.v * e, y = Y + drift + Math.sin(s.a) * s.v * e;
+    D.alpha(1 - clamp((sp - 0.6) / 0.8), () => { g.fillStyle = s.c; g.fillRect(x - s.s / 2, y - s.s / 2, s.s, s.s); }); }
+  // a pulse ring when the dot appears (0.9 → 0 opacity, 1 → 3.2 scale, 0.5 s)
+  const pu = seg(t, APPEAR + 0.05, APPEAR + 0.55, "Settle");
+  if (pu > 0 && pu < 1) D.alpha(0.9 * (1 - pu), () => { g.strokeStyle = C.spark; g.lineWidth = 4; g.beginPath(); g.arc(xs[0], Y + drift, R * (1 + 2.2 * pu), 0, 7); g.stroke(); });
+  // the dot (squash and stretch around its base, so it sits on the rail)
+  const d = dot(t);
+  if (d) { MDNA.glow(g, d.x, d.y + drift, 70, C.spark, 0.3);
+    g.save(); g.translate(d.x, d.y + drift + R); g.scale(d.sx, d.sy); g.beginPath(); g.ellipse(0, -R, R, R, 0, 0, 7); g.fillStyle = C.spark; g.fill(); g.restore(); }
+  // payoff line (above 1500 px)
+  const p = seg(t, PAY + 0.3, PAY + 0.9, "Land");
+  if (p > 0 && !MDNA.NOTEXT) D.alpha(p, () => MDNA.rich(D, VARS.payoff, W / 2, 1340 + 30 * (1 - p), 72, C.cloud, C.spark, "center"));
+  MDNA.finish(g, t, { vignette: 0.3, grain: 0.03 });
+}
+
+MDNA.scene({ w: W, h: H, duration: DUR, fps: 30, render });
+</script>

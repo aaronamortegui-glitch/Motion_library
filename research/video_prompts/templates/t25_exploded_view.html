@@ -1,0 +1,121 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T25 · Exploded view</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"><canvas id="c" width="1080" height="1920"></canvas></div>
+<script>
+// T25 · an exploded view for a 9:16 reel: a fictional phone-like device made of flat layers (glass, interface, widgets,
+// frame, chassis) seen in a 2.5D isometric view drawn with canvas transforms (rotate in the plane, squash, lift). The
+// stack fades in assembled, then the layers lift apart top first (0.07 s apart, 1.25 s each on Surge) while the stack
+// turns slowly with a small wobble; leader lines draw out to a right-hand label column (0.3 s each, 0.13 s apart) and
+// each label slides in 18 px and fades on Land. The end keeps turning and floating, so the hold never freezes.
+// Leader lines follow docs/LEARNINGS.md §10: 1.5 px, one bend, stop 5 px short of the part with a 4 px dot, labels
+// at least 150 px apart. Text stays in the reel safe area (220 px from the top, above 1500 px, 100 px from the sides).
+// Behaviour (layer order, stagger, lift and label timings) from claude-animation-skills (breakdown, MIT, 5dbea55),
+// rebuilt as 2D canvas; the device, look, curves and type are ours. 4 or 5 layers (with 4 the widget layer is dropped).
+const VARS = { kicker: "Exploded view", title: "What's *inside* the app",
+               layers: ["Cover glass", "Live interface", "Smart widgets", "Frame", "Chassis"] };
+const { T, seg, k, clamp, lerp } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1080, H = 1920, DUR = 5;
+const KINDS = VARS.layers.length >= 5 ? ["glass", "ui", "cards", "frame", "back"] : ["glass", "ui", "frame", "back"];
+const N = KINDS.length, PW = 290, PL = 540, PR = 46;            // device outline in its own plane (px)
+const CX = 350, CY = 1030, GAP = N >= 5 ? 172 : 212, TH = 12;    // stack centre, exploded gap, slab thickness
+const T_IN = 0.1, T_EX = 0.6, STAG = 0.07, T_EXD = 1.25, T_LB = 1.9, LSTAG = 0.13;
+const LX = 700, EX = LX - 60;                                   // label column and the leader's bend
+const deg = Math.PI / 180;
+
+// view at time t: in-plane turn, squash (tilt) and float; every value keeps moving to the last frame
+function view(t) { return { th: (-38 + 11 * t / DUR + 1.2 * Math.sin(t * 1.3)) * deg, sq: 0.56 + 0.018 * Math.sin(t * 0.9), fy: 6 * Math.sin(t * 1.1) }; }
+function lift(i, t) { return seg(t, T_EX + i * STAG, T_EX + i * STAG + T_EXD, "Surge"); }   // top layer (i = 0) leaves first
+function zOf(i, t) { const m = (N - 1) / 2, p = lift(i, t); return lerp((m - i) * (TH + 2), (m - i) * GAP, p) + 4 * p * Math.sin(t * 1.6 + i * 0.9); }
+const proj = (v, z, u, w) => ({ x: CX + u * Math.cos(v.th) - w * Math.sin(v.th), y: CY + v.fy - z + v.sq * (u * Math.sin(v.th) + w * Math.cos(v.th)) });
+function plane(v, z, fn) { g.save(); g.translate(CX, CY + v.fy - z); g.scale(1, v.sq); g.rotate(v.th); fn(); g.restore(); }
+// a slab: the side is the outline stacked a few px down in a darker tone, then the top face
+function slab(v, z, th, shape, side, top) { for (let s = th; s > 0; s -= 2) plane(v, z - s, () => { shape(); g.fillStyle = side; g.fill("evenodd"); }); plane(v, z, () => { shape(); top(); }); }
+const outline = (inset = 0) => () => D.rr(-PW / 2 + inset, -PL / 2 + inset, PW - 2 * inset, PL - 2 * inset, PR - inset);
+
+const LAYER = {
+  back(v, z) {
+    slab(v, z, TH, outline(), "#06231F", () => { const gr = g.createLinearGradient(0, -PL / 2, 0, PL / 2); gr.addColorStop(0, "#1E5A54"); gr.addColorStop(1, C.sea); g.fillStyle = gr; g.fill();
+      D.rr(-PW / 2 + 26, -PL / 2 + 26, 96, 96, 26); D.fill("#0C2E2A"); [[52, 52], [92, 52], [52, 92]].forEach(([x, y]) => { g.beginPath(); g.arc(-PW / 2 + x + 4, -PL / 2 + y + 4, 14, 0, 7); D.fill(C.ink); });
+      g.beginPath(); g.arc(0, 40, 64, 0, 7); g.lineWidth = 7; g.strokeStyle = C.spark; g.stroke();
+      for (let i = 0; i < 4; i++) { D.rr(-90, 150 + i * 22, 180 - i * 34, 8, 4); D.fill("#F7F9F21c"); } });
+  },
+  frame(v, z) {
+    const ring = () => { outline()(); g.roundRect(-PW / 2 + 20, -PL / 2 + 20, PW - 40, PL - 40, PR - 20); };   // one path, two loops (evenodd)
+    slab(v, z, TH, ring, "#4F8F7C", () => { g.fillStyle = C.mint; g.fill("evenodd"); });
+    plane(v, z, () => { D.rr(-38, -PL / 2 + 6, 76, 10, 5); D.fill(C.sea); [[-PW / 2 - 6, -120, 70], [-PW / 2 - 6, -30, 44], [PW / 2, -90, 90]].forEach(([x, y, h]) => { D.rr(x, y, 6, h, 3); D.fill("#4F8F7C"); }); });
+  },
+  cards(v, z) {
+    const card = (x, y, w, h, r, top, side) => slab(v, z, 8, () => D.rr(x, y, w, h, r), side, () => D.fill(top));
+    card(-PW / 2 + 22, -PL / 2 + 40, PW - 44, 120, 24, C.coral, "#B85A43");
+    card(-PW / 2 + 22, -PL / 2 + 184, 104, 104, 24, C.sky, "#4C7FBF");
+    card(-PW / 2 + 144, -PL / 2 + 184, 104, 104, 24, C.spark, "#93B54F");
+    card(-PW / 2 + 22, -PL / 2 + 312, PW - 44, 64, 32, C.cloud, "#AEB5A6");
+    plane(v, z, () => { D.rr(-PW / 2 + 44, -PL / 2 + 66, 110, 14, 7); D.fill("#04120F55"); D.rr(-PW / 2 + 44, -PL / 2 + 96, 170, 30, 10); D.fill("#04120F99");
+      g.beginPath(); g.arc(-PW / 2 + 74, -PL / 2 + 236, 22, 0, 7); g.lineWidth = 6; g.strokeStyle = C.ink; g.stroke();
+      D.rr(-PW / 2 + 160, -PL / 2 + 250, 72, 12, 6); D.fill("#04120F88"); D.rr(-PW / 2 + 44, -PL / 2 + 338, 120, 12, 6); D.fill("#04120F55"); });
+  },
+  ui(v, z) {
+    slab(v, z, 6, outline(14), "#05140F", () => { D.fill("#0F2B28");
+      D.rr(-PW / 2 + 30, -PL / 2 + 34, 40, 10, 5); D.fill("#F7F9F255"); D.rr(PW / 2 - 70, -PL / 2 + 34, 40, 10, 5); D.fill("#F7F9F255");
+      D.txt("2,480", -PW / 2 + 30, -PL / 2 + 112, 54, C.cloud, 700, T.font.ui, "left");
+      D.rr(-PW / 2 + 30, -PL / 2 + 150, 120, 10, 5); D.fill(C.mint);
+      [0.45, 0.7, 0.4, 0.85, 0.6, 1].forEach((b, i) => { const h = 120 * b; D.rr(-PW / 2 + 30 + i * 36, -PL / 2 + 320 - h, 24, h, 8); D.fill(i === 5 ? C.spark : C.sea); });
+      for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(-PW / 2 + 44, -PL / 2 + 362 + i * 40, 12, 0, 7); D.fill(i ? "#F7F9F233" : C.coral); D.rr(-PW / 2 + 68, -PL / 2 + 356 + i * 40, 130 - i * 24, 12, 6); D.fill("#F7F9F230"); } });
+  },
+  glass(v, z) {
+    plane(v, z, () => { outline()(); D.fill("#F7F9F212"); g.save(); g.clip(); const gr = g.createLinearGradient(-PW / 2, -PL / 2, PW / 2, PL / 2);
+      gr.addColorStop(0.28, "#F7F9F200"); gr.addColorStop(0.36, "#F7F9F240"); gr.addColorStop(0.44, "#F7F9F200"); gr.addColorStop(0.52, "#F7F9F21c"); gr.addColorStop(0.56, "#F7F9F200");
+      g.fillStyle = gr; g.fillRect(-PW, -PL, 2 * PW, 2 * PL); g.restore(); outline()(); g.lineWidth = 3; g.strokeStyle = "#F7F9F299"; g.stroke(); });
+  },
+};
+
+// where each leader starts: a point on the right edge of what the layer actually draws there, then 5 px further out
+const ANCH = { glass: [PW / 2, PL * 0.3], ui: [PW / 2 - 14, PL * 0.3], cards: [PW / 2 - 22, -PL / 2 + 344], frame: [PW / 2, PL * 0.3], back: [PW / 2, PL * 0.3] };
+function anchor(i, t) { const v = view(t), [u, w] = ANCH[KINDS[i]], a = proj(v, zOf(i, t), u, w); return { x: a.x + 5, y: a.y }; }
+// label rows: the anchors' heights once exploded, spread to at least 150 px and kept inside the safe area
+const LY = (() => { const ys = KINDS.map((_, i) => anchor(i, 3.4).y);
+  for (let i = 1; i < N; i++) ys[i] = Math.max(ys[i], ys[i - 1] + 150);
+  const over = ys[N - 1] - 1450; if (over > 0) for (let i = N - 1; i >= 0; i--) ys[i] = Math.min(ys[i], i === N - 1 ? 1450 : ys[i + 1] - 150);
+  return ys; })();
+const NUM = 24, NAMEMAX = 42, NAMEW = W - 100 - LX;   // the number sits above the name, the leader points at the name
+// one size for every name: the largest at which the longest still fits the column
+const NAME = (() => { let z = NAMEMAX; while (z > 28 && VARS.layers.some(s => D.width(s, z, 600) > NAMEW)) z -= 1; return z; })();
+
+function render(t) {
+  D.bg(C.pine); MDNA.glow(g, CX + 40, CY - 80, 760, "#174A46", 0.9);
+  const v = view(t), ex = seg(t, T_EX, T_EX + T_EXD + 0.3, "Cruise"), inA = seg(t, T_IN, T_IN + 0.5, "Land");
+  // header
+  const hA = seg(t, 0.05, 0.5, "Land"), hB = seg(t, 0.15, 0.65, "Land");
+  D.alpha(hA, () => MDNA.kicker(D, VARS.kicker, W / 2, 300 + 20 * (1 - hA), C.spark, "center", 30));
+  D.alpha(hB, () => MDNA.rich(D, VARS.title, W / 2, 420 + 30 * (1 - hB), 84, C.cloud, C.spark, "center"));
+  g.save(); g.translate(0, 40 * (1 - inA)); D.alpha(inA, () => {
+    // floor shadow under the lowest layer, softer as the stack opens
+    const zb = zOf(N - 1, t), sh = proj(v, zb - 70, 0, 0);
+    D.alpha(0.55 - 0.2 * ex, () => { g.filter = "blur(30px)"; g.beginPath(); g.ellipse(sh.x, sh.y + 40, 250 + 40 * ex, 90, 0, 0, 7); D.fill(C.ink); g.filter = "none"; });
+    // dashed guides through the outer corners, from the base to the top layer
+    D.alpha(0.22 * ex, () => { g.setLineDash([6, 10]); g.lineWidth = 1.5; g.strokeStyle = C.mint;
+      [[-PW / 2, -PL / 2], [PW / 2, PL / 2], [-PW / 2, PL / 2]].forEach(([u, w]) => { const a = proj(v, zOf(N - 1, t), u * 0.92, w * 0.95), b = proj(v, zOf(0, t), u * 0.92, w * 0.95);
+        g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); }); g.setLineDash([]); });
+    for (let i = N - 1; i >= 0; i--) LAYER[KINDS[i]](v, zOf(i, t));   // bottom first, top last
+  }); g.restore();
+  // leader lines and labels
+  if (!MDNA.NOTEXT) KINDS.forEach((_, i) => {
+    const t0 = T_LB + i * LSTAG, a = seg(t, t0, t0 + 0.3, "Cruise"); if (a <= 0) return;
+    const p = anchor(i, t), ly = LY[i], bx = Math.max(p.x + 30, EX), pts = [[p.x, p.y], [bx, ly], [LX - 16, ly]];
+    const l1 = Math.hypot(bx - p.x, ly - p.y), l2 = LX - 16 - bx; let rem = a * (l1 + l2);
+    g.beginPath(); g.moveTo(p.x, p.y);
+    if (rem <= l1) g.lineTo(p.x + (bx - p.x) * rem / l1, p.y + (ly - p.y) * rem / l1); else { g.lineTo(bx, ly); g.lineTo(bx + rem - l1, ly); }
+    g.lineWidth = 1.5; g.strokeStyle = "#F7F9F2cc"; g.lineCap = "round"; g.stroke();
+    g.beginPath(); g.arc(p.x, p.y, 4, 0, 7); D.fill(C.spark);
+    const la = seg(t, t0 + 0.18, t0 + 0.53, "Land");
+    if (la > 0) D.alpha(la, () => { const x = LX + 18 * (1 - la);
+      D.txt(String(i + 1).padStart(2, "0"), x, ly - 40, NUM, C.spark, 600, T.font.ui, "left", 1);
+      D.txt(VARS.layers[i], x, ly, NAME, C.cloud, 600, T.font.ui, "left"); });
+  });
+  MDNA.finish(g, t, { vignette: 0.35, grain: 0.04 });
+}
+
+MDNA.scene({ w: W, h: H, duration: DUR, fps: 30, render });
+</script>

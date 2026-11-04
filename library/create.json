@@ -98,8 +98,40 @@
    "order": "Add The Agent to this comp and make it say this voice line, with lipsync (MCP add_character with audio)."
   },
   {
+   "name": "The Agent eats a repo (pixel GIF)",
+   "sub": "Character · 1:1",
+   "desc": "Make a square looping pixel GIF: the character rolls in next to a big code document, its eyes light up, it turns toward it and lunges with its whole screen gaping (the body balloons), bites it, chews, rubs its belly, rol…",
+   "thumb": "library/templates/t22_agent_eats_repo.jpg",
+   "img": "library/templates/t22_agent_eats_repo.webm",
+   "order": "Make a the agent eats a repo (pixel gif) video for this, with the t22_agent_eats_repo template."
+  },
+  {
+   "name": "The Agent explains (promo + capsules)",
+   "sub": "Character · 16:9",
+   "desc": "Make a {duration}s announcement where a documented character presents what is new, one short scene per feature, each cut on the beat of the music bed (scene lengths in beats): a hook, each feature acted by the character …",
+   "thumb": "library/templates/t15_agent_update.jpg",
+   "img": "library/templates/t15_agent_update.webm",
+   "order": "Make a the agent explains (promo + capsules) video for this, with the t15_agent_update template."
+  },
+  {
+   "name": "Pixel character (documented rig)",
+   "sub": "Character · 16:9",
+   "desc": "Make a {duration}s pixel-art short where a documented character acts one beat: it rolls in, looks around, reads an order, reacts (squash, hop, land) as its screen swaps emotion, waves and celebrates; poses on twos, the e…",
+   "thumb": "library/templates/t14_pixel_character.jpg",
+   "img": "library/templates/t14_pixel_character.webm",
+   "order": "Make a pixel character (documented rig) video for this, with the t14_pixel_character template."
+  },
+  {
+   "name": "Storybook explainer",
+   "sub": "Character · 16:9",
+   "desc": "Make a {duration}s explainer told by a character with a personality (eyes, blinks, moods) across three worlds stacked like a camera tilting down (space, weather, ground), each handed over by a cloud bank the character di…",
+   "thumb": "library/templates/t06_storybook_explainer.jpg",
+   "img": "library/templates/t06_storybook_explainer.webm",
+   "order": "Make a storybook explainer video for this, with the t06_storybook_explainer template."
+  },
+  {
    "name": "Showreel on the beat",
-   "sub": "Made in code · Rendered",
+   "sub": "Made in code · 16:9",
    "desc": "Make a {duration}s motion-design showreel at {bpm} BPM: 6-7 scenes, each one formal idea (bars sweeping, a breathing dot grid, a kinetic word swap, one shape morphing, a particle burst settling into a ring, a chart drawi…",
    "thumb": "library/templates/t01_showreel.jpg",
    "img": "library/templates/t01_showreel.webm",
@@ -107,7 +139,7 @@
   },
   {
    "name": "SaaS launch",
-   "sub": "Made in code · Rendered",
+   "sub": "Made in code · 16:9",
    "desc": "Make a {duration}s launch film for {app} (fictional): a three-line hook, then its dashboard assembles card by card (a chart, a counting balance, a list, a progress bar) while a cursor taps the key element; three feature …",
    "thumb": "library/templates/t02_saas_launch.jpg",
    "img": "library/templates/t02_saas_launch.webm",
@@ -115,7 +147,7 @@
   },
   {
    "name": "One shape becomes the UI",
-   "sub": "Made in code · Rebuilt in AE",
+   "sub": "Made in code · 16:9",
    "desc": "Make a {duration}s UI film where one shape is never cut: it morphs by size, radius and colour into a button, a toggle, a slider, a stats card and a progress ring that ends in a check. A cursor drives every change with cl…",
    "thumb": "library/templates/t03_morph_ui.jpg",
    "img": "library/templates/t03_morph_ui.webm",
@@ -123,7 +155,7 @@
   },
   {
    "name": "Infinite zoom",
-   "sub": "Made in code · Rendered",
+   "sub": "Made in code · 16:9",
    "desc": "Make a {duration}s single continuous camera where every change of scale is a match: open already moving on a live data point and pull out to a finished product desktop (charts with area fills and labels, positions, watch…",
    "thumb": "library/templates/t04_infinite_zoom.jpg",
    "img": "library/templates/t04_infinite_zoom.webm",
@@ -131,23 +163,15 @@
   },
   {
    "name": "Kinetic typography",
-   "sub": "Made in code · Rebuilt in AE",
+   "sub": "Made in code · 16:9",
    "desc": "Make a {duration}s kinetic-typography overlay on transparency: a manifesto read word by word, one line per shot, words rising into a mask on Land, the key word of each line in spark with a Pop, a one-word line set huge w…",
    "thumb": "library/templates/t05_kinetic_type.jpg",
    "img": "library/templates/t05_kinetic_type.webm",
    "order": "Make a kinetic typography video for this, with the t05_kinetic_type template."
   },
   {
-   "name": "Storybook explainer",
-   "sub": "Made in code · Rendered",
-   "desc": "Make a {duration}s explainer told by a character with a personality (eyes, blinks, moods) across three worlds stacked like a camera tilting down (space, weather, ground), each handed over by a cloud bank the character di…",
-   "thumb": "library/templates/t06_storybook_explainer.jpg",
-   "img": "library/templates/t06_storybook_explainer.webm",
-   "order": "Make a storybook explainer video for this, with the t06_storybook_explainer template."
-  },
-  {
    "name": "Timeline explainer",
-   "sub": "Made in code · Rendered",
+   "sub": "Made in code · 16:9",
    "desc": "Make a {duration}s timeline: a line draws with the playhead (a spark ring), cards pop above and below per milestone with an illustration in a fixed slot, a year odometer rolls behind, the camera follows the playhead smoo…",
    "thumb": "library/templates/t07_timeline.jpg",
    "img": "library/templates/t07_timeline.webm",
@@ -155,7 +179,7 @@
   },
   {
    "name": "Data story",
-   "sub": "Made in code · Rendered",
+   "sub": "Made in code · 16:9",
    "desc": "Make a {duration}s data story about one number: 100 dots fall into a 10x10 waffle, the {share} that matter light up in spark one by one, the same dots regroup into labelled bars, then the headline percentage counts up an…",
    "thumb": "library/templates/t08_data_story.jpg",
    "img": "library/templates/t08_data_story.webm",
@@ -163,7 +187,7 @@
   },
   {
    "name": "Particle world",
-   "sub": "Made in code · Rendered",
+   "sub": "Made in code · 16:9",
    "desc": "Make a seamless {duration}s loop of a 3D place drawn with thousands of glowing specks (no solid fills): rolling waves of particles, a sun made of particles, a slow camera sway, the light going from day to dusk and back s…",
    "thumb": "library/templates/t09_particle_world.jpg",
    "img": "library/templates/t09_particle_world.webm",
@@ -171,7 +195,7 @@
   },
   {
    "name": "Shader hero object",
-   "sub": "Made in code · Rendered",
+   "sub": "Made in code · 16:9",
    "desc": "Make a {duration}s hero product plate as one fragment shader: a ray-marched glossy object (a torus that breathes into a capsule) on a studio floor with soft shadow, spark rim light, slow turntable and push-in. The shader…",
    "thumb": "library/templates/t10_shader_hero.jpg",
    "img": "library/templates/t10_shader_hero.webm",
@@ -179,7 +203,7 @@
   },
   {
    "name": "Liquid wipe",
-   "sub": "Made in code · Rendered",
+   "sub": "Made in code · 16:9",
    "desc": "Make a {duration}s transition overlay on transparency: a spark leading edge and a pine body sweep across with wobbling noisy fronts (Whip), fully cover the frame at the midpoint (cut the shots there), then uncover with t…",
    "thumb": "",
    "img": "library/templates/t11_liquid_transition.webm",
@@ -187,7 +211,7 @@
   },
   {
    "name": "Logo reveal",
-   "sub": "Made in code · Rebuilt in AE",
+   "sub": "Made in code · 16:9",
    "desc": "Make a {duration}s logo reveal on transparency for a fictional mark built from three primitives (disc, bar, arc): each part flies in on its own curve (Wind-up, Whip, Settle), they lock with a Pop, the mark slides left, t…",
    "thumb": "library/templates/t12_logo_reveal.jpg",
    "img": "library/templates/t12_logo_reveal.webm",
@@ -195,31 +219,47 @@
   },
   {
    "name": "Install tutorial (app walkthrough)",
-   "sub": "Made in code · Rendered",
+   "sub": "Made in code · 16:9",
    "desc": "Make a {duration}s step-by-step install tutorial on a pine gradient wallpaper: one flat dark window style for every app, a cursor that clicks through each step while the camera pushes in on what is clicked (so UI text re…",
    "thumb": "library/templates/t13_install_tutorial.jpg",
    "img": "library/templates/t13_install_tutorial.webm",
    "order": "Make a install tutorial (app walkthrough) video for this, with the t13_install_tutorial template."
   },
   {
-   "name": "Pixel character (documented rig)",
-   "sub": "Made in code · Rendered",
-   "desc": "Make a {duration}s pixel-art short where a documented character acts one beat: it rolls in, looks around, reads an order, reacts (squash, hop, land) as its screen swaps emotion, waves and celebrates; poses on twos, the e…",
-   "thumb": "library/templates/t14_pixel_character.jpg",
-   "img": "library/templates/t14_pixel_character.webm",
-   "order": "Make a pixel character (documented rig) video for this, with the t14_pixel_character template."
+   "name": "Hop steps (process in 9:16)",
+   "sub": "Made in code · 9:16",
+   "desc": "Make a minimal 9:16 graphic of a process in a few steps: a dot pops in on the first step and hops to each next one with squash and stretch, each landing lights its step and writes its label, the last step gets a ring and…",
+   "thumb": "library/templates/t23_hop_steps.jpg",
+   "img": "library/templates/t23_hop_steps.webm",
+   "order": "Make a hop steps (process in 9:16) video for this, with the t23_hop_steps template."
   },
   {
-   "name": "The Agent explains (promo + capsules)",
-   "sub": "Made in code · Rendered",
-   "desc": "Make a {duration}s announcement where a documented character presents what is new, one short scene per feature, each cut on the beat of the music bed (scene lengths in beats): a hook, each feature acted by the character …",
-   "thumb": "library/templates/t15_agent_update.jpg",
-   "img": "library/templates/t15_agent_update.webm",
-   "order": "Make a the agent explains (promo + capsules) video for this, with the t15_agent_update template."
+   "name": "Map route (A to B in 9:16)",
+   "sub": "Made in code · 9:16",
+   "desc": "Make a 9:16 graphic of a trip on a stylised 2D map drawn in code (street grid, blocks, parks, a canal, fictional names, our palette): a route draws from A to B with an in-out curve while the camera rides slightly behind …",
+   "thumb": "library/templates/t24_map_route.jpg",
+   "img": "library/templates/t24_map_route.webm",
+   "order": "Make a map route (a to b in 9:16) video for this, with the t24_map_route template."
+  },
+  {
+   "name": "Exploded view (layers and labels in 9:16)",
+   "sub": "Made in code · 9:16",
+   "desc": "Make a 9:16 exploded view of a fictional device built from flat layers in a 2.5D isometric view: the stack appears assembled, the layers lift apart top first with a short stagger while it turns slowly with a small wobble…",
+   "thumb": "library/templates/t25_exploded_view.jpg",
+   "img": "library/templates/t25_exploded_view.webm",
+   "order": "Make a exploded view (layers and labels in 9:16) video for this, with the t25_exploded_view template."
+  },
+  {
+   "name": "Line tip number (one stat in 9:16)",
+   "sub": "Made in code · 9:16",
+   "desc": "Make a minimal 9:16 stat graphic with one line and one big number: gridlines draw in from the left, axis labels fade in staggered, then a smoothed line draws left to right while the number above shows the value under the…",
+   "thumb": "library/templates/t26_line_tip_number.jpg",
+   "img": "library/templates/t26_line_tip_number.webm",
+   "order": "Make a line tip number (one stat in 9:16) video for this, with the t26_line_tip_number template."
   },
   {
    "name": "AI Answer Rank",
-   "sub": "Made in code · HyperFrames blocks",
+   "sub": "Made in code · 16:9",
    "desc": "Is your brand in the AI answer? A question types into a chat card, the assistant answers with a ranked list of three picks, then re-ranks: the promoted brand slides into its slot, the picks below step…",
    "thumb": "library/hyperframes/ai-answer-rank.jpg",
    "img": "library/hyperframes/ai-answer-rank.webm",
@@ -227,7 +267,7 @@
   },
   {
    "name": "App Showcase",
-   "sub": "Made in code · HyperFrames blocks",
+   "sub": "Made in code · 16:9",
    "desc": "Fitness app product showcase with three floating smartphone screens",
    "thumb": "library/hyperframes/app-showcase.jpg",
    "img": "library/hyperframes/app-showcase.webm",
@@ -235,7 +275,7 @@
   },
   {
    "name": "Bar Chart Race",
-   "sub": "Made in code · HyperFrames blocks",
+   "sub": "Made in code · 16:9",
    "desc": "Ranked bars grow and overtake each other as a time series advances, with the axis rescaling as values climb and the accent handing over to whoever leads",
    "thumb": "library/hyperframes/bar-chart-race.jpg",
    "img": "library/hyperframes/bar-chart-race.webm",
@@ -243,7 +283,7 @@
   },
   {
    "name": "Data Chart",
-   "sub": "Made in code · HyperFrames blocks",
+   "sub": "Made in code · 16:9",
    "desc": "Animated bar + line chart with staggered reveal, NYT-style typography, and value labels",
    "thumb": "library/hyperframes/data-chart.jpg",
    "img": "library/hyperframes/data-chart.webm",
@@ -251,7 +291,7 @@
   },
   {
    "name": "Speech Bubble",
-   "sub": "Made in code · HyperFrames blocks",
+   "sub": "Made in code · 16:9",
    "desc": "Hand-drawn speech bubble with a positionable tail: outline draws on, paper fill fades in, handwritten text types per character; boils",
    "thumb": "library/hyperframes/hw-text-cloud.jpg",
    "img": "library/hyperframes/hw-text-cloud.webm",
@@ -259,7 +299,7 @@
   },
   {
    "name": "Minimal Line Graph",
-   "sub": "Made in code · HyperFrames blocks",
+   "sub": "Made in code · 16:9",
    "desc": "One or two SVG series draw on with dots popping and value labels riding the draw front; dim baseline axis, x-labels, color-dot legend",
    "thumb": "library/hyperframes/mk-line-graph.jpg",
    "img": "library/hyperframes/mk-line-graph.webm",

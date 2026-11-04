@@ -21,7 +21,7 @@ python -m playwright install chromium
 ffmpeg must be on PATH (it already is for the rest of Motion DNA).
 
 ## Pick a template
-`research/video_prompts/templates/catalog.json` lists the archetypes (15 so far): id, title, uses, **route**, energy (1 calm ..
+`research/video_prompts/templates/catalog.json` lists the archetypes (21 so far; t17 and t18 numbers are taken by work in progress): id, title, uses, **route**, energy (1 calm ..
 5 explosive), tones, duration, `vars` (the content you change) and `prompt` (our own brief for making a new version).
 Previews: `research/video_prompts/previews/<id>.webp` (animated, from `make_previews.py`). Routes:
 - **A · render as an asset**: 3D, shaders, particles, long camera moves, alpha overlays (t04, t09, t10, t11, t01).
@@ -49,6 +49,15 @@ Previews: `research/video_prompts/previews/<id>.webp` (animated, from `make_prev
 - Finish and type: `MDNA.finish(g, t, {grain, vignette})`, `MDNA.glow(g, x, y, r, colour, a)`,
   `MDNA.rich(D, "Give your agent *taste.*", …)` (serif-italic accent), `MDNA.kicker(D, "Fig. 1", …)`, `D = MDNA.draw(canvas)`
   (txt, width, rr, fill, alpha, at, cursor). `MDNA.NOTEXT` is true when rendering a hybrid plate.
+
+## UI demos, loops and reels
+- A product or UI demo follows `docs/LEARNINGS.md` section 10: 3-5 beats in 10-16 s, the hero cropped 10-40% off the
+  frame, every change with a visible cause, the payoff held while the shot drifts. A cursor follows
+  `library/cursor_model.json` (time grows with distance, a slight arc, aim off the label, fade after 4 s at rest).
+- 9:16 reels keep text in the safe area (220 px from the top, above 1500 px, 100 px from the sides): check it with
+  `snap.py ... --safe`. t23-t26 are the 9:16 examples (steps, map route, exploded view, a number on a line's tip).
+- After every render: `python tools/motion_qa.py renders/<name>.mp4 [--loop]` (one-frame pops, frozen holds, loop seam,
+  poster frame). Use its poster time for the card's still.
 
 ## Rules
 - Motion DNA colours, fonts and curves only; fictional brands and names; never a real brand's logo or screenshots.

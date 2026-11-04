@@ -340,7 +340,7 @@ return r;""", includes=("ss_presets.jsx", "ss_behaviors.jsx", "ss_looks.jsx"))
 
 
 def t_add_captions(words=None, words_path=None, srt_path=None, comp=None, style="highlight", size=None, position=None, colors=None, brand=None,
-                   box=None, stroke=None, max_chars=None):
+                   box=None, stroke=None, max_chars=None, max_words=None):
     """Captions from word timings ([{w, s, e}], tools/vo_words.py) or an SRT file, styled (tools/ss_text.jsx)."""
     if words_path:
         words = json.loads(pathlib.Path(words_path).read_text(encoding="utf-8"))
@@ -363,7 +363,7 @@ def t_add_captions(words=None, words_path=None, srt_path=None, comp=None, style=
     if colors: c = dict(zip(("text", "accent", "box"), colors))
     elif brand:
         v = _brand_colors(brand); c = {"text": v[2] if len(v) > 2 else "#FFFFFF", "accent": v[1] if len(v) > 1 else "#D8FF85", "box": v[0] if v else "#000000"}
-    o = {k: v for k, v in dict(style=style, size=size, position=position, colors=c or None, box=box, stroke=stroke, maxChars=max_chars).items() if v is not None}
+    o = {k: v for k, v in dict(style=style, size=size, position=position, colors=c or None, box=box, stroke=stroke, maxChars=max_chars, maxWords=max_words).items() if v is not None}
     return run_jsx(COMP_JS + f"""var c = findComp({js(comp)});
 app.beginUndoGroup("Motion DNA captions");
 var r; try {{ r = SSTX.captions(c, {js(words)}, {js(o)}); }} finally {{ app.endUndoGroup(); }}
@@ -1206,7 +1206,8 @@ TOOLS_DEF = [
     ("add_captions", t_add_captions, "Captions from word timings (words [{w, s, e}] or words_path from tools/vo_words.py) or an SRT file: lines grouped by length and pauses; style highlight (spoken word in the accent) | karaoke | build (words appear as spoken) | pop | word (one word at a time); optional box and outline.",
      {"words": {"type": "array", "items": {"type": "object"}}, "words_path": {"type": "string"}, "srt_path": {"type": "string"}, "comp": {"type": "string"},
       "style": {"type": "string", "enum": ["highlight", "karaoke", "build", "pop", "word"]}, "size": {"type": "number"}, "position": {"type": "array", "items": {"type": "number"}},
-      "colors": {"type": "array", "items": {"type": "string"}}, "brand": {"type": "string"}, "box": {"type": "boolean"}, "stroke": {"type": "boolean"}, "max_chars": {"type": "integer"}}),
+      "colors": {"type": "array", "items": {"type": "string"}}, "brand": {"type": "string"}, "box": {"type": "boolean"}, "stroke": {"type": "boolean"}, "max_chars": {"type": "integer"},
+      "max_words": {"type": "integer", "description": "at most this many words per caption (reels: 1-3); a caption never ends on a small word like the, a, de, la"}}),
     ("add_element", t_add_element, "Semi-finished graphic element that sizes itself to its text (like Animation Composer's titles, callouts, social and counters): label (chip), lower_third (text = name, sub = role), title (text + sub, accent rule), underline / highlight (layer = an existing text layer), callout (point = [x, y]), counter (start → value, prefix/suffix/decimals), timer (value = countdown s, 0 counts up), price_tag (text = price, sub = label), handle (@name pill), bubble, chat (typing dots then text), sticker (tilted outlined word), quote (text, sub = author), text_box (text = title, sub = body), list (items), progress / ring (value %), rating (value of 5), button (text, pressed, click time; a cursor clicks; pressed_box Box on light scenes), kinetic (items = lines), tiles (letters on 3D tiles), media (slot [w, h] + optional layer to fit), scale_title (mode push|drop), cinematic (style neon|blur|kerning), glass_card (text, sub: a smoky frosted pane that blurs what is behind it; size [w, h]), end_card (the Motion DNA logo close, as in the logo manual: the helix mark grows up its diagonal with overshoot, the arrow kicks, MOTION / DNA rise into place below it; style horizontal for the side-by-side lockup; text = wordmark, sub = tagline, size = mark height; close every Motion DNA demo with it), cursor (text = the collaborator's name: a design-tool cursor with a name tag enters from the edge, travels on arcs to each items point, clicks there with a ripple, trails when fast and leaves), selection (text = frame name, slot = [w, h] at position: a cursor drags a selection marquee open from its corner, handles pop, the tag and the live size show; sub = the size line). outline = true draws boxes as outlines. list_kit shows them all with energy and tones. One controller per element (Reveal, Padding, Radius, Gap, Box/Accent/Text colours). Colours: [box, accent, text] hex, or brand = slug (its colours and fonts). t = in (s, default playhead), out = exit (s, optional).",
      {"kind": {"type": "string", "enum": ["label", "lower_third", "title", "underline", "highlight", "callout", "counter", "timer", "price_tag", "handle", "bubble", "sticker",
                                           "quote", "list", "progress", "button", "kinetic", "tiles", "text_box", "media", "scale_title", "cinematic", "chat", "rating", "ring", "glass_card", "end_card", "cursor", "selection"]},

@@ -63,6 +63,8 @@ Every item below cost a review round once; check them all, then render (details:
    Explain each remaining line (e.g. a word behind a cut-out is meant to be covered).
 2. `check_layout` on the edit and every scene comp: fix every warning or say why it stays.
 3. `render_frame` the key beats and **look** at them: supers, UI blocks, callouts, overlays that cross a cut.
+   After the render, `python tools/motion_qa.py <render> [--loop]`: no one-frame pops, no frozen hold over 3 s, a loop
+   that closes; it also proposes the poster frame.
 4. Measure each voice line (ebur128) and level them to within ~1.5 LU; then normalise the master (~−14 LUFS) and run
    `blackdetect -vf blackdetect=d=0.04` on the result (one black frame counts).
 6. Nested comps run on their own clock: when a cursor drives something inside a panel comp, key it on the nested time.

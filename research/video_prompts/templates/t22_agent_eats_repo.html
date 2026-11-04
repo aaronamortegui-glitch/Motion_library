@@ -1,0 +1,176 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T22 · The Agent eats a repo</title>
+<script src="../runtime/mdna.js"></script>
+<script src="../runtime/pixel_rig.js"></script>
+<div id="stage"><canvas id="c" width="720" height="720"></canvas></div>
+<script>
+// T22 · a square looping pixel GIF. The Agent rolls in next to a repo (a code document), its eyes light up, it opens its
+// mouth wide on its screen and swallows the repo whole, chews, rubs its belly, rolls away, and the line lands in the
+// centre: "I ate it!". Same rig as T14 (runtime/pixel_rig.js), poses on twos; three extra faces and one extra pose are
+// added here at runtime (the character file stays as it is). Starts and ends on an empty stage, so it loops.
+// The repo shows a neutral branch mark; ?mark=github draws the GitHub mark instead, for internal use only (Motion DNA's
+// library and demos never carry a third-party logo).
+const VARS = { character: "the-agent", line: "I *ate* it!", kicker: "New repo", label: "my-repo" };
+const MARK = (location.search.match(/[?&]mark=(\w+)/) || [])[1] || "branch";
+const { T, seg, k, clamp, rng } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 720, H = 720;
+const PX = 6, LW = W / PX, LH = H / PX;                        // the pixel world: 120 x 120
+const low = Object.assign(document.createElement("canvas"), { width: LW, height: LH }), lg = low.getContext("2d");
+const onTwos = t => Math.floor(t * 12) / 12;
+const DUR = 8.4;
+
+new Promise((ok, no) => { const x = new XMLHttpRequest(); x.open("GET", `../../../library/characters/${VARS.character}/character.json`);
+  x.onload = () => ok(JSON.parse(x.responseText)); x.onerror = no; x.send(); }).then(CH => {
+  // faces and a pose for this scene only
+  const pad = (rows, n) => rows.concat(Array(n).fill(".".repeat(rows[0].length)));
+  CH.emotions.starry = { eyes: ["..#..", ".###.", "#####", ".###.", "..#.."] };
+  CH.emotions.starry2 = { eyes: ["..#..", "..#..", "#####", "..#..", "..#.."] };
+  CH.emotions.chomp = { eyes: pad(["##..", "..##", "##.."], 7), eyes_R: pad(["..##", "##..", "..##"], 7) };
+  CH.emotions.gape = { eyes: ["...."] };
+  const GAPE = pad(["......##########......", "....##..........##....", "..##..............##..", ".#..................#.",
+    ".#..................#.", "#....................#", "#....................#", "#....................#", "#....................#",
+    "#....................#", "#....................#", "#.....##########.....#", ".#...#..........#...#.", ".#..#............#..#.",
+    "..##..............##..", "....##..........##....", ".....###......###.....", "........######........"], 12);   // the whole screen is a mouth (with a tongue line)
+  CH.poses.belly = { L: [6, -95], R: [6, -95], use: "rubs its belly" };
+  const rig = PixelRig(CH), V = CH.visemes;
+  const GROUND = 110, DX = 86;                                // floor line and the repo's centre x (low-res)
+
+  // the repo: a document with a folded corner, a mark, code lines
+  const GH = [   // the GitHub mark (cat cut out of a disc), 16 x 16; ' ' outside, '#' ink, '.' paper
+    "     ######     ", "   ##########   ", "  ############  ", " ###.######.### ", " ###..####..### ", "####........####",
+    "###..........###", "###..........###", "###..........###", "####........####", " ##.##....##### ", " ###.#....##### ",
+    "  ###.....####  ", "   ###....###   ", "     #....#     ", "      ....      "];
+  const BR = [   // a neutral branch mark, 16 x 16
+    "                ", "   ##       ##  ", "  #..#     #..# ", "  #..#     #..# ", "   ##       ##  ", "   #        #   ",
+    "   #       #    ", "   #      #     ", "   #    ##      ", "   #  ##        ", "   ###          ", "   #            ",
+    "   ##           ", "  #..#          ", "  #..#          ", "   ##           "];
+  const ICON = MARK === "github" ? GH : BR;
+  const DW = 40, DH = 52, FOLD = 9;
+  const docPix = [];   // [x, y, colour] relative to the doc's centre
+  for (let y = 0; y < DH; y++) for (let x = 0; x < DW; x++) {
+    const fx = x - (DW - FOLD);
+    if (fx >= 0 && y < FOLD && fx > y) continue;               // the cut corner
+    const edge = x === 0 || y === 0 || x === DW - 1 || y === DH - 1 || (fx >= 0 && y < FOLD && fx === y);
+    let c = edge ? "#3A2E22" : "#F6EEDB";
+    if (!edge && fx >= 0 && y < FOLD && y - fx < 2) c = "#C8B48D";   // fold shading
+    const ix = Math.floor((x - 4) / 2), iy = Math.floor((y - 5) / 2); if (x >= 4 && y >= 5 && ix < 16 && iy < 16 && ICON[iy][ix] === "#") c = "#24292F";   // the mark at 2x
+    const rows = [40, 43, 46], ri = rows.indexOf(y);
+    if (!edge && ri >= 0) { const len = [26, 18, 30][ri], ind = ri === 1 ? 9 : 5; if (x >= ind && x < ind + len) c = ri === 2 ? C.mint : "#9E8964"; }
+    docPix.push([x - DW / 2, y - DH / 2, c]);
+  }
+  function drawDoc(cx, cy, s, rot, keep) {   // nearest-neighbour: each doc pixel becomes an s x s block; pixels drop out as keep < 1
+    const cs = Math.cos(rot), sn = Math.sin(rot), b = Math.max(1, Math.round(s));
+    for (const [x, y, c] of docPix) {
+      if (keep < 1 && (((x + 20) * 7 + (y + 20) * 13) % 17) / 17 > keep) continue;
+      const X = cx + (cs * x - sn * y) * s, Y = cy + (sn * x + cs * y) * s;
+      lg.fillStyle = c; lg.fillRect(Math.round(X), Math.round(Y), b, b);
+    }
+  }
+
+  const sparkR = rng(7), sparks = Array.from({ length: 18 }, () => ({ a: sparkR() * Math.PI * 2, v: 10 + sparkR() * 18, s: sparkR() < 0.3 ? 2 : 1, c: sparkR() < 0.55 ? C.spark : C.mint, d: sparkR() * 0.1 }));
+  const crumbR = rng(11), crumbs = Array.from({ length: 12 }, () => ({ a: -Math.PI * (0.1 + crumbR() * 0.8), v: 6 + crumbR() * 12, c: crumbR() < 0.5 ? "#F6EEDB" : "#24292F" }));
+
+  // ---------- the acting ----------
+  const PATH = [[0, -40], [0.9, 34, "Land"], [2.1, 34], [2.3, 30, "Wind-up"], [2.62, 58, "Pop"], [4.55, 58], [5.35, 170, "Launch"]];   // a lunge at the repo
+  function state(t) {
+    const q = onTwos(t);
+    // travel on ones: in from the left, a step closer to the repo, then away to the right
+    const x = k(t, PATH), v = (k(t + 0.04, PATH) - x) / 0.04;
+    let emotion = "neutral", pose = "idle", poseFrom = "idle", armT = 1, look = [0, 0], sy = 1, lean = clamp(v / 12, -5, 5), hop = 0, mouth, light = 1;
+    if (q >= 0.95) { emotion = "curious"; look = [3, 0]; }
+    // its eyes light up: stars that twinkle, a little hop
+    if (q >= 1.25 && q < 2.35) { emotion = Math.floor(q * 8) % 2 ? "starry2" : "starry"; look = [2, 0];
+      sy = k(q, [[1.25, 1], [1.35, 0.88, "Wind-up"], [1.45, 1.1, "Pop"], [1.65, 1, "Settle"]]); hop = k(q, [[1.35, 0], [1.5, -5, "Pop"], [1.65, 0, "Launch"]]); }
+    // the gape: mouth wide open, leaning back, stretched
+    let gape = 0;
+    if (q >= 2.3 && q < 3.0) { emotion = q < 2.4 ? "chomp" : "gape"; mouth = q < 2.4 ? V.D : GAPE; look = [0, 0];
+      gape = k(q, [[2.3, 0], [2.55, 1.15, "Pop"], [2.7, 1, "Settle"], [2.95, 1.05]]); }
+    // it turns toward the repo for the bite (a narrower, leaning body reads as a three-quarter turn), then back
+    const turn = k(q, [[2.1, 0], [2.35, 1, "Settle"], [3.15, 1], [3.45, 0, "Settle"]]);
+    lean = lean * (1 - turn) + 7 * turn; if (q >= 2.1 && q < 2.4) look = [3, 0];
+    // chomp: shut, squash, then chew
+    if (q >= 3.0) { mouth = V.A; emotion = "happy"; sy = k(q, [[3.0, 0.82], [3.25, 1, "Settle"]]); }
+    if (q >= 3.25 && q < 3.75) { const c = Math.floor(q * 12) % 2; mouth = c ? V.C : V.A; sy *= c ? 0.96 : 1; }
+    // rubs its belly, pleased
+    if (q >= 3.75 && q < 4.6) { mouth = undefined; emotion = "love"; pose = "belly"; armT = seg(q, 3.75, 3.95, "Settle");
+      const r = 12 * Math.sin((q - 3.75) * Math.PI * 2 * 2.5); CH.poses.belly.L = [6, -95 + r]; CH.poses.belly.R = [6, -95 - r]; }
+    if (q >= 4.6) { mouth = undefined; emotion = "happy"; pose = "idle"; poseFrom = "belly"; armT = seg(q, 4.6, 4.85, "Settle"); }
+    return { x, emotion, pose, poseFrom, armT, look, light, sy, lean, hop, mouth, gape, turn, t: q };
+  }
+
+  // the cartoon gape: the screen band balloons (taller and wider), the dome is pushed up; the base stays on the floor
+  function drawWarped(sp, x0, y0, gp, turn = 0) {
+    if (gp <= 0 && turn <= 0) { lg.drawImage(sp, x0, y0); return; }
+    const B0 = 16, B1 = 45, cx = x0 + rig.CX + 2 * turn, grow = 0.75 * gp, rows = [], narrow = 1 - 0.14 * turn;
+    let y = y0 + rig.H;   // build from the bottom up
+    for (let sy = rig.H - 1; sy >= 0; sy--) {
+      const inBand = sy >= B0 && sy <= B1, u = (sy - B0) / (B1 - B0);
+      const h = inBand ? 1 + grow : 1, wx = narrow * (inBand ? 1 + 0.5 * gp * Math.sin(Math.PI * u) : sy < B0 ? 1 + 0.12 * gp : 1);
+      y -= h; rows.push([sy, y, h, wx]);
+    }
+    for (const [sy, dy, h, wx] of rows) lg.drawImage(sp, 0, sy, rig.W, 1, Math.round(cx - rig.CX * wx), Math.round(dy), Math.round(rig.W * wx), Math.max(1, Math.round(dy + h) - Math.round(dy)));
+  }
+
+  function world() {
+    lg.fillStyle = C.pine; lg.fillRect(0, 0, LW, LH);
+    lg.fillStyle = "#123A35"; for (let y = 6; y < GROUND - 4; y += 9) for (let x = 4 + (y / 9 % 2) * 4; x < LW; x += 8) lg.fillRect(x, y, 1, 1);
+    lg.fillStyle = "#0E2B27"; lg.fillRect(0, GROUND - 2, LW, LH);
+    lg.fillStyle = C.sea; lg.fillRect(0, GROUND - 2, LW, 1);
+  }
+  function sparkles(t, t0, ox, oy) {
+    const p = (t - t0) / 0.7; if (p <= 0 || p > 1.2) return;
+    for (const s of sparks) { const u = clamp((p - s.d) / 0.7); if (u <= 0 || u >= 1) continue;
+      const e = 1 - (1 - u) ** 3; if (u > 0.75 && (Math.floor(t * 15) % 2)) continue;
+      lg.fillStyle = s.c; lg.fillRect(Math.round(ox + Math.cos(s.a) * s.v * e), Math.round(oy + Math.sin(s.a) * s.v * e * 0.8), s.s, s.s); }
+  }
+
+  function repo(t, mouthAt) {
+    // the repo drops in, sits, then is pulled into the open mouth
+    const drop = seg(t, 0.35, 0.75, "Pop"), suck = seg(t, 2.6, 3.0, "Cruise"), dy0 = GROUND - DH / 2 - 1;
+    if (t >= 0.35 && suck < 1) {
+      const x = DX + (mouthAt[0] - DX) * suck, y = (dy0 - 50 * (1 - drop)) + (mouthAt[1] - dy0) * suck - 10 * Math.sin(Math.PI * suck);
+      if (suck === 0) { lg.fillStyle = "#061815"; lg.fillRect(DX - 18, GROUND - 1, 36, 1); }   // its shadow on the floor
+      drawDoc(x, y, 1 - 0.9 * suck * suck, 0.25 * Math.sin(t * 40) * suck - 0.5 * suck, 1 - 0.7 * seg(t, 2.85, 3.0, "Flat"));
+    }
+  }
+
+  function render(t) {
+    const st = state(t), top = GROUND - rig.G;
+    const mouthAt = [st.x - rig.CX + CH.styles.pixel.screen.mouth[0] + 0.7 * st.lean + 2 * (st.turn || 0), top + CH.styles.pixel.screen.mouth[1] - 4 - 12 * (st.gape || 0)];
+    world();
+    const sucking = t >= 2.5;
+    if (!sucking) repo(t, mouthAt);
+    rig.shadow(lg, st.x, GROUND, st.hop);
+    drawWarped(rig.render(st), Math.round(st.x - rig.CX), top, st.gape || 0, st.turn || 0);
+    if (sucking) repo(t, mouthAt);   // on top: it goes into the mouth
+    // crumbs on the chomp, sparkles when its eyes light up
+    const cp = (t - 3.0) / 0.5;
+    if (cp > 0 && cp < 1) for (const c of crumbs) { const e = 1 - (1 - cp) ** 2; lg.fillStyle = c.c;
+      lg.fillRect(Math.round(mouthAt[0] + Math.cos(c.a) * c.v * e), Math.round(mouthAt[1] + 4 + Math.sin(c.a) * c.v * e + 16 * cp * cp), 1, 1); }
+    sparkles(t, 1.3, st.x, top + 30);
+    g.imageSmoothingEnabled = false; g.drawImage(low, 0, 0, W, H);
+    // the screen glows while its eyes shine; the red light pulses on the chomp
+    const shine = seg(t, 1.25, 1.45, "Pop") * (1 - seg(t, 2.2, 2.4, "Settle"));
+    if (shine > 0) MDNA.glow(g, st.x * PX, (top + 31) * PX, 120, C.mint, 0.45 * shine);
+    MDNA.glow(g, st.x * PX, (top + rig.G - (rig.G - 9) * st.sy + st.hop - 22 * (st.gape || 0)) * PX, 55 + 40 * seg(t, 3.0, 3.1, "Pop") * (1 - seg(t, 3.1, 3.6, "Settle")), "#E2402F", 0.35);
+    // the repo's name tag, readable while it sits on the floor
+    const tag = seg(t, 0.6, 0.9, "Land") * (1 - seg(t, 2.45, 2.6, "Flat"));
+    if (tag > 0 && !MDNA.NOTEXT) D.alpha(tag, () => {
+      const tw = D.width(VARS.label, 28, 600) + 36, ty = (GROUND - DH - 7) * PX;   // above the repo
+      D.rr(DX * PX - tw / 2, ty - 22, tw, 44, 22); D.fill(C.cloud); D.txt(VARS.label, DX * PX, ty, 28, C.ink, 600, T.font.ui, "center");
+    });
+    // the line, centred, once the robot has gone; it leaves before the loop point
+    if (!MDNA.NOTEXT) {
+      const a = seg(t, 5.4, 5.8, "Pop"), out = seg(t, 7.95, 8.25, "Launch"), s = 0.75 + 0.25 * a;
+      if (a > 0 && out < 1) D.alpha(a * (1 - out), () => D.at(W / 2, H / 2 + 55 - 12 * out, s, 0, () => {
+        MDNA.kicker(D, VARS.kicker, 0, -150, C.spark, "center", 36);
+        MDNA.rich(D, VARS.line, 0, 14, 184, C.cloud, C.spark, "center");
+      }));
+    }
+    MDNA.finish(g, t, { vignette: 0.3, grain: 0 });   // no grain: clean pixels and a light GIF
+  }
+
+  MDNA.scene({ w: W, h: H, duration: DUR, fps: 24, render });
+});
+</script>

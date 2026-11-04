@@ -15,7 +15,7 @@ from playwright.sync_api import sync_playwright
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-def render(src, out=None, fps=None, scale=1.0, notext=False, mblur=1, shutter=0.5):
+def render(src, out=None, fps=None, scale=1.0, notext=False, mblur=1, shutter=0.5, query=""):
     src = os.path.abspath(src if os.path.exists(src) else os.path.join(HERE, src))
     name = os.path.splitext(os.path.basename(src))[0] + ("_plate" if notext else "")
     os.makedirs(os.path.join(HERE, "renders"), exist_ok=True)
@@ -25,7 +25,7 @@ def render(src, out=None, fps=None, scale=1.0, notext=False, mblur=1, shutter=0.
                                         "--allow-file-access-from-files"])   # templates may fetch repo data (e.g. a character.json)
         pg = b.new_page(viewport={"width": 1920, "height": 1080}, device_scale_factor=scale)
         errors = []; pg.on("pageerror", lambda e: errors.append(str(e)))
-        pg.goto("file:///" + src.replace("\\", "/") + "?render" + ("&notext" if notext else ""))
+        pg.goto("file:///" + src.replace("\\", "/") + "?render" + ("&notext" if notext else "") + ("&" + query if query else ""))
         pg.wait_for_function("window.MDNA_READY === true", timeout=30000)
         info = pg.evaluate("MDNA.info()")
         if not info: sys.exit("the page did not call MDNA.scene(...)")
@@ -65,4 +65,5 @@ if __name__ == "__main__":
     a.add_argument("--fps", type=float); a.add_argument("--scale", type=float, default=1.0)
     a.add_argument("--mblur", type=int, default=1, help="sub-frames averaged per frame for motion blur (e.g. 4)")
     a.add_argument("--notext", action="store_true", help="hybrid templates: render the plate without text/UI (they go live in AE)")
-    x = a.parse_args(); render(x.src, x.out, x.fps, x.scale, x.notext, x.mblur)
+    a.add_argument("--query", default="", help="extra page parameters, e.g. mark=github")
+    x = a.parse_args(); render(x.src, x.out, x.fps, x.scale, x.notext, x.mblur, query=x.query)

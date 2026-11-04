@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "note": "How a cursor or a finger behaves in a UI demo, so it reads as a person, not a tween. Times in ms, distances in px at 1080p. Numbers from Stageshow 1.1.0 (github.com/benjitaylor/skills, ccb6a38, MIT, kit/act.ts and cursor.css, plus the 71 example scenes); the curves are mapped to our tokens. Used by the cursor kit piece (tools/ss_elements.jsx) and the code templates that show a UI.",
+  "move": {
+    "ms": "clamp(260 + 0.9 * dist, 300, 650)",
+    "ease": "Cruise",
+    "bow_px": "min(dist * 0.08, 24)",
+    "why": "longer trips take longer but never drag; a slight arc, never a ruler line"
+  },
+  "aim": {
+    "x": 0.85,
+    "y": 0.6,
+    "why": "land inside the target, off its label, so the cursor never covers the word it clicks"
+  },
+  "click": {
+    "wait_ms": 120,
+    "press_ms": 100,
+    "press_scale": 0.9,
+    "press_in_ms": 80,
+    "release_ms": 260,
+    "release_ease": "Land",
+    "double": {
+      "press_ms": 80,
+      "gap_ms": 70
+    }
+  },
+  "drag": {
+    "press_ms": 60,
+    "grab_ms": 70,
+    "ms": "clamp(360 + 1.1 * dist, 450, 900)",
+    "bow_px": "min(dist * 0.06, 18)",
+    "carried": {
+      "scale": [
+        1.02,
+        1.03
+      ],
+      "tilt_deg": [
+        1,
+        2
+      ],
+      "keeps_grab_point": true,
+      "no_easing_while_carried": true,
+      "settle_on_release_ms": 320
+    },
+    "drop_slot": "jumps cell to cell and fades (120 ms); it never travels",
+    "file_image": {
+      "opacity": [
+        0.82,
+        0.85
+      ],
+      "drop_shrink_to": 0.5,
+      "drop_ms": 240
+    }
+  },
+  "finger": {
+    "show_ms": 140,
+    "press_ms": 170,
+    "flick_ms": "clamp(180 + 0.5 * dist, 240, 300)",
+    "flick_ease": "Coast"
+  },
+  "typing": {
+    "ms_per_char_by_context": {
+      "chat": 38,
+      "document": 42,
+      "form": [
+        52,
+        55
+      ],
+      "messages, calendar, table": [
+        60,
+        70
+      ],
+      "phone keyboard": 95,
+      "a teammate or a launcher": [
+        110,
+        150
+      ]
+    },
+    "uneven_rhythm": {
+      "base_ms": 105,
+      "factors": [
+        1.1,
+        0.8,
+        1.3,
+        0.9,
+        1.6,
+        1,
+        0.75,
+        1.2
+      ]
+    },
+    "caret": "solid while typing, blinks every ~1.05 s at rest",
+    "overwrite": "show select-all before typing over a value",
+    "streamed_answer": {
+      "ms_per_word": 40,
+      "thinking_ms": 1100
+    },
+    "why": "35 ms is only a kit default; the scenes type slower and unevenly, by context"
+  },
+  "idle": {
+    "fade_after_ms": 4000
+  },
+  "result": {
+    "state_fade_ms": 150,
+    "color_change_ms": 200,
+    "why": "a clicked state answers at once; the result then holds while the shot keeps drifting"
+  },
+  "extras": {
+    "wait_before_grab_ms": 150,
+    "tooltip_after_dwell_ms": 350,
+    "step_off_after_click_ms": [
+      350,
+      450
+    ],
+    "leave_frame_ms": 700,
+    "kind_changes": "I-beam over text, hand over links, grab while dragging",
+    "collaborator": {
+      "follow_spring_stiffness": 0.012,
+      "move_ms": [
+        950,
+        1100
+      ],
+      "ease": "Cruise",
+      "never_in_sync": true,
+      "name_flag_offset_px": [
+        11,
+        16
+      ]
+    },
+    "result_after_cause_ms": [
+      250,
+      350
+    ]
+  }
+}

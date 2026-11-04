@@ -709,3 +709,105 @@ Everything we learned building Motion DNA and *The 1974 Boardroom* test, written
   device_scale_factor 2.2 for the 880 px dock PNGs) and read each element's box from the DOM for the highlights.
 - **"Illegal use of reserved word" in an AE builder** → an object key named `with` (ExtendScript is ES3: reserved words
   cannot be bare keys) → rename the key, or quote it.
+
+## 10. UI demos, loops and reels (from external skills we reviewed)
+Rebuilt in our own words from two MIT skill sets reviewed on 2026-11-04; every item and what we did with it is in
+`library/external_skills.json`. Stageshow 1.1.0 (github.com/benjitaylor/skills, ccb6a38) for UI demos and loops;
+claude-animation-skills (github.com/artemnovitckii/claude-animation-skills, 5dbea55) for 9:16 reels. Curves are named
+with our tokens; the numbers are theirs.
+
+**Story and pace**
+- **A UI loop that feels long or busy** → too many beats or no payoff → 10–16 s, 3–5 beats; the payoff stays readable
+  for ~2 s; the next action starts within ~1 s of an exit. Nothing waits more than ~3 s.
+- **"Hold the result" vs our rule that a hold is never static** → both stand: the UI result stops changing (data never
+  rewinds or flickers in view), while the shot keeps a slow drift or push (Cruise). `tools/motion_qa.py` flags a whole
+  frozen frame over 3 s.
+- **Everything arrives at once** → one stagger for the whole scene → 40–80 ms inside a group (60 by default),
+  80–120 ms between grid tiles; exits are the reverse stagger, all gone within 0.5 s.
+- **A reset with no cause** (a value jumps back, a list empties) → nothing on screen did it → every change has a visible
+  cause (a click, a drag, a key), and only what changed moves.
+- **Moves around a cut look stitched** → the same brake on both sides → the move into a cut does not brake (Whip or
+  Ramp, it ends in the cut); the first move after the cut lands (Land, 0.6–0.8 s; 1.6 s for a big pull-out).
+
+**Timings that read as product UI** (our durations in brackets)
+- Collapse 0.42–0.46 s on Settle; expand 520 ms (a card) to 640 ms (a launch); fly 750 ms (Sweep); swap 450 ms;
+  page swap 200 ms with an 8 px rise (Blink); a state set by a click fades in ~150 ms; colour changes between distant
+  hues ~200 ms; a connector draws in ~1 s.
+- Counters: digits roll from the last digit, 45 ms apart, ~700 ms in all (an option for the counter pieces).
+- Phones: a system response is ~0.5 s on Land; a swipe throw ~0.5 s on Coast.
+
+**The cursor** (full model in `library/cursor_model.json`)
+- **The cursor reads as a robot** → constant speed in straight lines → time grows with distance (300–650 ms), a slight
+  arc, a short wait before the click, a press to 0.9 and a softer release; drags carry the card at 1.03 with 1–2° tilt.
+- **The cursor hides the word it clicks** → aimed at the centre → aim at 85% across, 60% down the target.
+- **A cursor parked on screen** → it never leaves → fade it after ~4 s of rest.
+
+**Framing and spacing** (stills and every frame of a demo)
+- **The UI looks small and staged** → it floats whole in the middle → crop 10–40% of the hero off the frame; the window
+  or phone fills at least ⅔ of the width; satellites (toasts, cards) straddle its edge about half outside; one gutter
+  for every edge.
+- **Edges that almost touch look like a mistake** → 1–3 px apart → line them up or part them by 8 px or more. Words sit
+  12 px in from any edge (under 8 px is a fault); a button sits 8–12 px under the field above; 4–6 px of ink between a
+  title and its subtitle.
+- **Too much real text** → every label written out → 3–7 real strings per frame; the rest are placeholder bars.
+- **Bento grids**: one hero tile; ⅓ to ½ of the tiles show UI; stat numbers 48–72 px with the unit on the same line;
+  tile copy 17–24 px.
+- **Leader lines** (callouts): 1 px (1.5 at hero scale), stopping 4–6 px short of the object, a 4 px dot at the end,
+  at most one bend; labels at least 150 px apart in an exploded view.
+
+**Checking**
+- **A one-frame pop nobody saw in the stills** → a missing tween or a key on the wrong frame → run
+  `python tools/motion_qa.py <render> [--loop]`: it flags a region that is still, moves in one frame and is still again
+  (face swaps on a pixel character are meant), frozen holds, and a loop that does not close; it also proposes the
+  poster frame (settled, never mid-change).
+- **The builder reviews their own work and sees what they meant** → a second look with only the frames (no notes, no
+  script) catches what the builder cannot.
+
+**From the example scenes** (Stageshow's 71 example folders and 9 teaching lessons, read in full)
+- **Curves seen most, on our tokens:** the commonest UI curve [0.22, 1, 0.36, 1] and its cousins [0.16, 1, 0.3, 1] and
+  [0.19, 1, 0.22, 1] are Land; travel and exits [0.45, 0, 0.1, 1] are Cruise; a single 900 ms choreography move
+  [0.72, 0, 0.22, 1] is Surge; closing a popup accelerates ([0.4, 0, 1, 1], 0.24 s): Launch.
+- **Typing that reads as a person** → one speed everywhere → by context: 38 ms a character in a chat, 42 in a document,
+  52–55 in forms, 60–70 in messages and tables, 95 on a phone keyboard, 110–150 for a teammate; uneven (a fixed set of
+  factors around the base); select-all before overwriting a value; the caret is solid while typing and blinks ~1.05 s at
+  rest; a streamed AI answer runs ~40 ms a word after a ~1.1 s thinking beat.
+- **A label that changes size jolts the layout** → each state laid out on its own → all states share one cell sized to
+  the longest; they crossfade 0.25 s with a 2 px blur, the new one 80 ms late; a label grows away from its chevron; a
+  number's box is sized to its final value before it counts; an error line has its lane reserved under the field.
+- **Text that hops at the end of a scale** → the whole button scaled → scale only the fill or the disc, never the text.
+- **Exits and handovers:** an exit fades 4 px up before it is removed; a second choice continues from where the first
+  is, never restarts; a flyer lands on the measured object, not its padded slot; a spinner is already turning when it
+  appears; a dragged thing keeps the point that was grabbed; an insertion carries its neighbours; in a scene crossfade
+  the incoming scene leads (in 0.45 s, out 0.45 s after 0.1 s); exits run in reverse, satellites first (0, 0.22, 0.5 s).
+- **Shape morph (a pill that becomes a panel):** grow on a spring (ζ 0.7, ω 15) ~500 ms; shrink stiffer (ζ 0.98, ω 19)
+  ~380 ms, 120 ms late; the content leaves in 0.12 s to 0.88 with blur and comes back after 0.16 s.
+- **Expand into detail:** the card becomes the detail as the same element (~620 ms on Land); closing, the body fades
+  first (0.08 s); the screen behind dims to 0.55 instead of scaling.
+- **Drags:** no easing while carried, a 0.32 s settle on release; the drop slot jumps cell to cell and only fades (0.12 s);
+  a file's drag image is at 0.82–0.85 opacity and shrinks to 0.5 in 0.24 s on drop; a swipe leaves at the finger's
+  last speed (300 ms) and the gap closes in one ease.
+- **Cause and loops:** the result follows its cause one beat later (250–350 ms); the loop reset has a visible cause
+  (undo, back, clear) with overlays hidden before the state snaps back, or the next loop is a new scene; skeleton rows
+  resolve top to bottom 70 ms apart (shimmer 1.6 s); "Delivered" at 600–700 ms, "Read" 0.9–1.2 s later.
+- **Charts:** a line draws left to right over ~1.1 s (Cruise), its area 80 ms behind, the end dot lands at the end;
+  scrubbing is one 1.5 s stroke while the readout snaps to the nearest point and its digits roll 25 ms apart.
+- **Composition:** crop filler, never a value the story needs; the new item is the heaviest thing in the frame; focus by
+  depth, never by dimming the neighbours; a crop through repeated items shows 40–75% of the last one; stacks share one
+  width with a 12 px gap, tilt only paper and never past 8° (top card straightest); a popover sits 8 px under its
+  trigger; masks fade only the edge where content is hidden (8 px).
+- **Style faults to avoid in UI demos:** purple gradients, coloured glows, tracked capitals, sparkle "AI" icons, invented
+  rainbow icons, text under 11 px; only the subject row gets real detail.
+
+**Reels (9:16)**
+- Script for ~40 s: 110–120 words (~2.5 words/s): a hook, the common belief, a turn on "But", examples that build, the
+  mechanism, a payoff that answers the hook. A new shot every 2–4 s, cut on caption beats; one dip to black on the turn
+  (0.18 s in, 0.1 s hold, 0.16 s out).
+- Captions: 1–3 words (the stick-figure engine caps at 2 words and 13 characters, lowercase, no punctuation), never ending on a small word ("the", "a"); each pops from 0.82 on Pop
+  in ~0.1 s and stays until the next one if the gap is under 0.5 s. `add_captions max_words=3` applies the word count and
+  the small-word rule.
+- Trim leading silence (−45 dB) so the hook lands on frame 1. Mix: music ~0.22 under the voice, ducked further while it
+  speaks; master to −14 LUFS (our rule already). A new voice take is re-timed onto the shots by its word timings.
+- Keep text inside the Instagram safe area: 220 px from the top, below 1500 px kept clear, 100 px from the sides.
+  `python research/video_prompts/snap.py <template> out.jpg <times> --safe` draws it on 9:16 frames.
+- **Contact sheets that lied about the shape** → `snap.py` squeezed every frame into 640x360, so square and vertical
+  templates looked distorted in the check → it now reads the scene size and tiles each frame at its own aspect.

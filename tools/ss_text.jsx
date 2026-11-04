@@ -175,10 +175,17 @@ var SSTX = (function () {
         o = o || {};
         var W = comp.width, H = comp.height, size = o.size || Math.round(H * 0.055), maxChars = o.maxChars || 30, style = o.style || "highlight";
         var pos = o.position || [W / 2, Math.round(H * 0.84)], c = o.colors || {};
-        var lines = [], cur = [], len = 0;
+        // a caption breaks on length, on a pause, and after maxWords (reels: 1-3); it never ends on a small word
+        // ("the", "a", "de", "la"…): that word moves to the next caption (rule from docs/LEARNINGS.md section 10)
+        var SMALL = /^(a|an|the|to|of|in|on|at|for|and|or|but|with|by|is|my|your|our|el|la|los|las|un|una|de|del|y|o|en|con|por|para|que|mi|tu|su|al)$/i;
+        var maxWords = o.maxWords || 99, lines = [], cur = [], len = 0;
         for (var i = 0; i < words.length; i++) {
             var w = words[i], gap = cur.length ? w.s - cur[cur.length - 1].e : 0;
-            if (cur.length && (len + w.w.length + 1 > maxChars || gap > (o.pause || 0.6))) { lines.push(cur); cur = []; len = 0; }
+            if (cur.length && (len + w.w.length + 1 > maxChars || cur.length >= maxWords || gap > (o.pause || 0.6))) {
+                var carry = [];
+                while (cur.length > 1 && SMALL.test(cur[cur.length - 1].w.replace(/[^\w\u00C0-\u017F]/g, "")) && gap <= (o.pause || 0.6)) carry.unshift(cur.pop());
+                lines.push(cur); cur = carry; len = 0; for (var q = 0; q < cur.length; q++) len += cur[q].w.length + 1;
+            }
             cur.push(w); len += w.w.length + 1;
         }
         if (cur.length) lines.push(cur);

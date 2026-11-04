@@ -1,0 +1,190 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>T24 · Map route</title>
+<script src="../runtime/mdna.js"></script>
+<div id="stage"><canvas id="c" width="1080" height="1920"></canvas></div>
+<script>
+// T24 · a 9:16 reel graphic of a trip from A to B on a stylised 2D map. The map is drawn in code (street grid, blocks,
+// parks, a canal, fictional place names): no real map data. The route draws itself from the start to the destination
+// (Surge, in-out) while the camera rides slightly behind its head, then the camera pulls back on Land to show the whole
+// route; a pin drops on the destination with one bounce and a squash, its name lands above it, and the ETA card counts
+// the minutes down with the route (rolling digits) and ends on "Arrived". Distance comes from the minutes and the mode
+// (walk 12 min/km, bike 4, drive 2).
+// Behaviour and numbers (draw ~0.25→2.75 s, camera trailing ~2% of the route, pin falling 0.28 s from height 9, one
+// bounce of 0.22 s to 1.1, an 18% squash for 0.12 s, ETA tied to progress) from claude-animation-skills, map-route
+// (github.com/artemnovitckii/claude-animation-skills, MIT, 5dbea55); our own 2D build: look, curves and type are ours.
+// Text stays in the Instagram safe area (220 px from the top, above 1500 px, 100 px from the sides).
+const VARS = { from: "Home", to: "Larch Park", mode: "walk", minutes: 9, kicker: "Sunday plan",
+               title: "Out the door to *the park*" };
+const { T, seg, k, lerp, clamp, rng } = MDNA, C = T.color;
+const cv = document.getElementById("c"), D = MDNA.draw(cv), g = D.g, W = 1080, H = 1920;
+const RATE = { walk: 12, bike: 4, drive: 2 }[VARS.mode] || 12, KM = VARS.minutes / RATE;
+const MODE = { walk: "Walk", bike: "Bike", drive: "Drive" }[VARS.mode] || "Walk";
+
+// timing
+const DRAW0 = 0.25, DRAW1 = 2.75;                        // the route draws itself
+const PULL0 = 2.55, PULL1 = 4.15;                        // the camera pulls back (a big pull-out lands in ~1.6 s)
+const PIN = 2.78, FALL = 0.28, BOUNCE = 0.22, SQ = 0.12; // pin: falls, squashes, bounces once, settles
+const DUR = 4.6;
+
+// the map (world units; streets every 160)
+const S = 160, R = rng(19);
+const ROUTE = [[-320, 480], [-320, 160], [160, 160], [160, -160], [320, -160], [320, -480]];
+const segs = ROUTE.slice(1).map((p, i) => { const a = ROUTE[i]; return { a, b: p, l: Math.hypot(p[0] - a[0], p[1] - a[1]) }; });
+const LEN = segs.reduce((s, x) => s + x.l, 0);
+function at(p) {                                          // point at fraction p (0..1) of the route
+  let d = clamp(p) * LEN;
+  for (const s of segs) { if (d <= s.l) { const u = d / s.l; return [lerp(s.a[0], s.b[0], u), lerp(s.a[1], s.b[1], u)]; } d -= s.l; }
+  return ROUTE[ROUTE.length - 1].slice();
+}
+const canalY = x => 300 + 70 * Math.sin(x / 260 + 0.6);   // a canal crossing the map; streets cross it on bridges
+const blocks = [], parks = [];
+for (let gx = -6; gx < 6; gx++) for (let gy = -7; gy < 7; gy++) {
+  const x0 = gx * S + 14, y0 = gy * S + 14, w = S - 28, cx = x0 + w / 2, cy = y0 + w / 2;
+  if (Math.abs(cy - canalY(cx)) < 120) continue;          // keep the canal banks free
+  if ((gx === -2 && gy === -2) || (gx === -3 && gy === -2) || (gx === 2 && gy === -4) || (gx === 0 && gy === 3)) { parks.push([x0, y0, w, w]); continue; }
+  const split = R();                                      // one, two or four buildings per block
+  if (split < 0.35) blocks.push([x0, y0, w, w]);
+  else if (split < 0.7) { const v = R() < 0.5, m = w * (0.4 + R() * 0.2);
+    if (v) blocks.push([x0, y0, m - 6, w], [x0 + m + 6, y0, w - m - 6, w]); else blocks.push([x0, y0, w, m - 6], [x0, y0 + m + 6, w, w - m - 6]); }
+  else { const h = (w - 12) / 2; blocks.push([x0, y0, h, h], [x0 + h + 12, y0, h, h], [x0, y0 + h + 12, h, h], [x0 + h + 12, y0 + h + 12, h, h]); }
+}
+const LABELS = [["Larch Park", -400, -306], ["Old Canal", -560, 250], ["Mill Row", 400, 80], ["Quay St", 80, 480]];
+LABELS[0][0] = VARS.to === "Larch Park" ? "Fern Common" : "Larch Park";   // never the destination's own name twice
+
+// camera: world point (cx, cy) shown at the focus point F, at zoom z
+const F = [W / 2, 1000];
+function follow(t) {                                      // trails the head by ~2% of the route, smoothed over corners
+  const p = seg(t, DRAW0, DRAW1, "Surge"), q = Math.max(0, p - 0.02);
+  let x = 0, y = 0; for (let i = -4; i <= 4; i++) { const pt = at(q + i * 0.012); x += pt[0]; y += pt[1]; }
+  return [x / 9, y / 9];
+}
+const xs = ROUTE.map(p => p[0]), ys = ROUTE.map(p => p[1]);
+const BB = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
+const OVER = [(BB[0] + BB[2]) / 2, (BB[1] + BB[3]) / 2 - 40], ZO = Math.min(760 / (BB[2] - BB[0]), 500 / (BB[3] - BB[1]));
+const ZF = 1.35;
+function camera(t) {
+  const f = follow(t), w = seg(t, PULL0, PULL1, "Land");
+  const z = Math.exp(lerp(Math.log(ZF + 0.08 * (1 - seg(t, 0, 1.2, "Settle"))), Math.log(ZO), w)) * (1 + 0.012 * t);   // a slow breath so nothing freezes
+  return { x: lerp(f[0], OVER[0], w), y: lerp(f[1], OVER[1], w), z };
+}
+const toScreen = (cam, p) => [F[0] + (p[0] - cam.x) * cam.z, F[1] + (p[1] - cam.y) * cam.z];
+
+function map(cam) {
+  g.save(); g.translate(F[0], F[1]); g.scale(cam.z, cam.z); g.translate(-cam.x, -cam.y);
+  g.fillStyle = "#0E2B27"; g.fillRect(-1100, -1300, 2200, 2600);           // street level
+  // canal
+  g.beginPath(); for (let x = -1100; x <= 1100; x += 20) { const y = canalY(x); x === -1100 ? g.moveTo(x, y) : g.lineTo(x, y); }
+  g.strokeStyle = "#1B4F5C"; g.lineWidth = 110; g.lineCap = "butt"; g.stroke();
+  g.strokeStyle = "#7FB8FF22"; g.lineWidth = 4; g.setLineDash([26, 30]); g.stroke(); g.setLineDash([]);
+  // parks and blocks (a 6-unit shadow gives the blocks a little depth)
+  for (const [x, y, w, h] of parks) { D.rr(x, y, w, h, 18); D.fill("#1F4A3A");
+    g.fillStyle = "#9FD8C21c"; for (let i = 0; i < 5; i++) { g.beginPath(); g.arc(x + 26 + ((i * 37) % (w - 40)), y + 30 + ((i * 53) % (h - 50)), 13, 0, 7); g.fill(); } }
+  for (const [x, y, w, h] of blocks) { D.rr(x + 6, y + 8, w, h, 8); D.fill("#04120F88"); D.rr(x, y, w, h, 8); D.fill("#174A46"); }
+  // street centre lines
+  g.strokeStyle = "#F7F9F20f"; g.lineWidth = 2; g.setLineDash([14, 18]);
+  for (let i = -6; i <= 6; i++) { g.beginPath(); g.moveTo(i * S, -1300); g.lineTo(i * S, 1300); g.stroke(); }
+  for (let j = -7; j <= 7; j++) { g.beginPath(); g.moveTo(-1100, j * S); g.lineTo(1100, j * S); g.stroke(); }
+  g.setLineDash([]);
+  g.restore();
+  // place names: fixed pixel size, so they read at any zoom
+  for (const [s, x, y] of LABELS) { const [sx, sy] = toScreen(cam, [x, y]); D.txt(s.toUpperCase(), sx, sy, 24, "#9FD8C2aa", 600, T.font.ui, "center", 5); }
+}
+
+function routeLine(cam, p) {                              // the route up to fraction p, in screen space (constant width)
+  if (p <= 0) return null;
+  const pts = [toScreen(cam, ROUTE[0])]; let d = p * LEN;
+  for (const s of segs) { if (d >= s.l) { pts.push(toScreen(cam, s.b)); d -= s.l; } else { pts.push(toScreen(cam, at(p))); break; } }
+  g.lineJoin = "round"; g.lineCap = "round";
+  const path = () => { g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); };
+  path(); g.strokeStyle = C.ink; g.lineWidth = 30; g.stroke();
+  path(); g.strokeStyle = C.spark; g.lineWidth = 16; g.stroke();
+  return pts[pts.length - 1];
+}
+
+function pill(x, y, label, bg, fg, a, align = "center") {   // a label card anchored by its bottom-centre (or side)
+  const size = 34, pw = D.width(label, size, 650) + 52, ph = 64;
+  let x0 = align === "center" ? x - pw / 2 : align === "right" ? x - pw : x;
+  x0 = clamp(x0, 100, W - 100 - pw);                         // keep inside the side margins
+  D.alpha(a, () => { D.rr(x0 + 4, y - ph + 6, pw, ph, 32); D.fill("#04120F66"); D.rr(x0, y - ph, pw, ph, 32); D.fill(bg);
+    D.txt(label, x0 + pw / 2, y - ph / 2 + 1, size, fg, 650); });
+}
+
+function pinShape(x, y, sx, sy) {                         // tip at (x, y); squash around the tip
+  g.save(); g.translate(x, y); g.scale(sx, sy);
+  g.beginPath(); g.moveTo(0, 0); g.bezierCurveTo(-14, -30, -38, -52, -38, -82); g.arc(0, -82, 38, Math.PI, 0); g.bezierCurveTo(38, -52, 14, -30, 0, 0); g.closePath();
+  g.fillStyle = C.coral; g.fill(); g.lineWidth = 4; g.strokeStyle = C.ink; g.stroke();
+  g.beginPath(); g.arc(0, -82, 14, 0, 7); g.fillStyle = C.cloud; g.fill(); g.restore();
+}
+
+function eta(t, p) {                                      // ETA card: minutes left roll down with the route, then "Arrived"
+  const a = seg(t, 0.2, 0.65, "Land"), cy = 1430 + 24 * (1 - a), cw = 520, ch = 128, x0 = W / 2 - cw / 2;
+  D.alpha(a, () => {
+    D.rr(x0 + 4, cy - ch / 2 + 8, cw, ch, 36); D.fill("#04120F88"); D.rr(x0, cy - ch / 2, cw, ch, 36); D.fill(C.cloud);
+    // a navigation arrow in a pine disc
+    g.save(); g.translate(x0 + 70, cy); g.beginPath(); g.arc(0, 0, 40, 0, 7); g.fillStyle = C.pine; g.fill();
+    g.rotate(0.6 * (1 - seg(t, 2.6, 3.0, "Settle"))); g.beginPath(); g.moveTo(0, -20); g.lineTo(15, 16); g.lineTo(0, 8); g.lineTo(-15, 16); g.closePath(); g.fillStyle = C.spark; g.fill(); g.restore();
+    const arr = seg(t, PIN + FALL, PIN + FALL + 0.35, "Cruise"), tx = x0 + 132;
+    // minutes: shown = m + 1 rolling to m while the remaining minutes r pass the last 0.35 above m
+    const r = VARS.minutes * (1 - p), m = Math.floor(r + 1e-6), u = MDNA.EASE.Cruise(clamp(1 - (r - m) / 0.35));
+    g.save(); g.beginPath(); g.rect(tx - 6, cy - 52, 230, 70); g.clip();
+    D.alpha(1 - clamp(arr / 0.4), () => {
+      const nw = D.width(String(m), 64, 800);
+      if (u < 1) D.txt(String(Math.min(VARS.minutes, m + 1)), tx, cy - 14 - 72 * u, 64, C.pine, 800, T.font.ui, "left");
+      D.txt(String(m), tx, cy - 14 + 72 * (1 - u), 64, C.pine, 800, T.font.ui, "left");
+      D.txt("min", tx + Math.max(nw, D.width(String(m + 1), 64, 800)) * 1 + 12, cy - 8, 34, C.sea, 600, T.font.ui, "left");
+    });
+    g.restore();
+    D.alpha(clamp((arr - 0.3) / 0.7), () => { const s = lerp(0.82, 1, seg(t, PIN + FALL + 0.1, PIN + FALL + 0.35, "Pop"));
+      D.at(tx, cy - 14, s, 0, () => D.txt("Arrived", 0, 0, 56, C.pine, 800, T.font.ui, "left")); });
+    D.txt(KM.toFixed(1) + " km · " + MODE, tx, cy + 36, 26, C.sea, 600, T.font.ui, "left", 1);
+  });
+}
+
+function render(t) {
+  const cam = camera(t), p = seg(t, DRAW0, DRAW1, "Surge");
+  map(cam);
+  // start marker and the route
+  const st = toScreen(cam, ROUTE[0]), sa = seg(t, 0.1, 0.45, "Pop");
+  const head = routeLine(cam, p);
+  D.at(st[0], st[1], sa, 0, () => { g.beginPath(); g.arc(0, 0, 22, 0, 7); g.fillStyle = C.cloud; g.fill(); g.lineWidth = 8; g.strokeStyle = C.ink; g.stroke();
+    g.beginPath(); g.arc(0, 0, 9, 0, 7); g.fillStyle = C.sea; g.fill(); });
+  // scrims: the header and the card read on a calm ground (the map and the route go under, markers stay on top)
+  let gr = g.createLinearGradient(0, 0, 0, 640); gr.addColorStop(0, C.pine); gr.addColorStop(0.62, C.pine + "f0"); gr.addColorStop(1, C.pine + "00");
+  g.fillStyle = gr; g.fillRect(0, 0, W, 640);
+  gr = g.createLinearGradient(0, 1300, 0, H); gr.addColorStop(0, C.pine + "00"); gr.addColorStop(0.35, C.pine + "e0"); gr.addColorStop(1, C.pine);
+  g.fillStyle = gr; g.fillRect(0, 1300, W, H - 1300);
+  // the moving head: a glowing dot that hands over to the pin
+  if (head) { const ha = 1 - seg(t, DRAW1 - 0.05, DRAW1 + 0.2, "Cruise");
+    D.alpha(ha, () => { MDNA.glow(g, head[0], head[1], 80, C.spark, 0.35); g.beginPath(); g.arc(head[0], head[1], 20, 0, 7); g.fillStyle = C.spark; g.fill();
+      g.beginPath(); g.arc(head[0], head[1], 8, 0, 7); g.fillStyle = C.pine; g.fill(); }); }
+  // the pin: falls from height 9 (×18 px, so it never crosses the header) in 0.28 s, squashes 18% for 0.12 s, bounces once to 1.1, settles
+  const end = toScreen(cam, ROUTE[ROUTE.length - 1]), tl = PIN + FALL;
+  if (t >= PIN) {
+    const hy = t < tl ? 162 * (1 - MDNA.EASE.Launch(clamp((t - PIN) / FALL)))
+      : t < tl + SQ ? 0
+      : 20 * Math.sin(Math.PI * clamp((t - tl - SQ) / BOUNCE));                               // one hop, gravity-like arc
+    const sq = t < tl ? 0 : t < tl + SQ ? Math.sin(Math.PI * (t - tl) / SQ) * 0.18 : 0;
+    const sq2 = t > tl + SQ + BOUNCE ? Math.sin(Math.PI * clamp((t - tl - SQ - BOUNCE) / 0.1)) * 0.06 : 0;   // a softer landing
+    const s = sq + sq2, sx = (1 + s) * (t < tl ? 0.94 : 1), sy = (1 - s) * (t < tl ? 1.06 : 1);
+    const sh = t < tl ? seg(t, PIN, tl, "Launch") : 1;                                        // shadow grows as it nears the ground
+    D.alpha(0.5 * sh, () => { g.beginPath(); g.ellipse(end[0], end[1] + 4, 30 * (0.5 + 0.5 * sh) * (1 + s), 9, 0, 0, 7); g.fillStyle = C.ink; g.fill(); });
+    D.alpha(clamp((t - PIN) / 0.1), () => pinShape(end[0], end[1] - hy, sx, sy));
+  }
+  // labels: where from (left of the start) and where to (above the pin, once it has landed)
+  const fa = seg(t, 0.35, 0.8, "Land");
+  if (fa > 0) pill(st[0] - 40, st[1] + 32, VARS.from, C.pine, C.cloud, fa * (1 - clamp((st[1] + 32 - 1320) / 40)), "right");   // gives way to the ETA card
+  const ta = seg(t, tl + SQ + 0.1, tl + SQ + 0.55, "Land");
+  if (ta > 0) pill(end[0], end[1] - 140 + 20 * (1 - ta), VARS.to, C.cloud, C.ink, ta, "center");
+  // header (safe area: below 220 px)
+  const hA = seg(t, 0.05, 0.5, "Land"), hB = seg(t, 0.15, 0.65, "Land");
+  if (!MDNA.NOTEXT) {
+    D.alpha(hA, () => MDNA.kicker(D, VARS.kicker, W / 2, 330 + 20 * (1 - hA), C.spark, "center", 30));
+    D.alpha(hB, () => MDNA.rich(D, VARS.title, W / 2, 450 + 30 * (1 - hB), 84, C.cloud, C.spark, "center"));
+  }
+  eta(t, p);
+  MDNA.finish(g, t, { vignette: 0.3, grain: 0.03 });
+}
+
+MDNA.scene({ w: W, h: H, duration: DUR, fps: 30, render });
+</script>
