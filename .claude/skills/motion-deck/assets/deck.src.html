@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>__TITLE__</title>
+<style>
+/* Motion Deck engine. A 1920x1080 stage scaled by --s, one slide per screen, every entrance on the Motion DNA easing
+   tokens. Keep this <style> and the <script> as they are; write your slides between <main> and </main>.
+   Slide types shown below: cover, statement, timeline, interlude + cover-up, horizontal stretch, section opener,
+   film, pinned steps, diagram, scroll marquee, cards grid, chips, gallery, count-up numbers, quote, closing. */
+__FONTS__
+:root{
+  --disp:"Unbounded","Arial Black",sans-serif; --sans:"Space Grotesk","Helvetica Neue",Arial,sans-serif; --mono:"JetBrains Mono",Consolas,monospace;
+  /* Motion DNA easing tokens (cubic-bezier) and durations */
+  --land:cubic-bezier(.12,.9,.28,1); --pop:cubic-bezier(.34,1.45,.64,1); --settle:cubic-bezier(.3,0,.1,1);
+  --whip:cubic-bezier(.75,0,.05,1); --surge:cubic-bezier(.7,0,.3,1); --coast:cubic-bezier(.18,.28,0,.9); --ramp:cubic-bezier(.87,0,.13,1);
+  --tick:133ms; --glide:300ms; --arrive:467ms; --sweep:700ms; --stage:1100ms;
+  --gut:max(16px, env(safe-area-inset-left, 0px));
+  --s:calc(min(100vw, var(--vh,1vh) * 177.78) / 1920);
+  --sy:0; --mx:-999px; --my:-999px;
+  /* accents: replace with a brand palette, keep text contrast >= 4.5:1 */
+  --cyan:#00A6C7; --violet:#6D4DFF; --hot:#F0287D; --lime:#7CC417;
+  --neon:linear-gradient(90deg,#00C2E8,#6D4DFF 55%,#F0287D);
+}
+html[data-theme="light"]{--bg:#FAFBFD; --card:#FFFFFF; --soft:#F2F5F9; --line:#E2E7EE; --ink:#0F1419; --mute:#5D6877; --shadow:0 1px 2px rgba(16,24,40,.05),0 10px 30px -12px rgba(16,24,40,.14); --gl:.07; color-scheme:light}
+html[data-theme="dark"]{--bg:#0B1018; --card:#151C27; --soft:#1C2533; --line:#2A3445; --ink:#EEF2F6; --mute:#A2ADBB; --shadow:0 1px 2px rgba(0,0,0,.3),0 14px 34px -14px rgba(0,0,0,.6); --gl:.12; color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--bg)}
+@media (min-width:900px) and (min-height:500px){html{scroll-snap-type:y mandatory}}
+html.free{scroll-snap-type:none}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:400;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::selection{background:var(--cyan);color:#fff}
+h1,h2,h3,p,ul,ol,figure,blockquote{margin:0}
+img,video{display:block}
+a{color:inherit}
+.ic{width:1.1em;height:1.1em;flex:none;vertical-align:-.18em}
+
+/* ---------- grounds: a slide can take its own colour; the chrome takes the slide's ink ---------- */
+.slide{--on:var(--ink)}
+.g-base{background:transparent;color:var(--ink)}
+.g-soft{background:var(--soft);color:var(--ink)}
+.g-dark{background:#0E1420;color:#EEF2F6;--on:#EEF2F6;--mute:#A2ADBB;--card:#171F2C;--line:#2B3546}
+.g-violet{background:#5B3BF0;color:#fff;--on:#fff;--mute:#DCD5FF;--card:#6B4EF5;--line:#8770FA}
+.g-cyan{background:#DDF6FB;color:#0F1419;--on:#0F1419}
+.g-ink{background:#0F1419;color:#fff;--on:#fff;--mute:#A9B3C1;--card:#1A222D;--line:#2D3845}
+
+/* ---------- the ground: line layers that drift with the scroll, a grid lit under the pointer ---------- */
+.ground{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.ground i{position:absolute;inset:-10%;display:block}
+.g-glow{background:radial-gradient(50% 45% at 85% 5%, rgba(109,77,255,var(--gl)), transparent 70%),radial-gradient(45% 40% at 5% 95%, rgba(0,194,232,var(--gl)), transparent 70%)}
+.g-cols{background:repeating-linear-gradient(90deg, transparent 0 119px, rgba(0,166,199,.06) 119px 120px)}
+.g-rows{background:repeating-linear-gradient(180deg, transparent 0 119px, rgba(109,77,255,.035) 119px 120px);background-position:0 calc(var(--sy) * -.04px)}
+.g-rain{background:linear-gradient(180deg, transparent, rgba(0,166,199,.55) 50%, transparent) 16% 0/2px 260px repeat-y,
+   linear-gradient(180deg, transparent, rgba(109,77,255,.45) 50%, transparent) 61% 0/2px 340px repeat-y,
+   linear-gradient(180deg, transparent, rgba(240,40,125,.35) 50%, transparent) 89% 0/2px 200px repeat-y;
+   background-position:16% calc(30% - var(--sy) * .6px), 61% calc(80% - var(--sy) * .45px), 89% calc(10% - var(--sy) * .75px)}
+.g-floor{inset:auto -40% -32% -40%;height:62%;transform:perspective(600px) rotateX(72deg);transform-origin:50% 0;opacity:.35;
+   background:repeating-linear-gradient(90deg, rgba(109,77,255,.16) 0 1px, transparent 1px 90px),repeating-linear-gradient(180deg, rgba(109,77,255,.16) 0 1px, transparent 1px 90px);
+   background-position:0 calc(var(--sy) * .5px);-webkit-mask-image:linear-gradient(180deg, transparent, #000 70%);mask-image:linear-gradient(180deg, transparent, #000 70%)}
+.g-hot{inset:0;background:repeating-linear-gradient(90deg, rgba(0,166,199,.35) 0 1px, transparent 1px 30px),repeating-linear-gradient(180deg, rgba(0,166,199,.35) 0 1px, transparent 1px 30px);
+   -webkit-mask-image:radial-gradient(220px 220px at var(--mx) var(--my), #000, transparent 75%);mask-image:radial-gradient(220px 220px at var(--mx) var(--my), #000, transparent 75%)}
+.spot{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(420px 420px at var(--mx) var(--my), rgba(0,194,232,.08), transparent 70%)}
+
+/* ---------- slides and the 16:9 stage ---------- */
+.slide{position:relative;z-index:1;height:100vh;height:calc(var(--vh,1vh) * 100);scroll-snap-align:start;overflow:hidden}
+.stage{position:absolute;left:50%;top:50%;width:calc(1920 * var(--s));height:calc(1080 * var(--s));translate:-50% -50%;z-index:3}
+.abs{position:absolute;left:calc(var(--x) * var(--s));top:calc(var(--y) * var(--s));width:calc(var(--w) * var(--s))}
+/* full-bleed media: a scrim always sits between pixels and text */
+.bg{position:absolute;inset:0;z-index:1;overflow:hidden}
+.bg img,.bg video{width:100%;height:100%;object-fit:cover}
+.scrim{position:absolute;inset:0;z-index:2;pointer-events:none}
+/* section openers: the clip fills the right side and fades into the ground on the left */
+.bg.side{left:42%;background:#000}
+.bg.side::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg, var(--bg) 0, color-mix(in srgb, var(--bg) 80%, transparent) 14%, transparent 40%)}
+.in .drift{animation:drift 16s var(--settle) 1.6s infinite alternate}
+@keyframes drift{from{transform:scale(1)}to{transform:scale(1.035)}}
+
+/* ---------- chrome: floating menu bar, progress, side rail, footer with the curve readout ---------- */
+.chrome{position:fixed;left:0;right:0;top:0;z-index:30;pointer-events:none;padding-top:calc(26 * var(--s));color:var(--chrome,var(--ink))}
+.chrome .row{width:calc(1920 * var(--s));margin-inline:auto;padding-inline:max(var(--gut), calc(64 * var(--s)));display:flex;align-items:center;gap:calc(18 * var(--s))}
+.mark{pointer-events:auto;display:flex;align-items:center;gap:calc(12 * var(--s));text-decoration:none;font:700 max(.78rem, calc(20 * var(--s)))/1 var(--disp);letter-spacing:.02em;transition:color var(--sweep) var(--settle)}
+.mark i{width:max(28px, calc(44 * var(--s)));height:max(28px, calc(44 * var(--s)));border-radius:calc(12 * var(--s));background:var(--neon);display:grid;place-items:center;color:#fff;font-style:normal;font-size:.8em;box-shadow:0 6px 18px -6px rgba(109,77,255,.6)}
+.navbar{pointer-events:auto;margin-inline:auto;display:flex;gap:4px;list-style:none;padding:5px;background:rgba(255,255,255,.86);backdrop-filter:blur(14px);border:1px solid rgba(15,20,25,.08);border-radius:999px;box-shadow:0 1px 2px rgba(16,24,40,.05),0 10px 30px -12px rgba(16,24,40,.18)}
+.navbar a{position:relative;display:flex;align-items:center;gap:8px;text-decoration:none;font:500 max(.72rem, calc(18 * var(--s)))/1 var(--sans);color:#5D6877;padding:max(8px, calc(12 * var(--s))) max(12px, calc(20 * var(--s)));border-radius:999px;transition:color var(--glide) var(--settle),background var(--glide) var(--settle)}
+.navbar a:hover{color:#0F1419;background:#F2F5F9}
+.navbar a.on{color:#0F1419;background:#EAF8FC}
+.navbar a.on .ic{color:var(--cyan)}
+.navbar a::after{content:"";position:absolute;left:22%;right:22%;bottom:4px;height:2px;border-radius:2px;background:var(--neon);transform:scaleX(0);transition:transform var(--arrive) var(--land)}
+.navbar a.on::after{transform:scaleX(1)}
+.cta{pointer-events:auto;display:flex;align-items:center;gap:10px;text-decoration:none;font:500 max(.72rem, calc(18 * var(--s)))/1 var(--sans);color:#fff;background:#0F1419;padding:max(10px, calc(14 * var(--s))) max(14px, calc(22 * var(--s)));border-radius:999px;position:relative;isolation:isolate;transition:transform var(--glide) var(--pop)}
+.cta::before{content:"";position:absolute;inset:-2px;border-radius:inherit;background:var(--neon);z-index:-1;opacity:0;transition:opacity var(--glide)}
+.cta:hover{transform:translateY(-2px)}.cta:hover::before{opacity:1}
+.live{width:8px;height:8px;border-radius:50%;background:var(--lime);animation:ping 2.4s ease-in-out infinite}
+@keyframes ping{0%,100%{box-shadow:0 0 0 3px rgba(124,196,23,.25)}50%{box-shadow:0 0 0 7px rgba(124,196,23,0)}}
+.chrome[data-hide="1"] .navbar{opacity:0;transform:translateY(-8px);visibility:hidden;transition:opacity var(--arrive) var(--settle),transform var(--arrive) var(--land),visibility 0s linear var(--arrive)}
+.navbar{transition:opacity var(--arrive) var(--settle),transform var(--arrive) var(--land)}
+.progress{position:fixed;left:0;top:0;height:3px;width:100%;transform-origin:left;transform:scaleX(0);background:var(--neon);z-index:31}
+.foot{position:fixed;left:0;right:0;bottom:0;z-index:30;pointer-events:none;color:var(--chrome,var(--ink))}
+.foot .row{width:calc(1920 * var(--s));margin-inline:auto;padding:0 max(var(--gut), calc(64 * var(--s))) calc(28 * var(--s));display:flex;gap:16px;align-items:center;font:400 max(.64rem, calc(16 * var(--s)))/1 var(--mono);letter-spacing:.06em;transition:color var(--sweep) var(--settle)}
+.foot .name{opacity:.75}
+.curve{display:flex;align-items:center;gap:.6em;opacity:.75;white-space:nowrap;margin-left:auto}
+.curve svg{width:2.2em;height:1.3em;overflow:visible}
+.curve svg path{fill:none;stroke:currentColor;stroke-width:1.6}
+.curve svg circle{fill:currentColor}
+.pageno{background:#fff;color:#0F1419;border:1px solid rgba(15,20,25,.08);border-radius:999px;padding:7px 12px;font-variant-numeric:tabular-nums}
+.rail{position:fixed;right:max(12px, calc(26 * var(--s)));top:50%;transform:translateY(-50%);z-index:30;display:flex;flex-direction:column;gap:9px;color:var(--chrome,var(--ink))}
+.rail button{position:relative;width:8px;height:8px;border-radius:999px;border:0;padding:0;background:currentColor;opacity:.3;cursor:pointer;transition:height var(--arrive) var(--pop),opacity var(--glide)}
+.rail button.on{height:24px;opacity:1;background:var(--neon)}
+.rail button span{position:absolute;right:20px;top:50%;transform:translate(6px,-50%);white-space:nowrap;font:400 12px/1 var(--mono);color:#0F1419;background:#fff;border:1px solid rgba(15,20,25,.08);border-radius:999px;padding:6px 10px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity var(--glide),transform var(--glide) var(--land)}
+.rail button:hover{opacity:1}.rail button:hover span{opacity:1;transform:translate(0,-50%)}
+
+/* ---------- type, in stage pixels ---------- */
+.disp{font-family:var(--disp);font-weight:700;letter-spacing:-.02em}
+.h130{font-size:calc(130 * var(--s));line-height:.98}
+.h110{font-size:calc(110 * var(--s));line-height:1}
+.h72{font-size:calc(72 * var(--s));line-height:1.06}
+.h56{font-size:calc(56 * var(--s));line-height:1.1}
+.t32{font-size:calc(32 * var(--s));line-height:1.35}
+.t26{font-size:calc(26 * var(--s));line-height:1.45}
+.t21{font-size:calc(21 * var(--s));line-height:1.5}
+.mono{font-family:var(--mono);font-size:calc(18 * var(--s));letter-spacing:.06em;color:var(--mute)}
+.mute{color:var(--mute)}
+.eyebrow{display:inline-flex;align-items:center;gap:calc(10 * var(--s));font:400 calc(18 * var(--s))/1 var(--mono);letter-spacing:.08em;color:var(--violet);background:color-mix(in srgb, var(--violet) 10%, transparent);border:1px solid color-mix(in srgb, var(--violet) 22%, transparent);border-radius:999px;padding:calc(10 * var(--s)) calc(16 * var(--s));width:auto!important}
+.g-dark .eyebrow,.g-violet .eyebrow,.g-ink .eyebrow{color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.08)}
+.neon{color:var(--violet)}
+.neon .wi,.neon.solid{background:var(--neon);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hl{color:var(--cyan);font-weight:500}
+/* a phrase marked with a colour block that wipes in with the slide */
+.markup{padding:0 .14em;margin:0 -.04em;white-space:nowrap;-webkit-box-decoration-break:clone;box-decoration-break:clone;background:linear-gradient(var(--mk,#DDF6FB),var(--mk,#DDF6FB)) no-repeat 0 0/100% 100%;transition:background-size var(--sweep) var(--whip) var(--d,400ms)}
+.armed:not(.in) .markup{background-size:0% 100%}
+.glitch{position:relative;display:inline-block}
+.glitch:hover{animation:jitter .38s steps(2) 1}
+@keyframes jitter{0%{filter:drop-shadow(3px 0 rgba(240,40,125,.6)) drop-shadow(-3px 0 rgba(0,194,232,.6));transform:translateX(1px)}50%{filter:drop-shadow(-4px 0 rgba(240,40,125,.6)) drop-shadow(4px 0 rgba(0,194,232,.6));transform:translateX(-2px) skewX(-4deg)}100%{filter:none;transform:none}}
+
+/* ---------- reveals ---------- */
+/* Each word rises inside its own mask, padded on every side and pulled back with negative margins, so descenders,
+   italics and commas are never cut. */
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding:.25em .35em .32em;margin:-.25em -.35em -.32em}
+.wi{display:inline-block;transition:transform var(--sweep) var(--land) var(--d,0ms)}
+.armed:not(.in) .wi{transform:translateY(150%)}
+.ch{display:inline-block;transition:transform var(--stage) var(--land) var(--d,0ms),opacity var(--arrive) var(--settle) var(--d,0ms)}
+.armed:not(.in) .ch{transform:translateY(.6em) rotate(6deg);opacity:0}
+.r{transition:opacity var(--arrive) var(--settle) var(--d,0ms),transform var(--sweep) var(--land) var(--d,0ms),clip-path var(--stage) var(--whip) var(--d,0ms)}
+.armed:not(.in) .r-up{opacity:0;transform:translateY(40px)}
+.armed:not(.in) .r-left{opacity:0;transform:translateX(-40px)}
+.armed:not(.in) .r-fade{opacity:0}
+.armed:not(.in) .r-pop{opacity:0;transform:scale(.85)}
+.r-pop{transition:opacity var(--glide) var(--settle) var(--d,0ms),transform var(--arrive) var(--pop) var(--d,0ms)}
+.armed:not(.in) .r-wipe{clip-path:inset(0 100% 0 0 round 20px)}
+.armed:not(.in) .r-wipeUp{clip-path:inset(100% 0 0 0 round 20px)}
+.r-wipe,.r-wipeUp{clip-path:inset(0 0 0 0 round 20px)}
+.zoom img,.zoom video{transition:transform 1800ms var(--coast) var(--d,0ms)}
+.armed:not(.in) .zoom img,.armed:not(.in) .zoom video{transform:scale(1.12)}
+.rule{position:relative}
+.rule::before{content:"";position:absolute;left:0;right:0;top:0;height:1.5px;background:currentColor;opacity:.35;transform-origin:left;transition:transform var(--stage) var(--whip) var(--d,0ms)}
+.armed:not(.in) .rule::before{transform:scaleX(0)}
+.illo path{transition:stroke-dashoffset 2600ms var(--settle) var(--d,0ms)}
+.armed:not(.in) .illo path{stroke-dashoffset:1}
+/* a curtain sweeps across once as a section opener enters */
+.t-curtain::after{content:"";position:absolute;inset:0;z-index:20;background:var(--neon);transform:scaleX(0);transform-origin:right;pointer-events:none}
+.t-curtain.in::after{animation:curtain 1100ms var(--whip) 1}
+@keyframes curtain{0%{transform:scaleX(0);transform-origin:left}50%{transform:scaleX(1);transform-origin:left}50.1%{transform-origin:right}100%{transform:scaleX(0);transform-origin:right}}
+/* loops run only while their slide is on screen */
+.slide:not(.in) *{animation-play-state:paused!important}
+
+/* ---------- cards: rounded, a neon edge and a tilt under the pointer ---------- */
+.hud{position:relative;background:var(--card);border:1px solid var(--line);border-radius:calc(20 * var(--s));box-shadow:var(--shadow);color:var(--on)}
+.hud::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1.5px;background:var(--neon);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity var(--arrive) var(--settle);pointer-events:none;z-index:5}
+.hud:hover::before{opacity:1}
+.tilt{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty,0px));transition:transform var(--arrive) var(--land),opacity var(--arrive) var(--settle) var(--d,0ms),box-shadow var(--glide)}
+.tilt:hover{--ty:-6px;box-shadow:0 2px 4px rgba(16,24,40,.06),0 24px 48px -16px rgba(109,77,255,.28)}
+.tilt::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(260px 260px at var(--px,50%) var(--py,50%), rgba(0,194,232,.10), transparent 70%);opacity:0;transition:opacity var(--glide);pointer-events:none}
+.tilt:hover::after{opacity:1}
+.armed:not(.in) .tilt.r-up{transform:perspective(900px) translateY(40px)}
+.media{position:absolute;left:calc(var(--l) * var(--s));top:calc(var(--t) * var(--s));width:calc(var(--w) * var(--s));height:calc(var(--h) * var(--s));padding:calc(8 * var(--s))}
+.media>.clip{position:relative;width:100%;height:100%;overflow:hidden;border-radius:calc(14 * var(--s));background:linear-gradient(135deg,#1b2230,#2b2550)}
+.media img,.media video{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--coast)}
+.media:hover img{transform:scale(1.05)}
+.media .clip::before,.media .clip::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;mix-blend-mode:screen}
+.media .clip::before{background:linear-gradient(90deg, rgba(0,194,232,.45), transparent 40%)}
+.media .clip::after{background:repeating-linear-gradient(180deg, transparent 0 6px, rgba(240,40,125,.28) 6px 8px)}
+.media:hover .clip::before{animation:slip .5s steps(3) 1}
+.media:hover .clip::after{animation:bands .6s steps(4) 1}
+@keyframes slip{0%{opacity:1;transform:translateX(-6%)}60%{opacity:.6;transform:translateX(4%)}100%{opacity:0;transform:none}}
+@keyframes bands{0%{opacity:1;clip-path:inset(10% 0 70% 0)}40%{opacity:1;clip-path:inset(55% 0 20% 0)}80%{opacity:.7;clip-path:inset(30% 0 50% 0)}100%{opacity:0}}
+.tag{position:absolute;left:calc(22 * var(--s));top:calc(22 * var(--s));z-index:3;display:flex;align-items:center;gap:8px;font:400 calc(15 * var(--s))/1 var(--mono);letter-spacing:.06em;color:#0F1419;background:rgba(255,255,255,.92);border-radius:999px;padding:calc(8 * var(--s)) calc(12 * var(--s))}
+.tag .ic{color:var(--violet)}
+
+/* ---------- pieces ---------- */
+.portrait{position:absolute;padding:calc(10 * var(--s))}
+.portrait .clip{position:relative;width:100%;height:100%;overflow:hidden;border-radius:calc(16 * var(--s));background:#0b0d12}
+.portrait img{width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+.portrait .tint{position:absolute;inset:0;background:linear-gradient(160deg, rgba(109,77,255,.45), rgba(0,194,232,.3) 60%, rgba(240,40,125,.3));mix-blend-mode:color}
+.portrait .sweep{position:absolute;left:0;right:0;height:16%;top:-20%;background:linear-gradient(180deg, transparent, rgba(0,194,232,.25), transparent);animation:sweep 6s var(--coast) infinite}
+@keyframes sweep{0%{top:-20%}60%,100%{top:110%}}
+.portrait:hover .clip{animation:slice .45s steps(3) 1}
+@keyframes slice{30%{clip-path:inset(20% 0 55% 0);transform:translateX(-8px)}60%{clip-path:inset(60% 0 10% 0);transform:translateX(8px)}100%{clip-path:inset(0);transform:none}}
+.badge{position:absolute;z-index:4;display:flex;align-items:center;gap:calc(10 * var(--s));background:#fff;color:#0F1419;border:1px solid rgba(15,20,25,.08);border-radius:999px;padding:calc(12 * var(--s)) calc(18 * var(--s));font:500 calc(18 * var(--s))/1 var(--sans);box-shadow:var(--shadow)}
+.badge>.ic{color:var(--cyan)}
+.in .badge{animation:float 5s ease-in-out 1.6s infinite}
+@keyframes float{50%{translate:0 -8px}}
+.metaline,.chips{display:flex;flex-wrap:wrap;gap:calc(12 * var(--s))}
+.pill{display:inline-flex;align-items:center;gap:calc(8 * var(--s));font:400 calc(17 * var(--s))/1 var(--mono);letter-spacing:.04em;color:var(--on);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:calc(11 * var(--s)) calc(15 * var(--s));transition:border-color var(--glide),transform var(--glide) var(--pop)}
+.pill:hover{border-color:var(--violet);transform:translateY(-2px)}
+.pill .ic{color:var(--cyan)}
+.chip{display:inline-flex;align-items:center;gap:calc(10 * var(--s));font:500 calc(20 * var(--s))/1 var(--sans);padding:calc(13 * var(--s)) calc(20 * var(--s));border:1px solid var(--line);background:var(--card);border-radius:999px;color:var(--on);transition:transform var(--glide) var(--pop),border-color var(--glide),box-shadow var(--glide),opacity var(--arrive) var(--settle) var(--d,0ms)}
+.chip .ic{color:var(--mute)}
+.chip:hover{transform:translateY(-3px);border-color:var(--cyan);box-shadow:0 8px 18px -8px rgba(0,166,199,.5)}
+.chip.hi{background:#0F1419;color:#fff;border-color:#0F1419}.chip.hi .ic{color:#5BE3FF}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(28 * var(--s))}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(22 * var(--s))}
+.card{padding:calc(30 * var(--s))}
+.cic{display:inline-grid;place-items:center;width:calc(52 * var(--s));height:calc(52 * var(--s));border-radius:calc(14 * var(--s));background:var(--soft);color:var(--violet);font-size:calc(26 * var(--s));transition:transform var(--arrive) var(--pop),background var(--glide),color var(--glide)}
+.hud:hover .cic{transform:rotate(-8deg) scale(1.08);background:var(--violet);color:#fff}
+.card h3{font:700 calc(26 * var(--s))/1.18 var(--disp);margin:calc(18 * var(--s)) 0 calc(12 * var(--s))}
+.card p{font-size:calc(19 * var(--s));line-height:1.5;color:var(--mute)}
+.st{display:inline-flex;align-items:center;gap:6px;font:400 calc(13 * var(--s))/1 var(--mono);letter-spacing:.08em;padding:calc(7 * var(--s)) calc(11 * var(--s));border-radius:999px;color:var(--violet);background:color-mix(in srgb, var(--violet) 12%, transparent)}
+.st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.st.ok{color:#4F8A0B;background:#EEF8E0}
+.cardtop{display:flex;justify-content:space-between;align-items:center}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:calc(18 * var(--s))}
+.stat{padding:calc(22 * var(--s)) calc(24 * var(--s));cursor:default}
+.stat b{display:block;font:700 calc(60 * var(--s))/1 var(--disp);font-variant-numeric:tabular-nums}
+.stat b em{font-style:normal;color:var(--hot)}
+.stat > span{display:flex;align-items:center;gap:8px;margin-top:calc(10 * var(--s));font:400 calc(15 * var(--s))/1.3 var(--mono);color:var(--mute);letter-spacing:.04em}
+.stat > span .ic{color:var(--cyan)}
+.quote{font:700 calc(64 * var(--s))/1.15 var(--disp);letter-spacing:-.02em}
+.quote::before{content:"“";display:block;font-size:2em;line-height:.6;color:var(--violet)}
+/* timeline */
+.tl{position:absolute;left:calc(80 * var(--s));right:calc(80 * var(--s));height:2px;background:var(--neon);transform-origin:left;transition:transform var(--stage) var(--whip) 200ms;opacity:.7}
+.armed:not(.in) .tl{transform:scaleX(0)}
+.ev{position:absolute;width:calc(400 * var(--s));padding:calc(26 * var(--s))}
+.ev::before{content:"";position:absolute;left:calc(40 * var(--s));top:calc(-50 * var(--s));width:2px;height:calc(50 * var(--s));background:var(--line)}
+.evi{position:absolute;left:calc(22 * var(--s));top:calc(-110 * var(--s));width:calc(40 * var(--s));height:calc(40 * var(--s));border-radius:50%;background:var(--card);border:2px solid var(--violet);display:grid;place-items:center;color:var(--violet);font-size:calc(18 * var(--s));transition:background var(--glide),color var(--glide)}
+.ev:hover .evi{background:var(--violet);color:#fff}
+.ev .yr{font:400 calc(16 * var(--s))/1 var(--mono);color:var(--cyan);letter-spacing:.06em}
+.ev h3{font:700 calc(25 * var(--s))/1.18 var(--disp);margin:calc(12 * var(--s)) 0 calc(10 * var(--s))}
+.ev p{font-size:calc(18 * var(--s));line-height:1.45;color:var(--mute)}
+/* continuous marquee strip */
+.marq{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.marq>div{display:flex;gap:calc(14 * var(--s));width:max-content;animation:marq 30s linear infinite}
+@keyframes marq{to{transform:translateX(-50%)}}
+/* films */
+.playbtn{position:absolute;inset:calc(8 * var(--s));z-index:4;display:grid;place-items:center;background:transparent;border:0;cursor:pointer;border-radius:calc(14 * var(--s));transition:opacity var(--arrive) var(--settle)}
+.playbtn span{display:flex;align-items:center;gap:calc(14 * var(--s));padding:calc(12 * var(--s)) calc(26 * var(--s)) calc(12 * var(--s)) calc(12 * var(--s));border-radius:999px;background:#fff;color:#0F1419;font:500 calc(19 * var(--s))/1 var(--sans);box-shadow:0 10px 30px -8px rgba(0,0,0,.4);transition:transform var(--arrive) var(--pop)}
+.playbtn span i{width:calc(44 * var(--s));height:calc(44 * var(--s));border-radius:50%;background:#FF0033;color:#fff;display:grid;place-items:center;font-size:calc(20 * var(--s))}
+.playbtn:hover span{transform:scale(1.06)}
+.playing .playbtn{opacity:0;pointer-events:none}
+/* contact */
+.contact{display:grid;grid-template-columns:1fr 1fr;gap:calc(20 * var(--s))}
+.cc{display:flex;align-items:center;gap:calc(18 * var(--s));padding:calc(22 * var(--s)) calc(24 * var(--s));text-decoration:none}
+.cc .cic{width:calc(56 * var(--s));height:calc(56 * var(--s))}
+.cc small{display:block;font:400 calc(14 * var(--s))/1 var(--mono);letter-spacing:.08em;color:var(--mute);margin-bottom:calc(8 * var(--s))}
+.cc strong{display:block;font:500 calc(23 * var(--s))/1.2 var(--sans)}
+.cc .go{margin-left:auto;color:var(--mute);font-size:calc(22 * var(--s));transition:transform var(--glide) var(--land),color var(--glide)}
+.cc:hover .go{transform:translate(3px,-3px);color:var(--cyan)}
+.cc.wide{grid-column:span 2}
+
+/* ---------- diagrams (FLOWS in the script) ---------- */
+svg.flow{display:block;width:100%;height:auto;overflow:visible}
+svg.flow text{font-family:var(--mono);fill:var(--on)}
+svg.flow .sub{fill:var(--mute)}
+svg.flow .box{fill:var(--card);stroke:var(--line)}
+svg.flow .ln{fill:none;stroke-width:2;stroke-dashoffset:1;transition:stroke-dashoffset var(--stage) var(--whip) var(--d,0ms),opacity var(--glide),stroke-width var(--glide)}
+.in svg.flow .ln{stroke-dashoffset:0}
+svg.flow .nd{transition:opacity var(--arrive) var(--settle) var(--d,0ms),transform var(--arrive) var(--pop) var(--d,0ms);transform-box:fill-box;transform-origin:center}
+.armed:not(.in) svg.flow .nd{opacity:0;transform:scale(.9)}
+svg.flow .pulse{opacity:0;transition:opacity 400ms 1400ms}
+.in svg.flow .pulse{opacity:1}
+svg.flow.focus .nd:not(.lit),svg.flow.focus .ln:not(.lit){opacity:.25}
+svg.flow .nd.lit .box{stroke:var(--violet);stroke-width:2}
+svg.flow .ln.lit{stroke-width:3.5;stroke:var(--violet)}
+
+/* ---------- interlude: a still the next slide covers from the bottom; its corner straightens as it lands ---------- */
+.hold{position:relative;scroll-snap-align:start}
+.interlude{position:sticky;top:0;z-index:0;scroll-snap-align:none}
+.interlude .bg img,.interlude .bg video{filter:brightness(var(--dim,1));transition:filter 120ms linear}
+.cover-up{z-index:1;border-top-right-radius:calc(var(--rad,0) * 1px);transform:translateZ(0);background:var(--bg)}
+
+/* ---------- horizontal stretch: later panels slide in from the right, stacked like tabs ---------- */
+.hwrap{position:relative;overflow:clip;--tab:calc(44 * var(--s));--tabr:calc(72 * var(--s))}
+.hsticky{position:sticky;top:0;height:calc(var(--vh,1vh) * 100);overflow:hidden}
+.hpanel{position:absolute;inset:0;height:100%;scroll-snap-align:none;border-top-right-radius:var(--tabr)}
+.hpanel + .hpanel{transform:translateX(100vw);will-change:transform;box-shadow:0 0 calc(56 * var(--s)) rgba(15,20,25,.3)}
+.hpanel:nth-child(2){inset:0 var(--tab) 0 0;height:auto}
+.hpanel:nth-child(3){inset:0 calc(var(--tab) * 2) 0 0;height:auto}
+.hpanel:nth-child(4){inset:0 calc(var(--tab) * 3) 0 0;height:auto}
+
+/* ---------- pinned stories: the scroll steps through states while the slide holds still ---------- */
+.pinned{height:auto;overflow:clip;scroll-snap-align:none}
+.stop{position:absolute;left:0;width:1px;height:calc(var(--vh,1vh) * 100);scroll-snap-align:start;pointer-events:none}
+.sticky{position:sticky;top:0;height:calc(var(--vh,1vh) * 100);overflow:hidden}
+.steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:calc(14 * var(--s))}
+.stext{display:grid;grid-template-columns:calc(80 * var(--s)) minmax(0,1fr);padding-block:calc(12 * var(--s));opacity:.38;transition:opacity var(--arrive) var(--settle)}
+.step.on .stext{opacity:1}
+.sn{font:700 calc(48 * var(--s))/.9 var(--disp);color:var(--violet);grid-row:span 3}
+.stext h3{font:700 calc(28 * var(--s))/1.15 var(--disp)}
+.stext p{font-size:calc(21 * var(--s));line-height:1.35;color:var(--mute);margin-top:.35em;max-height:0;overflow:hidden;opacity:0;transition:max-height var(--sweep) var(--land),opacity var(--arrive) var(--settle)}
+.step.on .stext p{max-height:6em;opacity:1}
+.sbar{display:block;height:2px;background:var(--line);margin-top:.8em;position:relative;overflow:hidden;border-radius:2px}
+.sbar i{position:absolute;inset:0;background:var(--neon);transform-origin:left;transform:scaleX(var(--p,0))}
+.smedia{position:absolute;left:calc(700 * var(--s));top:calc(-10 * var(--s));width:calc(1000 * var(--s));height:calc(562 * var(--s));border-radius:calc(24 * var(--s));overflow:hidden;background:linear-gradient(135deg,#1b2230,#2b2550);
+  opacity:0;transform:translateY(24px) scale(.97);transition:opacity var(--sweep) var(--settle),transform var(--sweep) var(--land);pointer-events:none;box-shadow:var(--shadow)}
+.step.on .smedia{opacity:1;transform:none}
+.smedia video,.smedia img{width:100%;height:100%;object-fit:cover}
+/* scroll marquee: one track of big lines crosses right to left, moved by the scroll */
+.smarq{position:absolute;inset:0;z-index:3;pointer-events:none;display:flex;align-items:center}
+.mtrack{display:flex;align-items:center;gap:calc(420 * var(--s));will-change:transform;transform:translateX(100vw)}
+.mitem{flex:none;width:max-content;max-width:calc(1500 * var(--s));font:700 calc(110 * var(--s))/1.04 var(--disp);letter-spacing:-.025em}
+.mbar{display:flex;gap:8px}
+.mbar i{width:calc(42 * var(--s));height:2px;background:var(--line);transition:background var(--arrive) var(--settle)}
+.mbar i.on{background:var(--violet)}
+
+/* ---------- pointer: a ring that grows over anything interactive ---------- */
+.ring{position:fixed;left:0;top:0;z-index:50;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:1.5px solid var(--violet);pointer-events:none;transform:translate(var(--mx),var(--my)) scale(var(--rs,1));transition:transform 120ms var(--land),border-color var(--glide),background var(--glide)}
+.ring.big{--rs:1.9;border-color:var(--cyan);background:rgba(0,194,232,.08)}
+@media (hover:none){.ring,.spot,.g-hot{display:none}}
+
+/* ---------- narrow screens: the stage becomes a reading column ---------- */
+@media (max-width:899px){
+  .navbar,.rail,.curve,.foot .name{display:none}
+  .slide{height:auto;min-height:0;padding:92px 16px 64px}
+  .stage{position:relative;left:auto;top:auto;width:auto;height:auto;translate:none;display:flex;flex-direction:column;gap:18px}
+  .abs,.media,.portrait,.ev,.badge{position:relative!important;left:auto!important;top:auto!important;right:auto!important;width:auto!important}
+  .media{height:auto!important;aspect-ratio:16/9}.portrait{aspect-ratio:4/5;height:auto!important}
+  .h130{font-size:3rem}.h110{font-size:2.6rem}.h72{font-size:2.2rem}.h56,.quote{font-size:1.8rem}.mitem{font-size:2rem}
+  .t32,.t26{font-size:1.05rem}.t21,.card p,.ev p{font-size:.95rem}.mono,.eyebrow,.pill,.chip,.tag{font-size:.75rem}
+  .grid3,.grid4,.stats,.contact{grid-template-columns:1fr}.cc.wide{grid-column:auto}
+  .bg{position:relative;inset:auto;aspect-ratio:16/9}.bg.side{left:auto}.tl,.ev::before,.evi{display:none}
+  .chrome .row,.foot .row{width:auto;padding-inline:16px}
+  .interlude{height:calc(var(--vh,1vh) * 100);padding:0}.interlude .bg{position:absolute;inset:0;aspect-ratio:auto}
+  .hsticky{position:relative;height:auto;overflow:visible}.hpanel,.hpanel + .hpanel{position:relative;inset:auto!important;height:auto;transform:none!important;filter:none!important;border-radius:0}
+  .pinned{height:auto!important}.stop{display:none}.sticky{position:relative;height:auto;overflow:visible;padding:92px 16px 64px}
+  .stext{opacity:1}.stext p{max-height:none;opacity:1}.sbar{display:none}
+  .smedia{position:relative;left:auto;top:auto;width:auto;height:auto;aspect-ratio:16/9;opacity:1;transform:none;margin-top:10px}
+  .smarq{position:relative}.mtrack{transform:none!important;flex-direction:column;align-items:flex-start;gap:24px}.mbar{display:none}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:1ms!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="ground" aria-hidden="true"><i class="g-glow"></i><i class="g-cols"></i><i class="g-rows"></i><i class="g-floor"></i><i class="g-rain"></i><i class="g-hot"></i></div>
+<div class="spot" aria-hidden="true"></div>
+<div class="ring" id="ring" aria-hidden="true"></div>
+<div class="progress" id="progress"></div>
+<header class="chrome" id="chrome" data-hide="1"><div class="row">
+  <a class="mark" href="#cover"><i>__MONO__</i>__TITLE__</a>
+  <!-- one link per section; data-sec lists the ids of every slide in that section -->
+  <ul class="navbar" id="navlist">
+    <li><a href="#intro" data-sec="intro path">{{i:user}}Intro</a></li>
+    <li><a href="#case" data-sec="case-hold photo case parts film steps">{{i:layers}}Case</a></li>
+    <li><a href="#system" data-sec="system lines">{{i:nodes}}System</a></li>
+    <li><a href="#results" data-sec="results gallery tools quote">{{i:spark}}Results</a></li>
+  </ul>
+  <a class="cta" href="#closing"><span class="live"></span>Contact</a>
+</div></header>
+<nav class="rail" id="rail" aria-label="Slides"></nav>
+<footer class="foot" id="foot" data-hide="1"><div class="row">
+  <span class="name">__TITLE__</span>
+  <span class="curve" aria-live="polite"><svg viewBox="0 0 40 24" aria-hidden="true"><path id="curvePath" d="M0 24 C4.8 2.4 11.2 0 40 0"/><circle id="curveDot" cx="0" cy="24" r="2.4"/></svg><span id="curveName">Land</span><span id="curveTime">· Stage 1100 ms</span></span>
+  <span class="pageno" id="pageno">01</span>
+</div></footer>
+
+<main>
+<!-- ============ EXAMPLE SLIDES: replace them. Each <section class="slide g-*"> takes data-label (rail, menu), and
+     optionally data-curve (Land|Pop|Settle|Whip|Coast|Surge) + data-dur for the curve readout in the footer. ============ -->
+
+<!-- cover -->
+<section class="slide g-base" id="cover" data-label="Cover" data-curve="Land" data-dur="Stage 1100 ms">
+  <div class="stage">
+    <p class="abs eyebrow r r-fade" style="--x:110;--y:200;--d:100ms">{{i:spark}}<span data-dec>ROLE OR DECK SUBJECT · ONE LINE</span></p>
+    <h1 class="abs disp h130" style="--x:104;--y:290;--w:1050"><span data-split data-base="200">Big</span><br><span class="neon glitch" data-split data-base="380">Title</span></h1>
+    <p class="abs t32 r r-up" style="--x:110;--y:610;--w:780;--d:700ms">One promise in one sentence: what this deck shows and why it matters.</p>
+    <div class="abs metaline r r-up" style="--x:110;--y:800;--w:1040;--d:950ms"><span class="pill">{{i:pin}}City, Country</span><span class="pill">{{i:nodes}}Key skill</span><span class="pill"><span class="live"></span>Status</span></div>
+    <div class="portrait hud r r-wipe" style="right:calc(110*var(--s));top:calc(160*var(--s));width:calc(660*var(--s));height:calc(770*var(--s));--d:300ms">
+      <div class="clip"><img class="drift" src="assets/hero.jpg" alt="Hero image"><div class="tint"></div><div class="sweep"></div></div>
+    </div>
+    <span class="badge r r-pop" style="left:calc(1070*var(--s));top:calc(250*var(--s));--d:900ms">{{i:nodes}}A floating fact</span>
+  </div>
+</section>
+
+<!-- statement + three cards -->
+<section class="slide g-base" id="intro" data-label="Intro" data-curve="Coast" data-dur="Sweep 700 ms">
+  <div class="stage">
+    <p class="abs eyebrow" style="--x:110;--y:150">{{i:user}}<span data-dec>01 · INTRO</span></p>
+    <h2 class="abs disp h72" style="--x:104;--y:215;--w:1500"><span data-split data-base="100">A statement that</span> <span class="neon glitch" data-split data-base="300">frames the deck.</span></h2>
+    <p class="abs t26 mute r r-up" style="--x:110;--y:400;--w:1250;--d:500ms">Supporting paragraph with a <span class="markup">marked phrase</span> that gets a colour block wiping in behind it.</p>
+    <div class="abs grid3" style="--x:110;--y:590;--w:1700">
+      <div class="card hud tilt r r-up" style="--d:700ms"><span class="cic">{{i:nodes}}</span><h3>First idea</h3><p>Two lines that explain it in plain words.</p></div>
+      <div class="card hud tilt r r-up" style="--d:820ms"><span class="cic">{{i:plug}}</span><h3>Second idea</h3><p>Two lines that explain it in plain words.</p></div>
+      <div class="card hud tilt r r-up" style="--d:940ms"><span class="cic">{{i:globe}}</span><h3>Third idea</h3><p>Two lines that explain it in plain words.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- timeline -->
+<section class="slide g-soft" id="path" data-label="Timeline" data-curve="Whip" data-dur="Stage 1100 ms">
+  <div class="stage">
+    <p class="abs eyebrow" style="--x:110;--y:150">{{i:route}}<span data-dec>01 · TIMELINE</span></p>
+    <h2 class="abs disp h72" style="--x:104;--y:215;--w:1500"><span data-split data-base="100">From here</span> <span class="neon" data-split data-base="260">to there.</span></h2>
+    <div class="tl" style="top:calc(470*var(--s))"></div>
+    <div class="ev hud tilt r r-up" style="left:calc(110*var(--s));top:calc(560*var(--s));--d:500ms"><span class="evi">{{i:film}}</span><p class="yr">2010 — 2015</p><h3>First stop</h3><p>What happened there.</p></div>
+    <div class="ev hud tilt r r-up" style="left:calc(540*var(--s));top:calc(560*var(--s));--d:660ms"><span class="evi">{{i:layers}}</span><p class="yr">2015 — 2020</p><h3>Second stop</h3><p>What happened there.</p></div>
+    <div class="ev hud tilt r r-up" style="left:calc(970*var(--s));top:calc(560*var(--s));--d:820ms"><span class="evi">{{i:flask}}</span><p class="yr">2020 — 2024</p><h3>Third stop</h3><p>What happened there.</p></div>
+    <div class="ev hud tilt r r-up" style="left:calc(1400*var(--s));top:calc(560*var(--s));--d:980ms"><span class="evi">{{i:spark}}</span><p class="yr">2024 — NOW</p><h3>Now</h3><p>What happens now.</p></div>
+  </div>
+</section>
+
+<!-- interlude: a held still; the next slide (class cover-up) rises over it -->
+<div class="hold" id="case-hold">
+<section class="slide g-ink interlude" id="photo" data-label="Interlude" data-curve="Settle" data-dur="Stage 1100 ms">
+  <div class="bg zoom"><img class="drift" src="assets/interlude.jpg" alt="A wide still that sets the scene"></div>
+  <div class="scrim" style="background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(15,20,25,.6),rgba(15,20,25,.35))"></div>
+  <div class="stage" style="display:grid;place-items:center"><h2 class="disp h110" style="color:#fff;text-align:center"><span data-split data-base="200">A scene</span> <span class="neon" data-split data-base="400">sets the mood.</span></h2></div>
+</section>
+
+<!-- section opener with a looping clip; it covers the interlude from the bottom (both inside the same .hold) -->
+<section class="slide g-base cover-up t-curtain" id="case" data-label="Case study" data-curve="Land" data-dur="Stage 1100 ms" data-rad="0">
+  <div class="bg side"><video src="assets/loop.webm" poster="assets/loop.jpg" muted loop playsinline data-auto></video></div>
+  <div class="stage">
+    <p class="abs eyebrow" style="--x:110;--y:330">{{i:layers}}<span data-dec>02 · CASE STUDY</span></p>
+    <h2 class="abs disp h130" style="--x:104;--y:400;--w:1100"><span data-split data-base="150">Case</span> <span class="neon glitch" data-split data-base="300">name</span></h2>
+    <p class="abs t32 r r-up" style="--x:110;--y:600;--w:780;--d:650ms">What it is in one line. <span class="hl">Where it stands today.</span></p>
+  </div>
+</section>
+</div>
+
+<!-- horizontal stretch: three panels, the scroll slides each in from the right -->
+<div class="hwrap pinned" id="parts" style="height:calc(var(--vh,1vh) * 300)">
+  <span class="stop" style="top:0"></span><span class="stop" style="top:calc(var(--vh,1vh) * 100)"></span><span class="stop" style="top:calc(var(--vh,1vh) * 200)"></span>
+  <div class="hsticky">
+  <section class="slide g-cyan hpanel" id="part1" data-label="Part one" data-curve="Pop" data-dur="Arrive 467 ms">
+    <div class="stage"><p class="abs eyebrow" style="--x:110;--y:150">{{i:grid}}<span>PART 1</span></p>
+      <h2 class="abs disp h110" style="--x:104;--y:300;--w:1200"><span data-split>One</span> <span class="neon" data-split data-base="150">part.</span></h2>
+      <p class="abs t26 r r-up" style="--x:110;--y:560;--w:900;--d:400ms">A short explanation of the first part.</p></div>
+  </section>
+  <section class="slide g-soft hpanel" id="part2" data-label="Part two" data-curve="Pop" data-dur="Arrive 467 ms">
+    <div class="stage"><p class="abs eyebrow" style="--x:110;--y:150">{{i:grid}}<span>PART 2</span></p>
+      <h2 class="abs disp h110" style="--x:104;--y:300;--w:1200"><span data-split>Another</span> <span class="neon" data-split data-base="150">part.</span></h2>
+      <p class="abs t26 r r-up" style="--x:110;--y:560;--w:900;--d:400ms">A short explanation of the second part.</p></div>
+  </section>
+  <section class="slide g-violet hpanel" id="part3" data-label="Part three" data-curve="Pop" data-dur="Arrive 467 ms">
+    <div class="stage"><p class="abs eyebrow" style="--x:110;--y:150">{{i:grid}}<span>PART 3</span></p>
+      <h2 class="abs disp h110" style="--x:104;--y:300;--w:1200"><span data-split>The last</span> <span data-split data-base="150">part.</span></h2>
+      <p class="abs t26 r r-up" style="--x:110;--y:560;--w:900;--d:400ms">A short explanation of the third part.</p></div>
+  </section>
+</div></div>
+
+<!-- film with stats; plays with sound on click -->
+<section class="slide g-base film" id="film" data-label="Film" data-curve="Coast" data-dur="Sweep 700 ms">
+  <div class="stage">
+    <p class="abs eyebrow" style="--x:110;--y:150">{{i:film}}<span data-dec>02 · THE FILM</span></p>
+    <h2 class="abs disp h56" style="--x:104;--y:215;--w:640"><span data-split data-base="100">A heading</span> <span class="neon" data-split data-base="300">for the film.</span></h2>
+    <div class="abs stats" style="--x:110;--y:480;--w:620">
+      <div class="stat hud r r-up" style="--d:500ms"><b><span data-count="20">20</span><em>×</em></b><span>{{i:bolt}}FASTER</span></div>
+      <div class="stat hud r r-up" style="--d:600ms"><b><span data-count="5">5</span><em>×</em></b><span>{{i:target}}CHEAPER</span></div>
+    </div>
+    <div class="media hud r r-wipe" style="--l:790;--t:215;--w:1020;--h:590;--d:250ms">
+      <div class="clip"><video src="assets/film.webm" poster="assets/film.jpg" playsinline preload="metadata"></video></div>
+      <button class="playbtn" type="button"><span><i>{{i:play}}</i>Play the film</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- pinned steps: the scroll picks the step; its clip plays and its bar fills -->
+<section class="slide g-dark pinned" id="steps" data-label="How it works" data-curve="Whip" data-dur="Stage 1100 ms" style="height:calc(var(--vh,1vh) * 300)">
+  <span class="stop" style="top:0"></span><span class="stop" style="top:calc(var(--vh,1vh) * 100)"></span><span class="stop" style="top:calc(var(--vh,1vh) * 200)"></span>
+  <div class="sticky"><div class="stage">
+    <p class="abs eyebrow" style="--x:110;--y:150">{{i:route}}<span>02 · HOW IT WORKS</span></p>
+    <h2 class="abs disp h56" style="--x:104;--y:215;--w:1500"><span data-split>Three steps,</span> <span class="neon" data-split data-base="200">one scroll.</span></h2>
+    <ol class="abs steps" style="--x:110;--y:360;--w:560">
+      <li class="step on"><div class="stext"><span class="sn">1</span><h3>Step one</h3><p>What happens in this step.</p><span class="sbar"><i></i></span></div><div class="smedia"><video src="assets/step1.webm" muted loop playsinline></video></div></li>
+      <li class="step"><div class="stext"><span class="sn">2</span><h3>Step two</h3><p>What happens in this step.</p><span class="sbar"><i></i></span></div><div class="smedia"><video src="assets/step2.webm" muted loop playsinline></video></div></li>
+      <li class="step"><div class="stext"><span class="sn">3</span><h3>Step three</h3><p>What happens in this step.</p><span class="sbar"><i></i></span></div><div class="smedia"><video src="assets/step3.webm" muted loop playsinline></video></div></li>
+    </ol>
+  </div></div>
+</section>
+
+<!-- diagram -->
+<section class="slide g-base" id="system" data-label="System" data-curve="Pop" data-dur="Arrive 467 ms">
+  <div class="stage">
+    <p class="abs eyebrow" style="--x:110;--y:150">{{i:nodes}}<span data-dec>03 · THE SYSTEM</span></p>
+    <h2 class="abs disp h56" style="--x:104;--y:215;--w:1500"><span data-split data-base="100">One input in.</span> <span class="neon" data-split data-base="260">The result out.</span></h2>
+    <p class="abs mono r r-fade" style="--x:110;--y:325;--w:600;--d:900ms">{{i:target}} HOVER A NODE TO FOLLOW ITS LINKS</p>
+    <div class="abs" style="--x:110;--y:380;--w:1700"><svg class="flow" data-flow="example" viewBox="0 0 1700 560" role="img" aria-label="Describe the diagram in one sentence"></svg></div>
+  </div>
+</section>
+
+<!-- scroll marquee: big lines cross the screen with the scroll -->
+<section class="slide g-ink pinned" id="lines" data-label="What you can ask" data-curve="Pop" data-dur="Arrive 467 ms">
+  <span class="stop" style="top:0"></span><span class="stop"></span>
+  <div class="sticky">
+    <div class="smarq"><div class="mtrack" id="mtrack"><p class="mitem">“A first big line.”</p><p class="mitem">“A second big line.”</p><p class="mitem">“A third one.”</p></div></div>
+    <div class="stage"><p class="abs eyebrow" style="--x:110;--y:150">{{i:spark}}<span>03 · IN THEIR WORDS</span></p><div class="abs mbar" style="--x:110;--y:920;--w:300"><i></i><i></i><i></i></div></div>
+  </div>
+</section>
+
+<!-- cards grid with status -->
+<section class="slide g-base" id="results" data-label="Results" data-curve="Pop" data-dur="Arrive 467 ms">
+  <div class="stage">
+    <p class="abs eyebrow" style="--x:110;--y:150">{{i:spark}}<span data-dec>04 · RESULTS</span></p>
+    <h2 class="abs disp h56" style="--x:104;--y:215;--w:1500"><span data-split data-base="100">What came</span> <span class="neon glitch" data-split data-base="260">out of it.</span></h2>
+    <div class="abs grid4" style="--x:110;--y:360;--w:1700">
+      <div class="card hud tilt r r-up" style="--d:300ms"><div class="cardtop"><span class="cic">{{i:film}}</span><span class="st ok">LIVE</span></div><h3>Result one</h3><p>One or two lines.</p></div>
+      <div class="card hud tilt r r-up" style="--d:380ms"><div class="cardtop"><span class="cic">{{i:target}}</span><span class="st ok">LIVE</span></div><h3>Result two</h3><p>One or two lines.</p></div>
+      <div class="card hud tilt r r-up" style="--d:460ms"><div class="cardtop"><span class="cic">{{i:cpu}}</span><span class="st">TESTING</span></div><h3>Result three</h3><p>One or two lines.</p></div>
+      <div class="card hud tilt r r-up" style="--d:540ms"><div class="cardtop"><span class="cic">{{i:code}}</span><span class="st">TESTING</span></div><h3>Result four</h3><p>One or two lines.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- gallery -->
+<section class="slide g-base" id="gallery" data-label="Gallery" data-curve="Coast" data-dur="Sweep 700 ms">
+  <div class="stage">
+    <p class="abs eyebrow" style="--x:110;--y:150">{{i:image}}<span data-dec>04 · GALLERY</span></p>
+    <h2 class="abs disp h56" style="--x:104;--y:215;--w:1500"><span data-split data-base="100">Four frames</span> <span class="neon" data-split data-base="260">from the work.</span></h2>
+    <div class="media hud zoom r r-up" style="--l:110;--t:360;--w:400;--h:520;--d:300ms"><div class="clip"><img src="assets/still1.jpg" alt="Still one" loading="lazy"></div><span class="tag">{{i:film}} LABEL</span></div>
+    <div class="media hud zoom r r-up" style="--l:542;--t:360;--w:400;--h:520;--d:400ms"><div class="clip"><img src="assets/still2.jpg" alt="Still two" loading="lazy"></div><span class="tag">{{i:users}} LABEL</span></div>
+    <div class="media hud zoom r r-up" style="--l:974;--t:360;--w:400;--h:520;--d:500ms"><div class="clip"><img src="assets/still3.jpg" alt="Still three" loading="lazy"></div><span class="tag">{{i:grid}} LABEL</span></div>
+    <div class="media hud zoom r r-up" style="--l:1406;--t:360;--w:400;--h:520;--d:600ms"><div class="clip"><img src="assets/still4.jpg" alt="Still four" loading="lazy"></div><span class="tag">{{i:image}} LABEL</span></div>
+  </div>
+</section>
+
+<!-- chips + endless marquee -->
+<section class="slide g-soft" id="tools" data-label="Tools" data-curve="Pop" data-dur="Arrive 467 ms">
+  <div class="stage">
+    <p class="abs eyebrow" style="--x:110;--y:150">{{i:layers}}<span data-dec>04 · TOOLKIT</span></p>
+    <h2 class="abs disp h56" style="--x:104;--y:215;--w:1500"><span data-split data-base="100">The stack</span> <span class="neon" data-split data-base="200">behind it.</span></h2>
+    <div class="abs chips" style="--x:110;--y:370;--w:1500"><span class="chip hi r r-pop" style="--d:200ms">{{i:nodes}}Key tool</span><span class="chip hi r r-pop" style="--d:240ms">{{i:layers}}Key tool</span><span class="chip r r-pop" style="--d:280ms">{{i:code}}Tool</span><span class="chip r r-pop" style="--d:320ms">{{i:grid}}Tool</span><span class="chip r r-pop" style="--d:360ms">{{i:globe}}Tool</span></div>
+    <div class="abs marq r r-fade" style="--x:0;--y:700;--w:1920;--d:600ms"><div><span class="chip">Partner one</span><span class="chip">Partner two</span><span class="chip">Partner three</span><span class="chip">Partner four</span><span class="chip">Partner five</span><span class="chip">Partner one</span><span class="chip">Partner two</span><span class="chip">Partner three</span><span class="chip">Partner four</span><span class="chip">Partner five</span></div></div>
+  </div>
+</section>
+
+<!-- quote: only a real quote, with permission -->
+<section class="slide g-violet" id="quote" data-label="Quote" data-curve="Settle" data-dur="Sweep 700 ms">
+  <div class="stage">
+    <blockquote class="abs quote" style="--x:110;--y:280;--w:1500"><span data-split data-base="100">A real sentence someone said about the work, kept short.</span></blockquote>
+    <p class="abs mono r r-up" style="--x:110;--y:760;--w:900;--d:900ms;color:#DCD5FF">NAME · ROLE, COMPANY</p>
+  </div>
+</section>
+
+<!-- closing -->
+<section class="slide g-base" id="closing" data-label="Contact" data-curve="Land" data-dur="Stage 1100 ms">
+  <div class="stage">
+    <p class="abs eyebrow" style="--x:110;--y:170">{{i:mail}}<span data-dec>CONTACT</span></p>
+    <h2 class="abs disp h110" style="--x:104;--y:235;--w:1100"><span data-split data-base="100">Let's build</span><br><span class="neon glitch" data-split data-base="260">it together.</span></h2>
+    <div class="abs contact" style="--x:110;--y:540;--w:1060">
+      <a class="cc wide hud tilt r r-up" style="--d:600ms" href="https://example.com" target="_blank" rel="noopener"><span class="cic">{{i:eye}}</span><span><small>FEATURED LINK</small><strong>The one link that matters most</strong></span><span class="go">{{i:arrow}}</span></a>
+      <a class="cc hud tilt r r-up" style="--d:700ms" href="https://example.com" target="_blank" rel="noopener"><span class="cic">{{i:linkedin}}</span><span><small>PROFILE</small><strong>Name</strong></span><span class="go">{{i:arrow}}</span></a>
+      <a class="cc hud tilt r r-up" style="--d:800ms" href="mailto:name@example.com"><span class="cic">{{i:mail}}</span><span><small>EMAIL</small><strong>name@example.com</strong></span><span class="go">{{i:arrow}}</span></a>
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const wide = () => matchMedia('(min-width:900px)').matches;
+  const root = document.documentElement;
+  const setVh = () => root.style.setProperty('--vh', (innerHeight / 100) + 'px');
+  setVh(); addEventListener('resize', setVh);
+  const slides = [...document.querySelectorAll('.slide')];
+  const CURVES = {Land:[.12,.9,.28,1], Pop:[.34,1.45,.64,1], Settle:[.3,0,.1,1], Whip:[.75,0,.05,1], Coast:[.18,.28,0,.9], Surge:[.7,0,.3,1]};
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
+  const bez = (p1x, p1y, p2x, p2y) => t => { let x = t; for (let i = 0; i < 8; i++) { const cx = 3*p1x*x*(1-x)**2 + 3*p2x*x*x*(1-x) + x**3 - t; const d = 3*p1x*(1-x)**2 + 6*(p2x-p1x)*x*(1-x) + 3*(1-p2x)*x*x; if (Math.abs(cx) < 1e-4 || !d) break; x -= cx / d; } return 3*p1y*x*(1-x)**2 + 3*p2y*x*x*(1-x) + x**3; };
+  const tryPlay = v => { const p = v.play(); if (p) p.catch(() => {}); };
+
+  // Headings rise word by word inside masks; [data-chars] titles arrive letter by letter.
+  document.querySelectorAll('[data-split]').forEach(node => {
+    const base = +(node.dataset.base || 0), words = node.textContent.trim().split(/\s+/);
+    node.textContent = '';
+    words.forEach((w, i) => {
+      const o = document.createElement('span'); o.className = 'w';
+      const n = document.createElement('span'); n.className = 'wi'; n.textContent = w;
+      n.style.setProperty('--d', (base + i * 55) + 'ms');
+      o.appendChild(n); node.appendChild(o);
+      if (i < words.length - 1) node.appendChild(document.createTextNode(' '));
+    });
+  });
+  document.querySelectorAll('[data-chars]').forEach(node => {
+    const text = node.textContent, base = +(node.dataset.delay || 0); node.textContent = ''; node.setAttribute('aria-label', text);
+    let k = 0;
+    text.split(/(\s+)/).forEach(part => {
+      if (/^\s+$/.test(part)) { node.appendChild(document.createTextNode(' ')); return; }
+      const word = document.createElement('span'); word.style.whiteSpace = 'nowrap'; word.setAttribute('aria-hidden', 'true');
+      [...part].forEach(c => { const s = document.createElement('span'); s.className = 'ch'; s.textContent = c; s.style.setProperty('--d', (base + k++ * 34) + 'ms'); word.appendChild(s); });
+      node.appendChild(word);
+    });
+  });
+  // Line illustrations draw themselves: each path gets a unit length so one dash can travel along it.
+  document.querySelectorAll('.illo path').forEach(p => { p.setAttribute('pathLength', '1'); p.style.strokeDasharray = '1 1'; });
+
+  // Labels decode from random glyphs and always land on the text (background tabs throttle frames).
+  const GLYPHS = '!<>-_\\/[]{}=+*^?#01';
+  const decode = (n, dur = 520) => {
+    if (reduce || n.dataset.busy) return; n.dataset.busy = 1;
+    const html = n.dataset.html || (n.dataset.html = n.innerHTML), text = n.textContent, start = performance.now();
+    let over = false;
+    const done = () => { if (over) return; over = true; n.innerHTML = html; delete n.dataset.busy; };
+    const tick = t => { if (over) return; const k = Math.min(1, (t - start) / dur), shown = Math.floor(k * text.length);
+      if (k >= 1) return done();
+      n.textContent = text.slice(0, shown) + [...text.slice(shown)].map(c => c === ' ' ? ' ' : GLYPHS[(Math.random() * GLYPHS.length) | 0]).join('');
+      requestAnimationFrame(tick); };
+    requestAnimationFrame(tick); setTimeout(done, dur + 120);
+  };
+  // Numbers count up on the Land curve; type lines type out.
+  const land = bez(...CURVES.Land);
+  const countUp = sec => sec.querySelectorAll('[data-count]').forEach((n, i) => {
+    const to = +n.dataset.count; if (reduce) { n.textContent = to; return; }
+    const t0 = performance.now() + 450 + i * 120, dur = 1100;
+    const tick = now => { const p = Math.min(1, Math.max(0, (now - t0) / dur)); n.textContent = Math.round(to * land(p)); if (p < 1) requestAnimationFrame(tick); };
+    n.textContent = 0; requestAnimationFrame(tick); setTimeout(() => { n.textContent = to; }, 1700 + i * 120);
+  });
+  const typeSeq = sec => {
+    const els = [...sec.querySelectorAll('[data-type]')]; if (reduce || !els.length) return;
+    clearTimeout(sec._tt); els.forEach(e => e.textContent = '');
+    let k = 0, i = 0;
+    const step = () => { const e = els[k]; if (!e) return; const full = e.dataset.type; e.textContent = full.slice(0, ++i);
+      if (i >= full.length) { k++; i = 0; sec._tt = setTimeout(step, 260); } else sec._tt = setTimeout(step, 22); };
+    sec._tt = setTimeout(step, 600);
+  };
+  const untype = sec => { clearTimeout(sec._tt); sec.querySelectorAll('[data-type]').forEach(e => e.textContent = e.dataset.type); };
+  document.querySelectorAll('.stat').forEach(s => s.addEventListener('mouseenter', () => { const b = s.querySelector('b'); if (b) decode(b, 420); }));
+
+  // Flow diagrams: nodes [id, x, y, LABEL, sub, colour] and links [from, to] in a 1700-wide viewBox; a link that goes
+  // back (to the left) curves above. Hover a node to light its path.
+  const C = {cyan:'#00A6C7', violet:'#6D4DFF', hot:'#F0287D', lime:'#7CC417', line:'#C9D2DE'};
+  const FLOWS = {
+    example: {w: 230, nodes: [
+        ['in', 140, 270, 'INPUT', 'brief · files', C.cyan], ['core', 560, 270, 'SYSTEM', 'the engine', C.violet],
+        ['a', 980, 110, 'BRANCH A', 'one path', C.cyan], ['b', 980, 430, 'BRANCH B', 'another path', C.cyan],
+        ['qa', 1360, 270, 'QA', 'checks', C.lime], ['out', 1600, 470, 'OUTPUT', 'delivered', C.hot]],
+      links: [['in','core'],['core','a'],['core','b'],['a','qa'],['b','qa'],['qa','out'],['qa','core']]}
+  };
+  document.querySelectorAll('[data-flow]').forEach(svg => {
+    const key = svg.dataset.flow, F = FLOWS[key]; if (!F) return;
+    const W = F.w || 230, H = 96, pos = {}, nodeEls = {}, linkEls = [];
+    const defs = el('defs', {}, svg), sh = el('filter', {id: 'sh-' + key, x: '-20%', y: '-20%', width: '140%', height: '160%'}, defs);
+    el('feDropShadow', {dx: 0, dy: 6, stdDeviation: 8, 'flood-color': '#101828', 'flood-opacity': .1}, sh);
+    const lines = el('g', {}, svg), nodes = el('g', {}, svg);
+    F.nodes.forEach(([id, x, y]) => pos[id] = [x, y]);
+    F.links.forEach(([a, b], i) => {
+      const [x1, y1] = pos[a], [x2, y2] = pos[b];
+      const sx = x1 + (x2 > x1 ? W / 2 : x2 < x1 ? -W / 2 : 0), ex = x2 + (x2 > x1 ? -W / 2 : x2 < x1 ? W / 2 : 0);
+      const sy = x1 === x2 ? y1 + (y2 > y1 ? H / 2 : -H / 2) : y1, ey = x1 === x2 ? y2 + (y2 > y1 ? -H / 2 : H / 2) : y2;
+      const back = x2 < x1, mx = (sx + ex) / 2;
+      const d = back ? `M${sx} ${sy} C${sx - 120} ${sy - 170} ${ex + 120} ${ey - 170} ${ex} ${ey}` : x1 === x2 ? `M${sx} ${sy} L${ex} ${ey}` : `M${sx} ${sy} C${mx} ${sy} ${mx} ${ey} ${ex} ${ey}`;
+      const p = el('path', {d, class: 'ln', stroke: back ? C.hot : C.line, pathLength: 1, 'stroke-dasharray': '1 1'}, lines);
+      p.style.setProperty('--d', (300 + i * 110) + 'ms'); linkEls.push([a, b, p]);
+      const dot = el('circle', {r: 5, fill: back ? C.hot : C.violet, class: 'pulse'}, lines);
+      el('animateMotion', {dur: (2.4 + (i % 3) * .4) + 's', repeatCount: 'indefinite', path: d, begin: (i * .3) + 's'}, dot);
+    });
+    F.nodes.forEach(([id, x, y, label, sub, color], i) => {
+      const g = el('g', {class: 'nd'}, nodes); g.style.setProperty('--d', (100 + i * 90) + 'ms'); nodeEls[id] = g;
+      el('rect', {class: 'box', x: x - W / 2, y: y - H / 2, width: W, height: H, rx: 16, 'stroke-width': 1.2, filter: `url(#sh-${key})`}, g);
+      el('rect', {x: x - W / 2 + 14, y: y - 30, width: 26, height: 26, rx: 7, fill: color, opacity: .16}, g);
+      el('circle', {cx: x - W / 2 + 27, cy: y - 17, r: 5, fill: color}, g);
+      el('text', {x: x - W / 2 + 50, y: y - 10, 'font-size': 18, 'font-weight': 700}, g).textContent = label;
+      el('text', {x: x - W / 2 + 16, y: y + 26, 'font-size': 15, class: 'sub'}, g).textContent = sub;
+      g.addEventListener('mouseenter', () => { svg.classList.add('focus'); g.classList.add('lit');
+        linkEls.forEach(([a, b, p]) => { if (a === id || b === id) { p.classList.add('lit'); nodeEls[a === id ? b : a].classList.add('lit'); } }); });
+      g.addEventListener('mouseleave', () => { svg.classList.remove('focus'); svg.querySelectorAll('.lit').forEach(n => n.classList.remove('lit')); });
+    });
+  });
+
+  // Pointer: spotlight and lit grid, a ring cursor, cards that tilt toward it.
+  const ring = document.getElementById('ring');
+  if (fine && !reduce) {
+    let px = 0, py = 0, raf = 0;
+    addEventListener('pointermove', e => { px = e.clientX; py = e.clientY;
+      if (!raf) raf = requestAnimationFrame(() => { raf = 0; root.style.setProperty('--mx', px + 'px'); root.style.setProperty('--my', py + 'px'); }); }, {passive: true});
+    document.addEventListener('pointerover', e => ring.classList.toggle('big', !!e.target.closest('a,button,.tilt,.nd,.chip,.stat,.media,.glitch,.pill')));
+    document.querySelectorAll('.tilt').forEach(c => {
+      c.addEventListener('pointermove', e => { const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+        c.style.setProperty('--ry', ((x - .5) * 7).toFixed(2) + 'deg'); c.style.setProperty('--rx', ((.5 - y) * 7).toFixed(2) + 'deg');
+        c.style.setProperty('--px', (x * 100) + '%'); c.style.setProperty('--py', (y * 100) + '%'); });
+      c.addEventListener('pointerleave', () => { c.style.setProperty('--rx', '0deg'); c.style.setProperty('--ry', '0deg'); });
+    });
+  } else ring.remove();
+
+  // Parallax ground: the line layers follow a smoothed scroll value; full-bleed stills drift a little.
+  let target = scrollY, cur = scrollY, running = false;
+  const drift = () => { cur += (target - cur) * .08; root.style.setProperty('--sy', cur.toFixed(1)); if (Math.abs(target - cur) > .5) requestAnimationFrame(drift); else running = false; };
+  root.style.setProperty('--sy', scrollY);
+  const pars = [...document.querySelectorAll('.slide > .bg')].filter(b => !b.querySelector('video') && !b.closest('.interlude'));
+  const updatePar = () => { if (reduce || !wide()) return; pars.forEach(b => { const r = b.parentElement.getBoundingClientRect(); b.style.translate = `0 ${(((r.top + r.height / 2 - innerHeight / 2) / innerHeight) * -40).toFixed(1)}px`; }); };
+
+  // Curve readout in the footer.
+  const curvePath = document.getElementById('curvePath'), curveDot = document.getElementById('curveDot');
+  const setCurve = sec => {
+    const name = sec.dataset.curve, c = CURVES[name]; if (!c) return;
+    document.getElementById('curveName').textContent = name;
+    document.getElementById('curveTime').textContent = sec.dataset.dur ? '· ' + sec.dataset.dur : '';
+    curvePath.setAttribute('d', `M0 24 C${c[0]*40} ${24 - c[1]*24} ${c[2]*40} ${24 - c[3]*24} 40 0`);
+    if (!reduce && curveDot.animate) curveDot.animate([{cx: 0, cy: 24}, {cx: 40, cy: 0}], {duration: 900, easing: `cubic-bezier(${c.join(',')})`, fill: 'forwards'});
+  };
+
+  // Reveal each slide as it enters, replay when it comes back; only visible clips play.
+  if (!reduce) slides.forEach(s => s.classList.add('armed'));
+  const play = s => {
+    if (s.classList.contains('in')) return; s.classList.add('in'); countUp(s); typeSeq(s);
+    s.querySelectorAll('[data-dec]').forEach(n => decode(n));
+    s.querySelectorAll('video[data-auto]').forEach(v => { try { v.currentTime = 0; } catch (e) {} tryPlay(v); });
+  };
+  const reset = s => {
+    s.classList.remove('in'); untype(s); s.querySelectorAll('video[data-auto]').forEach(v => v.pause());
+    if (s.classList.contains('film')) { const v = s.querySelector('.media video'); if (v) { v.pause(); v.controls = false; } s.classList.remove('playing'); }
+  };
+  requestAnimationFrame(() => requestAnimationFrame(() => slides.forEach(s => { const r = s.getBoundingClientRect(); if (r.top < innerHeight * .8 && r.bottom > 0) play(s); })));
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting && (e.intersectionRatio > .28 || e.intersectionRect.height > innerHeight * .35)) play(e.target);
+    else if (!e.isIntersecting) reset(e.target);
+  }), {threshold: [0, .05, .1, .2, .28, .4, .6]});
+  slides.forEach(s => io.observe(s));
+
+  // Films play on click, with sound.
+  const startFilm = s => { const v = s.querySelector('.media video'); s.classList.add('playing'); v.controls = true; tryPlay(v); };
+  document.querySelectorAll('.film').forEach(s => {
+    const b = s.querySelector('.playbtn'), v = s.querySelector('.media video'); if (!b || !v) return;
+    b.addEventListener('click', () => startFilm(s));
+    v.addEventListener('ended', () => { s.classList.remove('playing'); v.controls = false; });
+  });
+
+  // Pinned steps: the scroll position picks the step, its clip plays, its bar fills.
+  const pinnedSteps = [...document.querySelectorAll('.pinned')].filter(p => p.querySelector('.step')).map(p => [p, [...p.querySelectorAll('.step')]]);
+  const updateSteps = () => pinnedSteps.forEach(([p, steps]) => {
+    if (!wide()) { steps.forEach(li => li.classList.add('on')); return; }
+    const r = p.getBoundingClientRect(), prog = Math.min(steps.length - .001, Math.max(0, -r.top / innerHeight + .5)), i = Math.floor(prog);
+    const visible = r.bottom > 0 && r.top < innerHeight;
+    steps.forEach((li, k) => { li.classList.toggle('on', k === i); const bar = li.querySelector('.sbar i'); if (bar) bar.style.setProperty('--p', k < i ? 1 : k > i ? 0 : (prog - i));
+      const v = li.querySelector('video'); if (v) { if (k === i && visible) { if (v.paused) tryPlay(v); } else if (!v.paused) v.pause(); } });
+  });
+
+  // Scroll marquee: the track crosses right to left, two pixels per pixel scrolled, easing after the scroll.
+  const marqs = [...document.querySelectorAll('.pinned')].filter(p => p.querySelector('.mtrack')).map(p => ({p, track: p.querySelector('.mtrack'), items: [...p.querySelectorAll('.mitem')], bars: [...p.querySelectorAll('.mbar i')], stops: [...p.querySelectorAll('.stop')], len: 0, cur: null, tgt: 0, raf: 0}));
+  const RATE = 2;
+  const layoutMarq = () => marqs.forEach(m => {
+    if (!wide()) { m.p.style.height = ''; m.track.style.transform = ''; return; }
+    m.len = (innerWidth + m.track.scrollWidth) / RATE;
+    m.p.style.height = (m.len + innerHeight).toFixed(0) + 'px';
+    if (m.stops[1]) m.stops[1].style.top = m.len.toFixed(0) + 'px';
+  });
+  const drawMarq = m => {
+    m.track.style.transform = `translate3d(${m.cur.toFixed(1)}px,0,0)`;
+    let passed = 0;
+    m.items.forEach((it, k) => { const c = it.offsetLeft + it.offsetWidth / 2, d = Math.min(1, Math.abs(m.cur + c - innerWidth / 2) / (innerWidth * .8));
+      it.style.opacity = (1 - .7 * d).toFixed(3); if (m.cur + c < innerWidth * .62) passed = k + 1; });
+    m.bars.forEach((b, k) => b.classList.toggle('on', k < passed));
+  };
+  const updateMarq = () => marqs.forEach(m => {
+    const raw = -m.p.getBoundingClientRect().top;
+    root.classList.toggle('free', wide() && raw > -1 && raw < m.len + 1);
+    if (!wide()) return;
+    m.tgt = innerWidth - Math.min(m.len, Math.max(0, raw)) * RATE;
+    if (m.cur === null || reduce) { m.cur = m.tgt; drawMarq(m); return; }
+    if (!m.raf) { const step = () => { m.cur += (m.tgt - m.cur) * .12; drawMarq(m); if (Math.abs(m.tgt - m.cur) > .3) m.raf = requestAnimationFrame(step); else m.raf = 0; }; m.raf = requestAnimationFrame(step); }
+  });
+  layoutMarq(); addEventListener('resize', layoutMarq);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { layoutMarq(); onScroll(); });
+
+  // Horizontal stretch: one screen of scroll slides the next panel in from the right; the one underneath dims.
+  const hwraps = [...document.querySelectorAll('.hwrap')].map(w => [w, [...w.querySelectorAll('.hpanel')]]);
+  const updateH = () => hwraps.forEach(([w, panels]) => {
+    if (!wide()) { panels.forEach(pn => { pn.style.transform = ''; pn.style.filter = ''; }); return; }
+    const p = Math.min(panels.length - 1, Math.max(0, -w.getBoundingClientRect().top / innerHeight));
+    const off = panels.map((pn, k) => k === 0 ? 0 : Math.min(1, Math.max(0, k - p)));
+    panels.forEach((pn, k) => { if (k > 0) pn.style.transform = `translateX(${(off[k] * innerWidth).toFixed(1)}px)`;
+      const over = k + 1 < panels.length ? 1 - off[k + 1] : 0; pn.style.filter = over > 0 ? `brightness(${(1 - .15 * over).toFixed(3)})` : ''; });
+  });
+
+  // Interludes: as the next slide rises over the held still, its corner straightens and the still dims.
+  const covers = [...document.querySelectorAll('.cover-up')].map(s => [s, s.previousElementSibling]).filter(([, u]) => u && u.classList.contains('interlude'));
+  const updateCovers = () => {
+    const unit = Math.min(innerWidth, innerHeight * 1.7778) / 1920;
+    covers.forEach(([s, under]) => { const p = Math.min(1, Math.max(0, 1 - s.getBoundingClientRect().top / innerHeight)), rest = (+s.dataset.rad || 0) * unit;
+      s.style.setProperty('--rad', (reduce ? rest : rest + (1 - p) * (158 * unit - rest)).toFixed(1)); under.style.setProperty('--dim', (1 - .5 * p).toFixed(3)); });
+  };
+
+  // Chrome: the menu takes the ink of the slide under it; active section, rail, page number, progress.
+  const chrome = document.getElementById('chrome'), foot = document.getElementById('foot'), rail = document.getElementById('rail'), progress = document.getElementById('progress');
+  const navLinks = [...document.querySelectorAll('#navlist a')];
+  const numbered = slides.filter(s => !s.classList.contains('interlude'));
+  numbered.forEach((s, i) => { const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', `${i + 1}: ${s.dataset.label}`);
+    const tip = document.createElement('span'); tip.textContent = String(i + 1).padStart(2, '0') + ' · ' + s.dataset.label; b.appendChild(tip);
+    b.addEventListener('click', () => s.scrollIntoView({behavior: reduce ? 'auto' : 'smooth'})); rail.appendChild(b); });
+  const dots = [...rail.children];
+  const pageOf = i => { let n = -1; slides.slice(0, i + 1).forEach(s => { if (!s.classList.contains('interlude')) n++; }); return Math.max(0, n); };
+  let current = -1;
+  const setCurrent = i => {
+    if (i === current) return; current = i; const s = slides[i];
+    const ink = getComputedStyle(s).getPropertyValue('--on').trim() || getComputedStyle(root).getPropertyValue('--ink');
+    [chrome, foot, rail].forEach(n => n.style.setProperty('--chrome', ink));
+    chrome.dataset.hide = foot.dataset.hide = (i === 0) ? '1' : '0';
+    navLinks.forEach(a => a.classList.toggle('on', a.dataset.sec.split(' ').includes(s.id)));
+    const pg = pageOf(i); dots.forEach((d, k) => d.classList.toggle('on', k === pg));
+    document.getElementById('pageno').textContent = String(pg + 1).padStart(2, '0') + ' / ' + String(numbered.length).padStart(2, '0');
+    setCurve(s);
+  };
+  const onScroll = () => {
+    target = scrollY; if (!running && !reduce) { running = true; requestAnimationFrame(drift); }
+    updateH();
+    const mid = innerHeight * .5; let idx = 0;
+    slides.forEach((s, i) => { const r = s.getBoundingClientRect(); if (r.top <= mid && r.left <= innerWidth * .5) idx = i; });
+    setCurrent(idx); updateSteps(); updateMarq(); updatePar(); updateCovers();
+    const max = root.scrollHeight - innerHeight;
+    progress.style.transform = `scaleX(${max > 0 ? scrollY / max : 0})`;
+  };
+  addEventListener('scroll', onScroll, {passive: true}); addEventListener('resize', onScroll); onScroll();
+
+  // Presenting: keys step through every slide and every pinned stop; moves into or out of an interlude and between
+  // panels of a horizontal stretch glide slower than the browser's snap (Settle, 1500 / 1100 ms).
+  const posOf = n => (n.classList.contains('interlude') ? n.parentElement : n).getBoundingClientRect().top + scrollY;
+  const stops = () => [...document.querySelectorAll('.slide:not(.pinned):not(.hpanel), .pinned > .stop')]
+    .filter(n => getComputedStyle(n).display !== 'none').map(n => ({n, y: posOf(n)})).sort((a, b) => a.y - b.y);
+  const at = () => { const list = stops(); let k = 0; list.forEach((o, i) => { if (o.y - scrollY <= innerHeight * .4) k = i; }); return [list, k]; };
+  const settle = bez(...CURVES.Settle);
+  let gliding = false;
+  const glideTo = (y, dur) => {
+    const y0 = scrollY, t0 = performance.now(); gliding = true; root.style.scrollSnapType = 'none'; root.style.scrollBehavior = 'auto';
+    const step = now => { const p = Math.min(1, (now - t0) / dur); scrollTo(0, y0 + (y - y0) * settle(p));
+      if (p < 1) requestAnimationFrame(step); else { root.style.scrollSnapType = ''; root.style.scrollBehavior = ''; setTimeout(() => { gliding = false; }, 380); } };
+    requestAnimationFrame(step);
+  };
+  const sideways = (a, b) => a.n.parentElement === b.n.parentElement && a.n.parentElement.classList.contains('hwrap');
+  const soft = (a, b) => !reduce && wide() && a && b && a !== b && (a.n.classList.contains('interlude') || b.n.classList.contains('interlude') || sideways(a, b));
+  const glideFor = (a, b) => glideTo(b.y, sideways(a, b) ? 1100 : 1500);
+  const go = d => { const [list, k] = at(), a = list[k], b = list[Math.max(0, Math.min(list.length - 1, k + d))]; if (!b || a === b) return;
+    if (soft(a, b)) glideFor(a, b); else scrollTo({top: b.y, behavior: reduce ? 'auto' : 'smooth'}); };
+  addEventListener('wheel', e => {
+    if (gliding) { e.preventDefault(); return; }
+    if (Math.abs(e.deltaY) < 4 || e.ctrlKey) return;
+    const [list, k] = at(), a = list[k], b = list[k + Math.sign(e.deltaY)];
+    if (soft(a, b) && Math.abs(a.y - scrollY) < 8) { e.preventDefault(); glideFor(a, b); }
+  }, {passive: false});
+  addEventListener('keydown', e => {
+    if (e.target.closest('input,textarea,[contenteditable]')) return;
+    const s = slides[current];
+    if (e.key === ' ' && s && s.classList.contains('film')) { e.preventDefault(); const v = s.querySelector('.media video'); v.paused ? startFilm(s) : v.pause(); return; }
+    if (gliding && ['ArrowDown','PageDown','ArrowRight','ArrowUp','PageUp','ArrowLeft',' '].includes(e.key)) { e.preventDefault(); return; }
+    if (['ArrowDown','PageDown','ArrowRight'].includes(e.key) || (e.key === ' ' && !e.shiftKey)) { e.preventDefault(); go(1); }
+    else if (['ArrowUp','PageUp','ArrowLeft'].includes(e.key) || (e.key === ' ' && e.shiftKey)) { e.preventDefault(); go(-1); }
+    else if (e.key === 'Home') { e.preventDefault(); scrollTo(0, 0); }
+    else if (e.key === 'End') { e.preventDefault(); scrollTo(0, root.scrollHeight); }
+    else if (e.key === 'f' || e.key === 'F') { try { document.fullscreenElement ? document.exitFullscreen() : root.requestFullscreen(); } catch (err) {} }
+  });
+  if (location.hash) { const t = document.getElementById(location.hash.slice(1)); if (t) setTimeout(() => t.scrollIntoView(), 50); }
+})();
+</script>
+</body>
+</html>

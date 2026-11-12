@@ -16,7 +16,7 @@ Install / update:
      Extensions > Motion DNA) into the user's CEP extensions folder so it also runs from this clone.
   4. If Animation Composer asset packs are installed, indexes them and builds their previews (local only, never in git).
   5. Checks the library files and the tools Claude uses, and prints the steps only the user can do in After Effects.
-  6. Links the repo's Claude skills (motion-dna, video-templates) into ~/.claude/skills, so Claude knows Motion DNA
+  6. Links the repo's Claude skills (motion-dna, video-templates, motion-deck) into ~/.claude/skills, so Claude knows Motion DNA
      in every folder; an update brings the new skills with it, --uninstall removes the links.
   7. Sound kit (MCP add_sound): makes sure Python has Playwright, which renders the sounds in the installed Chrome or
      Edge. Last, like 6: a problem here is a note, never a stop.
@@ -585,7 +585,7 @@ def mcp_local(remove=False):
     return r.returncode == 0
 
 
-SKILLS = ["motion-dna", "video-templates"]   # the repo's Claude skills (.claude/skills/<name>)
+SKILLS = ["motion-dna", "video-templates", "motion-deck"]   # the repo's Claude skills (.claude/skills/<name>)
 
 
 def skills_dir():
