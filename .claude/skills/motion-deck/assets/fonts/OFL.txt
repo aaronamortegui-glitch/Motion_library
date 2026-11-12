@@ -1,9 +1,9 @@
-Fonts in this folder (latin subset, variable weight, from Google Fonts):
-  Unbounded.woff2      Copyright 2022 The Unbounded Project Authors (https://github.com/googlefonts/unbounded)
-  SpaceGrotesk.woff2   Copyright 2020 The Space Grotesk Project Authors (https://github.com/floriankarsten/space-grotesk)
-  JetBrainsMono.woff2  Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
+Fonts in this folder (latin subset, from Google Fonts):
+  InterTight.woff2                 Copyright 2022 The Inter Project Authors (https://github.com/rsms/inter-tight)
+  InstrumentSerif.woff2            Copyright 2022 The Instrument Serif Project Authors (https://github.com/Instrument/instrument-serif)
+  InstrumentSerif-Italic.woff2     same as above
 
-All three are licensed under the SIL Open Font License, Version 1.1, below.
+All are licensed under the SIL Open Font License, Version 1.1, below.
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

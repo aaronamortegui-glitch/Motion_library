@@ -19,8 +19,11 @@ src = SRC.read_text(encoding="utf-8")
 NAME = opt("--out", re.sub(r"\W+", "_", (re.search(r"<title>(.*?)</title>", src) or [None, "Deck"])[1]).strip("_") or "Deck")
 A = HERE / ("assets_lite" if LITE else "assets")
 
-# Fonts: (family, file in fonts/). Swap them for a brand's own WOFF2 files and update --disp/--sans/--mono.
-FONTS = [("Unbounded", "Unbounded.woff2"), ("Space Grotesk", "SpaceGrotesk.woff2"), ("JetBrains Mono", "JetBrainsMono.woff2")]
+# Fonts: (family, file in fonts/, style). Swap them for a brand's own WOFF2 files and update --sans/--serif.
+FONTS = [("Inter Tight", "InterTight.woff2", "normal"), ("Instrument Serif", "InstrumentSerif.woff2", "normal"),
+         ("Instrument Serif", "InstrumentSerif-Italic.woff2", "italic")]
+if (HERE / "fonts" / "fonts.json").exists():   # written by palette.py --pptx / --fonts
+    FONTS = [tuple(f) for f in json.loads((HERE / "fonts" / "fonts.json").read_text(encoding="utf-8"))]
 
 # Line icons, 24px grid, drawn for this kit (currentColor strokes).
 ICONS = {
@@ -65,14 +68,19 @@ def icon(name):
             f'stroke-linejoin="round" aria-hidden="true">{ICONS[name]}</svg>')
 
 fonts = []
-for fam, fn in FONTS:
+for fam, fn, style in FONTS:
     f = HERE / "fonts" / fn
     if f.exists():
-        fonts.append(f'@font-face{{font-family:"{fam}";font-weight:100 900;font-display:swap;'
+        fonts.append(f'@font-face{{font-family:"{fam}";font-style:{style};font-weight:100 900;font-display:swap;'
                      f'src:url(data:font/woff2;base64,{base64.b64encode(f.read_bytes()).decode()}) format("woff2")}}')
     else:
         print("missing font", f)
-out = src.replace("__FONTS__", "\n".join(fonts))
+# The footer mark: wordmark.svg next to the deck (a client's or the agency's own logo, with class="wordmark"),
+# or the deck title as text. The kit ships no logo.
+wm = HERE / "wordmark.svg"
+title = (re.search(r"<title>(.*?)</title>", src) or [None, ""])[1]
+mark = wm.read_text(encoding="utf-8") if wm.exists() else f'<span class="wordmark wordmark-text">{title}</span>'
+out = src.replace("__FONTS__", "\n".join(fonts)).replace("__WORDMARK__", mark)
 out = re.sub(r"\{\{i:(\w+)\}\}", lambda m: icon(m.group(1)), out)
 if not LITE:
     (HERE / "index.html").write_text(out, encoding="utf-8")

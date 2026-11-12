@@ -1,87 +1,79 @@
-# Design: stage, type, themes, slide catalogue, content rules, QA
+# Design: the Motion DNA deck look
 
-## Stage and grid
+Everything here is already in `assets/deck.src.html`; the example slides are the reference for spacing and rhythm.
 
-- Every slide holds a 1920×1080 `.stage` scaled by `--s` (`min(100vw, 100vh·16/9) / 1920`). Position with stage
-  pixels: `.abs` takes `--x --y --w`; media frames take `--l --t --w --h`. Everything is `calc(N * var(--s))`.
-- Margins: content from x 110 to 1810. Eyebrow at y 150, heading at y 215, body from ~y 330, the bottom 120 px is for
-  the footer (page number, deck name). The top 120 px belongs to the menu bar.
-- Columns that work: text 600-640 wide + visual ~1020 wide at x 790; three cards of 540; four cards of 410;
-  four stills of 400 with 32 gaps.
+## Stage
+
+- Each slide holds a 1920×1080 `.stage` scaled by `--s`; position in stage pixels with `.abs` (`--x --y --w`).
+  Margins: x 50 to 1870. Headings at y ~116, body from ~208. The menu sits above y 90, the footer below y 1010.
+- Full-bleed media: `.bg` (with `zoom` for the settle-in and `drift` on the image for a slow push) + `.scrim`
+  (a gradient tuned per slide so text sits on colour) + `.band top|bot` (edge bands in the ground colour).
+
+## Grounds (BRAND TOKENS, set by `palette.py`)
+
+| Class | Default | Text | Use |
+|---|---|---|---|
+| `g-pine` | #0A211F | cloud, accent spark | covers, statements, interludes, pinned stories |
+| `g-sea` | #19546E | cloud, accent spark | diagrams, prompts |
+| `g-leaf` | #2A4E45 | cloud, accent mint | solutions, closings |
+| `g-earth` | #292423 | cloud, accent peach | data, behind the scenes |
+| `g-cloud` | #F7F9F2 | pine | films, galleries, plain content |
+| `g-stone` `g-sky` `g-mint` `g-peach` `g-spark` | light colours | pine | problems, parts of a stretch, benefits |
+
+The menu, dots, footer, logo and progress bar take each ground's ink automatically (the `GROUND` table in the
+script). Rhythm: alternate light and dark; never two identical grounds in a row unless they are one stretch.
 
 ## Type (stage px)
 
 | Class | Size | Use |
 |---|---|---|
-| `.h130` | 130 | Cover name/title, section openers |
-| `.h110` | 110 | Big section titles, closing |
-| `.h72` | 72 | Statement headings |
-| `.h56` | 56 | Slide headings (most slides) |
-| `.t32` | 32 | Lead paragraph on covers/openers |
-| `.t26` | 26 | Supporting paragraph |
-| `.t21` | 21 | Small body next to a visual |
-| `.mono`, `.eyebrow` | 17-19 | Labels, captions, numbering |
+| `.h180` | 180 | statement slides ("We built / Motion DNA.") |
+| `.h160` | 160 serif | cover title (with `data-chars`) |
+| `.h107` | 107 serif italic | column titles, part labels |
+| `.h96` / `.h80` | 96 / 80 | cover subtitle / slide headings |
+| `.t48 .t40 .t37 .t32 .t27 .t24 .t21` | | body sizes; 32 is the default paragraph |
+| `.eyebrow` | 21 caps | small labels above a title |
+| `.serif` | | Instrument Serif in a heading (`<span class="serif" data-split>`) |
+| `.mark m-lav|m-spark|m-mint` | | a serif-italic phrase on a colour block that wipes in |
+| `.hl` | | a heading phrase on a spark block (dark grounds) |
+| `.num` | 88 serif italic | big numbers (with `data-count`) |
 
-Fonts (inlined): **Unbounded** for display, **Space Grotesk** for text, **JetBrains Mono** for labels. A brand deck
-can swap them: put the brand's WOFF2 files in `fonts/`, edit `FONTS` in `build.py` and `--disp/--sans/--mono`.
-Headings: one or two lines, the key words in `.neon` (gradient) or `.hl`. Body copy never under 18 px.
+## Slide catalogue (each one is an example in the template)
 
-## Themes
-
-`<html data-theme="light">` (default) or `"dark"`. Tokens: `--bg --card --soft --line --ink --mute` plus accents
-`--cyan --violet --hot --lime` and the `--neon` gradient. For a client, replace the accents with the brand palette
-and keep contrast ≥ 4.5:1 for text. Light is the default: it reads better on projectors and in email previews.
-Dark decks put content on lifted panels (`--card` a few steps above `--bg`, a visible border), never black on black.
-
-## Chrome
-
-A floating top bar (logo mark + name, section links with icons that highlight with the slide, one call-to-action
-button), a progress line at the very top, a side rail of dots with labels on hover, and a footer with the deck name
-and `NN / NN`. Hide the bar on a full-screen film if it covers the frame.
-
-## Slide catalogue (examples of each in `deck.src.html`)
-
-| Type | Contents | Notes |
+| Example id | Module | Use it for |
 |---|---|---|
-| Cover | eyebrow, big title (name), one-line promise, meta pills, portrait/visual with floating badges | The visual wipes in; badges pop and float |
-| Statement | eyebrow, h72 heading, paragraph, three icon cards | Cards tilt on hover |
-| Timeline | heading, a drawn line, 3-5 stops (icon, years, title, text) | Stops rise in order |
-| Section opener | eyebrow, h130/h110 title, one line, looping clip on the right | `.t-curtain` |
-| Film | heading, short text, 2-4 stats, a 16:9 film frame with a play button, tool pills | Plays with sound on click |
-| Diagram | heading, a hint line, a `FLOWS` diagram | Biggest thing on the slide |
-| Pipeline + stills | heading, a horizontal flow, 3-4 stills with tags | Stills glitch on hover |
-| Cards grid | heading, 4×2 cards with icon and status pill | For services, research, features |
-| Repos / links grid | heading, 4×2 link cards with meta | Arrow appears on hover |
-| Chips + cards | heading, tool chips (highlight the key ones), three cards | |
-| Gallery / mosaic | heading, 4-8 images in a grid, labels | `.zoom` frames |
-| Quote | big quote in `.quote`, attribution | Only real quotes, with permission |
-| Interlude | one full-bleed still or clip, one big line; the next slide covers it | Use 1-2 per deck, at chapter breaks |
-| Horizontal stretch | 2-4 panels on different grounds that slide in from the right | Parts of one idea (library, brand, agent) |
-| Pinned steps | numbered steps on the left, the clip of the active step on the right | A process told by scrolling |
-| Scroll marquee | big quoted lines crossing the screen with the scroll | Prompts, testimonials, claims |
+| `cover` | photo cover, `data-chars` title, subtitle, hint, people with photos | first slide |
+| `problem` | three columns: line illustration (`.illo`), serif title, text | problems, pillars |
+| `solution` | full-bleed photo, scrim, eyebrow, `.h180` statement, definition with `.mark` | the answer, the product |
+| `office` + `parts` | interlude (`.hold` + `.interlude`) covered by a horizontal stretch of three panels | chapter break + three parts of one idea |
+| `library` `brand` `agent` | `.hpanel` with a phone-shaped `.panel` clip, part label, marked text | features, modules |
+| `flow` | pinned workflow: numbered steps, bars, the active step's clip | a process told by scrolling |
+| `ask` | scroll marquee of big prompts with chips | prompts, testimonials, claims |
+| `studio` + `behind` | interlude covered by a slide with the style chart (`#chart`) | data, research |
+| `fed` | four-column numbers (`.fedgrid`, `data-count`) | what went in, key figures |
+| `roof` | pinned hub (`#hub`): spokes, ring, new nodes in three scroll steps | ecosystems, integrations |
+| `film` | a `.frame` with a play button; plays with sound | the main video |
+| `system` | live diagram (`data-flow`, `FLOWS` in the script) | any system or pipeline |
+| `why` | photo with scrim, list of advantages with icons | benefits |
+| `next` | closing over a looping video | last slide |
 
-Grounds per slide: `g-base` (theme), `g-soft`, `g-cyan`, `g-violet`, `g-dark`, `g-ink`. The menu, rail and footer
-take the slide's ink automatically. Alternate grounds to give the deck rhythm (a coloured ground every 3-4 slides).
-| Closing / contact | big line, contact cards (featured one spans two columns), portrait | Last slide always |
+Contact links: `.links` (two columns of underlined links with an arrow) on the closing slide.
 
 ## Content rules (from client reviews)
 
-1. The source deck is the master: same text, order and slide count. Changes go into the source first; one-off
-   HTML-only changes are fine when asked, and you say so.
-2. No invented explanations, captions, footers or guideline text.
+1. The source deck is the master: same text, order and slide count; HTML-only changes only when asked, and say so.
+2. No invented explanations, captions or footer guides.
 3. Inputs and outputs on separate slides.
-4. A diagram that matters takes most of the slide; supporting lists go under the box they describe.
+4. A diagram that matters takes most of the slide.
 5. A closing slide ends the deck.
-6. Figures quoted from a film or a third party are labelled as such.
-7. Personal data: an email and public profiles are fine on a personal deck; never a phone number unless asked.
+6. Figures from a film or a third party are labelled; an email and public profiles are fine on a personal deck,
+   a phone number only when asked.
 
-## QA (before handing over)
+## QA
 
-- Open `index.html` (the build writes it next to the single file) through a local server or by double click.
-- At 1600×900 step through every slide after its entrance (~2.5 s): nothing cut, nothing over the footer or under
-  the menu bar, headings on at most two lines.
-- Run an overlap check in the console: force every slide `.in`, then compare the bounding boxes of the top-level
-  blocks of each stage and of each mask against its word's ink (see `assets/qa_snippet.js`).
-- Check at a phone width (390 px): the menu collapses, nothing scrolls sideways.
-- Hover one card, one image, one diagram node; play each film for a second; read the console for errors.
-- Check the single file has no `assets/` references left and report its size (full and lite).
+- At 1600×900 step through every slide and every pinned stop with the arrow keys; wait ~2.5 s on each.
+- Nothing cut, nothing over the footer or under the menu, headings on at most two lines; new fonts change widths,
+  so check every heading after `palette.py --fonts`.
+- Run `qa_snippet.js` in the console; check a phone width (390 px): the stage becomes a reading column.
+- Hover the diagram, play each film for a second, read the console for errors.
+- The single file has no `assets/` references left; report full and lite sizes.

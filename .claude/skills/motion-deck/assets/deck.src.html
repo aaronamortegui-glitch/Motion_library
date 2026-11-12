@@ -1,575 +1,802 @@
-<!doctype html>
-<html lang="en" data-theme="light">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>__TITLE__</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>__TITLE__</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 40 40%27%3E%3Crect width=%2740%27 height=%2740%27 rx=%279%27 fill=%27%230A211F%27/%3E%3Ccircle cx=%2720%27 cy=%2720%27 r=%278%27 fill=%27%23D8FF85%27/%3E%3C/svg%3E"></head><body>
+
+<meta name="claude:viewport-fit-sides" content="cover">
+
 <style>
-/* Motion Deck engine. A 1920x1080 stage scaled by --s, one slide per screen, every entrance on the Motion DNA easing
-   tokens. Keep this <style> and the <script> as they are; write your slides between <main> and </main>.
-   Slide types shown below: cover, statement, timeline, interlude + cover-up, horizontal stretch, section opener,
-   film, pinned steps, diagram, scroll marquee, cards grid, chips, gallery, count-up numbers, quote, closing. */
+/* Motion Deck engine, built on the Motion DNA deck (Superside Deck 2.0 grounds, Inter Tight + Instrument Serif).
+   Keep the CSS and the script; replace the slides between <main> and </main>. The example slides show every module:
+   photo cover with people, illustrated three columns, full-bleed statement, interlude + cover-up, horizontal stretch
+   (three panels), pinned workflow with clips, scroll marquee of prompts, chart, what-we-fed-it numbers, hub diagram,
+   film, live diagram, why-it-matters list, closing over video. Colours and fonts come from the BRAND TOKENS block. */
 __FONTS__
+
+/* Layout: twelve slides on Superside Deck 2.0 grounds. On wide screens each slide holds a 1920×1080 stage scaled by --s (one Figma pixel),
+   so positions copy the Figma deck; two pinned scroll stories step through their states. Every entrance runs on Motion DNA's own curves. */
+/* BRAND TOKENS — palette.py rewrites this block from a deck's PPTX theme, images or a preset.
+   The ten grounds keep their Deck 2.0 names; map a brand's colours onto them (dark grounds: pine, sea, leaf, earth;
+   light grounds: cloud, stone, sky, mint, peach, spark, lav). --sans is the text face, --serif the accent face. */
 :root{
-  --disp:"Unbounded","Arial Black",sans-serif; --sans:"Space Grotesk","Helvetica Neue",Arial,sans-serif; --mono:"JetBrains Mono",Consolas,monospace;
-  /* Motion DNA easing tokens (cubic-bezier) and durations */
-  --land:cubic-bezier(.12,.9,.28,1); --pop:cubic-bezier(.34,1.45,.64,1); --settle:cubic-bezier(.3,0,.1,1);
-  --whip:cubic-bezier(.75,0,.05,1); --surge:cubic-bezier(.7,0,.3,1); --coast:cubic-bezier(.18,.28,0,.9); --ramp:cubic-bezier(.87,0,.13,1);
-  --tick:133ms; --glide:300ms; --arrive:467ms; --sweep:700ms; --stage:1100ms;
-  --gut:max(16px, env(safe-area-inset-left, 0px));
-  --s:calc(min(100vw, var(--vh,1vh) * 177.78) / 1920);
-  --sy:0; --mx:-999px; --my:-999px;
-  /* accents: replace with a brand palette, keep text contrast >= 4.5:1 */
-  --cyan:#00A6C7; --violet:#6D4DFF; --hot:#F0287D; --lime:#7CC417;
-  --neon:linear-gradient(90deg,#00C2E8,#6D4DFF 55%,#F0287D);
+  --pine:#0A211F; --leaf:#2A4E45; --cloud:#F7F9F2; --spark:#D8FF85; --mint:#8DFDBA;
+  --stone:#E6D3B0; --sky:#A1D4FF; --sea:#19546E; --earth:#292423; --peach:#FF9595; --lav:#FFAFED;
+  --sans:"Inter Tight","Helvetica Neue",Arial,sans-serif;
+  --serif:"Instrument Serif","Times New Roman",Georgia,serif;
 }
-html[data-theme="light"]{--bg:#FAFBFD; --card:#FFFFFF; --soft:#F2F5F9; --line:#E2E7EE; --ink:#0F1419; --mute:#5D6877; --shadow:0 1px 2px rgba(16,24,40,.05),0 10px 30px -12px rgba(16,24,40,.14); --gl:.07; color-scheme:light}
-html[data-theme="dark"]{--bg:#0B1018; --card:#151C27; --soft:#1C2533; --line:#2A3445; --ink:#EEF2F6; --mute:#A2ADBB; --shadow:0 1px 2px rgba(0,0,0,.3),0 14px 34px -14px rgba(0,0,0,.6); --gl:.12; color-scheme:dark}
+/* END BRAND TOKENS */
+:root{
+  /* Motion DNA easing tokens (cubic-bezier) */
+  --land:cubic-bezier(.12,.9,.28,1); --pop:cubic-bezier(.34,1.45,.64,1); --settle:cubic-bezier(.3,0,.1,1);
+  --whip:cubic-bezier(.75,0,.05,1); --surge:cubic-bezier(.7,0,.3,1); --coast:cubic-bezier(.18,.28,0,.9);
+  /* Motion DNA duration tokens */
+  --glide:300ms; --arrive:467ms; --sweep:700ms; --stage:1100ms;
+  --gut:max(16px, env(safe-area-inset-left, 0px)); --gutR:max(16px, env(safe-area-inset-right, 0px));
+  --s:calc(min(100vw, var(--vh,1vh) * 177.78) / 1920);
+  --ground:var(--pine);
+  color-scheme:light;
+}
 *,*::before,*::after{box-sizing:border-box}
-html{scroll-behavior:smooth;background:var(--bg)}
+html{scroll-behavior:smooth;background:var(--pine)}
 @media (min-width:900px) and (min-height:500px){html{scroll-snap-type:y mandatory}}
-html.free{scroll-snap-type:none}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:400;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-::selection{background:var(--cyan);color:#fff}
-h1,h2,h3,p,ul,ol,figure,blockquote{margin:0}
-img,video{display:block}
-a{color:inherit}
-.ic{width:1.1em;height:1.1em;flex:none;vertical-align:-.18em}
+body{margin:0;background:var(--pine);color:var(--cloud);font-family:var(--sans);font-weight:500;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--ground);transition:background var(--sweep) var(--settle)}
+::selection{background:var(--spark);color:var(--pine)}
+h1,h2,h3,p,ul,ol{margin:0}
 
-/* ---------- grounds: a slide can take its own colour; the chrome takes the slide's ink ---------- */
-.slide{--on:var(--ink)}
-.g-base{background:transparent;color:var(--ink)}
-.g-soft{background:var(--soft);color:var(--ink)}
-.g-dark{background:#0E1420;color:#EEF2F6;--on:#EEF2F6;--mute:#A2ADBB;--card:#171F2C;--line:#2B3546}
-.g-violet{background:#5B3BF0;color:#fff;--on:#fff;--mute:#DCD5FF;--card:#6B4EF5;--line:#8770FA}
-.g-cyan{background:#DDF6FB;color:#0F1419;--on:#0F1419}
-.g-ink{background:#0F1419;color:#fff;--on:#fff;--mute:#A9B3C1;--card:#1A222D;--line:#2D3845}
-
-/* ---------- the ground: line layers that drift with the scroll, a grid lit under the pointer ---------- */
-.ground{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.ground i{position:absolute;inset:-10%;display:block}
-.g-glow{background:radial-gradient(50% 45% at 85% 5%, rgba(109,77,255,var(--gl)), transparent 70%),radial-gradient(45% 40% at 5% 95%, rgba(0,194,232,var(--gl)), transparent 70%)}
-.g-cols{background:repeating-linear-gradient(90deg, transparent 0 119px, rgba(0,166,199,.06) 119px 120px)}
-.g-rows{background:repeating-linear-gradient(180deg, transparent 0 119px, rgba(109,77,255,.035) 119px 120px);background-position:0 calc(var(--sy) * -.04px)}
-.g-rain{background:linear-gradient(180deg, transparent, rgba(0,166,199,.55) 50%, transparent) 16% 0/2px 260px repeat-y,
-   linear-gradient(180deg, transparent, rgba(109,77,255,.45) 50%, transparent) 61% 0/2px 340px repeat-y,
-   linear-gradient(180deg, transparent, rgba(240,40,125,.35) 50%, transparent) 89% 0/2px 200px repeat-y;
-   background-position:16% calc(30% - var(--sy) * .6px), 61% calc(80% - var(--sy) * .45px), 89% calc(10% - var(--sy) * .75px)}
-.g-floor{inset:auto -40% -32% -40%;height:62%;transform:perspective(600px) rotateX(72deg);transform-origin:50% 0;opacity:.35;
-   background:repeating-linear-gradient(90deg, rgba(109,77,255,.16) 0 1px, transparent 1px 90px),repeating-linear-gradient(180deg, rgba(109,77,255,.16) 0 1px, transparent 1px 90px);
-   background-position:0 calc(var(--sy) * .5px);-webkit-mask-image:linear-gradient(180deg, transparent, #000 70%);mask-image:linear-gradient(180deg, transparent, #000 70%)}
-.g-hot{inset:0;background:repeating-linear-gradient(90deg, rgba(0,166,199,.35) 0 1px, transparent 1px 30px),repeating-linear-gradient(180deg, rgba(0,166,199,.35) 0 1px, transparent 1px 30px);
-   -webkit-mask-image:radial-gradient(220px 220px at var(--mx) var(--my), #000, transparent 75%);mask-image:radial-gradient(220px 220px at var(--mx) var(--my), #000, transparent 75%)}
-.spot{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(420px 420px at var(--mx) var(--my), rgba(0,194,232,.08), transparent 70%)}
-
-/* ---------- slides and the 16:9 stage ---------- */
-.slide{position:relative;z-index:1;height:100vh;height:calc(var(--vh,1vh) * 100);scroll-snap-align:start;overflow:hidden}
+/* ---------- slides, grounds and the 16:9 stage ---------- */
+.slide{position:relative;height:100vh;height:calc(var(--vh,1vh) * 100);scroll-snap-align:start;overflow:hidden}
 .stage{position:absolute;left:50%;top:50%;width:calc(1920 * var(--s));height:calc(1080 * var(--s));translate:-50% -50%;z-index:3}
 .abs{position:absolute;left:calc(var(--x) * var(--s));top:calc(var(--y) * var(--s));width:calc(var(--w) * var(--s))}
-/* full-bleed media: a scrim always sits between pixels and text */
-.bg{position:absolute;inset:0;z-index:1;overflow:hidden}
-.bg img,.bg video{width:100%;height:100%;object-fit:cover}
-.scrim{position:absolute;inset:0;z-index:2;pointer-events:none}
-/* section openers: the clip fills the right side and fades into the ground on the left */
-.bg.side{left:42%;background:#000}
-.bg.side::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg, var(--bg) 0, color-mix(in srgb, var(--bg) 80%, transparent) 14%, transparent 40%)}
-.in .drift{animation:drift 16s var(--settle) 1.6s infinite alternate}
-@keyframes drift{from{transform:scale(1)}to{transform:scale(1.035)}}
+.g-cloud{background:var(--cloud);color:var(--pine);--accent:var(--pine);--rule:var(--pine)}
+.g-stone{background:var(--stone);color:var(--pine);--accent:var(--pine);--rule:var(--pine)}
+.g-sky{background:var(--sky);color:var(--pine);--accent:var(--pine);--rule:var(--pine)}
+.g-mint{background:var(--mint);color:var(--pine);--accent:var(--pine);--rule:var(--pine)}
+.g-peach{background:var(--peach);color:var(--pine);--accent:var(--pine);--rule:var(--pine)}
+.g-spark{background:var(--spark);color:var(--pine);--accent:var(--pine);--rule:var(--pine)}
+.g-pine{background:var(--pine);color:var(--cloud);--accent:var(--spark);--rule:var(--cloud)}
+.g-sea{background:var(--sea);color:var(--cloud);--accent:var(--spark);--rule:var(--cloud)}
+.g-leaf{background:var(--leaf);color:var(--cloud);--accent:var(--mint);--rule:var(--cloud)}
+.g-earth{background:var(--earth);color:var(--cloud);--accent:var(--peach);--rule:var(--cloud)}
+.g-pine{--gcol:var(--pine)} .g-earth{--gcol:var(--earth)} .g-sea{--gcol:var(--sea)} .g-leaf{--gcol:var(--leaf)} .g-sky{--gcol:var(--sky)}
 
-/* ---------- chrome: floating menu bar, progress, side rail, footer with the curve readout ---------- */
-.chrome{position:fixed;left:0;right:0;top:0;z-index:30;pointer-events:none;padding-top:calc(26 * var(--s));color:var(--chrome,var(--ink))}
-.chrome .row{width:calc(1920 * var(--s));margin-inline:auto;padding-inline:max(var(--gut), calc(64 * var(--s)));display:flex;align-items:center;gap:calc(18 * var(--s))}
-.mark{pointer-events:auto;display:flex;align-items:center;gap:calc(12 * var(--s));text-decoration:none;font:700 max(.78rem, calc(20 * var(--s)))/1 var(--disp);letter-spacing:.02em;transition:color var(--sweep) var(--settle)}
-.mark i{width:max(28px, calc(44 * var(--s)));height:max(28px, calc(44 * var(--s)));border-radius:calc(12 * var(--s));background:var(--neon);display:grid;place-items:center;color:#fff;font-style:normal;font-size:.8em;box-shadow:0 6px 18px -6px rgba(109,77,255,.6)}
-.navbar{pointer-events:auto;margin-inline:auto;display:flex;gap:4px;list-style:none;padding:5px;background:rgba(255,255,255,.86);backdrop-filter:blur(14px);border:1px solid rgba(15,20,25,.08);border-radius:999px;box-shadow:0 1px 2px rgba(16,24,40,.05),0 10px 30px -12px rgba(16,24,40,.18)}
-.navbar a{position:relative;display:flex;align-items:center;gap:8px;text-decoration:none;font:500 max(.72rem, calc(18 * var(--s)))/1 var(--sans);color:#5D6877;padding:max(8px, calc(12 * var(--s))) max(12px, calc(20 * var(--s)));border-radius:999px;transition:color var(--glide) var(--settle),background var(--glide) var(--settle)}
-.navbar a:hover{color:#0F1419;background:#F2F5F9}
-.navbar a.on{color:#0F1419;background:#EAF8FC}
-.navbar a.on .ic{color:var(--cyan)}
-.navbar a::after{content:"";position:absolute;left:22%;right:22%;bottom:4px;height:2px;border-radius:2px;background:var(--neon);transform:scaleX(0);transition:transform var(--arrive) var(--land)}
-.navbar a.on::after{transform:scaleX(1)}
-.cta{pointer-events:auto;display:flex;align-items:center;gap:10px;text-decoration:none;font:500 max(.72rem, calc(18 * var(--s)))/1 var(--sans);color:#fff;background:#0F1419;padding:max(10px, calc(14 * var(--s))) max(14px, calc(22 * var(--s)));border-radius:999px;position:relative;isolation:isolate;transition:transform var(--glide) var(--pop)}
-.cta::before{content:"";position:absolute;inset:-2px;border-radius:inherit;background:var(--neon);z-index:-1;opacity:0;transition:opacity var(--glide)}
-.cta:hover{transform:translateY(-2px)}.cta:hover::before{opacity:1}
-.live{width:8px;height:8px;border-radius:50%;background:var(--lime);animation:ping 2.4s ease-in-out infinite}
-@keyframes ping{0%,100%{box-shadow:0 0 0 3px rgba(124,196,23,.25)}50%{box-shadow:0 0 0 7px rgba(124,196,23,0)}}
-.chrome[data-hide="1"] .navbar{opacity:0;transform:translateY(-8px);visibility:hidden;transition:opacity var(--arrive) var(--settle),transform var(--arrive) var(--land),visibility 0s linear var(--arrive)}
-.navbar{transition:opacity var(--arrive) var(--settle),transform var(--arrive) var(--land)}
-.progress{position:fixed;left:0;top:0;height:3px;width:100%;transform-origin:left;transform:scaleX(0);background:var(--neon);z-index:31}
-.foot{position:fixed;left:0;right:0;bottom:0;z-index:30;pointer-events:none;color:var(--chrome,var(--ink))}
-.foot .row{width:calc(1920 * var(--s));margin-inline:auto;padding:0 max(var(--gut), calc(64 * var(--s))) calc(28 * var(--s));display:flex;gap:16px;align-items:center;font:400 max(.64rem, calc(16 * var(--s)))/1 var(--mono);letter-spacing:.06em;transition:color var(--sweep) var(--settle)}
-.foot .name{opacity:.75}
+/* Full-bleed photographs: scrims and edge bands keep every line of text and chrome off bare pixels. */
+.bg{position:absolute;inset:0;z-index:1;overflow:hidden}
+.bg img,.bg video{width:100%;height:100%;object-fit:cover;display:block}
+.scrim{position:absolute;inset:0;z-index:2;pointer-events:none}
+.band{position:absolute;left:0;right:0;z-index:2;pointer-events:none;height:calc(150 * var(--s))}
+.band.top{top:0;background:linear-gradient(color-mix(in srgb, var(--gcol) 92%, transparent),color-mix(in srgb, var(--gcol) 0%, transparent))}
+.band.bot{bottom:0;background:linear-gradient(color-mix(in srgb, var(--gcol) 0%, transparent),color-mix(in srgb, var(--gcol) 85%, transparent))}
+
+/* ---------- chrome ---------- */
+.chrome,.foot{position:fixed;left:0;right:0;z-index:20;pointer-events:none;color:var(--chrome,var(--pine));transition:color var(--sweep) var(--settle)}
+.chrome{top:0;padding-top:env(safe-area-inset-top,0px)}
+.foot{bottom:0;padding-bottom:env(safe-area-inset-bottom,0px)}
+.chrome .row,.foot .row{width:calc(1920 * var(--s));margin-inline:auto;padding-inline:max(var(--gut), calc(50 * var(--s)));display:flex;gap:16px}
+/* the menu spans the bar and stops where the footer's right edge does, clear of the stacked tabs */
+.chrome .row{padding-top:calc(46 * var(--s));padding-right:max(var(--gutR), calc(150 * var(--s)));align-items:flex-start}
+/* the footer's right edge sits in from the frame so the page number clears the stacked tabs of the part slides */
+.foot .row{padding-right:max(var(--gutR), calc(150 * var(--s)));padding-bottom:calc(30 * var(--s));align-items:center;font-size:max(.72rem, calc(21 * var(--s)))}
+.navlist{display:flex;justify-content:space-between;flex:1;margin:0;list-style:none;padding:0;pointer-events:auto;transition:opacity var(--arrive) var(--settle),transform var(--arrive) var(--land)}
+.navlist a{color:inherit;text-decoration:none;font-size:max(.72rem, calc(21 * var(--s)));line-height:1;opacity:.72;position:relative;padding-bottom:6px;display:inline-block;transition:opacity var(--glide) var(--settle)}
+.navlist a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform var(--arrive) var(--land)}
+.navlist a:hover,.navlist a.on{opacity:1;font-weight:600}
+.navlist a.on::after{transform:scaleX(1)}
+.navlist a:focus-visible,.dots button:focus-visible,.present:focus-visible{outline:2px solid currentColor;outline-offset:4px;border-radius:4px}
+.wordmark{width:max(84px, calc(132 * var(--s)));height:auto;flex:none;display:block;margin-right:calc(8 * var(--s));transition:opacity var(--arrive) var(--settle),transform var(--arrive) var(--land),width var(--arrive) var(--settle),margin var(--arrive) var(--settle)}
+.wordmark path{fill:var(--logo,currentColor);transition:fill var(--sweep) var(--settle)}
+.wordmark-text{width:auto;font-weight:600;font-size:max(.8rem, calc(24 * var(--s)));letter-spacing:-.01em;white-space:nowrap;color:var(--logo,currentColor)}
+/* Hidden on the cover and closing: starts hidden so it never flashes on load, and leaves the page once faded. */
+.navlist,.wordmark{visibility:visible}
+.chrome[data-hide="1"] .navlist{opacity:0;transform:translateY(-8px);visibility:hidden;transition:opacity var(--arrive) var(--settle),transform var(--arrive) var(--land),visibility 0s linear var(--arrive)}
+.foot[data-hide="1"] .wordmark{opacity:0;transform:translateY(8px);width:0;margin-right:0;visibility:hidden;transition:opacity var(--arrive) var(--settle),transform var(--arrive) var(--land),visibility 0s linear var(--arrive)}
+.present{pointer-events:auto;font:inherit;color:inherit;background:none;border:1px solid currentColor;border-radius:999px;padding:.5em 1em;cursor:pointer;opacity:.8;transition:opacity var(--glide)}
+.present:hover{opacity:1}
 .curve{display:flex;align-items:center;gap:.6em;opacity:.75;white-space:nowrap;margin-left:auto}
 .curve svg{width:2.2em;height:1.3em;overflow:visible}
 .curve svg path{fill:none;stroke:currentColor;stroke-width:1.6}
 .curve svg circle{fill:currentColor}
-.pageno{background:#fff;color:#0F1419;border:1px solid rgba(15,20,25,.08);border-radius:999px;padding:7px 12px;font-variant-numeric:tabular-nums}
-.rail{position:fixed;right:max(12px, calc(26 * var(--s)));top:50%;transform:translateY(-50%);z-index:30;display:flex;flex-direction:column;gap:9px;color:var(--chrome,var(--ink))}
-.rail button{position:relative;width:8px;height:8px;border-radius:999px;border:0;padding:0;background:currentColor;opacity:.3;cursor:pointer;transition:height var(--arrive) var(--pop),opacity var(--glide)}
-.rail button.on{height:24px;opacity:1;background:var(--neon)}
-.rail button span{position:absolute;right:20px;top:50%;transform:translate(6px,-50%);white-space:nowrap;font:400 12px/1 var(--mono);color:#0F1419;background:#fff;border:1px solid rgba(15,20,25,.08);border-radius:999px;padding:6px 10px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity var(--glide),transform var(--glide) var(--land)}
-.rail button:hover{opacity:1}.rail button:hover span{opacity:1;transform:translate(0,-50%)}
+.pageno{margin-left:calc(14 * var(--s));font-variant-numeric:tabular-nums}
+.progress{position:fixed;left:0;top:0;height:3px;width:100%;transform-origin:left;transform:scaleX(0);background:var(--bar,var(--spark));z-index:31;transition:background var(--sweep) var(--settle)}
+.dots{position:fixed;right:calc(var(--gutR) - 4px);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:9px;z-index:20;color:var(--chrome,var(--pine))}
+.dots button{width:7px;height:7px;border-radius:999px;border:0;padding:0;background:currentColor;opacity:.3;cursor:pointer;transition:height var(--arrive) var(--pop),opacity var(--glide)}
+.dots button.on{height:24px;opacity:1}
 
-/* ---------- type, in stage pixels ---------- */
-.disp{font-family:var(--disp);font-weight:700;letter-spacing:-.02em}
-.h130{font-size:calc(130 * var(--s));line-height:.98}
-.h110{font-size:calc(110 * var(--s));line-height:1}
-.h72{font-size:calc(72 * var(--s));line-height:1.06}
-.h56{font-size:calc(56 * var(--s));line-height:1.1}
-.t32{font-size:calc(32 * var(--s));line-height:1.35}
-.t26{font-size:calc(26 * var(--s));line-height:1.45}
-.t21{font-size:calc(21 * var(--s));line-height:1.5}
-.mono{font-family:var(--mono);font-size:calc(18 * var(--s));letter-spacing:.06em;color:var(--mute)}
-.mute{color:var(--mute)}
-.eyebrow{display:inline-flex;align-items:center;gap:calc(10 * var(--s));font:400 calc(18 * var(--s))/1 var(--mono);letter-spacing:.08em;color:var(--violet);background:color-mix(in srgb, var(--violet) 10%, transparent);border:1px solid color-mix(in srgb, var(--violet) 22%, transparent);border-radius:999px;padding:calc(10 * var(--s)) calc(16 * var(--s));width:auto!important}
-.g-dark .eyebrow,.g-violet .eyebrow,.g-ink .eyebrow{color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.08)}
-.neon{color:var(--violet)}
-.neon .wi,.neon.solid{background:var(--neon);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hl{color:var(--cyan);font-weight:500}
-/* a phrase marked with a colour block that wipes in with the slide */
-.markup{padding:0 .14em;margin:0 -.04em;white-space:nowrap;-webkit-box-decoration-break:clone;box-decoration-break:clone;background:linear-gradient(var(--mk,#DDF6FB),var(--mk,#DDF6FB)) no-repeat 0 0/100% 100%;transition:background-size var(--sweep) var(--whip) var(--d,400ms)}
-.armed:not(.in) .markup{background-size:0% 100%}
-.glitch{position:relative;display:inline-block}
-.glitch:hover{animation:jitter .38s steps(2) 1}
-@keyframes jitter{0%{filter:drop-shadow(3px 0 rgba(240,40,125,.6)) drop-shadow(-3px 0 rgba(0,194,232,.6));transform:translateX(1px)}50%{filter:drop-shadow(-4px 0 rgba(240,40,125,.6)) drop-shadow(4px 0 rgba(0,194,232,.6));transform:translateX(-2px) skewX(-4deg)}100%{filter:none;transform:none}}
+/* ---------- type, sized in Figma pixels ---------- */
+.serif{font-family:var(--serif);font-weight:400}
+.it{font-style:italic}
+.semi{font-weight:600}
+.h80{font-size:calc(80 * var(--s));line-height:1;letter-spacing:-.02em}
+.h96{font-size:calc(96 * var(--s));line-height:1;letter-spacing:-.02em;font-weight:600}
+.h107{font-family:var(--serif);font-style:italic;font-weight:400;font-size:calc(107 * var(--s));line-height:1}
+.h160{font-family:var(--serif);font-weight:400;font-size:calc(160 * var(--s));line-height:.95;letter-spacing:-.01em}
+.h180{font-size:calc(180 * var(--s));line-height:.95;letter-spacing:-.025em}
+.t48{font-size:calc(48 * var(--s));line-height:1.15}
+.t40{font-size:calc(40 * var(--s));line-height:1.15}
+.t37{font-size:calc(37 * var(--s));line-height:1.15}
+.t32{font-size:calc(32 * var(--s));line-height:1.18}
+.t27{font-size:calc(27 * var(--s));line-height:1.2}
+.t24{font-size:calc(24 * var(--s));line-height:1.2}
+.t21{font-size:calc(21 * var(--s));line-height:1.2}
+.eyebrow{font-size:calc(21 * var(--s));text-transform:uppercase;letter-spacing:.12em}
+.wrap{text-wrap:pretty}
 
-/* ---------- reveals ---------- */
-/* Each word rises inside its own mask, padded on every side and pulled back with negative margins, so descenders,
-   italics and commas are never cut. */
-.w{display:inline-block;overflow:hidden;vertical-align:top;padding:.25em .35em .32em;margin:-.25em -.35em -.32em}
+/* ---------- reveal system ---------- */
+/* Each word rises inside its own mask. The mask is padded on every side (and pulled back with negative margins) so the
+   italic serif's overhangs, descenders and tall ascenders are never cut. */
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding:.1em .16em .2em;margin:-.1em -.16em -.2em}
 .wi{display:inline-block;transition:transform var(--sweep) var(--land) var(--d,0ms)}
-.armed:not(.in) .wi{transform:translateY(150%)}
+.r{transition:opacity var(--arrive) var(--settle) var(--d,0ms),transform var(--sweep) var(--land) var(--d,0ms),clip-path var(--stage) var(--whip) var(--d,0ms)}
+.armed:not(.in) .wi{transform:translateY(105%)}
+.armed:not(.in) .r-up{opacity:0;transform:translateY(48px)}
+.armed:not(.in) .r-fade{opacity:0}
+.armed:not(.in) .r-pop{opacity:0;transform:scale(.4)}
+.r-pop{transition:opacity var(--glide) var(--settle) var(--d,0ms),transform var(--arrive) var(--pop) var(--d,0ms)}
+.armed:not(.in) .r-wipe{clip-path:inset(100% 0 0 0)}
+.armed:not(.in) .r-wipeL{clip-path:inset(0 100% 0 0)}
+.armed:not(.in) .r-wipeR{clip-path:inset(0 0 0 100%)}
+.r-wipe,.r-wipeL,.r-wipeR{clip-path:inset(0 0 0 0)}
+.zoom img,.zoom video{transition:transform 1800ms var(--coast) var(--d,0ms)}
+.armed:not(.in) .zoom img,.armed:not(.in) .zoom video{transform:scale(1.14)}
 .ch{display:inline-block;transition:transform var(--stage) var(--land) var(--d,0ms),opacity var(--arrive) var(--settle) var(--d,0ms)}
 .armed:not(.in) .ch{transform:translateY(.6em) rotate(6deg);opacity:0}
-.r{transition:opacity var(--arrive) var(--settle) var(--d,0ms),transform var(--sweep) var(--land) var(--d,0ms),clip-path var(--stage) var(--whip) var(--d,0ms)}
-.armed:not(.in) .r-up{opacity:0;transform:translateY(40px)}
-.armed:not(.in) .r-left{opacity:0;transform:translateX(-40px)}
-.armed:not(.in) .r-fade{opacity:0}
-.armed:not(.in) .r-pop{opacity:0;transform:scale(.85)}
-.r-pop{transition:opacity var(--glide) var(--settle) var(--d,0ms),transform var(--arrive) var(--pop) var(--d,0ms)}
-.armed:not(.in) .r-wipe{clip-path:inset(0 100% 0 0 round 20px)}
-.armed:not(.in) .r-wipeUp{clip-path:inset(100% 0 0 0 round 20px)}
-.r-wipe,.r-wipeUp{clip-path:inset(0 0 0 0 round 20px)}
-.zoom img,.zoom video{transition:transform 1800ms var(--coast) var(--d,0ms)}
-.armed:not(.in) .zoom img,.armed:not(.in) .zoom video{transform:scale(1.12)}
 .rule{position:relative}
-.rule::before{content:"";position:absolute;left:0;right:0;top:0;height:1.5px;background:currentColor;opacity:.35;transform-origin:left;transition:transform var(--stage) var(--whip) var(--d,0ms)}
+.rule::before{content:"";position:absolute;left:0;right:0;top:0;height:1.5px;background:var(--rule);opacity:.4;transform-origin:left;transition:transform var(--stage) var(--whip) var(--d,0ms)}
 .armed:not(.in) .rule::before{transform:scaleX(0)}
+
+/* ---------- 01 cover / 12 closing ---------- */
+.cover-title{color:var(--spark)}
+#cover .bg img{object-position:100% 50%}
+.in #cover-drift,.in .drift{animation:drift 16s var(--settle) 1.6s infinite alternate}
+@keyframes drift{from{transform:scale(1)}to{transform:scale(1.035)}}
+#cover .drift{transform-origin:70% 48%}
+.rays{position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:screen;opacity:0;
+  background:radial-gradient(ellipse 22% 46% at 70% 38%, color-mix(in srgb, var(--sky) 30%, transparent), color-mix(in srgb, var(--sky) 0%, transparent) 70%),
+             conic-gradient(from 180deg at 70% 74%, transparent 0 40deg, rgba(141,253,186,.07) 48deg, transparent 56deg 80deg, color-mix(in srgb, var(--sky) 8%, transparent) 90deg, transparent 100deg 128deg, rgba(141,253,186,.06) 136deg, transparent 146deg)}
+.in .rays{animation:shimmer 6s var(--settle) 1.8s infinite alternate}
+@keyframes shimmer{from{opacity:.25}to{opacity:1}}
+#cover .scrim{background:linear-gradient(90deg,color-mix(in srgb, var(--pine) 96%, transparent) 0,color-mix(in srgb, var(--pine) 80%, transparent) 30%,color-mix(in srgb, var(--pine) 0%, transparent) 52%)}
+.hint{display:flex;align-items:center;gap:.6em;opacity:.7}
+.hint kbd{font:inherit;border:1px solid currentColor;border-radius:6px;padding:.1em .45em}
+#next .bg video{object-position:50% 50%}
+#next .scrim{background:linear-gradient(20deg,color-mix(in srgb, var(--leaf) 97%, transparent) 0,color-mix(in srgb, var(--leaf) 86%, transparent) 26%,color-mix(in srgb, var(--leaf) 0%, transparent) 50%)}
+.closing-title{color:var(--mint)}
+
+/* ---------- 02 problem ---------- */
+.illo{display:block;height:calc(300 * var(--s));width:auto;overflow:visible}
 .illo path{transition:stroke-dashoffset 2600ms var(--settle) var(--d,0ms)}
 .armed:not(.in) .illo path{stroke-dashoffset:1}
-/* a curtain sweeps across once as a section opener enters */
-.t-curtain::after{content:"";position:absolute;inset:0;z-index:20;background:var(--neon);transform:scaleX(0);transform-origin:right;pointer-events:none}
-.t-curtain.in::after{animation:curtain 1100ms var(--whip) 1}
-@keyframes curtain{0%{transform:scaleX(0);transform-origin:left}50%{transform:scaleX(1);transform-origin:left}50.1%{transform-origin:right}100%{transform:scaleX(0);transform-origin:right}}
-/* loops run only while their slide is on screen */
-.slide:not(.in) *{animation-play-state:paused!important}
 
-/* ---------- cards: rounded, a neon edge and a tilt under the pointer ---------- */
-.hud{position:relative;background:var(--card);border:1px solid var(--line);border-radius:calc(20 * var(--s));box-shadow:var(--shadow);color:var(--on)}
-.hud::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1.5px;background:var(--neon);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity var(--arrive) var(--settle);pointer-events:none;z-index:5}
-.hud:hover::before{opacity:1}
-.tilt{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty,0px));transition:transform var(--arrive) var(--land),opacity var(--arrive) var(--settle) var(--d,0ms),box-shadow var(--glide)}
-.tilt:hover{--ty:-6px;box-shadow:0 2px 4px rgba(16,24,40,.06),0 24px 48px -16px rgba(109,77,255,.28)}
-.tilt::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(260px 260px at var(--px,50%) var(--py,50%), rgba(0,194,232,.10), transparent 70%);opacity:0;transition:opacity var(--glide);pointer-events:none}
-.tilt:hover::after{opacity:1}
-.armed:not(.in) .tilt.r-up{transform:perspective(900px) translateY(40px)}
-.media{position:absolute;left:calc(var(--l) * var(--s));top:calc(var(--t) * var(--s));width:calc(var(--w) * var(--s));height:calc(var(--h) * var(--s));padding:calc(8 * var(--s))}
-.media>.clip{position:relative;width:100%;height:100%;overflow:hidden;border-radius:calc(14 * var(--s));background:linear-gradient(135deg,#1b2230,#2b2550)}
-.media img,.media video{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--coast)}
-.media:hover img{transform:scale(1.05)}
-.media .clip::before,.media .clip::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;mix-blend-mode:screen}
-.media .clip::before{background:linear-gradient(90deg, rgba(0,194,232,.45), transparent 40%)}
-.media .clip::after{background:repeating-linear-gradient(180deg, transparent 0 6px, rgba(240,40,125,.28) 6px 8px)}
-.media:hover .clip::before{animation:slip .5s steps(3) 1}
-.media:hover .clip::after{animation:bands .6s steps(4) 1}
-@keyframes slip{0%{opacity:1;transform:translateX(-6%)}60%{opacity:.6;transform:translateX(4%)}100%{opacity:0;transform:none}}
-@keyframes bands{0%{opacity:1;clip-path:inset(10% 0 70% 0)}40%{opacity:1;clip-path:inset(55% 0 20% 0)}80%{opacity:.7;clip-path:inset(30% 0 50% 0)}100%{opacity:0}}
-.tag{position:absolute;left:calc(22 * var(--s));top:calc(22 * var(--s));z-index:3;display:flex;align-items:center;gap:8px;font:400 calc(15 * var(--s))/1 var(--mono);letter-spacing:.06em;color:#0F1419;background:rgba(255,255,255,.92);border-radius:999px;padding:calc(8 * var(--s)) calc(12 * var(--s))}
-.tag .ic{color:var(--violet)}
+/* ---------- 03 solution ---------- */
+#solution .bg img{object-position:100% 50%}
+#solution .scrim{background:linear-gradient(90deg,color-mix(in srgb, var(--leaf) 95%, transparent) 0,color-mix(in srgb, var(--leaf) 75%, transparent) 36%,color-mix(in srgb, var(--leaf) 0%, transparent) 56%)}
+.statement .serif{color:var(--mint);letter-spacing:-.01em}
+.definition b{font-weight:600}
 
-/* ---------- pieces ---------- */
-.portrait{position:absolute;padding:calc(10 * var(--s))}
-.portrait .clip{position:relative;width:100%;height:100%;overflow:hidden;border-radius:calc(16 * var(--s));background:#0b0d12}
-.portrait img{width:100%;height:100%;object-fit:cover;object-position:50% 30%}
-.portrait .tint{position:absolute;inset:0;background:linear-gradient(160deg, rgba(109,77,255,.45), rgba(0,194,232,.3) 60%, rgba(240,40,125,.3));mix-blend-mode:color}
-.portrait .sweep{position:absolute;left:0;right:0;height:16%;top:-20%;background:linear-gradient(180deg, transparent, rgba(0,194,232,.25), transparent);animation:sweep 6s var(--coast) infinite}
-@keyframes sweep{0%{top:-20%}60%,100%{top:110%}}
-.portrait:hover .clip{animation:slice .45s steps(3) 1}
-@keyframes slice{30%{clip-path:inset(20% 0 55% 0);transform:translateX(-8px)}60%{clip-path:inset(60% 0 10% 0);transform:translateX(8px)}100%{clip-path:inset(0);transform:none}}
-.badge{position:absolute;z-index:4;display:flex;align-items:center;gap:calc(10 * var(--s));background:#fff;color:#0F1419;border:1px solid rgba(15,20,25,.08);border-radius:999px;padding:calc(12 * var(--s)) calc(18 * var(--s));font:500 calc(18 * var(--s))/1 var(--sans);box-shadow:var(--shadow)}
-.badge>.ic{color:var(--cyan)}
-.in .badge{animation:float 5s ease-in-out 1.6s infinite}
-@keyframes float{50%{translate:0 -8px}}
-.metaline,.chips{display:flex;flex-wrap:wrap;gap:calc(12 * var(--s))}
-.pill{display:inline-flex;align-items:center;gap:calc(8 * var(--s));font:400 calc(17 * var(--s))/1 var(--mono);letter-spacing:.04em;color:var(--on);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:calc(11 * var(--s)) calc(15 * var(--s));transition:border-color var(--glide),transform var(--glide) var(--pop)}
-.pill:hover{border-color:var(--violet);transform:translateY(-2px)}
-.pill .ic{color:var(--cyan)}
-.chip{display:inline-flex;align-items:center;gap:calc(10 * var(--s));font:500 calc(20 * var(--s))/1 var(--sans);padding:calc(13 * var(--s)) calc(20 * var(--s));border:1px solid var(--line);background:var(--card);border-radius:999px;color:var(--on);transition:transform var(--glide) var(--pop),border-color var(--glide),box-shadow var(--glide),opacity var(--arrive) var(--settle) var(--d,0ms)}
-.chip .ic{color:var(--mute)}
-.chip:hover{transform:translateY(-3px);border-color:var(--cyan);box-shadow:0 8px 18px -8px rgba(0,166,199,.5)}
-.chip.hi{background:#0F1419;color:#fff;border-color:#0F1419}.chip.hi .ic{color:#5BE3FF}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(28 * var(--s))}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(22 * var(--s))}
-.card{padding:calc(30 * var(--s))}
-.cic{display:inline-grid;place-items:center;width:calc(52 * var(--s));height:calc(52 * var(--s));border-radius:calc(14 * var(--s));background:var(--soft);color:var(--violet);font-size:calc(26 * var(--s));transition:transform var(--arrive) var(--pop),background var(--glide),color var(--glide)}
-.hud:hover .cic{transform:rotate(-8deg) scale(1.08);background:var(--violet);color:#fff}
-.card h3{font:700 calc(26 * var(--s))/1.18 var(--disp);margin:calc(18 * var(--s)) 0 calc(12 * var(--s))}
-.card p{font-size:calc(19 * var(--s));line-height:1.5;color:var(--mute)}
-.st{display:inline-flex;align-items:center;gap:6px;font:400 calc(13 * var(--s))/1 var(--mono);letter-spacing:.08em;padding:calc(7 * var(--s)) calc(11 * var(--s));border-radius:999px;color:var(--violet);background:color-mix(in srgb, var(--violet) 12%, transparent)}
-.st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
-.st.ok{color:#4F8A0B;background:#EEF8E0}
-.cardtop{display:flex;justify-content:space-between;align-items:center}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:calc(18 * var(--s))}
-.stat{padding:calc(22 * var(--s)) calc(24 * var(--s));cursor:default}
-.stat b{display:block;font:700 calc(60 * var(--s))/1 var(--disp);font-variant-numeric:tabular-nums}
-.stat b em{font-style:normal;color:var(--hot)}
-.stat > span{display:flex;align-items:center;gap:8px;margin-top:calc(10 * var(--s));font:400 calc(15 * var(--s))/1.3 var(--mono);color:var(--mute);letter-spacing:.04em}
-.stat > span .ic{color:var(--cyan)}
-.quote{font:700 calc(64 * var(--s))/1.15 var(--disp);letter-spacing:-.02em}
-.quote::before{content:"“";display:block;font-size:2em;line-height:.6;color:var(--violet)}
-/* timeline */
-.tl{position:absolute;left:calc(80 * var(--s));right:calc(80 * var(--s));height:2px;background:var(--neon);transform-origin:left;transition:transform var(--stage) var(--whip) 200ms;opacity:.7}
-.armed:not(.in) .tl{transform:scaleX(0)}
-.ev{position:absolute;width:calc(400 * var(--s));padding:calc(26 * var(--s))}
-.ev::before{content:"";position:absolute;left:calc(40 * var(--s));top:calc(-50 * var(--s));width:2px;height:calc(50 * var(--s));background:var(--line)}
-.evi{position:absolute;left:calc(22 * var(--s));top:calc(-110 * var(--s));width:calc(40 * var(--s));height:calc(40 * var(--s));border-radius:50%;background:var(--card);border:2px solid var(--violet);display:grid;place-items:center;color:var(--violet);font-size:calc(18 * var(--s));transition:background var(--glide),color var(--glide)}
-.ev:hover .evi{background:var(--violet);color:#fff}
-.ev .yr{font:400 calc(16 * var(--s))/1 var(--mono);color:var(--cyan);letter-spacing:.06em}
-.ev h3{font:700 calc(25 * var(--s))/1.18 var(--disp);margin:calc(12 * var(--s)) 0 calc(10 * var(--s))}
-.ev p{font-size:calc(18 * var(--s));line-height:1.45;color:var(--mute)}
-/* continuous marquee strip */
-.marq{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
-.marq>div{display:flex;gap:calc(14 * var(--s));width:max-content;animation:marq 30s linear infinite}
-@keyframes marq{to{transform:translateX(-50%)}}
-/* films */
-.playbtn{position:absolute;inset:calc(8 * var(--s));z-index:4;display:grid;place-items:center;background:transparent;border:0;cursor:pointer;border-radius:calc(14 * var(--s));transition:opacity var(--arrive) var(--settle)}
-.playbtn span{display:flex;align-items:center;gap:calc(14 * var(--s));padding:calc(12 * var(--s)) calc(26 * var(--s)) calc(12 * var(--s)) calc(12 * var(--s));border-radius:999px;background:#fff;color:#0F1419;font:500 calc(19 * var(--s))/1 var(--sans);box-shadow:0 10px 30px -8px rgba(0,0,0,.4);transition:transform var(--arrive) var(--pop)}
-.playbtn span i{width:calc(44 * var(--s));height:calc(44 * var(--s));border-radius:50%;background:#FF0033;color:#fff;display:grid;place-items:center;font-size:calc(20 * var(--s))}
+/* ---------- interlude: a still photograph the next slide covers from the bottom ---------- */
+.hold{position:relative}
+.interlude{position:sticky;top:0;z-index:0}
+.interlude .bg img{filter:brightness(var(--dim,1));transition:filter 120ms linear}
+.iscrim{background:radial-gradient(ellipse 70% 60% at 50% 50%,color-mix(in srgb, var(--pine) 62%, transparent),color-mix(in srgb, var(--pine) 38%, transparent))}
+.ihead{display:grid;place-items:center;text-align:center}
+.ititle{font-weight:500;font-size:calc(150 * var(--s));line-height:1.02;letter-spacing:-.02em;color:var(--cloud);max-width:calc(1680 * var(--s))}
+.ititle .serif{letter-spacing:-.005em}
+/* Highlight block: Spark is the accent on a dark ground; it wipes in, then the words rise inside it. */
+.hl{position:relative;display:inline-block;isolation:isolate;color:var(--pine);padding:0 .14em .02em}
+.hl::before{content:"";position:absolute;inset:.06em 0 0;background:var(--spark);z-index:-1;transform-origin:left;transition:transform var(--sweep) var(--whip) 380ms}
+.armed:not(.in) .hl::before{transform:scaleX(0)}
+.cover-up{z-index:1;border-top-right-radius:calc(var(--rad,0) * 1px);transform:translateZ(0)}
+
+/* ---------- horizontal stretch: later panels slide in from the right over the one before ---------- */
+#parts{height:calc(var(--vh,1vh) * 300)}
+.hwrap{position:relative;overflow:clip;transform:none}
+.hsticky{position:sticky;top:0;height:calc(var(--vh,1vh) * 100);overflow:hidden}
+.hpanel{position:absolute;inset:0;height:100%;scroll-snap-align:none}
+.interlude{scroll-snap-align:none}
+.hold{scroll-snap-align:start}
+/* Stacked like tabs on the right only: full bleed at the top, bottom and left; each later panel stops a step short of
+   the right edge and rounds its top-right corner, so the panels underneath show as strips on the right. */
+.hwrap{--tab:calc(44 * var(--s));--tabr:calc(72 * var(--s))}
+.hpanel{border-top-right-radius:var(--tabr)}
+.hpanel + .hpanel{box-shadow:0 0 calc(56 * var(--s)) color-mix(in srgb, var(--pine) 34%, transparent),0 0 calc(14 * var(--s)) color-mix(in srgb, var(--pine) 22%, transparent)}   /* each tab casts onto the one beneath */   /* on every panel: the wrapper's own corner scrolls away while they are pinned */
+.hpanel + .hpanel{transform:translateX(100vw);will-change:transform}
+#brand{inset:0 var(--tab) 0 0;height:auto}
+#agent{inset:0 calc(var(--tab) * 2) 0 0;height:auto}
+
+/* ---------- 04–06 three parts ---------- */
+/* Highlighted phrases: Instrument Serif italic in Pine on a brand-colour block that wipes in with the slide.
+   A phrase stays on one line, so its block is never split. */
+.mark{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--pine);padding:0 .14em;margin:0 -.04em;white-space:nowrap;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;
+  background:linear-gradient(var(--hlc),var(--hlc)) no-repeat 0 0 / 100% 100%;transition:background-size var(--sweep) var(--whip) var(--d,0ms)}
+.armed:not(.in) .mark{background-size:0% 100%}
+.m-lav{--hlc:var(--lav)} .m-spark{--hlc:var(--spark)} .m-mint{--hlc:var(--mint)}
+.panel{position:absolute;top:calc(100 * var(--s));width:calc(431 * var(--s));height:calc(880 * var(--s));background:#1F2121;overflow:hidden;
+  box-shadow:0 calc(44 * var(--s)) calc(90 * var(--s)) color-mix(in srgb, var(--pine) 42%, transparent),0 calc(14 * var(--s)) calc(30 * var(--s)) color-mix(in srgb, var(--pine) 30%, transparent),0 calc(2 * var(--s)) calc(6 * var(--s)) color-mix(in srgb, var(--pine) 22%, transparent)}   /* asked for: lifts the panel off its ground */
+.panel.r-wipe{clip-path:inset(calc(-140 * var(--s)))}   /* the wipe's resting clip reaches past the panel so the shadow shows */
+.panel video{width:100%;height:100%;object-fit:cover;object-position:50% 0;display:block}
+.part-label{font-family:var(--serif);font-style:italic;font-weight:400;font-size:calc(180 * var(--s));line-height:1}
+
+/* ---------- 07 pinned workflow ---------- */
+.pinned{height:auto;overflow:clip;scroll-snap-align:none}
+#flow{height:calc(var(--vh,1vh) * 400)}
+#roof{height:calc(var(--vh,1vh) * 300)}
+.stop{position:absolute;left:0;width:1px;height:calc(var(--vh,1vh) * 100);scroll-snap-align:start;pointer-events:none}
+.sticky{position:sticky;top:0;height:calc(var(--vh,1vh) * 100);overflow:hidden}
+.flow-steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:calc(14 * var(--s))}
+.ftext{display:grid;grid-template-columns:calc(80 * var(--s)) minmax(0,1fr);padding-block:calc(12 * var(--s));opacity:.38;transition:opacity var(--arrive) var(--settle),transform var(--sweep) var(--land) var(--d,0ms)}
+.fstep.on .ftext{opacity:1}
+.fn{font-family:var(--serif);font-style:italic;font-size:calc(64 * var(--s));line-height:.8;color:var(--spark);grid-row:span 3}
+.ftext h3{font-size:calc(32 * var(--s));font-weight:600;line-height:1.1}
+.ftext p{font-size:calc(24 * var(--s));line-height:1.2;margin-top:.35em;max-height:0;overflow:hidden;opacity:0;transition:max-height var(--sweep) var(--land),opacity var(--arrive) var(--settle)}
+.fstep.on .ftext p{max-height:6em;opacity:1}
+.fbar{display:block;height:2px;background:color-mix(in srgb, var(--cloud) 22%, transparent);margin-top:.8em;position:relative;overflow:hidden;border-radius:2px}
+.fbar i{position:absolute;inset:0;background:var(--spark);transform-origin:left;transform:scaleX(var(--p,0))}
+/* Offsets are from the step list (stage 50,330), its containing block; the clip lands at stage 790,340. */
+.fmedia{position:absolute;left:calc(740 * var(--s));top:calc(10 * var(--s));width:calc(1080 * var(--s));height:calc(607.5 * var(--s));border-radius:calc(36 * var(--s));overflow:hidden;background:#000;
+  opacity:0;transform:translateY(24px) scale(.97);transition:opacity var(--sweep) var(--settle),transform var(--sweep) var(--land);pointer-events:none}
+.fstep.on .fmedia{opacity:1;transform:none}
+.fmedia video{width:100%;height:100%;object-fit:cover;display:block}
+
+/* ---------- 08 more you can ask ---------- */
+#ask .bg img{object-position:0 50%}
+#ask .scrim{background:linear-gradient(90deg,color-mix(in srgb, var(--sea) 62%, transparent) 0,color-mix(in srgb, var(--sea) 74%, transparent) 45%,color-mix(in srgb, var(--sea) 90%, transparent) 100%)}
+/* The prompts ride one track across the whole screen, right to left, moved by the scroll (see updateAsk). */
+.marquee{position:absolute;inset:0;z-index:3;pointer-events:none;display:flex;align-items:center;padding-top:calc(150 * var(--s))}
+.mtrack{position:relative;flex:none;display:flex;align-items:center;gap:calc(520 * var(--s));will-change:transform;transform:translateX(100vw)}
+.mitem{flex:none;width:max-content;max-width:calc(1680 * var(--s))}
+.mitem p{position:relative;font-size:calc(128 * var(--s));line-height:1.04;letter-spacing:-.025em;text-wrap:balance}
+.mq{position:absolute;right:100%;top:0;margin-right:.08em;font-family:var(--serif);font-style:italic;font-weight:400;color:var(--spark)}
+.mqe{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--spark);margin-left:.04em}
+.mitem .chip{display:inline-block;font-size:calc(30 * var(--s));margin:0 0 calc(30 * var(--s))}
+.askbar{display:flex;gap:8px}
+.askbar i{width:calc(42 * var(--s));height:2px;background:color-mix(in srgb, var(--cloud) 25%, transparent);transition:background var(--arrive) var(--settle)}
+.askbar i.on{background:var(--spark)}
+@media (min-width:900px){.asklist{display:none}}
+html.free{scroll-snap-type:none}   /* inside the prompts the scroll runs free, so they follow it exactly */
+#ask .stop:not(:first-child):not(:nth-child(6)){scroll-snap-align:none}   /* the stops on each prompt are for the keys */
+.asklist{list-style:none;padding:0}
+.asklist li{display:grid;grid-template-columns:calc(70 * var(--s)) minmax(0,1fr) auto;column-gap:calc(20 * var(--s));align-items:start;padding-block:calc(30 * var(--s))}
+.q{font-family:var(--serif);font-style:italic;color:var(--spark);font-size:calc(64 * var(--s));line-height:.8}
+.ptext{display:grid;font-size:calc(37 * var(--s));line-height:1.15}
+.ptext > *{grid-area:1/1}
+.ghost{visibility:hidden}
+.chip{font-size:calc(21 * var(--s));color:var(--pine);border-radius:999px;padding:.55em 1em;white-space:nowrap;margin-top:.2em}
+.c-spark{background:var(--spark)} .c-mint{background:var(--mint)} .c-peach{background:var(--peach)} .c-lav{background:var(--lav)}
+
+/* ---------- 09 behind the scenes ---------- */
+.smrow{display:grid;grid-template-columns:calc(420 * var(--s)) minmax(0,1fr);align-items:center;height:calc(190 * var(--s))}
+.num{font-family:var(--serif);font-style:italic;font-size:calc(88 * var(--s));line-height:1;color:var(--spark);font-variant-numeric:tabular-nums;white-space:nowrap}
+.chartcard{position:absolute;left:calc(912 * var(--s));top:calc(133 * var(--s));right:calc(-200 * var(--s));bottom:calc(-200 * var(--s));border-top-left-radius:calc(158 * var(--s));background:#0E2523;box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--cloud) 20%, transparent);overflow:hidden}
+.chart{position:absolute;left:0;top:0;width:calc(1008 * var(--s));height:calc(947 * var(--s));overflow:visible}
+.chart text{font-family:var(--sans);font-weight:500;fill:color-mix(in srgb, var(--cloud) 75%, transparent)}
+.chart .ax{stroke:color-mix(in srgb, var(--cloud) 45%, transparent);stroke-width:1.5;transition:stroke-dashoffset var(--stage) var(--whip) var(--d,0ms)}
+.chart .mid{stroke:color-mix(in srgb, var(--cloud) 20%, transparent);stroke-width:1.5;stroke-dasharray:5 7}
+.armed:not(.in) .chart .ax{stroke-dashoffset:1}
+.chart .dot{transform-box:fill-box;transform-origin:center;transition:transform var(--arrive) var(--pop) var(--d,0ms),opacity var(--glide) var(--settle) var(--d,0ms)}
+.armed:not(.in) .chart .dot{transform:scale(0);opacity:0}
+.chart .dot:hover{transform:scale(1.6)}
+
+/* ---------- what we fed it ---------- */
+.hl.peach::before{background:var(--peach)}
+.fedgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:calc(36 * var(--s));row-gap:calc(40 * var(--s))}
+.fed{padding-top:calc(22 * var(--s))}
+.fed .num{color:var(--peach);font-size:calc(64 * var(--s))}
+.fed h3{font-size:calc(27 * var(--s));font-weight:600;line-height:1.15;margin:calc(10 * var(--s)) 0 calc(8 * var(--s))}
+.fed p{font-size:calc(21 * var(--s));line-height:1.3;opacity:.82}
+
+/* ---------- cover: the people behind it ---------- */
+.people{display:flex;gap:calc(56 * var(--s))}
+.person{display:flex;align-items:center;gap:calc(22 * var(--s))}
+.person img{width:calc(112 * var(--s));height:calc(112 * var(--s));border-radius:50%;object-fit:cover;display:block;box-shadow:0 0 0 calc(3 * var(--s)) color-mix(in srgb, var(--cloud) 18%, transparent)}
+.person b{display:block;font-size:calc(27 * var(--s));font-weight:600;line-height:1.15}
+.person span{display:block;font-size:calc(21 * var(--s));line-height:1.25;opacity:.8}
+
+/* ---------- 10 every app under one roof ---------- */
+.hub{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.hub text{font-family:var(--sans);font-weight:500;letter-spacing:.02em;text-anchor:middle;dominant-baseline:central}
+.hub .node,.hub .core{transform-box:fill-box;transform-origin:center;transition:transform var(--sweep) var(--pop) var(--d,0ms),opacity var(--arrive) var(--settle) var(--d,0ms)}
+.hub .mline{transition:stroke-dashoffset var(--stage) var(--settle) var(--d,0ms)}
+.hub .grp{transition:opacity var(--arrive) var(--settle)}
+#roof:not(.in) .core,#roof[data-st="0"] .core{transform:scale(0);opacity:0}
+#roof:not([data-st="1"]):not([data-st="2"]):not([data-st="3"]) .g1 .node{transform:scale(0);opacity:0}
+#roof:not([data-st="3"]) .g3 .node{transform:scale(0);opacity:0}
+#roof:not([data-st="1"]):not([data-st="2"]):not([data-st="3"]) .g1 .mline,
+#roof:not([data-st="2"]):not([data-st="3"]) .g2 .mline,
+#roof:not([data-st="3"]) .g3 .mline{stroke-dashoffset:1}
+.pulse{transform-box:fill-box;transform-origin:center;animation:pulse 2.8s var(--coast) infinite;opacity:0}
+@keyframes pulse{0%{transform:scale(1);opacity:.55}100%{transform:scale(1.5);opacity:0}}
+.caps{display:grid}
+.caps > p{grid-area:1/1;transition:opacity var(--arrive) var(--settle),transform var(--sweep) var(--land)}
+#roof:not([data-st="1"]) .cap1,#roof:not([data-st="2"]) .cap2,#roof:not([data-st="3"]) .cap3{opacity:0;transform:translateY(12px)}
+#roof[data-st="0"] .cap1{opacity:1;transform:none}
+.roofbar{display:flex;gap:8px;margin-top:calc(16 * var(--s))}
+.roofbar i{width:calc(42 * var(--s));height:2px;background:color-mix(in srgb, var(--cloud) 25%, transparent);transition:background var(--arrive) var(--settle)}
+#roof[data-st="1"] .roofbar i:nth-child(-n+1),#roof[data-st="2"] .roofbar i:nth-child(-n+2),#roof[data-st="3"] .roofbar i{background:var(--spark)}
+
+/* ---------- 11 why it matters ---------- */
+#why .bg img{object-position:100% 50%}
+#why .scrim{background:linear-gradient(90deg,color-mix(in srgb, var(--sky) 96%, transparent) 0,color-mix(in srgb, var(--sky) 85%, transparent) 36%,color-mix(in srgb, var(--sky) 0%, transparent) 52%)}
+.adv{padding-block:calc(26 * var(--s))}
+.adv .head{display:flex;align-items:center;gap:calc(26 * var(--s))}
+.adv .ico{width:calc(38 * var(--s));height:auto;flex:none;transition:transform var(--arrive) var(--pop)}
+.adv .ico path{fill:currentColor}
+.adv:hover .ico{transform:rotate(-10deg) scale(1.15)}
+.adv p.t27{margin-top:calc(12 * var(--s))}
+
+/* ---------- added modules: a film that plays with sound, a live diagram, contact links ---------- */
+.frame{position:absolute;left:calc(var(--l) * var(--s));top:calc(var(--t) * var(--s));width:calc(var(--w) * var(--s));height:calc(var(--h) * var(--s));border-radius:calc(28 * var(--s));overflow:hidden;background:#000;
+  box-shadow:0 calc(30 * var(--s)) calc(70 * var(--s)) color-mix(in srgb, var(--pine) 30%, transparent)}
+.frame video,.frame img{width:100%;height:100%;object-fit:cover;display:block}
+.frame.r-wipe{clip-path:inset(0 0 0 0 round calc(28 * var(--s)))}
+.armed:not(.in) .frame.r-wipe{clip-path:inset(100% 0 0 0 round calc(28 * var(--s)))}
+.playbtn{position:absolute;inset:0;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;transition:opacity var(--arrive) var(--settle)}
+.playbtn span{display:flex;align-items:center;gap:.7em;font:600 calc(24 * var(--s))/1 var(--sans);color:var(--pine);background:var(--spark);border-radius:999px;padding:.75em 1.3em .75em 1em;transition:transform var(--arrive) var(--pop)}
+.playbtn span::before{content:"";border-left:.8em solid currentColor;border-block:.5em solid transparent}
 .playbtn:hover span{transform:scale(1.06)}
 .playing .playbtn{opacity:0;pointer-events:none}
-/* contact */
-.contact{display:grid;grid-template-columns:1fr 1fr;gap:calc(20 * var(--s))}
-.cc{display:flex;align-items:center;gap:calc(18 * var(--s));padding:calc(22 * var(--s)) calc(24 * var(--s));text-decoration:none}
-.cc .cic{width:calc(56 * var(--s));height:calc(56 * var(--s))}
-.cc small{display:block;font:400 calc(14 * var(--s))/1 var(--mono);letter-spacing:.08em;color:var(--mute);margin-bottom:calc(8 * var(--s))}
-.cc strong{display:block;font:500 calc(23 * var(--s))/1.2 var(--sans)}
-.cc .go{margin-left:auto;color:var(--mute);font-size:calc(22 * var(--s));transition:transform var(--glide) var(--land),color var(--glide)}
-.cc:hover .go{transform:translate(3px,-3px);color:var(--cyan)}
-.cc.wide{grid-column:span 2}
-
-/* ---------- diagrams (FLOWS in the script) ---------- */
 svg.flow{display:block;width:100%;height:auto;overflow:visible}
-svg.flow text{font-family:var(--mono);fill:var(--on)}
-svg.flow .sub{fill:var(--mute)}
-svg.flow .box{fill:var(--card);stroke:var(--line)}
-svg.flow .ln{fill:none;stroke-width:2;stroke-dashoffset:1;transition:stroke-dashoffset var(--stage) var(--whip) var(--d,0ms),opacity var(--glide),stroke-width var(--glide)}
+svg.flow text{font-family:var(--sans);font-weight:600;fill:currentColor}
+svg.flow .sub{font-weight:500;opacity:.7}
+svg.flow .box{fill:color-mix(in srgb, currentColor 6%, transparent);stroke:currentColor;stroke-opacity:.35}
+svg.flow .ln{fill:none;stroke:currentColor;stroke-opacity:.45;stroke-width:2;stroke-dashoffset:1;transition:stroke-dashoffset var(--stage) var(--whip) var(--d,0ms),stroke-opacity var(--glide)}
 .in svg.flow .ln{stroke-dashoffset:0}
 svg.flow .nd{transition:opacity var(--arrive) var(--settle) var(--d,0ms),transform var(--arrive) var(--pop) var(--d,0ms);transform-box:fill-box;transform-origin:center}
 .armed:not(.in) svg.flow .nd{opacity:0;transform:scale(.9)}
 svg.flow .pulse{opacity:0;transition:opacity 400ms 1400ms}
 .in svg.flow .pulse{opacity:1}
-svg.flow.focus .nd:not(.lit),svg.flow.focus .ln:not(.lit){opacity:.25}
-svg.flow .nd.lit .box{stroke:var(--violet);stroke-width:2}
-svg.flow .ln.lit{stroke-width:3.5;stroke:var(--violet)}
-
-/* ---------- interlude: a still the next slide covers from the bottom; its corner straightens as it lands ---------- */
-.hold{position:relative;scroll-snap-align:start}
-.interlude{position:sticky;top:0;z-index:0;scroll-snap-align:none}
-.interlude .bg img,.interlude .bg video{filter:brightness(var(--dim,1));transition:filter 120ms linear}
-.cover-up{z-index:1;border-top-right-radius:calc(var(--rad,0) * 1px);transform:translateZ(0);background:var(--bg)}
-
-/* ---------- horizontal stretch: later panels slide in from the right, stacked like tabs ---------- */
-.hwrap{position:relative;overflow:clip;--tab:calc(44 * var(--s));--tabr:calc(72 * var(--s))}
-.hsticky{position:sticky;top:0;height:calc(var(--vh,1vh) * 100);overflow:hidden}
-.hpanel{position:absolute;inset:0;height:100%;scroll-snap-align:none;border-top-right-radius:var(--tabr)}
-.hpanel + .hpanel{transform:translateX(100vw);will-change:transform;box-shadow:0 0 calc(56 * var(--s)) rgba(15,20,25,.3)}
-.hpanel:nth-child(2){inset:0 var(--tab) 0 0;height:auto}
-.hpanel:nth-child(3){inset:0 calc(var(--tab) * 2) 0 0;height:auto}
-.hpanel:nth-child(4){inset:0 calc(var(--tab) * 3) 0 0;height:auto}
-
-/* ---------- pinned stories: the scroll steps through states while the slide holds still ---------- */
-.pinned{height:auto;overflow:clip;scroll-snap-align:none}
-.stop{position:absolute;left:0;width:1px;height:calc(var(--vh,1vh) * 100);scroll-snap-align:start;pointer-events:none}
-.sticky{position:sticky;top:0;height:calc(var(--vh,1vh) * 100);overflow:hidden}
-.steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:calc(14 * var(--s))}
-.stext{display:grid;grid-template-columns:calc(80 * var(--s)) minmax(0,1fr);padding-block:calc(12 * var(--s));opacity:.38;transition:opacity var(--arrive) var(--settle)}
-.step.on .stext{opacity:1}
-.sn{font:700 calc(48 * var(--s))/.9 var(--disp);color:var(--violet);grid-row:span 3}
-.stext h3{font:700 calc(28 * var(--s))/1.15 var(--disp)}
-.stext p{font-size:calc(21 * var(--s));line-height:1.35;color:var(--mute);margin-top:.35em;max-height:0;overflow:hidden;opacity:0;transition:max-height var(--sweep) var(--land),opacity var(--arrive) var(--settle)}
-.step.on .stext p{max-height:6em;opacity:1}
-.sbar{display:block;height:2px;background:var(--line);margin-top:.8em;position:relative;overflow:hidden;border-radius:2px}
-.sbar i{position:absolute;inset:0;background:var(--neon);transform-origin:left;transform:scaleX(var(--p,0))}
-.smedia{position:absolute;left:calc(700 * var(--s));top:calc(-10 * var(--s));width:calc(1000 * var(--s));height:calc(562 * var(--s));border-radius:calc(24 * var(--s));overflow:hidden;background:linear-gradient(135deg,#1b2230,#2b2550);
-  opacity:0;transform:translateY(24px) scale(.97);transition:opacity var(--sweep) var(--settle),transform var(--sweep) var(--land);pointer-events:none;box-shadow:var(--shadow)}
-.step.on .smedia{opacity:1;transform:none}
-.smedia video,.smedia img{width:100%;height:100%;object-fit:cover}
-/* scroll marquee: one track of big lines crosses right to left, moved by the scroll */
-.smarq{position:absolute;inset:0;z-index:3;pointer-events:none;display:flex;align-items:center}
-.mtrack{display:flex;align-items:center;gap:calc(420 * var(--s));will-change:transform;transform:translateX(100vw)}
-.mitem{flex:none;width:max-content;max-width:calc(1500 * var(--s));font:700 calc(110 * var(--s))/1.04 var(--disp);letter-spacing:-.025em}
-.mbar{display:flex;gap:8px}
-.mbar i{width:calc(42 * var(--s));height:2px;background:var(--line);transition:background var(--arrive) var(--settle)}
-.mbar i.on{background:var(--violet)}
-
-/* ---------- pointer: a ring that grows over anything interactive ---------- */
-.ring{position:fixed;left:0;top:0;z-index:50;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:1.5px solid var(--violet);pointer-events:none;transform:translate(var(--mx),var(--my)) scale(var(--rs,1));transition:transform 120ms var(--land),border-color var(--glide),background var(--glide)}
-.ring.big{--rs:1.9;border-color:var(--cyan);background:rgba(0,194,232,.08)}
-@media (hover:none){.ring,.spot,.g-hot{display:none}}
+svg.flow.focus .nd:not(.lit){opacity:.3}
+svg.flow.focus .ln.lit{stroke-opacity:1;stroke-width:3}
+.links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(18 * var(--s)) calc(48 * var(--s))}
+.links a{display:flex;justify-content:space-between;align-items:baseline;gap:1em;text-decoration:none;padding-block:calc(18 * var(--s));border-top:1.5px solid color-mix(in srgb, currentColor 30%, transparent);font-size:calc(32 * var(--s));transition:border-color var(--glide)}
+.links a small{font-size:calc(21 * var(--s));text-transform:uppercase;letter-spacing:.12em;opacity:.7}
+.links a::after{content:"\2197";transition:transform var(--glide) var(--land)}
+.links a:hover{border-color:currentColor}.links a:hover::after{transform:translate(4px,-4px)}
 
 /* ---------- narrow screens: the stage becomes a reading column ---------- */
 @media (max-width:899px){
-  .navbar,.rail,.curve,.foot .name{display:none}
-  .slide{height:auto;min-height:0;padding:92px 16px 64px}
+  .navlist,.dots,.curve{display:none}
+  .pageno{margin-left:auto}
+  .slide{height:auto;min-height:0;padding:92px var(--gutR) 64px var(--gut)}
+  #cover,#next{min-height:calc(var(--vh,1vh) * 100);display:flex;flex-direction:column;justify-content:flex-end}
   .stage{position:relative;left:auto;top:auto;width:auto;height:auto;translate:none;display:flex;flex-direction:column;gap:18px}
-  .abs,.media,.portrait,.ev,.badge{position:relative!important;left:auto!important;top:auto!important;right:auto!important;width:auto!important}
-  .media{height:auto!important;aspect-ratio:16/9}.portrait{aspect-ratio:4/5;height:auto!important}
-  .h130{font-size:3rem}.h110{font-size:2.6rem}.h72{font-size:2.2rem}.h56,.quote{font-size:1.8rem}.mitem{font-size:2rem}
-  .t32,.t26{font-size:1.05rem}.t21,.card p,.ev p{font-size:.95rem}.mono,.eyebrow,.pill,.chip,.tag{font-size:.75rem}
-  .grid3,.grid4,.stats,.contact{grid-template-columns:1fr}.cc.wide{grid-column:auto}
-  .bg{position:relative;inset:auto;aspect-ratio:16/9}.bg.side{left:auto}.tl,.ev::before,.evi{display:none}
-  .chrome .row,.foot .row{width:auto;padding-inline:16px}
-  .interlude{height:calc(var(--vh,1vh) * 100);padding:0}.interlude .bg{position:absolute;inset:0;aspect-ratio:auto}
-  .hsticky{position:relative;height:auto;overflow:visible}.hpanel,.hpanel + .hpanel{position:relative;inset:auto!important;height:auto;transform:none!important;filter:none!important;border-radius:0}
-  .pinned{height:auto!important}.stop{display:none}.sticky{position:relative;height:auto;overflow:visible;padding:92px 16px 64px}
-  .stext{opacity:1}.stext p{max-height:none;opacity:1}.sbar{display:none}
-  .smedia{position:relative;left:auto;top:auto;width:auto;height:auto;aspect-ratio:16/9;opacity:1;transform:none;margin-top:10px}
-  .smarq{position:relative}.mtrack{transform:none!important;flex-direction:column;align-items:flex-start;gap:24px}.mbar{display:none}
+  .abs{position:relative;left:auto;top:auto;width:auto}
+  .h80{font-size:2.3rem} .h96{font-size:2.4rem} .h107{font-size:2.6rem} .h160{font-size:4rem} .h180{font-size:3.4rem} .part-label{font-size:3.6rem}
+  .t48,.t40,.t37{font-size:1.25rem} .t32,.t27,.t24{font-size:1.02rem} .t21,.eyebrow,.chip{font-size:.8rem}
+  .chrome .row,.foot .row{width:auto;padding-inline:var(--gut) var(--gutR)}
+  .chrome .row{padding-top:18px} .foot .row{padding-bottom:14px}
+  .foot{background:linear-gradient(rgba(0,0,0,0),var(--ground) 60%)}
+  .bg{position:relative;inset:auto;aspect-ratio:16/9;margin:-24px calc(-1 * var(--gutR)) 24px calc(-1 * var(--gut))}
+  #cover .bg,#next .bg{position:absolute;inset:0;margin:0;aspect-ratio:auto}
+  #cover .bg img{object-position:70% 50%}
+  .interlude{height:calc(var(--vh,1vh) * 100);padding:0}
+  .interlude .bg{position:absolute;inset:0;margin:0;aspect-ratio:auto}
+  .hwrap{overflow:visible}
+  .hsticky{position:relative;height:auto;overflow:visible}
+  .hpanel,.hpanel + .hpanel,#brand,#agent{position:relative;inset:auto;height:auto;transform:none!important;filter:none!important;border-radius:0}
+  .interlude .ihead{position:absolute;inset:0;padding:0 var(--gutR) 0 var(--gut);display:grid;place-items:center}
+  .ititle{font-size:3rem}
+  #cover .scrim{background:linear-gradient(0deg,color-mix(in srgb, var(--pine) 97%, transparent) 40%,color-mix(in srgb, var(--pine) 0%, transparent) 75%)}
+  #next .scrim{background:linear-gradient(0deg,color-mix(in srgb, var(--leaf) 97%, transparent) 30%,color-mix(in srgb, var(--leaf) 0%, transparent) 65%)}
+  #solution .scrim,#ask .scrim,#why .scrim,.band,.rays{display:none}
+  .illo{height:170px}
+  .cols3{display:flex;flex-direction:column;gap:36px}
+  .panel{position:relative;top:auto;left:auto!important;right:auto!important;width:min(100%,320px);height:auto;aspect-ratio:440/898;margin-bottom:12px}
+  .pinned{height:auto!important;overflow:hidden}
+  .stop{display:none}
+  .sticky{position:relative;height:auto;overflow:visible;padding:92px var(--gutR) 64px var(--gut)}
+  #flow,#roof,#ask{padding:0}
+  .marquee,.askbar{display:none}
+  .ftext{opacity:1;grid-template-columns:48px minmax(0,1fr)} .fn{font-size:2.2rem}
+  .ftext h3{font-size:1.15rem} .ftext p{font-size:1rem;max-height:none;opacity:1}
+  .fbar,.flow-hint{display:none}
+  .fmedia{position:relative;left:auto;top:auto;width:auto;height:auto;aspect-ratio:16/9;opacity:1;transform:none;margin:10px 0 0;border-radius:18px}
+  .asklist li{grid-template-columns:34px minmax(0,1fr);padding-block:16px} .q{font-size:2.2rem} .ptext{font-size:1.15rem}
+  .asklist .chip{grid-column:2;justify-self:start;margin-top:8px}
+  .smrow{grid-template-columns:minmax(0,1fr);height:auto;padding-block:14px;gap:6px} .num{font-size:2.6rem}
+  .chartcard{position:relative;left:auto;top:auto;right:auto;bottom:auto;aspect-ratio:1008/947;border-top-left-radius:60px;margin:12px calc(-1 * var(--gutR)) 0 0}
+  .chart{width:100%;height:100%}
+  .hubwrap{position:relative;aspect-ratio:1000/860;margin-top:8px}
+  .hub{inset:auto;width:100%;height:100%}
+  .caps > p{opacity:1!important;transform:none!important;grid-area:auto}
+  .caps{gap:4px}.roofbar{display:none}
+  .adv .ico{width:28px} .adv .head{gap:14px}
+  .fedgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px 16px} .fed .num{font-size:2rem} .fed h3{font-size:1rem} .fed p{font-size:.85rem}
+  .frame{position:relative;left:auto;top:auto;width:auto;height:auto;aspect-ratio:16/9;border-radius:18px}
+  .links{grid-template-columns:minmax(0,1fr)} .links a{font-size:1.1rem} .links a small{font-size:.75rem}
+  .people{flex-direction:column;gap:14px} .person img{width:64px;height:64px} .person b{font-size:1rem} .person span{font-size:.8rem}
 }
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:1ms!important;animation:none!important}}
+@media (min-width:900px){ .hubwrap{position:absolute;inset:0} }
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:1ms!important;animation:none!important}
+}
 </style>
-</head>
-<body>
-<div class="ground" aria-hidden="true"><i class="g-glow"></i><i class="g-cols"></i><i class="g-rows"></i><i class="g-floor"></i><i class="g-rain"></i><i class="g-hot"></i></div>
-<div class="spot" aria-hidden="true"></div>
-<div class="ring" id="ring" aria-hidden="true"></div>
+
 <div class="progress" id="progress"></div>
-<header class="chrome" id="chrome" data-hide="1"><div class="row">
-  <a class="mark" href="#cover"><i>__MONO__</i>__TITLE__</a>
-  <!-- one link per section; data-sec lists the ids of every slide in that section -->
-  <ul class="navbar" id="navlist">
-    <li><a href="#intro" data-sec="intro path">{{i:user}}Intro</a></li>
-    <li><a href="#case" data-sec="case-hold photo case parts film steps">{{i:layers}}Case</a></li>
-    <li><a href="#system" data-sec="system lines">{{i:nodes}}System</a></li>
-    <li><a href="#results" data-sec="results gallery tools quote">{{i:spark}}Results</a></li>
-  </ul>
-  <a class="cta" href="#closing"><span class="live"></span>Contact</a>
-</div></header>
-<nav class="rail" id="rail" aria-label="Slides"></nav>
-<footer class="foot" id="foot" data-hide="1"><div class="row">
-  <span class="name">__TITLE__</span>
-  <span class="curve" aria-live="polite"><svg viewBox="0 0 40 24" aria-hidden="true"><path id="curvePath" d="M0 24 C4.8 2.4 11.2 0 40 0"/><circle id="curveDot" cx="0" cy="24" r="2.4"/></svg><span id="curveName">Land</span><span id="curveTime">· Stage 1100 ms</span></span>
-  <span class="pageno" id="pageno">01</span>
-</div></footer>
+
+<header class="chrome" id="chrome" data-hide="1">
+  <div class="row">
+    <ul class="navlist" id="navlist">
+      <li><a href="#problem" data-sec="problem">01 Problem</a></li>
+      <li><a href="#solution" data-sec="solution office library brand agent">02 Motion DNA</a></li>
+      <li><a href="#flow" data-sec="flow ask">03 In action</a></li>
+      <li><a href="#behind" data-sec="studio behind fed roof">04 Behind it</a></li>
+      <li><a href="#why" data-sec="why">05 Why it matters</a></li>
+    </ul>
+  </div>
+</header>
+
+<nav class="dots" id="dots" aria-label="Slides"></nav>
+
+<footer class="foot" id="foot" data-hide="1">
+  <div class="row">
+    __WORDMARK__
+    <button class="present" id="present" type="button">Full screen</button>
+    <span class="curve" aria-live="polite"><svg viewBox="0 0 40 24" aria-hidden="true"><path id="curvePath" d="M0 24 C4.8 2.4 11.2 0 40 0"/><circle id="curveDot" cx="0" cy="24" r="2.4"/></svg><span id="curveName">Land</span><span class="long" id="curveTime">· Stage 1100 ms</span></span>
+    <span class="pageno" id="pageno">01 / 12</span>
+  </div>
+</footer>
 
 <main>
-<!-- ============ EXAMPLE SLIDES: replace them. Each <section class="slide g-*"> takes data-label (rail, menu), and
-     optionally data-curve (Land|Pop|Settle|Whip|Coast|Surge) + data-dur for the curve readout in the footer. ============ -->
-
-<!-- cover -->
-<section class="slide g-base" id="cover" data-label="Cover" data-curve="Land" data-dur="Stage 1100 ms">
+<!-- 01 cover -->
+<section class="slide g-pine" id="cover" data-label="AI Briefly" data-curve="Land" data-dur="Stage 1100 ms">
+  <div class="bg zoom" style="--d:0ms"><img class="drift" src="assets/img01.jpg" alt="The Motion DNA box on a pedestal under light rays"></div>
+  <div class="rays"></div>
+  <div class="scrim"></div><div class="band bot"></div>
   <div class="stage">
-    <p class="abs eyebrow r r-fade" style="--x:110;--y:200;--d:100ms">{{i:spark}}<span data-dec>ROLE OR DECK SUBJECT · ONE LINE</span></p>
-    <h1 class="abs disp h130" style="--x:104;--y:290;--w:1050"><span data-split data-base="200">Big</span><br><span class="neon glitch" data-split data-base="380">Title</span></h1>
-    <p class="abs t32 r r-up" style="--x:110;--y:610;--w:780;--d:700ms">One promise in one sentence: what this deck shows and why it matters.</p>
-    <div class="abs metaline r r-up" style="--x:110;--y:800;--w:1040;--d:950ms"><span class="pill">{{i:pin}}City, Country</span><span class="pill">{{i:nodes}}Key skill</span><span class="pill"><span class="live"></span>Status</span></div>
-    <div class="portrait hud r r-wipe" style="right:calc(110*var(--s));top:calc(160*var(--s));width:calc(660*var(--s));height:calc(770*var(--s));--d:300ms">
-      <div class="clip"><img class="drift" src="assets/hero.jpg" alt="Hero image"><div class="tint"></div><div class="sweep"></div></div>
-    </div>
-    <span class="badge r r-pop" style="left:calc(1070*var(--s));top:calc(250*var(--s));--d:900ms">{{i:nodes}}A floating fact</span>
-  </div>
-</section>
-
-<!-- statement + three cards -->
-<section class="slide g-base" id="intro" data-label="Intro" data-curve="Coast" data-dur="Sweep 700 ms">
-  <div class="stage">
-    <p class="abs eyebrow" style="--x:110;--y:150">{{i:user}}<span data-dec>01 · INTRO</span></p>
-    <h2 class="abs disp h72" style="--x:104;--y:215;--w:1500"><span data-split data-base="100">A statement that</span> <span class="neon glitch" data-split data-base="300">frames the deck.</span></h2>
-    <p class="abs t26 mute r r-up" style="--x:110;--y:400;--w:1250;--d:500ms">Supporting paragraph with a <span class="markup">marked phrase</span> that gets a colour block wiping in behind it.</p>
-    <div class="abs grid3" style="--x:110;--y:590;--w:1700">
-      <div class="card hud tilt r r-up" style="--d:700ms"><span class="cic">{{i:nodes}}</span><h3>First idea</h3><p>Two lines that explain it in plain words.</p></div>
-      <div class="card hud tilt r r-up" style="--d:820ms"><span class="cic">{{i:plug}}</span><h3>Second idea</h3><p>Two lines that explain it in plain words.</p></div>
-      <div class="card hud tilt r r-up" style="--d:940ms"><span class="cic">{{i:globe}}</span><h3>Third idea</h3><p>Two lines that explain it in plain words.</p></div>
+    <h1 class="abs h160 cover-title" style="--x:50;--y:63" data-chars>AI Briefly</h1>
+    <p class="abs h96" style="--x:50;--y:230" data-split data-base="450">Motion DNA</p>
+    <p class="abs t27 r r-up" style="--x:50;--y:375;--w:608;--d:800ms">A motion library and MCP plugin for After Effects.</p>
+    <p class="abs t21 hint r r-fade" style="--x:50;--y:470;--d:1400ms"><kbd>↓</kbd> Scroll or use the arrow keys to present</p>
+    <div class="abs people" style="--x:50;--y:830">
+      <div class="person r r-up" style="--d:1150ms"><img src="assets/img02.jpg" alt="Gian Orsi"><div><b>Gian Orsi</b><span>ACD · AI Motion</span></div></div>
+      <div class="person r r-up" style="--d:1280ms"><img src="assets/img03.jpg" alt="Aaron Amortegui"><div><b>Aaron Amortegui</b><span>ACD · AI-Driven Scalable Systems</span></div></div>
     </div>
   </div>
 </section>
 
-<!-- timeline -->
-<section class="slide g-soft" id="path" data-label="Timeline" data-curve="Whip" data-dur="Stage 1100 ms">
+<!-- 02 problem -->
+<section class="slide g-stone" id="problem" data-label="The problem" data-curve="Settle" data-dur="Stage 1100 ms">
   <div class="stage">
-    <p class="abs eyebrow" style="--x:110;--y:150">{{i:route}}<span data-dec>01 · TIMELINE</span></p>
-    <h2 class="abs disp h72" style="--x:104;--y:215;--w:1500"><span data-split data-base="100">From here</span> <span class="neon" data-split data-base="260">to there.</span></h2>
-    <div class="tl" style="top:calc(470*var(--s))"></div>
-    <div class="ev hud tilt r r-up" style="left:calc(110*var(--s));top:calc(560*var(--s));--d:500ms"><span class="evi">{{i:film}}</span><p class="yr">2010 — 2015</p><h3>First stop</h3><p>What happened there.</p></div>
-    <div class="ev hud tilt r r-up" style="left:calc(540*var(--s));top:calc(560*var(--s));--d:660ms"><span class="evi">{{i:layers}}</span><p class="yr">2015 — 2020</p><h3>Second stop</h3><p>What happened there.</p></div>
-    <div class="ev hud tilt r r-up" style="left:calc(970*var(--s));top:calc(560*var(--s));--d:820ms"><span class="evi">{{i:flask}}</span><p class="yr">2020 — 2024</p><h3>Third stop</h3><p>What happened there.</p></div>
-    <div class="ev hud tilt r r-up" style="left:calc(1400*var(--s));top:calc(560*var(--s));--d:980ms"><span class="evi">{{i:spark}}</span><p class="yr">2024 — NOW</p><h3>Now</h3><p>What happens now.</p></div>
+    <h2 class="abs h80" style="--x:50;--y:116;--w:1825" data-split>AI can now drive After Effects</h2>
+    <p class="abs t32 semi r r-up wrap" style="--x:50;--y:208;--w:1500;--d:350ms">New LLM capabilities can speed up animation and control software like <span class="mark m-lav" style="--d:800ms">After Effects</span> efficiently. Three gaps still kept it out of real client work.</p>
+    <div class="cols3">
+      <div class="abs" style="--x:47;--y:318;--w:549">
+        <svg class="illo" style="--d:500ms" aria-hidden="true" viewBox="0 0 445 300" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M243.694 278.488H70.2306M152.824 18.7525H150.53C103.938 18.7525 66.168 56.5227 66.168 103.114V146.275M160.992 18.7525H163.413C210.005 18.7525 247.775 56.5227 247.775 103.114L247.775 197.715M66.168 273.797V183.9M247.775 239.546L247.775 273.797M202.155 18.7508H160.779M111.478 18.7508H152.854M212.41 106.537V113.164H108.701V106.537H212.41V197.69H108.701V106.537M102.244 128.817H91.2224M102.244 146.274H85.3352M102.244 164.896H93.3729M102.244 184.064H87.2584M81.9442 184.064H74.6861M145.297 197.69H270.327C281.885 197.69 291.254 207.06 291.254 218.618C291.254 230.176 281.885 239.545 270.327 239.545H145.297M211.972 213.941H245.437L254.228 219.787L262.443 213.941H290.607M66.168 235.545C75.5166 235.545 83.095 227.967 83.095 218.618C83.095 209.27 75.5166 201.691 66.168 201.691M243.714 281.005L243.713 274.732C243.713 274.221 244.127 273.807 244.638 273.807L250.911 273.805C251.422 273.805 251.836 274.22 251.836 274.731L251.838 281.004C251.838 281.515 251.423 281.929 250.912 281.929L244.639 281.93C244.128 281.93 243.714 281.516 243.714 281.005ZM62.107 281.005L62.1059 274.732C62.1058 274.221 62.5201 273.807 63.0312 273.807L69.304 273.805C69.8152 273.805 70.2296 274.22 70.2297 274.731L70.2308 281.004C70.2309 281.515 69.8166 281.929 69.3055 281.929L63.0326 281.93C62.5215 281.93 62.1071 281.516 62.107 281.005ZM85.3352 164.897L78.5896 162.429C73.9828 160.701 70.2809 157.082 68.6357 152.475L66.1677 145.729L63.6998 152.475C61.9723 157.082 58.3527 160.784 53.7459 162.429L47.0002 164.897L53.7459 167.365C58.3527 169.092 62.0545 172.712 63.6998 177.319L66.1677 184.064L68.6357 177.319C70.3632 172.712 73.9828 169.01 78.5896 167.365L85.3352 164.897ZM153.147 14.9165H160.777V22.5893H153.147V14.9165ZM111.333 18.7499C111.333 20.2982 110.085 21.5534 108.545 21.5534C107.005 21.5534 105.757 20.2982 105.757 18.7499C105.757 17.2015 107.005 15.9463 108.545 15.9463C110.085 15.9463 111.333 17.2015 111.333 18.7499ZM208.169 18.7499C208.169 20.2982 206.921 21.5534 205.381 21.5534C203.842 21.5534 202.594 20.2982 202.594 18.7499C202.594 17.2015 203.842 15.9463 205.381 15.9463C206.921 15.9463 208.169 17.2015 208.169 18.7499ZM66.4521 197.69H191.482C203.04 197.69 212.409 207.06 212.409 218.618C212.409 230.176 203.04 239.545 191.482 239.545H66.4521V197.69ZM207.394 218.618C207.394 227.967 199.816 235.545 190.467 235.545C181.119 235.545 173.54 227.967 173.54 218.618C173.54 209.27 181.119 201.691 190.467 201.691C199.816 201.691 207.394 209.27 207.394 218.618ZM165.961 218.618C165.961 227.967 158.382 235.545 149.034 235.545C139.685 235.545 132.107 227.967 132.107 218.618C132.107 209.27 139.685 201.691 149.034 201.691C158.382 201.691 165.961 209.27 165.961 218.618ZM154.912 178.528C154.912 186.519 148.434 192.997 140.444 192.997C132.453 192.997 125.976 186.519 125.976 178.528C125.976 170.538 132.453 164.06 140.444 164.06C148.434 164.06 154.912 170.538 154.912 178.528ZM124.528 218.618C124.528 227.967 116.95 235.545 107.601 235.545C98.2526 235.545 90.6741 227.967 90.6741 218.618C90.6741 209.27 98.2526 201.691 107.601 201.691C116.95 201.691 124.528 209.27 124.528 218.618ZM162.761 175.846H207.394V192.996H162.761V175.846ZM118.127 125.111H162.761L118.127 167.635V125.111ZM182.539 119.593L207.394 144.449L182.539 169.304L157.684 144.449L182.539 119.593ZM218.276 72.8587C219.971 77.436 223.531 80.9961 228.108 82.6914C223.531 84.3867 219.971 87.9468 218.276 92.5242C216.58 87.9468 213.02 84.3867 208.443 82.6914C213.02 80.9961 216.58 77.436 218.276 72.8587Z" stroke="currentColor" stroke-width="1.36971" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p class="h107" style="margin-top:calc(22 * var(--s))" data-split data-base="560">Same moves</p>
+        <p class="t32 r r-up wrap" style="margin-top:calc(14 * var(--s));--d:760ms">Alone, an LLM keys everything linearly, fades it all in at once, holds still and cuts. AI motion all looks the same.</p>
+      </div>
+      <div class="abs" style="--x:667;--y:318;--w:549">
+        <svg class="illo" style="--d:700ms" aria-hidden="true" viewBox="0 0 429 300" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M132.604 273.598V256.412M136.579 277.595H300.54M132.583 223.091V186.56M137.612 99.9631C136.139 103.963 135.108 108.111 134.224 112.259M139.961 93.6881C143.525 85.6653 148.282 78.2901 154.007 71.7878M294.767 89.2607C300.512 100.076 303.783 111.817 304.372 124.706M221.111 42.6357C220.227 42.6357 218.635 42.6357 218.635 42.6357C208.323 42.6357 198.6 44.4135 189.467 47.6728L185.761 49.3433M269.544 59.5675C276.454 64.6974 282.498 70.6073 287.577 77.5977M304.519 273.601V184.119M303.633 185.596C303.633 185.596 311.146 174.04 313.208 163.818C314.387 158.04 312.914 147.522 312.619 145.003C312.324 142.485 311.882 137.448 311.882 137.448C311.882 137.448 308.199 139.522 306.432 142.633C304.664 145.744 305.548 151.522 305.253 155.818C304.959 160.114 302.601 163.225 302.601 163.225M278.444 195.965C278.444 195.965 286.104 190.78 289.345 186.78C292.586 182.78 295.68 176.706 295.68 176.706M270.486 188.854C270.486 188.854 285.364 178.039 288.605 171.817C291.846 165.594 293.467 163.372 294.94 158.631C296.413 153.89 298.181 142.039 299.065 138.335C299.949 134.631 302.453 126.927 304.221 124.853C305.989 122.779 309.966 121.298 309.966 121.298L308.198 139.965M250.451 277.595C250.451 269.299 251.629 258.336 253.986 254.188C257.375 248.262 279.325 232.854 281.682 231.521C284.039 230.188 296.708 220.262 300.096 210.484C303.337 200.706 303.189 197.891 303.631 192.706C303.631 191.373 303.631 188.706 303.631 185.447C303.484 176.41 302.6 163.076 302.6 163.076C302.6 163.076 300.096 164.113 298.77 165.595C294.793 169.891 295.087 188.558 294.498 192.262C293.614 198.188 290.52 201.891 288.458 204.262C286.396 206.632 279.914 211.373 279.914 211.373M215.833 277.596C216.275 272.411 216.57 267.67 216.57 264.707C216.57 255.522 216.57 235.078 217.453 221.744C217.453 220.263 217.601 218.929 217.748 217.744C218.927 204.855 227.618 186.189 230.27 180.707C232.922 175.226 235.868 165.003 236.899 162.188C238.078 159.374 239.403 142.04 244.707 144.855C249.421 147.374 249.421 158.04 247.8 168.114C246.769 175.077 240.876 188.263 243.086 190.929C245.296 193.596 256.05 187.818 258.702 186.337C261.5 185.003 277.41 171.966 280.651 167.67C288.606 157.448 291.405 137.596 293.173 133.448C295.383 128.41 302.012 128.411 302.012 128.411M132.454 172.706C132.454 172.706 125.383 160.854 123.762 150.484C122.879 144.706 124.646 134.187 124.941 131.669C125.236 129.15 125.825 124.113 125.825 124.113C125.825 124.113 129.36 126.187 130.981 129.595C132.601 133.002 131.57 138.484 131.717 142.78C131.865 147.076 134.074 150.335 134.074 150.335M157.348 184.114C157.348 184.114 149.983 178.632 146.889 174.484C143.796 170.336 140.849 164.114 140.849 164.114M165.452 177.151C165.452 177.151 151.015 165.743 147.922 159.521C146.301 156.114 143.355 150.928 142.029 146.039C140.998 142.188 139.378 129.299 138.641 125.595C137.904 121.891 135.695 114.039 133.927 111.817C132.159 109.595 128.182 108.113 128.182 108.113L129.213 126.928M154.994 199.375C154.994 199.375 148.807 194.338 146.745 191.968C144.682 189.597 141.736 185.745 141.147 179.671C140.705 175.968 141.589 157.301 137.906 152.856C136.58 151.375 134.223 150.19 134.223 150.19C134.223 150.19 133.192 161.597 132.602 170.338C132.602 171.079 132.602 171.819 132.602 172.412C132.455 175.671 132.308 178.338 132.308 179.671C132.308 182.042 132.308 183.819 132.602 186.042C132.897 188.708 133.486 192.116 135.107 197.597C138.053 207.523 150.28 217.745 152.784 219.227C155.141 220.708 176.502 236.857 179.743 242.931C182.837 249.005 182.837 268.412 181.953 274.783C181.953 275.672 181.658 276.412 181.511 277.449M135.844 115.816C135.844 115.816 142.473 116.112 144.388 121.149C146.008 125.445 148.218 145.297 155.731 155.816C158.825 160.112 174.44 173.742 177.092 175.223C179.743 176.705 190.203 182.927 192.56 180.26C194.917 177.742 189.466 164.26 188.729 157.297C187.551 147.075 187.993 136.557 192.707 134.186C198.158 131.52 198.894 149.001 199.925 151.816C200.957 154.631 203.461 164.853 205.965 170.483C208.47 176.112 216.424 194.927 217.161 207.964C217.308 211.816 217.456 216.557 217.456 221.594M129.604 83.4951L129.908 83.1274C129.908 83.1274 133.52 86.1064 134.777 87.7605C136.034 89.4146 141.315 95.5547 141.315 95.5547L137.313 100.408M109.299 73.1559C109.299 73.1559 110.985 74.043 112.633 74.3033C114.28 74.5636 122.782 76.6319 125.513 79.0902C128.238 81.4739 129.471 83.658 129.471 83.658L126.105 87.4029M109.284 73.1736C109.284 73.1736 110.481 74.6541 111.051 76.2218C111.62 77.7895 115.27 85.7414 118.204 87.9546C121.063 90.1749 123.442 90.9698 123.442 90.9698L126.076 87.4383M137.34 100.376C137.34 100.376 130.306 96.3607 128.443 95.4421C126.579 94.5234 122.967 91.5444 122.967 91.5444L123.397 91.0234M175.573 128.126C174.529 129.392 172.738 128.671 172.163 128.06C171.589 127.449 146.585 111.155 142.842 108.068C138.378 104.387 137.341 100.374 137.341 100.374M175.775 127.882C176.819 126.615 175.769 124.995 175.06 124.547C174.351 124.099 153.592 102.657 149.85 99.5711C145.385 95.8894 141.248 95.6359 141.248 95.6359M255.634 134.716L264.682 125.669M264.682 125.669C265.66 126.647 267.247 126.647 268.226 125.668C269.204 124.69 269.204 123.103 268.226 122.125C267.247 121.146 265.66 121.146 264.682 122.125C263.703 123.103 263.703 124.69 264.682 125.669ZM174.675 55.4172V75.6271M178.544 56.4645L186.656 60.8536L182.065 69.785M164.258 63.0452L161.684 72.7672L170.072 75.6274M291.851 68.7089L293.766 73.7459C294.945 76.857 297.302 79.2274 300.396 80.4126L305.404 82.3386L300.396 84.2645C297.302 85.4497 294.945 87.82 293.766 90.9312L291.851 95.9682L289.936 90.9312C288.758 87.82 286.401 85.4497 283.307 84.2645L278.298 82.3386L283.307 80.4126C286.401 79.2274 288.758 76.857 289.936 73.7459L291.851 68.7089ZM300.544 273.6H308.352V281.452H300.544V273.6ZM128.628 273.6H136.436V281.452H128.628V273.6ZM132.59 222.043C135.683 230.34 142.018 236.71 150.267 239.821C142.018 242.932 135.683 249.303 132.59 257.599C129.496 249.303 123.161 242.932 114.912 239.821C123.161 236.71 129.496 230.34 132.59 222.043ZM258.997 138.318C265.223 132.433 268.303 131.874 273.541 132.682L282.21 107.98L257.508 116.649C258.316 121.887 257.757 124.967 251.872 131.193L258.997 138.318ZM170.603 96.2641L195.129 82.9127C197.517 81.6127 198.518 78.7048 197.436 76.2105L182.313 41.3553C181.25 38.9057 178.518 37.6437 175.964 38.4226L149.756 46.4146C146.784 47.3209 145.245 50.5953 146.443 53.4621L163.247 93.6767C164.448 96.5491 167.869 97.7526 170.603 96.2641ZM258.392 92.2859L219.731 82.1667C217.094 81.4766 215.424 78.8844 215.885 76.1984L224.536 25.7905C224.988 23.1542 227.35 21.2793 230.02 21.4366L269.189 23.745C272.285 23.9275 274.549 26.7394 274.067 29.8032L264.909 88.0219C264.426 91.0915 261.398 93.0727 258.392 92.2859ZM231.719 50.3398L227.241 72.5446L255.977 79.8219L260.455 55.5641L231.719 50.3398ZM230.547 44.9643L231.995 50.1618L260.521 42.0995L259.471 35.8313L230.547 44.9643Z" stroke="currentColor" stroke-width="1.36415" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p class="h107" style="margin-top:calc(22 * var(--s))" data-split data-base="700">Code only</p>
+        <p class="t32 r r-up wrap" style="margin-top:calc(14 * var(--s));--d:900ms">Many AI motion tools only output code or a rendered clip. Client work needs layers and keyframes in After Effects that a team can still edit.</p>
+      </div>
+      <div class="abs" style="--x:1281;--y:318;--w:549">
+        <svg class="illo" style="--d:900ms" aria-hidden="true" viewBox="0 0 429 300" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="currentColor" stroke-width="1.22449" stroke-linecap="round" stroke-linejoin="round">
+<path d="M239.937 47.3476C239.937 49.1332 239.693 50.9189 239.206 52.6233C236.69 61.2267 228.249 67.6386 218.185 67.6386C208.121 67.6386 199.68 61.3078 197.164 52.6233C196.677 50.9189 196.433 49.2144 196.433 47.3476C196.433 45.4809 196.595 44.7504 196.839 43.5329C197.326 41.2603 198.138 39.1501 199.355 37.2021C203.089 31.1148 210.15 27.0566 218.185 27.0566C226.22 27.0566 234.255 31.7641 237.827 38.5819C238.638 40.124 239.207 41.7473 239.531 43.5329C239.775 44.7504 239.937 46.049 239.937 47.3476Z"/>
+<path d="M198.227 60.9012C197.334 61.9563 197 62.7726 197 63.9089C197 65.0452 197 64.4771 197.082 64.8017C198.056 69.1846 206.091 72.6746 216.236 73.0804C216.886 73.0804 217.535 73.0804 218.184 73.0804C229.222 73.0804 238.232 69.4281 239.287 64.7206C239.287 64.3959 239.368 64.1524 239.368 63.8278C239.368 62.6103 239.032 61.9563 238.059 60.9012"/>
+<path d="M240.83 55.8705C240.1 57.5749 239.126 59.117 237.99 60.578C233.445 66.6653 226.302 70.5611 218.186 70.5611C217.43 70.5611 216.887 70.5612 216.238 70.48C208.933 69.9118 202.521 66.1783 198.382 60.578C197.245 59.117 196.353 57.5749 195.541 55.8705"/>
+<path d="M243.061 43.7425C242.656 30.0258 231.74 19.5918 218.266 19.5918C204.793 19.5918 193.736 30.3451 193.331 44.0618"/>
+<path d="M195.8 42.4649C196.125 40.6793 196.434 39.7207 197.083 38.0975C200.492 30.0622 208.689 24.4619 218.267 24.4619C227.844 24.4619 237.016 30.7927 240.019 39.6396C240.425 40.7759 240.604 41.5242 240.847 42.7417"/>
+<path d="M239.207 52.6409V53.8407C239.207 54.8146 239.937 55.6263 240.83 55.8698C240.992 55.8698 241.154 55.8698 241.317 55.8698C241.885 55.8698 242.453 55.6262 242.778 55.2204C243.102 54.8146 243.346 54.3276 243.346 53.7595V44.9938C243.346 44.6691 243.346 44.3445 243.184 44.101C242.859 43.3705 242.128 42.8835 241.317 42.8835C240.505 42.8835 240.992 42.8835 240.911 42.8835C240.343 42.9647 239.937 43.2893 239.612 43.7763"/>
+<path d="M197.245 53.1914V53.8408C197.245 54.4089 197.002 54.8959 196.677 55.3017C196.353 55.7076 196.028 55.7887 195.703 55.8699C195.541 55.8699 195.379 55.8699 195.216 55.8699C194.08 55.8699 193.187 54.9771 193.187 53.7596V44.9939C193.187 44.6693 193.187 44.4258 193.35 44.1011C193.674 43.3707 194.405 42.8837 195.216 42.8837C196.028 42.8837 195.541 42.8837 195.622 42.8837C196.19 42.9648 196.353 43.2978 196.677 43.7848"/>
+<path d="M184.663 72.9082V54.9798C184.663 50.11 188.396 46.133 193.104 45.646"/>
+<path d="M243.347 45.646C248.054 46.133 251.788 50.11 251.788 54.9798V73.1636"/>
+<path d="M239.368 64.557C242.939 65.3686 246.024 67.3166 248.459 69.8327L251.867 73.7286L278.408 104.165C281.086 107.249 282.06 111.389 281.168 115.366L278.083 128.352"/>
+<path d="M261.446 126.647L262.014 123.4V122.913C262.501 119.342 260.877 115.852 257.955 113.823L250.732 108.953L249.109 107.817L248.459 111.55L247.566 117.151L244.482 135.818H192.132L188.479 113.823L187.505 107.817V107.654L182.96 110.739L180.688 112.281C176.386 115.203 172.815 118.936 170.055 123.319C169.812 123.725 169.568 124.131 169.325 124.537L164.374 133.302"/>
+<path d="M196.758 64.6481C194.648 65.1351 193.026 65.9367 191.24 67.073C189.942 67.8847 188.724 68.6963 187.75 69.8326L186.452 71.2124L184.585 73.1603L177.118 81.1144L175.413 82.9L168.677 90.1236L166.972 91.9904L156.421 103.191C153.905 105.869 152.038 109.197 150.983 112.768C150.821 113.255 150.739 113.661 150.658 114.148L147.168 129.569"/>
+<path d="M242.534 65.7761C240.424 77.626 243.264 96.6184 248.702 107.251L249.027 107.9"/>
+<path d="M193.837 65.7761C195.947 77.626 193.106 96.6184 187.668 107.251L187.344 107.9"/>
+<path d="M205.036 114.15C206.784 114.15 208.201 112.733 208.201 110.985C208.201 109.237 206.784 107.82 205.036 107.82C203.288 107.82 201.871 109.237 201.871 110.985C201.871 112.733 203.288 114.15 205.036 114.15Z"/>
+<path d="M200.084 124.05C201.833 124.05 203.25 122.633 203.25 120.885C203.25 119.137 201.833 117.72 200.084 117.72C198.336 117.72 196.919 119.137 196.919 120.885C196.919 122.633 198.336 124.05 200.084 124.05Z"/>
+<path d="M231.415 114.15C233.163 114.15 234.58 112.733 234.58 110.985C234.58 109.237 233.163 107.82 231.415 107.82C229.666 107.82 228.249 109.237 228.249 110.985C228.249 112.733 229.666 114.15 231.415 114.15Z"/>
+<path d="M236.366 124.051C238.115 124.051 239.532 122.633 239.532 120.885C239.532 119.137 238.115 117.72 236.366 117.72C234.618 117.72 233.201 119.137 233.201 120.885C233.201 122.633 234.618 124.051 236.366 124.051Z"/>
+<path d="M256.658 79.4112C255.197 80.7098 254.223 82.6578 254.223 84.768C254.223 88.7451 257.388 91.9104 261.365 91.9104C264.989 91.9104 266.073 90.1248 266.073 90.1248"/>
+<path d="M258.524 81.8434C257.712 82.5739 257.225 83.7101 257.225 84.9276C257.225 87.2002 258.93 88.9858 260.959 88.9858C262.988 88.9858 263.84 87.704 263.84 87.704"/>
+<path d="M177.117 81.1977L182.555 86.0675L174.276 95.2391L168.676 90.2069"/>
+<path d="M230.928 76.5707H205.524C203.551 76.5707 201.952 78.1695 201.952 80.1419V97.4298C201.952 99.4021 203.551 101.001 205.524 101.001H230.928C232.9 101.001 234.499 99.4021 234.499 97.4298V80.1419C234.499 78.1695 232.9 76.5707 230.928 76.5707Z"/>
+<path d="M221.674 80.3031H229.06C230.196 80.3031 231.089 81.1959 231.089 82.3322V95.2372C231.089 96.3735 230.196 97.2663 229.06 97.2663H221.674"/>
+<path d="M218.184 80.4653H205.117V96.7792H218.184V80.4653Z"/>
+<path d="M217.616 85.5785H205.279M217.616 91.749H205.279M221.517 76.8892L221.517 100.988"/>
+<path d="M184.922 54.0864H187.26C189.451 54.0864 191.318 55.872 191.318 58.1446V66.9472"/>
+<path d="M244.239 66.1171V58.2259C244.239 56.0344 246.024 54.1677 248.297 54.1677H251.62"/>
+<path d="M259.822 135.332C259.822 135.332 262.501 131.518 269.156 133.222C275.812 134.927 275.73 135.657 275.73 135.657L278.49 128.677C278.49 128.677 274.269 126.567 270.13 126.08C265.991 125.593 261.283 126.729 261.283 126.729L259.903 135.332H259.822Z"/>
+<path d="M262.418 133.384C262.418 133.384 260.551 134.115 259.821 135.332C259.09 136.55 257.142 140.689 256.412 141.825C255.682 142.961 253.003 146.695 253.003 147.426C253.003 148.156 253.734 149.049 254.545 148.724C255.357 148.399 259.577 143.611 259.577 143.611C259.577 143.611 256.98 149.211 256.493 150.104C256.006 150.997 253.084 154.487 253.084 155.38C253.084 156.272 253.734 156.759 253.734 156.759C253.734 156.759 256.493 157.246 257.873 156.759C259.253 156.272 267.288 151.484 268.749 150.51C270.21 149.536 271.914 148.075 272.32 146.857C272.726 145.64 274.836 138.497 274.836 137.605C274.836 136.712 275.242 135.738 275.242 135.738"/>
+<path d="M262.418 147.668C262.418 147.668 260.064 151.239 258.766 152.376C257.467 153.512 253.49 156.434 253.49 156.434"/>
+<path d="M265.421 149.373C265.421 149.373 261.607 153.107 260.146 154.243C258.685 155.379 255.682 156.922 255.682 156.922"/>
+<path d="M164.535 133.629L161.37 139.554L160.558 141.015C160.558 141.015 160.558 140.771 160.396 140.365C160.234 140.041 160.071 139.716 159.747 139.31C158.854 138.255 157.149 137.119 153.659 136.957C150.251 136.875 147.978 136.794 146.923 136.713C146.436 136.713 146.192 136.713 146.192 136.713L146.76 129.733H147.247C148.627 129.733 152.604 129.814 155.932 130.463C161.938 131.681 163.805 132.898 164.373 133.385C164.535 133.548 164.617 133.629 164.617 133.629H164.535Z"/>
+<path d="M146.841 136.63C146.679 137.199 146.679 137.848 146.435 138.335C146.03 139.228 144.893 146.451 144.731 147.75C144.569 149.048 145.543 151.078 146.435 152.538C147.328 154.081 152.442 161.629 153.497 162.765C154.552 163.901 157.23 164.632 157.23 164.632C157.23 164.632 157.393 164.632 157.636 164.47C157.88 164.307 158.204 164.064 158.448 163.658C158.772 162.927 157.717 158.463 157.636 157.489C157.636 156.515 157.636 150.347 157.636 150.347C157.636 150.347 159.422 156.434 159.99 157.084C160.558 157.733 161.613 157.165 161.938 156.516C162.262 155.866 161.451 151.321 161.288 150.104C161.126 148.886 161.207 143.773 161.045 142.88C160.883 141.987 160.314 140.202 160.314 140.202"/>
+<path d="M153.417 152.784C153.417 152.784 153.985 157.005 154.715 158.547C155.446 160.089 157.718 164.472 157.718 164.472"/>
+<path d="M150.009 153.109C150.009 153.109 151.794 158.06 152.687 159.683C153.58 161.306 155.528 163.985 155.528 163.985"/>
+<path d="M224.517 80.3844V97.2665M227.844 80.3844V97.2665M171.518 87.1184L176.956 92.0694M174.845 84.0347L179.877 88.8234"/>
+<path d="M146.729 133.007C146.729 133.007 153.497 133.139 157.068 134.113C160.64 135.087 162.425 136.791 162.425 136.791"/>
+<path d="M276.866 132.166C276.866 132.166 271.996 129.325 267.938 129.244C263.88 129.163 261.039 129.974 261.039 129.974"/>
+<path d="M180.849 177.131C180.849 177.131 182.716 172.504 193.754 172.748C204.792 172.991 209.906 177.618 209.906 177.618"/>
+<path d="M182.717 192.39C182.717 192.39 186.45 197.179 194.242 196.692C202.034 196.205 207.715 192.634 207.715 192.634"/>
+<path d="M216.968 179.403C216.968 179.403 220.296 174.29 231.253 174.533C242.21 174.777 246.918 179.647 246.918 179.647"/>
+<path d="M216.968 198.072C216.968 198.072 221.026 201.887 228.899 201.481C238.152 200.994 245.457 197.261 245.457 197.261"/>
+<path d="M192.051 135.901C192.051 135.901 187.1 150.104 184.99 154.65C182.88 159.114 179.228 166.824 179.228 170.233C179.228 173.642 181.013 176.889 181.013 176.889C181.013 176.889 179.877 181.271 180.039 184.762C180.202 188.252 182.88 192.797 182.88 192.797L190.022 208.461C190.022 208.461 193.756 214.062 199.6 213.493C205.443 212.925 209.177 209.516 209.177 209.516C209.177 209.516 208.933 199.939 208.609 197.342C208.365 194.663 207.797 192.878 207.797 192.878C207.797 192.878 209.096 183.869 209.664 182.245C210.232 180.622 209.908 177.781 209.908 177.781C209.908 177.781 212.424 171.451 212.748 168.853C213.073 166.256 214.453 162.523 214.453 162.523C214.453 162.523 214.047 161.954 215.183 164.957C216.319 167.961 216.969 179.486 216.969 179.486C216.429 180.78 215.427 184.924 215.345 187.44C215.345 189.956 216.969 198.154 216.969 198.154C216.969 198.154 215.345 207 215.345 211.302C215.345 215.604 215.345 243.443 215.345 243.443C215.345 243.443 215.914 245.716 223.624 246.527C233.607 247.664 236.123 241.089 236.123 241.089L245.457 197.261C245.457 197.261 248.217 191.092 248.217 187.927C248.217 184.761 247.08 179.973 247.08 179.973C247.08 179.973 247.73 164.552 246.594 157.247C245.457 149.942 244.402 136.225 244.402 136.225"/>
+<path d="M215.426 243.845C215.426 243.845 215.102 247.498 214.858 251.799C214.615 255.939 214.939 261.62 214.939 261.62L213.965 263.406C213.235 264.786 212.91 266.328 213.154 267.789C213.559 270.873 213.478 275.337 221.351 275.986C229.224 276.636 231.172 265.678 231.172 265.678C231.172 265.678 233.039 258.536 233.445 255.371C233.85 252.205 234.695 243.326 234.695 243.326"/>
+<path d="M232.712 259.836C232.712 259.836 234.335 281.426 219.806 280.371C209.58 279.64 213.232 265.437 213.232 265.437C213.232 265.437 216.56 264.868 219.32 265.437C222.079 266.005 224.027 266.898 226.543 267.222L229.059 267.547"/>
+<path d="M219.809 251.152C219.809 251.152 217.942 255.86 219.403 257.158C220.864 258.457 225.49 258.863 226.302 257.727C227.113 256.59 228.168 253.1 226.789 252.289C225.409 251.477 219.809 251.152 219.809 251.152Z"/>
+<path d="M226.544 251.558L227.606 246.754M220.539 250.99V246.285M215.02 261.623L226.464 263.084"/>
+<path d="M227.52 253.426C227.52 253.426 229.143 254.237 230.929 254.318C232.714 254.4 233.482 253.8 233.482 253.8"/>
+<path d="M227.137 256.057C227.137 256.057 228.17 256.997 229.955 257.078C231.741 257.159 233.202 256.834 233.202 256.834"/>
+<path d="M219.24 252.129L215.101 251.642M218.753 255.534L214.857 255.047"/>
+<path d="M192.211 211.219C192.211 211.219 193.754 223.231 197.568 225.26C201.383 227.289 205.928 225.098 207.146 223.231C208.363 221.364 209.499 214.303 208.444 210.082"/>
+<path d="M192.211 211.3C192.211 211.3 193.916 225.747 197.649 228.02C201.383 230.292 206.009 227.857 207.227 225.747C208.444 223.637 210.059 214.827 209.085 210.201"/>
+<path d="M196.433 213.41C196.433 213.41 196.352 217.306 198.706 217.631C201.06 217.955 203.089 217.793 203.576 216.981C204.063 216.17 203.576 212.862 203.576 212.862"/>
+<path d="M209.174 209.434C209.661 214.71 205.847 219.174 204.629 220.716C203.412 222.258 197.406 221.203 195.863 220.229C194.321 219.255 192.455 211.869 192.455 211.869"/>
+<path d="M204.144 215.522L208.365 213.493M193.349 215.277L196.839 216.007M218.104 135.901L214.452 162.441M245.131 128.595L191.239 128.758"/>
+<path d="M277.095 229.199L273.26 235.128L279.189 238.963L283.024 233.035L277.095 229.199Z"/>
+<path d="M300.241 198.396L279.626 230.375M255.031 268.362L275.825 236.77"/>
+<path d="M253.572 273.232C255.006 273.232 256.169 272.069 256.169 270.634C256.169 269.2 255.006 268.037 253.572 268.037C252.137 268.037 250.975 269.2 250.975 270.634C250.975 272.069 252.137 273.232 253.572 273.232Z"/>
+<path d="M301.783 198.642C303.217 198.642 304.38 197.479 304.38 196.045C304.38 194.61 303.217 193.448 301.783 193.448C300.348 193.448 299.185 194.61 299.185 196.045C299.185 197.479 300.348 198.642 301.783 198.642Z"/>
+<path d="M152.326 67.1246L148.491 73.0534L154.419 76.8889L158.255 70.9601L152.326 67.1246Z"/>
+<path d="M175.495 36.3947L154.798 68.3733M130.284 106.357L150.753 74.7605"/>
+<path d="M128.825 111.227C130.259 111.227 131.422 110.065 131.422 108.63C131.422 107.196 130.259 106.033 128.825 106.033C127.39 106.033 126.228 107.196 126.228 108.63C126.228 110.065 127.39 111.227 128.825 111.227Z"/>
+<path d="M177.036 36.6378C178.47 36.6378 179.633 35.475 179.633 34.0406C179.633 32.6062 178.47 31.4433 177.036 31.4433C175.602 31.4433 174.439 32.6062 174.439 34.0406C174.439 35.475 175.602 36.6378 177.036 36.6378Z"/>
+<path d="M140.839 191.661L143.274 198.316C144.978 202.861 148.549 206.514 153.095 208.137L159.75 210.572L153.095 213.007C148.549 214.711 144.897 218.282 143.274 222.828L140.839 229.483L138.404 222.828C136.7 218.282 133.128 214.63 128.583 213.007L121.928 210.572L128.583 208.137C133.128 206.433 136.781 202.861 138.404 198.316L140.839 191.661Z"/>
+<path d="M287.733 52.1378L290.168 58.7933C291.872 63.3384 295.443 66.9908 299.988 68.6141L306.644 71.049L299.988 73.4839C295.443 75.1884 291.791 78.7596 290.168 83.3048L287.733 89.9602L285.298 83.3048C283.593 78.7596 280.022 75.1072 275.477 73.4839L268.822 71.049L275.477 68.6141C280.022 66.9096 283.674 63.3384 285.298 58.7933L287.733 52.1378Z"/>
+<path d="M275.59 236.916C274.454 238.62 273.619 239.789 272.402 241.493C262.5 254.317 248.458 263.732 232.307 267.79"/>
+<path d="M212.585 270.065H140.836V228.996"/>
+<path d="M287.742 89.3646V196.611C287.742 208.786 284.821 220.23 279.545 230.294"/>
+<path d="M155.12 68.5329C164.453 55.7902 177.927 46.1317 193.51 41.5865"/>
+<path d="M242.372 38.5866H287.742V52.5348"/>
+<path d="M151.051 74.8668C144.477 85.9051 140.836 98.2408 140.836 111.958V192.147"/>
+</g></svg>
+        <p class="h107" style="margin-top:calc(22 * var(--s))" data-split data-base="840">No memory</p>
+        <p class="t32 r r-up wrap" style="margin-top:calc(14 * var(--s));--d:1040ms">Each client’s motion guidelines, and the learnings from every review, were lost between projects.</p>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- interlude: a held still; the next slide (class cover-up) rises over it -->
-<div class="hold" id="case-hold">
-<section class="slide g-ink interlude" id="photo" data-label="Interlude" data-curve="Settle" data-dur="Stage 1100 ms">
-  <div class="bg zoom"><img class="drift" src="assets/interlude.jpg" alt="A wide still that sets the scene"></div>
-  <div class="scrim" style="background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(15,20,25,.6),rgba(15,20,25,.35))"></div>
-  <div class="stage" style="display:grid;place-items:center"><h2 class="disp h110" style="color:#fff;text-align:center"><span data-split data-base="200">A scene</span> <span class="neon" data-split data-base="400">sets the mood.</span></h2></div>
+<!-- 03 how we solved it -->
+<section class="slide g-leaf" id="solution" data-label="How we solved it" data-curve="Coast" data-dur="Sweep 700 ms">
+  <div class="bg zoom"><img class="drift" style="transform-origin:78% 40%" src="assets/img04.jpg" alt="Rex, a grinning salesman in a pink suit, holds up the Motion DNA box in a 1970s office"></div>
+  <div class="scrim"></div><div class="band top"></div><div class="band bot"></div>
+  <div class="stage">
+    <p class="abs eyebrow r r-fade" style="--x:50;--y:250">How we solved it</p>
+    <p class="abs h180 statement" style="--x:50;--y:300;--w:1100"><span data-split>We built</span><br><span class="serif" data-split data-base="220">Motion DNA.</span></p>
+    <p class="abs t48 definition r r-up wrap" style="--x:50;--y:697;--w:960;--d:650ms">A <span class="mark m-lav" style="--d:1050ms">motion library and MCP</span> <b>plugin for After Effects</b> that supports motion designers across the whole creative process, from small, granular tasks to complete multi-step workflows.</p>
+  </div>
 </section>
 
-<!-- section opener with a looping clip; it covers the interlude from the bottom (both inside the same .hold) -->
-<section class="slide g-base cover-up t-curtain" id="case" data-label="Case study" data-curve="Land" data-dur="Stage 1100 ms" data-rad="0">
-  <div class="bg side"><video src="assets/loop.webm" poster="assets/loop.jpg" muted loop playsinline data-auto></video></div>
+<!-- interlude: the office holds still while Library slides up over it -->
+<div class="hold">
+<section class="slide g-pine interlude" id="office" data-label="The office" data-curve="Settle" data-dur="Stage 1100 ms" aria-label="The 1985 office where the Motion DNA story takes place">
+  <div class="bg zoom"><img class="drift" style="transform-origin:50% 55%" src="assets/img05.jpg" alt="An empty 1985 office: wood panelling, a wall clock, cork boards and beige computers on the desks"></div>
+  <div class="scrim iscrim"></div><div class="band top"></div><div class="band bot"></div>
+  <div class="stage ihead">
+    <h2 class="ititle"><span data-split data-base="150">How does</span> <span class="hl"><span class="serif it" data-split data-base="520">it work?</span></span></h2>
+  </div>
+</section>
+
+<!-- 04–06 three parts: rise over the office together, then Brand profile and Agent mode slide in from the right -->
+<div class="hwrap pinned cover-up" id="parts" data-rad="72">
+  <span class="stop" style="top:0"></span>
+  <span class="stop" style="top:calc(var(--vh,1vh) * 100)"></span>
+  <span class="stop" style="top:calc(var(--vh,1vh) * 200)"></span>
+  <div class="hsticky">
+
+<!-- 04 library -->
+<section class="slide g-mint hpanel" id="library" data-label="Library" data-curve="Pop" data-dur="Arrive 467 ms">
   <div class="stage">
-    <p class="abs eyebrow" style="--x:110;--y:330">{{i:layers}}<span data-dec>02 · CASE STUDY</span></p>
-    <h2 class="abs disp h130" style="--x:104;--y:400;--w:1100"><span data-split data-base="150">Case</span> <span class="neon glitch" data-split data-base="300">name</span></h2>
-    <p class="abs t32 r r-up" style="--x:110;--y:600;--w:780;--d:650ms">What it is in one line. <span class="hl">Where it stands today.</span></p>
+    <div class="panel r r-wipe" style="left:calc(160 * var(--s));--d:150ms"><video src="assets/clip06.mp4" poster="assets/img07.jpg" muted loop playsinline preload="auto" data-auto aria-label="The Motion DNA panel: picking a move from the library, then the curves tab reshaping an easing curve"></video></div>
+    <p class="abs eyebrow r r-fade" style="--x:783;--y:300;--d:300ms">Part 1 of 3</p>
+    <h2 class="abs part-label" style="--x:783;--y:345;--w:977" data-split data-base="350">Library</h2>
+    <p class="abs t40 r r-up wrap" style="--x:783;--y:560;--w:900;--d:600ms"><span class="mark m-lav" style="--d:900ms">Ready-made</span> moves and <span class="mark m-lav" style="--d:1050ms">easing curves</span>: 80 moves, 14 curves, 9 styles and a kit of 159 pieces, applied as native keyframes.</p>
+    <p class="abs t27 r r-up wrap" style="--x:783;--y:740;--w:820;--d:760ms">Pick a move and apply it, or shape your own curve, save it and reuse it on every project.</p>
+  </div>
+</section>
+
+<!-- 05 brand profile -->
+<section class="slide g-peach hpanel" id="brand" data-label="Brand profile" data-curve="Pop" data-dur="Arrive 467 ms">
+  <div class="stage">
+    <p class="abs eyebrow r r-fade" style="--x:160;--y:300;--d:300ms">Part 2 of 3</p>
+    <h2 class="abs part-label" style="--x:160;--y:345;--w:977" data-split data-base="350">Brand profile</h2>
+    <p class="abs t40 r r-up wrap" style="--x:160;--y:560;--w:900;--d:600ms">Stores a <span class="mark m-spark" style="--d:900ms">brand’s motion guidelines</span>, its easing curves, speed benchmarks and rules, and applies them to every project.</p>
+    <p class="abs t27 r r-up wrap" style="--x:160;--y:740;--w:820;--d:760ms">Every review note becomes a new rule. Share the whole brand as one file.</p>
+    <div class="panel r r-wipe" style="left:calc(1287 * var(--s));--d:150ms"><video src="assets/clip08.mp4" poster="assets/img09.jpg" muted loop playsinline preload="auto" data-auto aria-label="The Brands tab: opening the brand Vela and activating it, its curves and timings, adding a rule from a review note, then downloading the brand as one file to share"></video></div>
+  </div>
+</section>
+
+<!-- 06 agent mode -->
+<section class="slide g-spark hpanel" id="agent" data-label="Agent mode" data-curve="Pop" data-dur="Arrive 467 ms">
+  <div class="stage">
+    <div class="panel r r-wipe" style="left:calc(160 * var(--s));--d:150ms"><video src="assets/clip10.mp4" poster="assets/img11.jpg" muted loop playsinline preload="auto" data-auto aria-label="The agent: a request typed in the chat, the steps it runs, its answer with time and cost, then a tour of the Prompt library: styles, a preview, techniques and the kit"></video></div>
+    <p class="abs eyebrow r r-fade" style="--x:783;--y:300;--d:300ms">Part 3 of 3</p>
+    <h2 class="abs part-label" style="--x:783;--y:345;--w:977" data-split data-base="350">Agent mode</h2>
+    <p class="abs t40 r r-up wrap" style="--x:783;--y:560;--w:900;--d:600ms">Handles <span class="mark m-mint" style="--d:900ms">technical tasks</span> and runs <span class="mark m-mint" style="--d:1050ms">workflows</span> across other platforms and tools such as Figma, Flora or Blender.</p>
+    <p class="abs t27 r r-up wrap" style="--x:783;--y:740;--w:820;--d:760ms">One sentence in the chat. It does the steps in After Effects and reports the time and cost.</p>
+  </div>
+</section>
+
+  </div>
+</div>
+</div>
+
+<!-- 07 workflow, pinned while it scrolls -->
+<section class="slide g-pine pinned" id="flow" data-label="Figma to After Effects" data-curve="Whip" data-dur="Stage 1100 ms">
+  <span class="stop" style="top:0"></span>
+  <span class="stop" style="top:calc(var(--vh,1vh) * 100)"></span>
+  <span class="stop" style="top:calc(var(--vh,1vh) * 200)"></span>
+  <span class="stop" style="top:calc(var(--vh,1vh) * 300)"></span>
+  <div class="sticky">
+    <div class="stage">
+      <p class="abs eyebrow r r-fade" style="--x:50;--y:116">Agent mode, in detail</p>
+      <h2 class="abs h80" style="--x:50;--y:156;--w:1700" data-split>From a Figma storyboard to an After Effects timeline</h2>
+      <ol class="abs flow-steps" style="--x:50;--y:330;--w:680" id="flowSteps">
+        <li class="fstep on"><div class="ftext r r-up" style="--d:350ms"><span class="fn">01</span><h3>Ask in one sentence</h3><p>“Grab this storyboard from Figma and animate it in an editorial style.”</p><span class="fbar"><i></i></span></div>
+          <div class="fmedia"><video src="assets/clip12.mp4" poster="assets/img13.jpg" muted loop playsinline preload="auto" aria-label="Dana types the prompt in the agent chat"></video></div></li>
+        <li class="fstep"><div class="ftext r r-up" style="--d:450ms"><span class="fn">02</span><h3>It reads the Figma file</h3><p>The agent pulls the storyboard frames and their layers straight from Figma.</p><span class="fbar"><i></i></span></div>
+          <div class="fmedia"><video src="assets/clip14.mp4" poster="assets/img15.jpg" muted loop playsinline preload="auto" aria-label="Two roads: Figma layers go to After Effects, layers marked AI go to Flora"></video></div></li>
+        <li class="fstep"><div class="ftext r r-up" style="--d:550ms"><span class="fn">03</span><h3>It builds the timeline</h3><p>Each frame becomes live layers and native keyframes in After Effects, on the library’s curves.</p><span class="fbar"><i></i></span></div>
+          <div class="fmedia"><video src="assets/clip16.mp4" poster="assets/img17.jpg" muted loop playsinline preload="auto" aria-label="The After Effects timeline built by the agent"></video></div></li>
+        <li class="fstep"><div class="ftext r r-up" style="--d:650ms"><span class="fn">04</span><h3>Refine, then render</h3><p>Ask for changes in plain words: it refines the motion and looks, then renders the spot.</p><span class="fbar"><i></i></span></div>
+          <div class="fmedia"><video src="assets/clip18.mp4" poster="assets/img19.jpg" muted loop playsinline preload="auto" aria-label="The car spot gets its transitions and renders"></video></div></li>
+      </ol>
+      <p class="abs t21 flow-hint r r-fade" style="--x:50;--y:960;--d:900ms;opacity:.6">Keep scrolling to step through</p>
+    </div>
+  </div>
+</section>
+
+<!-- 08 more you can ask -->
+<!-- pinned: the prompts cross the screen from right to left as you scroll (stops and height are set by the script) -->
+<section class="slide g-sea pinned" id="ask" data-label="More you can ask" data-curve="Pop" data-dur="Arrive 467 ms">
+  <span class="stop"></span><span class="stop"></span><span class="stop"></span><span class="stop"></span><span class="stop"></span><span class="stop"></span>
+  <div class="sticky">
+  <div class="bg zoom"><img class="drift" style="transform-origin:20% 50%" src="assets/img20.jpg" alt="A beige retro robot with green eyes in a 1970s office"></div>
+  <div class="scrim"></div><div class="band top"></div><div class="band bot"></div>
+  <div class="marquee" aria-hidden="true"><div class="mtrack" id="askTrack">
+    <div class="mitem"><span class="chip c-spark">Figma QA</span><p><span class="mq">“</span>QA this comp against its Figma layouts.<span class="mqe">”</span></p></div>
+    <div class="mitem"><span class="chip c-mint">Resizes</span><p><span class="mq">“</span>Resize this comp into every social format.<span class="mqe">”</span></p></div>
+    <div class="mitem"><span class="chip c-peach">Sound</span><p><span class="mq">“</span>Add a sound to every click.<span class="mqe">”</span></p></div>
+    <div class="mitem"><span class="chip c-lav">Blender</span><p><span class="mq">“</span>Connect to Blender and help me block out this scene with a complex camera move.<span class="mqe">”</span></p></div>
+  </div></div>
+  <div class="stage">
+    <h2 class="abs h80" style="--x:50;--y:116;--w:1100" data-split>More you can ask</h2>
+    <p class="abs t27 r r-up" style="--x:50;--y:208;--w:1100;--d:350ms">From a small, granular task to a full workflow, in the same chat.</p>
+    <div class="abs askbar r r-fade" style="--x:50;--y:270;--d:600ms" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <ul class="abs asklist" style="--x:980;--y:275;--w:870">
+      <li class="rule r r-up" style="--d:250ms"><span class="q" aria-hidden="true">“</span><span class="ptext"><span class="ghost" aria-hidden="true">QA this comp against its Figma layouts.</span><span data-type="QA this comp against its Figma layouts.">QA this comp against its Figma layouts.</span></span><span class="chip c-spark r r-pop" style="--d:1500ms">Figma QA</span></li>
+      <li class="rule r r-up" style="--d:350ms"><span class="q" aria-hidden="true">“</span><span class="ptext"><span class="ghost" aria-hidden="true">Resize this comp into every social format.</span><span data-type="Resize this comp into every social format.">Resize this comp into every social format.</span></span><span class="chip c-mint r r-pop" style="--d:2700ms">Resizes</span></li>
+      <li class="rule r r-up" style="--d:450ms"><span class="q" aria-hidden="true">“</span><span class="ptext"><span class="ghost" aria-hidden="true">Add a sound to every click.</span><span data-type="Add a sound to every click.">Add a sound to every click.</span></span><span class="chip c-peach r r-pop" style="--d:3550ms">Sound</span></li>
+      <li class="rule r r-up" style="--d:550ms"><span class="q" aria-hidden="true">“</span><span class="ptext"><span class="ghost" aria-hidden="true">Connect to Blender and help me block out this scene with a complex camera move.</span><span data-type="Connect to Blender and help me block out this scene with a complex camera move.">Connect to Blender and help me block out this scene with a complex camera move.</span></span><span class="chip c-lav r r-pop" style="--d:5600ms">Blender</span></li>
+    </ul>
+  </div>
+  </div>
+</section>
+
+<!-- interlude: the studio holds still while Behind the scenes slides up over it -->
+<div class="hold">
+<section class="slide g-pine interlude" id="studio" data-label="Behind the scenes (interlude)" data-curve="Settle" data-dur="Stage 1100 ms" aria-label="A 1985 TV studio seen from behind the set">
+  <div class="bg zoom"><img class="drift" style="transform-origin:50% 50%" src="assets/img21.jpg" alt="A 1985 TV studio: a green screen, two lights, a studio camera on a tripod and a desk with a computer and a Motion DNA box"></div>
+  <div class="scrim iscrim"></div><div class="band top"></div><div class="band bot"></div>
+  <div class="stage ihead">
+    <h2 class="ititle"><span data-split data-base="150">What’s behind the</span> <span class="hl"><span class="serif it" data-split data-base="520">scenes?</span></span></h2>
+  </div>
+</section>
+
+<!-- 09 behind the scenes -->
+<section class="slide g-pine cover-up" id="behind" data-label="Behind the scenes" data-curve="Settle" data-dur="Sweep 700 ms">
+  <div class="stage">
+    <h2 class="abs h80" style="--x:50;--y:116;--w:840" data-split>Behind the scenes</h2>
+    <p class="abs t27 r r-up wrap" style="--x:50;--y:215;--w:800;--d:350ms">Motion DNA is fed curated content, skills and direction. It runs on a set of motion skills and on motion references organised in a <span class="mark m-spark" style="--d:800ms">Motion Style Map</span>, the basis for the library’s presets and styles.</p>
+    <div class="abs" style="--x:50;--y:400;--w:800">
+      <div class="smrow r r-up" style="--d:500ms"><p class="num"><span data-count="20">20</span>+ films</p><p class="t24">Measured frame by frame: cuts, speed, time in motion and music.</p></div>
+      <div class="smrow rule r r-up" style="--d:620ms"><p class="num"><span data-count="4">4</span> families</p><p class="t24">Sorted so each style can be understood and replicated.</p></div>
+      <div class="smrow rule r r-up" style="--d:740ms"><p class="num"><span data-count="9">9</span> styles</p><p class="t24">Ready-made looks, from Calm Modern and Elegant to Editorial, Storybook and Collage, each a mix of moves and curves.</p></div>
+    </div>
+    <div class="chartcard r r-wipe" style="--d:150ms" role="img" aria-label="Every reference film plotted by measured energy, from calm to high-paced, and tone, from restrained to expressive. Elegant films cluster calm and restrained, the playful reels sit high-paced and expressive, character films are expressive at medium pace, and the two mixed-media films sit in between.">
+      <svg class="chart" id="chart" viewBox="912 133 1008 947" aria-hidden="true"></svg>
+    </div>
   </div>
 </section>
 </div>
 
-<!-- horizontal stretch: three panels, the scroll slides each in from the right -->
-<div class="hwrap pinned" id="parts" style="height:calc(var(--vh,1vh) * 300)">
-  <span class="stop" style="top:0"></span><span class="stop" style="top:calc(var(--vh,1vh) * 100)"></span><span class="stop" style="top:calc(var(--vh,1vh) * 200)"></span>
-  <div class="hsticky">
-  <section class="slide g-cyan hpanel" id="part1" data-label="Part one" data-curve="Pop" data-dur="Arrive 467 ms">
-    <div class="stage"><p class="abs eyebrow" style="--x:110;--y:150">{{i:grid}}<span>PART 1</span></p>
-      <h2 class="abs disp h110" style="--x:104;--y:300;--w:1200"><span data-split>One</span> <span class="neon" data-split data-base="150">part.</span></h2>
-      <p class="abs t26 r r-up" style="--x:110;--y:560;--w:900;--d:400ms">A short explanation of the first part.</p></div>
-  </section>
-  <section class="slide g-soft hpanel" id="part2" data-label="Part two" data-curve="Pop" data-dur="Arrive 467 ms">
-    <div class="stage"><p class="abs eyebrow" style="--x:110;--y:150">{{i:grid}}<span>PART 2</span></p>
-      <h2 class="abs disp h110" style="--x:104;--y:300;--w:1200"><span data-split>Another</span> <span class="neon" data-split data-base="150">part.</span></h2>
-      <p class="abs t26 r r-up" style="--x:110;--y:560;--w:900;--d:400ms">A short explanation of the second part.</p></div>
-  </section>
-  <section class="slide g-violet hpanel" id="part3" data-label="Part three" data-curve="Pop" data-dur="Arrive 467 ms">
-    <div class="stage"><p class="abs eyebrow" style="--x:110;--y:150">{{i:grid}}<span>PART 3</span></p>
-      <h2 class="abs disp h110" style="--x:104;--y:300;--w:1200"><span data-split>The last</span> <span data-split data-base="150">part.</span></h2>
-      <p class="abs t26 r r-up" style="--x:110;--y:560;--w:900;--d:400ms">A short explanation of the third part.</p></div>
-  </section>
-</div></div>
-
-<!-- film with stats; plays with sound on click -->
-<section class="slide g-base film" id="film" data-label="Film" data-curve="Coast" data-dur="Sweep 700 ms">
+<!-- 10 what we fed it: everything the plugin learned from -->
+<section class="slide g-earth" id="fed" data-label="What we fed it" data-curve="Settle" data-dur="Sweep 700 ms">
   <div class="stage">
-    <p class="abs eyebrow" style="--x:110;--y:150">{{i:film}}<span data-dec>02 · THE FILM</span></p>
-    <h2 class="abs disp h56" style="--x:104;--y:215;--w:640"><span data-split data-base="100">A heading</span> <span class="neon" data-split data-base="300">for the film.</span></h2>
-    <div class="abs stats" style="--x:110;--y:480;--w:620">
-      <div class="stat hud r r-up" style="--d:500ms"><b><span data-count="20">20</span><em>×</em></b><span>{{i:bolt}}FASTER</span></div>
-      <div class="stat hud r r-up" style="--d:600ms"><b><span data-count="5">5</span><em>×</em></b><span>{{i:target}}CHEAPER</span></div>
-    </div>
-    <div class="media hud r r-wipe" style="--l:790;--t:215;--w:1020;--h:590;--d:250ms">
-      <div class="clip"><video src="assets/film.webm" poster="assets/film.jpg" playsinline preload="metadata"></video></div>
-      <button class="playbtn" type="button"><span><i>{{i:play}}</i>Play the film</span></button>
+    <h2 class="abs h80" style="--x:50;--y:116;--w:1400"><span data-split>What we</span> <span class="hl peach"><span class="serif it" data-split data-base="300">fed it</span></span></h2>
+    <p class="abs t27 r r-up wrap" style="--x:50;--y:215;--w:1100;--d:350ms">Motion DNA is only as good as what it learns from. Everything here lives in the repo, so the LLM reads it in every session, and it keeps growing with every project.</p>
+    <div class="abs fedgrid" style="--x:50;--y:330;--w:1820">
+        <div class="fed rule r r-up" style="--d:400ms"><p class="num">2 skills</p><h3>How the LLM drives it</h3><p><i>motion-dna</i>: the After Effects bridge, the API and the house rules. <i>video-templates</i>: videos written as code, rebuilt in AE.</p></div>
+        <div class="fed rule r r-up" style="--d:490ms"><p class="num">20 films</p><h3>The Motion Style Map</h3><p>Measured frame by frame and by ear: 209 behaviors, fitted curves, cuts on the beat. The gaps became new curves, presets and styles.</p></div>
+        <div class="fed rule r r-up" style="--d:580ms"><p class="num">14 curves</p><h3>Motion tokens</h3><p>14 curves and 6 durations that every preset asks for, so the whole library retunes in one place.</p></div>
+        <div class="fed rule r r-up" style="--d:670ms"><p class="num">20 engines</p><h3>Open source, put to work</h3><p>Tone.js, react-spring, anime.js, matter.js, gl-transitions, three.js, PixiJS, Rapier, faster-whisper, FFmpeg and more.</p></div>
+        <div class="fed rule r r-up" style="--d:760ms"><p class="num">180 resources</p><h3>Outside, license checked</h3><p>Scripts, expression libraries, VFX, sound effects and music, each checked before it can ship.</p></div>
+        <div class="fed rule r r-up" style="--d:850ms"><p class="num">703 prompts</p><h3>Videos made as code</h3><p>Community prompts indexed by use and quality, rewritten as 15 templates on our own tokens. Never copied.</p></div>
+        <div class="fed rule r r-up" style="--d:1030ms"><p class="num">54 routes</p><h3>Briefs and lessons</h3><p>Routes that turn a brief into options, and a log where every review note and every fix becomes a rule.</p></div>
     </div>
   </div>
 </section>
 
-<!-- pinned steps: the scroll picks the step; its clip plays and its bar fills -->
-<section class="slide g-dark pinned" id="steps" data-label="How it works" data-curve="Whip" data-dur="Stage 1100 ms" style="height:calc(var(--vh,1vh) * 300)">
-  <span class="stop" style="top:0"></span><span class="stop" style="top:calc(var(--vh,1vh) * 100)"></span><span class="stop" style="top:calc(var(--vh,1vh) * 200)"></span>
-  <div class="sticky"><div class="stage">
-    <p class="abs eyebrow" style="--x:110;--y:150">{{i:route}}<span>02 · HOW IT WORKS</span></p>
-    <h2 class="abs disp h56" style="--x:104;--y:215;--w:1500"><span data-split>Three steps,</span> <span class="neon" data-split data-base="200">one scroll.</span></h2>
-    <ol class="abs steps" style="--x:110;--y:360;--w:560">
-      <li class="step on"><div class="stext"><span class="sn">1</span><h3>Step one</h3><p>What happens in this step.</p><span class="sbar"><i></i></span></div><div class="smedia"><video src="assets/step1.webm" muted loop playsinline></video></div></li>
-      <li class="step"><div class="stext"><span class="sn">2</span><h3>Step two</h3><p>What happens in this step.</p><span class="sbar"><i></i></span></div><div class="smedia"><video src="assets/step2.webm" muted loop playsinline></video></div></li>
-      <li class="step"><div class="stext"><span class="sn">3</span><h3>Step three</h3><p>What happens in this step.</p><span class="sbar"><i></i></span></div><div class="smedia"><video src="assets/step3.webm" muted loop playsinline></video></div></li>
-    </ol>
-  </div></div>
-</section>
-
-<!-- diagram -->
-<section class="slide g-base" id="system" data-label="System" data-curve="Pop" data-dur="Arrive 467 ms">
-  <div class="stage">
-    <p class="abs eyebrow" style="--x:110;--y:150">{{i:nodes}}<span data-dec>03 · THE SYSTEM</span></p>
-    <h2 class="abs disp h56" style="--x:104;--y:215;--w:1500"><span data-split data-base="100">One input in.</span> <span class="neon" data-split data-base="260">The result out.</span></h2>
-    <p class="abs mono r r-fade" style="--x:110;--y:325;--w:600;--d:900ms">{{i:target}} HOVER A NODE TO FOLLOW ITS LINKS</p>
-    <div class="abs" style="--x:110;--y:380;--w:1700"><svg class="flow" data-flow="example" viewBox="0 0 1700 560" role="img" aria-label="Describe the diagram in one sentence"></svg></div>
-  </div>
-</section>
-
-<!-- scroll marquee: big lines cross the screen with the scroll -->
-<section class="slide g-ink pinned" id="lines" data-label="What you can ask" data-curve="Pop" data-dur="Arrive 467 ms">
-  <span class="stop" style="top:0"></span><span class="stop"></span>
+<!-- 11 every app under one roof, pinned in three states -->
+<section class="slide g-sea pinned" id="roof" data-label="Every app under one roof" data-curve="Land" data-dur="Sweep 700 ms" data-st="0">
+  <span class="stop" style="top:0"></span>
+  <span class="stop" style="top:calc(var(--vh,1vh) * 100)"></span>
+  <span class="stop" style="top:calc(var(--vh,1vh) * 200)"></span>
   <div class="sticky">
-    <div class="smarq"><div class="mtrack" id="mtrack"><p class="mitem">“A first big line.”</p><p class="mitem">“A second big line.”</p><p class="mitem">“A third one.”</p></div></div>
-    <div class="stage"><p class="abs eyebrow" style="--x:110;--y:150">{{i:spark}}<span>03 · IN THEIR WORDS</span></p><div class="abs mbar" style="--x:110;--y:920;--w:300"><i></i><i></i><i></i></div></div>
-  </div>
-</section>
-
-<!-- cards grid with status -->
-<section class="slide g-base" id="results" data-label="Results" data-curve="Pop" data-dur="Arrive 467 ms">
-  <div class="stage">
-    <p class="abs eyebrow" style="--x:110;--y:150">{{i:spark}}<span data-dec>04 · RESULTS</span></p>
-    <h2 class="abs disp h56" style="--x:104;--y:215;--w:1500"><span data-split data-base="100">What came</span> <span class="neon glitch" data-split data-base="260">out of it.</span></h2>
-    <div class="abs grid4" style="--x:110;--y:360;--w:1700">
-      <div class="card hud tilt r r-up" style="--d:300ms"><div class="cardtop"><span class="cic">{{i:film}}</span><span class="st ok">LIVE</span></div><h3>Result one</h3><p>One or two lines.</p></div>
-      <div class="card hud tilt r r-up" style="--d:380ms"><div class="cardtop"><span class="cic">{{i:target}}</span><span class="st ok">LIVE</span></div><h3>Result two</h3><p>One or two lines.</p></div>
-      <div class="card hud tilt r r-up" style="--d:460ms"><div class="cardtop"><span class="cic">{{i:cpu}}</span><span class="st">TESTING</span></div><h3>Result three</h3><p>One or two lines.</p></div>
-      <div class="card hud tilt r r-up" style="--d:540ms"><div class="cardtop"><span class="cic">{{i:code}}</span><span class="st">TESTING</span></div><h3>Result four</h3><p>One or two lines.</p></div>
+    <div class="stage">
+      <h2 class="abs h80" style="--x:50;--y:116;--w:1200" ><span data-split>Every app under</span> <span class="hl"><span class="serif it" data-split data-base="330">one roof</span></span></h2>
+      <div class="abs caps eyebrow" style="--x:50;--y:212;--w:600">
+        <p class="cap1">1 · Every app talks to Motion DNA</p>
+        <p class="cap2">2 · …and to each other</p>
+        <p class="cap3">3 · New apps join the network</p>
+      </div>
+      <div class="abs roofbar r r-fade" style="--x:50;--y:250;--d:400ms"><i></i><i></i><i></i></div>
+      <p class="abs t32 r r-up wrap" style="--x:50;--y:481;--w:592;--d:450ms">Motion DNA brings the apps we use to make a motion piece into one place, with the LLM in the middle so they talk to each other. Generative content goes to Flora and Krea once the cost is quoted. Layers and vectors from Figma go straight into After Effects. Everything comes together in one comp.</p>
+      <div class="hubwrap"><svg class="hub" id="hub" viewBox="0 0 1920 1080" role="img" aria-label="Figma, Flora, Krea and After Effects each connect to the centre, where the LLM drives Motion DNA in After Effects, then to each other; Blender, Superspace, Product Studio and Drive join the network."></svg></div>
     </div>
   </div>
 </section>
 
-<!-- gallery -->
-<section class="slide g-base" id="gallery" data-label="Gallery" data-curve="Coast" data-dur="Sweep 700 ms">
+<!-- added: a film with its numbers; it plays with sound on click (space bar too) -->
+<section class="slide g-cloud film" id="film" data-label="The film" data-curve="Coast" data-dur="Sweep 700 ms">
   <div class="stage">
-    <p class="abs eyebrow" style="--x:110;--y:150">{{i:image}}<span data-dec>04 · GALLERY</span></p>
-    <h2 class="abs disp h56" style="--x:104;--y:215;--w:1500"><span data-split data-base="100">Four frames</span> <span class="neon" data-split data-base="260">from the work.</span></h2>
-    <div class="media hud zoom r r-up" style="--l:110;--t:360;--w:400;--h:520;--d:300ms"><div class="clip"><img src="assets/still1.jpg" alt="Still one" loading="lazy"></div><span class="tag">{{i:film}} LABEL</span></div>
-    <div class="media hud zoom r r-up" style="--l:542;--t:360;--w:400;--h:520;--d:400ms"><div class="clip"><img src="assets/still2.jpg" alt="Still two" loading="lazy"></div><span class="tag">{{i:users}} LABEL</span></div>
-    <div class="media hud zoom r r-up" style="--l:974;--t:360;--w:400;--h:520;--d:500ms"><div class="clip"><img src="assets/still3.jpg" alt="Still three" loading="lazy"></div><span class="tag">{{i:grid}} LABEL</span></div>
-    <div class="media hud zoom r r-up" style="--l:1406;--t:360;--w:400;--h:520;--d:600ms"><div class="clip"><img src="assets/still4.jpg" alt="Still four" loading="lazy"></div><span class="tag">{{i:image}} LABEL</span></div>
+    <h2 class="abs h80" style="--x:50;--y:116;--w:640" data-split>The film</h2>
+    <p class="abs t32 r r-up wrap" style="--x:50;--y:230;--w:620;--d:350ms">One sentence on what the film shows, with a <span class="mark m-spark" style="--d:800ms">marked phrase</span>.</p>
+    <div class="abs" style="--x:50;--y:560;--w:640"><p class="num r r-up" style="color:var(--pine);--d:500ms"><span data-count="20">20</span>&times;</p><p class="t24 r r-up" style="--d:600ms">faster, as an example figure</p></div>
+    <div class="frame r-wipe" style="--l:760;--t:116;--w:1110;--h:624;--d:200ms"><video src="assets/film.mp4" poster="assets/film.jpg" playsinline preload="metadata"></video><button class="playbtn" type="button"><span>Play the film</span></button></div>
   </div>
 </section>
 
-<!-- chips + endless marquee -->
-<section class="slide g-soft" id="tools" data-label="Tools" data-curve="Pop" data-dur="Arrive 467 ms">
+<!-- added: a live diagram (FLOWS in the script); hover a node to follow its links -->
+<section class="slide g-sea" id="system" data-label="The system" data-curve="Whip" data-dur="Stage 1100 ms">
   <div class="stage">
-    <p class="abs eyebrow" style="--x:110;--y:150">{{i:layers}}<span data-dec>04 · TOOLKIT</span></p>
-    <h2 class="abs disp h56" style="--x:104;--y:215;--w:1500"><span data-split data-base="100">The stack</span> <span class="neon" data-split data-base="200">behind it.</span></h2>
-    <div class="abs chips" style="--x:110;--y:370;--w:1500"><span class="chip hi r r-pop" style="--d:200ms">{{i:nodes}}Key tool</span><span class="chip hi r r-pop" style="--d:240ms">{{i:layers}}Key tool</span><span class="chip r r-pop" style="--d:280ms">{{i:code}}Tool</span><span class="chip r r-pop" style="--d:320ms">{{i:grid}}Tool</span><span class="chip r r-pop" style="--d:360ms">{{i:globe}}Tool</span></div>
-    <div class="abs marq r r-fade" style="--x:0;--y:700;--w:1920;--d:600ms"><div><span class="chip">Partner one</span><span class="chip">Partner two</span><span class="chip">Partner three</span><span class="chip">Partner four</span><span class="chip">Partner five</span><span class="chip">Partner one</span><span class="chip">Partner two</span><span class="chip">Partner three</span><span class="chip">Partner four</span><span class="chip">Partner five</span></div></div>
+    <h2 class="abs h80" style="--x:50;--y:116;--w:1500" data-split>How the system works</h2>
+    <p class="abs t24 r r-fade" style="--x:50;--y:220;--w:900;--d:600ms;opacity:.75">Hover a step to follow its links.</p>
+    <div class="abs" style="--x:110;--y:330;--w:1700"><svg class="flow" data-flow="example" viewBox="0 0 1700 560" role="img" aria-label="Describe the diagram in one sentence"></svg></div>
   </div>
 </section>
 
-<!-- quote: only a real quote, with permission -->
-<section class="slide g-violet" id="quote" data-label="Quote" data-curve="Settle" data-dur="Sweep 700 ms">
+<!-- 11 why it matters -->
+<section class="slide g-sky" id="why" data-label="Why it matters" data-curve="Pop" data-dur="Arrive 467 ms">
+  <div class="bg zoom"><img class="drift" style="transform-origin:75% 50%" src="assets/img22.jpg" alt="Dana smiles at her desk as the beige robot brings her a coffee"></div>
+  <div class="scrim"></div><div class="band top"></div><div class="band bot"></div>
   <div class="stage">
-    <blockquote class="abs quote" style="--x:110;--y:280;--w:1500"><span data-split data-base="100">A real sentence someone said about the work, kept short.</span></blockquote>
-    <p class="abs mono r r-up" style="--x:110;--y:760;--w:900;--d:900ms;color:#DCD5FF">NAME · ROLE, COMPANY</p>
-  </div>
-</section>
-
-<!-- closing -->
-<section class="slide g-base" id="closing" data-label="Contact" data-curve="Land" data-dur="Stage 1100 ms">
-  <div class="stage">
-    <p class="abs eyebrow" style="--x:110;--y:170">{{i:mail}}<span data-dec>CONTACT</span></p>
-    <h2 class="abs disp h110" style="--x:104;--y:235;--w:1100"><span data-split data-base="100">Let's build</span><br><span class="neon glitch" data-split data-base="260">it together.</span></h2>
-    <div class="abs contact" style="--x:110;--y:540;--w:1060">
-      <a class="cc wide hud tilt r r-up" style="--d:600ms" href="https://example.com" target="_blank" rel="noopener"><span class="cic">{{i:eye}}</span><span><small>FEATURED LINK</small><strong>The one link that matters most</strong></span><span class="go">{{i:arrow}}</span></a>
-      <a class="cc hud tilt r r-up" style="--d:700ms" href="https://example.com" target="_blank" rel="noopener"><span class="cic">{{i:linkedin}}</span><span><small>PROFILE</small><strong>Name</strong></span><span class="go">{{i:arrow}}</span></a>
-      <a class="cc hud tilt r r-up" style="--d:800ms" href="mailto:name@example.com"><span class="cic">{{i:mail}}</span><span><small>EMAIL</small><strong>name@example.com</strong></span><span class="go">{{i:arrow}}</span></a>
+    <h2 class="abs h80" style="--x:50;--y:116;--w:900" data-split>Why it matters</h2>
+    <div class="abs" style="--x:50;--y:200;--w:640">
+      <div class="adv">
+        <div class="head"><svg class="ico r r-pop" style="--d:450ms" viewBox="0 0 256 256" aria-hidden="true"><path d="M215.79,118.17a8,8,0,0,0-5-5.66L153.18,90.9l14.66-73.33a8,8,0,0,0-13.69-7l-112,120a8,8,0,0,0,3,13l57.630,21.61L88.16,238.43a8,8,0,0,0,13.69,7l112-120A8,8,0,0,0,215.79,118.17ZM109.37,214l10.47-52.38a8,8,0,0,0-5-9.06L62,132.71l84.62-90.66L136.16,94.43a8,8,0,0,0,5,9.06l52.8,19.8Z"/></svg><p class="h107" data-split data-base="520">Speed</p></div>
+        <p class="t27 r r-up" style="--d:720ms">Hours of repetitive keyframing, file importing and technical setup become a single request.</p>
+      </div>
+      <div class="adv rule" style="--d:600ms">
+        <div class="head"><svg class="ico r r-pop" style="--d:590ms" viewBox="0 0 256 256" aria-hidden="true"><path d="M225.86,102.82c-3.77-3.94-7.67-8-9.14-11.57-1.36-3.27-1.44-8.69-1.52-13.94-.15-9.76-.31-20.82-8-28.51s-18.75-7.85-28.51-8c-5.25-.08-10.67-.16-13.94-1.52-3.56-1.47-7.63-5.37-11.57-9.14C146.28,23.51,138.44,16,128,16s-18.27,7.51-25.18,14.14c-3.94,3.77-8,7.67-11.57,9.14C88,40.64,82.56,40.72,77.31,40.8c-9.76.15-20.82.31-28.51,8S41,67.55,40.8,77.31c-.08,5.25-.16,10.67-1.52,13.94-1.47,3.56-5.37,7.63-9.14,11.57C23.51,109.72,16,117.56,16,128s7.51,18.27,14.14,25.18c3.77,3.94,7.67,8,9.14,11.57,1.36,3.27,1.44,8.69,1.52,13.94.15,9.76.31,20.82,8,28.51s18.75,7.85,28.51,8c5.25.08,10.67.16,13.94,1.52,3.56,1.47,7.63,5.37,11.57,9.14C109.72,232.49,117.56,240,128,240s18.27-7.51,25.18-14.14c3.94-3.77,8-7.67,11.57-9.14,3.27-1.36,8.69-1.44,13.94-1.52,9.76-.15,20.82-.31,28.51-8s7.85-18.75,8-28.51c.08-5.25.16-10.67,1.52-13.94,1.47-3.56,5.37-7.63,9.14-11.57C232.49,146.28,240,138.44,240,128S232.49,109.73,225.86,102.82Zm-11.55,39.29c-4.79,5-9.75,10.17-12.38,16.52-2.52,6.1-2.63,13.07-2.73,19.82-.1,7-.21,14.33-3.32,17.43s-10.39,3.22-17.43,3.32c-6.75.1-13.72.21-19.82,2.73-6.35,2.63-11.52,7.59-16.52,12.38S132,224,128,224s-9.15-4.92-14.11-9.69-10.17-9.75-16.52-12.38c-6.1-2.52-13.07-2.63-19.82-2.73-7-.1-14.33-.21-17.43-3.32s-3.22-10.39-3.32-17.43c-.1-6.75-.21-13.72-2.73-19.82-2.63-6.35-7.59-11.52-12.38-16.52S32,132,32,128s4.92-9.15,9.69-14.11,9.75-10.17,12.38-16.52c2.52-6.1,2.63-13.07,2.73-19.82.1-7,.21-14.33,3.32-17.43S70.51,56.9,77.55,56.8c6.75-.1,13.72-.21,19.82-2.73,6.35-2.63,11.52-7.59,16.52-12.38S124,32,128,32s9.15,4.92,14.11,9.69,10.17,9.75,16.52,12.38c6.1,2.52,13.07,2.63,19.82,2.73,7,.1,14.33.21,17.43,3.32s3.22,10.39,3.32,17.43c.1,6.75.21,13.72,2.73,19.82,2.63,6.35,7.59,11.52,12.38,16.52S224,124,224,128,219.08,137.15,214.31,142.11ZM173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34Z"/></svg><p class="h107" data-split data-base="660">Consistency</p></div>
+        <p class="t27 r r-up" style="--d:860ms">The same brand motion on every project, and for every team member.</p>
+      </div>
+      <div class="adv rule" style="--d:750ms">
+        <div class="head"><svg class="ico r r-pop" style="--d:730ms" viewBox="0 0 256 256" aria-hidden="true"><path d="M40,88H73a32,32,0,0,0,62,0h81a8,8,0,0,0,0-16H135a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16Zm64-24A16,16,0,1,1,88,80,16,16,0,0,1,104,64ZM216,168H199a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16h97a32,32,0,0,0,62,0h17a8,8,0,0,0,0-16Zm-48,24a16,16,0,1,1,16-16A16,16,0,0,1,168,192Z"/></svg><p class="h107" data-split data-base="800">Control</p></div>
+        <p class="t27 r r-up" style="--d:1000ms">Everything the AI makes stays fully editable in After Effects. Motion designers refine it, stay central to the process and keep the creative decisions.</p>
+      </div>
     </div>
+  </div>
+</section>
+
+<!-- 12 closing -->
+<section class="slide g-leaf" id="next" data-label="In use today" data-curve="Land" data-dur="Stage 1100 ms">
+  <div class="bg"><video src="assets/clip23.mp4" poster="assets/img24.jpg" muted playsinline preload="auto" data-once aria-label="The robot's screen glitches into the Superside squiggle"></video></div>
+  <div class="scrim"></div>
+  <div class="stage">
+    <h2 class="abs h160 closing-title" style="--x:50;--y:760;--w:1832" data-chars data-delay="1400">In use today.</h2>
+    <p class="abs t27 r r-up" style="--x:50;--y:920;--w:608;--d:2000ms">Directed by you. Accelerated by AI.</p>
   </div>
 </section>
 </main>
 
 <script>
 (() => {
+  const tok = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
   const wide = () => matchMedia('(min-width:900px)').matches;
-  const root = document.documentElement;
-  const setVh = () => root.style.setProperty('--vh', (innerHeight / 100) + 'px');
+  const setVh = () => document.documentElement.style.setProperty('--vh', (innerHeight / 100) + 'px');
   setVh(); addEventListener('resize', setVh);
   const slides = [...document.querySelectorAll('.slide')];
-  const CURVES = {Land:[.12,.9,.28,1], Pop:[.34,1.45,.64,1], Settle:[.3,0,.1,1], Whip:[.75,0,.05,1], Coast:[.18,.28,0,.9], Surge:[.7,0,.3,1]};
+  const CURVES = {Land:[.12,.9,.28,1],Pop:[.34,1.45,.64,1],Settle:[.3,0,.1,1],Whip:[.75,0,.05,1],Coast:[.18,.28,0,.9]};
   const NS = 'http://www.w3.org/2000/svg';
   const el = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
-  const bez = (p1x, p1y, p2x, p2y) => t => { let x = t; for (let i = 0; i < 8; i++) { const cx = 3*p1x*x*(1-x)**2 + 3*p2x*x*x*(1-x) + x**3 - t; const d = 3*p1x*(1-x)**2 + 6*(p2x-p1x)*x*(1-x) + 3*(1-p2x)*x*x; if (Math.abs(cx) < 1e-4 || !d) break; x -= cx / d; } return 3*p1y*x*(1-x)**2 + 3*p2y*x*x*(1-x) + x**3; };
-  const tryPlay = v => { const p = v.play(); if (p) p.catch(() => {}); };
 
-  // Headings rise word by word inside masks; [data-chars] titles arrive letter by letter.
+  // Split headings into masked words, display titles into characters.
   document.querySelectorAll('[data-split]').forEach(node => {
     const base = +(node.dataset.base || 0), words = node.textContent.trim().split(/\s+/);
     node.textContent = '';
@@ -591,30 +818,90 @@ svg.flow .ln.lit{stroke-width:3.5;stroke:var(--violet)}
       node.appendChild(word);
     });
   });
+
   // Line illustrations draw themselves: each path gets a unit length so one dash can travel along it.
   document.querySelectorAll('.illo path').forEach(p => { p.setAttribute('pathLength', '1'); p.style.strokeDasharray = '1 1'; });
 
-  // Labels decode from random glyphs and always land on the text (background tabs throttle frames).
-  const GLYPHS = '!<>-_\\/[]{}=+*^?#01';
-  const decode = (n, dur = 520) => {
-    if (reduce || n.dataset.busy) return; n.dataset.busy = 1;
-    const html = n.dataset.html || (n.dataset.html = n.innerHTML), text = n.textContent, start = performance.now();
-    let over = false;
-    const done = () => { if (over) return; over = true; n.innerHTML = html; delete n.dataset.busy; };
-    const tick = t => { if (over) return; const k = Math.min(1, (t - start) / dur), shown = Math.floor(k * text.length);
-      if (k >= 1) return done();
-      n.textContent = text.slice(0, shown) + [...text.slice(shown)].map(c => c === ' ' ? ' ' : GLYPHS[(Math.random() * GLYPHS.length) | 0]).join('');
-      requestAnimationFrame(tick); };
-    requestAnimationFrame(tick); setTimeout(done, dur + 120);
-  };
-  // Numbers count up on the Land curve; type lines type out.
+  // Style map chart: 20 reference films, energy on x and summed tone on y, both on a 0–10 scale.
+  const FILMS = [[1,4.0,0.5],[1,4.1,1.5],[1,2.9,5.5],[4,4.2,6.5],[3,2.6,7.0],[2,5.0,5.5],[1,4.6,4.0],[1,1.2,4.0],[2,7.7,7.0],[2,6.1,8],[1,4.3,3.0],[4,6.4,4.0],[1,5.2,4.5],[2,4.4,4.5],[1,5.0,4.0],[2,5.2,7.0],[3,3.8,7.5],[3,4.8,8.0],[1,3.7,4.0],[1,5.7,3.0]];
+  const FAM = {1:['Elegant 10',tok('--sky')],2:['Playful reel 5',tok('--spark')],3:['Character 3',tok('--peach')],4:['Mixed media 2',tok('--lav')]};
+  (() => {
+    const svg = document.getElementById('chart'); if (!svg) return;
+    const X0 = 1063, X1 = 1843, Y0 = 932, Y1 = 341;
+    const px = v => X0 + v / 10 * (X1 - X0), py = v => Y0 - v / 10 * (Y0 - Y1);
+    const t = (x, y, s, txt, anchor, extra) => { const n = el('text', Object.assign({x, y, 'font-size': s, 'text-anchor': anchor || 'start', 'dominant-baseline': 'hanging'}, extra || {}), svg); n.textContent = txt; return n; };
+    t(1063, 230, 18, 'EVERY REFERENCE FILM, BY ENERGY AND TONE', 'start', {'letter-spacing': '2'});
+    let kx = 1089; Object.values(FAM).forEach(([name, c]) => { el('circle', {cx: kx - 14, cy: 281, r: 6, fill: c}, svg); const n = t(kx, 270, 21, name); n.style.fill = tok('--cloud'); kx += name.length * 10.6 + 52; });
+    el('line', {x1: px(5), y1: Y1, x2: px(5), y2: Y0, class: 'mid'}, svg);
+    el('line', {x1: X0, y1: py(5), x2: X1, y2: py(5), class: 'mid'}, svg);
+    [[X0, Y1, X0, Y0, 300], [X0, Y0, X1, Y0, 450]].forEach(([a, b, c, d, delay]) => { const l = el('line', {x1: a, y1: b, x2: c, y2: d, class: 'ax', pathLength: 1, 'stroke-dasharray': '1 1'}, svg); l.style.setProperty('--d', delay + 'ms'); });
+    t(X0, 952, 21, 'Calm'); t(1455, 952, 21, 'Energy, measured', 'middle'); t(X1, 952, 21, 'High-paced', 'end');
+    t(1047, 330, 21, 'Expressive', 'end'); t(1047, 622, 21, 'Tone', 'end'); t(1047, 908, 21, 'Restrained', 'end');
+    [...FILMS].map((f, i) => [f, i]).sort((a, b) => a[0][1] - b[0][1]).forEach(([[fam, e, tone], i], k) => {
+      const d = el('circle', {cx: px(e), cy: py(tone), r: 7.5, fill: FAM[fam][1], class: 'dot'}, svg);
+      d.style.setProperty('--d', (700 + k * 55) + 'ms');
+      el('title', {}, d).textContent = `${FAM[fam][0].replace(/ \d+$/, '')} · energy ${e}, tone ${tone}`;
+    });
+  })();
+
+  // One-roof hub: dashed links revealed by solid strokes in a mask, so the dash pattern never moves while a link draws.
+  (() => {
+    const svg = document.getElementById('hub'); if (!svg) return;
+    const R = 95.5, r = 78;
+    const N = {fig:[1374.5,289.5,R,'FIGMA'], flo:[1093.5,560.5,R,'FLORA'], kre:[1640.5,560.5,R,'KREA'], ae:[1378.5,824.5,R,'AFTER EFFECTS'], dna:[1374.5,557.5,R,'MOTION DNA'],
+      ble:[1010,250,r,'BLENDER'], sup:[1760,250,r,'SUPERSPACE'], pro:[1760,880,r,'PRODUCT|STUDIO'], dri:[1010,880,r,'DRIVE']};
+    const defs = el('defs', {}, svg);
+    const mk = el('marker', {id: 'arw', viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 9, markerHeight: 9, orient: 'auto-start-reverse', markerUnits: 'userSpaceOnUse'}, defs);
+    el('path', {d: 'M1 1 L8 5 L1 9', fill: 'none', stroke: tok('--cloud'), 'stroke-width': 1.6}, mk);
+    const seg = (a, b, gap) => { const [x1, y1, r1] = N[a], [x2, y2, r2] = N[b], dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
+      return [x1 + ux * (r1 + gap), y1 + uy * (r1 + gap), x2 - ux * (r2 + gap), y2 - uy * (r2 + gap)]; };
+    const group = (cls, links, color, arrows, delay0) => {
+      // The mask carries the group's class too: its reveal strokes live in <defs>, outside the group.
+      const id = 'm' + cls, m = el('mask', {id, class: cls, maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: 1920, height: 1080}, defs);
+      const g = el('g', {class: 'grp ' + cls}, svg), lines = el('g', {mask: `url(#${id})`}, g);
+      links.forEach(([a, b], k) => {
+        const [x1, y1, x2, y2] = seg(a, b, arrows ? 6 : 4);
+        const ln = el('line', {x1, y1, x2, y2, stroke: color, 'stroke-width': 2, 'stroke-dasharray': '7 7'}, lines);
+        if (arrows) ln.setAttribute('marker-end', 'url(#arw)');
+        const ml = el('line', {x1, y1, x2, y2, stroke: '#fff', 'stroke-width': 18, 'stroke-linecap': 'round', pathLength: 1, 'stroke-dasharray': '1 1', class: 'mline'}, m);
+        ml.style.setProperty('--d', (delay0 + k * 120) + 'ms');
+      });
+      return g;
+    };
+    const node = (g, key, color, size, delay, cls) => {
+      const [x, y, rad, label] = N[key], n = el('g', {class: cls || 'node'}, g); n.style.setProperty('--d', delay + 'ms');
+      el('circle', {cx: x, cy: y, r: rad, fill: 'rgba(25,84,110,.001)', stroke: color, 'stroke-width': 2, 'stroke-dasharray': '7 7'}, n);
+      const parts = label.split('|');
+      parts.forEach((p, i) => { const t = el('text', {x, y: y + (i - (parts.length - 1) / 2) * size * 1.1, 'font-size': size, fill: color}, n); t.textContent = p; if (cls === undefined && color !== tok('--cloud')) t.setAttribute('font-weight', 600); });
+      return n;
+    };
+    const g1 = group('g1', [['dna','fig'],['dna','flo'],['dna','kre'],['dna','ae']], tok('--cloud'), true, 250);
+    ['fig','flo','kre','ae'].forEach((k, i) => node(g1, k, tok('--cloud'), 21, 120 + i * 90));
+    group('g2', [['fig','kre'],['kre','ae'],['ae','flo'],['flo','fig']], tok('--cloud'), false, 0);
+    const g3 = group('g3', [['ble','fig'],['ble','flo'],['sup','fig'],['sup','kre'],['pro','kre'],['pro','ae'],['dri','flo'],['dri','ae']], tok('--spark'), false, 380);
+    ['ble','sup','pro','dri'].forEach((k, i) => node(g3, k, tok('--spark'), 19, i * 110));
+    const core = el('g', {class: 'core'}, svg);
+    el('circle', {cx: N.dna[0], cy: N.dna[1], r: R, fill: 'none', stroke: tok('--spark'), 'stroke-width': 2, class: 'pulse'}, core);
+    // The centre is split: the LLM on top connects every app; Motion DNA in After Effects is what it drives below.
+    const [cx, cy] = N.dna, gap = 3;
+    const half = (up, fill) => el('path', {d: `M${cx - R} ${cy + (up ? -gap : gap)} A${R} ${R} 0 0 ${up ? 1 : 0} ${cx + R} ${cy + (up ? -gap : gap)} Z`, fill}, core);
+    half(true, tok('--spark')); half(false, tok('--cloud'));
+    const lab = (txt, y, size) => { const t = el('text', {x: cx, y, 'font-size': size, fill: tok('--pine'), 'font-weight': 600}, core); t.textContent = txt; };
+    lab('LLM', cy - 42, 34);
+    lab('AE', cy + 32, 19); lab('MOTION DNA', cy + 56, 19);
+  })();
+
+  // Count-up numbers on Motion DNA's Land curve.
+  const bez = (p1x, p1y, p2x, p2y) => t => { let x = t; for (let i = 0; i < 8; i++) { const cx = 3*p1x*x*(1-x)**2 + 3*p2x*x*x*(1-x) + x**3 - t; const d = 3*p1x*(1-x)**2 + 6*(p2x-p1x)*x*(1-x) + 3*(1-p2x)*x*x; if (Math.abs(cx) < 1e-4 || !d) break; x -= cx / d; } return 3*p1y*x*(1-x)**2 + 3*p2y*x*x*(1-x) + x**3; };
   const land = bez(...CURVES.Land);
   const countUp = sec => sec.querySelectorAll('[data-count]').forEach((n, i) => {
     const to = +n.dataset.count; if (reduce) { n.textContent = to; return; }
     const t0 = performance.now() + 450 + i * 120, dur = 1100;
     const tick = now => { const p = Math.min(1, Math.max(0, (now - t0) / dur)); n.textContent = Math.round(to * land(p)); if (p < 1) requestAnimationFrame(tick); };
-    n.textContent = 0; requestAnimationFrame(tick); setTimeout(() => { n.textContent = to; }, 1700 + i * 120);
+    n.textContent = 0; requestAnimationFrame(tick);
   });
+
+  // Type prompts one after another; each row keeps its height through a hidden ghost copy.
   const typeSeq = sec => {
     const els = [...sec.querySelectorAll('[data-type]')]; if (reduce || !els.length) return;
     clearTimeout(sec._tt); els.forEach(e => e.textContent = '');
@@ -624,231 +911,280 @@ svg.flow .ln.lit{stroke-width:3.5;stroke:var(--violet)}
     sec._tt = setTimeout(step, 600);
   };
   const untype = sec => { clearTimeout(sec._tt); sec.querySelectorAll('[data-type]').forEach(e => e.textContent = e.dataset.type); };
-  document.querySelectorAll('.stat').forEach(s => s.addEventListener('mouseenter', () => { const b = s.querySelector('b'); if (b) decode(b, 420); }));
-
-  // Flow diagrams: nodes [id, x, y, LABEL, sub, colour] and links [from, to] in a 1700-wide viewBox; a link that goes
-  // back (to the left) curves above. Hover a node to light its path.
-  const C = {cyan:'#00A6C7', violet:'#6D4DFF', hot:'#F0287D', lime:'#7CC417', line:'#C9D2DE'};
-  const FLOWS = {
-    example: {w: 230, nodes: [
-        ['in', 140, 270, 'INPUT', 'brief · files', C.cyan], ['core', 560, 270, 'SYSTEM', 'the engine', C.violet],
-        ['a', 980, 110, 'BRANCH A', 'one path', C.cyan], ['b', 980, 430, 'BRANCH B', 'another path', C.cyan],
-        ['qa', 1360, 270, 'QA', 'checks', C.lime], ['out', 1600, 470, 'OUTPUT', 'delivered', C.hot]],
-      links: [['in','core'],['core','a'],['core','b'],['a','qa'],['b','qa'],['qa','out'],['qa','core']]}
-  };
-  document.querySelectorAll('[data-flow]').forEach(svg => {
-    const key = svg.dataset.flow, F = FLOWS[key]; if (!F) return;
-    const W = F.w || 230, H = 96, pos = {}, nodeEls = {}, linkEls = [];
-    const defs = el('defs', {}, svg), sh = el('filter', {id: 'sh-' + key, x: '-20%', y: '-20%', width: '140%', height: '160%'}, defs);
-    el('feDropShadow', {dx: 0, dy: 6, stdDeviation: 8, 'flood-color': '#101828', 'flood-opacity': .1}, sh);
-    const lines = el('g', {}, svg), nodes = el('g', {}, svg);
-    F.nodes.forEach(([id, x, y]) => pos[id] = [x, y]);
-    F.links.forEach(([a, b], i) => {
-      const [x1, y1] = pos[a], [x2, y2] = pos[b];
-      const sx = x1 + (x2 > x1 ? W / 2 : x2 < x1 ? -W / 2 : 0), ex = x2 + (x2 > x1 ? -W / 2 : x2 < x1 ? W / 2 : 0);
-      const sy = x1 === x2 ? y1 + (y2 > y1 ? H / 2 : -H / 2) : y1, ey = x1 === x2 ? y2 + (y2 > y1 ? -H / 2 : H / 2) : y2;
-      const back = x2 < x1, mx = (sx + ex) / 2;
-      const d = back ? `M${sx} ${sy} C${sx - 120} ${sy - 170} ${ex + 120} ${ey - 170} ${ex} ${ey}` : x1 === x2 ? `M${sx} ${sy} L${ex} ${ey}` : `M${sx} ${sy} C${mx} ${sy} ${mx} ${ey} ${ex} ${ey}`;
-      const p = el('path', {d, class: 'ln', stroke: back ? C.hot : C.line, pathLength: 1, 'stroke-dasharray': '1 1'}, lines);
-      p.style.setProperty('--d', (300 + i * 110) + 'ms'); linkEls.push([a, b, p]);
-      const dot = el('circle', {r: 5, fill: back ? C.hot : C.violet, class: 'pulse'}, lines);
-      el('animateMotion', {dur: (2.4 + (i % 3) * .4) + 's', repeatCount: 'indefinite', path: d, begin: (i * .3) + 's'}, dot);
-    });
-    F.nodes.forEach(([id, x, y, label, sub, color], i) => {
-      const g = el('g', {class: 'nd'}, nodes); g.style.setProperty('--d', (100 + i * 90) + 'ms'); nodeEls[id] = g;
-      el('rect', {class: 'box', x: x - W / 2, y: y - H / 2, width: W, height: H, rx: 16, 'stroke-width': 1.2, filter: `url(#sh-${key})`}, g);
-      el('rect', {x: x - W / 2 + 14, y: y - 30, width: 26, height: 26, rx: 7, fill: color, opacity: .16}, g);
-      el('circle', {cx: x - W / 2 + 27, cy: y - 17, r: 5, fill: color}, g);
-      el('text', {x: x - W / 2 + 50, y: y - 10, 'font-size': 18, 'font-weight': 700}, g).textContent = label;
-      el('text', {x: x - W / 2 + 16, y: y + 26, 'font-size': 15, class: 'sub'}, g).textContent = sub;
-      g.addEventListener('mouseenter', () => { svg.classList.add('focus'); g.classList.add('lit');
-        linkEls.forEach(([a, b, p]) => { if (a === id || b === id) { p.classList.add('lit'); nodeEls[a === id ? b : a].classList.add('lit'); } }); });
-      g.addEventListener('mouseleave', () => { svg.classList.remove('focus'); svg.querySelectorAll('.lit').forEach(n => n.classList.remove('lit')); });
-    });
-  });
-
-  // Pointer: spotlight and lit grid, a ring cursor, cards that tilt toward it.
-  const ring = document.getElementById('ring');
-  if (fine && !reduce) {
-    let px = 0, py = 0, raf = 0;
-    addEventListener('pointermove', e => { px = e.clientX; py = e.clientY;
-      if (!raf) raf = requestAnimationFrame(() => { raf = 0; root.style.setProperty('--mx', px + 'px'); root.style.setProperty('--my', py + 'px'); }); }, {passive: true});
-    document.addEventListener('pointerover', e => ring.classList.toggle('big', !!e.target.closest('a,button,.tilt,.nd,.chip,.stat,.media,.glitch,.pill')));
-    document.querySelectorAll('.tilt').forEach(c => {
-      c.addEventListener('pointermove', e => { const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-        c.style.setProperty('--ry', ((x - .5) * 7).toFixed(2) + 'deg'); c.style.setProperty('--rx', ((.5 - y) * 7).toFixed(2) + 'deg');
-        c.style.setProperty('--px', (x * 100) + '%'); c.style.setProperty('--py', (y * 100) + '%'); });
-      c.addEventListener('pointerleave', () => { c.style.setProperty('--rx', '0deg'); c.style.setProperty('--ry', '0deg'); });
-    });
-  } else ring.remove();
-
-  // Parallax ground: the line layers follow a smoothed scroll value; full-bleed stills drift a little.
-  let target = scrollY, cur = scrollY, running = false;
-  const drift = () => { cur += (target - cur) * .08; root.style.setProperty('--sy', cur.toFixed(1)); if (Math.abs(target - cur) > .5) requestAnimationFrame(drift); else running = false; };
-  root.style.setProperty('--sy', scrollY);
-  const pars = [...document.querySelectorAll('.slide > .bg')].filter(b => !b.querySelector('video') && !b.closest('.interlude'));
-  const updatePar = () => { if (reduce || !wide()) return; pars.forEach(b => { const r = b.parentElement.getBoundingClientRect(); b.style.translate = `0 ${(((r.top + r.height / 2 - innerHeight / 2) / innerHeight) * -40).toFixed(1)}px`; }); };
 
   // Curve readout in the footer.
   const curvePath = document.getElementById('curvePath'), curveDot = document.getElementById('curveDot');
   const setCurve = sec => {
-    const name = sec.dataset.curve, c = CURVES[name]; if (!c) return;
+    const name = sec.dataset.curve, c = CURVES[name];
     document.getElementById('curveName').textContent = name;
-    document.getElementById('curveTime').textContent = sec.dataset.dur ? '· ' + sec.dataset.dur : '';
+    document.getElementById('curveTime').textContent = '· ' + sec.dataset.dur;
     curvePath.setAttribute('d', `M0 24 C${c[0]*40} ${24 - c[1]*24} ${c[2]*40} ${24 - c[3]*24} 40 0`);
-    if (!reduce && curveDot.animate) curveDot.animate([{cx: 0, cy: 24}, {cx: 40, cy: 0}], {duration: 900, easing: `cubic-bezier(${c.join(',')})`, fill: 'forwards'});
+    if (!reduce && curveDot.animate) curveDot.animate([{cx:0, cy:24}, {cx:40, cy:0}], {duration: 900, easing: `cubic-bezier(${c.join(',')})`, fill: 'forwards'});
   };
 
-  // Reveal each slide as it enters, replay when it comes back; only visible clips play.
+  // Arm sections, then reveal each one as it enters; replay when it comes back.
+  const tryPlay = v => { const p = v.play(); if (p) p.catch(() => {}); };
   if (!reduce) slides.forEach(s => s.classList.add('armed'));
   const play = s => {
     if (s.classList.contains('in')) return; s.classList.add('in'); countUp(s); typeSeq(s);
-    s.querySelectorAll('[data-dec]').forEach(n => decode(n));
     s.querySelectorAll('video[data-auto]').forEach(v => { try { v.currentTime = 0; } catch (e) {} tryPlay(v); });
+    s.querySelectorAll('video[data-once]').forEach(v => { clearTimeout(v._t); v._t = setTimeout(() => { try { v.currentTime = 0; } catch (e) {} tryPlay(v); }, reduce ? 0 : 350); });
   };
-  const reset = s => {
-    s.classList.remove('in'); untype(s); s.querySelectorAll('video[data-auto]').forEach(v => v.pause());
-    if (s.classList.contains('film')) { const v = s.querySelector('.media video'); if (v) { v.pause(); v.controls = false; } s.classList.remove('playing'); }
+  const reset = s => { s.classList.remove('in'); untype(s); s.querySelectorAll('video[data-auto],video[data-once]').forEach(v => { clearTimeout(v._t); v.pause(); });
+    if (s.classList.contains('film')) { const v = s.querySelector('.frame video'); if (v) { v.pause(); v.controls = false; } s.classList.remove('playing'); } };
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    slides.forEach(s => { const r = s.getBoundingClientRect(); if (r.top < innerHeight * .8 && r.bottom > 0) play(s); });
+  }));
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting && (e.intersectionRatio > .28 || e.intersectionRect.height > innerHeight * .35)) play(e.target);
+      else if (!e.isIntersecting) reset(e.target);
+    }), {threshold: [0, .05, .1, .15, .2, .28, .4]});
+    slides.forEach(s => io.observe(s));
+  } else slides.forEach(s => s.classList.add('in'));
+
+  // Pinned workflow: scroll position picks the step, its clip plays, its bar fills.
+  const flow = document.getElementById('flow');
+  const fsteps = flow ? [...flow.querySelectorAll('.fstep')] : [];
+  const fvids = fsteps.map(li => li.querySelector('video'));
+  let fActive = -1;
+  const updateFlow = () => {
+    if (!flow) return;
+    if (!wide()) { if (fActive !== -2) { fActive = -2; fsteps.forEach(li => li.classList.add('on')); } return; }
+    const r = flow.getBoundingClientRect(), vh = innerHeight;
+    const prog = Math.min(fsteps.length - .001, Math.max(0, -r.top / vh + .5));
+    const i = Math.floor(prog);
+    fsteps.forEach((li, k) => li.querySelector('.fbar i').style.setProperty('--p', k < i ? 1 : k > i ? 0 : (prog - i)));
+    const visible = r.bottom > 0 && r.top < vh;
+    if (i !== fActive) { fActive = i; fsteps.forEach((li, k) => li.classList.toggle('on', k === i)); }
+    fvids.forEach((v, k) => { if (k === i && visible) { if (v.paused) tryPlay(v); } else if (!v.paused) v.pause(); });
   };
-  requestAnimationFrame(() => requestAnimationFrame(() => slides.forEach(s => { const r = s.getBoundingClientRect(); if (r.top < innerHeight * .8 && r.bottom > 0) play(s); })));
-  const io = new IntersectionObserver(es => es.forEach(e => {
-    if (e.isIntersecting && (e.intersectionRatio > .28 || e.intersectionRect.height > innerHeight * .35)) play(e.target);
-    else if (!e.isIntersecting) reset(e.target);
-  }), {threshold: [0, .05, .1, .2, .28, .4, .6]});
-  slides.forEach(s => io.observe(s));
 
-  // Films play on click, with sound.
-  const startFilm = s => { const v = s.querySelector('.media video'); s.classList.add('playing'); v.controls = true; tryPlay(v); };
-  document.querySelectorAll('.film').forEach(s => {
-    const b = s.querySelector('.playbtn'), v = s.querySelector('.media video'); if (!b || !v) return;
-    b.addEventListener('click', () => startFilm(s));
-    v.addEventListener('ended', () => { s.classList.remove('playing'); v.controls = false; });
-  });
-
-  // Pinned steps: the scroll position picks the step, its clip plays, its bar fills.
-  const pinnedSteps = [...document.querySelectorAll('.pinned')].filter(p => p.querySelector('.step')).map(p => [p, [...p.querySelectorAll('.step')]]);
-  const updateSteps = () => pinnedSteps.forEach(([p, steps]) => {
-    if (!wide()) { steps.forEach(li => li.classList.add('on')); return; }
-    const r = p.getBoundingClientRect(), prog = Math.min(steps.length - .001, Math.max(0, -r.top / innerHeight + .5)), i = Math.floor(prog);
-    const visible = r.bottom > 0 && r.top < innerHeight;
-    steps.forEach((li, k) => { li.classList.toggle('on', k === i); const bar = li.querySelector('.sbar i'); if (bar) bar.style.setProperty('--p', k < i ? 1 : k > i ? 0 : (prog - i));
-      const v = li.querySelector('video'); if (v) { if (k === i && visible) { if (v.paused) tryPlay(v); } else if (!v.paused) v.pause(); } });
-  });
-
-  // Scroll marquee: the track crosses right to left, two pixels per pixel scrolled, easing after the scroll.
-  const marqs = [...document.querySelectorAll('.pinned')].filter(p => p.querySelector('.mtrack')).map(p => ({p, track: p.querySelector('.mtrack'), items: [...p.querySelectorAll('.mitem')], bars: [...p.querySelectorAll('.mbar i')], stops: [...p.querySelectorAll('.stop')], len: 0, cur: null, tgt: 0, raf: 0}));
-  const RATE = 2;
-  const layoutMarq = () => marqs.forEach(m => {
-    if (!wide()) { m.p.style.height = ''; m.track.style.transform = ''; return; }
-    m.len = (innerWidth + m.track.scrollWidth) / RATE;
-    m.p.style.height = (m.len + innerHeight).toFixed(0) + 'px';
-    if (m.stops[1]) m.stops[1].style.top = m.len.toFixed(0) + 'px';
-  });
-  const drawMarq = m => {
-    m.track.style.transform = `translate3d(${m.cur.toFixed(1)}px,0,0)`;
-    let passed = 0;
-    m.items.forEach((it, k) => { const c = it.offsetLeft + it.offsetWidth / 2, d = Math.min(1, Math.abs(m.cur + c - innerWidth / 2) / (innerWidth * .8));
-      it.style.opacity = (1 - .7 * d).toFixed(3); if (m.cur + c < innerWidth * .62) passed = k + 1; });
-    m.bars.forEach((b, k) => b.classList.toggle('on', k < passed));
+  // Pinned hub: three scroll moments, spokes, then the ring, then the new apps.
+  const roof = document.getElementById('roof');
+  const updateRoof = () => {
+    if (!roof) return;
+    if (!wide()) { roof.dataset.st = '3'; return; }
+    const r = roof.getBoundingClientRect(), vh = innerHeight;
+    if (!roof.classList.contains('in')) { roof.dataset.st = '0'; return; }
+    roof.dataset.st = String(Math.min(3, Math.max(1, Math.floor(-r.top / vh + .5) + 1)));
   };
-  const updateMarq = () => marqs.forEach(m => {
-    const raw = -m.p.getBoundingClientRect().top;
-    root.classList.toggle('free', wide() && raw > -1 && raw < m.len + 1);
-    if (!wide()) return;
-    m.tgt = innerWidth - Math.min(m.len, Math.max(0, raw)) * RATE;
-    if (m.cur === null || reduce) { m.cur = m.tgt; drawMarq(m); return; }
-    if (!m.raf) { const step = () => { m.cur += (m.tgt - m.cur) * .12; drawMarq(m); if (Math.abs(m.tgt - m.cur) > .3) m.raf = requestAnimationFrame(step); else m.raf = 0; }; m.raf = requestAnimationFrame(step); }
-  });
-  layoutMarq(); addEventListener('resize', layoutMarq);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { layoutMarq(); onScroll(); });
 
-  // Horizontal stretch: one screen of scroll slides the next panel in from the right; the one underneath dims.
-  const hwraps = [...document.querySelectorAll('.hwrap')].map(w => [w, [...w.querySelectorAll('.hpanel')]]);
-  const updateH = () => hwraps.forEach(([w, panels]) => {
-    if (!wide()) { panels.forEach(pn => { pn.style.transform = ''; pn.style.filter = ''; }); return; }
-    const p = Math.min(panels.length - 1, Math.max(0, -w.getBoundingClientRect().top / innerHeight));
-    const off = panels.map((pn, k) => k === 0 ? 0 : Math.min(1, Math.max(0, k - p)));
-    panels.forEach((pn, k) => { if (k > 0) pn.style.transform = `translateX(${(off[k] * innerWidth).toFixed(1)}px)`;
-      const over = k + 1 < panels.length ? 1 - off[k + 1] : 0; pn.style.filter = over > 0 ? `brightness(${(1 - .15 * over).toFixed(3)})` : ''; });
-  });
-
-  // Interludes: as the next slide rises over the held still, its corner straightens and the still dims.
-  const covers = [...document.querySelectorAll('.cover-up')].map(s => [s, s.previousElementSibling]).filter(([, u]) => u && u.classList.contains('interlude'));
+  // Interludes: as the next slide rises over the pinned photo, its corner straightens and the photo dims.
+  const covers = [...document.querySelectorAll('.cover-up')].map(s => [s, s.previousElementSibling, s.classList.contains('slide') ? s : s.querySelector('.slide')]);
   const updateCovers = () => {
     const unit = Math.min(innerWidth, innerHeight * 1.7778) / 1920;
-    covers.forEach(([s, under]) => { const p = Math.min(1, Math.max(0, 1 - s.getBoundingClientRect().top / innerHeight)), rest = (+s.dataset.rad || 0) * unit;
-      s.style.setProperty('--rad', (reduce ? rest : rest + (1 - p) * (158 * unit - rest)).toFixed(1)); under.style.setProperty('--dim', (1 - .5 * p).toFixed(3)); });
+    covers.forEach(([s, under, inked]) => {
+      const top = s.getBoundingClientRect().top, p = Math.min(1, Math.max(0, 1 - top / innerHeight));
+      // the corner straightens as the slide lands, down to its resting radius (data-rad, Figma px; 0 by default)
+      const rest = (+s.dataset.rad || 0) * unit;
+      s.style.setProperty('--rad', (reduce ? rest : rest + (1 - p) * (158 * unit - rest)).toFixed(1));
+      under.style.setProperty('--dim', (1 - .5 * p).toFixed(3));
+      // Mid-cover, each bar takes the ink of the slide actually behind it.
+      if (top > -2 && top < innerHeight + 2) {
+        const navOn = ground(top < chrome.getBoundingClientRect().bottom ? inked : under), footOn = ground(top < foot.getBoundingClientRect().top ? inked : under);
+        [chrome, dotsEl].forEach(n => n.style.setProperty('--chrome', navOn[1]));
+        foot.style.setProperty('--chrome', footOn[1]); foot.style.setProperty('--logo', footOn[2]);
+      }
+    });
   };
 
-  // Chrome: the menu takes the ink of the slide under it; active section, rail, page number, progress.
-  const chrome = document.getElementById('chrome'), foot = document.getElementById('foot'), rail = document.getElementById('rail'), progress = document.getElementById('progress');
+  // Pinned prompts: one track crosses the screen right to left, two pixels for every pixel scrolled. The first prompt
+  // starts just off screen on arrival. Snapping is off between the slide's first and last stop, so the wheel moves the
+  // prompts back and forth exactly; the stops in between are for the arrow keys only.
+  const ask = document.getElementById('ask'), track = document.getElementById('askTrack');
+  const mitems = track ? [...track.children] : [], astops = ask ? [...ask.querySelectorAll('.stop')] : [], abars = ask ? [...ask.querySelectorAll('.askbar i')] : [];
+  const RATE = 2, START = 1;   // START: where the track begins, as a share of the screen width (1 = just off the right edge)
+  let askLen = 0, mcs = [];
+  const layoutAsk = () => {
+    if (!ask || !track) return;
+    if (!wide()) { ask.style.height = ''; track.style.transform = ''; mitems.forEach(m => m.style.opacity = ''); return; }
+    const W = innerWidth;
+    mcs = mitems.map(m => m.offsetLeft + m.offsetWidth / 2);
+    askLen = (W * START + track.scrollWidth) / RATE;
+    ask.style.height = (askLen + innerHeight).toFixed(0) + 'px';
+    [0, ...mcs.map(c => (W * START - W / 2 + c) / RATE), askLen].forEach((y, k) => { if (astops[k]) astops[k].style.top = y.toFixed(0) + 'px'; });
+  };
+  // The track eases after the scroll: a short lag, so it slows down before it stops.
+  const LAG = .10;   // share of the gap closed per 60 fps frame
+  let curX = null, tgtX = 0, askRaf = 0, lastT = 0;
+  const drawAsk = () => {
+    const W = innerWidth, x = curX;
+    track.style.transform = `translate3d(${x.toFixed(1)}px,0,0)`;
+    let passed = 0;
+    mitems.forEach((m, k) => {
+      const c = mcs[k], d = Math.min(1, Math.abs(x + c - W / 2) / (W * .8));
+      m.style.opacity = (1 - .7 * d).toFixed(3);
+      if (x + c < W * .62) passed = k + 1;
+    });
+    abars.forEach((b, k) => b.classList.toggle('on', k < passed));
+  };
+  const stepAsk = now => {
+    const f = 1 - Math.pow(1 - LAG, Math.min(4, (now - lastT) / 16.67)); lastT = now;
+    curX += (tgtX - curX) * f;
+    if (Math.abs(tgtX - curX) < .3) { curX = tgtX; askRaf = 0; } else askRaf = requestAnimationFrame(stepAsk);
+    drawAsk();
+  };
+  const updateAsk = () => {
+    if (!ask || !track) return;
+    const raw = -ask.getBoundingClientRect().top;
+    document.documentElement.classList.toggle('free', wide() && raw > -1 && raw < askLen + 1);
+    if (!wide()) { curX = null; return; }
+    tgtX = innerWidth * START - Math.min(askLen, Math.max(0, raw)) * RATE;
+    const onScreen = raw > -innerHeight && raw < askLen + innerHeight;
+    if (curX === null || reduce || !onScreen) { curX = tgtX; drawAsk(); return; }
+    if (!askRaf) { lastT = performance.now(); askRaf = requestAnimationFrame(stepAsk); }
+  };
+  layoutAsk(); addEventListener('resize', layoutAsk);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { layoutAsk(); updateAsk(); });
+
+  // Horizontal stretch: one viewport of scroll slides the next panel in from the right, a step shorter than the one
+  // under it (the stacked tabs are CSS); the panel underneath dims a little.
+  const hwraps = [...document.querySelectorAll('.hwrap')].map(w => [w, [...w.querySelectorAll('.hpanel')]]);
+  const updateH = () => {
+    hwraps.forEach(([w, panels]) => {
+      if (!wide()) { panels.forEach(pn => { pn.style.transform = ''; pn.style.filter = ''; }); return; }
+      const p = Math.min(panels.length - 1, Math.max(0, -w.getBoundingClientRect().top / innerHeight));
+      const off = panels.map((pn, k) => k === 0 ? 0 : Math.min(1, Math.max(0, k - p)));
+      panels.forEach((pn, k) => {
+        if (k > 0) pn.style.transform = `translateX(${(off[k] * innerWidth).toFixed(1)}px)`;   // starts fully off screen
+        const over = k + 1 < panels.length ? 1 - off[k + 1] : 0;
+        pn.style.filter = over > 0 ? `brightness(${(1 - .15 * over).toFixed(3)})` : '';
+      });
+    });
+  };
+
+  // Gentle parallax on full-bleed photographs.
+  const pars = [...document.querySelectorAll('.slide .bg')].filter(b => !b.querySelector('video'));
+  const updatePar = () => { if (reduce || !wide()) return; pars.forEach(b => { const r = b.parentElement.getBoundingClientRect(); const c = (r.top + r.height / 2 - innerHeight / 2) / innerHeight; b.style.translate = `0 ${(c * -40).toFixed(1)}px`; }); };
+
+  // Films play on click, with sound; leaving the slide pauses them.
+  const startFilm = sec => { const v = sec.querySelector('.frame video'); if (!v) return; sec.classList.add('playing'); v.controls = true; tryPlay(v); };
+  document.querySelectorAll('.film').forEach(sec => { const b = sec.querySelector('.playbtn'), v = sec.querySelector('.frame video'); if (!b || !v) return;
+    b.addEventListener('click', () => startFilm(sec)); v.addEventListener('ended', () => { sec.classList.remove('playing'); v.controls = false; }); });
+  // Live diagrams: nodes [id, x, y, 'Label', 'sub'] and links [from, to] in a 1700-wide viewBox; a link back (to the left)
+  // arcs above. Lines draw in, a dot travels each link, hovering a node lights its links.
+  const FLOWS = {
+    example: {nodes: [['in', 140, 270, 'Brief', 'files and notes'], ['core', 560, 270, 'System', 'the engine'], ['a', 980, 110, 'Branch A', 'one path'],
+      ['b', 980, 430, 'Branch B', 'another path'], ['qa', 1360, 270, 'Review', 'checks'], ['out', 1580, 470, 'Delivery', 'on brand']],
+      links: [['in','core'],['core','a'],['core','b'],['a','qa'],['b','qa'],['qa','out'],['qa','core']]}
+  };
+  document.querySelectorAll('[data-flow]').forEach(svg => {
+    const F = FLOWS[svg.dataset.flow]; if (!F) return;
+    const W = F.w || 230, H = 96, pos = {}, nodeEls = {}, links = [], accent = tok('--spark');
+    const lines = el('g', {}, svg), nodes = el('g', {}, svg);
+    F.nodes.forEach(([id, x, y]) => pos[id] = [x, y]);
+    F.links.forEach(([a, b], i) => {
+      const [x1, y1] = pos[a], [x2, y2] = pos[b], back = x2 < x1;
+      const sx = x1 + (x2 > x1 ? W / 2 : back ? -W / 2 : 0), ex = x2 + (x2 > x1 ? -W / 2 : back ? W / 2 : 0), mx = (sx + ex) / 2;
+      const d = back ? `M${sx} ${y1} C${sx - 120} ${y1 - 170} ${ex + 120} ${y2 - 170} ${ex} ${y2}` : `M${sx} ${y1} C${mx} ${y1} ${mx} ${y2} ${ex} ${y2}`;
+      const p = el('path', {d, class: 'ln', pathLength: 1, 'stroke-dasharray': '1 1'}, lines); p.style.setProperty('--d', (300 + i * 110) + 'ms'); links.push([a, b, p]);
+      const dot = el('circle', {r: 5, fill: accent, class: 'pulse'}, lines);
+      el('animateMotion', {dur: (2.4 + (i % 3) * .4) + 's', repeatCount: 'indefinite', path: d, begin: (i * .3) + 's'}, dot);
+    });
+    F.nodes.forEach(([id, x, y, label, sub], i) => {
+      const g = el('g', {class: 'nd'}, nodes); g.style.setProperty('--d', (100 + i * 90) + 'ms'); nodeEls[id] = g;
+      el('rect', {class: 'box', x: x - W / 2, y: y - H / 2, width: W, height: H, rx: 18, 'stroke-width': 1.5}, g);
+      el('circle', {cx: x - W / 2 + 26, cy: y - 14, r: 6, fill: accent}, g);
+      el('text', {x: x - W / 2 + 44, y: y - 7, 'font-size': 24}, g).textContent = label;
+      el('text', {x: x - W / 2 + 20, y: y + 28, 'font-size': 18, class: 'sub'}, g).textContent = sub;
+      g.addEventListener('mouseenter', () => { svg.classList.add('focus'); g.classList.add('lit');
+        links.forEach(([a, b, p]) => { if (a === id || b === id) { p.classList.add('lit'); nodeEls[a === id ? b : a].classList.add('lit'); } }); });
+      g.addEventListener('mouseleave', () => { svg.classList.remove('focus'); svg.querySelectorAll('.lit').forEach(n => n.classList.remove('lit')); });
+    });
+  });
+
+  // Chrome: colour, active nav, dots, page number, progress.
+  const chrome = document.getElementById('chrome'), foot = document.getElementById('foot'), dotsEl = document.getElementById('dots');
   const navLinks = [...document.querySelectorAll('#navlist a')];
+  // Interludes are transitions, not slides: they get no dot and no page number, so numbering matches the Figma deck.
   const numbered = slides.filter(s => !s.classList.contains('interlude'));
-  numbered.forEach((s, i) => { const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', `${i + 1}: ${s.dataset.label}`);
-    const tip = document.createElement('span'); tip.textContent = String(i + 1).padStart(2, '0') + ' · ' + s.dataset.label; b.appendChild(tip);
-    b.addEventListener('click', () => s.scrollIntoView({behavior: reduce ? 'auto' : 'smooth'})); rail.appendChild(b); });
-  const dots = [...rail.children];
+  numbered.forEach((s, i) => { const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', `${i + 1}: ${s.dataset.label}`); b.addEventListener('click', () => s.scrollIntoView({behavior: reduce ? 'auto' : 'smooth'})); dotsEl.appendChild(b); });
+  const dots = [...dotsEl.children];
   const pageOf = i => { let n = -1; slides.slice(0, i + 1).forEach(s => { if (!s.classList.contains('interlude')) n++; }); return Math.max(0, n); };
+  // Per ground: [background, nav ink, logo, progress bar] — approved logo pairings only.
+  const GROUND = {cloud:[tok('--cloud'),tok('--pine'),tok('--pine'),tok('--pine')], stone:[tok('--stone'),tok('--pine'),tok('--pine'),tok('--pine')], sky:[tok('--sky'),tok('--pine'),tok('--pine'),tok('--pine')],
+    mint:[tok('--mint'),tok('--pine'),tok('--pine'),tok('--pine')], peach:[tok('--peach'),tok('--pine'),tok('--pine'),tok('--pine')], spark:[tok('--spark'),tok('--pine'),tok('--pine'),tok('--pine')],
+    pine:[tok('--pine'),tok('--cloud'),tok('--cloud'),tok('--spark')], sea:[tok('--sea'),tok('--cloud'),tok('--spark'),tok('--spark')], leaf:[tok('--leaf'),tok('--cloud'),tok('--cloud'),tok('--mint')], earth:[tok('--earth'),tok('--cloud'),tok('--cloud'),tok('--peach')]};
+  const ground = s => GROUND[[...s.classList].find(c => c.startsWith('g-')).slice(2)];
+  const progress = document.getElementById('progress');
   let current = -1;
   const setCurrent = i => {
     if (i === current) return; current = i; const s = slides[i];
-    const ink = getComputedStyle(s).getPropertyValue('--on').trim() || getComputedStyle(root).getPropertyValue('--ink');
-    [chrome, foot, rail].forEach(n => n.style.setProperty('--chrome', ink));
-    chrome.dataset.hide = foot.dataset.hide = (i === 0) ? '1' : '0';
+    const [bg, ink, logo, bar] = ground(s);
+    [chrome, foot, dotsEl].forEach(n => n.style.setProperty('--chrome', ink));
+    [chrome, foot].forEach(n => n.style.setProperty('--logo', logo)); progress.style.setProperty('--bar', bar);
+    document.documentElement.style.setProperty('--ground', bg);
+    chrome.dataset.hide = foot.dataset.hide = (i === 0 || i === slides.length - 1) ? '1' : '0';
     navLinks.forEach(a => a.classList.toggle('on', a.dataset.sec.split(' ').includes(s.id)));
-    const pg = pageOf(i); dots.forEach((d, k) => d.classList.toggle('on', k === pg));
+    const pg = pageOf(i);
+    dots.forEach((d, k) => d.classList.toggle('on', k === pg));
     document.getElementById('pageno').textContent = String(pg + 1).padStart(2, '0') + ' / ' + String(numbered.length).padStart(2, '0');
     setCurve(s);
   };
   const onScroll = () => {
-    target = scrollY; if (!running && !reduce) { running = true; requestAnimationFrame(drift); }
-    updateH();
     const mid = innerHeight * .5; let idx = 0;
+    updateH();
     slides.forEach((s, i) => { const r = s.getBoundingClientRect(); if (r.top <= mid && r.left <= innerWidth * .5) idx = i; });
-    setCurrent(idx); updateSteps(); updateMarq(); updatePar(); updateCovers();
-    const max = root.scrollHeight - innerHeight;
+    setCurrent(idx); updateFlow(); updateAsk(); updateRoof(); updatePar(); updateCovers();
+    const max = document.documentElement.scrollHeight - innerHeight;
     progress.style.transform = `scaleX(${max > 0 ? scrollY / max : 0})`;
   };
   addEventListener('scroll', onScroll, {passive: true}); addEventListener('resize', onScroll); onScroll();
+  if (roof) new MutationObserver(updateRoof).observe(roof, {attributes: true, attributeFilter: ['class']});
 
-  // Presenting: keys step through every slide and every pinned stop; moves into or out of an interlude and between
-  // panels of a horizontal stretch glide slower than the browser's snap (Settle, 1500 / 1100 ms).
+  // Presenting: keys step through every slide and every pinned step.
+  // Stops are compared by their place in the document: a pinned interlude reports top 0 while it is held,
+  // so it is measured by its hold instead.
   const posOf = n => (n.classList.contains('interlude') ? n.parentElement : n).getBoundingClientRect().top + scrollY;
-  const stops = () => [...document.querySelectorAll('.slide:not(.pinned):not(.hpanel), .pinned > .stop')]
-    .filter(n => getComputedStyle(n).display !== 'none').map(n => ({n, y: posOf(n)})).sort((a, b) => a.y - b.y);
-  const at = () => { const list = stops(); let k = 0; list.forEach((o, i) => { if (o.y - scrollY <= innerHeight * .4) k = i; }); return [list, k]; };
+  const stops = () => [...document.querySelectorAll('.slide:not(.pinned):not(.hpanel), .pinned .stop')].filter(n => getComputedStyle(n).display !== 'none').sort((a, b) => posOf(a) - posOf(b));
+  const at = () => { const list = stops(); let k = 0; list.forEach((n, i) => { if (posOf(n) - scrollY <= innerHeight * .4) k = i; }); return [list, k]; };
+  // Moves into or out of an interlude glide slower than the browser's snap: 1500 ms on the Settle curve.
   const settle = bez(...CURVES.Settle);
   let gliding = false;
-  const glideTo = (y, dur) => {
-    const y0 = scrollY, t0 = performance.now(); gliding = true; root.style.scrollSnapType = 'none'; root.style.scrollBehavior = 'auto';
+  const glideTo = (y, dur = 1500) => {
+    const html = document.documentElement, y0 = scrollY, t0 = performance.now();
+    gliding = true; html.style.scrollSnapType = 'none'; html.style.scrollBehavior = 'auto';
     const step = now => { const p = Math.min(1, (now - t0) / dur); scrollTo(0, y0 + (y - y0) * settle(p));
-      if (p < 1) requestAnimationFrame(step); else { root.style.scrollSnapType = ''; root.style.scrollBehavior = ''; setTimeout(() => { gliding = false; }, 380); } };
+      if (p < 1) requestAnimationFrame(step); else { html.style.scrollSnapType = ''; html.style.scrollBehavior = ''; setTimeout(() => { gliding = false; }, 380); } };
     requestAnimationFrame(step);
   };
-  const sideways = (a, b) => a.n.parentElement === b.n.parentElement && a.n.parentElement.classList.contains('hwrap');
-  const soft = (a, b) => !reduce && wide() && a && b && a !== b && (a.n.classList.contains('interlude') || b.n.classList.contains('interlude') || sideways(a, b));
-  const glideFor = (a, b) => glideTo(b.y, sideways(a, b) ? 1100 : 1500);
-  const go = d => { const [list, k] = at(), a = list[k], b = list[Math.max(0, Math.min(list.length - 1, k + d))]; if (!b || a === b) return;
-    if (soft(a, b)) glideFor(a, b); else scrollTo({top: b.y, behavior: reduce ? 'auto' : 'smooth'}); };
+  // Soft moves: into or out of an interlude (1500 ms), and between panels of a horizontal stretch (Stage, 1100 ms).
+  const sideways = (a, b) => a.parentElement === b.parentElement && a.parentElement.classList.contains('hwrap');
+  const softPair = (a, b) => !reduce && wide() && a && b && a !== b && (a.classList.contains('interlude') || b.classList.contains('interlude') || sideways(a, b));
+  const glideFor = (a, b) => glideTo(posOf(b), sideways(a, b) ? 1100 : 1500);
+  const go = d => {
+    const [list, k] = at(); const from = list[k], t = list[Math.max(0, Math.min(list.length - 1, k + d))];
+    if (softPair(from, t)) glideFor(from, t); else t.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block: 'start'});
+  };
   addEventListener('wheel', e => {
     if (gliding) { e.preventDefault(); return; }
     if (Math.abs(e.deltaY) < 4 || e.ctrlKey) return;
-    const [list, k] = at(), a = list[k], b = list[k + Math.sign(e.deltaY)];
-    if (soft(a, b) && Math.abs(a.y - scrollY) < 8) { e.preventDefault(); glideFor(a, b); }
+    const [list, k] = at(), t = list[k + Math.sign(e.deltaY)];
+    // At the top of the free-running prompts, scrolling up goes back to the slide before instead of creeping into it.
+    if (ask && e.deltaY < 0 && wide() && Math.abs(ask.getBoundingClientRect().top) < 8) { e.preventDefault(); const p = list[list.indexOf(astops[0]) - 1]; if (p) p.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block: 'start'}); return; }
+    if (softPair(list[k], t) && Math.abs(posOf(list[k]) - scrollY) < 8) { e.preventDefault(); glideFor(list[k], t); }
   }, {passive: false});
   addEventListener('keydown', e => {
     if (e.target.closest('input,textarea,[contenteditable]')) return;
-    const s = slides[current];
-    if (e.key === ' ' && s && s.classList.contains('film')) { e.preventDefault(); const v = s.querySelector('.media video'); v.paused ? startFilm(s) : v.pause(); return; }
+    { const cs = slides[current]; if (e.key === ' ' && cs && cs.classList.contains('film')) { e.preventDefault(); const v = cs.querySelector('.frame video'); if (v) v.paused ? startFilm(cs) : v.pause(); return; } }
     if (gliding && ['ArrowDown','PageDown','ArrowRight','ArrowUp','PageUp','ArrowLeft',' '].includes(e.key)) { e.preventDefault(); return; }
     if (['ArrowDown','PageDown','ArrowRight'].includes(e.key) || (e.key === ' ' && !e.shiftKey)) { e.preventDefault(); go(1); }
     else if (['ArrowUp','PageUp','ArrowLeft'].includes(e.key) || (e.key === ' ' && e.shiftKey)) { e.preventDefault(); go(-1); }
-    else if (e.key === 'Home') { e.preventDefault(); scrollTo(0, 0); }
-    else if (e.key === 'End') { e.preventDefault(); scrollTo(0, root.scrollHeight); }
-    else if (e.key === 'f' || e.key === 'F') { try { document.fullscreenElement ? document.exitFullscreen() : root.requestFullscreen(); } catch (err) {} }
+    else if (e.key === 'Home') { e.preventDefault(); slides[0].scrollIntoView(); }
+    else if (e.key === 'End') { e.preventDefault(); slides.at(-1).scrollIntoView(); }
+    else if (e.key === 'f' || e.key === 'F') toggleFs();
   });
+  const btn = document.getElementById('present');
+  const toggleFs = () => {
+    try {
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      else { const p = document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); if (p && p.catch) p.catch(() => { btn.textContent = 'Full screen not available here'; }); }
+    } catch (e) { btn.textContent = 'Full screen not available here'; }
+  };
+  btn.addEventListener('click', toggleFs);
+  document.addEventListener('fullscreenchange', () => { btn.textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen'; });
   if (location.hash) { const t = document.getElementById(location.hash.slice(1)); if (t) setTimeout(() => t.scrollIntoView(), 50); }
 })();
 </script>
-</body>
-</html>
+</body></html>
