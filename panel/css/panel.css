@@ -307,8 +307,13 @@ select.field.big { height: 30px; font-weight: 600; border-color: rgba(216, 255, 
 .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .lib-detail { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
 .lib-detail img { width: 100%; border-radius: 4px; background: var(--pine); aspect-ratio: 16 / 9; object-fit: cover; }
-.lib-detail video.lib-clip { width: 100%; max-height: 420px; border-radius: 4px; background: var(--pine); aspect-ratio: 16 / 9; object-fit: contain; display: block; }
-.lib-detail video.lib-clip.post { aspect-ratio: 4 / 5; width: auto; height: min(420px, 110vw); max-width: 100%; align-self: center; }   /* a 4:5 post plays at its own shape, not shrunk into 16:9 */
+.lib-detail .lib-clip { width: 100%; max-height: 420px; border-radius: 4px; background: var(--pine); aspect-ratio: 16 / 9; object-fit: contain; display: block; }
+.lib-detail .lib-clip.post { aspect-ratio: 4 / 5; width: auto; height: min(420px, 110vw); max-width: 100%; align-self: center; }   /* a 4:5 post plays at its own shape, not shrunk into 16:9 */
+/* the big preview: the still and the clip in the same cell; the clip shows once it has really played (no black flash) */
+.lib-stage { display: grid; justify-items: center; }
+.lib-stage > * { grid-area: 1 / 1; }
+.lib-detail video.lib-play { opacity: 0; }
+.lib-detail video.lib-play.on { opacity: 1; }
 .lib-detail img.small { width: auto; max-width: min(240px, 100%); align-self: center; }   /* kit previews are 240 px: never upscale them */
 .lib-variants { display: flex; flex-wrap: wrap; gap: 4px; }
 .lib-variants .chip { font-size: 10px; padding: 0 8px; }

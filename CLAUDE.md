@@ -51,6 +51,13 @@ Install everything, library included — the panel reads the library from the re
 - **Open-source sources only with permissive licenses** (MIT, BSD, Apache-2.0, CC0) and with the exact version and license recorded next to the data (see `library/css_presets.json`). If a project changed license, use the last permissive release and say so.
 - **Real people** appear only with their consent; check likeness with `tools/face_check.py` before spending on video. Brands, prices and names on screen are fictional.
 - **Every clip with a real person gets the face refinement pass** before it goes into an edit: `python tools/faceswap_refine.py media/faceswap/jobs.json` (MiniMax H3 head inpainting with the real photo; wardrobe, background and camera stay). Add a job per new clip, then run `face_check.py` on the result. Generated video drifts from the real face; this pass is not optional.
+- **Editable by default.** What you make for After Effects is built from native, editable layers (text, shapes,
+  solids, precomps, 3D layers and a camera, keyframes on the library's curves), never delivered as one rendered MP4,
+  unless the user asks for a render or a piece cannot be built in AE (shaders, particles, physics: render only that
+  piece, with alpha, and keep text and pictures live on top). A picture, logo or clip you do not have becomes a
+  placeholder: a precomp named `PLACEHOLDER · <what goes here>` at its final size, holding a labelled solid in the
+  brand colours, used everywhere that picture appears, so the user replaces its content once and the whole animation
+  updates. An empty project folder is no reason to render: build with placeholders and list them when you finish.
 - **Generation costs**: quote USD before generating with Flora (or similar) unless the user already approved the spend, and record real costs in `docs/LEARNINGS.md` §8.
 - **Commit or push only when the user asks.** End commit messages with the co-author line your harness gives you.
 - **Every user interface has an animated GIF in the repo** (`docs/screens/`, under ~500 KB) showing it in use. If you change the panel, the visualizer or any UI, re-record its GIF (see CONTRIBUTING §7) in the same commit.

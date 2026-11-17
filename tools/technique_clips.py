@@ -27,7 +27,7 @@ FONT = ROOT / "assets/fonts/InterTight[wght].ttf"
 
 # slug: (how, source, start s, length s, sound). "cut" is a plain cut; the others are made below.
 JOBS = {
-    "tracked-labels": ("tracked", V + "R4_car3_kling.mp4", 0, 5.0, False),
+    "tracked-labels": ("tracked", V + "SF_embarcadero_kling.mp4", 0, 5.0, False),   # the teaser's car under the overpass, as on its still
     "text-behind-people": ("behind", [V + "A_yes_k3_cut.mp4", V + "A_yes_k3_matte.mov"], 0, 2.2, False),
     "roto-breakdown": ("roto", [V + "A_yes_k3_cut.mp4", V + "A_yes_k3_matte.mov"], 0, 2.2, False),
     "hud-overlays": ("hud", V + "G5_robot_closeup.mp4", 0.3, 4.4, False),
@@ -154,16 +154,23 @@ def track(f, box):
 
 
 def tracked(src, start, length):
-    """A label pinned to a moving car: the car is tracked, corner brackets and a leader line follow it."""
-    f = frames(src, start, length); boxes = track(f, (314, 214, 92, 68)); out = []
+    """A label pinned to a moving car, as in the teaser's spot (its still, library/techniques/tracked-labels.png): the
+    car under the overpass is tracked, corner brackets follow it, a leader rises to AEROSPACE EXTERIOR and the lower
+    third "Aerospace exterior. / Inspired by the SR-71" slides in."""
+    f = frames(src, start, length); boxes = track(f, (212, 228, 250, 84)); out = []
     for i, fr in enumerate(f):
-        im = rgba(fr); d = ImageDraw.Draw(im, "RGBA"); x, y, w, h = boxes[i]; t = i / FPS; k = LAND(min(1, max(0, (t - .25) / .5))); L = 12
+        im = rgba(fr); d = ImageDraw.Draw(im, "RGBA"); x, y, w, h = boxes[i]; t = i / FPS; k = LAND(min(1, max(0, (t - .25) / .5))); L = 14
         for (cx, cy, sx, sy) in ((x, y, 1, 1), (x + w, y, -1, 1), (x, y + h, 1, -1), (x + w, y + h, -1, -1)):   # corner brackets
             d.line([(cx, cy), (cx + sx * L, cy)], fill=SPARK, width=3); d.line([(cx, cy), (cx, cy + sy * L)], fill=SPARK, width=3)
-        if k > 0:   # the leader goes up and to the left, into the sea, where the label never leaves the frame
-            ax, ay = x + w * .3, y; lx, ly = ax - 80 * k, ay - 64 * k
+        if k > 0:   # the leader rises up and to the right from the windscreen, over the road, as in the teaser
+            ax, ay = x + w * .55, y + h * .2; lx, ly = ax + 70 * k, ay - 58 * k
             d.line([(ax, ay), (lx, ly)], fill=SPARK, width=2); d.ellipse([ax - 4, ay - 4, ax + 4, ay + 4], fill=SPARK)
-            if k > .6: chip(d, lx, ly - 30, "CLASSIC 4 · 1974", 18, anchor="rt")
+            if k > .6: chip(d, lx, ly - 30, "AEROSPACE EXTERIOR", 16, anchor="mt")   # centred on the leader, kept inside the frame
+        s = LAND(min(1, max(0, (t - .6) / .6)))   # the lower third slides in from the left
+        if s > 0:
+            bx = int(-300 * (1 - s)); d.rectangle([bx, 284, bx + 268, 340], fill=(18, 65, 67, int(240 * s)))   # the teaser's lower-third teal
+            d.text((bx + 16, 292), "Aerospace exterior.", font=font(20, 700), fill=CLOUD)
+            d.text((bx + 16, 318), "Inspired by the SR-71", font=font(12, 500), fill=CLOUD)
         chip(d, 16, 16, "TRACKED · 0 KEYFRAMES BY HAND", 15, fill=(4, 18, 15), ink=SPARK)
         out.append(flat(im))
     return out

@@ -60,6 +60,13 @@ Previews: `research/video_prompts/previews/<id>.webp` (animated, from `make_prev
   poster frame). Use its poster time for the card's still.
 
 ## Rules
+- **Editable by default (repo CLAUDE.md).** For someone working in After Effects, a template is a recipe, not a file
+  to import: rebuild it natively (route B: text, shapes, precomps, 3D layers and a camera, keyframes on the token
+  curves; `research/video_prompts/ae/route_b.jsx` shows the pattern). Render to MP4/MOV only when asked, or only the
+  pieces AE cannot build (route A pieces: shaders, particles, physics), with alpha and with text and pictures live on
+  top (route C). Pictures you do not have become `PLACEHOLDER · <what goes here>` precomps at their final size (a
+  labelled solid in the brand colours), one per picture, used wherever it appears; list them when you finish.
+  A carousel (t16) is one precomp per slide on 3D layers with a camera, each slide holding its placeholder.
 - Motion DNA colours, fonts and curves only; fictional brands and names; never a real brand's logo or screenshots.
 - The source collection and the Skillry remakes are third-party: `python research/video_prompts/fetch_sources.py`
   downloads them into `source/` (git-ignored). Use them as behavioral references; never copy a prompt text into the

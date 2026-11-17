@@ -28,7 +28,9 @@ function fileUrl(path) { return "file:///" + encodeURI(path.replace(/\\/g, "/").
 function readJSON(url) {
   return new Promise((resolve, reject) => {
     const x = new XMLHttpRequest();
-    x.open("GET", url);
+    // the same cache-buster as the scripts (index.html): CEP kept serving an old library/create.json after a reload,
+    // so the panel showed orders that were already rewritten in the repo
+    x.open("GET", url + (url.includes("?") ? "&" : "?") + "v=" + (window.__v || Date.now()));
     x.onload = () => { try { resolve(JSON.parse(x.responseText)); } catch (e) { reject(e); } };
     x.onerror = () => reject(new Error("cannot read " + url));
     x.send();

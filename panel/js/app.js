@@ -40,9 +40,14 @@ function clip(gif, attrs = {}) {   // a looping, muted video of the preview; fal
 let hoverStop = null;
 function stopHover() { if (hoverStop) hoverStop(); }
 function bigClips() { return document.querySelectorAll(".lib-detail video"); }
-function shown(v, cb) {   // cb runs once a real frame is on screen ("playing" can fire before anything is painted)
-  if (v.requestVideoFrameCallback) { v.requestVideoFrameCallback(() => cb()); return; }
-  const t = () => { if (v.currentTime > 0.04) { v.removeEventListener("timeupdate", t); cb(); } };
+// cb runs once the clip has really played for a moment: inside After Effects (CEP) the first frames a VP9 clip reports
+// as presented can still paint black while its decoder starts, longer when AE is busy, so one presented frame was not
+// enough (the card and the big preview went black for 1 to 2 s). The still stays until 0.2 s have played.
+function shown(v, cb) {
+  let done = false;
+  const ok = () => { if (!done && v.currentTime > 0.2) { done = true; cb(); } return done; };
+  if (v.requestVideoFrameCallback) { const f = () => { if (!ok() && v.isConnected) v.requestVideoFrameCallback(f); }; v.requestVideoFrameCallback(f); return; }
+  const t = () => { if (ok()) v.removeEventListener("timeupdate", t); };
   v.addEventListener("timeupdate", t);
 }
 function hoverPlay(card, img, gif) {
@@ -56,14 +61,26 @@ function hoverPlay(card, img, gif) {
   card.addEventListener("mouseenter", () => {   // hover plays the preview from the start, over the still
     stopHover(); on = true; hoverStop = stop; card.classList.add("playing");
     if (card.classList.contains("sel")) { on = false; hoverStop = null; card.classList.remove("playing"); return; }   // already playing above
-    for (const b of bigClips()) b.pause();
+    for (const b of bigClips()) pauseBig(b);
     if (!webmOf(gif)) { const t = new Image(); t.onload = () => { if (on && img.isConnected) img.src = t.src; }; t.src = gif + "?t=" + Date.now(); return; }
     const mine = v = clip(gif, { class: img.className + " hoverclip", preload: "auto" });
     shown(mine, () => { if (v === mine) mine.classList.add("on"); });
     img.after(mine);
   });
-  card.addEventListener("mouseleave", () => { stop(); for (const b of bigClips()) b.play().catch(() => {}); });
+  card.addEventListener("mouseleave", () => { stop(); for (const b of bigClips()) resumeBig(b); });
   card.addEventListener("click", stop, true);   // a click opens the big preview: the small one stops
+}
+// A paused big clip loses its picture in CEP while the hovered card's clip starts decoding (it went black for ~2 s):
+// while it is paused its still shows instead (the clip sits over its still in .lib-stage), and it comes back once it
+// has painted two new frames after resuming.
+function onStage(b) { return b.parentElement && b.parentElement.classList.contains("lib-stage"); }
+function pauseBig(b) { b.pause(); if (onStage(b)) b.classList.remove("on"); }
+function resumeBig(b) {
+  const p = b.play(); if (p) p.catch(() => {});
+  if (!onStage(b)) return;
+  const tok = (b._resume = (b._resume || 0) + 1), show = () => { if (b._resume === tok && !b.paused) b.classList.add("on"); };
+  if (b.requestVideoFrameCallback) b.requestVideoFrameCallback(() => b.requestVideoFrameCallback(show));
+  else setTimeout(show, 250);
 }
 const store = {   // per-user conveniences (section, filters, favorites); the panel works without it
   get(k, d) { try { const v = localStorage.getItem("mdna." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
@@ -139,7 +156,38 @@ async function boot() {
     energy: ENERGY_WORD[r.energy] || r.energy, use: "Measured reference · " + (r.section || "") }));
   await loadCurves();
   $("#boot").remove();
-  header(); tabs(); renderAll(); status(); setInterval(() => { status(); selHint(); }, 4000);
+  header(); tabs(); renderAll(); status(); setInterval(pollAE, 4000); panelBridge();
+}
+// While the panel is open it runs the bridge's jobs itself: Node looks at bridge/inbox every 0.3 s (no script runs in
+// AE for that) and asks AE to run the jobs only when there is one. AE's own timer fired while dialogs were open and
+// showed "Cannot run a script while a modal dialog is waiting for response"; a call from the panel waits instead.
+// The heartbeat tells the bridge and the MCP server that the panel is here; 10 s without it and the timer comes back.
+function panelBridge() {
+  const req = IN_AE && typeof nodeReq === "function" && nodeReq();
+  if (!req || !S.root) return;
+  const fs = req("fs"), dir = S.root + "/bridge/", beat = dir + "outbox/_panel_beat.txt";
+  const touch = () => { try { fs.writeFileSync(beat, new Date().toISOString()); } catch (e) {} };
+  touch(); call("mdna_bridge_panel");
+  let busy = false, beatAt = Date.now();
+  setInterval(async () => {
+    if (Date.now() - beatAt > 4000) { beatAt = Date.now(); touch(); }
+    if (busy) return;
+    let jobs = [];
+    try { jobs = fs.readdirSync(dir + "inbox").filter((f) => f.endsWith(".jsx")); } catch (e) { return; }
+    if (!jobs.length) return;
+    busy = true;
+    try { await call("mdna_bridge_run"); } finally { busy = false; }
+  }, 300);
+}
+// Each call into After Effects runs a script there, and AE shows its wait cursor while it runs. The status is read every
+// 4 s only while someone uses the panel (or an Agent order runs), otherwise every 20 s; the selection hint only while
+// a section that shows it is on screen. Nothing is read while the panel is hidden.
+let lastStatus = 0;
+function pollAE() {
+  if (document.hidden) return;
+  const now = Date.now(), active = now - lastTouch < 30000 || (typeof AG !== "undefined" && !!AG.proc);
+  if (active || now - lastStatus > 20000) { lastStatus = now; status(); }
+  if ([...document.querySelectorAll(".sel-hint")].some((e) => e.offsetParent)) selHint();
 }
 
 // ---------- header ----------

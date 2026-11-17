@@ -291,7 +291,7 @@ const RULE_ASK = "When I give you a review note or a correction, apply it, then 
   "effects, color, audio, edit, process. Do not save rules yourself: the panel asks me where to keep them.";
 
 async function contextBlock() {
-  const lines = [`[Motion DNA panel · Agent. Motion DNA (library, tools, rules): ${S.root}; follow its CLAUDE.md. Keep replies short: what changed and what needs my decision (put a question first), in one to three sentences; no step-by-step narration or tool output, the panel shows the steps. Ask before any paid generation. Never save the After Effects project unless I ask. Before you call a build done, run check_layout and fix its warnings (or say why one stays), then add_sound for its sound effects unless I asked for silence or it plays muted.]`];
+  const lines = [`[Motion DNA panel · Agent. Motion DNA (library, tools, rules): ${S.root}; follow its CLAUDE.md. Keep replies short: what changed and what needs my decision (put a question first), in one to three sentences; no step-by-step narration or tool output, the panel shows the steps. Ask before any paid generation. Never save the After Effects project unless I ask. Build everything as editable After Effects layers, never one rendered MP4 unless I ask for a render; a picture I have not given you becomes a 'PLACEHOLDER · <what goes here>' precomp at its final size that I can replace later (CLAUDE.md › Editable by default). Before you call a build done, run check_layout and fix its warnings (or say why one stays), then add_sound for its sound effects unless I asked for silence or it plays muted.]`];
   if (!PJ && scope().kind === "brand") lines.push(`You are in the folder of the brand ${scope().name} (${scope().dir}): this conversation is for everything about that brand.`);
   if (PJ) {
     lines.push(`Project: ${PJ.p.name}, folder ${PJ.dir} (your working folder: put what you make in its subfolders, never in the Motion DNA repo).`);
@@ -774,7 +774,7 @@ function agent() {
   agent.render = () => { render(); projectSection(); };
   agent.render();
   authStatus().then((ok) => { const was = AG.logged; AG.logged = ok; if (was !== ok) render(); });
-  loadProject(); setInterval(loadProject, 15000);
+  loadProject(); setInterval(() => { if (!document.hidden) loadProject(); }, 30000);   // a call into AE: see pollAE
 }
 
 function chatView() {
@@ -939,7 +939,14 @@ function libraryView() {
     const v = it.variants ? it.variants[Math.min(vi || 0, it.variants.length - 1)] : it;
     const chips = it.variants && it.variants.length > 1 ? h("div", { class: "lib-variants" }, ...it.variants.map((x, i) =>
       h("button", { class: "chip" + (x === v ? " on" : ""), title: x.desc, onclick: () => show(it, i) }, x.name))) : null;
-    const media = /\.webm$/.test(v.img || "") ? clip(v.img, Object.assign({ class: "lib-clip" + (/^Carousel/.test(v.sub || it.sub || "") ? " post" : "") }, v.thumb ? { poster: v.thumb } : {})) : safeImg([v.img, v.thumb, v.fallback], v.name, it.variants ? { class: "small" } : {});
+    // a clip plays over its still, and shows only once it has really played (shown in app.js): no black while it loads
+    const cls = "lib-clip" + (/^Carousel/.test(v.sub || it.sub || "") ? " post" : "");
+    let media;
+    if (/\.webm$/.test(v.img || "")) {
+      const vid = clip(v.img, { class: cls + " lib-play" });
+      media = v.thumb ? h("div", { class: "lib-stage" }, h("img", { class: cls, src: v.thumb, alt: "" }), vid) : vid;
+      if (v.thumb) shown(vid, () => vid.classList.add("on")); else vid.classList.add("on");
+    } else media = safeImg([v.img, v.thumb, v.fallback], v.name, it.variants ? { class: "small" } : {});
     for (const old of detail.querySelectorAll("video")) { old.pause(); old.removeAttribute("src"); old.load(); }   // one decoder at a time
     detail.replaceChildren(...kids(media,
       h("b", {}, it.variants ? it.name + (it.variants.length > 1 ? " · " + v.name : "") : it.name), it.family ? h("p", { class: "dim" }, it.family) : null, chips,

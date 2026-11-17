@@ -312,18 +312,41 @@ TEMPLATE = (ROOT / "tools" / "library_guide.html").read_text(encoding="utf-8") i
 def panel_create():
     """library/create.json for the panel's Agent › Library › Web Motion tab: the new things, each with its clip and order,
     and the techniques that have a moving example (the panel plays it on hover)."""
+    # A panel order is sent as it is, so it names what to work from (the selected layers or the open comp) and says to ask
+    # when that is missing: "Animate this carousel post" left the agent asking which post (no "this" reaches it).
+    # Editable by default (CLAUDE.md): the order asks for native After Effects layers, and placeholders for any picture
+    # the project does not have yet, never a rendered MP4 to import (an empty project folder got an MP4).
     D = data(); items = []
-    for x in D["carousel"]: items.append(dict(name=x["name"], sub="Carousel · " + x["group"], desc=x["use"], thumb="library/" + x["poster"], img="library/" + x["video"], order=x["ask"] + " Use the video-templates skill, template t16_carousel."))
+    PH = " Any picture you do not have becomes a 'PLACEHOLDER · <what goes here>' precomp at its final size that I can replace later."
+    for x in D["carousel"]:
+        items.append(dict(name=x["name"], sub="Carousel · " + x["group"], desc=x["use"], thumb="library/" + x["poster"], img="library/" + x["video"],
+                          order=f"Make a 4:5 carousel post in the {x['name'].lower()} style in the open comp, built as editable After Effects layers: one "
+                                "precomp per slide on 3D layers with a camera, keyframed on our curves (video-templates skill, template t16_carousel, as the "
+                                "reference for the motion). The slides are the selected layers, top to bottom; with nothing selected, the image and precomp "
+                                "layers of the comp; with none, five 'PLACEHOLDER · Slide N' precomps I can replace later."))
     c = D["character"]
     items.append(dict(name=c["name"] + " talks", sub="Character · lipsync", desc="A pixel character from its file: drawn in Figma, built in After Effects, its mouth keyed to a voice line.",
-                      thumb="library/" + c["poster"], img="library/" + c["video"], order="Add The Agent to this comp and make it say this voice line, with lipsync (MCP add_character with audio)."))
+                      thumb="library/" + c["poster"], img="library/" + c["video"],
+                      order="Add The Agent to the open comp, saying the voice line I give you, with lipsync (MCP add_character with audio). If I have not given you the line or an audio file, ask me for it first."))
     for x in D["code"]:   # a template acted by a character sits next to the character; the others show their format
+        if x["group"] == "HyperFrames blocks":
+            block = pathlib.Path(x["video"]).stem
+            order = (f"Make the HyperFrames block {block} in the open comp in our brand's colours and curves, rebuilt as editable After Effects "
+                     "layers where you can, its text and numbers always live; render only what After Effects cannot build, with alpha. Use the text and "
+                     "numbers in the comp, or sample ones I can edit.")
+        else:
+            tid = pathlib.Path(x["video"]).stem
+            order = (f"Make a {x['name']} piece in the open comp from the video-templates skill, template {tid}, rebuilt as editable After Effects "
+                     "layers (text, shapes, precomps, keyframes on our curves); render only what After Effects cannot build, with alpha. Use the "
+                     "comp's text and images and the project brief." + PH)
         it = dict(name=x["name"], sub=("Character · " + x.get("aspect", "16:9")) if x.get("character") else "Made in code · " + x.get("aspect", "16:9"),
-                  desc=x["use"], thumb="library/" + x["poster"] if x["poster"] else "", img="library/" + x["video"], order=x["ask"])
+                  desc=x["use"], thumb="library/" + x["poster"] if x["poster"] else "", img="library/" + x["video"], order=order)
         if x.get("character"): items.insert(next(i for i, y in enumerate(items) if y["sub"] == "Character · lipsync") + 1, it)
         else: items.append(it)
     for x in D["fx"]:
-        if x["group"] in ("3D in code",): items.append(dict(name=x["name"], sub="3D in code", desc=x["use"], thumb="library/" + x["poster"], img="library/" + x["video"], order=x["ask"]))
+        if x["group"] in ("3D in code",):
+            items.append(dict(name=x["name"], sub="3D in code", desc=x["use"], thumb="library/" + x["poster"], img="library/" + x["video"],
+                              order=x["ask"] + " Work in the open comp, on the selected layer: render only the 3D piece, with alpha, and keep the rest editable." + PH))
     clips = sorted(p.stem for p in (LIB / "techniques").glob("*.webm"))
     return {"note": "Built by tools/build_library_guide.py for the panel (Agent › Library › Web Motion).", "items": items, "technique_clips": clips}
 

@@ -61,6 +61,17 @@ def start_bridge_script(path):
 
 def ensure_bridge():
     marker = OUTBOX / "_bridge_started.txt"
+    beat = OUTBOX / "_panel_beat.txt"   # the Motion DNA panel runs the jobs while it is open (tools/ss_bridge.jsx)
+    try:
+        if time.time() - beat.stat().st_mtime < 10:
+            return
+    except OSError:
+        pass
+    try:   # the panel ran the jobs    try:   # the panel ran the jobs but has closed: start the timed bridge
+        if marker.read_text(encoding="utf-8", errors="replace").startswith("panel"):
+            marker.unlink(missing_ok=True)
+    except OSError:
+        pass
     if not ae_running():
         marker.unlink(missing_ok=True)
         raise RuntimeError("After Effects is not running. Open it (with the Motion DNA panel docked the bridge starts by itself).")
@@ -1323,6 +1334,12 @@ def handle(req):
                                 "(CONTRIBUTING.md section 8). Apply with apply_preset (duration, intensity, direction, ease), apply_pack, add_asset; undo "
                                 "with remove_animation; check with render_frame and, before calling a build done, check_layout; then add_sound (sound effects made in code, by default unless silence is asked for). Never save the AE project unless asked. Working for a brand or a project? Read it first with get_brand and "
                                 "save every review note with add_brand_note: each brand profile learns and keeps its own rules. "
+                                "EDITABLE BY DEFAULT: build what you make as native, editable After Effects layers (text, shapes, solids, "
+                                "precomps, 3D layers and a camera, keyframes on the library's curves), never as one rendered MP4, unless the user "
+                                "asks for a render or a piece cannot be built in AE (shader, particles, physics: render only that piece, with alpha, "
+                                "and keep text and pictures live on top). A picture, logo or clip you do not have becomes a placeholder precomp named "
+                                "'PLACEHOLDER · <what goes here>' at its final size (a labelled solid in the brand colours), used wherever that "
+                                "picture appears, so the user swaps its content once and the whole animation updates; list the placeholders at the end. "
                                 "Read CLAUDE.md in the repo for the rules."}
     if method == "tools/list":
         return {"tools": tool_list()}

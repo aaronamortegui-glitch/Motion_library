@@ -46,7 +46,7 @@ function mdna_boot(extPath) {
 // Agent order runs), never on a timer alone: a restarted tick that meets a dialog still open shows the error again.
 // After a restart that did not bring the heartbeat back, the next one waits twice as long (15 s, 30 s … 4 min).
 function mdna_bridge_heal() {
-    if (!$.global.SS_BRIDGE_TASK || typeof $.global.SS_BRIDGE_POLL !== "function") return false;
+    if (!$.global.SS_BRIDGE_TASK || $.global.SS_BRIDGE_TASK === "panel" || typeof $.global.SS_BRIDGE_POLL !== "function") return false;   // the panel runs the jobs: no timer to heal
     var now = new Date().getTime(), last = $.global.SS_BRIDGE_LAST || 0;
     if (!last) { $.global.SS_BRIDGE_LAST = now; return false; }   // an older bridge without heartbeat: give it one round
     if (now - last < 15000) { $.global.SS_BRIDGE_HEAL_N = 0; return false; }   // alive
@@ -59,14 +59,26 @@ function mdna_bridge_heal() {
     $.global.SS_BRIDGE_HEALED = now; $.global.SS_BRIDGE_HEAL_N = n + 1;
     return true;
 }
+// The panel runs the bridge's jobs (app.js panelBridge): it stops the timer (ss_bridge.jsx sees the panel's heartbeat)
+// and calls mdna_bridge_run only when bridge/inbox has a job. A call from the panel waits while a dialog is open.
+function mdna_bridge_panel() {
+    $.global.SS_BRIDGE_ON = false;
+    try { if ($.global.SS_BRIDGE_TASK && $.global.SS_BRIDGE_TASK !== "panel") app.cancelTask($.global.SS_BRIDGE_TASK); } catch (e) {}
+    $.global.SS_BRIDGE_TASK = null;
+    try { $.evalFile(new File($.global.SS_ROOT + "/tools/ss_bridge.jsx")); } catch (e) { return "ERR " + e.toString(); }
+    return mdna_status();
+}
+function mdna_bridge_run() {
+    if (typeof $.global.SS_BRIDGE_POLL !== "function") mdna_bridge_panel();
+    $.global.SS_BRIDGE_POLL();
+    return "OK";
+}
 function mdna_status(heal) {
     var healed = false; if (heal === "1") { try { healed = mdna_bridge_heal(); } catch (e) {} }
-    var on = !!$.global.SS_BRIDGE_TASK, mins = -1;
-    try {
-        var fs = Folder($.global.SS_ROOT + "/bridge/outbox").getFiles("*.txt"), best = 0;
-        for (var i = 0; i < fs.length; i++) if (fs[i].name.charAt(0) !== "_" && fs[i].modified && fs[i].modified.getTime() > best) best = fs[i].modified.getTime();
-        if (best) mins = Math.round((new Date().getTime() - best) / 60000);
-    } catch (e) {}
+    // minutes since the bridge last ran a job, from its own clock (SS_BRIDGE_BUSY): reading the date of every result in
+    // bridge/outbox, every 4 s, took longer as the folder grew and kept After Effects' wait cursor on screen
+    var on = !!$.global.SS_BRIDGE_TASK, busy = $.global.SS_BRIDGE_BUSY || 0;
+    var mins = busy ? Math.round((new Date().getTime() - busy) / 60000) : -1;
     return mdna_json({ bridge: on, minutes: mins, healed: healed });
 }
 function mdna_connect() {
