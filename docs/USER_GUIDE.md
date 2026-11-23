@@ -188,13 +188,13 @@ Each one was tested end to end (use cases UC12–UC19). The Agent knows the tool
 ## Projects: one folder and one conversation per piece
 **Project** (the first tab) › 2 Project folder › **New project**:
 - name it, pick where, and choose its brand;
-- tick the folders: `01_Brief` … `07_Exports`, `Claude` (made on disk and as matching bins in the After Effects project);
+- tick the folders: `01_Brief` … `08_Exports` (`04_Statics` holds stills, images and design files), `Claude` (made on disk and as matching bins in the After Effects project);
 - optionally save the open After Effects project in it.
 
 The project gets its own conversation. Continue it from the panel, the Claude app or a terminal. The project can also
 keep rules of its own, next to the brand's.
 
-> **Tip:** keep the `.aep` inside the project's `05_AE`. The agent then knows which file belongs to the piece and asks
+> **Tip:** keep the `.aep` inside the project's `06_AE`. The agent then knows which file belongs to the piece and asks
 > before building somewhere else.
 
 ## For Claude

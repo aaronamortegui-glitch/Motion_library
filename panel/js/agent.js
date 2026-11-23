@@ -20,7 +20,7 @@ const AG = {
 let PJ = null;   // the open project: {dir, p} (p = motion-dna.project.json)
 const nodeReq = () => window.require || (window.cep_node && window.cep_node.require) || null;
 // the folders of a new project, made on disk and as bins in the After Effects project (host.jsx mdna_project_new)
-const PROJECT_FOLDERS = ["01_Brief", "02_References", "03_Footage", "04_Audio", "05_AE", "06_Renders", "07_Exports", "Claude"];
+const PROJECT_FOLDERS = ["01_Brief", "02_References", "03_Footage", "04_Statics", "05_Audio", "06_AE", "07_Renders", "08_Exports", "Claude"];
 
 // macOS apps start with a bare PATH (/usr/bin:/bin…): add Homebrew, ~/.local/bin and npm's folder so claude, codex,
 // node, git and python3 resolve the same way they do in a terminal
@@ -90,12 +90,31 @@ async function connStatus() {
   AG.exe = AG.exe || findClaude();
   setDot("st-claude", null, "Claude Code sign-in: checking…"); setDot("st-figma", null, "Figma: checking…");
   AG.logged = await authStatus();
-  setDot("st-claude", AG.logged, AG.logged ? "Claude Code: signed in (Agent ready)" : AG.logged === false ? "Claude Code: not signed in. Click to sign in." : "Claude Code: not found. Click for setup.");
+  claudeDot();
   if (typeof agent.draw === "function") agent.draw();
   AG.figma = await figmaStatus();
   setDot("st-figma", AG.figma === "connected", { connected: "Figma: connected (Agent, Full mode)", auth: "Figma: added, needs sign-in. Click for the step.",
     missing: "Figma: not connected. Click to connect it.", unknown: "Figma: status unknown. Click to check." }[AG.figma]);
   if (AG.figma === "unknown") setDot("st-figma", null, "Figma: status unknown. Click to check.");
+  codexDot(AG.codexSt = await codexStatus());
+}
+function claudeDot() {
+  if (typeof codexOnly === "function" && codexOnly()) return setDot("st-claude", false, "Claude: off for this brand (client policy: Codex only)");
+  setDot("st-claude", AG.logged, AG.logged ? "Claude Code: signed in (Agent ready)" : AG.logged === false ? "Claude Code: not signed in. Click to sign in." : "Claude Code: not found. Click for setup.");
+}
+// the active brand changed (or another project opened): a Codex-only brand stops a running order and turns the chat off
+function policyChanged() {
+  const on = typeof codexOnly === "function" && codexOnly();
+  if (on === AG.codexOnly) return; AG.codexOnly = on;
+  if (on && AG.proc) stopAgent();
+  if (AG.logged !== undefined) claudeDot();
+  if (agent.render) agent.render();
+}
+function codexDot(cx) {   // shown only where Codex is installed (it is optional): green when signed in and it has the Motion DNA tools
+  const b = document.getElementById("st-codex"); if (!b) return;
+  b.hidden = !(cx && cx.found); if (b.hidden) return;
+  setDot("st-codex", cx.logged && cx.mcp, cx.logged && cx.mcp ? "Codex: connected (it has the Motion DNA tools)"
+    : !cx.logged ? "Codex: not signed in. Click to sign in with ChatGPT." : "Codex: Motion DNA is not added yet. Click to add it.");
 }
 function openSetup() { if (agent.showSetup) agent.showSetup(); }
 // Connectors the Agent can use, found in `claude mcp list` either from the Claude account ("claude.ai Krea"), a plugin
@@ -244,7 +263,7 @@ async function copyDiagnostics() {
 }
 function figmaStatus() { return svcStatus("figma", true).then((st) => { AG.figmaServer = AG.server && AG.server.figma; return st; }); }
 document.addEventListener("DOMContentLoaded", () => {
-  for (const id of ["st-claude", "st-figma"]) { const b = document.getElementById(id); if (b) b.onclick = openSetup; }
+  for (const id of ["st-claude", "st-figma", "st-codex"]) { const b = document.getElementById(id); if (b) b.onclick = openSetup; }
 });
 setTimeout(() => { connStatus(); setInterval(connStatus, 10 * 60 * 1000); }, 2500);
 
@@ -438,6 +457,7 @@ function setSession(id, title) {
 // Opens the conversation in the Claude app (Code tab), where it stays in the sidebar. No conversation yet: the panel
 // starts it with a first message that names it ("Motion DNA · Brand: Vela"), then opens it.
 function openInClaudeApp(id) {
+  if (typeof codexOnly === "function" && codexOnly()) return toast("This brand is Codex only (client policy): Claude stays off.", true);
   const sc = scope();
   if (!id) {
     if (AG.proc) return toast("Wait for the current order to finish.", true);
@@ -527,6 +547,7 @@ function splitRules(text) {   // RULE: category | rule | why  lines become propo
 }
 async function runAgent(prompt, images = []) {
   if (AG.proc) return;
+  if (typeof codexOnly === "function" && codexOnly()) return toast("This brand is Codex only (client policy): Claude stays off. Work on it from Codex.", true);
   const cp = nodeReq()("child_process");
   let sid = sessionNow();
   if (busyElsewhere(sid) && !confirm("This conversation was used in the last seconds somewhere else (the Claude app or a terminal).\nMessages from both would mix. Send anyway?")) return;
@@ -778,6 +799,13 @@ function agent() {
 }
 
 function chatView() {
+  if (typeof codexOnly === "function" && codexOnly()) {   // client policy: no Claude on this brand's projects
+    const b = activeBrand();
+    return h("div", { class: "stack" }, h("div", { class: "card-box avoid" },
+      h("b", {}, "Claude is off for " + b.name),
+      h("span", {}, "Client policy: this brand is Codex only. The Agent chat does not start Claude here, and Motion DNA refuses requests from Claude Code while this brand is active."),
+      h("span", { class: "dim" }, "Work on it from Codex: it drives After Effects through the same Motion DNA tools (the Codex chip in the header turns green when it is set up). To change this, open the brand › Overview › AI assistant.")));
+  }
   const wrap = h("div", { class: "stack" });
   const logEl = h("div", { class: "agent-log" });
   const PLACEHOLDER = "Tell the agent what to do, e.g. \"Animate the selected layers in the brand's style\".\nCtrl+Enter sends.";
@@ -1151,6 +1179,19 @@ function findCodex() {
   const fs = req("fs"), path = req("path"), os = req("os"), cp = req("child_process");
   const cands = process.platform === "win32" ? [path.join(process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"), "npm", "codex.cmd")] : ["/opt/homebrew/bin/codex", "/usr/local/bin/codex", path.join(os.homedir(), ".npm-global", "bin", "codex")];
   for (const c of cands) if (fs.existsSync(c)) return c;
+  // the Codex desktop app brings its own CLI (same ChatGPT sign-in, same ~/.codex/config.toml): on Windows a copy in
+  // %LOCALAPPDATA%\OpenAI\Codex\bin\<build>\codex.exe (the newest build wins), on macOS inside Codex.app
+  if (process.platform === "win32") {
+    const bin = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local"), "OpenAI", "Codex", "bin");
+    try {
+      const exes = fs.readdirSync(bin).map((d) => path.join(bin, d, "codex.exe")).filter((p) => fs.existsSync(p))
+        .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+      if (exes.length) return exes[0];
+    } catch (e) {}
+  } else {
+    for (const app of ["/Applications/Codex.app", path.join(os.homedir(), "Applications", "Codex.app")])
+      for (const c of [app + "/Contents/Resources/codex", app + "/Contents/MacOS/codex"]) if (fs.existsSync(c)) return c;
+  }
   try { const out = cp.execSync(process.platform === "win32" ? "where codex" : "command -v codex", { encoding: "utf8", windowsHide: true, timeout: 5000 }); const ls = out.split(/\r?\n/).map((l) => l.trim()).filter(Boolean); const first = process.platform === "win32" ? ls.find((l) => /\.(cmd|exe)$/i.test(l)) : ls[0]; if (first) return first; } catch (e) {}
   return null;
 }
@@ -1210,7 +1251,7 @@ function waitForSignIn(onDone) {   // checks every 4 s for 5 minutes after the s
   clearInterval(AG.signWait); let n = 0;
   AG.signWait = setInterval(async () => {
     if (++n > 75) return clearInterval(AG.signWait);
-    if (await authStatus()) { clearInterval(AG.signWait); AG.logged = true; setDot("st-claude", true, "Claude: connected"); toast("Claude is connected."); onDone(); }
+    if (await authStatus()) { clearInterval(AG.signWait); AG.logged = true; claudeDot(); toast("Claude is connected."); onDone(); }
   }, 4000);
 }
 function showSetup(setup) {
@@ -1251,7 +1292,7 @@ function showSetup(setup) {
   const cx = AG.codexSt;
   const codex = !cx ? step(false, "Codex (optional)", h("span", { class: "dim" }, "Checking Codex…"))
     : !cx.found ? step(false, "Codex (optional)", [h("span", {}, "Use the same Motion DNA tools from OpenAI's Codex."), h("button", { class: "btn", onclick: () => openUrl("https://developers.openai.com/codex/cli") }, "Install Codex")])
-    : cx.logged && cx.mcp ? step(true, "Codex is ready", h("span", { class: "dim" }, "Codex has the Motion DNA tools: open After Effects with this panel and ask Codex."))
+    : cx.logged && cx.mcp ? step(true, "Codex is connected", h("span", { class: "dim" }, "Codex has the Motion DNA tools: open After Effects with this panel and ask Codex."))
     : step(false, "Codex (optional)", [h("span", {}, "Use the same Motion DNA tools from OpenAI's Codex."),
         !cx.logged ? h("button", { class: "solid apply big", onclick: () => { codexWindow("login", "Codex sign-in"); toast("Sign in with ChatGPT in your browser, then Check again."); } }, "Sign in to Codex") : null,
         !cx.mcp ? h("button", { class: cx.logged ? "solid apply big" : "btn", onclick: () => addMotionDnaToCodex(redraw) }, "Add Motion DNA to Codex") : null]);
@@ -1272,9 +1313,9 @@ function showSetup(setup) {
     h("span", { class: "dim" }, "Still stuck? Copy what is needed to find out why:"), h("button", { class: "btn", onclick: copyDiagnostics }, "Copy diagnostics"));
 
   setup.replaceChildren(h("div", { class: "kit-top" }, h("b", { class: "kit-title" }, "Connect"), close), claude, figma, krea, flora, codex, upd,
-    h("div", { class: "crow" }, h("button", { class: "btn", onclick: async () => { AG.logged = await authStatus(); AG.figma = await figmaStatus(); for (const n of ["krea", "flora"]) { AG.svc[n] = await confirmStatus(n, await svcStatus(n)); (AG.svcAt = AG.svcAt || {})[n] = Date.now(); } AG.codexSt = await codexStatus(); AG.repoSt = await repoStatus(); redraw(); if (agent.draw) agent.draw(); } }, "Check again")), trouble);
+    h("div", { class: "crow" }, h("button", { class: "btn", onclick: async () => { AG.logged = await authStatus(); AG.figma = await figmaStatus(); for (const n of ["krea", "flora"]) { AG.svc[n] = await confirmStatus(n, await svcStatus(n)); (AG.svcAt = AG.svcAt || {})[n] = Date.now(); } codexDot(AG.codexSt = await codexStatus()); AG.repoSt = await repoStatus(); redraw(); if (agent.draw) agent.draw(); } }, "Check again")), trouble);
   if (fig === undefined) figmaStatus().then((f) => { AG.figma = f; setDot("st-figma", f === "connected", f === "connected" ? "Figma: connected" : "Figma: not connected (optional). Click to connect."); redraw(); });
   for (const n of ["krea", "flora"]) if (AG.svc[n] === undefined) { AG.svc[n] = null; svcStatus(n).then((st) => confirmStatus(n, st)).then((st) => { AG.svc[n] = st; (AG.svcAt = AG.svcAt || {})[n] = Date.now(); redraw(); }); }
-  if (!AG.codexSt && !AG.codexBusy) { AG.codexBusy = true; codexStatus().then((c) => { AG.codexSt = c; AG.codexBusy = false; redraw(); }); }
+  if (!AG.codexSt && !AG.codexBusy) { AG.codexBusy = true; codexStatus().then((c) => { AG.codexSt = c; AG.codexBusy = false; codexDot(c); redraw(); }); }
   if (!AG.repoSt && !AG.repoBusy && nodeReq()) { AG.repoBusy = true; repoStatus().then((r) => { AG.repoSt = r || { head: "?", when: "", behind: null }; AG.repoBusy = false; redraw(); }); }
 }

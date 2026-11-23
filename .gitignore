@@ -6,6 +6,7 @@ research/contact_sheets/
 bridge/inbox/
 bridge/outbox/
 bridge/done/
+bridge/policy.json
 ae/Adobe After Effects Auto-Save/
 **/*.aep Logs/
 __pycache__/

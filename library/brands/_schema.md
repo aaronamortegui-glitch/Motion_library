@@ -45,7 +45,9 @@ tools `list_brands`, `get_brand`, `add_brand_note`, `apply_brand`; the panel sho
  "shared": [{"date": "…", "by": "…", "from": "…"}],                       // import history
  "claude": {"session": "<id>", "sessions": [{"id": "…", "title": "…", "started": "…"}]},   // this computer's
                                  // conversations for the brand (Claude Code session ids); never exported
- "projects": [{"name": "…", "path": "media/…", "date": "YYYY-MM-DD"}]
+ "projects": [{"name": "…", "path": "media/…", "date": "YYYY-MM-DD"}],
+ "assistant_only": "codex"       // optional client policy (Overview › AI assistant): while the brand is active Claude is
+                                 // off (no Agent chat) and the MCP server refuses every client but Codex (bridge/policy.json)
 }
 ```
 

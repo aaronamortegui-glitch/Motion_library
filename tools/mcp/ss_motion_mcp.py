@@ -59,6 +59,9 @@ def start_bridge_script(path):
         subprocess.Popen([AFX, "-s", f"$.evalFile(new File('{path}'))"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
+ANSWERED = {"at": 0.0}   # when AE last answered a job: while it answers, skip the process check (tasklist costs ~0.8 s)
+
+
 def ensure_bridge():
     marker = OUTBOX / "_bridge_started.txt"
     beat = OUTBOX / "_panel_beat.txt"   # the Motion DNA panel runs the jobs while it is open (tools/ss_bridge.jsx)
@@ -67,11 +70,13 @@ def ensure_bridge():
             return
     except OSError:
         pass
-    try:   # the panel ran the jobs    try:   # the panel ran the jobs but has closed: start the timed bridge
+    try:   # the panel ran the jobs but has closed: start the timed bridge
         if marker.read_text(encoding="utf-8", errors="replace").startswith("panel"):
             marker.unlink(missing_ok=True)
     except OSError:
         pass
+    if time.time() - ANSWERED["at"] < 60 and marker.exists():
+        return
     if not ae_running():
         marker.unlink(missing_ok=True)
         raise RuntimeError("After Effects is not running. Open it (with the Motion DNA panel docked the bridge starts by itself).")
@@ -94,12 +99,21 @@ def run_jsx(body, timeout=180, includes=("ss_presets.jsx", "ss_assets.jsx")):
     try:
         (INBOX / f"{name}.jsx").write_text(f'$.evalFile(new File("{job.as_posix()}"));\n', encoding="utf-8")
         out = OUTBOX / f"{name}.txt"
-        for _ in range(int(timeout * 4)):
+        for _ in range(int(timeout * 20)):
             if out.exists():
                 break
-            time.sleep(0.25)
+            time.sleep(0.05)
         else:
+            ANSWERED["at"] = 0.0   # check the process again next time
             raise RuntimeError(f"No answer from After Effects in {timeout}s (is a render or a modal dialog blocking it?)")
+        ANSWERED["at"] = time.time()
+        size = -1   # the file appears when AE opens it: read it once its size stops changing
+        for _ in range(40):
+            now = out.stat().st_size
+            if now and now == size:
+                break
+            size = now
+            time.sleep(0.03)
         text = out.read_text(encoding="utf-8", errors="replace")
         status, _, rest = text.partition("\n")
         if not status.startswith("OK"):
@@ -1315,6 +1329,26 @@ def tool_list():
     return out
 
 
+# ---------------------------------------------------------------- client policy
+# A brand set to "Codex only" (brand.json "assistant_only": "codex") keeps Claude off its projects. While one is active
+# in After Effects the panel writes bridge/policy.json (it follows the open project) and every tool refuses a client
+# that is not Codex, library tools included: nothing of that client's work reaches Claude.
+POLICY = ROOT / "bridge" / "policy.json"
+CLIENT = {"name": ""}   # from the initialize request: Codex says "codex-mcp-client", Claude Code "claude-code"
+
+
+def policy_block():
+    try:
+        p = json.loads(POLICY.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if p.get("assistant_only") == "codex" and not CLIENT["name"].lower().startswith("codex"):
+        return (f"Client policy: the brand active in After Effects ({p.get('brand', '?')}) is Codex only, so Motion DNA is off "
+                f"for {CLIENT['name'] or 'this client'}. Do not work on this project; tell the user to use Codex, or to change "
+                "the brand's AI assistant setting in the Motion DNA panel (Brands > the brand > Overview).")
+    return None
+
+
 # ---------------------------------------------------------------- JSON-RPC over stdio
 def send(msg):
     sys.stdout.write(json.dumps(msg) + "\n")
@@ -1324,6 +1358,7 @@ def send(msg):
 def handle(req):
     method, rid = req.get("method"), req.get("id")
     if method == "initialize":
+        CLIENT["name"] = str((req.get("params", {}).get("clientInfo") or {}).get("name", ""))
         return {"protocolVersion": req.get("params", {}).get("protocolVersion", PROTOCOL),
                 "capabilities": {"tools": {}}, "serverInfo": {"name": "motion-dna", "version": "0.1"},
                 "instructions": "Motion DNA: a motion library for After Effects that gives AI-made motion its own identity. Everything is tagged "
@@ -1348,6 +1383,9 @@ def handle(req):
         fn = {t[0]: t[1] for t in TOOLS_DEF}.get(p.get("name"))
         if not fn:
             return {"content": [{"type": "text", "text": f"Unknown tool {p.get('name')}"}], "isError": True}
+        blocked = policy_block()
+        if blocked:
+            return {"content": [{"type": "text", "text": blocked}], "isError": True}
         try:
             text = fn(**(p.get("arguments") or {}))
             return {"content": [{"type": "text", "text": str(text)}]}

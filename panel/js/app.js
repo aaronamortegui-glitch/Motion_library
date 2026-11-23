@@ -201,6 +201,7 @@ async function status() {
   pill.classList.toggle("on", !!s.bridge); pill.classList.toggle("off", !s.bridge);
   const last = s.minutes >= 0 && s.minutes <= 1 ? " · active now" : (s.minutes > 1 && s.minutes < 60 ? ` · last ${s.minutes} min ago` : "");
   pill.title = s.bridge ? "Claude connected through MCP" + last : "Claude offline: click to connect";
+  if (s.project !== undefined && s.project !== BR.project) { BR.project = s.project; brandChip(); if (typeof onBrandChange === "function") onBrandChange(activeSlug()); }   // another project opened: its own brand
 }
 // The bridge can look started yet stop answering: the MCP dot (and "reconnect" in the Agent chat) restarts it from here,
 // with no Claude involved. Requests that waited too long are answered as skipped (host.jsx mdna_reconnect).
@@ -652,12 +653,29 @@ async function loadBrands() {
   for (const x of BRANDS) { ensureMotion(x.b); await ensureUids(x.b); }   // uids from the text as loaded, the way tools/brand.py derives them
   brandChip();
 }
+// Client policy: a brand set to "Codex only" (brand.json "assistant_only": "codex") keeps Claude off its projects. While
+// one is active the panel's Agent does not start Claude, and bridge/policy.json tells the MCP server to refuse every
+// client but Codex (tools/mcp/ss_motion_mcp.py policy_block). The file follows the open project (status() every 4 s).
+const codexOnly = () => { const b = activeBrand(); return !!(b && b.assistant_only === "codex"); };
+function writePolicy() {
+  const req = nodeReq(); if (!req || !S.root) return;
+  const fs = req("fs"), path = req("path"), file = path.join(S.root, "bridge", "policy.json"), b = activeBrand();
+  const want = codexOnly() ? JSON.stringify({ assistant_only: "codex", brand: b.name, slug: b.slug, project: BR.project, at: new Date().toISOString() }, null, 1) + "\n" : null;
+  try {
+    const have = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : null;
+    if (!want) { if (have !== null) fs.unlinkSync(file); }
+    else if (!have || have.replace(/"at": "[^"]*"/, "") !== want.replace(/"at": "[^"]*"/, "")) { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, want, "utf8"); }
+  } catch (e) {}
+}
 function brandChip() {
+  writePolicy(); if (typeof policyChanged === "function") policyChanged();
   const chip = $("#brandchip"), b = activeBrand();
   chip.hidden = !b; if (!b) return;
   const c = Object.values((b.identity || {}).colors || {})[1] || "#d8ff85";
-  chip.replaceChildren(h("i", { class: "swatch", style: `background:${c}` }), h("span", {}, b.name));
-  chip.title = `Active brand for this project: ${b.name}. Click to open its kit.`;
+  const lock = () => { const e = h("em", { class: "lock" }); e.innerHTML = '<svg viewBox="0 0 12 12"><rect x="2.5" y="5.5" width="7" height="5" rx="1.2" fill="currentColor"/><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>Codex'; return e; };
+  chip.classList.toggle("policy", codexOnly());
+  chip.replaceChildren(...[h("i", { class: "swatch", style: `background:${c}` }), h("span", {}, b.name), codexOnly() ? lock() : null].filter(Boolean));   // the DOM's replaceChildren writes a null as the text "null"
+  chip.title = `Active brand for this project: ${b.name}.` + (codexOnly() ? " Client policy: Codex only, Claude is off for this project." : "") + " Click to open its kit.";
   chip.onclick = () => { S.sec = "brands"; store.set("section", "brands"); BR.view = "kit"; BR.slug = b.slug; showSection(); brands.render(); };
 }
 
@@ -818,7 +836,7 @@ function kitOverview(x) {
   let whole = true;
   const apply = async () => report(await call("mdna_apply_brand", { slug: b.slug, phase: S.phase, whole, tune: tuning(), markers: CTL.markers, existing: CTL.existing }));
   const prefer = Object.entries(pr.prefer || {}).map(([role, list]) => h("div", { class: "kv" }, h("span", {}, role), h("span", {}, list.join(", "))));
-  return h("div", { class: "stack" }, ...kids(whereCard(x), shareCard(x),
+  return h("div", { class: "stack" }, ...kids(whereCard(x), shareCard(x), x.where === "template" ? null : policyCard(x),
     h("div", { class: "subhead" }, "Feel"),
     h("div", { class: "card-box" },
       h("div", { class: "ctl wide" }, h("label", {}, "Style"), style),
@@ -845,6 +863,20 @@ function whereCard(x) {
     tpl ? null : row("CLAUDE.md", "what Claude reads when it works in this folder"),
     tpl ? null : row("projects/", "one folder per video, each with its conversation"),
     h("span", { class: "dim" }, tpl ? "A template in the Motion DNA repo." : "On this computer only: never in the repo."));
+}
+// which AI assistant may work on this client's projects (client policy)
+function policyCard(x) {
+  const b = x.b, only = b.assistant_only === "codex";
+  const pick = h("select", { class: "field", onchange: async (e) => {
+    if (e.target.value === "codex") b.assistant_only = "codex"; else delete b.assistant_only;
+    await saveBrand(x); brands.render();
+    toast(b.assistant_only ? `${b.name}: Codex only. Claude is off while this brand is active.` : `${b.name}: Claude and Codex can both work on it.`);
+  } }, h("option", { value: "", selected: !only }, "Claude or Codex"), h("option", { value: "codex", selected: only }, "Codex only (client policy)"));
+  return h("div", { class: "card-box" + (only ? " avoid" : "") },
+    h("div", { class: "ctl wide" }, h("label", {}, "AI assistant"), pick),
+    h("span", { class: "dim" }, only
+      ? "While this brand is active, Claude is off: the Agent chat does not start, and Motion DNA refuses requests from Claude Code. Only Codex can drive After Effects."
+      : "Set Codex only when the client does not allow Claude on its work."));
 }
 // sharing: one file out, one file in
 function shareCard(x) {

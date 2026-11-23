@@ -79,7 +79,8 @@ function mdna_status(heal) {
     // bridge/outbox, every 4 s, took longer as the folder grew and kept After Effects' wait cursor on screen
     var on = !!$.global.SS_BRIDGE_TASK, busy = $.global.SS_BRIDGE_BUSY || 0;
     var mins = busy ? Math.round((new Date().getTime() - busy) / 60000) : -1;
-    return mdna_json({ bridge: on, minutes: mins, healed: healed });
+    var pf = null; try { pf = app.project.file; } catch (e) {}   // the open project: its brand decides who may drive AE (bridge/policy.json)
+    return mdna_json({ bridge: on, minutes: mins, healed: healed, project: pf ? pf.fsName : "" });
 }
 function mdna_connect() {
     try { if (!$.global.SS_BRIDGE_TASK) $.evalFile(new File($.global.SS_ROOT + "/tools/ss_bridge.jsx")); } catch (e) { return "ERR " + e.toString(); }
@@ -449,8 +450,8 @@ function mdna_project_new(s) {   // s = {parent, name, slug, brand, folders:[...
         app.endUndoGroup();
         var aep = "";
         if (a.saveAep) {
-            var sub = "";   // the AE folder (05_AE), whatever its case
-            for (var m = 0; m < a.folders.length; m++) if (/^05_/i.test(a.folders[m])) sub = a.folders[m];
+            var sub = "";   // the AE folder (06_AE), found by its name so a renumbered list still finds it, whatever its case
+            for (var m = 0; m < a.folders.length; m++) if (/^\d+_AE$/i.test(a.folders[m])) sub = a.folders[m];
             var file = new File(dir.fsName + (sub ? "/" + sub : "") + "/" + a.slug + ".aep");
             if (!file.exists) { app.project.save(file); aep = file.fsName.split("\\").join("/"); }
         }
