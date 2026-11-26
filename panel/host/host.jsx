@@ -428,7 +428,7 @@ function mdna_project_find(start) {   // walks up from the open .aep (or a given
 function mdna_project_save(s) {   // s = {dir, text}
     try { var a = mdna_parse(s); mdna_write_text(a.dir + "/" + MDNA_PROJECT, a.text); return "OK"; } catch (e) { return "ERR " + e.toString(); }
 }
-function mdna_project_new(s) {   // s = {parent, name, slug, brand, folders:[...], saveAep, text, claude, mcp}
+function mdna_project_new(s) {   // s = {parent, name, slug, brand, folders:[...] (on disk), bins:[...] (in AE), saveAep, text, claude, mcp}
     try {
         var a = mdna_parse(s), dir = new Folder(a.parent + "/" + a.slug);
         if (new File(dir.fsName + "/" + MDNA_PROJECT).exists) return "ERR There is already a Motion DNA project in " + dir.fsName;
@@ -437,21 +437,22 @@ function mdna_project_new(s) {   // s = {parent, name, slug, brand, folders:[...
         mdna_write_text(dir.fsName + "/" + MDNA_PROJECT, a.text);
         mdna_write_text(dir.fsName + "/CLAUDE.md", a.claude);
         mdna_write_text(dir.fsName + "/.mcp.json", a.mcp);
-        // the same folders as bins in the After Effects project, so the Project panel matches the folder on disk
-        var bins = [];
-        app.beginUndoGroup("Motion DNA: project folders");
+        // the bins inside the After Effects project: their own list (static assets, footage, audio, precomps, master
+        // comps), not the disk folders; an older panel that sends none gets the disk folders as before
+        var bins = [], want = a.bins || a.folders;
+        app.beginUndoGroup("Motion DNA: project bins");
         try {
-            for (var j = 0; j < a.folders.length; j++) {
+            for (var j = 0; j < want.length; j++) {
                 var have = null;
-                for (var k = 1; k <= app.project.numItems; k++) { var it = app.project.item(k); if (it instanceof FolderItem && it.parentFolder === app.project.rootFolder && it.name === a.folders[j]) { have = it; break; } }
-                if (!have) { app.project.items.addFolder(a.folders[j]); bins.push(a.folders[j]); }
+                for (var k = 1; k <= app.project.numItems; k++) { var it = app.project.item(k); if (it instanceof FolderItem && it.parentFolder === app.project.rootFolder && it.name === want[j]) { have = it; break; } }
+                if (!have) { app.project.items.addFolder(want[j]); bins.push(want[j]); }
             }
         } catch (eb) {}
         app.endUndoGroup();
         var aep = "";
         if (a.saveAep) {
-            var sub = "";   // the AE folder (06_AE), found by its name so a renumbered list still finds it, whatever its case
-            for (var m = 0; m < a.folders.length; m++) if (/^\d+_AE$/i.test(a.folders[m])) sub = a.folders[m];
+            var sub = "";   // the AE files folder (06_AE_Files; 05_AE or 06_AE in older lists), found by its name, whatever its case; never 09_AE_Collect
+            for (var m = 0; m < a.folders.length; m++) if (/^\d+_AE(_Files)?$/i.test(a.folders[m])) sub = a.folders[m];
             var file = new File(dir.fsName + (sub ? "/" + sub : "") + "/" + a.slug + ".aep");
             if (!file.exists) { app.project.save(file); aep = file.fsName.split("\\").join("/"); }
         }

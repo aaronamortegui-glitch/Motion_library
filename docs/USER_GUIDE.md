@@ -188,13 +188,31 @@ Each one was tested end to end (use cases UC12–UC19). The Agent knows the tool
 ## Projects: one folder and one conversation per piece
 **Project** (the first tab) › 2 Project folder › **New project**:
 - name it, pick where, and choose its brand;
-- tick the folders: `01_Brief` … `08_Exports` (`04_Statics` holds stills, images and design files), `Claude` (made on disk and as matching bins in the After Effects project);
+- tick the folders and bins (below);
 - optionally save the open After Effects project in it.
 
-The project gets its own conversation. Continue it from the panel, the Claude app or a terminal. The project can also
+It makes two structures. **On your computer** (paired with the project's Drive folder, so every creative finds files
+in the same place):
+
+| Folder | What goes in it |
+|---|---|
+| `01_Brief` | the brief and client inputs |
+| `02_Reference` | references and moodboards |
+| `03_Static_Assets` | stills, images, logos and design files |
+| `04_Footage` | video footage and AI clips |
+| `05_Audio` | music, voice-over and sound effects |
+| `06_AE_Files` | the `.aep`, one file per version |
+| `07_Renders` | renders and exports |
+| `08_Claude` | the project's conversation with the agent (always made) |
+| `09_AE_Collect` | *File › Dependencies › Collect Files*, to hand the project over |
+
+**Inside After Effects**, as bins: `01_Static_Assets`, `02_Footage`, `03_Audio`, `04_Precomps`, `05_Master_Comps`.
+The project's `CLAUDE.md` lists both, so the agent files what it makes and imports the same way.
+
+The project gets its own conversation, kept in `08_Claude` (`agent-chat.md`, `sessions/`, `attachments/`). Continue it from the panel, the Claude app or a terminal. The project can also
 keep rules of its own, next to the brand's.
 
-> **Tip:** keep the `.aep` inside the project's `06_AE`. The agent then knows which file belongs to the piece and asks
+> **Tip:** keep the `.aep` inside the project's `06_AE_Files`. The agent then knows which file belongs to the piece and asks
 > before building somewhere else.
 
 ## For Claude

@@ -728,7 +728,7 @@ function newBrandForm() {
   const drawWhere = () => { whereTxt.textContent = BR.where === "folder" ? (BR.folder ? BR.folder + "/<brand>" : "pick a folder…") : "On this computer (never in git)"; };
   const whereSeg = h("div", { class: "seg" }, ...[["plugin", "Plugin folder"], ["folder", "Choose folder…"]].map(([k, l]) => h("button", { class: BR.where === k ? "on" : "",
     onclick: async (e) => {
-      if (k === "folder") { const f = await call("mdna_pick_folder", "Where should this brand live?"); if (!f || String(f).startsWith("ERR")) return; BR.folder = f; }
+      if (k === "folder") { const f = await pickFolder("Where should this brand live?", BR.folder); if (!f || String(f).startsWith("ERR")) return; BR.folder = f; }
       BR.where = k; for (const b of whereSeg.children) b.classList.toggle("on", b === e.currentTarget); drawWhere();
     } }, l)));
   drawWhere();

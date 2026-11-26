@@ -16,6 +16,65 @@ function call(fn, ...args) {
 }
 function parse(r) { try { return JSON.parse(r); } catch (e) { return { error: String(r) }; } }
 
+// Choosing a folder. ExtendScript's Folder.selectDialog opens Windows' old tree ("Browse For Folder"); on Windows the
+// panel opens the modern Explorer picker instead (IFileOpenDialog with FOS_PICKFOLDERS, the window AE's own Import
+// uses), through PowerShell, owned by the After Effects window so it opens on top. It starts in `start` when given.
+// Elsewhere, or if PowerShell fails, the old dialog. Resolves to a path with forward slashes, or "" when cancelled.
+const PICK_FOLDER_PS = `Add-Type -TypeDefinition @"
+using System; using System.Runtime.InteropServices;
+public static class MdnaPick {
+  [ComImport, Guid("DC1C5A9C-E88A-4dde-A5A1-60F82A20AEF7")] class FileOpenDialogRCW {}
+  [ComImport, Guid("42f85136-db7e-439c-85f1-e4075d135fc8"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+  interface IFileDialog {
+    [PreserveSig] int Show(IntPtr parent);
+    void SetFileTypes(uint c, IntPtr f); void SetFileTypeIndex(uint i); void GetFileTypeIndex(out uint i);
+    void Advise(IntPtr p, out uint c); void Unadvise(uint c); void SetOptions(uint o); void GetOptions(out uint o);
+    void SetDefaultFolder(IShellItem i); void SetFolder(IShellItem i); void GetFolder(out IShellItem i); void GetCurrentSelection(out IShellItem i);
+    void SetFileName([MarshalAs(UnmanagedType.LPWStr)] string n); void GetFileName([MarshalAs(UnmanagedType.LPWStr)] out string n);
+    void SetTitle([MarshalAs(UnmanagedType.LPWStr)] string t); void SetOkButtonLabel([MarshalAs(UnmanagedType.LPWStr)] string t);
+    void SetFileNameLabel([MarshalAs(UnmanagedType.LPWStr)] string t); void GetResult(out IShellItem i);
+    void AddPlace(IShellItem i, int p); void SetDefaultExtension([MarshalAs(UnmanagedType.LPWStr)] string e);
+    void Close(int hr); void SetClientGuid(ref Guid g); void ClearClientData(); void SetFilter(IntPtr f);
+  }
+  [ComImport, Guid("43826D1E-E718-42EE-BC55-A1E261C37BFE"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+  interface IShellItem {
+    void BindToHandler(IntPtr pbc, ref Guid bhid, ref Guid riid, out IntPtr ppv); void GetParent(out IShellItem i);
+    void GetDisplayName(uint sigdn, [MarshalAs(UnmanagedType.LPWStr)] out string name); void GetAttributes(uint m, out uint a); void Compare(IShellItem i, uint h, out int o);
+  }
+  [DllImport("shell32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+  static extern void SHCreateItemFromParsingName(string path, IntPtr pbc, ref Guid riid, out IShellItem item);
+  public static string Pick(string title, string start, IntPtr owner) {
+    var d = (IFileDialog)new FileOpenDialogRCW();
+    d.SetOptions(0x20 | 0x40 | 0x800);   // pick folders, file-system paths only, the path must exist
+    if (!string.IsNullOrEmpty(title)) d.SetTitle(title);
+    if (!string.IsNullOrEmpty(start) && System.IO.Directory.Exists(start)) {
+      var g = typeof(IShellItem).GUID; IShellItem s; SHCreateItemFromParsingName(start, IntPtr.Zero, ref g, out s); d.SetFolder(s);
+    }
+    if (d.Show(owner) != 0) return "";   // cancelled
+    IShellItem r; d.GetResult(out r); string p; r.GetDisplayName(0x80058000, out p); return p;
+  }
+}
+"@
+$ae = Get-Process -Name AfterFX -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1
+$owner = if ($ae) { $ae.MainWindowHandle } else { [IntPtr]::Zero }
+[Console]::OutputEncoding = [Text.Encoding]::UTF8
+[Console]::Out.Write("PICKED:" + [MdnaPick]::Pick($env:MDNA_TITLE, $env:MDNA_START, $owner))`;
+function pickFolder(title, start) {
+  const req = IN_AE && (window.require || (window.cep_node && window.cep_node.require));
+  const old = () => call("mdna_pick_folder", title);
+  if (!req || req("process").platform !== "win32") return old();
+  return new Promise((resolve) => {
+    const enc = req("buffer").Buffer.from(PICK_FOLDER_PS, "utf16le").toString("base64");   // -EncodedCommand: no quoting, no execution policy
+    const env = Object.assign({}, req("process").env, { MDNA_TITLE: title || "Choose a folder", MDNA_START: (start || "").replace(/\//g, "\\") });
+    req("child_process").execFile("powershell.exe", ["-NoProfile", "-STA", "-NonInteractive", "-EncodedCommand", enc], { env, windowsHide: true, maxBuffer: 1 << 20 },
+      (err, out) => {
+        const m = /PICKED:(.*)$/s.exec(String(out || ""));
+        if (err || !m) return old().then(resolve);   // PowerShell failed: the old dialog still works
+        resolve(m[1].trim().replace(/\\/g, "/"));
+      });
+  });
+}
+
 // the extension folder as a plain path (CEP returns a file URL)
 function extensionPath() {
   if (!IN_AE) return "";

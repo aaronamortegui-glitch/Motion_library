@@ -19,8 +19,34 @@ const AG = {
 };
 let PJ = null;   // the open project: {dir, p} (p = motion-dna.project.json)
 const nodeReq = () => window.require || (window.cep_node && window.cep_node.require) || null;
-// the folders of a new project, made on disk and as bins in the After Effects project (host.jsx mdna_project_new)
-const PROJECT_FOLDERS = ["01_Brief", "02_References", "03_Footage", "04_Statics", "05_Audio", "06_AE", "07_Renders", "08_Exports", "Claude"];
+// A new project gets two structures (host.jsx mdna_project_new): folders on disk, paired with the project's Drive folder
+// so every creative finds files in the same place, and bins inside the After Effects project. Each entry: [name, what
+// goes in it]; the descriptions go into the project's CLAUDE.md so the agent files things the same way.
+const PROJECT_FOLDERS = [
+  ["01_Brief", "the brief and client inputs"],
+  ["02_Reference", "references and moodboards"],
+  ["03_Static_Assets", "stills, images, logos and design files (Figma exports)"],
+  ["04_Footage", "video footage and AI clips"],
+  ["05_Audio", "music, voice-over and sound effects"],
+  ["06_AE_Files", "the After Effects project (.aep), one file per version"],
+  ["07_Renders", "renders and exports"],
+  ["08_Claude", "this project's conversation with the agent: agent-chat.md, sessions/, attachments/, usage.csv"],
+  ["09_AE_Collect", "File › Dependencies › Collect Files, for handing the project to someone else"],
+];
+const AE_BINS = [
+  ["01_Static_Assets", "imported stills, images, logos and design files"],
+  ["02_Footage", "imported video"],
+  ["03_Audio", "imported music, voice-over and sound effects"],
+  ["04_Precomps", "precomps"],
+  ["05_Master_Comps", "the comps that are delivered and rendered"],
+];
+// A project's Claude folder, where its conversation is kept: 08_Claude in new projects, Claude in older ones (and in a
+// brand's own folder). Found by name, so a renumbered list still finds it.
+function claudeDir(dir) {
+  const fs = nodeReq()("fs"), path = nodeReq()("path");
+  try { const hit = fs.readdirSync(dir).find((n) => /^(\d+_)?claude$/i.test(n) && fs.statSync(path.join(dir, n)).isDirectory()); if (hit) return path.join(dir, hit); } catch (e) {}
+  return path.join(dir, "Claude");
+}
 
 // macOS apps start with a bare PATH (/usr/bin:/bin…): add Homebrew, ~/.local/bin and npm's folder so claude, codex,
 // node, git and python3 resolve the same way they do in a terminal
@@ -370,7 +396,7 @@ function push(role, text, extra) {
 function writeChat(m) {   // the readable copy in the project's (or brand's) folder
   const sc = scope(); if (sc.kind === "repo" || !nodeReq()) return;
   try {
-    const fs = nodeReq()("fs"), path = nodeReq()("path"), file = path.join(sc.dir, "Claude", "agent-chat.md");
+    const fs = nodeReq()("fs"), path = nodeReq()("path"), file = path.join(claudeDir(sc.dir), "agent-chat.md");
     fs.mkdirSync(path.dirname(file), { recursive: true });
     if (!fs.existsSync(file)) fs.writeFileSync(file, `# ${sc.name} · Agent conversation\n\nWritten by the Motion DNA panel. The full transcript of each conversation is in sessions/.\n`);
     const t = new Date().toISOString().replace("T", " ").slice(0, 16);
@@ -382,7 +408,7 @@ function writeChat(m) {   // the readable copy in the project's (or brand's) fol
 function keepTranscript(id) {   // after each order: Claude Code's transcript copied next to the project
   const sc = scope(); if (!id || sc.kind === "repo" || !nodeReq()) return;
   try {
-    const fs = nodeReq()("fs"), path = nodeReq()("path"), src = sessionFile(id, sc.dir), dir = path.join(sc.dir, "Claude", "sessions");
+    const fs = nodeReq()("fs"), path = nodeReq()("path"), src = sessionFile(id, sc.dir), dir = path.join(claudeDir(sc.dir), "sessions");
     if (!fs.existsSync(src)) return;
     fs.mkdirSync(dir, { recursive: true }); fs.copyFileSync(src, path.join(dir, id + ".jsonl"));
   } catch (e) {}
@@ -527,7 +553,7 @@ function busyElsewhere(id) {   // the conversation file changed in the last 20 s
 function logUsage(row) {
   try {
     const fs = nodeReq()("fs"), path = nodeReq()("path");
-    const file = PJ ? path.join(PJ.dir, "Claude", "usage.csv") : path.join(S.root, "bridge", "usage.local.csv");
+    const file = PJ ? path.join(claudeDir(PJ.dir), "usage.csv") : path.join(S.root, "bridge", "usage.local.csv");
     fs.mkdirSync(path.dirname(file), { recursive: true });
     if (!fs.existsSync(file)) fs.writeFileSync(file, "date,session,seconds,turns,cost_usd_estimate,tokens,mode,order\n");
     fs.appendFileSync(file, row.map((v) => /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : v).join(",") + "\n");
@@ -643,7 +669,7 @@ async function readImage(file) {
 }
 function attachDir() {   // the project's (or brand's) claude/attachments, else a temp folder: never the Motion DNA repo
   const sc = scope(), path = nodeReq()("path"), os = nodeReq()("os");
-  return sc.kind === "repo" ? path.join(os.tmpdir(), "motion-dna-attachments") : path.join(sc.dir, "Claude", "attachments");
+  return sc.kind === "repo" ? path.join(os.tmpdir(), "motion-dna-attachments") : path.join(claudeDir(sc.dir), "attachments");
 }
 function ffBin(name) {   // ffmpeg / ffprobe: on PATH, or Homebrew's on a Mac (After Effects' PATH often lacks it)
   if (process.platform === "win32") return name;
@@ -679,7 +705,7 @@ async function readVideo(file) {
 function saveAttachments(images) {
   const sc = scope(); if (sc.kind === "repo" || !nodeReq()) return [];
   try {
-    const fs = nodeReq()("fs"), path = nodeReq()("path"), dir = path.join(sc.dir, "Claude", "attachments"), stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    const fs = nodeReq()("fs"), path = nodeReq()("path"), dir = path.join(claudeDir(sc.dir), "attachments"), stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
     fs.mkdirSync(dir, { recursive: true });
     return images.map((x, i) => { if (x.kind === "video") return x.path;
       const f = path.join(dir, `${stamp}_${i + 1}_${x.name.replace(/[^\w.-]+/g, "_")}`); fs.writeFileSync(f, Buffer.from(x.data, "base64")); return f.split("\\").join("/"); });
@@ -1041,23 +1067,30 @@ function projectView() {
     const name = h("input", { class: "field", placeholder: "Project name (e.g. Acme launch film)" });
     const bx = brandOf(activeSlug());   // a video of the active brand goes inside the brand's folder by default
     let parent = bx && bx.dir && bx.where !== "template" ? bx.dir + "/projects" : store.get("projectParent", ""); const parentTxt = h("span", { class: "dim" }, parent || "Pick where to create it…");
-    const pick = h("button", { class: "btn", onclick: async () => { const f = await call("mdna_pick_folder", "Where should the project folder go?"); if (f) { parent = f; store.set("projectParent", f); parentTxt.textContent = f; } } }, "Choose folder…");
+    const pick = h("button", { class: "btn", onclick: async () => { const f = await pickFolder("Where should the project folder go?", parent); if (f) { parent = f; store.set("projectParent", f); parentTxt.textContent = f; } } }, "Choose folder…");
     const brandSel = h("select", { class: "field" }, [h("option", { value: "" }, "Brand (optional)"), ...BRANDS.map((x) => h("option", { value: x.b.slug, selected: x.b.slug === activeSlug() }, x.b.name))]);
-    const checks = PROJECT_FOLDERS.map((f) => h("input", { type: "checkbox", checked: true, value: f }));
+    // 08_Claude is always made: the project's conversation is kept there
+    const tick = ([f, what]) => h("input", Object.assign({ type: "checkbox", checked: true, value: f, title: what }, /claude$/i.test(f) ? { disabled: true } : {}));
+    const checks = PROJECT_FOLDERS.map(tick), binChecks = AE_BINS.map(tick);
+    const picked = (list, boxes) => list.filter((x, i) => boxes[i].checked);
     const saveAep = h("input", { type: "checkbox", checked: true });
     const create = async () => {
       const nm = name.value.trim(); if (!nm) return name.focus();
       if (!parent) return toast("Choose where to create the project first.", true);
       if (/\/projects$/.test(parent)) await call("mdna_write_file", { path: parent + "/.keep", text: "" });   // makes the folder
-      const sl = slugify(nm), folders = checks.filter((c) => c.checked).map((c) => c.value);
-      const p = { name: nm, slug: sl, created: today(), by: whoAmI(), brand: brandSel.value || null, folders, sessions: [], session: null, rules: [], removed: [], motion_dna: S.root };
+      const sl = slugify(nm), dirs = picked(PROJECT_FOLDERS, checks), binsOn = picked(AE_BINS, binChecks);
+      const folders = dirs.map((x) => x[0]), bins = binsOn.map((x) => x[0]);
+      const p = { name: nm, slug: sl, created: today(), by: whoAmI(), brand: brandSel.value || null, folders, bins, sessions: [], session: null, rules: [], removed: [], motion_dna: S.root };
       const claude = `# ${nm} · a Motion DNA project\n\nMotion DNA (the motion library for After Effects, its tools and rules) lives in \`${S.root}\`: read its CLAUDE.md first.\n` +
         `The \`motion-dna\` MCP server is registered in this folder's .mcp.json (approve it once).\n\n` +
         (p.brand ? `Brand: **${brandSel.selectedOptions[0].textContent}** (slug \`${p.brand}\`). Read it with \`get_brand\` before animating, and save every review note with \`add_brand_note\`.\n\n` : "") +
-        `Project rules and the conversation history are in \`motion-dna.project.json\`. Folders: ${folders.map((f) => "`" + f + "`").join(", ")}.\n` +
-        `Put everything you make in these folders, never in the Motion DNA repo. Ask before any paid generation.\n`;
+        `Project rules and the conversation history are in \`motion-dna.project.json\`.\n\n` +
+        `## Folders on disk (paired with the project's Drive folder)\n${dirs.map(([f, w]) => `- \`${f}\`: ${w}`).join("\n")}\n\n` +
+        `## Bins in the After Effects project\n${binsOn.map(([f, w]) => `- \`${f}\`: ${w}`).join("\n")}\n\n` +
+        `Put every file you make or download in its folder on disk, and every item you import or build in its bin; never in the ` +
+        `Motion DNA repo. Ask before any paid generation.\n`;
       const mcp = JSON.stringify({ mcpServers: { "motion-dna": { command: pyExe(), args: [S.root + "/tools/mcp/ss_motion_mcp.py"] } } }, null, 1) + "\n";
-      const r = await call("mdna_project_new", { parent, name: nm, slug: sl, folders, saveAep: saveAep.checked, text: JSON.stringify(p, null, 1) + "\n", claude, mcp });
+      const r = await call("mdna_project_new", { parent, name: nm, slug: sl, folders, bins, saveAep: saveAep.checked, text: JSON.stringify(p, null, 1) + "\n", claude, mcp });
       if (String(r).startsWith("ERR")) return report(r);
       const res = parse(r); PJ = { dir: res.dir, p };
       if (p.brand) {
@@ -1065,11 +1098,11 @@ function projectView() {
         const bx2 = brandOf(p.brand);   // the brand lists its videos
         if (bx2) { bx2.b.projects = bx2.b.projects || []; bx2.b.projects.push({ name: nm, path: res.dir, date: today() }); await saveBrand(bx2); }
       }
-      toast(`Project created in ${res.dir}` + (res.bins ? `, with the same ${res.bins} folders in the After Effects project` : "") + (res.aep ? ", and the After Effects project saved there." : "."));
+      toast(`Project created in ${res.dir}` + (res.bins ? `, with ${res.bins} bins in the After Effects project` : "") + (res.aep ? ", and the After Effects project saved there." : "."));
       agent.render();
     };
     const openExisting = async () => {
-      const f = await call("mdna_pick_folder", "Open a Motion DNA project folder"); if (!f) return;
+      const f = await pickFolder("Open a Motion DNA project folder", store.get("projectParent", "")); if (!f) return;
       const r = await call("mdna_project_find", f);
       if (!r || r === "null") return toast("No motion-dna.project.json in that folder.", true);
       PJ = parse(r); PJ.p.sessions = PJ.p.sessions || []; PJ.p.rules = PJ.p.rules || [];
@@ -1079,7 +1112,8 @@ function projectView() {
     };
     wrap.append(h("div", { class: "note", style: "padding:0" }, "One folder per piece: footage, AE file, renders and its own Claude conversation."),
       h("div", { class: "saveform" }, h("b", {}, "New project"), name, h("div", { class: "crow" }, pick, parentTxt), brandSel,
-        h("div", { class: "subhead", style: "margin:0" }, "Folders"), h("div", { class: "folders" }, ...checks.map((c) => h("label", {}, c, c.value))),
+        h("div", { class: "subhead", style: "margin:0" }, "Folders on your computer"), h("div", { class: "folders" }, ...checks.map((c) => h("label", { title: c.title }, c, c.value))),
+        h("div", { class: "subhead", style: "margin:0" }, "Bins in After Effects"), h("div", { class: "folders" }, ...binChecks.map((c) => h("label", { title: c.title }, c, c.value))),
         h("label", {}, saveAep, " Save the open AE project in it"),
         h("div", { class: "row" }, h("button", { class: "solid apply", onclick: create }, "Create project"))),
       h("button", { class: "btn", onclick: openExisting }, "Open an existing project folder…"));
