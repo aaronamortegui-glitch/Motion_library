@@ -77,11 +77,15 @@ def diagnose():
             "within 2 seconds.")
 
 
+LABEL = {"text": None}   # the tool being run, in plain words, for the panel
+
+
 def run(js, premiere=None, timeout=30):
     st = ensure_helper()
     if not st.get("plugin"):
         raise RuntimeError(diagnose())
-    data = json.dumps({"js": PRELUDE + js, "timeout": timeout, "target": premiere}).encode()
+    data = json.dumps({"js": PRELUDE + js, "timeout": timeout, "target": premiere, "label": LABEL["text"]}).encode()
+    LABEL["text"] = None   # only the first job of a tool carries it
     req = urllib.request.Request(BASE + "/call", data=data, headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=timeout + 10) as r:
         res = json.load(r)
@@ -936,7 +940,7 @@ def t_add_title(text, title="headline", sequence=None, track=2, time_s=0.0, colo
         rgb = None
         if color is not None:
             h = str(color).lstrip("#"); rgb = [int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)]
-        run(f"""
+        got, _ = run(f"""
 const seq = await seqBy({json.dumps(sequence)});
 const v = {int(track) - 1};
 let item = null;
@@ -944,7 +948,7 @@ for (const it of await clipsOf(seq, "video", v)) if (Math.abs((await it.getStart
 if (!item) throw new Error("title not found on V{int(track)} at {time_s}s");
 let cap = null;
 for (let k = 0; k < 20 && !cap; k++) {{ cap = await componentByMatch(item, "AE.ADBE Capsule"); if (!cap) await new Promise((r) => setTimeout(r, 300)); }}   // controls load a moment after insert
-if (!cap) throw new Error("the title's controls did not load");
+if (!cap) return -1;   // Premiere 2026 does not expose MOGRT controls (from 27.0): the title keeps its own colour and size
 const S = {json.dumps({k: val for k, val in sets.items() if k != "colour"})}, RGB = {json.dumps(rgb)};
 const acts = [];
 for (let i = 0; i < cap.getParamCount(); i++) {{
@@ -954,6 +958,8 @@ for (let i = 0; i < cap.getParamCount(); i++) {{
 }}
 tx("Motion DNA: title look", () => acts.map(([p, val]) => p.createSetValueAction(p.createKeyframe(val), true)));
 return acts.length;""", premiere)
+        if got == -1:
+            sets = {"note": "colour and size need Premiere 2027; kept the kit's own"}
     # place it clear of the person under it (tracked face), in the band that reads in this format
     fr, _ = run(f"const f = await (await seqBy({json.dumps(sequence)})).getFrameSize(); return [f.width, f.height];", premiere)
     face = _face_y(sequence, float(time_s) + 1.0, premiere)
@@ -987,6 +993,8 @@ def t_add_music(source, sequence=None, track=2, level_db=None, fade_in_s=0.5, fa
     if p.exists():
         t_import_media(str(p), bin="Music", premiere=premiere)
         name = p.name
+    elif "/" in str(source) or "\\" in str(source):
+        raise FileNotFoundError(f"{source} does not exist (give a music file that exists, or the name of one already in the project)")
     else:
         name = source   # already in the project
     how = "set by hand"
@@ -1124,6 +1132,10 @@ TOOLS_DEF = [
     ("run_script", t_run_script, "Advanced: run UXP JavaScript in Premiere (async function body with ppro, uxp, require, P = open project and the helpers seqBy, tx, clipAt, findItem, BACK, FWD). Use `return`.",
      {"code": {"type": "string"}, "timeout_s": {"type": "number"}, **PREM}, ["code"]),
 ]
+PANEL_LABEL = {"ppro_status": "Checking the project", "create_sequence": "Creating sequence", "list_clips": "Reading the timeline",
+               "import_media": "Importing", "place_clip": "Placing a clip", "apply_preset": "Applying", "animate": "Animating",
+               "add_title": "Adding title", "speed_ramp": "Speed ramp", "reformat_sequence": "Reformatting to", "reframe_follow": "Following the person",
+               "add_music": "Adding music", "export_sequence": "Exporting", "render_frame": "Looking at a frame"}
 INSTRUCTIONS = ("Motion DNA in Premiere (beta): drives the Premiere project the user has open through the Motion DNA UXP plugin. "
                 "Start with ppro_status. Create or open sequences, import media (files or Flora/Krea URLs) and place it, animate clips "
                 "on the library's token curves (animate: exact, one keyframe per frame), add MOGRTs (titles from After Effects; their "
@@ -1154,7 +1166,13 @@ def handle(req):
         if not fn:
             return {"content": [{"type": "text", "text": f"Unknown tool {p.get('name')}"}], "isError": True}
         try:
-            out = fn(**(p.get("arguments") or {}))
+            args = p.get("arguments") or {}
+            LABEL["text"] = PANEL_LABEL.get(p.get("name"), p.get("name", "").replace("_", " ").capitalize())
+            for k in ("preset", "text", "target", "name"):
+                if args.get(k):
+                    LABEL["text"] += f" {args[k]}" if k != "text" else f" “{args[k]}”"
+                    break
+            out = fn(**args)
             if isinstance(out, dict) and "content" in out:
                 return out
             return {"content": [{"type": "text", "text": str(out)}]}

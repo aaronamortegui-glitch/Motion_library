@@ -51,7 +51,8 @@ Frames 0 / 2 / 4 / 8 / 12 of the 25 fps test card show the Land curve: off-scree
 6. `createSequence(name)` makes a 23.976 default; set the rate with `settings.setVideoFrameRate(FrameRate.createWithValue(fps))`
    + `createSetSettingsAction`, or use a preset path with backslashes.
 7. To clear animation: `createSetTimeVaryingAction(false)` then `(true)`.
-8. Only After Effects-authored MOGRTs expose their controls (`MogrtText`, colours) — Adobe's changelog says so.
+8. Only After Effects-authored MOGRTs expose their controls (`MogrtText`, colours) — Adobe's changelog says so. On
+   26.5.3 they show too (26.5.2 in the first spike showed none: the controls load a moment after insert).
 
 ## What this changes in the plan
 - **Baked keys are the curve route** (exact); the "simple" two-key mode is dropped — the API cannot ease.
@@ -145,6 +146,18 @@ words what is missing when not connected. Skill: `.claude/skills/motion-dna-prem
 
 Result: `MDNA promo v3` 16:9 / 9:16 / 1:1 (two people, Glide In chosen by tags, kit titles, speed ramp, music at
 -14.3 LUFS), built and exported by Claude with no manual step.
+
+## Panel and test (2026-11-27, plugin 0.3.0)
+- The panel follows the After Effects panel's UI (`panel/css/panel.css`): the still DNA helix as the mark (drawn by
+  `make_helix.py` with the same formula as `helixDraw` in `panel/js/app.js`, since UXP has no dependable canvas),
+  Claude / Project pills (muted · spark · coral), the helix spinning next to whatever Claude is running (labels come
+  from the MCP tool, in plain words), `.btn` buttons, the same tokens. It says plainly that it is driven from Claude's
+  chat and lists prompts to copy. People's guide: `GUIDE.md`.
+- `test_premiere.py` (Premiere open, panel connected): **19/19 passed on Premiere 27.0.0 and on 26.5.3** with the Aaron and Gian clips
+  (`--footage`; without footage it makes synthetic clips). Its title check counts near-white pixels in the title band;
+  footage with white clothes there can pass without a title: look at one frame when in doubt.
+- Glide In's edge guard (x1.326) makes the first shot noticeably tighter: a preset that starts smaller than the
+  frame should rather start from the frame size on footage (next).
 
 ## Not done yet
 - The first frame is black on purpose (Glide In fades in from black); the repo's blackdetect rule flags it.

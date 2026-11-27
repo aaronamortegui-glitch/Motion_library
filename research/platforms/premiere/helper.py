@@ -148,7 +148,7 @@ def pick(target=None):
     return None
 
 
-def call(js, timeout=60, target=None):
+def call(js, timeout=60, target=None, label=None):
     conn = pick(target)
     if not conn:
         live = [(c.get("hello") or {}).get("version") for c in state["conns"].values()]
@@ -158,7 +158,7 @@ def call(js, timeout=60, target=None):
     ev = threading.Event()
     pending[cid] = {"event": ev, "reply": None}
     try:
-        ws_send(conn, json.dumps({"id": cid, "js": js}))
+        ws_send(conn, json.dumps({"id": cid, "js": js, "label": label}))
         if not ev.wait(timeout):
             return {"ok": False, "error": f"timeout after {timeout} s"}
         r = pending[cid]["reply"]
@@ -192,7 +192,7 @@ class Handler(BaseHTTPRequestHandler):
             req = json.loads(self.rfile.read(n) or b"{}")
         except ValueError:
             return self._json(400, {"error": "bad json"})
-        self._json(200, call(req.get("js", ""), float(req.get("timeout", 60)), req.get("target")))
+        self._json(200, call(req.get("js", ""), float(req.get("timeout", 60)), req.get("target"), req.get("label")))
 
     def log_message(self, *a):
         pass

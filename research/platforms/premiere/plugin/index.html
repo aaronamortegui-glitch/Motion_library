@@ -3,14 +3,71 @@
 <head>
   <meta charset="utf-8">
   <style>
-    body { font-family: sans-serif; font-size: 12px; color: #ddd; padding: 10px; }
-    #status { font-weight: bold; margin-bottom: 6px; }
-    #log { font-family: monospace; font-size: 11px; color: #aaa; white-space: pre-wrap; }
+    /* Same family as the After Effects panel (panel/css/panel.css): brand anchors Pine #0A211F, Cloud #F7F9F2,
+       Spark #D8FF85, Coral for destructive; chrome follows the host's dark UI so it sits quietly next to native panels. */
+    :root {
+      --pine: #0a211f; --sea: #174a45; --spark: #d8ff85; --cloud: #f7f9f2; --coral: #ff9494; --muted: #8c9e96;
+      --bg: #1f2120; --surface: #262928; --surface-2: #2e3231; --line: #3a3f3d; --text: #e3e6e1; --text-dim: #a3aaa6;
+      --radius: 6px; --gap: 8px;
+    }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: "Inter Tight", "Segoe UI", sans-serif; font-size: 12px; line-height: 1.4; }
+    /* header: mark · name · status pills (as in AE) */
+    .top { display: flex; align-items: center; gap: 8px; padding: 10px 12px 6px; }
+    .mark { width: 22px; height: 22px; margin-right: -2px; }
+    .title { font-weight: 700; font-size: 14px; letter-spacing: .14px; }
+    .grow { flex: 1; }
+    .pill { display: flex; align-items: center; height: 22px; padding: 0 10px 0 8px; border-radius: 11px; background: #171918;
+            border: 1px solid rgba(140, 158, 150, .5); color: var(--muted); font-weight: 700; font-size: 11px; }
+    .pill .dot { width: 7px; height: 7px; border-radius: 4px; background: var(--muted); margin-right: 6px; }
+    .pill.on { border-color: rgba(216, 255, 133, .55); color: var(--spark); }
+    .pill.on .dot { background: var(--spark); }
+    .pill.off { border-color: rgba(255, 148, 148, .55); color: var(--coral); }
+    .pill.off .dot { background: var(--coral); }
+    main { padding: 4px 12px 16px; }
+    .preview { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px; margin-bottom: var(--gap); }
+    .lead { font-size: 13px; line-height: 1.45; }
+    .lead b { color: var(--spark); }
+    .project { color: var(--text-dim); margin-top: 6px; }
+    .sec { color: var(--muted); font-size: 11px; font-weight: 700; margin: 14px 0 6px; }
+    .ask { display: flex; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 7px 8px; margin-bottom: 6px; }
+    .ask span { flex: 1; line-height: 1.35; color: var(--text-dim); margin-right: 8px; }
+    .btn { height: 24px; padding: 0 10px; border-radius: 5px; border: 1px solid var(--line); background: #171918; color: var(--text); font-size: 11px; }
+    .btn.on { border-color: var(--spark); color: var(--spark); }
+    .loading { display: flex; align-items: center; color: var(--text); margin-bottom: 4px; }
+    .loading img { width: 14px; height: 14px; margin-right: 6px; }
+    .row { display: flex; color: var(--text-dim); margin-bottom: 3px; }
+    .row .t { color: var(--muted); width: 40px; flex: none; font-variant-numeric: tabular-nums; }
+    .row.err { color: var(--coral); }
+    .note { color: var(--muted); font-size: 11px; margin-top: 12px; }
   </style>
 </head>
 <body>
-  <div id="status">Motion DNA: starting…</div>
-  <div id="log"></div>
+  <header class="top">
+    <img class="mark" src="icons/helix_mark.png" alt="">
+    <span class="title">Motion DNA</span>
+    <span class="grow"></span>
+    <span class="pill" id="pill-claude" title="Claude: connects when you ask it something"><i class="dot"></i>Claude</span>
+    <span class="pill" id="pill-project" title="The Premiere project Claude works on"><i class="dot"></i>Project</span>
+  </header>
+
+  <main>
+    <div class="preview lead">
+      This panel is driven from <b>Claude's chat</b>. Keep it open and ask Claude in your own words: it edits this
+      project with Motion DNA's moves, curves, titles and formats.
+      <div class="project" id="project">No project yet</div>
+    </div>
+
+    <div class="sec">Try asking Claude</div>
+    <div id="asks"></div>
+
+    <div class="sec">What Claude is doing</div>
+    <div class="preview">
+      <div class="loading" id="busy" hidden><img id="busy-helix" src="icons/helix/00.png" alt=""><span id="busy-text"></span></div>
+      <div id="log"><div class="row"><span class="t"></span><span>Nothing yet.</span></div></div>
+    </div>
+
+    <div class="note" id="foot">Motion DNA for Premiere · beta</div>
+  </main>
   <script src="main.js"></script>
 </body>
 </html>

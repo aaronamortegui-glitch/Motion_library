@@ -2,7 +2,7 @@
   "manifestVersion": 5,
   "id": "com.motiondna.premiere",
   "name": "Motion DNA",
-  "version": "0.1.1",
+  "version": "0.3.0",
   "main": "index.html",
   "host": {
     "app": "premierepro",
@@ -24,13 +24,27 @@
         "height": 2000
       },
       "preferredDockedSize": {
-        "width": 300,
-        "height": 220
+        "width": 320,
+        "height": 520
       },
       "preferredFloatingSize": {
-        "width": 300,
-        "height": 220
-      }
+        "width": 320,
+        "height": 520
+      },
+      "icons": [
+        {
+          "width": 23,
+          "height": 23,
+          "path": "icons/panel.png",
+          "scale": [
+            1,
+            2
+          ],
+          "theme": [
+            "all"
+          ]
+        }
+      ]
     }
   ],
   "requiredPermissions": {
@@ -38,6 +52,24 @@
       "domains": "all"
     },
     "localFileSystem": "fullAccess",
-    "allowCodeGenerationFromStrings": true
-  }
+    "allowCodeGenerationFromStrings": true,
+    "clipboard": "readAndWrite"
+  },
+  "icons": [
+    {
+      "width": 23,
+      "height": 23,
+      "path": "icons/panel.png",
+      "scale": [
+        1,
+        2
+      ],
+      "theme": [
+        "all"
+      ],
+      "species": [
+        "pluginList"
+      ]
+    }
+  ]
 }
