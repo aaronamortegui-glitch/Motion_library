@@ -5,7 +5,7 @@
 const uxp = require("uxp");
 const ppro = require("premierepro");
 const URL_WS = "ws://127.0.0.1:8737/mdna";
-const VERSION = "0.3.0";
+const VERSION = "0.3.1";
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 let ws = null;
 const lines = [];
