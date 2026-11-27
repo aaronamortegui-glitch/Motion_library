@@ -1,0 +1,303 @@
+{
+ "version": 1,
+ "notes": "Motion DNA colour looks for Premiere, as Lumetri Color settings (editable after they are applied). Values use Lumetri's own units; omitted ones stay at Lumetri's defaults. Tagged like the rest of the library: energy 1 calm .. 5 explosive, open tones. Basic.* = Basic Correction, Creative.* = Creative, Vignette.* = Vignette. Own work, CC0 within this repo. A look may carry colour wheels (shadows / midtones / highlights as hue + amount), applied with Levels per channel because Lumetri's wheels are not exposed to plugins.",
+ "looks": {
+  "clean-modern": {
+   "label": "Clean Modern",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "modern",
+    "corporate",
+    "technical"
+   ],
+   "use": "Product, UI, corporate interviews: true colour, a little crisper",
+   "params": {
+    "Basic.Contrast": 8,
+    "Basic.Highlights": -6,
+    "Basic.Shadows": 6,
+    "Creative.Vibrance": 10,
+    "Creative.Sharpen": 12
+   }
+  },
+  "warm-film": {
+   "label": "Warm Film",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "warm",
+    "elegant",
+    "editorial",
+    "retro"
+   ],
+   "use": "People, stories, 70s interiors: warm, soft blacks, a film fade",
+   "params": {
+    "Basic.Temperature": 14,
+    "Basic.Tint": 4,
+    "Basic.Contrast": 6,
+    "Basic.Blacks": 10,
+    "Creative.Faded Film": 18,
+    "Creative.Saturation": 92,
+    "Vignette.Amount": -0.8,
+    "Vignette.Feather": 70
+   }
+  },
+  "teal-orange": {
+   "label": "Teal & Orange",
+   "energy": [
+    3,
+    5
+   ],
+   "tones": [
+    "cinematic",
+    "bold"
+   ],
+   "use": "Trailers, sport, launch films: skin warm against cool shadows",
+   "params": {
+    "Basic.Temperature": -6,
+    "Basic.Contrast": 18,
+    "Basic.Shadows": -8,
+    "Creative.Vibrance": 22,
+    "Creative.Tint Balance": 30,
+    "Vignette.Amount": -1.2
+   },
+   "wheels": {
+    "shadows": {
+     "hue": 190,
+     "amount": 0.35
+    },
+    "highlights": {
+     "hue": 30,
+     "amount": 0.25
+    }
+   }
+  },
+  "noir": {
+   "label": "Noir",
+   "energy": [
+    2,
+    4
+   ],
+   "tones": [
+    "cinematic",
+    "elegant",
+    "luxury"
+   ],
+   "use": "Black and white with deep blacks: drama, luxury, editorial",
+   "params": {
+    "Basic.Saturation": 0,
+    "Basic.Contrast": 30,
+    "Basic.Blacks": -12,
+    "Basic.Whites": 8,
+    "Creative.Sharpen": 10,
+    "Vignette.Amount": -1.5
+   }
+  },
+  "pastel-soft": {
+   "label": "Pastel Soft",
+   "energy": [
+    1,
+    2
+   ],
+   "tones": [
+    "calm",
+    "friendly",
+    "playful"
+   ],
+   "use": "Lifestyle, beauty, kids: lifted shadows, low contrast, light colours",
+   "params": {
+    "Basic.Exposure": 0.3,
+    "Basic.Contrast": -18,
+    "Basic.Shadows": 20,
+    "Basic.Blacks": 16,
+    "Creative.Faded Film": 12,
+    "Creative.Saturation": 85,
+    "Basic.Tint": 4
+   }
+  },
+  "golden-hour": {
+   "label": "Golden Hour",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "warm",
+    "organic",
+    "calm"
+   ],
+   "use": "Outdoors, travel, food: warm light, soft highlights",
+   "params": {
+    "Basic.Temperature": 24,
+    "Basic.Tint": 6,
+    "Basic.Highlights": -14,
+    "Creative.Vibrance": 14,
+    "Vignette.Amount": -0.6
+   },
+   "wheels": {
+    "midtones": {
+     "hue": 35,
+     "amount": 0.15
+    },
+    "highlights": {
+     "hue": 40,
+     "amount": 0.2
+    }
+   }
+  },
+  "cool-tech": {
+   "label": "Cool Tech",
+   "energy": [
+    2,
+    4
+   ],
+   "tones": [
+    "technical",
+    "modern",
+    "corporate"
+   ],
+   "use": "SaaS, AI, hardware: cool, clean, contrasty",
+   "params": {
+    "Basic.Temperature": -18,
+    "Basic.Tint": -4,
+    "Basic.Contrast": 14,
+    "Basic.Whites": 6,
+    "Creative.Saturation": 90,
+    "Creative.Sharpen": 14
+   },
+   "wheels": {
+    "shadows": {
+     "hue": 210,
+     "amount": 0.2
+    }
+   }
+  },
+  "vivid-pop": {
+   "label": "Vivid Pop",
+   "energy": [
+    4,
+    5
+   ],
+   "tones": [
+    "playful",
+    "bold",
+    "colorful"
+   ],
+   "use": "Social hooks, music, retail: saturated and punchy",
+   "params": {
+    "Basic.Contrast": 16,
+    "Basic.Saturation": 125,
+    "Creative.Vibrance": 30,
+    "Creative.Sharpen": 10
+   }
+  },
+  "muted-editorial": {
+   "label": "Muted Editorial",
+   "energy": [
+    1,
+    3
+   ],
+   "tones": [
+    "editorial",
+    "elegant",
+    "calm"
+   ],
+   "use": "Fashion, interviews, brand films: desaturated, gentle",
+   "params": {
+    "Basic.Saturation": 72,
+    "Basic.Contrast": 4,
+    "Basic.Highlights": -10,
+    "Creative.Faded Film": 10,
+    "Creative.Tint Balance": -10
+   }
+  },
+  "retro-70s": {
+   "label": "Retro 70s",
+   "energy": [
+    2,
+    4
+   ],
+   "tones": [
+    "retro",
+    "warm",
+    "handmade"
+   ],
+   "use": "Period pieces, nostalgic ads: warm, faded, yellowed highlights",
+   "params": {
+    "Basic.Temperature": 20,
+    "Basic.Tint": 8,
+    "Basic.Contrast": -6,
+    "Basic.Blacks": 18,
+    "Creative.Faded Film": 30,
+    "Creative.Saturation": 88,
+    "Vignette.Amount": -1.0,
+    "Vignette.Feather": 80
+   },
+   "wheels": {
+    "shadows": {
+     "hue": 30,
+     "amount": 0.2
+    },
+    "highlights": {
+     "hue": 50,
+     "amount": 0.25
+    }
+   }
+  },
+  "night-neon": {
+   "label": "Night Neon",
+   "energy": [
+    3,
+    5
+   ],
+   "tones": [
+    "bold",
+    "cinematic",
+    "colorful"
+   ],
+   "use": "Night, clubs, gaming: magenta-cyan, crushed blacks",
+   "params": {
+    "Basic.Temperature": -10,
+    "Basic.Tint": 16,
+    "Basic.Contrast": 22,
+    "Basic.Blacks": -16,
+    "Creative.Vibrance": 26,
+    "Vignette.Amount": -1.4
+   },
+   "wheels": {
+    "shadows": {
+     "hue": 260,
+     "amount": 0.35
+    },
+    "highlights": {
+     "hue": 320,
+     "amount": 0.2
+    }
+   }
+  },
+  "natural-fix": {
+   "label": "Natural Fix",
+   "energy": [
+    1,
+    5
+   ],
+   "tones": [
+    "corporate",
+    "friendly",
+    "modern"
+   ],
+   "use": "A neutral correction for mixed footage before a look: tame highlights, open shadows",
+   "params": {
+    "Basic.Highlights": -18,
+    "Basic.Shadows": 14,
+    "Basic.Whites": -4,
+    "Basic.Blacks": 4,
+    "Creative.Vibrance": 6
+   }
+  }
+ }
+}

@@ -409,7 +409,40 @@ throw new Error("No MOGRT colour control found");""", premiere)
     return f"Set {r} to {color} (Premiere {v})."
 
 
-def t_render_frame(time_s=0.0, sequence=None, width=960, premiere=None):
+def _render_exact(time_s, sequence, width, premiere):
+    """One frame through Premiere's exporter (a 2-frame in/out, restored after): titles, mattes and effects as in the MP4."""
+    out = pathlib.Path(tempfile.gettempdir()) / "motion_dna_premiere"
+    out.mkdir(exist_ok=True)
+    stamp = int(time.time() * 1000)
+    mp4 = out / f"frame_{stamp}.mp4"
+    r, v = run(f"""
+const seq = await seqBy({json.dumps(sequence)});
+const fps = await fpsOf(seq);
+const a = ppro.TickTime.createWithSeconds({float(time_s)}), b = ppro.TickTime.createWithSeconds({float(time_s)} + 2 / fps);
+const oldIn = await seq.getInPoint(), oldOut = await seq.getOutPoint();
+tx("Motion DNA: frame range", () => [seq.createSetInPointAction(a), seq.createSetOutPointAction(b)]);
+const pre = "C:/Program Files/Adobe/Adobe Premiere Pro 20" + MAJOR + "/MediaIO/systempresets/4E49434B_48323634/00 - Match Source - High bitrate.epr";
+const em = await ppro.EncoderManager.getManager();
+const ok = await em.exportSequence(seq, ppro.Constants.ExportType.IMMEDIATELY, BACK({json.dumps(str(mp4))}), BACK(pre), false);
+const s2 = await seqBy({json.dumps(sequence)});
+tx("Motion DNA: restore range", () => [s2.createSetInPointAction(oldIn), s2.createSetOutPointAction(oldOut)]);
+return {{ ok, seq: seq.name }};""", premiere, timeout=120)
+    for _ in range(40):
+        if mp4.exists() and mp4.stat().st_size:
+            break
+        time.sleep(0.25)
+    f = out / f"frame_{stamp}.png"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(mp4), "-frames:v", "1", "-vf", f"scale={int(width)}:-2", str(f)], check=False)
+    if not f.exists():
+        return f"Premiere did not render the frame ({r}); try exact=False."
+    return {"content": [{"type": "text", "text": f"{r['seq']} at {time_s}s, rendered by Premiere's exporter (Premiere {v}): {f}"},
+                        {"type": "image", "data": base64.b64encode(f.read_bytes()).decode(), "mimeType": "image/png"}]}
+
+
+def t_render_frame(time_s=0.0, sequence=None, width=960, exact=True, premiere=None):
+    """exact (default): render through the exporter, as the MP4 will look; exact=False: quick, without titles or mattes."""
+    if exact:
+        return _render_exact(time_s, sequence, width, premiere)
     out = pathlib.Path(tempfile.gettempdir()) / "motion_dna_premiere"
     out.mkdir(exist_ok=True)
     name = f"frame_{int(time.time() * 1000)}.png"
@@ -991,6 +1024,8 @@ def t_add_music(source, sequence=None, track=2, level_db=None, fade_in_s=0.5, fa
     (other audio in the sequence) 16 dB under; alone, the gain that brings it to target_lufs (feed master ~-14)."""
     p = pathlib.Path(source)
     if p.exists():
+        import ppro_extra
+        p, _chan = ppro_extra.fix_channels(p)   # one dead channel -> a copy with sound on both sides
         t_import_media(str(p), bin="Music", premiere=premiere)
         name = p.name
     elif "/" in str(source) or "\\" in str(source):
@@ -1031,7 +1066,7 @@ if ((await clip.getEndTime()).seconds > end + 0.01) tx("Motion DNA: trim music",
 clip = (await clipsOf(seq, "audio", a))[0];
 const chain = await clip.getComponentChain();
 let lvl = null;
-for (let c = 0; c < chain.getComponentCount(); c++) {{ const k = chain.getComponentAtIndex(c); if ((await k.getMatchName()) === "Internal Volume Stereo") lvl = k.getParam(1); }}
+for (let c = 0; c < chain.getComponentCount(); c++) {{ const k = chain.getComponentAtIndex(c); if (/^Internal Volume/.test(await k.getMatchName())) lvl = k.getParam(1); }}
 const inS = (await clip.getInPoint()).seconds, len = (await clip.getEndTime()).seconds - (await clip.getStartTime()).seconds;
 const FIN = {json.dumps(fin)}, FOUT = {json.dumps(fout)}, FO = {float(fade_out_s)};
 const keys = FIN.map(([s, g]) => [s, g]).concat(FOUT.map(([u, g]) => [len - FO + u * FO, g]));
@@ -1127,15 +1162,25 @@ TOOLS_DEF = [
       "target_lufs": {"type": "number"}, "fade_in_s": {"type": "number"}, "fade_out_s": {"type": "number"}, "curve": {"type": "string"}, **PREM}, ["source"]),
     ("export_sequence", t_export_sequence, "Export a sequence to an MP4 (H.264 Match Source: its own size and frame rate) or any .epr preset; immediately (waits) or queued in Media Encoder.",
      {**SEQ, "out": {"type": "string"}, "preset": {"type": "string"}, "queue": {"type": "boolean"}, **PREM}),
-    ("render_frame", t_render_frame, "Export one frame of a sequence and look at it. Check your work with it.",
-     {"time_s": {"type": "number"}, **SEQ, "width": {"type": "integer"}, **PREM}),
+    ("render_frame", t_render_frame, "Look at one frame as it will export (titles, masks, effects): exact=True (default) renders it through Premiere's exporter; exact=False is a quick preview without titles or mattes. Check your work with it.",
+     {"time_s": {"type": "number"}, **SEQ, "width": {"type": "integer"}, "exact": {"type": "boolean"}, **PREM}),
     ("run_script", t_run_script, "Advanced: run UXP JavaScript in Premiere (async function body with ppro, uxp, require, P = open project and the helpers seqBy, tx, clipAt, findItem, BACK, FWD). Use `return`.",
      {"code": {"type": "string"}, "timeout_s": {"type": "number"}, **PREM}, ["code"]),
 ]
+# part 2 (project, assets, effects, transitions, colour, masks): ppro_extra.py
+sys.path.insert(0, str(HERE))
+import ppro_extra  # noqa: E402
+if hasattr(ppro_extra, "TOOLS"):   # when ppro_extra was imported first, it registers itself at its end
+    TOOLS_DEF += ppro_extra.TOOLS
+
 PANEL_LABEL = {"ppro_status": "Checking the project", "create_sequence": "Creating sequence", "list_clips": "Reading the timeline",
                "import_media": "Importing", "place_clip": "Placing a clip", "apply_preset": "Applying", "animate": "Animating",
                "add_title": "Adding title", "speed_ramp": "Speed ramp", "reformat_sequence": "Reformatting to", "reframe_follow": "Following the person",
-               "add_music": "Adding music", "export_sequence": "Exporting", "render_frame": "Looking at a frame"}
+               "add_music": "Adding music", "export_sequence": "Exporting", "render_frame": "Looking at a frame",
+               "organize_project": "Organizing the project", "collect_project": "Collecting files", "export_interchange": "Exporting for another app",
+               "merge_project": "Merging", "add_placeholder": "Placeholder", "add_generated": "Bringing in", "add_voice": "Adding voice",
+               "add_animation": "Adding animation", "add_effect": "Effect", "add_transition": "Transition", "add_markers": "Markers",
+               "beat_markers": "Markers on the beat", "apply_look": "Grading:", "add_mask": "Mask", "lumetri": "Lumetri", "color_wheels": "Colour wheels", "remove_effect": "Removing", "add_title": "Adding title"}
 INSTRUCTIONS = ("Motion DNA in Premiere (beta): drives the Premiere project the user has open through the Motion DNA UXP plugin. "
                 "Start with ppro_status. Create or open sequences, import media (files or Flora/Krea URLs) and place it, animate clips "
                 "on the library's token curves (animate: exact, one keyframe per frame), add MOGRTs (titles from After Effects; their "

@@ -159,6 +159,36 @@ Result: `MDNA promo v3` 16:9 / 9:16 / 1:1 (two people, Glide In chosen by tags, 
 - Glide In's edge guard (x1.326) makes the first shot noticeably tighter: a preset that starts smaller than the
   frame should rather start from the frame size on footage (next).
 
+## Part 2: project, assets, effects, colour, masks (ppro_extra.py, 2026-11-27, tested on 27.0)
+Tools: `organize_project`, `collect_project`, `export_interchange` (otio / fcpxml / aaf), `merge_project` (.prproj or
+.aep live), `add_placeholder`, `add_generated` (provenance marker, replaces a placeholder in place), `add_voice` (level
++ music ducking + channel fix), `add_animation` (code templates rendered by html_to_mp4.py, MOV/PNG sequence, .aep),
+`list_effects` / `add_effect` / `remove_effect` (115 effects), `add_transition` (118; by name or energy, token
+durations), `add_markers` / `beat_markers`, `list_looks` / `apply_look` (looks.json), `list_lumetri` / `lumetri`
+(every exposed parameter, animatable on token curves), `color_wheels` (Levels per channel), `add_mask` (shape or
+person matte + Track Matte Key). All checked on `MDNA full test` with exact frames.
+
+26. Effects: `VideoFilterFactory.createComponent(matchName)` + `chain.createAppendComponentAction`; remove with
+    `createRemoveComponentAction`. Lumetri is `AE.ADBE Lumetri` (130 params on 27.0).
+27. **Lumetri through the API**: numbers, booleans and colours are writable (Basic, Creative adjustments, HSL Secondary,
+    Vignette); **curve points, colour-wheel values and custom LUT files are not** (blobs); Look / Input LUT are indices
+    into Premiere's built-in lists. The section booleans ("Light", "Creative"…) are the panel's open/closed state, not
+    an on/off: values apply either way. Names repeat (Saturation ×3, Temperature ×2…), so tools address them as
+    "Section/Name".
+28. Colour wheels instead: `PR.ADBE Levels` per channel (R/G/B black input/output, white input/output, gamma).
+29. Masks: no mask-path API. A matte clip on the track above + `AE.ADBE Legacy Key Track Matte` with **Matte = track
+    number (1-based)** and **Composite Using 1 = luma, 0 = alpha**; Premiere then hides the matte track.
+30. `exportSequenceFrame` skips titles **and track mattes**: `render_frame` now renders through the exporter (a
+    two-frame in/out, restored after; ~1 s), so Claude sees what the MP4 will show.
+31. Audio volume components are named per layout ("Internal Volume Mono/Stereo/…"): match `^Internal Volume`; Level
+    is param 1, linear gain with 0 dB = 0.1778.
+32. Transitions: `TransitionFactory.createVideoTransition(match)` + `new AddTransitionOptions()` (`setApplyToStart`,
+    `setDuration`) + `trackItem.createAddVideoTransitionAction(tr, opts, true)`.
+33. Markers: `Markers.getMarkers(seq).createAddMarkerAction(name, "Comment", start, duration, comments)`.
+34. `exportAAF` writes the file but its promise may never answer: check the file instead.
+35. `importFiles([".prproj"])` merges a whole project into a bin; `importAllAEComps(aep, bin)` brings AE comps live.
+36. `saveAs` makes the copy the open project (collect_project says so); `changeMediaFilePath(path, true)` relinks.
+
 ## Not done yet
 - The first frame is black on purpose (Glide In fades in from black); the repo's blackdetect rule flags it.
 - The plugin still runs free JavaScript from the helper (spike mode): move to named commands.

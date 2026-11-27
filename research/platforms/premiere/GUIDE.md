@@ -42,6 +42,22 @@ examples with a **Copy** button. More:
 | A brand's rules | "Work for *Conair*: follow its motion rules." |
 | Export | "Export the three formats." (MP4, straight from Premiere, next to the project in *Motion DNA renders*.) |
 
+More you can ask, all done by Claude in your project:
+
+| You want | Ask Claude |
+|---|---|
+| A tidy project | "Organize the project." (Bins by kind — Footage, Audio, Music, Voice, Generated, Graphics, Stills, Sequences, Placeholders, Renders — with colour labels.) |
+| A hand-off folder | "Collect the project into D:\handoff." (Copies all media, saves the project there relinked; the open project becomes the copy, the original stays.) |
+| Send the edit to another app | "Export this sequence as OTIO / Final Cut XML / AAF." |
+| Another project's work | "Bring in the sequences from D:\old\launch.prproj." or an After Effects project (comps come in live). |
+| A shot still to come | "Put a placeholder for the product hero shot after the second clip." Later: "Generate it with Flora and swap it in." |
+| A voice-over | "Add the ElevenLabs line voice_01.wav at 0:02." (Levelled, music ducked under it; a file with sound on one channel only is fixed.) |
+| An animation made in code | "Put the liquid wipe template over the cut." (Rendered with transparency, placed on top.) |
+| Colour | "Grade the whole edit warm film." / "Teal and orange on the second clip, half strength." / "Exposure +0.5 on clip 1." |
+| A mask | "Rounded mask on the first clip, revealing on Land." / "Cut the person out." (person cut-out: this machine only) |
+| Transitions | "A dissolve between the clips." / "Something energetic on the cuts." |
+| Cuts on the beat | "Put markers on the music's beats." |
+
 Claude picks moves, curves and durations from the Motion DNA library by feel (energy 1 calm … 5 explosive, and tones
 like elegant, playful, corporate), so describe the feeling, not the keyframes.
 
@@ -56,7 +72,36 @@ like elegant, playful, corporate), so describe the feeling, not the keyframes.
   clip), because Premiere does not let plugins change speed.
 - It never saves your project unless you ask.
 
+## Colour: what Claude controls in Lumetri
+Motion DNA has its own **look library** (`looks.json`: Clean Modern, Warm Film, Teal & Orange, Noir, Pastel Soft,
+Golden Hour, Cool Tech, Vivid Pop, Muted Editorial, Retro 70s, Night Neon, Natural Fix), tagged by energy and tone
+like the rest of the library. A look is applied as **Lumetri Color**, so you can open the Lumetri panel and keep
+adjusting. Claude can also set any single Lumetri value, and animate it over time on the Motion DNA curves.
+
+Premiere lets plugins reach most of Lumetri, but not all of it:
+
+| Lumetri | Claude can set it? |
+|---|---|
+| Basic Correction: white balance, temperature, tint, exposure, contrast, highlights, shadows, whites, blacks, saturation | Yes |
+| Creative: intensity, faded film, sharpen, vibrance, saturation, tint balance | Yes |
+| Creative Look / Input LUT | Only Premiere's built-in list (by number); not your own .cube file |
+| RGB curves, Hue/Sat curves (points) | **No** — Premiere does not expose curve points |
+| Color wheels (shadows / midtones / highlights) | **No** in Lumetri — Claude does them with **Levels per channel** instead (same idea: lift, gamma, gain) |
+| HSL Secondary (key colours, denoise, blur, correction) | Yes |
+| Vignette | Yes |
+
+So: for curves and custom LUTs, adjust by hand in the Lumetri panel after Claude's grade; everything else Claude
+can do, and its looks that need wheels (Teal & Orange, Night Neon, Retro 70s, Golden Hour, Cool Tech) add a Levels
+effect next to Lumetri.
+
+## Sound, mono and stereo
+A mono file plays centred on both sides of a stereo sequence: nothing to fix. A stereo file with sound on one channel
+only (a lav mic recorded on the left) plays from one side: Claude makes a copy with that channel on both sides and
+uses it (the original stays). Ask for "real stereo" if you want a mono file turned into a stereo file.
+
 ## Limits (beta)
+- Premiere's API has no mask paths: masks are a matte clip on the track above + Track Matte Key (Claude sets it up).
+- Premiere's quick frame preview skips titles and masks, so Claude checks frames through the exporter (exact).
 - Titles come from the **Motion DNA title kit** (`kit/`). Titles you type into other templates through Claude show in
   Premiere but disappear from exports (a Premiere bug), so Claude uses the kit.
 - Slow motion (speed ramps) is rendered; the clip has no audio yet.

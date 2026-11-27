@@ -33,6 +33,13 @@ Code and full notes: `research/platforms/premiere/` (README.md has every API rul
   placed clear of faces), `speed_ramp`, `reformat_sequence` (+ `reframe_follow`; re-places titles), `add_music`
   (alone -> -14 LUFS, under a voice -16 dB), `export_sequence` (inside Premiere, H.264 Match Source), `render_frame`,
   `run_script` (last resort). Never `set_mogrt_text` for anything that must export (Premiere drops API-set text).
+- More tools (ppro_extra.py): `organize_project`, `collect_project`, `export_interchange` (otio/fcpxml/aaf),
+  `merge_project`, `add_placeholder`, `add_generated` (after generating with Flora/Krea/Weave: quote USD first),
+  `add_voice` (ElevenLabs or local voice file; ducks the music, fixes one-channel audio), `add_animation` (code
+  templates rendered with alpha), `add_effect` / `remove_effect` / `list_effects`, `add_transition` (by name or energy),
+  `add_markers` / `beat_markers`, colour: `list_looks` / `apply_look` (Motion DNA looks as Lumetri), `list_lumetri` /
+  `lumetri` (any exposed value, animatable), `color_wheels` (Levels: Lumetri's wheels and curves are not exposed),
+  masks: `add_mask` (shapes on a curve, or the person; Track Matte Key).
 - Choose moves, curves and durations the Motion DNA way: `library/INDEX.txt`, tags and styles (the `motion-dna`
   skill); a brand's rules come first (`get_brand` in the AE MCP or `python tools/brand.py show <slug>`).
 - Editable by default: keyframes on the clips, MOGRTs with live text. Only what Premiere cannot do natively is
@@ -40,8 +47,8 @@ Code and full notes: `research/platforms/premiere/` (README.md has every API rul
 - Never save the Premiere project unless asked.
 
 ## Check your work
-- `render_frame` shows footage and stills but **not titles** (Premiere's frame export skips graphics): to check titles,
-  `export_sequence` and look at frames of the MP4 (ffmpeg). Then loudness (ebur128) and blackdetect, as in CLAUDE.md.
+- `render_frame` (exact, the default) renders the frame through Premiere's exporter: titles, masks and effects show as
+  in the MP4. Then loudness (ebur128) and blackdetect on the export, as in CLAUDE.md.
 - Feed rules for vertical: content inside y 270–1440 of 1920, music about 15–16 dB under the voice.
 
 ## Known limits (beta)
