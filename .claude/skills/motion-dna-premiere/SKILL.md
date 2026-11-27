@@ -39,7 +39,8 @@ Code and full notes: `research/platforms/premiere/` (README.md has every API rul
   templates rendered with alpha), `add_effect` / `remove_effect` / `list_effects`, `add_transition` (by name or energy),
   `add_markers` / `beat_markers`, colour: `list_looks` / `apply_look` (Motion DNA looks as Lumetri), `list_lumetri` /
   `lumetri` (any exposed value, animatable), `color_wheels` (Levels: Lumetri's wheels and curves are not exposed),
-  masks: `add_mask` (shapes on a curve, or the person; Track Matte Key).
+  masks: `add_mask` (shapes on a curve, or the person; Track Matte Key), text-based editing: `transcribe`,
+  `cut_by_text` (keep sentences, drop fillers and pauses), `add_captions` (kit titles timed to the words).
 - Choose moves, curves and durations the Motion DNA way: `library/INDEX.txt`, tags and styles (the `motion-dna`
   skill); a brand's rules come first (`get_brand` in the AE MCP or `python tools/brand.py show <slug>`).
 - Editable by default: keyframes on the clips, MOGRTs with live text. Only what Premiere cannot do natively is

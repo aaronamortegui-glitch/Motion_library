@@ -189,6 +189,19 @@ person matte + Track Matte Key). All checked on `MDNA full test` with exact fram
 35. `importFiles([".prproj"])` merges a whole project into a bin; `importAllAEComps(aep, bin)` brings AE comps live.
 36. `saveAs` makes the copy the open project (collect_project says so); `changeMediaFilePath(path, true)` relinks.
 
+## Text-based editing (2026-11-27, Premiere 27)
+`transcribe` (Premiere's own speech-to-text, cached), `cut_by_text` (keep sentences, drop fillers and long pauses:
+editable three-point edits) and `add_captions` (kit titles timed to the words, following the cut). Test: a 21.6 s
+talking clip with four long pauses and an "um" became 9.83 s in four cuts; nine caption lines in the lower band.
+
+37. `Transcript.transcribeClipProjectItem(item, {language})` is local and settles when done; `exportToJSON` gives
+    segments (sentences) with words (start, duration, text, eos, speaker). Premiere already drops "um" by itself.
+38. Three-point edit: `ClipProjectItem.createSetInOutPointsAction(in, out)` then `createOverwriteItemAction`; clear
+    with `createClearInOutPointsAction`.
+39. Removing clips: `TrackItemSelection.createEmptySelection(cb)`, add items and create + commit
+    `createRemoveItemsAction(sel, ripple, Constants.MediaType.ANY, shiftOverlapping)` inside the callback (the
+    selection only lives there). `createSequenceFromMedia` lays the whole clip down first: remove it.
+
 ## Not done yet
 - The first frame is black on purpose (Glide In fades in from black); the repo's blackdetect rule flags it.
 - The plugin still runs free JavaScript from the helper (spike mode): move to named commands.

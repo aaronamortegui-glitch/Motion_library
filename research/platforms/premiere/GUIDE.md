@@ -57,6 +57,8 @@ More you can ask, all done by Claude in your project:
 | A mask | "Rounded mask on the first clip, revealing on Land." / "Cut the person out." (person cut-out: this machine only) |
 | Transitions | "A dissolve between the clips." / "Something energetic on the cuts." |
 | Cuts on the beat | "Put markers on the music's beats." |
+| Edit an interview by its words | "Transcribe interview.mp4, keep sentences 1, 3 and 4, cut the pauses and the ums." (Premiere's own transcription; English, Spanish and more.) |
+| Captions | "Add Motion DNA captions to the cut, four words per line." |
 
 Claude picks moves, curves and durations from the Motion DNA library by feel (energy 1 calm … 5 explosive, and tones
 like elegant, playful, corporate), so describe the feeling, not the keyframes.

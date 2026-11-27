@@ -794,6 +794,166 @@ return n;""", premiere, timeout=120)
     return f"Removed {r} x {match}. Premiere {v}."
 
 
+# ---------------------------------------------------------------- text-based editing
+FILLERS = {"um", "uh", "erm", "er", "ah", "eh", "hmm", "mm", "mhm", "ehm", "este", "eh", "o sea", "like", "you know"}
+
+
+def _transcript(item, language=None, premiere=None, force=False):
+    """Premiere's own transcription of a project item (local, free), cached as JSON next to the project."""
+    r0, _ = run("return P.path;", premiere)
+    cache = M._renders_dir(r0) / "transcripts" / f"{pathlib.Path(item).stem}.json"
+    if cache.exists() and not force:
+        return json.loads(cache.read_text(encoding="utf-8"))
+    r, v = run(f"""
+const item = ppro.ClipProjectItem.cast(await findItem({js(item)}));
+if (!item) throw new Error("no project item " + {js(item)});
+let had = false; try {{ had = await ppro.Transcript.hasTranscript(item); }} catch (e) {{}}
+if (!had || {js(bool(force))}) {{
+  const opts = {js(language)} ? {{ language: {js(language)} }} : undefined;
+  const ok = await ppro.Transcript.transcribeClipProjectItem(item, opts);
+  if (!ok) throw new Error("Premiere could not transcribe it (is the language pack installed? see Premiere's Text panel)");
+}}
+return await ppro.Transcript.exportToJSON(item);""", premiere, timeout=1800)
+    data = json.loads(r)
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    cache.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    return data
+
+
+def _words(data):
+    out = []
+    for si, seg in enumerate(data.get("segments", [])):
+        for w in seg.get("words", []):
+            if w.get("type", "word") != "word":
+                continue
+            out.append({"t": float(w["start"]), "e": float(w["start"]) + float(w["duration"]), "text": w["text"], "seg": si,
+                        "eos": bool(w.get("eos")), "speaker": seg.get("speaker")})
+    return out
+
+
+def t_transcribe(item, language=None, force=False, premiere=None):
+    """Transcribe a project item with Premiere's own speech-to-text (local; English, Spanish, German, French, Mandarin…):
+    the text by sentence with times, cached for cut_by_text and add_captions. language e.g. "en-US", "es-ES"."""
+    data = _transcript(item, language, premiere, force)
+    lines = []
+    for i, seg in enumerate(data.get("segments", [])):
+        ws = [w["text"] for w in seg.get("words", [])]
+        lines.append(f"[{i}] {seg['start']:.2f}-{seg['start'] + seg['duration']:.2f}s  {' '.join(ws)}")
+    return f"Transcript of {item} ({data.get('language')}), {len(lines)} segments:\n" + "\n".join(lines)
+
+
+def _keep_ranges(words, keep_segments=None, drop_words=(), max_pause=0.35, pad=0.08, fillers=True):
+    """Source ranges to keep: chosen segments, minus fillers and dropped words, with pauses longer than max_pause cut."""
+    ws = [w for w in words if (keep_segments is None or w["seg"] in keep_segments)]
+    drop = {d.lower().strip(".,!?") for d in drop_words}
+    ws = [w for w in ws if not ((fillers and w["text"].lower().strip(".,!?") in FILLERS) or w["text"].lower().strip(".,!?") in drop)]
+    ranges = []
+    for w in ws:
+        a, b = max(0.0, w["t"] - pad), w["e"] + pad
+        if ranges and a - ranges[-1][1] <= max_pause:
+            ranges[-1][1] = max(ranges[-1][1], b)
+        else:
+            ranges.append([a, b])
+    return ranges
+
+
+def t_cut_by_text(item, name=None, keep_segments=None, drop_words=None, max_pause=0.35, fillers=True, fps=None, language=None, premiere=None):
+    """Text-based editing: build a new sequence from a talking clip keeping only the chosen sentences (keep_segments:
+    indices from transcribe; default all), with fillers (um, uh…) and dropped words removed and pauses longer than
+    max_pause cut. Three-point edits from the clip's own media: nothing is rendered, every cut stays editable."""
+    data = _transcript(item, language, premiere)
+    words = _words(data)
+    ranges = _keep_ranges(words, set(keep_segments) if keep_segments else None, drop_words or [], max_pause, 0.08, fillers)
+    if not ranges:
+        raise ValueError("nothing left to keep")
+    seqname = name or f"{pathlib.Path(item).stem} · cut"
+    r, v = run(f"""
+const item = await findItem({js(item)});
+const clip = ppro.ClipProjectItem.cast(item);
+let seq = (await P.getSequences()).find((s) => s.name === {js(seqname)});
+if (seq) throw new Error("a sequence named " + {js(seqname)} + " already exists");
+seq = await P.createSequenceFromMedia({js(seqname)}, [clip], await P.getRootItem());
+seq = (await P.getSequences()).find((s) => s.name === {js(seqname)});
+// empty it: createSequenceFromMedia lays the whole clip down; rebuild it from the kept ranges
+const ed = ppro.SequenceEditor.getEditor(seq);
+const R = {js(ranges)};
+const full = [];
+for (let t = 0; t < await seq.getVideoTrackCount(); t++) full.push(...(await clipsOf(seq, "video", t)));
+for (let t = 0; t < await seq.getAudioTrackCount(); t++) full.push(...(await clipsOf(seq, "audio", t)));
+// remove the full-length copy (a selection lives only inside its callback: build, remove and commit in there)
+P.lockedAccess(() => ppro.TrackItemSelection.createEmptySelection((sel) => {{
+  for (const it of full) sel.addItem(it, true);
+  const act = ed.createRemoveItemsAction(sel, false, ppro.Constants.MediaType.ANY, false);
+  P.executeTransaction((ca) => ca.addAction(act), "Motion DNA: clear");
+}}));
+let at = 0;
+const placed = [];
+for (const [a, b] of R) {{
+  tx("Motion DNA: marks", () => clip.createSetInOutPointsAction(ppro.TickTime.createWithSeconds(a), ppro.TickTime.createWithSeconds(b)));
+  tx("Motion DNA: cut", () => ed.createOverwriteItemAction(item, ppro.TickTime.createWithSeconds(at), 0, 0));
+  placed.push([a, b, at]);
+  at += b - a;
+}}
+tx("Motion DNA: clear marks", () => clip.createClearInOutPointsAction());
+// drop the disabled full-length copy
+const s2 = (await P.getSequences()).find((s) => s.name === {js(seqname)});
+return {{ seq: s2.name, placed, total: at }};""", premiere, timeout=600)
+    edl = {"item": item, "sequence": r["seq"], "ranges": r["placed"]}
+    r0, _ = run("return P.path;", premiere)
+    (M._renders_dir(r0) / "transcripts" / f"{r['seq']}.edl.json").write_text(json.dumps(edl), encoding="utf-8")
+    src_len = words[-1]["e"] if words else 0
+    return (f"{r['seq']}: {len(r['placed'])} pieces, {r['total']:.2f}s (source speech ran to {src_len:.2f}s): fillers "
+            f"{'removed' if fillers else 'kept'}, pauses over {max_pause}s cut. Editable cuts, nothing rendered. Premiere {v}.")
+
+
+def t_add_captions(item, sequence=None, title="headline", words_per_line=4, track=3, color=None, text_width=60, premiere=None):
+    """Captions in the Motion DNA style from the clip's transcript: short lines (words_per_line), each a kit title on
+    its own time, placed in the lower band clear of faces. Works on a cut sequence too (follows cut_by_text's edit)."""
+    data = _transcript(item, None, premiere)
+    words = _words(data)
+    r0, _ = run("return P.path;", premiere)
+    seqname = sequence or run("return (await P.getActiveSequence()).name;", premiere)[0]
+    edl_f = M._renders_dir(r0) / "transcripts" / f"{seqname}.edl.json"
+    ranges = json.loads(edl_f.read_text(encoding="utf-8"))["ranges"] if edl_f.exists() else None
+
+    def to_seq(t):
+        if ranges is None:
+            return t
+        for a, b, at in ranges:
+            if a <= t <= b:
+                return at + (t - a)
+        return None
+
+    lines, cur = [], []
+    for w in words:
+        if w["text"].lower().strip(".,!?") in FILLERS:
+            continue
+        cur.append(w)
+        if len(cur) >= int(words_per_line) or w["eos"]:
+            lines.append(cur); cur = []
+    if cur:
+        lines.append(cur)
+    done = 0
+    for ln in lines:
+        s, e = to_seq(ln[0]["t"]), to_seq(ln[-1]["e"])
+        if s is None or e is None:
+            continue
+        text = " ".join(w["text"] for w in ln)
+        M.t_add_title(text, title=title, sequence=seqname, track=track, time_s=round(s, 3), color=color, text_width=text_width,
+                      y=None, premiere=premiere)
+        _set_last_end(seqname, track, s, e + 0.15, premiere)
+        done += 1
+    return f"{done} caption lines on V{track} of {seqname} ({words_per_line} words max, Motion DNA title kit)."
+
+
+def _set_last_end(sequence, track, start_s, end_s, premiere):
+    run(f"""
+const seq = await seqBy({js(sequence)});
+for (const it of await clipsOf(seq, "video", {int(track) - 1})) if (Math.abs((await it.getStartTime()).seconds - {float(start_s)}) < 0.05)
+  tx("Motion DNA: caption length", () => it.createSetEndAction(ppro.TickTime.createWithSeconds({float(end_s)})));
+return true;""", premiere)
+
+
 TOOLS = [
     ("organize_project", t_organize_project, "Sort the open project into Motion DNA bins (Footage, Audio, Music, Voice, Generated, Graphics, Stills, Sequences, Placeholders, Renders) with colour labels. dry_run shows the plan.",
      {"dry_run": {"type": "boolean"}}),
@@ -833,6 +993,14 @@ TOOLS = [
      {"shadows": {}, "midtones": {}, "highlights": {}, "sequence": {"type": "string"}, "track": {"type": "integer"}, "clip": {}}),
     ("remove_effect", t_remove_effect, "Remove an effect from a clip, a track (clip='all') or every clip (track=0).",
      {"effect": {"type": "string"}, "sequence": {"type": "string"}, "track": {"type": "integer"}, "clip": {}}, ["effect"]),
+    ("transcribe", t_transcribe, "Transcribe a project item with Premiere's own speech-to-text (local; English, Spanish, German, French, Mandarin…): sentences with times and their indices, for cut_by_text and add_captions.",
+     {"item": {"type": "string"}, "language": {"type": "string"}, "force": {"type": "boolean"}}, ["item"]),
+    ("cut_by_text", t_cut_by_text, "Text-based editing: a new sequence from a talking clip keeping the chosen sentences (keep_segments from transcribe), without fillers (um, uh…) or drop_words, pauses over max_pause cut. Editable three-point edits, nothing rendered.",
+     {"item": {"type": "string"}, "name": {"type": "string"}, "keep_segments": {"type": "array", "items": {"type": "integer"}}, "drop_words": {"type": "array", "items": {"type": "string"}},
+      "max_pause": {"type": "number"}, "fillers": {"type": "boolean"}, "language": {"type": "string"}}, ["item"]),
+    ("add_captions", t_add_captions, "Captions in the Motion DNA style from a clip's transcript, a few words per line, each a kit title timed to the speech (follows a cut_by_text edit).",
+     {"item": {"type": "string"}, "sequence": {"type": "string"}, "title": {"type": "string"}, "words_per_line": {"type": "integer"}, "track": {"type": "integer"},
+      "color": {"type": "string"}, "text_width": {"type": "number"}}, ["item"]),
     ("add_mask", t_add_mask, "Mask a clip: rect / ellipse / rounded / iris / wipe revealed on a Motion DNA curve (feather, invert, rect in 0-1), or person=True (local GPU cut-out). Done with a matte clip on the track above + Track Matte Key.",
      {"shape": {"type": "string", "enum": ["rect", "ellipse", "rounded", "iris", "wipe"]}, "sequence": {"type": "string"}, "track": {"type": "integer"}, "clip": {},
       "rect": {"type": "array", "items": {"type": "number"}}, "center": {"type": "array", "items": {"type": "number"}}, "feather": {"type": "number"}, "invert": {"type": "boolean"},

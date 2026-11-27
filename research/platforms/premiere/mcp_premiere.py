@@ -1180,7 +1180,7 @@ PANEL_LABEL = {"ppro_status": "Checking the project", "create_sequence": "Creati
                "organize_project": "Organizing the project", "collect_project": "Collecting files", "export_interchange": "Exporting for another app",
                "merge_project": "Merging", "add_placeholder": "Placeholder", "add_generated": "Bringing in", "add_voice": "Adding voice",
                "add_animation": "Adding animation", "add_effect": "Effect", "add_transition": "Transition", "add_markers": "Markers",
-               "beat_markers": "Markers on the beat", "apply_look": "Grading:", "add_mask": "Mask", "lumetri": "Lumetri", "color_wheels": "Colour wheels", "remove_effect": "Removing", "add_title": "Adding title"}
+               "beat_markers": "Markers on the beat", "apply_look": "Grading:", "add_mask": "Mask", "lumetri": "Lumetri", "color_wheels": "Colour wheels", "remove_effect": "Removing", "transcribe": "Transcribing", "cut_by_text": "Cutting by text", "add_captions": "Adding captions", "add_title": "Adding title"}
 INSTRUCTIONS = ("Motion DNA in Premiere (beta): drives the Premiere project the user has open through the Motion DNA UXP plugin. "
                 "Start with ppro_status. Create or open sequences, import media (files or Flora/Krea URLs) and place it, animate clips "
                 "on the library's token curves (animate: exact, one keyframe per frame), add MOGRTs (titles from After Effects; their "
