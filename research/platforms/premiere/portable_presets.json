@@ -1,0 +1,7046 @@
+{
+ "version": 1,
+ "tokens": "0.2-draft",
+ "fps": 30,
+ "note": "Motion DNA presets as portable recipes, exported from the After Effects engine by research/platforms/export_portable.jsx. Each phase (in/out) is a list of segments: channel, start_f and frames (at 30 fps, from the phase start), from/to relative to the layer's rest value (position and anchor: pixel offsets, y down; rotation: degrees; scale and opacity: fractions), and the curve: ease (a token in tokens/superside_motion_tokens.json), bezier (cubic-bezier), stops (several token segments) or ae (After Effects influence/speed). ae_only lists what a preset animates that only After Effects has (effects, masks, text).",
+ "portable": [
+  "Back In Down",
+  "Back In Left",
+  "Back Out Up",
+  "Bounce In",
+  "Bounce In Up",
+  "Coast Rise",
+  "Drop Bounce",
+  "Fade",
+  "Fade Up",
+  "Flip In",
+  "Flip In X",
+  "Glide In",
+  "Heart Beat",
+  "Jack In The Box",
+  "Nudge Grow",
+  "Punch Zoom",
+  "Push Through",
+  "Ramp Slide",
+  "Ramp Spin",
+  "Ramp Zoom",
+  "Roll In",
+  "Rotate Settle",
+  "Rubber Band",
+  "Scale Pop",
+  "Slide Land",
+  "Snap Scale",
+  "Spin Pop",
+  "Squash Warp",
+  "Stretch Slide",
+  "Surge Rise",
+  "Swing Hinge",
+  "Tada",
+  "Whip Pan",
+  "Wind-up Slide",
+  "Wobble",
+  "Zoom In Down",
+  "Zoom Out"
+ ],
+ "presets": {
+  "Fade": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 6,
+     "from": 0,
+     "to": 1,
+     "dur": "Blink",
+     "ease": "Flat"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 6,
+     "from": 1,
+     "to": 0,
+     "dur": "Blink",
+     "ease": "Flat"
+    }
+   ],
+   "ae_only": []
+  },
+  "Fade Up": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 6,
+     "from": 0,
+     "to": 1,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      0,
+      40
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "dur": "Arrive",
+     "ease": "Land"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      0,
+      -30
+     ],
+     "dur": "Glide",
+     "ease": "Launch"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 9,
+     "from": 1,
+     "to": 0,
+     "dur": "Glide",
+     "ease": "Flat"
+    }
+   ],
+   "ae_only": []
+  },
+  "Scale Pop": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 4,
+     "from": 0,
+     "to": 1,
+     "dur": "Tick",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "dur": "Arrive",
+     "ease": "Pop"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 4,
+     "frames": 4,
+     "from": 1,
+     "to": 0,
+     "dur": "Tick",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "dur": "Glide",
+     "ease": "Recoil"
+    }
+   ],
+   "ae_only": []
+  },
+  "Blur In": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 9,
+     "from": 0,
+     "to": 1,
+     "dur": "Glide",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Gaussian Blur 2-0001",
+     "channel": null,
+     "start_f": 0,
+     "frames": 21,
+     "from": 40,
+     "to": 0,
+     "dur": "Sweep",
+     "ease": "Settle"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 14,
+     "from": 1,
+     "to": 0,
+     "dur": "Arrive",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Gaussian Blur 2-0001",
+     "channel": null,
+     "start_f": 0,
+     "frames": 14,
+     "from": 0,
+     "to": 40,
+     "dur": "Arrive",
+     "ease": "Launch"
+    }
+   ],
+   "ae_only": [
+    "ADBE Gaussian Blur 2-0001"
+   ]
+  },
+  "Slide Land": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 21,
+     "from": [
+      1160,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "dur": "Sweep",
+     "ease": "Land"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 21,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      -1160,
+      0
+     ],
+     "dur": "Sweep",
+     "ease": "Launch"
+    }
+   ],
+   "ae_only": []
+  },
+  "Rotate Settle": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 6,
+     "from": 0,
+     "to": 1,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 14,
+     "from": -12,
+     "to": 0,
+     "dur": "Arrive",
+     "ease": "Settle"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      0.8,
+      0.8
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "dur": "Arrive",
+     "ease": "Settle"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 9,
+     "from": 0,
+     "to": 12,
+     "dur": "Glide",
+     "ease": "Launch"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      0.8,
+      0.8
+     ],
+     "dur": "Glide",
+     "ease": "Launch"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 9,
+     "from": 1,
+     "to": 0,
+     "dur": "Glide",
+     "ease": "Flat"
+    }
+   ],
+   "ae_only": []
+  },
+  "Squash Warp": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 4,
+     "from": 0,
+     "to": 1,
+     "dur": "Tick",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      1.4,
+      0.3
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "dur": "Arrive",
+     "ease": "Pop"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 4,
+     "frames": 4,
+     "from": 1,
+     "to": 0,
+     "dur": "Tick",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      0.3,
+      1.4
+     ],
+     "dur": "Glide",
+     "ease": "Recoil"
+    }
+   ],
+   "ae_only": []
+  },
+  "Wipe Reveal": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Linear Wipe-0001",
+     "channel": null,
+     "start_f": 0,
+     "frames": 21,
+     "from": 100,
+     "to": 0,
+     "dur": "Sweep",
+     "ease": "Cruise"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Linear Wipe-0001",
+     "channel": null,
+     "start_f": 0,
+     "frames": 14,
+     "from": 0,
+     "to": 100,
+     "dur": "Arrive",
+     "ease": "Launch"
+    }
+   ],
+   "ae_only": [
+    "ADBE Linear Wipe-0001"
+   ]
+  },
+  "Organic Draw": {
+   "in": [],
+   "out": [],
+   "ae_only": []
+  },
+  "Organic Stroke": {
+   "in": [],
+   "out": [],
+   "ae_only": []
+  },
+  "Line Draw": {
+   "in": [],
+   "out": [],
+   "ae_only": []
+  },
+  "Slam In": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 4,
+     "from": 0,
+     "to": 1,
+     "dur": "Tick",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Gaussian Blur 2-0001",
+     "channel": null,
+     "start_f": 0,
+     "frames": 9,
+     "from": 40,
+     "to": 0,
+     "dur": "Glide",
+     "ease": "Land"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 14,
+     "from": -7.5,
+     "to": 0,
+     "dur": "Arrive",
+     "ease": "Settle"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      1.65,
+      1.65
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "dur": "Arrive",
+     "ease": "Pop"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 6,
+     "from": 1,
+     "to": 0,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Gaussian Blur 2-0001",
+     "channel": null,
+     "start_f": 0,
+     "frames": 6,
+     "from": 0,
+     "to": 20,
+     "dur": "Blink",
+     "ease": "Launch"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 6,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      0.86,
+      0.86
+     ],
+     "dur": "Blink",
+     "ease": "Launch"
+    }
+   ],
+   "ae_only": [
+    "ADBE Gaussian Blur 2-0001"
+   ]
+  },
+  "Flip In": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 6,
+     "from": 0,
+     "to": 1,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Rotate Y",
+     "channel": "rotationY",
+     "start_f": 0,
+     "frames": 14,
+     "from": 90,
+     "to": 0,
+     "dur": "Arrive",
+     "ease": "Land"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 6,
+     "frames": 6,
+     "from": 1,
+     "to": 0,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Rotate Y",
+     "channel": "rotationY",
+     "start_f": 0,
+     "frames": 9,
+     "from": 0,
+     "to": -90,
+     "dur": "Glide",
+     "ease": "Launch"
+    }
+   ],
+   "ae_only": []
+  },
+  "Spin Pop": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 4,
+     "from": 0,
+     "to": 1,
+     "dur": "Tick",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 14,
+     "from": -180,
+     "to": 0,
+     "dur": "Arrive",
+     "ease": "Settle"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "dur": "Arrive",
+     "ease": "Pop"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 9,
+     "from": 0,
+     "to": 120,
+     "dur": "Glide",
+     "ease": "Launch"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 4,
+     "frames": 6,
+     "from": 1,
+     "to": 0,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "dur": "Glide",
+     "ease": "Launch"
+    }
+   ],
+   "ae_only": []
+  },
+  "Drop Bounce": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 4,
+     "from": 0,
+     "to": 1,
+     "dur": "Tick",
+     "ease": "Flat"
+    },
+    {
+     "kind": "stops",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 26,
+     "from": [
+      0,
+      -320
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "stops": [
+      {
+       "v": [
+        0,
+        0
+       ],
+       "frames": 10,
+       "ease": "Launch"
+      },
+      {
+       "v": [
+        0,
+        -48
+       ],
+       "frames": 5,
+       "ease": "Settle"
+      },
+      {
+       "v": [
+        0,
+        0
+       ],
+       "frames": 5,
+       "ease": "Launch"
+      },
+      {
+       "v": [
+        0,
+        -14
+       ],
+       "frames": 3,
+       "ease": "Settle"
+      },
+      {
+       "v": [
+        0,
+        0
+       ],
+       "frames": 3,
+       "ease": "Launch"
+      }
+     ]
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 6,
+     "frames": 6,
+     "from": 1,
+     "to": 0,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      0,
+      360
+     ],
+     "dur": "Glide",
+     "ease": "Launch"
+    }
+   ],
+   "ae_only": []
+  },
+  "Stretch Slide": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 4,
+     "from": 0,
+     "to": 1,
+     "dur": "Tick",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      1.35,
+      0.8
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "dur": "Arrive",
+     "ease": "Pop"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      -420,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "dur": "Arrive",
+     "ease": "Land"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      1.35,
+      0.8
+     ],
+     "dur": "Glide",
+     "ease": "Launch"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 4,
+     "frames": 6,
+     "from": 1,
+     "to": 0,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      420,
+      0
+     ],
+     "dur": "Glide",
+     "ease": "Launch"
+    }
+   ],
+   "ae_only": []
+  },
+  "Ramp Slide": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 6,
+     "from": 0,
+     "to": 1,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 33,
+     "from": [
+      -760,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "dur": "Stage",
+     "ease": "Ramp"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 9,
+     "frames": 6,
+     "from": 1,
+     "to": 0,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      760,
+      0
+     ],
+     "dur": "Arrive",
+     "ease": "Surge"
+    }
+   ],
+   "ae_only": []
+  },
+  "Ramp Zoom": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 9,
+     "from": 0,
+     "to": 1,
+     "dur": "Glide",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 33,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "dur": "Stage",
+     "ease": "Ramp"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 9,
+     "frames": 6,
+     "from": 1,
+     "to": 0,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      2.2,
+      2.2
+     ],
+     "dur": "Arrive",
+     "ease": "Surge"
+    }
+   ],
+   "ae_only": []
+  },
+  "Ramp Spin": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 6,
+     "from": 0,
+     "to": 1,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 33,
+     "from": [
+      0.6,
+      0.6
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "dur": "Stage",
+     "ease": "Surge"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 33,
+     "from": -360,
+     "to": 0,
+     "dur": "Stage",
+     "ease": "Ramp"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 9,
+     "frames": 6,
+     "from": 1,
+     "to": 0,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 14,
+     "from": 0,
+     "to": 180,
+     "dur": "Arrive",
+     "ease": "Surge"
+    }
+   ],
+   "ae_only": []
+  },
+  "Whip Pan": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 4,
+     "from": 0,
+     "to": 1,
+     "dur": "Tick",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 21,
+     "from": [
+      980,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "dur": "Sweep",
+     "ease": "Whip"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 9,
+     "frames": 4,
+     "from": 1,
+     "to": 0,
+     "dur": "Tick",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      -980,
+      0
+     ],
+     "dur": "Arrive",
+     "ease": "Whip"
+    }
+   ],
+   "ae_only": []
+  },
+  "Surge Rise": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 9,
+     "from": 0,
+     "to": 1,
+     "dur": "Glide",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 21,
+     "from": [
+      0,
+      140
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "dur": "Sweep",
+     "ease": "Surge"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 6,
+     "frames": 6,
+     "from": 1,
+     "to": 0,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      0,
+      -140
+     ],
+     "dur": "Arrive",
+     "ease": "Surge"
+    }
+   ],
+   "ae_only": []
+  },
+  "Speed Ramp": {
+   "in": [],
+   "out": [],
+   "ae_only": []
+  },
+  "Punch Zoom": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      1.08,
+      1.08
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "dur": "Glide",
+     "ease": "Land"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      1.08,
+      1.08
+     ],
+     "dur": "Glide",
+     "ease": "Launch"
+    }
+   ],
+   "ae_only": []
+  },
+  "Coast Rise": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 6,
+     "from": 0,
+     "to": 1,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      0,
+      90
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "dur": "Arrive",
+     "ease": "Coast"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 4,
+     "frames": 6,
+     "from": 1,
+     "to": 0,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      0,
+      -90
+     ],
+     "dur": "Glide",
+     "ease": "Launch"
+    }
+   ],
+   "ae_only": []
+  },
+  "Glide In": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 9,
+     "from": 0,
+     "to": 1,
+     "dur": "Glide",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 33,
+     "from": [
+      0.96,
+      0.96
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "dur": "Stage",
+     "ease": "Coast"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 33,
+     "from": [
+      -260,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "dur": "Stage",
+     "ease": "Coast"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 4,
+     "frames": 9,
+     "from": 1,
+     "to": 0,
+     "dur": "Glide",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      0.96,
+      0.96
+     ],
+     "dur": "Arrive",
+     "ease": "Launch"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      260,
+      0
+     ],
+     "dur": "Arrive",
+     "ease": "Launch"
+    }
+   ],
+   "ae_only": []
+  },
+  "Wind-up Slide": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 9,
+     "from": 0,
+     "to": 1,
+     "dur": "Glide",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 33,
+     "from": [
+      -420,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "dur": "Stage",
+     "ease": "Wind-up"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 9,
+     "frames": 6,
+     "from": 1,
+     "to": 0,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      420,
+      0
+     ],
+     "dur": "Arrive",
+     "ease": "Recoil"
+    }
+   ],
+   "ae_only": []
+  },
+  "Nudge Grow": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 21,
+     "from": [
+      1,
+      0
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "dur": "Sweep",
+     "ease": "Nudge"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      1,
+      0
+     ],
+     "dur": "Glide",
+     "ease": "Launch"
+    }
+   ],
+   "ae_only": []
+  },
+  "Snap Scale": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 9,
+     "from": 0,
+     "to": 1,
+     "dur": "Glide",
+     "ease": "Snap"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      0.15,
+      0.15
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "dur": "Glide",
+     "ease": "Snap"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 9,
+     "from": 1,
+     "to": 0,
+     "dur": "Glide",
+     "ease": "Snap"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      0.15,
+      0.15
+     ],
+     "dur": "Glide",
+     "ease": "Snap"
+    }
+   ],
+   "ae_only": []
+  },
+  "Iris Reveal": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Mask Offset",
+     "channel": null,
+     "start_f": 0,
+     "frames": 9,
+     "from": 0,
+     "to": 145.42135623731,
+     "dur": "Glide",
+     "ease": "Wind-up"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Mask Offset",
+     "channel": null,
+     "start_f": 0,
+     "frames": 9,
+     "from": 145.42135623731,
+     "to": 0,
+     "dur": "Glide",
+     "ease": "Launch"
+    }
+   ],
+   "ae_only": [
+    "ADBE Mask Offset"
+   ]
+  },
+  "Wordmark Reveal": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Linear Wipe-0001",
+     "channel": null,
+     "start_f": 0,
+     "frames": 21,
+     "from": 100,
+     "to": 0,
+     "dur": "Sweep",
+     "ease": "Surge"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 21,
+     "from": [
+      -200,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "dur": "Sweep",
+     "ease": "Surge"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Linear Wipe-0001",
+     "channel": null,
+     "start_f": 0,
+     "frames": 14,
+     "from": 0,
+     "to": 100,
+     "dur": "Arrive",
+     "ease": "Launch"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      -200,
+      0
+     ],
+     "dur": "Arrive",
+     "ease": "Launch"
+    }
+   ],
+   "ae_only": [
+    "ADBE Linear Wipe-0001"
+   ]
+  },
+  "Push Through": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 6,
+     "from": 0,
+     "to": 1,
+     "dur": "Blink",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      1.6,
+      1.6
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "dur": "Arrive",
+     "ease": "Coast"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 10.8,
+     "frames": 4,
+     "from": 1,
+     "to": 0,
+     "dur": "Tick",
+     "ease": "Flat"
+    },
+    {
+     "kind": "token",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 14,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      7,
+      7
+     ],
+     "dur": "Arrive",
+     "ease": "Launch"
+    }
+   ],
+   "ae_only": []
+  },
+  "Color Wipe": {
+   "in": [
+    {
+     "kind": "token",
+     "prop": "ADBE Linear Wipe-0001",
+     "channel": null,
+     "start_f": 0,
+     "frames": 9,
+     "from": 100,
+     "to": 0,
+     "dur": "Glide",
+     "ease": "Surge"
+    }
+   ],
+   "out": [
+    {
+     "kind": "token",
+     "prop": "ADBE Linear Wipe-0001",
+     "channel": null,
+     "start_f": 0,
+     "frames": 9,
+     "from": 0,
+     "to": 100,
+     "dur": "Glide",
+     "ease": "Surge"
+    }
+   ],
+   "ae_only": [
+    "ADBE Linear Wipe-0001"
+   ]
+  },
+  "Back In Down": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 24,
+     "from": [
+      0,
+      -1200
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 24,
+     "frames": 6,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 24,
+     "from": [
+      0.7,
+      0.7
+     ],
+     "to": [
+      0.7,
+      0.7
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 24,
+     "frames": 6,
+     "from": [
+      0.7,
+      0.7
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 24,
+     "from": 0.7,
+     "to": 0.7,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 24,
+     "frames": 6,
+     "from": 0.7,
+     "to": 1,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 6,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 6,
+     "frames": 24,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      0,
+      -1200
+     ],
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 6,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      0.7,
+      0.7
+     ],
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 6,
+     "frames": 24,
+     "from": [
+      0.7,
+      0.7
+     ],
+     "to": [
+      0.7,
+      0.7
+     ],
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 6,
+     "from": 1,
+     "to": 0.7,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 6,
+     "frames": 24,
+     "from": 0.7,
+     "to": 0.7,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    }
+   ],
+   "ae_only": []
+  },
+  "Back In Left": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 24,
+     "from": [
+      -2000,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 24,
+     "frames": 6,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 24,
+     "from": [
+      0.7,
+      0.7
+     ],
+     "to": [
+      0.7,
+      0.7
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 24,
+     "frames": 6,
+     "from": [
+      0.7,
+      0.7
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 24,
+     "from": 0.7,
+     "to": 0.7,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 24,
+     "frames": 6,
+     "from": 0.7,
+     "to": 1,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 6,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 6,
+     "frames": 24,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      -2000,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 6,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      0.7,
+      0.7
+     ],
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 6,
+     "frames": 24,
+     "from": [
+      0.7,
+      0.7
+     ],
+     "to": [
+      0.7,
+      0.7
+     ],
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 6,
+     "from": 1,
+     "to": 0.7,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 6,
+     "frames": 24,
+     "from": 0.7,
+     "to": 0.7,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    }
+   ],
+   "ae_only": []
+  },
+  "Bounce In": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 4.5,
+     "from": [
+      0.3,
+      0.3
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      },
+      "in": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 4.5,
+     "frames": 4.5,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      0.9,
+      0.9
+     ],
+     "ae": {
+      "out": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      },
+      "in": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 9,
+     "frames": 4.5,
+     "from": [
+      0.9,
+      0.9
+     ],
+     "to": [
+      1.03,
+      1.03
+     ],
+     "ae": {
+      "out": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      },
+      "in": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 13.5,
+     "frames": 4.5,
+     "from": [
+      1.03,
+      1.03
+     ],
+     "to": [
+      0.97,
+      0.97
+     ],
+     "ae": {
+      "out": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      },
+      "in": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 18,
+     "frames": 4.5,
+     "from": [
+      0.97,
+      0.97
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      },
+      "in": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 13.5,
+     "from": 0,
+     "to": 1,
+     "ae": {
+      "out": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      },
+      "in": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 13.5,
+     "frames": 9,
+     "from": 1,
+     "to": 1,
+     "ae": {
+      "out": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      },
+      "in": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 4.5,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      0.97,
+      0.97
+     ],
+     "ae": {
+      "out": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 4.5,
+     "frames": 4.5,
+     "from": [
+      0.97,
+      0.97
+     ],
+     "to": [
+      1.03,
+      1.03
+     ],
+     "ae": {
+      "out": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 9,
+     "frames": 4.5,
+     "from": [
+      1.03,
+      1.03
+     ],
+     "to": [
+      0.9,
+      0.9
+     ],
+     "ae": {
+      "out": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 13.5,
+     "frames": 4.5,
+     "from": [
+      0.9,
+      0.9
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 18,
+     "frames": 4.5,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      0.3,
+      0.3
+     ],
+     "ae": {
+      "out": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 9,
+     "from": 1,
+     "to": 1,
+     "ae": {
+      "out": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 9,
+     "frames": 13.5,
+     "from": 1,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      }
+     }
+    }
+   ],
+   "ae_only": []
+  },
+  "Bounce In Up": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 18,
+     "from": [
+      0,
+      1400
+     ],
+     "to": [
+      0,
+      -20
+     ],
+     "ae": {
+      "out": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      },
+      "in": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 18,
+     "frames": 4.5,
+     "from": [
+      0,
+      -20
+     ],
+     "to": [
+      0,
+      10
+     ],
+     "ae": {
+      "out": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      },
+      "in": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 22.5,
+     "frames": 4.5,
+     "from": [
+      0,
+      10
+     ],
+     "to": [
+      0,
+      -5
+     ],
+     "ae": {
+      "out": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      },
+      "in": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 27,
+     "frames": 3,
+     "from": [
+      0,
+      -5
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      },
+      "in": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 18,
+     "from": [
+      1,
+      3
+     ],
+     "to": [
+      1,
+      0.9
+     ],
+     "ae": {
+      "out": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      },
+      "in": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 18,
+     "frames": 4.5,
+     "from": [
+      1,
+      0.9
+     ],
+     "to": [
+      1,
+      0.95
+     ],
+     "ae": {
+      "out": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      },
+      "in": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 22.5,
+     "frames": 4.5,
+     "from": [
+      1,
+      0.95
+     ],
+     "to": [
+      1,
+      0.985
+     ],
+     "ae": {
+      "out": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      },
+      "in": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 18,
+     "from": 0,
+     "to": 1,
+     "ae": {
+      "out": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      },
+      "in": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 3,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      0,
+      -5
+     ],
+     "ae": {
+      "out": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 3,
+     "frames": 4.5,
+     "from": [
+      0,
+      -5
+     ],
+     "to": [
+      0,
+      10
+     ],
+     "ae": {
+      "out": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 7.5,
+     "frames": 4.5,
+     "from": [
+      0,
+      10
+     ],
+     "to": [
+      0,
+      -20
+     ],
+     "ae": {
+      "out": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 12,
+     "frames": 18,
+     "from": [
+      0,
+      -20
+     ],
+     "to": [
+      0,
+      1400
+     ],
+     "ae": {
+      "out": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 3,
+     "frames": 4.5,
+     "from": [
+      1,
+      0.985
+     ],
+     "to": [
+      1,
+      0.95
+     ],
+     "ae": {
+      "out": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 7.5,
+     "frames": 4.5,
+     "from": [
+      1,
+      0.95
+     ],
+     "to": [
+      1,
+      0.9
+     ],
+     "ae": {
+      "out": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 12,
+     "frames": 18,
+     "from": [
+      1,
+      0.9
+     ],
+     "to": [
+      1,
+      3
+     ],
+     "ae": {
+      "out": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 12,
+     "frames": 18,
+     "from": 1,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 64.5,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 21.5,
+       "speed_x_avg": 2.83720930232558
+      }
+     }
+    }
+   ],
+   "ae_only": []
+  },
+  "Rubber Band": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      1.25,
+      0.75
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 9,
+     "frames": 3,
+     "from": [
+      1.25,
+      0.75
+     ],
+     "to": [
+      0.75,
+      1.25
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 12,
+     "frames": 3,
+     "from": [
+      0.75,
+      1.25
+     ],
+     "to": [
+      1.15,
+      0.85
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 15,
+     "frames": 4.5,
+     "from": [
+      1.15,
+      0.85
+     ],
+     "to": [
+      0.95,
+      1.05
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 19.5,
+     "frames": 3,
+     "from": [
+      0.95,
+      1.05
+     ],
+     "to": [
+      1.05,
+      0.95
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 22.5,
+     "frames": 7.5,
+     "from": [
+      1.05,
+      0.95
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 9,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      1.25,
+      0.75
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 9,
+     "frames": 3,
+     "from": [
+      1.25,
+      0.75
+     ],
+     "to": [
+      0.75,
+      1.25
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 12,
+     "frames": 3,
+     "from": [
+      0.75,
+      1.25
+     ],
+     "to": [
+      1.15,
+      0.85
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 15,
+     "frames": 4.5,
+     "from": [
+      1.15,
+      0.85
+     ],
+     "to": [
+      0.95,
+      1.05
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 19.5,
+     "frames": 3,
+     "from": [
+      0.95,
+      1.05
+     ],
+     "to": [
+      1.05,
+      0.95
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 22.5,
+     "frames": 7.5,
+     "from": [
+      1.05,
+      0.95
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "ae_only": []
+  },
+  "Jello": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 0,
+     "frames": 3.33,
+     "from": 0,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 3.33,
+     "frames": 3.33,
+     "from": 0,
+     "to": -12.5,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 6.66,
+     "frames": 3.33,
+     "from": -12.5,
+     "to": 6.25,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 9.99,
+     "frames": 3.33,
+     "from": 6.25,
+     "to": -3.125,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 13.32,
+     "frames": 3.33,
+     "from": -3.125,
+     "to": 1.5625,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 16.65,
+     "frames": 3.33,
+     "from": 1.5625,
+     "to": -0.78125,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 19.98,
+     "frames": 3.33,
+     "from": -0.78125,
+     "to": 0.390625,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 23.31,
+     "frames": 3.33,
+     "from": 0.390625,
+     "to": -0.1953125,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 26.64,
+     "frames": 3.36,
+     "from": -0.1953125,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 0,
+     "frames": 3.33,
+     "from": 0,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 3.33,
+     "frames": 3.33,
+     "from": 0,
+     "to": -12.5,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 6.66,
+     "frames": 3.33,
+     "from": -12.5,
+     "to": 6.25,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 9.99,
+     "frames": 3.33,
+     "from": 6.25,
+     "to": -3.125,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 13.32,
+     "frames": 3.33,
+     "from": -3.125,
+     "to": 1.5625,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 16.65,
+     "frames": 3.33,
+     "from": 1.5625,
+     "to": -0.78125,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 19.98,
+     "frames": 3.33,
+     "from": -0.78125,
+     "to": 0.390625,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 23.31,
+     "frames": 3.33,
+     "from": 0.390625,
+     "to": -0.1953125,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 26.64,
+     "frames": 3.36,
+     "from": -0.1953125,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "ae_only": [
+    "ADBE Geometry2-0006"
+   ]
+  },
+  "Heart Beat": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 5.46,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      1.3,
+      1.3
+     ],
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 5.46,
+     "frames": 5.46,
+     "from": [
+      1.3,
+      1.3
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 10.92,
+     "frames": 5.46,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      1.3,
+      1.3
+     ],
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 16.38,
+     "frames": 10.92,
+     "from": [
+      1.3,
+      1.3
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 27.3,
+     "frames": 11.7,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 5.46,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      1.3,
+      1.3
+     ],
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 5.46,
+     "frames": 5.46,
+     "from": [
+      1.3,
+      1.3
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 10.92,
+     "frames": 5.46,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      1.3,
+      1.3
+     ],
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 16.38,
+     "frames": 10.92,
+     "from": [
+      1.3,
+      1.3
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 27.3,
+     "frames": 11.7,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "ae_only": []
+  },
+  "Tada": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 3,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      0.9,
+      0.9
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 3,
+     "frames": 3,
+     "from": [
+      0.9,
+      0.9
+     ],
+     "to": [
+      0.9,
+      0.9
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 6,
+     "frames": 3,
+     "from": [
+      0.9,
+      0.9
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 9,
+     "frames": 3,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 12,
+     "frames": 3,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 15,
+     "frames": 3,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 18,
+     "frames": 3,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 21,
+     "frames": 3,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 24,
+     "frames": 3,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 27,
+     "frames": 3,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 3,
+     "from": 0,
+     "to": -3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 3,
+     "frames": 3,
+     "from": -3,
+     "to": -3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 6,
+     "frames": 3,
+     "from": -3,
+     "to": 3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 9,
+     "frames": 3,
+     "from": 3,
+     "to": -3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 12,
+     "frames": 3,
+     "from": -3,
+     "to": 3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 15,
+     "frames": 3,
+     "from": 3,
+     "to": -3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 18,
+     "frames": 3,
+     "from": -3,
+     "to": 3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 21,
+     "frames": 3,
+     "from": 3,
+     "to": -3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 24,
+     "frames": 3,
+     "from": -3,
+     "to": 3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 27,
+     "frames": 3,
+     "from": 3,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 3,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      0.9,
+      0.9
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 3,
+     "frames": 3,
+     "from": [
+      0.9,
+      0.9
+     ],
+     "to": [
+      0.9,
+      0.9
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 6,
+     "frames": 3,
+     "from": [
+      0.9,
+      0.9
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 9,
+     "frames": 3,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 12,
+     "frames": 3,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 15,
+     "frames": 3,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 18,
+     "frames": 3,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 21,
+     "frames": 3,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 24,
+     "frames": 3,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      1.1,
+      1.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 27,
+     "frames": 3,
+     "from": [
+      1.1,
+      1.1
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 3,
+     "from": 0,
+     "to": -3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 3,
+     "frames": 3,
+     "from": -3,
+     "to": -3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 6,
+     "frames": 3,
+     "from": -3,
+     "to": 3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 9,
+     "frames": 3,
+     "from": 3,
+     "to": -3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 12,
+     "frames": 3,
+     "from": -3,
+     "to": 3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 15,
+     "frames": 3,
+     "from": 3,
+     "to": -3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 18,
+     "frames": 3,
+     "from": -3,
+     "to": 3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 21,
+     "frames": 3,
+     "from": 3,
+     "to": -3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 24,
+     "frames": 3,
+     "from": -3,
+     "to": 3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 27,
+     "frames": 3,
+     "from": 3,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "ae_only": []
+  },
+  "Wobble": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 4.5,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      -50,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 4.5,
+     "frames": 4.5,
+     "from": [
+      -50,
+      0
+     ],
+     "to": [
+      40,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 9,
+     "frames": 4.5,
+     "from": [
+      40,
+      0
+     ],
+     "to": [
+      -30,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 13.5,
+     "frames": 4.5,
+     "from": [
+      -30,
+      0
+     ],
+     "to": [
+      20,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 18,
+     "frames": 4.5,
+     "from": [
+      20,
+      0
+     ],
+     "to": [
+      -10,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 22.5,
+     "frames": 7.5,
+     "from": [
+      -10,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 4.5,
+     "from": 0,
+     "to": -5,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 4.5,
+     "frames": 4.5,
+     "from": -5,
+     "to": 3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 9,
+     "frames": 4.5,
+     "from": 3,
+     "to": -3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 13.5,
+     "frames": 4.5,
+     "from": -3,
+     "to": 2,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 18,
+     "frames": 4.5,
+     "from": 2,
+     "to": -1,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 22.5,
+     "frames": 7.5,
+     "from": -1,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 4.5,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      -50,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 4.5,
+     "frames": 4.5,
+     "from": [
+      -50,
+      0
+     ],
+     "to": [
+      40,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 9,
+     "frames": 4.5,
+     "from": [
+      40,
+      0
+     ],
+     "to": [
+      -30,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 13.5,
+     "frames": 4.5,
+     "from": [
+      -30,
+      0
+     ],
+     "to": [
+      20,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 18,
+     "frames": 4.5,
+     "from": [
+      20,
+      0
+     ],
+     "to": [
+      -10,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 22.5,
+     "frames": 7.5,
+     "from": [
+      -10,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 4.5,
+     "from": 0,
+     "to": -5,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 4.5,
+     "frames": 4.5,
+     "from": -5,
+     "to": 3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 9,
+     "frames": 4.5,
+     "from": 3,
+     "to": -3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 13.5,
+     "frames": 4.5,
+     "from": -3,
+     "to": 2,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 18,
+     "frames": 4.5,
+     "from": 2,
+     "to": -1,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 22.5,
+     "frames": 7.5,
+     "from": -1,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "ae_only": []
+  },
+  "Swing Hinge": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 6,
+     "from": 0,
+     "to": 15,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 6,
+     "frames": 6,
+     "from": 15,
+     "to": -10,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 12,
+     "frames": 6,
+     "from": -10,
+     "to": 5,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 18,
+     "frames": 6,
+     "from": 5,
+     "to": -5,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 24,
+     "frames": 6,
+     "from": -5,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 6,
+     "from": 0,
+     "to": 15,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 6,
+     "frames": 6,
+     "from": 15,
+     "to": -10,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 12,
+     "frames": 6,
+     "from": -10,
+     "to": 5,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 18,
+     "frames": 6,
+     "from": 5,
+     "to": -5,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 24,
+     "frames": 6,
+     "from": -5,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "ae_only": []
+  },
+  "Flip In X": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 18,
+     "from": 0,
+     "to": 1,
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate X",
+     "channel": "rotationX",
+     "start_f": 0,
+     "frames": 12,
+     "from": 90,
+     "to": -20,
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate X",
+     "channel": "rotationX",
+     "start_f": 12,
+     "frames": 6,
+     "from": -20,
+     "to": 10,
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate X",
+     "channel": "rotationX",
+     "start_f": 18,
+     "frames": 6,
+     "from": 10,
+     "to": -5,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate X",
+     "channel": "rotationX",
+     "start_f": 24,
+     "frames": 6,
+     "from": -5,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 12,
+     "frames": 18,
+     "from": 1,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate X",
+     "channel": "rotationX",
+     "start_f": 0,
+     "frames": 6,
+     "from": 0,
+     "to": -5,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate X",
+     "channel": "rotationX",
+     "start_f": 6,
+     "frames": 6,
+     "from": -5,
+     "to": 10,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate X",
+     "channel": "rotationX",
+     "start_f": 12,
+     "frames": 6,
+     "from": 10,
+     "to": -20,
+     "ae": {
+      "out": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate X",
+     "channel": "rotationX",
+     "start_f": 18,
+     "frames": 12,
+     "from": -20,
+     "to": 90,
+     "ae": {
+      "out": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "ae_only": []
+  },
+  "Light Speed In": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 30,
+     "from": [
+      200,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 18,
+     "from": 0,
+     "to": 1,
+     "ae": {
+      "out": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 0,
+     "frames": 18,
+     "from": -30,
+     "to": 20,
+     "ae": {
+      "out": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 18,
+     "frames": 6,
+     "from": 20,
+     "to": -5,
+     "ae": {
+      "out": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 24,
+     "frames": 6,
+     "from": -5,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 42,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 30,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      200,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 12,
+     "frames": 18,
+     "from": 1,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 0,
+     "frames": 6,
+     "from": 0,
+     "to": -5,
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 6,
+     "frames": 6,
+     "from": -5,
+     "to": 20,
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Geometry2-0006",
+     "channel": null,
+     "start_f": 12,
+     "frames": 18,
+     "from": 20,
+     "to": -30,
+     "ae": {
+      "out": {
+       "influence": 42,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 0.1,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "ae_only": [
+    "ADBE Geometry2-0006"
+   ]
+  },
+  "Roll In": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 30,
+     "from": [
+      -200,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 30,
+     "from": -120,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 30,
+     "from": 0,
+     "to": 1,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 30,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      -200,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 30,
+     "from": 0,
+     "to": -120,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 30,
+     "from": 1,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    }
+   ],
+   "ae_only": []
+  },
+  "Zoom In Down": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 18,
+     "from": [
+      0,
+      -300
+     ],
+     "to": [
+      0,
+      28
+     ],
+     "ae": {
+      "out": {
+       "influence": 55,
+       "speed_x_avg": 0.1
+      },
+      "in": {
+       "influence": 32.5,
+       "speed_x_avg": 2.49230769230769
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 18,
+     "frames": 12,
+     "from": [
+      0,
+      28
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 17.5,
+       "speed_x_avg": 5.05714285714286
+      },
+      "in": {
+       "influence": 68,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 18,
+     "from": [
+      0.1,
+      0.1
+     ],
+     "to": [
+      0.475,
+      0.475
+     ],
+     "ae": {
+      "out": {
+       "influence": 55,
+       "speed_x_avg": 0.1
+      },
+      "in": {
+       "influence": 32.5,
+       "speed_x_avg": 2.49230769230769
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 18,
+     "frames": 12,
+     "from": [
+      0.475,
+      0.475
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 17.5,
+       "speed_x_avg": 5.05714285714286
+      },
+      "in": {
+       "influence": 68,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 18,
+     "from": 0,
+     "to": 1,
+     "ae": {
+      "out": {
+       "influence": 55,
+       "speed_x_avg": 0.1
+      },
+      "in": {
+       "influence": 32.5,
+       "speed_x_avg": 2.49230769230769
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 12,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      0,
+      28
+     ],
+     "ae": {
+      "out": {
+       "influence": 68,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 17.5,
+       "speed_x_avg": 5.05714285714286
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 12,
+     "frames": 18,
+     "from": [
+      0,
+      28
+     ],
+     "to": [
+      0,
+      -300
+     ],
+     "ae": {
+      "out": {
+       "influence": 32.5,
+       "speed_x_avg": 2.49230769230769
+      },
+      "in": {
+       "influence": 55,
+       "speed_x_avg": 0.1
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 12,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      0.475,
+      0.475
+     ],
+     "ae": {
+      "out": {
+       "influence": 68,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 17.5,
+       "speed_x_avg": 5.05714285714286
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 12,
+     "frames": 18,
+     "from": [
+      0.475,
+      0.475
+     ],
+     "to": [
+      0.1,
+      0.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 32.5,
+       "speed_x_avg": 2.49230769230769
+      },
+      "in": {
+       "influence": 55,
+       "speed_x_avg": 0.1
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 12,
+     "frames": 18,
+     "from": 1,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 32.5,
+       "speed_x_avg": 2.49230769230769
+      },
+      "in": {
+       "influence": 55,
+       "speed_x_avg": 0.1
+      }
+     }
+    }
+   ],
+   "ae_only": []
+  },
+  "Jack In The Box": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 30,
+     "from": [
+      0.1,
+      0.1
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 15,
+     "from": 30,
+     "to": -10,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 15,
+     "frames": 6,
+     "from": -10,
+     "to": 3,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 21,
+     "frames": 9,
+     "from": 3,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 30,
+     "from": 0,
+     "to": 1,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 30,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      0.1,
+      0.1
+     ],
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 0,
+     "frames": 9,
+     "from": 0,
+     "to": 3,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 9,
+     "frames": 6,
+     "from": 3,
+     "to": -10,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Rotate Z",
+     "channel": "rotation",
+     "start_f": 15,
+     "frames": 15,
+     "from": -10,
+     "to": 30,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 30,
+     "from": 1,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    }
+   ],
+   "ae_only": []
+  },
+  "Back Out Up": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 24,
+     "from": [
+      0,
+      -1200
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 24,
+     "frames": 6,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 24,
+     "from": [
+      0.7,
+      0.7
+     ],
+     "to": [
+      0.7,
+      0.7
+     ],
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 24,
+     "frames": 6,
+     "from": [
+      0.7,
+      0.7
+     ],
+     "to": [
+      1,
+      1
+     ],
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 24,
+     "from": 0.7,
+     "to": 0.7,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 24,
+     "frames": 6,
+     "from": 0.7,
+     "to": 1,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 0,
+     "frames": 6,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      0,
+      0
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Position",
+     "channel": "position",
+     "start_f": 6,
+     "frames": 24,
+     "from": [
+      0,
+      0
+     ],
+     "to": [
+      0,
+      -1200
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 6,
+     "from": [
+      1,
+      1
+     ],
+     "to": [
+      0.7,
+      0.7
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 6,
+     "frames": 24,
+     "from": [
+      0.7,
+      0.7
+     ],
+     "to": [
+      0.7,
+      0.7
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 6,
+     "from": 1,
+     "to": 0.7,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 6,
+     "frames": 24,
+     "from": 0.7,
+     "to": 0.7,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "ae_only": []
+  },
+  "Zoom Out": {
+   "in": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 0,
+     "frames": 15,
+     "from": [
+      0.3,
+      0.3
+     ],
+     "to": [
+      0.3,
+      0.3
+     ],
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 15,
+     "from": 0,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 15,
+     "frames": 15,
+     "from": 0,
+     "to": 1,
+     "ae": {
+      "out": {
+       "influence": 75,
+       "speed_x_avg": 0
+      },
+      "in": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      }
+     }
+    }
+   ],
+   "out": [
+    {
+     "kind": "raw",
+     "prop": "ADBE Scale",
+     "channel": "scale",
+     "start_f": 15,
+     "frames": 15,
+     "from": [
+      0.3,
+      0.3
+     ],
+     "to": [
+      0.3,
+      0.3
+     ],
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 0,
+     "frames": 15,
+     "from": 1,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    },
+    {
+     "kind": "raw",
+     "prop": "ADBE Opacity",
+     "channel": "opacity",
+     "start_f": 15,
+     "frames": 15,
+     "from": 0,
+     "to": 0,
+     "ae": {
+      "out": {
+       "influence": 25,
+       "speed_x_avg": 0.4
+      },
+      "in": {
+       "influence": 75,
+       "speed_x_avg": 0
+      }
+     }
+    }
+   ],
+   "ae_only": []
+  }
+ }
+}

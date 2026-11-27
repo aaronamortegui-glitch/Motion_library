@@ -5,6 +5,12 @@
       "args": [
         "tools/mcp/ss_motion_mcp.py"
       ]
+    },
+    "motion-dna-premiere": {
+      "command": "python",
+      "args": [
+        "research/platforms/premiere/mcp_premiere.py"
+      ]
     }
   }
 }

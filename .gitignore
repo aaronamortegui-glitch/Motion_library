@@ -125,3 +125,7 @@ research/hyperframes/projects/
 
 # shareable builds (tools/pack_library_guide.py)
 dist/
+
+# Premiere spike: test projects, frames and packaged plugin
+research/platforms/premiere/spike/_projects/
+research/platforms/premiere/dist/

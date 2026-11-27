@@ -20,6 +20,9 @@ Install / update:
      in every folder; an update brings the new skills with it, --uninstall removes the links.
   7. Sound kit (MCP add_sound): makes sure Python has Playwright, which renders the sounds in the installed Chrome or
      Edge. Last, like 6: a problem here is a note, never a stop.
+  8. Premiere (beta), only if Premiere 2026 or newer is installed: the Motion DNA UXP plugin (Window > UXP Plugins >
+     Motion DNA) and the motion-dna-premiere MCP (research/platforms/premiere/install_premiere.py). Like 6: a note,
+     never a stop.
 """
 import os
 import pathlib
@@ -585,7 +588,7 @@ def mcp_local(remove=False):
     return r.returncode == 0
 
 
-SKILLS = ["motion-dna", "video-templates", "motion-deck"]   # the repo's Claude skills (.claude/skills/<name>)
+SKILLS = ["motion-dna", "video-templates", "motion-deck", "motion-dna-premiere"]   # the repo's Claude skills (.claude/skills/<name>)
 
 
 def skills_dir():
@@ -651,7 +654,25 @@ def uninstall():
         print(WARN + f"Claude skill links not removed ({e})")
     fonts(remove=True)
     cep(remove=True)
+    try:
+        premiere(remove=True)
+    except Exception as e:
+        print(WARN + f"Premiere plugin not removed ({e})")
     print("\nThe repo folder itself is untouched; delete it by hand if you want. Restart After Effects.")
+
+
+PREMIERE = ROOT / "research/platforms/premiere/install_premiere.py"
+
+
+def premiere(remove=False):
+    """Motion DNA for Premiere (beta): the UXP plugin and the motion-dna-premiere MCP, when Premiere 2026+ is here.
+    The work is in research/platforms/premiere/install_premiere.py (it also runs on its own)."""
+    if not PREMIERE.exists():
+        return True
+    args = ["--uninstall"] if remove else (["--mcp-user"] if "--mcp-user" in sys.argv else [])
+    print("Premiere (beta)")
+    r = subprocess.run([sys.executable, str(PREMIERE), *args], text=True, encoding="utf-8", errors="replace")
+    return r.returncode == 0
 
 
 def guide():
@@ -692,6 +713,10 @@ def main():
         sound()
     except Exception as e:
         print(WARN + f"sound kit not checked ({e}); everything else is installed")
+    try:   # Premiere (beta): only when Premiere 2026+ is installed; never in the way of After Effects
+        premiere()
+    except Exception as e:
+        print(WARN + f"Premiere part not installed ({e}); After Effects is not affected")
     try:   # the downloadable library: built from this clone's data, so it always matches the version installed
         guide()
     except Exception as e:

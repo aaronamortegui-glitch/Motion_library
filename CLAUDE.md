@@ -24,6 +24,13 @@ Install everything, library included — the panel reads the library from the re
 4. With AE open and the panel docked, confirm the connection with the MCP tool `ae_status` (the panel header's MCP dot is green).
 5. To remove it: `python tools/setup.py --uninstall` (loaders, MCP registration, fonts; the clone stays).
 
+## Motion DNA in Premiere (beta)
+Premiere 2026+ gets its own plugin and MCP (`motion-dna-premiere`), installed by `tools/setup.py` when Premiere is
+present. Claude edits the project the user has open: sequences, the library's moves, titles, music, speed ramps,
+16:9 → 9:16 that follows the person, export. The skill `.claude/skills/motion-dna-premiere/SKILL.md` has the install
+steps, what only the person can click, and the tools; `research/platforms/premiere/README.md` has every API rule.
+Users never need After Effects for it: AE only builds the title kit (MOGRTs) once.
+
 ## Before you start
 1. Read `CONTRIBUTING.md` (how to add presets, open-source effects, packs, case studies and learnings).
 2. Skim `docs/LEARNINGS.md`: every pitfall already solved (ExtendScript, rendering, Flora/AI video, likeness, tracking, audio, costs). Do not rediscover them.
